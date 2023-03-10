@@ -87,7 +87,11 @@ void clearStore(EditorDetails& details){
 
 
 std::string attrValToUiString(AttributeValue& value){
-  modassert(false, "attrValToUiString not yet implemented")
+  auto strValue = std::get_if<std::string>(&value);
+  if (strValue){
+    return *strValue;
+  }
+  modassert(false, "attrValToUiString not yet implemented for this type");
   return "";
 }
 
@@ -146,7 +150,7 @@ DetailObjType getGameobjType(std::string name){
   if (name.at(0) == '_'){
     return SLIDER;
   }
-  if (name.at(1) == ')'){
+  if (name.at(0) == ')'){
     return TEXT;
   }
   modassert(false, "getGameobjType not found");
@@ -776,7 +780,7 @@ void updateText(EditorDetails& details, objid obj, std::string& text, CursorUpda
   auto cursorHighlightLength = cursor.highlightLength;
 
   auto detailBinding = getStrAttr(attr, "details-binding");
-  auto detailBindingIndex = optionalInt(getFloatAttr(attr, "details-binding-index")).value(); // should cast to int
+  auto detailBindingIndex = optionalInt(getFloatAttr(attr, "details-binding-index"));
   auto editableType = getStrAttr(attr, "details-editable-type");
 
   GameobjAttributes newAttr {
@@ -784,6 +788,8 @@ void updateText(EditorDetails& details, objid obj, std::string& text, CursorUpda
     .numAttributes = { {"offset", offset }, { "cursor", cursorIndex}, { "cursor-highlight", cursorHighlightLength} },
     .vecAttr = { .vec3 = {}, .vec4 = {} },
   };
+
+  modlog("editor", "details setting " + mainApi -> getGameObjNameForId(obj).value() + " text with: " + text);
   mainApi -> setGameObjectAttr(obj, newAttr);
   if (detailBinding.has_value()){
     auto updateValue = getUpdatedValue(details, detailBinding.value(), detailBindingIndex, editableType.value(), text);
@@ -839,14 +845,14 @@ bool isManagedText(GameobjAttributes& attr, std::string objname){
 
 void setManagedSelectionMode(EditorDetails& details, objid obj){
   details.managedSelectionMode = obj;
-  modlog("editor", std::string("details - set managed selection mode") + std::to_string(obj));  
+  modlog("editor", std::string("details - set managed selection mode: ") + std::to_string(obj));  
 }
-void finishManagedSelectionMode(EditorDetails& details, objid obj){
+void finishManagedSelectionMode(EditorDetails& details, objid selectedObj){
   modlog("editor", "details - finished managed selection mode");  
-  auto name = mainApi -> getGameObjNameForId(obj).value();
-  CursorUpdate cursor { .index = 0, .highlightLength = 0, .newCursorDir = "left" };
-  auto attr = mainApi -> getGameObjectAttr(obj);
-  updateText(details, obj, name, cursor, 0, attr);
+  auto name = mainApi -> getGameObjNameForId(selectedObj).value();
+  CursorUpdate cursor { .index = -1, .highlightLength = 0, .newCursorDir = "left" };
+  auto attr = mainApi -> getGameObjectAttr(details.managedSelectionMode.value());
+  updateText(details, details.managedSelectionMode.value(), name, cursor, 0, attr);
   details.managedSelectionMode = std::nullopt;
 }
 
@@ -879,6 +885,7 @@ void onDetailsObjectSelected(int32_t id, void* data, int32_t index) {
     auto valueDialogType = getStrAttr(attr, "details-value-dialog");
 
     if (objInScene && reselectAttr.has_value()){
+      modlog("editor", "details reselection");
       onDetailsObjectSelected(id, data, mainApi -> getGameObjectByName(reselectAttr.value(), sceneId, true).value());
       return;
     }  
@@ -1056,63 +1063,68 @@ CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
     }
   };
 
-  //binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
-  //  EditorDetails* details = static_cast<EditorDetails*>(data);
-  //  if (action == 0){
-  //    if (key == ';'){
-  //      togglePauseMode(*details);
-  //    }else if (key == '='){
-  //      togglePlayMode(*details);
-  //    }
-  //  }
-  //  if (
-  //    (action == 1 || action == 2) && 
-  //    !isControlKey(key) && 
-  //    (key == 262 || key == 263 || key == 264 || key == 265 || key == 259 || key == 261) // /* arrow, backspace, delete
-  //  ){
-  //    processFocusedElement(*details, key);
-  //  }
-  //};
+  binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
+    EditorDetails* details = static_cast<EditorDetails*>(data);
+    if (action == 0){
+      if (key == ';'){
+        togglePauseMode(*details);
+      }else if (key == '='){
+        togglePlayMode(*details);
+      }
+    }
+    if (
+      (action == 1 || action == 2) && 
+      !isControlKey(key) && 
+      (key == 262 || key == 263 || key == 264 || key == 265 || key == 259 || key == 261) // /* arrow, backspace, delete
+    ){
+      processFocusedElement(*details, key);
+    }
+  };
 
   binding.onKeyCharCallback = [](int32_t id, void* data, unsigned int key) -> void {
     EditorDetails* details = static_cast<EditorDetails*>(data);
     if (key == ','){
       prettyPrint(details -> dataValues);
     }
-   // if (!isControlKey(key)){
-   //   processFocusedElement(*details, key);
-   // }
-   // if (isSubmitKey(key)){
-   //   submitAndPopulateData(*details);
-   // }
+    if (!isControlKey(key)){
+      processFocusedElement(*details, key);
+    }
+    if (isSubmitKey(key)){
+      submitAndPopulateData(*details);
+    }
   };
 
-  //binding.onObjectHover = [](objid scriptId, void* data, int32_t index, bool hoverOn) -> void {
-  //  EditorDetails* details = static_cast<EditorDetails*>(data);
-  //  if (hoverOn){
-  //    details -> hoveredObj = index;
-  //  }else{
-  //    details -> hoveredObj = std::nullopt;
-  //  }
-  //};
+  binding.onObjectHover = [](objid scriptId, void* data, int32_t index, bool hoverOn) -> void {
+    EditorDetails* details = static_cast<EditorDetails*>(data);
+    if (hoverOn){
+      details -> hoveredObj = index;
+    }else{
+      details -> hoveredObj = std::nullopt;
+    }
+  };
 
   binding.onObjectSelected = [](int32_t id, void* data, int32_t index, glm::vec3 color) -> void {
     onDetailsObjectSelected(id, data, index);
   };
-  //binding.onObjectUnselected = [](int32_t id, void* data) -> void {
-  //  EditorDetails* details = static_cast<EditorDetails*>(data);
-  //  unsetFocused(*details);
-  //};
+  binding.onObjectUnselected = [](int32_t id, void* data) -> void {
+    EditorDetails* details = static_cast<EditorDetails*>(data);
+    unsetFocused(*details);
+  };
 
-  /*binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
+  binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     EditorDetails* details = static_cast<EditorDetails*>(data);
     if ((button == 0) && (action == 0) && details -> hoveredObj.has_value()){
       auto attr = mainApi -> getGameObjectAttr(details -> hoveredObj.value());
       handleActiveScene(*details, mainApi -> listSceneId(details -> hoveredObj.value()), attr);  // pull this into a seperate script, don't like the idea of the editor managing this 
       maybePerformAction(*details, attr);
-      populateData(*details);
+      submitAndPopulateData(*details);
     }
-  };*/
+
+    if ((button == 1) && (action == 0) && details -> hoveredObj.has_value() && details -> managedSelectionMode.has_value()){
+      finishManagedSelectionMode(*details, details -> hoveredObj.value());
+      submitAndPopulateData(*details);
+    }
+  };
 
   return binding;
 }
