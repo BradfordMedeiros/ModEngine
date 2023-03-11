@@ -37,16 +37,23 @@ std::optional<AttributeValue> getDataValue(EditorDetails& details, std::string a
   return details.dataValues.at(attrField).value;
 } 
 
-UpdatedValue getUpdatedValue(EditorDetails& details, std::string& detailBindingName, std::optional<int> detailBindingIndex, std::string& detailBindingType, AttributeValue newvalueOld) {
+
+/*
+UpdatedValue getUpdatedValue(EditorDetails& details, std::string& detailBindingName, std::optional<int> detailBindingIndex, AttributeValue newvalueOld) {
   auto oldvalue = getDataValue(details, detailBindingName);
+  modassert(oldvalue.has_value());
+
   if (detailBindingIndex.has_value()){
     auto list3 = std::get_if<glm::vec3>(&newvalueOld);
     auto list4 = std::get_if<glm::vec4>(&newvalueOld);
-    modassert(list3 != NULL || list4 != NULL, "get update value - index specified, must be vec3 or vec4");
+    auto floatValue = std::get_if<float>(&newvalueOld);
+    modassert(list3 != NULL || list4 != NULL || floatValue != NULL, "get update value - index specified, must be vec3 or vec4 or float, got value: " + print(newvalueOld));
     modassert(detailBindingIndex.value() >= 0 && (detailBindingIndex.value() < (list4 != NULL ? 4 :  3)), "detail binding index to high for type");
     auto updateValue = std::get_if<float>(&newvalueOld);
     modassert(updateValue != NULL, "update value must be float for vec type with binding index");
+    
     if (!oldvalue.has_value()){
+      modassert(false, "get update value - no old value");
       if (list3 != NULL){
         glm::vec3 updateVec(0.f, 0.f, 0.f);
         updateVec[detailBindingIndex.value()] = *updateValue;
@@ -55,11 +62,97 @@ UpdatedValue getUpdatedValue(EditorDetails& details, std::string& detailBindingN
         glm::vec4 updateVec(0.f, 0.f, 0.f, 0.f);
         updateVec[detailBindingIndex.value()] = *updateValue;
         oldvalue = updateVec;
+      }else if (floatValue != NULL){
+        glm::vec3 updateVec(0.f, 0.f, 0.f);
+        updateVec[detailBindingIndex.value()] = *updateValue;
+        oldvalue = updateVec;
+      }else {
+        modassert(false, "not yet implemented");
       }
+    }else{
+
     }
+
+    // this needs to update the type correclty.  Notice it doesn't eg update an existing vec correctly w/ a float
+
+    // this should respe
     return UpdatedValue { .key = detailBindingName, .value = oldvalue.value() };
   }
-  return UpdatedValue{ .key = detailBindingName, .value = newvalueOld };
+  return UpdatedValue{ .key = detailBindingName, .value = oldvalue.value() };
+}
+
+*/
+
+std::string print(std::map<std::string, DataValue> values){
+  std::string strValue = "";
+  for (auto &[key, value] : values){
+    strValue += "( " + key + ", " + print(value.value) + ") ";
+  }
+  return strValue;
+}
+void prettyPrint(std::map<std::string, DataValue>& dataValues){
+  std::cout << "data values: [\n";
+  for (auto &[key, value] : dataValues){
+    std::cout << "( " << key << ", value = " << print(value.value) << " )\n";
+  }
+  std::cout << "]" << std::endl;
+}
+
+
+UpdatedValue getUpdatedValue(EditorDetails& details, std::string& detailBindingName, std::optional<int> detailBindingIndex, AttributeValue newValue) {
+  auto oldValue = getDataValue(details, detailBindingName);
+  if (!oldValue.has_value()){
+    prettyPrint(details.dataValues);
+    modassert(false,"get update value no old value for: " + detailBindingName);
+  }
+
+  modlog("editor", "details - update " + print(oldValue.value()) + ", " + print(newValue));
+  auto oldValueStr = std::get_if<std::string>(&oldValue.value());
+  auto oldValueVec3 = std::get_if<glm::vec3>(&oldValue.value());
+  auto oldValueVec4 = std::get_if<glm::vec4>(&oldValue.value());
+  auto oldValueFloat = std::get_if<float>(&oldValue.value());
+
+  auto newValueStr = std::get_if<std::string>(&newValue);
+  auto newValueVec3 = std::get_if<glm::vec3>(&newValue);
+  auto newValueVec4 = std::get_if<glm::vec4>(&newValue);
+  auto newValueFloat = std::get_if<float>(&newValue);
+
+  if (detailBindingIndex.has_value()){
+    if (oldValueStr){
+      modassert(false, "detail binding index specified for string type, not allowed");
+    }else if (oldValueFloat){
+      modassert(false, "detail binding index specified for float type, not allowed");
+    }else if (oldValueVec3){
+      modassert(newValueFloat, "old value is vec3, new value must be float");
+      modassert(detailBindingIndex.value() <= 2, "detail binding index must be <= 2 for vec3 target type");
+      (*oldValueVec3)[detailBindingIndex.value()] = *newValueFloat;
+      std::cout << "update value vec3 with value: " << *newValueFloat << std::endl;
+    }else if (oldValueVec4){
+      modassert(newValueFloat, "old value is vec4, new value must be float");
+      modassert(detailBindingIndex.value() <= 3, "detail binding index must be <= 3 for vec4 target type");
+      (*oldValueVec4)[detailBindingIndex.value()] = *newValueFloat;
+    }else{
+      modassert(false, "default case should not reach");
+    }
+ 
+  }else{
+    if (oldValueStr){
+      modassert(newValueStr, "old value is a string, new value must be a string, got: " + print(newValue));
+      oldValue = *newValueStr;
+    }else if (oldValueFloat){
+      modassert(newValueFloat, "old value is float, new value must be float, got: " + print(newValue));
+      oldValue = *newValueFloat;
+    }else if (oldValueVec3){
+      modassert(false, "not yet implemented vec3");
+    }else if (oldValueVec4){
+      modassert(false, "not yet implemented vec4");
+    }else{
+      modassert(false, "default case should not reach");
+    }
+     
+  }
+ 
+  return UpdatedValue{ .key = detailBindingName, .value = oldValue.value() };
 }
 
 
@@ -91,17 +184,21 @@ std::string attrValToUiString(AttributeValue& value){
   if (strValue){
     return *strValue;
   }
+  auto floatValue = std::get_if<float>(&value);
+  if (floatValue){
+    return serializeFloat(*floatValue);
+  }
   modassert(false, "attrValToUiString not yet implemented for this type");
   return "";
 }
 
 std::string bindQueryMain(std::string& query, std::map<std::string, DataValue>& dataValues){
   std::string newQuery = query;
-  for (auto &[key, dataValue] : dataValues){
-    auto keyToReplace = std::string("$") + key;
-    auto dataValueStr = attrValToUiString(dataValue.value);
-    newQuery.replace(newQuery.find(keyToReplace.c_str()), sizeof(keyToReplace.c_str()) - 1, dataValueStr.c_str());
-  }
+  //for (auto &[key, dataValue] : dataValues){
+  //  auto keyToReplace = std::string("$") + key;
+  //  auto dataValueStr = attrValToUiString(dataValue.value);
+  //  newQuery.replace(newQuery.find(keyToReplace.c_str()), sizeof(keyToReplace.c_str()) - 1, dataValueStr.c_str());
+  //}
   return newQuery;
 }
 
@@ -170,6 +267,7 @@ float uncalcSlideValue(objid obj, float value){
   float min = getFloatAttr(objattr, "min").value();
   float max = getFloatAttr(objattr, "max").value();
   float ratio = (value - min) / (max - min);
+  std::cout << "uncalc slide value = " << value<< ", ratio = " <<  ratio << ", min = " << min << ", max = " << max << std::endl;
   return ratio;
 }
 
@@ -227,9 +325,8 @@ void updateBinding(EditorDetails& details, objid id, std::string& detailBinding,
 void updateBindingWithValue(EditorDetails& details, float value, GameobjAttributes& objattr){
   auto detailBinding = getStrAttr(objattr, "details-binding");
   auto detailBindingIndex = optionalInt(getFloatAttr(objattr, "details-binding-index"));
-  auto editableType = getStrAttr(objattr, "details-editable-type");
   if (detailBinding.has_value()){
-    auto updateValue = getUpdatedValue(details, detailBinding.value(), detailBindingIndex, editableType.value(), value);
+    auto updateValue = getUpdatedValue(details, detailBinding.value(), detailBindingIndex, value);
     updateStoreValueModified(details, updateValue.key, updateValue.value, true);
   }
 }
@@ -238,8 +335,8 @@ void updateBindingWithValue(EditorDetails& details, float value, GameobjAttribut
 bool controlEnabled(EditorDetails& details, GameobjAttributes& gameobjAttr){
   auto isEnabledBinding = getStrAttr(gameobjAttr, "details-enable-binding");
   auto isEnabledBindingOff = getStrAttr(gameobjAttr, "details-enable-binding-off");
-  auto bindingValue = getDataValue(details, isEnabledBinding.value());
   if (isEnabledBinding.has_value() && isEnabledBindingOff.has_value()){
+    auto bindingValue = getDataValue(details, isEnabledBinding.value());
     auto bindingValueStr = std::get_if<std::string>(&bindingValue.value());
     modassert(bindingValueStr, "control enabled - binding value must be string type");
     return *bindingValueStr != isEnabledBindingOff.value();
@@ -320,7 +417,7 @@ struct ParsedDetailAttr {
 };
 ParsedDetailAttr parseDetailAttr(std::string value){
   auto parts = split(value, ':');
-  modassert(parts.size() == 2, "parse detail attr size should be 2");
+  modassert(parts.size() == 2, "parse detail attr size should be 2, attr was: " + value);
   return ParsedDetailAttr { .prefixAttr = parts.at(0), .attr = parts.at(1) };
 }
 
@@ -387,6 +484,8 @@ void submitData(EditorDetails& details){
     }
 
     auto objAttrs = gameobjAttrFromAttributes(gameobjAttrs);
+    std::cout << "setting attr: " << print(objAttrs) << std::endl;
+
     mainApi -> setGameObjectAttr(details.managedObj.value(), objAttrs);
 
     submitWorldAttr(worldAttrs);
@@ -406,10 +505,9 @@ void maybeSetBinding(EditorDetails& details, GameobjAttributes& objattr){
   auto detailBinding = getStrAttr(objattr, "details-binding-toggle");
   auto detailBindingIndex = getFloatAttr(objattr, "details-binding-index");
   auto enableValue = getStrAttr(objattr, "details-binding-on");
-  auto editableType = getStrAttr(objattr, "details-editable-type");
 
   if (shouldSet && enableValue.has_value() && detailBinding.has_value()){
-    auto updatedValue =  getUpdatedValue(details, detailBinding.value(), detailBindingIndex, editableType.value(), enableValue.value());
+    auto updatedValue = getUpdatedValue(details, detailBinding.value(), detailBindingIndex, enableValue.value());
     updateStoreValueModified(details, updatedValue.key, updatedValue.value, true);
   }
   submitAndPopulateData(details);
@@ -773,6 +871,14 @@ bool shouldUpdateType(std::string& newText, GameobjAttributes& attr){
   return false;
 }
 
+AttributeValue makeTypeCorrect(std::string& text, std::optional<std::string>& detailBindingType){
+  if (detailBindingType.has_value()){
+    if (detailBindingType.value() == "vec3"){
+      
+    }
+  }
+  return text;
+}
 
 void updateText(EditorDetails& details, objid obj, std::string& text, CursorUpdate& cursor, int offset, GameobjAttributes& attr){
   auto cursorIndex = cursor.index;
@@ -781,7 +887,7 @@ void updateText(EditorDetails& details, objid obj, std::string& text, CursorUpda
 
   auto detailBinding = getStrAttr(attr, "details-binding");
   auto detailBindingIndex = optionalInt(getFloatAttr(attr, "details-binding-index"));
-  auto editableType = getStrAttr(attr, "details-editable-type");
+  auto detailBindingType = getStrAttr(attr, "details-editable-type");
 
   GameobjAttributes newAttr {
     .stringAttributes = { {"cursor-dir", cursorDir}, { "value", text } },
@@ -792,7 +898,8 @@ void updateText(EditorDetails& details, objid obj, std::string& text, CursorUpda
   modlog("editor", "details setting " + mainApi -> getGameObjNameForId(obj).value() + " text with: " + text);
   mainApi -> setGameObjectAttr(obj, newAttr);
   if (detailBinding.has_value()){
-    auto updateValue = getUpdatedValue(details, detailBinding.value(), detailBindingIndex, editableType.value(), text);
+    modassert(false, "type not corrected, should do here");
+    auto updateValue = getUpdatedValue(details, detailBinding.value(), detailBindingIndex, makeTypeCorrect(text, detailBindingType));
     updateStoreValueModified(details, updateValue.key, updateValue.value, true);
   }
 }
@@ -821,22 +928,6 @@ void processFocusedElement(EditorDetails& details, int key){
   }
   submitData(details);
 }
-
-std::string print(std::map<std::string, DataValue> values){
-  std::string strValue = "";
-  for (auto &[key, value] : values){
-    strValue += "(" + key + ", " + print(value.value) + ") ";
-  }
-  return strValue;
-}
-void prettyPrint(std::map<std::string, DataValue>& dataValues){
-  std::cout << "data values: [\n";
-  for (auto &[key, value] : dataValues){
-    std::cout << "(" << key << ", value = " << print(value.value) << " )\n";
-  }
-  std::cout << "]" << std::endl;
-}
-
 
 bool isManagedText(GameobjAttributes& attr, std::string objname){
   return shouldUpdateText(attr) && objname.at(0) == ')';
@@ -999,6 +1090,7 @@ void maybePerformAction(EditorDetails& details, GameobjAttributes& objattr){
 
 void onSlide(EditorDetails& details, objid id, float slideAmount, GameobjAttributes& attr){
   auto value = calcSlideValue(attr, slideAmount);
+  modlog("editor", "on slide: id = " + std::to_string(id) + ", slideamount = " + std::to_string(slideAmount) + ", new value = " + std::to_string(value));
   updateBindingWithValue(details, value, attr);
   submitAndPopulateData(details);
 }
