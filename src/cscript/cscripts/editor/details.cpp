@@ -158,7 +158,6 @@ AttributeValue uiStringToAttrVal(std::string& text, AttributeValue& oldValue, st
     modassert(isFloat, "uiStringToAttrVal invalid float: " + text);
     return number;
   }
-
   modassert(false, "invalid uiStringToAttrVal, not yet supported");
   return text;
 }
@@ -855,7 +854,7 @@ bool shouldUpdateType(std::string& newText, GameobjAttributes& attr){
   }else if (isEditableType("positive-integer", attr)){
     return isTypePositiveInteger(newText);
   }
-  return false;
+  return true;
 }
 
 
