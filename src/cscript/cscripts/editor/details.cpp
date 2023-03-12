@@ -38,51 +38,6 @@ std::optional<AttributeValue> getDataValue(EditorDetails& details, std::string a
 } 
 
 
-/*
-UpdatedValue getUpdatedValue(EditorDetails& details, std::string& detailBindingName, std::optional<int> detailBindingIndex, AttributeValue newvalueOld) {
-  auto oldvalue = getDataValue(details, detailBindingName);
-  modassert(oldvalue.has_value());
-
-  if (detailBindingIndex.has_value()){
-    auto list3 = std::get_if<glm::vec3>(&newvalueOld);
-    auto list4 = std::get_if<glm::vec4>(&newvalueOld);
-    auto floatValue = std::get_if<float>(&newvalueOld);
-    modassert(list3 != NULL || list4 != NULL || floatValue != NULL, "get update value - index specified, must be vec3 or vec4 or float, got value: " + print(newvalueOld));
-    modassert(detailBindingIndex.value() >= 0 && (detailBindingIndex.value() < (list4 != NULL ? 4 :  3)), "detail binding index to high for type");
-    auto updateValue = std::get_if<float>(&newvalueOld);
-    modassert(updateValue != NULL, "update value must be float for vec type with binding index");
-    
-    if (!oldvalue.has_value()){
-      modassert(false, "get update value - no old value");
-      if (list3 != NULL){
-        glm::vec3 updateVec(0.f, 0.f, 0.f);
-        updateVec[detailBindingIndex.value()] = *updateValue;
-        oldvalue = updateVec;
-      }else if (list4 != NULL){
-        glm::vec4 updateVec(0.f, 0.f, 0.f, 0.f);
-        updateVec[detailBindingIndex.value()] = *updateValue;
-        oldvalue = updateVec;
-      }else if (floatValue != NULL){
-        glm::vec3 updateVec(0.f, 0.f, 0.f);
-        updateVec[detailBindingIndex.value()] = *updateValue;
-        oldvalue = updateVec;
-      }else {
-        modassert(false, "not yet implemented");
-      }
-    }else{
-
-    }
-
-    // this needs to update the type correclty.  Notice it doesn't eg update an existing vec correctly w/ a float
-
-    // this should respe
-    return UpdatedValue { .key = detailBindingName, .value = oldvalue.value() };
-  }
-  return UpdatedValue{ .key = detailBindingName, .value = oldvalue.value() };
-}
-
-*/
-
 std::string print(std::map<std::string, DataValue> values){
   std::string strValue = "";
   for (auto &[key, value] : values){
@@ -178,6 +133,28 @@ void clearStore(EditorDetails& details){
   details.dataValues = {};
 }
 
+AttributeValue uiStringToAttrVal(std::string& text, AttributeValue& oldValue){
+  auto strValue = std::get_if<std::string>(&oldValue);
+  auto vec3Value = std::get_if<glm::vec3>(&oldValue);
+  auto vec4Value = std::get_if<glm::vec4>(&oldValue);
+  auto floatValue = std::get_if<float>(&oldValue);
+  modassert(strValue || vec3Value || vec4Value || floatValue, "uiStringToAttrVal invalid type for attributeValue");
+  if (strValue){
+    return text;
+  }
+  if (floatValue){
+    if (text == "" || text == "-" || text == "."){
+      return 0.f;
+    }
+    float number = 0.f;
+    bool isFloat = maybeParseFloat(text, number);
+    modassert(isFloat, "uiStringToAttrVal invalid float: " + text);
+    return number;
+  }
+  
+
+  return text;
+}
 
 std::string attrValToUiString(AttributeValue& value){
   auto strValue = std::get_if<std::string>(&value);
@@ -344,22 +321,22 @@ bool controlEnabled(EditorDetails& details, GameobjAttributes& gameobjAttr){
   return true;
 }
 
-void updateToggleBinding(EditorDetails& details, objid id, std::string& detailBinding, std::optional<int> detailBindingIndex, std::optional<std::string> bindingOn){
+void updateToggleBinding(EditorDetails& details, objid id, std::string& detailBinding, std::optional<int> detailBindingIndex, std::optional<AttributeValue> bindingOn){
   auto hasValue = details.dataValues.find(detailBinding) != details.dataValues.end();
   modlog("editor", "details update binding: " + detailBinding + ", hasvalue = " + print(hasValue));
   if (!hasValue){
     return;
   }
   auto toggleEnableText = details.dataValues.at(detailBinding).value;
-  auto toggleEnableTextStr = std::get_if<std::string>(&toggleEnableText);
-  modassert(toggleEnableTextStr, "toggle enable text str is not a string");
+
   auto enableValueStr = bindingOn.has_value() ? bindingOn.value() : "enabled";
-  auto enableValue = enableValueStr == *toggleEnableTextStr;
+  auto enableValue = aboutEqual(enableValueStr, toggleEnableText);
+  std::cout << "setting detailbinding: " << detailBinding << " equal?: " << enableValue << " enableValueStr = " << print(enableValueStr) << ", toggleEnableText = " << print(toggleEnableText) << std::endl;
   auto gameobjAttr = mainApi -> getGameObjectAttr(id);
   auto isEnabled = controlEnabled(details, gameobjAttr);
   auto onOffColor = enableValue ? glm::vec4(0.3f, 0.3f, 0.6f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
   GameobjAttributes newAttr {
-    .stringAttributes = { {"state", enableValue ? "on" : "off" }},
+    .stringAttributes = {{ "state", enableValue ? "on" : "off" }},
     .numAttributes = {  },
     .vecAttr = { .vec3 = {}, .vec4 = { {"tint", isEnabled ? onOffColor : glm::vec4(0.4f, 0.4f, 0.4f, 1.f) }} },
   };
@@ -404,7 +381,7 @@ void populateData(EditorDetails& details){
     auto detailBindingIndex = getFloatAttr(attr, "details-binding-index");
     auto detailBinding = getStrAttr(attr, "details-binding-toggle");
     auto bindingTypeValue = getStrAttr(attr, "details-binding");
-    auto bindingOn = getStrAttr(attr, "details-binding-on");
+    auto bindingOn = getAttr(attr, "details-binding-on");
     updateToggleBinding(details, bindingElementId, detailBinding.value(), optionalInt(detailBindingIndex), bindingOn);
   }
   enforceLayouts(details);
@@ -417,8 +394,9 @@ struct ParsedDetailAttr {
 };
 ParsedDetailAttr parseDetailAttr(std::string value){
   auto parts = split(value, ':');
-  modassert(parts.size() == 2, "parse detail attr size should be 2, attr was: " + value);
-  return ParsedDetailAttr { .prefixAttr = parts.at(0), .attr = parts.at(1) };
+  modassert(parts.size() >= 2, "parse detail attr size should be >= 2, attr was: " + value);
+  auto restString = join(subvector(parts, 1, parts.size()), ':');
+  return ParsedDetailAttr { .prefixAttr = parts.at(0), .attr = restString };
 }
 
 void submitWorldAttr(std::vector<KeyAndAttribute>& worldAttrs){
@@ -429,6 +407,8 @@ void submitWorldAttr(std::vector<KeyAndAttribute>& worldAttrs){
     auto name = prefix.at(0);
     auto attribute = prefix.at(1);
     auto value = keyAttr.value;
+
+    std::cout << "setting world state: name = " << name << ", attr = " << attribute << ", value = " << print(value) << std::endl;
     worldState.push_back(ObjectValue {
       .object = name,
       .attribute = attribute,
@@ -504,7 +484,7 @@ void maybeSetBinding(EditorDetails& details, GameobjAttributes& objattr){
   auto shouldSet = getStrAttr(objattr, "details-binding-set").has_value();
   auto detailBinding = getStrAttr(objattr, "details-binding-toggle");
   auto detailBindingIndex = getFloatAttr(objattr, "details-binding-index");
-  auto enableValue = getStrAttr(objattr, "details-binding-on");
+  auto enableValue = getAttr(objattr, "details-binding-on");
 
   if (shouldSet && enableValue.has_value() && detailBinding.has_value()){
     auto updatedValue = getUpdatedValue(details, detailBinding.value(), detailBindingIndex, enableValue.value());
@@ -871,14 +851,6 @@ bool shouldUpdateType(std::string& newText, GameobjAttributes& attr){
   return false;
 }
 
-AttributeValue makeTypeCorrect(std::string& text, std::optional<std::string>& detailBindingType){
-  if (detailBindingType.has_value()){
-    if (detailBindingType.value() == "vec3"){
-      
-    }
-  }
-  return text;
-}
 
 void updateText(EditorDetails& details, objid obj, std::string& text, CursorUpdate& cursor, int offset, GameobjAttributes& attr){
   auto cursorIndex = cursor.index;
@@ -898,8 +870,8 @@ void updateText(EditorDetails& details, objid obj, std::string& text, CursorUpda
   modlog("editor", "details setting " + mainApi -> getGameObjNameForId(obj).value() + " text with: " + text);
   mainApi -> setGameObjectAttr(obj, newAttr);
   if (detailBinding.has_value()){
-    modassert(false, "type not corrected, should do here");
-    auto updateValue = getUpdatedValue(details, detailBinding.value(), detailBindingIndex, makeTypeCorrect(text, detailBindingType));
+    auto oldValue = getDataValue(details, detailBinding.value()).value();
+    auto updateValue = getUpdatedValue(details, detailBinding.value(), detailBindingIndex, uiStringToAttrVal(text, oldValue));
     updateStoreValueModified(details, updateValue.key, updateValue.value, true);
   }
 }

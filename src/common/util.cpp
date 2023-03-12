@@ -626,6 +626,30 @@ bool aboutEqualNormalized(glm::vec3 one, glm::vec3 two){
 bool aboutEqual(glm::vec4 one, glm::vec4 two){
   return aboutEqual(one.x, two.x) && aboutEqual(one.y, two.y) && aboutEqual(one.z, two.z) && aboutEqual(one.w, two.w);
 }
+bool aboutEqual(AttributeValue one, AttributeValue two){
+  auto strValueOne = std::get_if<std::string>(&one);
+  auto strValueTwo = std::get_if<std::string>(&two);
+  if (strValueOne && strValueTwo){
+    return *strValueOne == *strValueTwo;
+  }
+  auto floatValueOne = std::get_if<float>(&one);
+  auto floatValueTwo = std::get_if<float>(&two);
+  if (floatValueOne && floatValueTwo){
+    return aboutEqual(*floatValueOne, *floatValueTwo);
+  }
+  auto vec3ValueOne = std::get_if<glm::vec3>(&one);
+  auto vec3ValueTwo = std::get_if<glm::vec3>(&two);
+  if (vec3ValueOne && vec3ValueTwo){
+    return aboutEqual(*vec3ValueOne, *vec3ValueTwo);
+  }
+  auto vec4ValueOne = std::get_if<glm::vec4>(&one);
+  auto vec4ValueTwo = std::get_if<glm::vec4>(&two);
+  if (vec4ValueOne && vec4ValueTwo){
+    return aboutEqual(*vec4ValueOne, *vec4ValueTwo);
+  }
+  modassert(false, "cannot compare types: " + print(one) + " " + print(two));
+  return false;
+}
 
 bool isIdentityVec(glm::vec3 scale){
   return scale.x = 1 && scale.y == 1 && scale.z == 1;
@@ -683,6 +707,27 @@ std::optional<glm::vec4> getVec4Attr(GameobjAttributes& objAttr, std::string key
     return objAttr.vecAttr.vec4.at(key);
   }
   return std::nullopt; 
+}
+
+std::optional<AttributeValue> getAttr(GameobjAttributes& objAttr, std::string key){
+  auto strAttr = getStrAttr(objAttr, key);
+  if (strAttr.has_value()){
+    return strAttr;
+  }
+  auto floatAttr = getFloatAttr(objAttr, key);
+  if (floatAttr.has_value()){
+    return floatAttr;
+  }
+  auto vec3Attr = getVec3Attr(objAttr, key);
+  if (vec3Attr.has_value()){
+    return vec3Attr;
+  }
+  auto vec4Attr = getVec4Attr(objAttr, key);
+  if (vec4Attr.has_value()){
+    return vec4Attr;
+  }
+
+  return std::nullopt;
 }
 
 bool hasAttribute(GameobjAttributes& attributes, std::string attr){

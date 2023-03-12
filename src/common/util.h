@@ -200,6 +200,7 @@ std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string ke
 std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key);
 std::optional<glm::vec3> getVec3Attr(GameobjAttributes& objAttr, std::string key);
 std::optional<glm::vec4> getVec4Attr(GameobjAttributes& objAttr, std::string key);
+std::optional<AttributeValue> getAttr(GameobjAttributes& objAttr, std::string key);
 bool hasAttribute(GameobjAttributes& attributes, std::string attr);
 bool maybeSetVec3FromAttr(glm::vec3* _valueToUpdate, const char* field, GameobjAttributes& attributes);
 bool maybeSetVec4FromAttr(glm::vec4* _valueToUpdate, const char* field, GameobjAttributes& attributes);
@@ -216,6 +217,7 @@ bool aboutEqual(glm::vec2 one, glm::vec2 two);
 bool aboutEqual(glm::vec3 one, glm::vec3 two);
 bool aboutEqualNormalized(glm::vec3 one, glm::vec3 two);
 bool aboutEqual(glm::vec4 one, glm::vec4 two);
+bool aboutEqual(AttributeValue one, AttributeValue two);
 
 bool isIdentityVec(glm::vec3 scale);
 bool isIdentityVec(glm::vec4 vec);
