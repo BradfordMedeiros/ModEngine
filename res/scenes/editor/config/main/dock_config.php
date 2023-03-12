@@ -775,18 +775,20 @@
                 "type" => "slider", 
                 "name" => "gravity", 
                 "value" => [ 
-                  "binding" => "physics_gravity", 
-                  "binding-index" =>  0,
+                  "binding" => "gameobj:physics_gravity", 
+                  "binding-index" =>  1,
+                  "min" => -10,
+                  "max" => 10,
                 ]
               ],
               [ 
                 "type" => "float", 
                 "name" => "physics max speed", 
                 "value" => [ 
-                  "binding" => "physics_gravity", 
+                  "binding" => "gameobj:physics_maxspeed", 
                   "type" => "number",
                   "min" => 0,
-                  "max" => 100,
+                  "max" => 10,
                 ],
               ],
             ]
@@ -836,73 +838,14 @@
             ]
           ],
         ],
-        /*[ "type" => "label", 
-          "data" => [
-            "key" => "Mesh", 
-            "value" => [
-              "binding" => "mesh",
-            ],
-          ]
-        ],/*
         [ "type" => "label", 
           "data" => [
             "key" => "Render Layer", 
             "value" => [
-              "binding" => "layer",
+              "binding" => "gameobj:layer",
             ],
           ]
-        ],*/
-        /*[
-          "type" => "options",
-          "data" => [
-            "key" => "light-type", 
-            "value" => "placeholder value",
-            "selector" => "lighttype-selector",
-            "options" => [
-              [ "label" => "directional", "selector-index" => "dir" ],
-              [ "label" => "spotlight", "selector-index" => "spot" ], 
-              [ "label" => "point", "selector-index" => "point" ],
-            ],
-          ],
-        ],/*
-        [texture
-          "type" => "options",
-          "data" => [
-            "key" => "light-type", 
-            "value" => "placeholder value",
-            "selector" => "lighttype-selector",
-            "options" => [
-              [ "label" => "directional", "selector-index" => "dir" ],
-              [ "label" => "spotlight", "selector-index" => "spot" ], 
-              [ "label" => "point", "selector-index" => "point" ],
-            ],
-          ],
         ],
-        [
-          "type" => "numeric",
-          "data" => [
-            "key" => "scale", 
-            "value" => $vec3Type,
-          ],
-        ],
-        [
-          "type" => "numeric",
-          "data" => [
-            "key" => "rotation", 
-            "value" => $vec4Type,
-          ],
-        ],
-        [
-          "type" => "list",
-          "data" => [
-            "key" => "Object Types",
-            "values" => [
-              ["image" => "./res/scenes/editor/dock/images/camera.png", "action" => "create-camera" ],
-              ["image" => "./res/scenes/editor/dock/images/light.png", "action" => "create-light" ],
-              ["image" => "./res/scenes/editor/dock/images/sound.png", "action" => "create-sound" ],
-            ],
-          ],
-        ],*/
       ]
     ],
     "scene_info" => [
@@ -1466,7 +1409,7 @@
       ],
     ],
     "transform_types" => [
-      "items" => [
+      "items" => [ 
         [
           "type" => "label",
           "data" => [
