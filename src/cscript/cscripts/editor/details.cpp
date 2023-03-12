@@ -350,6 +350,25 @@ void updateToggleBinding(EditorDetails& details, objid id, std::string& detailBi
 }
 
 
+AttributeValue specialTransform(std::string& key, AttributeValue& value){
+  if (key == "gameobj:texturetiling" || key == "gameobj:texturesize" || key == "gameobj:textureoffset"){
+    auto strValue = std::get_if<std::string>(&value);
+    modassert(strValue, "texturetiling str must be a string");
+    auto vec2 = parseVec2(*strValue);
+    return glm::vec3(vec2.x, vec2.y, 0.f);
+  }
+  return value;
+}
+
+AttributeValue inverseSpecialTransform(std::string key, AttributeValue& value){
+  if (key == "gameobj:texturetiling" || key == "gameobj:texturesize" || key == "gameobj:textureoffset"){
+    auto vec3Value = std::get_if<glm::vec3>(&value);
+    modassert(vec3Value, "texturetiling str must be a vec3");
+    return serializeVec(glm::vec2(vec3Value -> x, vec3Value -> y));
+  }
+  return value;
+}
+
 void refillStore(EditorDetails& details, objid gameobj){
    clearStore(details);
    updateStoreValue(details, "object_name", mainApi -> getGameObjNameForId(gameobj).value());
@@ -357,7 +376,7 @@ void refillStore(EditorDetails& details, objid gameobj){
    auto allKeysAndAttr = allKeysAndAttributes(gameobjAttr);
    for (auto &[attribute, value] : allKeysAndAttr){
       auto keyname = std::string("gameobj:" + attribute);
-      updateStoreValue(details, keyname, value);
+      updateStoreValue(details, keyname, specialTransform(keyname, value));
    }
    updateStoreValue(details, "meta-numscenes", mainApi -> listScenes({}).size());
    updateStoreValue(details, "runtime-id", std::to_string(gameobj));
@@ -365,7 +384,8 @@ void refillStore(EditorDetails& details, objid gameobj){
    updateStoreValue(details, "play-mode-on", details.playModeEnabled ? "on" : "off");
    updateStoreValue(details, "pause-mode-on", details.pauseModeEnabled ? "on" : "off");
    for (auto &state : mainApi -> getWorldState()){
-      updateStoreValue(details, std::string("world:") + state.object + ":" + state.attribute, state.value);
+      auto keyname =  std::string("world:") + state.object + ":" + state.attribute;
+      updateStoreValue(details, keyname, specialTransform(keyname, state.value));
    }
    populateSqlData(details);
 }
@@ -457,12 +477,12 @@ void submitData(EditorDetails& details){
       if(parsedAttr.prefixAttr == "gameobj"){
         gameobjAttrs.push_back(KeyAndAttribute {
           .key = parsedAttr.attr,
-          .value = value.value,
+          .value = inverseSpecialTransform(key, value.value),
         });
       }else if (parsedAttr.prefixAttr == "world"){
         worldAttrs.push_back(KeyAndAttribute {
           .key = parsedAttr.attr,
-          .value = value.value,
+          .value = inverseSpecialTransform(key, value.value),
         });
       }else{
         modassert(false, "submit data, unknown attr: " + parsedAttr.prefixAttr);
