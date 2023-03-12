@@ -78,12 +78,12 @@ UpdatedValue getUpdatedValue(EditorDetails& details, std::string& detailBindingN
     }else if (oldValueFloat){
       modassert(false, "detail binding index specified for float type, not allowed");
     }else if (oldValueVec3){
-      modassert(newValueFloat, "old value is vec3, new value must be float");
+      modassert(newValueFloat, "old value is vec3, new value must be float, got: " + print(newValue));
       modassert(detailBindingIndex.value() <= 2, "detail binding index must be <= 2 for vec3 target type");
       (*oldValueVec3)[detailBindingIndex.value()] = *newValueFloat;
       std::cout << "update value vec3 with value: " << *newValueFloat << std::endl;
     }else if (oldValueVec4){
-      modassert(newValueFloat, "old value is vec4, new value must be float");
+      modassert(newValueFloat, "old value is vec4, new value must be float, got: " + print(newValue));
       modassert(detailBindingIndex.value() <= 3, "detail binding index must be <= 3 for vec4 target type");
       (*oldValueVec4)[detailBindingIndex.value()] = *newValueFloat;
     }else{
@@ -133,16 +133,18 @@ void clearStore(EditorDetails& details){
   details.dataValues = {};
 }
 
-AttributeValue uiStringToAttrVal(std::string& text, AttributeValue& oldValue){
+AttributeValue uiStringToAttrVal(std::string& text, AttributeValue& oldValue, std::optional<int> detailBindingIndex){
   auto strValue = std::get_if<std::string>(&oldValue);
   auto vec3Value = std::get_if<glm::vec3>(&oldValue);
   auto vec4Value = std::get_if<glm::vec4>(&oldValue);
   auto floatValue = std::get_if<float>(&oldValue);
   modassert(strValue || vec3Value || vec4Value || floatValue, "uiStringToAttrVal invalid type for attributeValue");
   if (strValue){
+    modassert(detailBindingIndex.has_value(), "old value string value, cannot have detail binding index");
     return text;
   }
-  if (floatValue){
+  if (floatValue || vec3Value || vec4Value){
+    modassert(detailBindingIndex.has_value(), "old value float value, cannot have detail binding index");
     if (text == "" || text == "-" || text == "."){
       return 0.f;
     }
@@ -151,8 +153,8 @@ AttributeValue uiStringToAttrVal(std::string& text, AttributeValue& oldValue){
     modassert(isFloat, "uiStringToAttrVal invalid float: " + text);
     return number;
   }
-  
 
+  modassert(false, "invalid uiStringToAttrVal, not yet supported");
   return text;
 }
 
@@ -871,7 +873,7 @@ void updateText(EditorDetails& details, objid obj, std::string& text, CursorUpda
   mainApi -> setGameObjectAttr(obj, newAttr);
   if (detailBinding.has_value()){
     auto oldValue = getDataValue(details, detailBinding.value()).value();
-    auto updateValue = getUpdatedValue(details, detailBinding.value(), detailBindingIndex, uiStringToAttrVal(text, oldValue));
+    auto updateValue = getUpdatedValue(details, detailBinding.value(), detailBindingIndex, uiStringToAttrVal(text, oldValue, detailBindingIndex));
     updateStoreValueModified(details, updateValue.key, updateValue.value, true);
   }
 }
