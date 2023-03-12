@@ -140,11 +140,16 @@ AttributeValue uiStringToAttrVal(std::string& text, AttributeValue& oldValue, st
   auto floatValue = std::get_if<float>(&oldValue);
   modassert(strValue || vec3Value || vec4Value || floatValue, "uiStringToAttrVal invalid type for attributeValue");
   if (strValue){
-    modassert(detailBindingIndex.has_value(), "old value string value, cannot have detail binding index");
+    modassert(!detailBindingIndex.has_value(), "old value string value, cannot have detail binding index");
     return text;
   }
   if (floatValue || vec3Value || vec4Value){
-    modassert(detailBindingIndex.has_value(), "old value float value, cannot have detail binding index");
+    if (vec3Value || vec4Value){
+      modassert(detailBindingIndex.has_value(), "old value vec3, vec4 value, must have detail binding index");
+    }
+    if (floatValue){
+      modassert(!detailBindingIndex.has_value(), "old value float must not have detail binding index");
+    }
     if (text == "" || text == "-" || text == "."){
       return 0.f;
     }
