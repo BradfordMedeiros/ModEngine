@@ -1,4 +1,6 @@
 <?php
+  include_once "common/createTextbox.php";
+
   $titleName = ")" . $unique_control_id . "_label";
   createElement($titleName, $default_key, [ "value" => $data["key"] ]);
 

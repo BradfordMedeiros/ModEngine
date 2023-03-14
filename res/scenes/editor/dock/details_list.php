@@ -1,4 +1,6 @@
 <?php
+  include_once "common/createTextbox.php";
+
   /*
   eg
     )key_2_checkbox_label:layer:basicui
