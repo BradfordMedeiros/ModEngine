@@ -1,0 +1,3 @@
+weather.name:STRING,weather.texture:STRING,weather.duration:STRING,weather.rate:STRING,weather.particle-limit:STRING,weather.tint:STRING
+rain,../gameresources/textures/particles/rain.png,2,1,5,1 1 1 1
+lightning,../gameresources/textures/particles/lightning.png,2,1,5,1 0 0 0.7

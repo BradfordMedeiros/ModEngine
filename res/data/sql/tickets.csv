@@ -1,0 +1,4 @@
+tickets.name:STRING,tickets.price:STRING,tickets.multiday:STRING,tickets.club:STRING
+single,63,false,exclusive
+multiday,123,true,single
+season,212,true,multi

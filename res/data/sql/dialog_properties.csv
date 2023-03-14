@@ -1,0 +1,11 @@
+dialog_properties.node:STRING,dialog_properties.key:STRING,dialog_properties.value:STRING
+end1,text,this more cool text
+start,color,  red
+end2,color,yellow
+loner_node,color,blue
+another_random,whatever,2
+another_random,text,some text goes here
+another_random,event-type,newquest-start
+another_random,event-value,devilsdagger
+npc_rumors,text,i dont got no rumors
+npc_rumors,clip,./somefake/sound/path.mp3

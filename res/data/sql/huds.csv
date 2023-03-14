@@ -1,0 +1,5 @@
+name:STRING,image:STRING,position:STRING,scale:STRING,tint:STRING,shader:STRING
+default3,/home/brad/Pictures/art/rhino_final2.png,-0.9 -0.9 0,0.1 -0.1 1,0 0 1 0.1,
+default3,/home/brad/gamedev/mosttrusted/ModEngine/res/textures/crosshairs/crosshair029.png,0 0 0,0.02 0.02 0.02,,../afterworld/shaders/menu/fragment.glsl
+default2,/home/brad/Pictures/art/rhino_final2.png,0 0.9 0,0.1 -0.1 1,,
+default2,/home/brad/gamedev/mosttrusted/ModEngine/res/textures/crosshairs/crosshair029.png,0 0 0,0.02 0.02 0.02,,

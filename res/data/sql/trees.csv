@@ -1,0 +1,4 @@
+trees.tree_type:STRING,trees.growth_rate:STRING,trees.description:STRING
+big_tree,slow,somevalue1
+small_tree,medium,somevalue2
+small_tree,fast,somevalue3

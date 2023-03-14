@@ -1,0 +1,5 @@
+people.name:STRING,people.age:STRING,people.description:STRING,people.class:STRING,people.topspeed:STRING,people.color:STRING
+box1,20,john is cool,mage,2,1?0?0?5
+bF?SF,10,billy is lame,warrior,20,1?1?1?1
+box3,10,billy is lame,thief,30,0?0?1?1
+john,10,billy is lame,thief,w,0?0?1?13.53

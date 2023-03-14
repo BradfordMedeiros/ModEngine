@@ -1,0 +1,2 @@
+vehicles.name:STRING,vehicles.model:STRING,vehicles.sound:STRING,vehicles.speed:STRING,vehicles.mass:STRING,vehicles.physics_angle:STRING,vehicles.physics_linear:STRING,vehicles.camera_offset:STRING
+digmole,../gameresources/build/uncategorized/car2.gltf,,100,5,0 0 0,1 1 1,0 0 -4

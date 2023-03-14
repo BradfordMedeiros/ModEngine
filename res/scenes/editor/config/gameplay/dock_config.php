@@ -12,41 +12,6 @@
             ]
           ],
         ],
-        [
-          "type" => "checkbox",
-          "data" => [
-            "key" => "Is Multiday Ticket?", 
-            "value" => [
-              "sql" => [
-                "binding" => "multiday-ticket",
-                "query" => "select tickets.multiday from tickets where tickets.name = single",
-                "update" => 'update tickets set tickets.multiday  = $multiday-ticket where tickets.name = single',
-                "cast" => "string",
-              ],
-              "binding" => "multiday-ticket",
-              "binding-on" => "true",
-              "binding-off" => "false",
-            ],
-          ],
-        ],
-        [
-          "type" => "options",
-          "data" => [
-            "key" => "type", 
-            "sql" => [
-              "binding" => "ticket-club",
-              "query" => "select tickets.club from tickets where tickets.name = single",
-              "update" => 'update tickets set tickets.club  = $ticket-club where tickets.name = single',
-              "cast" => "string",
-            ],
-            "options" => [
-              # bindings need to be corrected
-              [ "label" => "exclusive", "binding" => "ticket-club", "binding-on" => "exclusive" ], #
-              [ "label" => "single", "binding" => "ticket-club", "binding-on" => "single" ],
-              [ "label" => "multi", "binding" => "ticket-club", "binding-on" => "multi" ],
-            ],
-          ],
-        ],
         //[
         //  "type" => "numeric",
         //  "sql" => [
@@ -90,61 +55,51 @@
                   "type" => "number",
                 ]
               ],
-              //[ 
-              //  "type" => "float", 
-              //  "name" => "Jump Height", 
-              //  "value" => [ 
-              //    "binding" => "player-speed", 
-              //    "type" => "number",
-              //  ]
-              //],
-              /*[ 
+              [ 
+                "type" => "float", 
+                "name" => "Jump Height", 
+                "sql" => [
+                  "binding" => "player-jump-height",
+                  "query" => "select traits.jump-height from traits where profile = default",
+                  "update" => 'update traits set traits.jump-height = $player-jump-height where traits.profile = default',
+                  "cast" => "number",
+                ], 
+                "value" => [ 
+                  "binding" => "player-jump-height", 
+                  "type" => "number",
+                ]
+              ],
+              [ 
                 "type" => "float", 
                 "name" => "Gravity", 
+                "sql" => [
+                  "binding" => "player-gravity",
+                  "query" => "select traits.gravity from traits where profile = default",
+                  "update" => 'update traits set traits.gravity = $player-gravity where traits.profile = default',
+                  "cast" => "number",
+                ], 
                 "value" => [ 
-                  "binding" => "false-binding", 
-                  "binding-index" => 0,
+                  "binding" => "player-gravity", 
                   "type" => "number",
                 ]
               ],
               [ 
                 "type" => "float", 
                 "name" => "Friction", 
+                "sql" => [
+                  "binding" => "player-friction",
+                  "query" => "select traits.friction from traits where profile = default",
+                  "update" => 'update traits set traits.friction = $player-friction where traits.profile = default',
+                  "cast" => "number",
+                ], 
                 "value" => [ 
-                  "binding" => "false-binding", 
-                  "binding-index" => 0,
+                  "binding" => "player-friction", 
                   "type" => "number",
                 ]
-              ],*/
+              ],
             ]
           ],
         ],
-        /*[
-          "type" => "numeric",
-          "data" => [
-            "key" => "Animation", 
-            "value" => [
-              [ 
-                "type" => "float", 
-                "name" => "Vertical Bob", 
-                "value" => [ 
-                  "binding" => "false-binding", 
-                  "binding-index" => 0,
-                  "type" => "number",
-                ]
-              ],
-              [ 
-                "type" => "float", 
-                "name" => "Horizontal Lean", 
-                "value" => [ 
-                  "binding" => "false-binding", 
-                  "binding-index" => 0,
-                  "type" => "number",
-                ]
-              ],
-            ]
-          ],
-        ],*/
       ],
     ],
     "weapons" => [
