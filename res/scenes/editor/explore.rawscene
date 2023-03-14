@@ -8,7 +8,7 @@
 )text_main:layer:basicui
 )text_main:scale:0.005 0.015 0.005
 )text_main:value:Explorer
-)text_main:script:./res/scenes/editor/explore.scm
+)text_main:script:native/explore
 
 (dialog:layer:basicui
 (dialog:type:vertical

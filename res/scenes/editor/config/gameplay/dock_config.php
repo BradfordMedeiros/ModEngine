@@ -13,6 +13,65 @@
           ],
         ],
         [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "Is Multiday Ticket?", 
+            "value" => [
+              "sql" => [
+                "binding" => "multiday-ticket",
+                "query" => "select tickets.multiday from tickets where tickets.name = single",
+                "update" => 'update tickets set tickets.multiday  = $multiday-ticket where tickets.name = single',
+                "cast" => "string",
+              ],
+              "binding" => "multiday-ticket",
+              "binding-on" => "true",
+              "binding-off" => "false",
+            ],
+          ],
+        ],
+        [
+          "type" => "options",
+          "data" => [
+            "key" => "type", 
+            "sql" => [
+              "binding" => "ticket-club",
+              "query" => "select tickets.club from tickets where tickets.name = single",
+              "update" => 'update tickets set tickets.club  = $ticket-club where tickets.name = single',
+              "cast" => "string",
+            ],
+            "options" => [
+              # bindings need to be corrected
+              [ "label" => "exclusive", "binding" => "ticket-club", "binding-on" => "exclusive" ], #
+              [ "label" => "single", "binding" => "ticket-club", "binding-on" => "single" ],
+              [ "label" => "multi", "binding" => "ticket-club", "binding-on" => "multi" ],
+            ],
+          ],
+        ],
+        //[
+        //  "type" => "numeric",
+        //  "sql" => [
+        //    "binding" => "sql-trait-speed",
+        //    "query" => "select people.topspeed from people where people.name = john",
+        //    "update" => 'update people set people.topspeed = $sql-trait-speed where people.name = john',
+        //    "cast" => "number",
+        //  ], 
+        //  "data" => [
+        //    "key" => "Physics Tuning", 
+        //    "value" => [
+        //      [ 
+        //        "type" => "float", 
+        //        "name" => "physics max speed", 
+        //        "value" => [ 
+        //          "binding" => "sql-trait-speed", 
+        //          "type" => "number",
+        //          "min" => 0,
+        //          "max" => 100,
+        //        ],
+        //      ],
+        //    ]
+        //  ],
+        //],
+        [
           "type" => "numeric",
           "data" => [
             "key" => "Core Movement", 
@@ -20,22 +79,26 @@
               [ 
                 "type" => "float", 
                 "name" => "Movement Speed", 
+                "sql" => [
+                  "binding" => "player-speed",
+                  "query" => "select traits.speed from traits where profile = default",
+                  "update" => 'update traits set traits.speed = $player-speed where traits.profile = default',
+                  "cast" => "number",
+                ], 
                 "value" => [ 
-                  "binding" => "false-binding", 
-                  "binding-index" => 0,
+                  "binding" => "player-speed", 
                   "type" => "number",
                 ]
               ],
-              [ 
-                "type" => "float", 
-                "name" => "Jump Height", 
-                "value" => [ 
-                  "binding" => "false-binding", 
-                  "binding-index" => 0,
-                  "type" => "number",
-                ]
-              ],
-              [ 
+              //[ 
+              //  "type" => "float", 
+              //  "name" => "Jump Height", 
+              //  "value" => [ 
+              //    "binding" => "player-speed", 
+              //    "type" => "number",
+              //  ]
+              //],
+              /*[ 
                 "type" => "float", 
                 "name" => "Gravity", 
                 "value" => [ 
@@ -52,11 +115,11 @@
                   "binding-index" => 0,
                   "type" => "number",
                 ]
-              ],
+              ],*/
             ]
           ],
         ],
-        [
+        /*[
           "type" => "numeric",
           "data" => [
             "key" => "Animation", 
@@ -81,7 +144,7 @@
               ],
             ]
           ],
-        ],
+        ],*/
       ],
     ],
     "weapons" => [

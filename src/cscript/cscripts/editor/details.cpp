@@ -454,7 +454,6 @@ void submitWorldAttr(std::vector<KeyAndAttribute>& worldAttrs){
 
 
 void submitSqlUpdates(EditorDetails& details){
-  // might be all wrong 
   auto allQueriesObj = mainApi -> getObjectsByAttr("sql-query", std::nullopt, std::nullopt);
   for (auto queryObjId : allQueriesObj){
     auto attr = mainApi -> getGameObjectAttr(queryObjId);
@@ -464,7 +463,7 @@ void submitSqlUpdates(EditorDetails& details){
     
     modlog("editor", "details update - " + sqlUpdate.value());
     auto query = bindQueryMain(sqlUpdate.value(), details.dataValues);
-    modlog("editor", "details update binded - " + sqlUpdate.value());
+    modlog("editor", "details update binded - " + query);
 
     bool valid = false;
     auto compiledQuery = mainApi -> compileSqlQuery(query, {});

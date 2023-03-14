@@ -22,7 +22,11 @@
       if (array_key_exists("readonly", $value[$x]["value"])){
         $readonly = $value[$x]["value"]["readonly"];
       }
-      createTextbox($holdername, $valuename, $readonly, $editableType, $value[$x]["value"], false, false, $styles);
+      $sql = NULL;
+      if (array_key_exists("sql", $value[$x])){
+        $sql = $value[$x]["sql"];
+      }
+      createTextbox($holdername, $valuename, $readonly, $editableType, $value[$x]["value"], false, false, $styles, $sql);
       array_push($managedElements, $holdername);
     }else if ($controlType == "slider"){
       $hasBinding = !is_string($value[$x]);
@@ -51,7 +55,11 @@
       if (array_key_exists("max", $value[$x]["value"])){
         $attrValues["max"] = $value[$x]["value"]["max"];
       }
-
+      $sql = NULL;
+      if (array_key_exists("sql", $value[$x])){
+        $sql = $value[$x]["sql"];
+      }
+      includeSql($sql, $attrValues);
       createElement($sliderElementName, $default_value, $attrValues);
       array_push($managedElements, $sliderElementName);
     }else{

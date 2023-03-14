@@ -53,7 +53,7 @@
     $valueFromDialog = $data["value"]["valueFromDialog"];
   }
 
-  createTextbox($holdername, $valuename, $readonly, $type, $data["value"], $valueFromSelection, $valueFromDialog, $styles);
+  createTextbox($holdername, $valuename, $readonly, $type, $data["value"], $valueFromSelection, $valueFromDialog, $styles, NULL);
 
   createElement($rootElementName, $default_rootLayout, [ "elements" => $keyname . "," . $holdername ]);
 ?>

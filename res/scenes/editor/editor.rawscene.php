@@ -69,7 +69,8 @@
 (menubar:margin-bottom:0.02
 (menubar:minwidth:2
 (menubar:border-color:1 0.5 0.5
-(menubar:script:./res/scenes/editor/editor.scm
+#(menubar:script:./res/scenes/editor/editor.scm
+(menubar:script:native/editor
 
 
 (row2:layer:basicui

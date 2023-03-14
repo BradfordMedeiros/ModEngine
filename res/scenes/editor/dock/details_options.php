@@ -40,7 +40,13 @@
   $optionsHolder["position"] = "0 0 " . $depth[28];
   $optionsHolder["align-items-horizontal"] = "center";
 
-  createElement($optionsLayout, $optionsHolder, [ "elements" => implode(",", $optionElements) ]);
+  $attrValues = [ "elements" => implode(",", $optionElements) ];
+  $sql = NULL;
+  if (array_key_exists("sql", $data)){
+    $sql = $data["sql"];
+  }
+  includeSql($sql, $attrValues);
+  createElement($optionsLayout, $optionsHolder, $attrValues);
   createElement($rootElementName, $default_rootLayout, [ 
     #"tint" => "0 0 1 1", 
     "type" => "vertical", 

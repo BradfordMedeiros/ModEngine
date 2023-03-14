@@ -5,7 +5,22 @@
   // or 
   // 2. [ "value" => [ "binding"= > "binding to create" ]]
 
-  function createTextbox($holdername, $valuename, $readonly, $type, $binding, $valueFromSelection, $valueFromDialog, $styles){
+
+  function includeSql($sql, &$_attr){
+    if ($sql == NULL){
+      return;
+    }
+    $_attr["sql-binding"] = $sql["binding"];
+    $_attr["sql-query"] = $sql["query"];
+    if (array_key_exists("update", $sql)){
+      $_attr["sql-update"] = $sql["update"];
+    }
+    if (array_key_exists("cast", $sql)){
+      $_attr["sql-cast"] = $sql["cast"];
+    }
+  }
+ 
+  function createTextbox($holdername, $valuename, $readonly, $type, $binding, $valueFromSelection, $valueFromDialog, $styles, $sql){
     // details-editable-type to sponsor the type behavior
     if ($type != NULL){
       if ($type!= "number" && $type != "positive-number" && $type != "integer" && $type != "positive-integer" && $type != "list"){  // should actually sponsor
@@ -67,8 +82,10 @@
     if (!$readonly){
       $combinedStyle = array_merge($editableStyle, $defaultStyle);
     }
- 
+  
+    includeSql($sql, $combinedStyle);
+
     createElement($holdername, $default_key, $combinedStyle);
   }
- 
+
 ?> 

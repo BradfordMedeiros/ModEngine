@@ -14,7 +14,7 @@
     }
   }
 
-  function includeTemplate($file, $rootElementName, $i, $data,  $unique_control_id, $zpos, $sqlBinding, $depth, $default_rootLayout ){
+  function includeTemplate($file, $rootElementName, $i, $data,  $unique_control_id, $zpos, $depth, $default_rootLayout ){
     $default_style = [ "layer" => "basicui" ];
     $default_text_style = [
       "layer" => "basicui", 
@@ -40,16 +40,6 @@
       "position" => "0 0 " . $depth[2],
     ];
 
-    if ($sqlBinding){
-      $default_rootLayout["sql-binding"] = $sqlBinding["binding"];
-      $default_rootLayout["sql-query"] = $sqlBinding["query"];
-      if (array_key_exists("update", $sqlBinding)){
-        $default_rootLayout["sql-update"] = $sqlBinding["update"];
-      }
-      if (array_key_exists("cast", $sqlBinding)){
-        $default_rootLayout["sql-cast"] = $sqlBinding["cast"];
-      }
-    }
     include $file;
   }
 
@@ -186,13 +176,7 @@
   
         $rootElementName = "(" . $unique_control_id;
         $templateFile = $typeToTemplate[$type];
-        $sqlBinding = [];
-  
-        if (array_key_exists("sql", $keyvaluePairs[$i])){
-          $sqlBinding = $keyvaluePairs[$i]["sql"];
-        }
-  
-        includeTemplate($templateFile, $rootElementName, $i, $data, $unique_control_id, $zpos, $sqlBinding, $depth, $default_rootLayout);
+        includeTemplate($templateFile, $rootElementName, $i, $data, $unique_control_id, $zpos, $depth, $default_rootLayout);
         array_push($test_panel_elements, $rootElementName);
   
         echo ("\n");

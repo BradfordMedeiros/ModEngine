@@ -43,6 +43,12 @@
     $buttonFields["details-binding-off"] = $data["value"]["binding-off"];
   }
  
+  $sql = NULL;
+  if (array_key_exists("sql", $data["value"])){
+    $sql = $data["value"]["sql"];
+  }
+  includeSql($sql, $buttonFields);
+
   createElement($checkboxName, $default_text_style, $buttonFields);
   createElement($rootElementName, $default_rootLayout, [ 
     "content-spacing" => "space-for-first",  "tint" => "0.2 0.2 0.2 1", "margin-top" => "0.01", "margin-bottom" => "0.01", "spacing" => "0", "elements" =>  $labelName . "," . $checkboxName 
