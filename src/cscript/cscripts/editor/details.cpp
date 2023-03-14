@@ -112,6 +112,7 @@ UpdatedValue getUpdatedValue(EditorDetails& details, std::string& detailBindingN
 
 
 void updateStoreValueModified(EditorDetails& details, std::string key, AttributeValue value, bool modified){
+  modlog("editor", "details - updateStoreValueModified: " + key + ", " + print(value));
   details.dataValues[key] = DataValue { .modified = modified, .value = value };
 
 }
@@ -171,17 +172,23 @@ std::string attrValToUiString(AttributeValue& value){
   if (floatValue){
     return serializeFloat(*floatValue);
   }
-  modassert(false, "attrValToUiString not yet implemented for this type");
+  modassert(false, "attrValToUiString not yet implemented for this type: " + print(value));
   return "";
 }
 
 std::string bindQueryMain(std::string& query, std::map<std::string, DataValue>& dataValues){
   std::string newQuery = query;
-  //for (auto &[key, dataValue] : dataValues){
-  //  auto keyToReplace = std::string("$") + key;
-  //  auto dataValueStr = attrValToUiString(dataValue.value);
-  //  newQuery.replace(newQuery.find(keyToReplace.c_str()), sizeof(keyToReplace.c_str()) - 1, dataValueStr.c_str());
-  //}
+  for (auto &[key, dataValue] : dataValues){
+    auto keyToReplace = std::string("$") + key;
+    auto replaceIndex = newQuery.find(keyToReplace.c_str());
+    if (replaceIndex == std::string::npos){
+      modlog("editor", "bind query: key = " + key + ", but couldn't find a matching key");
+      continue;
+    }
+    auto dataValueStr = attrValToUiString(dataValue.value);
+    modlog("editor", "bind query: key = " + key + ", value = " + dataValueStr);
+    newQuery.replace(replaceIndex, keyToReplace.size(), dataValueStr.c_str());
+  }
   return newQuery;
 }
 
@@ -201,15 +208,17 @@ void populateSqlData(EditorDetails& details){
     auto sqlBinding = getStrAttr(attr, "sql-binding");
     auto sqlQuery = getStrAttr(attr, "sql-query");
     auto sqlCast = getStrAttr(attr, "sql-cast");
-
     auto query = bindQueryMain(sqlQuery.value(), details.dataValues);
     bool valid = false;
+    modlog("editor", "sql query: " + sqlQuery.value());
+    modlog("editor", "sql query bind: " + query);
     auto compiledQuery = mainApi -> compileSqlQuery(query, {});
     auto sqlResult = mainApi -> executeSqlQuery(compiledQuery, &valid);
     modassert(valid, "populate sql data, invalid query");
 
     auto firstColInFirstRow = sqlResult.at(0).at(0);
-    if (!sqlCast.has_value()){
+    modlog("editor", "sql query result: " + print(sqlResult.at(0)));
+    if (!sqlCast.has_value() || sqlCast.value() == "string"){
       updateStoreValue(details, sqlBinding.value(), firstColInFirstRow);
     }else{
       auto type = sqlCast.value();
@@ -415,14 +424,13 @@ void populateData(EditorDetails& details){
 
 
 struct ParsedDetailAttr {
-  std::string prefixAttr;
+  std::optional<std::string> prefixAttr;
   std::string attr;
 };
 ParsedDetailAttr parseDetailAttr(std::string value){
   auto parts = split(value, ':');
-  modassert(parts.size() >= 2, "parse detail attr size should be >= 2, attr was: " + value);
   auto restString = join(subvector(parts, 1, parts.size()), ':');
-  return ParsedDetailAttr { .prefixAttr = parts.at(0), .attr = restString };
+  return ParsedDetailAttr { .prefixAttr = parts.size() >= 2 ? std::optional<std::string>(parts.at(0)) : std::nullopt, .attr = restString };
 }
 
 void submitWorldAttr(std::vector<KeyAndAttribute>& worldAttrs){
@@ -454,7 +462,10 @@ void submitSqlUpdates(EditorDetails& details){
     auto sqlUpdate = getStrAttr(attr, "sql-update");
     auto sqlCast = getStrAttr(attr, "sql-cast");
     
+    modlog("editor", "details update - " + sqlUpdate.value());
     auto query = bindQueryMain(sqlUpdate.value(), details.dataValues);
+    modlog("editor", "details update binded - " + sqlUpdate.value());
+
     bool valid = false;
     auto compiledQuery = mainApi -> compileSqlQuery(query, {});
     auto sqlResult = mainApi -> executeSqlQuery(compiledQuery, &valid);
@@ -471,21 +482,21 @@ void submitData(EditorDetails& details){
       if (!value.modified){
         continue;
       }
-      // maybe serialize vec2 to string here
-
       auto parsedAttr = parseDetailAttr(key);
-      if(parsedAttr.prefixAttr == "gameobj"){
-        gameobjAttrs.push_back(KeyAndAttribute {
-          .key = parsedAttr.attr,
-          .value = inverseSpecialTransform(key, value.value),
-        });
-      }else if (parsedAttr.prefixAttr == "world"){
-        worldAttrs.push_back(KeyAndAttribute {
-          .key = parsedAttr.attr,
-          .value = inverseSpecialTransform(key, value.value),
-        });
-      }else{
-        modassert(false, "submit data, unknown attr: " + parsedAttr.prefixAttr);
+      if (parsedAttr.prefixAttr.has_value()){
+        if(parsedAttr.prefixAttr.value() == "gameobj"){
+          gameobjAttrs.push_back(KeyAndAttribute {
+            .key = parsedAttr.attr,
+            .value = inverseSpecialTransform(key, value.value),
+          });
+        }else if (parsedAttr.prefixAttr.value() == "world"){
+          worldAttrs.push_back(KeyAndAttribute {
+            .key = parsedAttr.attr,
+            .value = inverseSpecialTransform(key, value.value),
+          });
+        }else{
+          modassert(false, "submit data, unknown attr: " + parsedAttr.prefixAttr.value());
+        }
       }
     }
 
