@@ -46,8 +46,8 @@
   }
  
   $sql = NULL;
-  if (array_key_exists("sql", $data["value"])){
-    $sql = $data["value"]["sql"];
+  if (array_key_exists("sql", $data)){
+    $sql = $data["sql"];
   }
   includeSql($sql, $buttonFields);
 

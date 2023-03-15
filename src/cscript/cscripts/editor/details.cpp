@@ -627,6 +627,59 @@ void createVoxels(EditorDetails& details){
   mainApi -> makeObjectAttr(details.activeSceneId.value(), "]voxel-" + uniqueName(), attr, submodelAttributes); 
 }
 
+void createVolume(EditorDetails& details){
+  modlog("editor", "details create volume placeholder");
+
+  GameobjAttributes attr {
+    .stringAttributes = { 
+       { "mesh", "../gameresources/build/primitives/walls/1-0.2-1.gltf" },
+       { "trigger-switch", "someswitch" },
+       { "physics", "enabled" },
+    },
+    .numAttributes = {},
+    .vecAttr = { 
+      .vec3 = {
+        { "scale", glm::vec3(5.f, 5.f, 5.f) },
+      }, 
+      .vec4 = {
+        { "tint", glm::vec4(0.f, 1.f, 0.f, 0.2f) },
+      } 
+    },
+  };
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  mainApi -> makeObjectAttr(details.activeSceneId.value(), "volume-" + uniqueName(), attr, submodelAttributes); 
+}
+
+void createWater(EditorDetails& details){
+  modlog("editor", "details create volume placeholder");
+
+  GameobjAttributes attr {
+    .stringAttributes = { 
+       { "mesh", "../gameresources/build/primitives/walls/1-0.2-1.gltf" },
+       { "physics", "enabled" },
+       { "water", "true" },
+    },
+    .numAttributes = {},
+    .vecAttr = { 
+      .vec3 = {
+        { "scale", glm::vec3(5.f, 5.f, 5.f) },
+      }, 
+      .vec4 = {
+        { "tint", glm::vec4(0.f, 0.f, 1.f, 0.2f) },
+      } 
+    },
+  };
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  mainApi -> makeObjectAttr(details.activeSceneId.value(), "volume-" + uniqueName(), attr, submodelAttributes); 
+}
+
+void reloadHud(EditorDetails& details){
+  auto playerHud = getDataValue(details, "player-hud");
+  mainApi -> sendNotifyMessage("reload-config:hud",  playerHud.value());
+  modlog("editor", "details - reload hud request: " + print(playerHud.value()));
+}
+
+
 void setManipulatorMode(std::string mode){
   mainApi -> setWorldState({ 
     ObjectValue {
@@ -645,7 +698,6 @@ void setAxis(std::string axis){
     }
   }); 
 }
-
 
 
 void setPauseMode(EditorDetails& details, bool enabled){
@@ -1073,6 +1125,8 @@ std::map<std::string, std::function<void(EditorDetails&)>> buttonToAction = {
 	{ "save-heightmap", saveHeightmap },
 	{ "save-heightmap-as", saveHeightmapAs },
 	{ "create-voxels", createVoxels },
+  { "create-volume", createVolume },
+  { "create-water", createWater },
   { "set-transform-mode", [](EditorDetails&) -> void { setManipulatorMode("translate"); }},
   { "set-scale-mode", [](EditorDetails&) -> void { setManipulatorMode("scale"); }},
   { "set-rotate-mode", [](EditorDetails&) -> void { setManipulatorMode("rotate"); }},
@@ -1082,6 +1136,7 @@ std::map<std::string, std::function<void(EditorDetails&)>> buttonToAction = {
   { "set-axis-y", [](EditorDetails&) -> void { setAxis("y"); }},
   { "set-axis-z", [](EditorDetails&) -> void { setAxis("z"); }},
   { "copy-object", [](EditorDetails&) -> void { mainApi -> sendNotifyMessage("copy-object", "true"); }},
+  { "reload-hud", reloadHud },
 };
 
 void maybePerformAction(EditorDetails& details, GameobjAttributes& objattr){

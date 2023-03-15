@@ -53,7 +53,11 @@
     $valueFromDialog = $data["value"]["valueFromDialog"];
   }
 
-  createTextbox($holdername, $valuename, $readonly, $type, $data["value"], $valueFromSelection, $valueFromDialog, $styles, NULL);
+  $sql = NULL;
+  if (array_key_exists("sql", $data)){
+    $sql = $data["sql"];
+  }
+  createTextbox($holdername, $valuename, $readonly, $type, $data["value"], $valueFromSelection, $valueFromDialog, $styles, $sql);
 
   createElement($rootElementName, $default_rootLayout, [ "elements" => $keyname . "," . $holdername ]);
 ?>

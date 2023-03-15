@@ -3,40 +3,6 @@
     "movement" => [
       "items" => [
         [
-          "type" => "label",
-          "data" => [
-            "key" => "Modify movement settings for main character controller",
-            "readonly" => true,
-            "value" => [
-              "binding" => "false-binding-0",
-            ]
-          ],
-        ],
-        //[
-        //  "type" => "numeric",
-        //  "sql" => [
-        //    "binding" => "sql-trait-speed",
-        //    "query" => "select people.topspeed from people where people.name = john",
-        //    "update" => 'update people set people.topspeed = $sql-trait-speed where people.name = john',
-        //    "cast" => "number",
-        //  ], 
-        //  "data" => [
-        //    "key" => "Physics Tuning", 
-        //    "value" => [
-        //      [ 
-        //        "type" => "float", 
-        //        "name" => "physics max speed", 
-        //        "value" => [ 
-        //          "binding" => "sql-trait-speed", 
-        //          "type" => "number",
-        //          "min" => 0,
-        //          "max" => 100,
-        //        ],
-        //      ],
-        //    ]
-        //  ],
-        //],
-        [
           "type" => "numeric",
           "data" => [
             "key" => "Core Movement", 
@@ -52,6 +18,34 @@
                 ], 
                 "value" => [ 
                   "binding" => "player-speed", 
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "Movement Speed Air", 
+                "sql" => [
+                  "binding" => "player-speed-air",
+                  "query" => "select traits.speed-air from traits where profile = default",
+                  "update" => 'update traits set traits.speed-air = $player-speed-air where traits.profile = default',
+                  "cast" => "number",
+                ], 
+                "value" => [ 
+                  "binding" => "player-speed-air", 
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "Movement Speed Water", 
+                "sql" => [
+                  "binding" => "player-speed-water",
+                  "query" => "select traits.speed-water from traits where profile = default",
+                  "update" => 'update traits set traits.speed-water = $player-speed-water where traits.profile = default',
+                  "cast" => "number",
+                ], 
+                "value" => [ 
+                  "binding" => "player-speed-water", 
                   "type" => "number",
                 ]
               ],
@@ -97,9 +91,40 @@
                   "type" => "number",
                 ]
               ],
+              [ 
+                "type" => "float", 
+                "name" => "Restitution", 
+                "sql" => [
+                  "binding" => "player-restitution",
+                  "query" => "select traits.restitution from traits where profile = default",
+                  "update" => 'update traits set traits.restitution = $player-restitution where traits.profile = default',
+                  "cast" => "number",
+                ], 
+                "value" => [ 
+                  "binding" => "player-restitution", 
+                  "type" => "number",
+                ]
+              ],
             ]
           ],
         ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "crouch",
+            "sql" => [
+              "binding" => "player-crouch",
+              "query" => "select traits.crouch from traits where profile = default",
+              "update" => 'update traits set traits.crouch = $player-crouch where traits.profile = default',
+              "cast" => "string",
+            ], 
+            "value" => [
+              "binding" => "player-crouch",  
+              "binding-on" => "TRUE",
+              "binding-off" => "FALSE",
+            ],
+          ],
+        ], 
       ],
     ],
     "weapons" => [
@@ -173,31 +198,8 @@
             "value" => [
               "binding" => "false-binding-0",
             ],
-            "action" => "create-volume", # not yet implemented
+            "action" => "create-volume", 
             "tint" => "1 1 0 1",
-          ],
-        ],
-        [
-          "type" => "options",
-          "data" => [
-            "key" => "type", 
-            "options" => [
-              # bindings need to be corrected
-              [ "label" => "box", "binding" => "gameobj:type", "binding-on" => "point" ], #
-              [ "label" => "sphere", "binding" => "gameobj:type", "binding-on" => "spotlight" ],
-              [ "label" => "cylinder", "binding" => "gameobj:type", "binding-on" => "directional" ],
-            ],
-          ],
-        ],
-        [
-          "type" => "checkbox",
-          "data" => [
-            "key" => "Has Trigger", 
-            "value" => [
-              "binding" => "gameobj:dof",  
-              "binding-on" => "enabled",
-              "binding-off" => "disabled",
-            ],
           ],
         ],
         [
@@ -205,7 +207,7 @@
           "data" => [
             "key" => "Trigger Name",
             "value" => [
-              "binding" => "false-binding-0",
+              "binding" => "gameobj:trigger-switch",  
             ]
           ],
         ],
@@ -223,6 +225,33 @@
             ]
           ],
         ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Reload Hud",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ],
+            "action" => "reload-hud", 
+            "tint" => "0 1 1 1",
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Hud Name",
+            "sql" => [
+              "binding" => "player-hud",
+              "query" => "select traits.profile from traits where profile = default",
+              "update" => 'update traits set traits.speed-water = $profile where traits.profile = default',
+              "cast" => "string",
+            ], 
+            "value" => [
+              "binding" => "player-hud",
+            ]
+          ],
+        ],
       ],
     ],
     "water" => [
@@ -230,11 +259,23 @@
         [
           "type" => "label",
           "data" => [
-            "key" => "Create Water",
+            "key" => "Water",
             "readonly" => true,
             "value" => [
               "binding" => "false-binding-0",
             ]
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Create Water",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ],
+            "action" => "create-water", 
+            "tint" => "0 0 1 1",
           ],
         ],
       ],
