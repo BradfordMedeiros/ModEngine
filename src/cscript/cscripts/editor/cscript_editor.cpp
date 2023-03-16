@@ -249,22 +249,30 @@ void maybeUnloadSidepanelAll(EditorData& editorData){
   }
 }
 
-void maybeUnloadSidepanelSnap(EditorData& editorData, int panelIndex){
-  if (editorData.snapPosToSceneId.find(panelIndex) != editorData.snapPosToSceneId.end()){
-    auto sceneId = editorData.snapPosToSceneId.at(panelIndex);
+void maybeUnloadSidepanelSnap(EditorData& editorData, int snappingIndex){
+  if (editorData.snapPosToSceneId.find(snappingIndex) != editorData.snapPosToSceneId.end()){
+    auto sceneId = editorData.snapPosToSceneId.at(snappingIndex);
     mainApi -> unloadScene(sceneId);
-    editorData.snapPosToSceneId.erase(panelIndex);
+    editorData.snapPosToSceneId.erase(snappingIndex);
   }
 }
 
 
-std::optional<int> getSnapId(EditorData& editorData, int index){
+std::optional<int> getSceneIdForSnapIndex(EditorData& editorData, int index){
   if (editorData.snapPosToSceneId.find(index) != editorData.snapPosToSceneId.end()){
     return editorData.snapPosToSceneId.at(index);
   }
   return std::nullopt;
 }
 
+std::optional<int> getCurrSnapForScene(EditorData& editorData, int sceneId){
+  for (auto &[snapindex, sceneIdAtSnapPos] : editorData.snapPosToSceneId){
+    if (sceneId == sceneIdAtSnapPos){
+      return snapindex;
+    }
+  }
+  return std::nullopt;
+}
 
 
 void popoverAction(EditorData& editorData, std::string action){
@@ -341,36 +349,43 @@ objid loadSidePanel(std::string scene, std::optional<glm::vec3> pos, bool moveab
   return mainApi -> loadScene(scene, additionalTokens, std::nullopt, tags);
 }
 
-void updateSnapPos(EditorData& editorData, int snappingIndex, int sceneId){
-  modassert(editorData.snapPosToSceneId.find(snappingIndex) == editorData.snapPosToSceneId.end() || editorData.snapPosToSceneId.at(snappingIndex) == sceneId, "update snap failed, index occupied: " + snappingIndex);
-  std::optional<int> oldSnappingIndex = std::nullopt;
-  for (auto &[snapindex, sceneId] : editorData.snapPosToSceneId){
-    if (sceneId == sceneId){
-      oldSnappingIndex = snapindex;
-    }
+void doPrintSnapPos(EditorData& editorData){
+  std::string snapPosStr = "";
+  for (auto &[snapPos, sceneId] : editorData.snapPosToSceneId){
+    snapPosStr += std::to_string(snapPos) + "(" + std::to_string(sceneId) + ") ";
   }
+  modlog("editor", "snap pos: [ " + snapPosStr + " ]\n");
+}
+
+// returns if did update
+bool updateSnapPos(EditorData& editorData, int snappingIndex, int sceneId){
+  if (editorData.snapPosToSceneId.find(snappingIndex) != editorData.snapPosToSceneId.end()){
+    return false;
+  }
+  auto oldSnappingIndex = getCurrSnapForScene(editorData, sceneId);
   if (oldSnappingIndex.has_value()){
     editorData.snapPosToSceneId.erase(oldSnappingIndex.value());
   }
   editorData.snapPosToSceneId[snappingIndex] = sceneId;
+  doPrintSnapPos(editorData);
 
-  std::cout << "snapping pos: ";
-  for (auto &[snapIndex, sceneId] : editorData.snapPosToSceneId){
-    std:: cout << "(" << snapIndex << ", " << sceneId << ") ";
-  }
-  std::cout << std::endl;
+  return true;
 }
+
 
 void changeSidepanel(EditorData& editorData, int snappingIndex, std::string scene, std::string anchorElementName){
   modlog("editor", "change sidepanel, load scene: " + scene + ", anchor: " + anchorElementName);
   maybeUnloadSidepanelSnap(editorData, snappingIndex);
-  auto snapId = getSnapId(editorData, snappingIndex);
-  if (!snapId.has_value()){
-    auto sidePanelSceneId = loadSidePanel(scene, std::nullopt, true, true, true);
-    auto testPanelId = mainApi -> getGameObjectByName("(test_panel", sidePanelSceneId, false);
-    updateSnapPos(editorData, snappingIndex, sidePanelSceneId);
-    mainApi -> enforceLayout(testPanelId.value());
-  }
+
+  auto sceneId = getSceneIdForSnapIndex(editorData, snappingIndex);
+  modassert(!sceneId.has_value(), "snap index already occupied");
+  auto sidePanelSceneId = loadSidePanel(scene, std::nullopt, true, true, true);
+  auto testPanelId = mainApi -> getGameObjectByName("(test_panel", sidePanelSceneId, false);
+  bool didUpdate = updateSnapPos(editorData, snappingIndex, sidePanelSceneId);
+  modassert(didUpdate, "could not load sidepanel, was occupied");
+
+  mainApi -> enforceLayout(testPanelId.value());
+  doPrintSnapPos(editorData);
 }
 
 std::vector<objid> loadAllPanels(std::vector<PanelAndPosition> panels){
@@ -485,10 +500,10 @@ struct SnappingPosition {
 
 std::vector<SnappingPosition> snappingPositions = {
   //SnappingPosition { .xPos = 0.f, .snappingPosition = glm::vec3(0.78, -0.097f, 0.f) },
+  SnappingPosition { .xPos = -1.2f, .snappingPosition = glm::vec3(-1.2f, -0.097f, 0.f) },
   SnappingPosition { .xPos = -1.f, .snappingPosition = glm::vec3(-0.78, -0.097f, 0.f) },
   SnappingPosition { .xPos = 1.f, .snappingPosition = glm::vec3(0.78 , -0.097f, 0.f) },
   SnappingPosition { .xPos = 1.2f, .snappingPosition = glm::vec3(1.2f, -0.097f, 0.f) },
-  SnappingPosition { .xPos = -1.2f, .snappingPosition = glm::vec3(-1.2f, -0.097f, 0.f) },
 };
 
 int getSnappingPosition(glm::vec3 position){
@@ -515,11 +530,19 @@ void maybeHandleSidePanelDrop(EditorData& editorData, objid id){
   if (shouldSnap){
     auto pos = mainApi -> getGameObjectPos(id, true);
     int snappingIndex = getSnappingPosition(pos);
-    std::cout << "snapping index: " << snappingIndex << std::endl;
-    auto snappingPos = snappingPositions.at(snappingIndex).snappingPosition;
-    updateSnapPos(editorData, snappingIndex, sceneId);
-    mainApi -> setGameObjectPos(id, glm::vec3(snappingPos.x, pos.y, pos.z));
-    mainApi -> enforceLayout(id);
+    bool didUpdate = updateSnapPos(editorData, snappingIndex, sceneId);
+    if (didUpdate){
+      auto snappingPos = snappingPositions.at(snappingIndex).snappingPosition;
+      mainApi -> setGameObjectPos(id, glm::vec3(snappingPos.x, pos.y, pos.z));
+      mainApi -> enforceLayout(id);
+    }else{
+      auto currSnapIndex = getCurrSnapForScene(editorData, sceneId);
+      if (currSnapIndex.has_value()){
+        auto snappingPos = snappingPositions.at(currSnapIndex.value()).snappingPosition;
+        mainApi -> setGameObjectPos(id, glm::vec3(snappingPos.x, pos.y, pos.z));
+        mainApi -> enforceLayout(id);
+      }
+    }
   }
 }
 
@@ -581,6 +604,9 @@ CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
     }else if (codepoint == 'p'){
       EditorData* editorData = static_cast<EditorData*>(data);
       loadPanelsFromDb(*editorData, "testload");
+    }else if (codepoint == 'i'){
+      EditorData* editorData = static_cast<EditorData*>(data);
+      doPrintSnapPos(*editorData);
     }
   };
 
