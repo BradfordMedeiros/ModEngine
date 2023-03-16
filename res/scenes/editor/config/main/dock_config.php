@@ -1603,7 +1603,7 @@
         [
           "type" => "checkbox",
           "data" => [
-            "key" => "Cameras", 
+            "key" => "Show Debug", 
             "action" => "submit-debug-vis",
             "value" => [
               "binding" => "world:editor:debug",  
