@@ -1588,6 +1588,68 @@
         ],
       ],
     ],
+    "debug" => [
+      "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Modify Debug Masks",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "Cameras", 
+            "action" => "submit-debug-vis",
+            "value" => [
+              "binding" => "world:editor:debug",  
+              "binding-on" => "true",
+              "binding-off" => "false",
+            ],
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "Cameras", 
+            "action" => "submit-debug-vis",
+            "value" => [
+              "binding" => "debug-show-cameras",  
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "Lights", 
+            "action" => "submit-debug-vis",
+            "value" => [
+              "binding" => "debug-show-lights",  
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "Sound", 
+            "action" => "submit-debug-vis",
+            "value" => [
+              "binding" => "debug-show-sound",  
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
+          ],
+        ],
+      ],
+    ],
   ];
 ?>
 

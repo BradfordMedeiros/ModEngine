@@ -20,8 +20,6 @@ std::map<std::string, std::vector<std::string>> uiList = {
   { "misc", { "fullscreen" }},
 };
 
-
-
 void maybeUnloadDialog(EditorData& editorData){
   modlog("editor", "maybe unload dialog");
   if (editorData.dialogSceneId.has_value()){
@@ -327,7 +325,6 @@ objid loadSidePanel(std::string scene, std::optional<glm::vec3> pos, bool moveab
   std::vector<std::vector<std::string>> additionalTokens = {
     { ")window_x", "script", "native/details" },
     //{ ")window_x", "script", "./res/scenes/editor/dock/details.scm" },
-
     // ;(list "(test_panel" "anchor" anchorElementName)
     { "(test_panel", "position", serializeVec(pos.has_value() ? pos.value() : glm::vec3(-0.78f, -0.097f, -1.f)) }, 
   };
@@ -540,7 +537,6 @@ void tintThemeColors(bool isPlay, objid sceneId){
     mainApi -> setGameObjectAttr(themeObjId, attr);
   }
 }
-
 
 
 CScriptBinding cscriptEditorBinding(CustomApiBindings& api){

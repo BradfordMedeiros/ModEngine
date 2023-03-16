@@ -18,6 +18,7 @@
     ["value" => "PORTAL", "dialogoption" => "./res/scenes/editor/build/dock/portal.rawscene"],
     ["value" => "HEIGHTMAP", "dialogoption" => "./res/scenes/editor/build/dock/heightmap.rawscene"],
     ["value" => "VOXELS", "dialogoption" => "./res/scenes/editor/build/dock/voxel.rawscene"],
+    ["value" => "DEBUG", "dialogoption" => "./res/scenes/editor/build/dock/debug.rawscene"],
 
   ];
 

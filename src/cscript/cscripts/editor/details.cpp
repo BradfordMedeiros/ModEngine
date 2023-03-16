@@ -679,6 +679,51 @@ void reloadHud(EditorDetails& details){
   modlog("editor", "details - reload hud request: " + print(playerHud.value()));
 }
 
+ObjectValue getWorldState(std::string object, std::string attribute){
+  auto worldState = mainApi -> getWorldState();
+  for (auto &objectValue : worldState){
+    if(objectValue.object == "editor" && objectValue.attribute == "debugmask"){
+      return objectValue;
+    }
+  }
+  modassert(false, "get world state incorrect object and attribute");
+  return ObjectValue {};
+}
+
+
+int maskBasedOnFloatField(EditorDetails& details, int debugValue, std::string field, int mask){
+  auto soundValue = getDataValue(details, field);
+  auto strSoundValue = !soundValue.has_value() ? NULL : std::get_if<std::string>(&soundValue.value());
+  bool showSound = strSoundValue && (*strSoundValue == "enabled");
+  if (showSound){
+    debugValue |= mask;
+  }else{
+    debugValue &= ~(mask);
+  }
+  return debugValue;
+}
+
+void submitDebugVisualization(EditorDetails& details){
+  modlog("editor", "details - submit debug visualization");
+  auto debugMask = getWorldState("editor", "debugmask");
+  auto debugMaskFloat = std::get_if<float>(&debugMask.value);
+  modassert(debugMaskFloat, "debug mask is not a float");
+  auto debugValue = static_cast<int>(*debugMaskFloat);
+
+  debugValue = maskBasedOnFloatField(details, debugValue, "debug-show-cameras", 0b10);
+  debugValue = maskBasedOnFloatField(details, debugValue, "debug-show-sound", 0b100);
+  debugValue = maskBasedOnFloatField(details, debugValue, "debug-show-lights", 0b1000);
+  modlog("editor", "debug visualization: new debug mask is: " + std::to_string(debugValue));
+
+  mainApi -> setWorldState({
+     ObjectValue {
+       .object = "editor",
+       .attribute = "debugmask",
+       .value = debugValue,
+     },
+  });
+}
+
 
 void setManipulatorMode(std::string mode){
   mainApi -> setWorldState({ 
@@ -1137,6 +1182,7 @@ std::map<std::string, std::function<void(EditorDetails&)>> buttonToAction = {
   { "set-axis-z", [](EditorDetails&) -> void { setAxis("z"); }},
   { "copy-object", [](EditorDetails&) -> void { mainApi -> sendNotifyMessage("copy-object", "true"); }},
   { "reload-hud", reloadHud },
+  { "submit-debug-vis", submitDebugVisualization },
 };
 
 void maybePerformAction(EditorDetails& details, GameobjAttributes& objattr){

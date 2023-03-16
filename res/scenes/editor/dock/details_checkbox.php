@@ -44,6 +44,10 @@
     $buttonFields["details-binding-on"] = $data["value"]["binding-on"];
     $buttonFields["details-binding-off"] = $data["value"]["binding-off"];
   }
+
+  if (array_key_exists("action", $data)){
+    $buttonFields["details-action"] = $data["action"];
+  }
  
   $sql = NULL;
   if (array_key_exists("sql", $data)){
