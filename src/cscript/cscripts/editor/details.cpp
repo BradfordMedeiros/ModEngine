@@ -728,7 +728,7 @@ void submitDebugVisualization(EditorDetails& details){
 void setManipulatorMode(std::string mode){
   mainApi -> setWorldState({ 
     ObjectValue {
-      .object = "tools ",
+      .object = "tools",
       .attribute = "manipulator-mode",
       .value = mode,
     }
@@ -737,7 +737,7 @@ void setManipulatorMode(std::string mode){
 void setAxis(std::string axis){
   mainApi -> setWorldState({ 
     ObjectValue {
-      .object = "tools ",
+      .object = "tools",
       .attribute = "manipulator-axis",
       .value = axis,
     }
@@ -749,7 +749,7 @@ void setPauseMode(EditorDetails& details, bool enabled){
   details.pauseModeEnabled = enabled;
   mainApi -> setWorldState({ 
     ObjectValue {
-      .object = "world ",
+      .object = "world",
       .attribute = "paused",
       .value = details.pauseModeEnabled ? "true" : "false",
     }
