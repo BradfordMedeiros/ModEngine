@@ -265,6 +265,7 @@ typedef std::function<void(int32_t, std::string&)> id_stringfunc;
 
 typedef void(*messagefunc)(std::queue<StringAttribute>&);
 
+void printBacktrace();
 void assertWithBacktrace(bool isTrue, std::string message);
 void assertTodo(std::string message);
 

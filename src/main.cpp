@@ -769,6 +769,7 @@ void signalHandler(int signum) {
     auto crashFile = "./build/crash.info";
     std::cout << "wrote crash file: " << crashFile << std::endl;
     saveFile(crashFile, dumpDebugInfo());
+    printBacktrace();
   }
   exit(signum);  
 }
@@ -1539,7 +1540,7 @@ int main(int argc, char* argv[]){
     .nav = &world.meshes.at("./res/models/ui/node.obj").mesh,
   };
 
-  //loadAllTextures();
+  loadAllTextures();
   loadTextureWorld(world, "./res/models/box/grid.png", -1);
 
   GLFWimage images[1]; 

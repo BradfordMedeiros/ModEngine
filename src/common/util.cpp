@@ -660,19 +660,23 @@ bool isIdentityVec(glm::vec4 vec){
 
 const int maxCallstack = 128;
 bool warnOnly = false;
+
+void printBacktrace(){ 
+  void* callstack[maxCallstack];
+  int frames = backtrace(callstack, maxCallstack);
+  char** strs = backtrace_symbols(callstack, frames);
+  for (int i = 0; i < frames; ++i) {
+    printf("%s\n", strs[i]);
+  }
+  free(strs);
+}
 void assertWithBacktrace(bool isTrue, std::string message){
   if (!isTrue){
     std::cout << message << std::endl;
     if (warnOnly){
       return;
     }
-    void* callstack[maxCallstack];
-    int frames = backtrace(callstack, maxCallstack);
-    char** strs = backtrace_symbols(callstack, frames);
-    for (int i = 0; i < frames; ++i) {
-      printf("%s\n", strs[i]);
-    }
-    free(strs);
+    printBacktrace();    
     exit(1);
   }
 }
