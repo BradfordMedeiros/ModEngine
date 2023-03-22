@@ -252,7 +252,7 @@ void onObjDoNothing(EditorScenegraph& scenegraph, objid gameobjid){
 
 void onObjectSelectedSelectItem(EditorScenegraph& scenegraph, objid gameobjid){
 	auto drawList = drawListFromDepGraph(scenegraph);
-	for (int i = 0; i <drawList.elements.size(); i++){
+	for (int i = 0; i < drawList.elements.size(); i++){
 		if (drawList.elements.at(i).id == gameobjid){
 			scenegraph.selectedIndex = i;
 			break;
@@ -400,6 +400,24 @@ struct DepInfo {
 };
 
 
+std::vector<objid> sortedElements(std::set<objid> elements, std::function<DepInfo(objid)> infoForId){
+	std::vector<objid> elementsSorted;
+	for (auto id : elements){
+		elementsSorted.push_back(id);
+	}
+	std::sort(elementsSorted.begin(), elementsSorted.end(), [&infoForId](objid id1, objid id2) -> bool {
+		auto info1 = infoForId(id1);
+		auto info2 = infoForId(id2);
+		auto compValue = info1.name.compare(info2.name);
+		if (compValue == 0){
+			return info1.id > info2.id;
+		}
+		return compValue > 0;
+	});
+
+	return elementsSorted;
+}
+
 void navigateDeps(std::vector<SceneDrawElement>& _elements, std::map<objid, std::set<objid>> _dependencyMap, objid currElement, int& index, int childIndex, std::function<DepInfo(objid)> infoForId){
 	bool hasChildren = _dependencyMap.find(currElement) != _dependencyMap.end();
 	auto idInfo = infoForId(currElement);
@@ -421,19 +439,20 @@ void navigateDeps(std::vector<SceneDrawElement>& _elements, std::map<objid, std:
 		return;
 	}
 	auto dependencies = _dependencyMap.at(currElement);
-	for (auto &dependency : dependencies){
+	for (auto &dependency : sortedElements(dependencies, infoForId)){
 		navigateDeps(_elements, _dependencyMap, dependency, index, childIndex + 1, infoForId);
 	}
 }
 
+
 void addElementsToList(std::vector<SceneDrawElement>& elements, std::map<objid, std::set<objid>> _dependencyMap, int index, std::function<DepInfo(objid)> infoForId){
-	std::vector<objid> rootElements;
+	std::set<objid> rootElements;
 	for (auto &[item, deps] : _dependencyMap){
 		if (!isAnyDependency(_dependencyMap, item)){
-			rootElements.push_back(item);
+			rootElements.insert(item);
 		}
 	}
-	for (auto &rootElement : rootElements){
+	for (auto &rootElement : sortedElements(rootElements, infoForId)){
 		navigateDeps(elements, _dependencyMap, rootElement, index, 0, infoForId);
 	}
 }
@@ -470,13 +489,12 @@ SceneDrawList drawListFromDepGraph(EditorScenegraph& scenegraph){
 			return DepInfo {}; 
 		}
 	);
+
 	SceneDrawList drawList {
 		.elements = elements,
 	};
 	return drawList;
 }
-
-
 
 
 bool drawTitle = false;
