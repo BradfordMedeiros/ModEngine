@@ -54,11 +54,12 @@ void prettyPrint(std::map<std::string, DataValue>& dataValues){
 }
 
 
-UpdatedValue getUpdatedValue(EditorDetails& details, std::string& detailBindingName, std::optional<int> detailBindingIndex, AttributeValue newValue) {
+std::optional<UpdatedValue> getUpdatedValue(EditorDetails& details, std::string& detailBindingName, std::optional<int> detailBindingIndex, AttributeValue newValue) {
   auto oldValue = getDataValue(details, detailBindingName);
   if (!oldValue.has_value()){
     prettyPrint(details.dataValues);
-    modassert(false,"get update value no old value for: " + detailBindingName);
+    modlog("editor", "get update value no old value for: " + detailBindingName);
+    return std::nullopt;
   }
 
   modlog("editor", "details - update " + print(oldValue.value()) + ", " + print(newValue));
@@ -319,7 +320,9 @@ void updateBindingWithValue(EditorDetails& details, float value, GameobjAttribut
   auto detailBindingIndex = optionalInt(getFloatAttr(objattr, "details-binding-index"));
   if (detailBinding.has_value()){
     auto updateValue = getUpdatedValue(details, detailBinding.value(), detailBindingIndex, value);
-    updateStoreValueModified(details, updateValue.key, updateValue.value, true);
+    if (updateValue.has_value()){
+      updateStoreValueModified(details, updateValue.value().key, updateValue.value().value, true);
+    }
   }
 }
 
@@ -527,7 +530,9 @@ void maybeSetBinding(EditorDetails& details, GameobjAttributes& objattr){
 
   if (shouldSet && enableValue.has_value() && detailBinding.has_value()){
     auto updatedValue = getUpdatedValue(details, detailBinding.value(), detailBindingIndex, enableValue.value());
-    updateStoreValueModified(details, updatedValue.key, updatedValue.value, true);
+    if (updatedValue.has_value()){
+      updateStoreValueModified(details, updatedValue.value().key, updatedValue.value().value, true);
+    }
   }
   submitAndPopulateData(details);
 }
@@ -1008,7 +1013,8 @@ void updateText(EditorDetails& details, objid obj, std::string& text, CursorUpda
   if (detailBinding.has_value()){
     auto oldValue = getDataValue(details, detailBinding.value()).value();
     auto updateValue = getUpdatedValue(details, detailBinding.value(), detailBindingIndex, uiStringToAttrVal(text, oldValue, detailBindingIndex));
-    updateStoreValueModified(details, updateValue.key, updateValue.value, true);
+    modlog("editor", "details warning: no value for binding: " + detailBinding.value());
+    updateStoreValueModified(details, updateValue.value().key, updateValue.value().value, true);
   }
 }
 
@@ -1099,6 +1105,8 @@ void onDetailsObjectSelected(int32_t id, void* data, int32_t index) {
     if (index == id){ // ; assumes script it attached to window x
       mainApi -> sendNotifyMessage("dock-self-remove", std::to_string(id));
     }
+
+
     if (valueDialogType.has_value()){
       mainApi -> sendNotifyMessage("explorer", valueDialogType.value());
     }
