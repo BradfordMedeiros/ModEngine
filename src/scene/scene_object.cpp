@@ -832,7 +832,10 @@ std::vector<TextureAndName> worldTextures(World& world){
   return textures;
 }
 
-std::string lookupNormalTexture(std::string textureName){
+std::optional<std::string> lookupNormalTexture(World& world, std::string textureName){
+  if (!world.interface.modlayerFileExists(textureName)){
+    return std::nullopt;
+  }
   std::filesystem::path textureFile = std::filesystem::canonical(textureName);
   auto folder = textureFile.parent_path();
   auto newFileName = textureFile.stem().string() + ".normal" + textureFile.extension().string();
@@ -843,8 +846,11 @@ std::string lookupNormalTexture(std::string textureName){
 
 void setTexture(World& world, objid index, std::string textureName){
   auto textureId = loadTextureWorld(world, textureName, index).textureId;
-  auto normalTextureName = lookupNormalTexture(textureName);
-  std::optional<Texture> normalTexture = maybeLoadTextureWorld(world, normalTextureName, index);
+  auto normalTextureName = lookupNormalTexture(world, textureName);
+  std::optional<Texture> normalTexture = std::nullopt;
+  if (normalTextureName.has_value()){
+    normalTexture = loadTextureWorld(world, normalTextureName.value(), index);
+  }
 
   for (auto id : getIdsInGroup(world.sandbox, index)){
     GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
@@ -853,7 +859,7 @@ void setTexture(World& world, objid index, std::string textureName){
       meshObj -> texture.loadingInfo.textureId = textureId;
 
       if (normalTexture.has_value()){
-        meshObj -> normalTexture.textureString = normalTextureName;
+        meshObj -> normalTexture.textureString = normalTextureName.value();
         meshObj -> normalTexture.textureId = normalTexture.value().textureId;
       }   
     }

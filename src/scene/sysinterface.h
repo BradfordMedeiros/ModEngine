@@ -12,6 +12,7 @@ struct SysInterface {
   std::function<float()> getCurrentTime;
   std::function<std::string(std::string)> readFile;
   std::function<std::string(std::string)> modlayerPath;
+  std::function<bool(std::string)> modlayerFileExists;
   std::function<FontFamily&(std::string)> fontFamilyByName;
 };
 

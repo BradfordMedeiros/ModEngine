@@ -44,6 +44,11 @@ std::string modlayerPath(std::string file){
 	return file;
 }
 
+bool modlayerFileExists(std::string file){
+	auto filepath = modlayerPath(file);
+	return fileExists(filepath);
+}
+
 std::string modlayerReadFile(std::string file){
 	return loadFile(modlayerPath(file));
 }

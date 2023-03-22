@@ -1148,6 +1148,7 @@ int main(int argc, char* argv[]){
     .getCurrentTime = getTotalTime,
     .readFile = modlayerReadFile,
     .modlayerPath = modlayerPath,
+    .modlayerFileExists = modlayerFileExists,
     .fontFamilyByName = fontFamilyByName,
   };
 
