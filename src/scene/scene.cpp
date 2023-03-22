@@ -376,6 +376,18 @@ Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid owner
   };
   return texture;  
 }
+
+std::optional<Texture> maybeLoadTextureWorld(World& world, std::string texturepath, objid ownerId){
+  if (world.textures.find(texturepath) != world.textures.end()){
+    world.textures.at(texturepath).owners.insert(ownerId);
+    return world.textures.at(texturepath).texture;
+  }
+  if (!fileExists(texturepath)){
+    return std::nullopt;
+  }
+  return loadTextureWorld(world, texturepath, ownerId);
+}
+
 Texture loadSkyboxWorld(World& world, std::string texturepath, objid ownerId){
   if (world.textures.find(texturepath) != world.textures.end()){
     world.textures.at(texturepath).owners.insert(ownerId);

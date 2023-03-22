@@ -128,6 +128,7 @@ void onMouse(int button, int action, int mods){
     setNoActiveObj(state.editor);
   }
 
+  modlog("input", "mouse callback: " + std::to_string(button) + ", action: " + std::to_string(action) + ", mods: " + std::to_string(mods));
   cBindings.onMouseCallback(button, action, mods);
 
   if (button == 0){

@@ -12,6 +12,7 @@ struct GameObjectMesh {
   bool nodeOnly;
   std::string rootMesh;
   TextureInformation texture;
+  TextureLoadingData normalTexture;
   float discardAmount;
   float emissionAmount;
   glm::vec4 tint;

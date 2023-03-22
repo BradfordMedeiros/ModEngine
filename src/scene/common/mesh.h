@@ -54,7 +54,8 @@ void setVertexPosition(Mesh& mesh, unsigned int vertexIndex, glm::vec3 pos, glm:
 Mesh loadMesh(std::string defaultTexture, MeshData modelData, std::function<Texture(std::string)> ensureLoadTexture);		 // loads model and returns mesh/bound texture data
 Mesh loadSpriteMeshSubimage(std::string imagePath, float offsetx, float offsety, float width, float height, std::function<Texture(std::string)> ensureLoadTexture, bool flipVerticalTexCoords); // 2DMesh with subimage selection
 Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> ensureLoadTexture);  // loads a 2d mesh with vertex centered around 0 to 1 x/y
-void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId = -1, unsigned int customOpacityTextureId = -1,  bool drawPoints = false);  						 // draws mesh and related texture info (no shader data supplied)
+
+void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId = -1, unsigned int customOpacityTextureId = -1, bool drawPoints = false, unsigned int customNormalTextureId = -1);  						 // draws mesh and related texture info (no shader data supplied)
 
 struct LineRenderData {
   unsigned int VAO;

@@ -472,11 +472,14 @@ void submitSqlUpdates(EditorDetails& details){
   }
 }
 
+bool managedObjExists(EditorDetails& details){
+  return details.managedObj.has_value() && mainApi -> getGameObjNameForId(details.managedObj.value());
+}
 
 void submitData(EditorDetails& details){
   std::vector<KeyAndAttribute> gameobjAttrs;
   std::vector<KeyAndAttribute> worldAttrs;
-  if (details.managedObj.has_value()){
+  if (managedObjExists(details)){
     for (auto &[key, value] : details.dataValues){
       if (!value.modified){
         continue;
@@ -609,7 +612,7 @@ void saveHeightmap(EditorDetails& details){
 void saveHeightmapAs(EditorDetails& details){
   auto name = getAsType<std::string>(getStoreValue(details, "heightmap:filename"));
   bool isNamed = name.size() > 0;
-  if (isNamed && details.managedObj.has_value()){
+  if (isNamed && managedObjExists(details)){
     mainApi -> saveHeightmap(details.managedObj.value(), std::string("./res/heightmaps/") + name + ".png");
   }
 }
@@ -1009,7 +1012,14 @@ void updateText(EditorDetails& details, objid obj, std::string& text, CursorUpda
   }
 }
 
+bool uiDisabled(EditorDetails& details){
+  return !details.managedObj.has_value();
+}
+
 void processFocusedElement(EditorDetails& details, int key){
+  if (uiDisabled(details)){
+    return;
+  }
   if (details.focusedElement.has_value()){
     auto attr = mainApi -> getGameObjectAttr(details.focusedElement.value());
     if (shouldUpdateText(attr)){
@@ -1111,13 +1121,16 @@ void onDetailsObjectSelected(int32_t id, void* data, int32_t index) {
       }
 
       if (isSelectableItem(attr)){
-        refillStore(*details, index);
         details -> managedObj = index;
+        refillStore(*details, index);
         populateData(*details);
       }
-      maybeSetBinding(*details, attr);
-      if (managedText){
-        maybeSetTextCursor(index);
+
+      if (!uiDisabled(*details)){
+        maybeSetBinding(*details, attr);
+        if (managedText){
+          maybeSetTextCursor(index);
+        }
       }
     }
 }
@@ -1152,7 +1165,7 @@ void toggleButtonBinding(EditorDetails& details, objid buttonId, bool on){
 
 void handleActiveScene(EditorDetails& details, objid sceneId, GameobjAttributes& attr){
   auto layerAttr = getStrAttr(attr, "layer");
-  if (layerAttr.has_value() && layerAttr.value() == "basicui"){
+  if (layerAttr.has_value() && layerAttr.value() != "basicui"){
     details.activeSceneId = sceneId;
     mainApi -> sendNotifyMessage("active-scene-id", std::to_string(sceneId));
   }
@@ -1186,9 +1199,13 @@ std::map<std::string, std::function<void(EditorDetails&)>> buttonToAction = {
 };
 
 void maybePerformAction(EditorDetails& details, GameobjAttributes& objattr){
+  if (!details.activeSceneId.has_value()){
+    return;
+  }
   auto attrAction = getStrAttr(objattr, "details-action");
   modlog("editor", std::string("details attr actions: ") + (attrAction.has_value() ? attrAction.value() : "no actions"));
   if (attrAction.has_value() && controlEnabled(details, objattr)){
+    modlog("editor", "maybe perform action called: " + attrAction.value());
     if (buttonToAction.find(attrAction.value()) != buttonToAction.end()){
       auto action = buttonToAction.at(attrAction.value());
       action(details);
@@ -1203,7 +1220,6 @@ void onSlide(EditorDetails& details, objid id, float slideAmount, GameobjAttribu
   updateBindingWithValue(details, value, attr);
   submitAndPopulateData(details);
 }
-
 
 CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("native/details", api);
@@ -1231,12 +1247,15 @@ CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
     if (topic == "debug-details"){
       modlog("editor", "details - data values: [" + print(details -> dataValues) + "]");
     }else if (topic == "explorer-sound-final"){
+      if (uiDisabled(*details)){ return; }
       updateDialogValues("load-sound", value);
       submitAndPopulateData(*details);
     }else if (topic == "explorer-heightmap-brush-final"){
+      if (uiDisabled(*details)){ return; }
       updateDialogValues("load-heightmap-brush", value);
       submitAndPopulateData(*details);
     }else if (topic == "explorer-heightmap-final"){
+      if (uiDisabled(*details)){ return; }
       updateDialogValues("load-heightmap", value);
       submitAndPopulateData(*details);
     }else if (topic == "active-scene-id"){
@@ -1244,16 +1263,19 @@ CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
       modassert(strValue, "active-scene-id: str value is null");
       details -> activeSceneId = std::atoi(strValue -> c_str());
     }else if (topic == "editor-button-on"){
+      if (uiDisabled(*details)){ return; }
       auto strValue = std::get_if<std::string>(&value);
       modassert(strValue, "editor-button-on: str value is null");
       toggleButtonBinding(*details, std::atoi(strValue -> c_str()), true);
       submitAndPopulateData(*details);
     }else if (topic == "editor-button-off"){
+      if (uiDisabled(*details)){ return; }
       auto strValue = std::get_if<std::string>(&value);
       modassert(strValue, "editor-button-off: str value is null");
       toggleButtonBinding(*details, std::atoi(strValue -> c_str()), false);
       submitAndPopulateData(*details);
     }else if (topic == "details-editable-slide"){
+      if (uiDisabled(*details)){ return; }
       auto strValue = std::get_if<std::string>(&value);
       modassert(strValue, "details-editable-slide: str value is null");
       auto sliderId = std::atoi(strValue -> c_str());
@@ -1305,6 +1327,9 @@ CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
   };
 
   binding.onObjectSelected = [](int32_t id, void* data, int32_t index, glm::vec3 color) -> void {
+    EditorDetails* details = static_cast<EditorDetails*>(data);
+    auto attr = mainApi -> getGameObjectAttr(index);
+    handleActiveScene(*details, mainApi -> listSceneId(index), attr);  // pull this into a seperate script, don't like the idea of the editor managing this 
     onDetailsObjectSelected(id, data, index);
   };
   binding.onObjectUnselected = [](int32_t id, void* data) -> void {
@@ -1314,14 +1339,24 @@ CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
 
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     EditorDetails* details = static_cast<EditorDetails*>(data);
-    if ((button == 0) && (action == 0) && details -> hoveredObj.has_value()){
+    modlog("editor", "on mouse callback: button: " + std::to_string(button) + ", action: " + std::to_string(action));
+    if (!details -> managedObj.has_value()){
+      return;
+    }
+    if (!details -> hoveredObj.has_value()){
+      return;
+    }
+    auto objSceneId =  mainApi -> listSceneId(details -> hoveredObj.value());
+    if (objSceneId != mainApi -> listSceneId(id)){
+      return;
+    }
+    if ((button == 0) && (action == 0)){
       auto attr = mainApi -> getGameObjectAttr(details -> hoveredObj.value());
-      handleActiveScene(*details, mainApi -> listSceneId(details -> hoveredObj.value()), attr);  // pull this into a seperate script, don't like the idea of the editor managing this 
       maybePerformAction(*details, attr);
       submitAndPopulateData(*details);
     }
 
-    if ((button == 1) && (action == 0) && details -> hoveredObj.has_value() && details -> managedSelectionMode.has_value()){
+    if ((button == 1) && (action == 0) && details -> managedSelectionMode.has_value()){
       finishManagedSelectionMode(*details, details -> hoveredObj.value());
       submitAndPopulateData(*details);
     }

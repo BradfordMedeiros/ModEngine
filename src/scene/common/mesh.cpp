@@ -175,7 +175,7 @@ Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> e
   return loadSpriteMeshSubimage(imagePath, 0, 0, 1, 1, ensureLoadTexture, false);
 }
 
-void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId,  bool drawPoints){
+void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId,  bool drawPoints, unsigned int customNormalTextureId){
   glBindVertexArray(mesh.VAOPointer);
  
   glActiveTexture(GL_TEXTURE0); 
@@ -205,9 +205,11 @@ void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsi
   glActiveTexture(GL_TEXTURE0 + 5);
   glBindTexture(GL_TEXTURE_2D, mesh.roughnessTexture.textureId);
 
-  glUniform1i(glGetUniformLocation(shaderProgram, "hasNormalTexture"), mesh.hasNormalTexture);
+  auto normalTextureId = customNormalTextureId == -1 ? mesh.normalTexture.textureId : customNormalTextureId;
+  bool hasNormalTexture = mesh.hasNormalTexture || (customNormalTextureId != -1);
+  glUniform1i(glGetUniformLocation(shaderProgram, "hasNormalTexture"), hasNormalTexture);
   glActiveTexture(GL_TEXTURE0 + 6);
-  glBindTexture(GL_TEXTURE_2D, mesh.normalTexture.textureId);
+  glBindTexture(GL_TEXTURE_2D, normalTextureId);
 
   glActiveTexture(GL_TEXTURE0); 
   glDrawElements(GL_TRIANGLES, mesh.numElements, GL_UNSIGNED_INT, 0);

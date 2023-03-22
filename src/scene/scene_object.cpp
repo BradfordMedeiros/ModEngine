@@ -832,13 +832,30 @@ std::vector<TextureAndName> worldTextures(World& world){
   return textures;
 }
 
+std::string lookupNormalTexture(std::string textureName){
+  std::filesystem::path textureFile = std::filesystem::canonical(textureName);
+  auto folder = textureFile.parent_path();
+  auto newFileName = textureFile.stem().string() + ".normal" + textureFile.extension().string();
+  std::filesystem::path fullNormalPath = std::filesystem::weakly_canonical(folder / newFileName); //  / is append operator 
+  modlog("editor", "normal fullfilepath is: " + fullNormalPath.string());
+  return fullNormalPath;
+}
+
 void setTexture(World& world, objid index, std::string textureName){
   auto textureId = loadTextureWorld(world, textureName, index).textureId;
+  auto normalTextureName = lookupNormalTexture(textureName);
+  std::optional<Texture> normalTexture = maybeLoadTextureWorld(world, normalTextureName, index);
+
   for (auto id : getIdsInGroup(world.sandbox, index)){
     GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
     if (meshObj != NULL){
       meshObj -> texture.loadingInfo.textureString = textureName;
-      meshObj -> texture.loadingInfo.textureId = textureId;       
+      meshObj -> texture.loadingInfo.textureId = textureId;
+
+      if (normalTexture.has_value()){
+        meshObj -> normalTexture.textureString = normalTextureName;
+        meshObj -> normalTexture.textureId = normalTexture.value().textureId;
+      }   
     }
 
     GameObjectUIButton* buttonObj = std::get_if<GameObjectUIButton>(&world.objectMapping.at(id));
