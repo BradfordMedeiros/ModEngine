@@ -1183,6 +1183,17 @@
         [
           "type" => "checkbox",
           "data" => [
+            "key" => "enable attenuation", 
+            "value" => [
+              "binding" => "world:attenuation:enabled",  
+              "binding-on" => "true",
+              "binding-off" => "false",
+            ],
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
             "key" => "enable exposure", 
             "value" => [
               "binding" => "world:exposure:enabled",  
