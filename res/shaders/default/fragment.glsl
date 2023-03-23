@@ -21,6 +21,7 @@ uniform vec4 tint;
 uniform vec3 cameraPosition;
 
 uniform bool enableLighting;
+uniform bool enableAttenutation;
 uniform bool enableShadows;
 uniform bool enableDiffuse;
 uniform bool enableSpecular;
@@ -55,7 +56,6 @@ uniform float discardTexAmount;
 uniform float time;
 uniform float bloomThreshold;
 
-bool enableAttenutation = false;
 
 int getNumLights(){
   return min(numlights, MAX_LIGHTS);
@@ -94,7 +94,7 @@ vec3 calculatePhongLight(vec3 normal){
       angleFactor = (angle - minAngle) / (maxAngle - minAngle);
     }
 
-    vec3 diffuse = max(dot(normal, lightDir), 0.0) * lightscolor[i];
+    vec3 diffuse = max(dot(normal, lightDir), 0.0) * vec3(1.0, 1.0, 1.0);
     vec3 viewDir = normalize(cameraPosition - FragPos);
     vec3 reflectDir = reflect(-lightDir, normal);  
     vec3 specular = pow(max(dot(viewDir, reflectDir), 0.0), 32) * vec3(1.0, 1.0, 1.0);  
@@ -234,6 +234,9 @@ void main(){
 
     if (enableLighting){
       FragColor = tint *  vec4(color.xyz * shadowDelta, color.w);
+     // if (hasNormalTexture){
+     //   FragColor = vec4(1, 0, 0, 1);
+     // }
     }else{
       FragColor = tint * texColor;
     }

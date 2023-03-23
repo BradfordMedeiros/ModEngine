@@ -436,6 +436,8 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   glUniform1i(glGetUniformLocation(shader, "enableSpecular"), state.enableSpecular);
   glUniform1i(glGetUniformLocation(shader, "enablePBR"), state.enablePBR);
   glUniform1i(glGetUniformLocation(shader, "enableLighting"), true);
+  glUniform1i(glGetUniformLocation(shader, "enableAttenutation"), state.enableAttenuation);
+
   glUniform1i(glGetUniformLocation(shader, "enableShadows"), state.enableShadows);
   glUniform1f(glGetUniformLocation(shader, "shadowIntensity"),  state.shadowIntensity);
   
@@ -465,6 +467,7 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
   glUniform3fv(glGetUniformLocation(shader, "ambientAmount"), 1, glm::value_ptr(glm::vec3(state.ambient)));
   glUniform1f(glGetUniformLocation(shader, "bloomThreshold"),  state.bloomThreshold);
+
 
   setRenderUniformData(shader, uniforms);
 }
@@ -1900,10 +1903,10 @@ int main(int argc, char* argv[]){
     }
 
     if (state.lastHoverIndex != state.currentHoverIndex){
-      if (state.lastHoveredIdInScene){
+      if (idExists(world.sandbox, state.lastHoverIndex)){
         cBindings.onObjectHover(state.lastHoverIndex, false);
       }
-      if (state.hoveredIdInScene){
+      if (idExists(world.sandbox, state.currentHoverIndex)){
         cBindings.onObjectHover(state.currentHoverIndex, true);
       }
     }

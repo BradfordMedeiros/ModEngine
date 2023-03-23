@@ -69,6 +69,7 @@ struct engineState {
   bool enableDiffuse;
   bool enableSpecular;
   bool enablePBR;
+  bool enableAttenuation;
   bool enableShadows;
   float shadowIntensity;
   bool showBoneWeight;
