@@ -1370,6 +1370,7 @@ int main(int argc, char* argv[]){
     .applyImpulseRel = applyImpulseRel,
     .clearImpulse = clearImpulse,
     .applyForce = applyForce,
+    .getModAABB = getModAABB,
     .listAnimations = listAnimations,
     .playAnimation = playAnimation,
     .listClips = listSounds,

@@ -49,6 +49,7 @@ struct CustomApiBindings {
   void (*applyImpulseRel)(int32_t index, glm::vec3 impulse);
   void (*clearImpulse)(int32_t index);
   void (*applyForce)(int32_t index, glm::vec3 force);
+  std::optional<ModAABB> (*getModAABB)(int32_t index); 
   std::vector<std::string> (*listAnimations)(int32_t id);
   void (*playAnimation)(int32_t id, std::string animationToPlay, bool loop);
   std::vector<std::string>(*listClips)();

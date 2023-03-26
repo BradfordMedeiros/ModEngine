@@ -312,6 +312,21 @@ void clampMaxVelocity(btRigidBody* body, float maxspeed){
   body -> setLinearVelocity(btVector3(xVelocity, yVelocity, zVelocity));
 }
 
+ModAABB getModAABB(btRigidBody* body){
+  auto transform = body -> getWorldTransform();
+
+  btVector3 vec1(0, 0, 0);
+  btVector3 vec2(0, 0, 0);
+  btCollisionShape* shape = body -> getCollisionShape(); 
+  shape  -> getAabb(transform, vec1, vec2);
+  return ModAABB {
+    .position = btToGlm(transform.getOrigin()),
+    .min = btToGlm(vec1),
+    .max = btToGlm(vec2),
+  };
+}
+
+
 void deinitPhysics(physicsEnv env){
   modlog("physics", "deinitializing physics system");
   MODTODO("maybe clean up rigid bodies too but maybe not");

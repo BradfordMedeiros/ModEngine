@@ -49,6 +49,7 @@ void applyImpulse(int32_t index, glm::vec3 impulse);
 void applyImpulseRel(int32_t index, glm::vec3 impulse);
 void clearImpulse(int32_t index);
 void applyForce(int32_t index, glm::vec3 force);
+std::optional<ModAABB> getModAABB(int32_t index);
 
 std::vector<std::string> listSceneFiles(std::optional<objid> sceneId);
 bool parentScene(objid sceneId, objid* _parentSceneId);

@@ -72,6 +72,15 @@ void applyForce(int32_t index, glm::vec3 force){
   }
 }
 
+std::optional<ModAABB> getModAABB(int32_t index){
+  auto rigidBody = getRigidBody(index);
+  if (rigidBody == NULL){
+    return std::nullopt;
+  }
+  return getModAABB(rigidBody);
+}
+
+
 std::vector<std::string> listSceneFiles(std::optional<objid> sceneId){
   if (sceneId.has_value()){
     if (!sceneExists(world.sandbox, sceneId.value())){
@@ -1044,3 +1053,4 @@ void tickScheduledTasks(){
   }
   removeScheduledTask(idsToRemove);
 }
+

@@ -80,6 +80,8 @@ void applyForce(btRigidBody* body, glm::vec3 force);
 
 void clampMaxVelocity(btRigidBody* body, float maxspeed);
 
+ModAABB getModAABB(btRigidBody* body);
+
 void printRigidBodyInfo(btRigidBody* body);
 
 std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, PhysicsValue>& rigidbodys, glm::vec3 posFrom, glm::quat direction, float maxDistance);

@@ -313,4 +313,10 @@ struct Token {
 
 enum RecordingPlaybackType { RECORDING_PLAY_ONCE, RECORDING_PLAY_LOOP };
 
+struct ModAABB {
+  glm::vec3 position;
+  glm::vec3 min;
+  glm::vec3 max;
+};
+
 #endif
