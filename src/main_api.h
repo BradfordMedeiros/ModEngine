@@ -48,6 +48,7 @@ void setCameraRotation(glm::quat orientation);
 void applyImpulse(int32_t index, glm::vec3 impulse);
 void applyImpulseRel(int32_t index, glm::vec3 impulse);
 void clearImpulse(int32_t index);
+void applyForce(int32_t index, glm::vec3 force);
 
 std::vector<std::string> listSceneFiles(std::optional<objid> sceneId);
 bool parentScene(objid sceneId, objid* _parentSceneId);

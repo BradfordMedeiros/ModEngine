@@ -65,6 +65,13 @@ void clearImpulse(int32_t index){
   }
 }
 
+void applyForce(int32_t index, glm::vec3 force){
+  auto rigidBody = getRigidBody(index);
+  if (rigidBody != NULL){
+    applyForce(rigidBody, force);
+  }
+}
+
 std::vector<std::string> listSceneFiles(std::optional<objid> sceneId){
   if (sceneId.has_value()){
     if (!sceneExists(world.sandbox, sceneId.value())){

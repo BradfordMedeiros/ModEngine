@@ -1369,6 +1369,7 @@ int main(int argc, char* argv[]){
     .applyImpulse = applyImpulse,
     .applyImpulseRel = applyImpulseRel,
     .clearImpulse = clearImpulse,
+    .applyForce = applyForce,
     .listAnimations = listAnimations,
     .playAnimation = playAnimation,
     .listClips = listSounds,
