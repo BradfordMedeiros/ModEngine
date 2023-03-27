@@ -660,14 +660,18 @@ void createVolume(EditorDetails& details){
 
 void createWater(EditorDetails& details){
   modlog("editor", "details create volume placeholder");
-
   GameobjAttributes attr {
     .stringAttributes = { 
        { "mesh", "../gameresources/build/primitives/walls/1-0.2-1.gltf" },
        { "physics", "enabled" },
        { "water", "true" },
+       { "layer", "transparency" },
     },
-    .numAttributes = {},
+    .numAttributes = {
+      { "water-density", 10.f },
+      { "water-gravity", 0.0125f },
+      { "water-viscosity", 0.1f },
+    },
     .vecAttr = { 
       .vec3 = {
         { "scale", glm::vec3(5.f, 5.f, 5.f) },

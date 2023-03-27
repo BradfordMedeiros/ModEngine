@@ -300,6 +300,9 @@ void clearImpulse(btRigidBody* body){
 void applyForce(btRigidBody* body, glm::vec3 force){
   body -> applyCentralForce(btVector3(force.x, force.y, force.z));
 }
+void applyTorque(btRigidBody* body, glm::vec3 torque){
+  body -> applyTorque(btVector3(torque.x, torque.y, torque.z));
+}
 
 void clampMaxVelocity(btRigidBody* body, float maxspeed){
   if (maxspeed <= 0){

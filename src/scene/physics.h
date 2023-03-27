@@ -77,6 +77,7 @@ void setTransform(btRigidBody* body, glm::vec3 pos, glm::vec3 scale, glm::quat r
 void applyImpulse(btRigidBody* body, glm::vec3 force);
 void clearImpulse(btRigidBody* body);
 void applyForce(btRigidBody* body, glm::vec3 force);
+void applyTorque(btRigidBody* body, glm::vec3 torque);
 
 void clampMaxVelocity(btRigidBody* body, float maxspeed);
 glm::vec3 getVelocity(btRigidBody* body);

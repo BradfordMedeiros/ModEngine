@@ -71,6 +71,12 @@ void applyForce(int32_t index, glm::vec3 force){
     applyForce(rigidBody, force);
   }
 }
+void applyTorque(int32_t index, glm::vec3 torque){
+  auto rigidBody = getRigidBody(index);
+  if (rigidBody != NULL){
+    applyTorque(rigidBody, torque);
+  }
+}
 
 std::optional<ModAABB> getModAABB(int32_t index){
   auto rigidBody = getRigidBody(index);
