@@ -278,6 +278,39 @@
             "tint" => "0 0 1 1",
           ],
         ],
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "Water Properties", 
+            "value" => [
+              [ 
+                "type" => "float", 
+                "name" => "Density", 
+                "value" => [ 
+                  "binding" => "gameobj:water-density", 
+                  "type" => "positive-number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "Viscosity", 
+                "value" => [ 
+                  "binding" => "gameobj:water-gravity", 
+                  "type" => "positive-number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "Gravity", 
+                "value" => [ 
+                  "binding" => "gameobj:water-viscosity", 
+                  "type" => "positive-number",
+                ]
+              ],
+            ]
+          ],
+        ],
+
       ],
     ],
   ];
