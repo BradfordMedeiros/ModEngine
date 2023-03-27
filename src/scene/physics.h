@@ -79,6 +79,8 @@ void clearImpulse(btRigidBody* body);
 void applyForce(btRigidBody* body, glm::vec3 force);
 
 void clampMaxVelocity(btRigidBody* body, float maxspeed);
+glm::vec3 getVelocity(btRigidBody* body);
+glm::vec3 getAngularVelocity(btRigidBody* body);
 
 ModAABB getModAABB(btRigidBody* body);
 

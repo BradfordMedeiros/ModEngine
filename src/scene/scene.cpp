@@ -1311,6 +1311,9 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, Physic
         .scale = getScale(rigidBody.body),
         .rotation = rotation,
       });
+
+      gameobj.physicsOptions.velocity = getVelocity(rigidBody.body);
+      gameobj.physicsOptions.angularVelocity = getAngularVelocity(rigidBody.body);
     }
     clampMaxVelocity(rigidBody.body, gameobj.physicsOptions.maxspeed);
   }

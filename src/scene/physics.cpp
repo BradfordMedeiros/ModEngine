@@ -311,6 +311,15 @@ void clampMaxVelocity(btRigidBody* body, float maxspeed){
   auto zVelocity = fmax(-maxspeed, fmin(maxspeed, velocity.getZ()));
   body -> setLinearVelocity(btVector3(xVelocity, yVelocity, zVelocity));
 }
+glm::vec3 getVelocity(btRigidBody* body){
+  auto velocity = body -> getLinearVelocity();
+  return btToGlm(velocity);
+}
+glm::vec3 getAngularVelocity(btRigidBody* body){
+  auto velocity = body -> getAngularVelocity();
+  return btToGlm(velocity);
+}
+
 
 ModAABB getModAABB(btRigidBody* body){
   auto transform = body -> getWorldTransform();
