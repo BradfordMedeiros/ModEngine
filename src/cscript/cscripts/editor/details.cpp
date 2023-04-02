@@ -1358,10 +1358,10 @@ CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
   binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
     EditorDetails* details = static_cast<EditorDetails*>(data);
     modlog("editor", "on mouse callback: button: " + std::to_string(button) + ", action: " + std::to_string(action));
-    if (!details -> managedObj.has_value()){
+    if (!details -> managedObj.has_value() || !mainApi -> getGameObjNameForId(details -> managedObj.value()).has_value()){
       return;
     }
-    if (!details -> hoveredObj.has_value()){
+    if (!details -> hoveredObj.has_value() || !mainApi -> getGameObjNameForId(details -> hoveredObj.value()).has_value()){
       return;
     }
     auto objSceneId =  mainApi -> listSceneId(details -> hoveredObj.value());
