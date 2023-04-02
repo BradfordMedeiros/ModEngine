@@ -685,6 +685,11 @@ void createWater(EditorDetails& details){
   mainApi -> makeObjectAttr(details.activeSceneId.value(), "volume-" + uniqueName(), attr, submodelAttributes); 
 }
 
+void createScene(EditorDetails& details){
+  modlog("editor", "create scene placeholder\n");
+  modassert(false, "create scene not yet implemented");
+}
+
 void reloadHud(EditorDetails& details){
   auto playerHud = getDataValue(details, "player-hud");
   mainApi -> sendNotifyMessage("reload-config:hud",  playerHud.value());
@@ -1208,6 +1213,7 @@ std::map<std::string, std::function<void(EditorDetails&)>> buttonToAction = {
   { "copy-object", [](EditorDetails&) -> void { mainApi -> sendNotifyMessage("copy-object", "true"); }},
   { "reload-hud", reloadHud },
   { "submit-debug-vis", submitDebugVisualization },
+  { "create-scene", createScene },
 };
 
 void maybePerformAction(EditorDetails& details, GameobjAttributes& objattr){

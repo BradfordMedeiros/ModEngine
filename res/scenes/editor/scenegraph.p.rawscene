@@ -20,4 +20,7 @@
 #|fileexplorer:title:Sound List
 #|fileexplorer:values:sound one|sound two|sound three
 
-
+|scenes:script:native/scenegraph
+|scenes:depgraph:textures
+|scenes:gentexture:gentexture-scenes
+|scenes:basenumber:40000

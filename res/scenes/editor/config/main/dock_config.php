@@ -880,6 +880,39 @@
             ]
           ],
         ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Create Scene",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ],
+            "action" => "create-scene",
+            "tint" => "1 1 0 1",
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "autosave", 
+            "value" => [
+              "binding" => "world:skybox:enable",  
+              "binding-on" => "true",
+              "binding-off" => "false",
+            ],
+          ],
+        ],
+        [
+          "type" => "list",
+          "data" => [
+            "key" => "",
+            "values" => [
+              ["image" => "gentexture-scenes", "size" => "0.42 1 0.16" ],
+            ],
+            "type" => "vertical",
+          ],
+        ],
       ],
     ],
     "object_tools" => [

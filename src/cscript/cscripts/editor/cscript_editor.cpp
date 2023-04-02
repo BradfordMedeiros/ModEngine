@@ -563,7 +563,8 @@ void tintThemeColors(bool isPlay, objid sceneId){
 
 std::vector<std::string> editorDefaultScenes = { 
   "./res/scenes/editor/console.rawscene", 
-  "./res/scenes/editor/build/dock/editor_object_tools.rawscene" 
+  "./res/scenes/editor/build/dock/editor_object_tools.rawscene",
+  "./res/scenes/editor/scenegraph.p.rawscene", // would be better to just load these lazily when the dock itself is loaded, have editor-load attr
 };
 std::vector<std::string> editorManagerTags = { "editor" };
 void loadEditorDefaultScenes(){
