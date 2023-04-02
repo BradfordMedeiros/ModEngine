@@ -978,7 +978,7 @@
           "data" => [
             "key" => "",
             "values" => [
-              ["image" => "graphs-testplot", "action" => "set-rotate-mode", "size" => "0.42 -1.2 0.16" ],
+              ["image" => "graphs-testplot", "action" => "set-rotate-mode", "size" => "0.42 1 0.16" ],
             ],
             "type" => "vertical",
           ],
