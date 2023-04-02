@@ -128,5 +128,6 @@ std::string getType(std::string name);
 
 std::optional<objid> getMappingTexture(World& world, std::string& texture);
 void freeTextureRefsIdByOwner(World& world, int ownerId, std::optional<int> id);
+void freeTextureRefsByOwner(World& world, int ownerId);
 
 #endif

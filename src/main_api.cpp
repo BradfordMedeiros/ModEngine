@@ -926,17 +926,19 @@ unsigned int createTexture(std::string name, unsigned int width, unsigned int he
   auto textureID = loadTextureWorldEmpty(world, name, ownerId, width, height, selectionTextureId).textureId;
   userTextures.push_back(UserTexture{
     .id = textureID,
+    .ownerId = ownerId,
     .selectionTextureId = selectionTextureId,
     .autoclear = false,
     .shouldClear = true,
     .clearTextureId = std::nullopt, //world.textures.at("./res/textures/wood.jpg").texture.textureId,//,
     .clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f),
   });
+
+  modlog("create-texture", "number of textures: " + std::to_string(userTextures.size()));
   return textureID;
 }
 
 void freeTexture(std::string name, objid ownerId){
-  MODTODO("delete texture -> use ownership id of the script being used");
   auto textureId = world.textures.at(name).texture.textureId;
   int selectionTextureId = -1;
 
@@ -952,7 +954,16 @@ void freeTexture(std::string name, objid ownerId){
   freeTextureRefsIdByOwner(world, ownerId, textureId);
   modassert(selectionTextureId > 0, "selectionTextureId not found");
   freeTextureRefsIdByOwner(world, ownerId, selectionTextureId);
-
+}
+void freeTexture(objid ownerId){
+  std::vector<UserTexture> remainingTextures;
+  for (auto userTexture : userTextures){
+    if (userTexture.ownerId != ownerId){
+      remainingTextures.push_back(userTexture);
+    }
+  }
+  userTextures = remainingTextures;
+  freeTextureRefsByOwner(world, ownerId);
 }
 
 // clear texture, should automatically load texture

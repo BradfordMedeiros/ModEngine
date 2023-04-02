@@ -186,6 +186,7 @@ void takeScreenshot(std::string filepath);
 
 struct UserTexture {
   unsigned int id;
+  unsigned int ownerId;
   unsigned int selectionTextureId;
   bool autoclear;
   bool shouldClear;
@@ -195,6 +196,7 @@ struct UserTexture {
 std::vector<UserTexture> textureIdsToRender();
 unsigned int  createTexture(std::string name, unsigned int width, unsigned int height, objid ownerId);
 void freeTexture(std::string name, objid ownerId);
+void freeTexture(objid ownerId);
 void clearTexture(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color, std::optional<std::string> texture);
 void markUserTexturesCleared();
 

@@ -1503,6 +1503,7 @@ int main(int argc, char* argv[]){
       onObjDelete(id);
       netObjectDelete(id, isNet, netcode, bootStrapperMode);
       cBindings.onObjectRemoved(id);
+      freeTexture(id);
     }, 
     debuggerDrawer, 
     layers,
