@@ -383,7 +383,6 @@ void changeSidepanel(EditorData& editorData, int snappingIndex, std::string scen
   auto testPanelId = mainApi -> getGameObjectByName("(test_panel", sidePanelSceneId, false);
   bool didUpdate = updateSnapPos(editorData, snappingIndex, sidePanelSceneId);
   modassert(didUpdate, "could not load sidepanel, was occupied");
-
   mainApi -> enforceLayout(testPanelId.value());
   doPrintSnapPos(editorData);
 }
@@ -570,7 +569,11 @@ std::vector<std::string> editorDefaultScenes = {
 std::vector<std::string> editorManagerTags = { "editor" };
 void loadEditorDefaultScenes(){
   for (auto &defaultScene : editorDefaultScenes){
-    mainApi -> loadScene(defaultScene, {}, std::nullopt, editorManagerTags);
+    auto sceneId = mainApi -> loadScene(defaultScene, {}, std::nullopt, editorManagerTags);
+    auto testPanelId = mainApi -> getGameObjectByName("(test_panel", sceneId, false);
+    if (testPanelId.has_value()){
+       mainApi -> enforceLayout(testPanelId.value());
+    }
   }
 }
 
