@@ -364,10 +364,7 @@ Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
 
 Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight, std::optional<objid> mappingTexture){
   std::cout << "load texture world empty: " << texturepath << std::endl;
-  if (world.textures.find(texturepath) != world.textures.end()){
-    assert(false);
-    return Texture  { .textureId = 0  };
-  }
+  modassert(world.textures.find(texturepath) == world.textures.end(), "texture is already loaded: " + texturepath);
   Texture texture = loadTextureEmpty(textureWidth, textureHeight, 4);
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
