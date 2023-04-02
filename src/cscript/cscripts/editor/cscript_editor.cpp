@@ -561,6 +561,17 @@ void tintThemeColors(bool isPlay, objid sceneId){
   }
 }
 
+std::vector<std::string> editorDefaultScenes = { 
+  "./res/scenes/editor/console.rawscene", 
+  "./res/scenes/editor/build/dock/editor_object_tools.rawscene" 
+};
+std::vector<std::string> editorManagerTags = { "editor" };
+void loadEditorDefaultScenes(){
+  for (auto &defaultScene : editorDefaultScenes){
+    mainApi -> loadScene(defaultScene, {}, std::nullopt, editorManagerTags);
+  }
+}
+
 
 CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("native/editor", api);
@@ -587,6 +598,7 @@ CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
     mainApi -> enforceLayout(row2Id.value());
     mainApi -> enforceLayout(row3Id.value());
     mainApi -> enforceLayout(menubarId.value());
+    loadEditorDefaultScenes();
     return editorData;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
