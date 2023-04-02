@@ -46,7 +46,11 @@
 
   function execute($detailType){
     $zpos = -1;  # + or +- 0.2 for certain order of elements within
-    echo ("(test_panel:position:-0.78 -0.097 " . $zpos . "\n");
+    if (array_key_exists("position", $detailType)){
+      echo ("(test_panel:position:" . $detailType["position"] . " " . $zpos . "\n");
+    }else{
+      echo ("(test_panel:position:-0.78 -0.097 " . $zpos . "\n");
+    }
 
     $vec3Type = [
       [ "type" => "float", "name" => "x", "value" => ".-3.4" ], 
