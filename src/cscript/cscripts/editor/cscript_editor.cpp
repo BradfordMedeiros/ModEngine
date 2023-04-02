@@ -346,7 +346,13 @@ objid loadSidePanel(std::string scene, std::optional<glm::vec3> pos, bool moveab
     additionalTokens.push_back({ "(test_panel", "editor-shouldsnap", "true" });
   }
   std::optional<std::vector<std::string>> tags = std::optional<std::vector<std::string>>({ "editor" });
-  return mainApi -> loadScene(scene, additionalTokens, std::nullopt, tags);
+
+  auto sceneId = mainApi -> loadScene(scene, additionalTokens, std::nullopt, tags);
+  auto testPanelId = mainApi -> getGameObjectByName("(test_panel", sceneId, false);
+  if (testPanelId.has_value()){
+    mainApi -> enforceLayout(testPanelId.value());
+  }
+  return sceneId;
 }
 
 void doPrintSnapPos(EditorData& editorData){
