@@ -235,21 +235,6 @@
             ]
           ],
         ],
-        //[
-        //  "type" => "list",
-        //  "data" => [
-        //    "key" => "",
-        //    "values" => [
-        //      [ 
-        //        "image" => "./res/scenes/editor/dock/images/play.png", 
-        //        "action" => "toggle-play-mode",
-        //        "binding" => "play-mode-on", 
-        //        "binding-on" => "on",
-        //        "binding-off" => "off",
-        //      ],
-        //    ],
-        //  ],
-        //],
         [
           "type" => "label",
           "data" => [

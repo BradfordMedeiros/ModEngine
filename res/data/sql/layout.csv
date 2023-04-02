@@ -1,8 +1,5 @@
 layout.name:STRING,layout.panel:STRING,layout.position:STRING
-layout2,./res/scenes/editor/build/dock/editor_cameras.rawscene,0.78125?-0.09700000286102295?-1.0
-none,./res/scenes/editor/build/dock/editor_object_tools.rawscene,0.951903 0 0
-none,./res/scenes/editor/build/dock/editor_transform.rawscene,0.889962 0 0
-testload,./res/scenes/editor/build/dock/editor_object_tools.rawscene,0.951903 0 0
-testload,./res/scenes/editor/build/dock/editor_transform.rawscene,0.889962 0 0
-main,./res/scenes/editor/build/dock/editor_object_tools.rawscene,0.951903 0 0
-main,./res/scenes/editor/build/dock/editor_transform.rawscene,0.889962 0 0
+main,./res/scenes/editor/build/dock/editor_object_tools.rawscene,0 0 -1
+main,./res/scenes/editor/console.rawscene,0 0 0
+main,./res/scenes/editor/scenegraph.p.rawscene,0 0 0
+main,./res/scenes/features/createtexture.p.rawscene,0 0 0

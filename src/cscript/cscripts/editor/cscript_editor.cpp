@@ -560,24 +560,6 @@ void tintThemeColors(bool isPlay, objid sceneId){
   }
 }
 
-std::vector<std::string> editorDefaultScenes = { 
-  "./res/scenes/editor/console.rawscene", 
-  "./res/scenes/editor/build/dock/editor_object_tools.rawscene",
-  "./res/scenes/editor/scenegraph.p.rawscene", // would be better to just load these lazily when the dock itself is loaded, have editor-load attr
-  "./res/scenes/features/createtexture.p.rawscene",
-};
-std::vector<std::string> editorManagerTags = { "editor" };
-void loadEditorDefaultScenes(){
-  for (auto &defaultScene : editorDefaultScenes){
-    auto sceneId = mainApi -> loadScene(defaultScene, {}, std::nullopt, editorManagerTags);
-    auto testPanelId = mainApi -> getGameObjectByName("(test_panel", sceneId, false);
-    if (testPanelId.has_value()){
-       mainApi -> enforceLayout(testPanelId.value());
-    }
-  }
-}
-
-
 CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("native/editor", api);
   mainApi = &api;
@@ -591,7 +573,7 @@ CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
     editorData -> dialogSceneId = std::nullopt;
 
     auto args =  mainApi -> getArgs();
-    editorData -> layoutToUse = args.find("layout") == args.end() ? std::nullopt: std::optional<std::string>(args.at("layout"));
+    editorData -> layoutToUse = args.find("layout") == args.end() ? std::optional<std::string>("main"): std::optional<std::string>(args.at("layout"));
 
     if (editorData -> layoutToUse.has_value()){
       loadPanelsFromDb(*editorData, editorData -> layoutToUse.value());
@@ -603,7 +585,6 @@ CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
     mainApi -> enforceLayout(row2Id.value());
     mainApi -> enforceLayout(row3Id.value());
     mainApi -> enforceLayout(menubarId.value());
-    loadEditorDefaultScenes();
     return editorData;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
