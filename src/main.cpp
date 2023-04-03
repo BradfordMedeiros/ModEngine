@@ -1071,7 +1071,7 @@ int main(int argc, char* argv[]){
    ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))
    ("g,grid", "Size of grid chunking grid used for open world streaming, default to zero (no grid)", cxxopts::value<int>()->default_value("0"))
    ("w,world", "Use streaming chunk system", cxxopts::value<std::string>()->default_value(""))
-   ("r,rawscene", "Rawscene file to use (only used when world = false)", cxxopts::value<std::vector<std::string>>() -> default_value(""))
+   ("r,rawscene", "Rawscene file to use.  Set tags by adding =tag1,tag2,tag3 (optionally) and then :name to name", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("a,args", "Args to provide to scheme", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("m,mapping", "Key mapping file to use", cxxopts::value<std::string>()->default_value(""))
    ("l,benchmark", "Benchmark file to write results", cxxopts::value<std::string>()->default_value(""))
