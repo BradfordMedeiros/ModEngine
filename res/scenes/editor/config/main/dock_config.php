@@ -878,6 +878,18 @@
           ],
         ],
         [
+          "type" => "label",
+          "data" => [
+            "key" => "Save Scene",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ],
+            "action" => "save-scene",
+            "tint" => "1 1 0 1",
+          ],
+        ],
+        [
           "type" => "checkbox",
           "data" => [
             "key" => "autosave", 

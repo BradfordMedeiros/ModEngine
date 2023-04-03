@@ -560,7 +560,6 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
   	if (scenegraph -> didScroll){
   		scenegraph -> didScroll = false;
   		onGraphChange(*scenegraph);
-
   	}
   };
 
