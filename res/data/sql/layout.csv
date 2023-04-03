@@ -1,5 +1,6 @@
 layout.name:STRING,layout.panel:STRING,layout.position:STRING
-main,./res/scenes/editor/build/dock/editor_object_tools.rawscene,0.95 -0.925 -1
+main,./res/scenes/editor/build/dock/editor_object_tools.rawscene,0.955895 -0.934361 -1
 main,./res/scenes/editor/console.rawscene,0 0 0
 main,./res/scenes/editor/scenegraph.p.rawscene,0 0 0
 main,./res/scenes/features/createtexture.p.rawscene,0 0 0
+main,./res/scenes/editor/explorer-loader.rawscene,0 0 0
