@@ -633,13 +633,12 @@ SCM scmTimeElapsed(){
   return scm_from_double(_timeElapsed());
 }
 
-void (*_saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename); 
+bool (*_saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename); 
 SCM scmSaveScene(SCM scmIncludeIds, SCM scmSceneId, SCM filepath){
   auto includeIds = scmIncludeIds == SCM_UNDEFINED ? false : scm_to_bool(scmIncludeIds);
   auto sceneId = scmSceneId == SCM_UNDEFINED ? currentSceneId() : scm_to_int32(scmSceneId);
   auto sceneName = filepath == SCM_UNDEFINED ? std::nullopt : std::optional<std::string>(scm_to_locale_string(filepath));
-  _saveScene(includeIds, sceneId, sceneName);
-  return SCM_UNSPECIFIED;
+  return scm_from_bool(_saveScene(includeIds, sceneId, sceneName));
 }
 
 void (*_saveHeightmap)(objid id, std::optional<std::string> filename);
@@ -1413,7 +1412,7 @@ void createStaticSchemeBindings(
   void (*sendNotifyMessage)(std::string topic, AttributeValue value),
   double (*timeSeconds)(bool realtime),
   double (*timeElapsed)(),
-  void (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename),
+  bool (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename),
   void (*saveHeightmap)(objid id, std::optional<std::string> filename),
   std::map<std::string, std::string> (*listServers)(),
   std::string (*connectServer)(std::string server),

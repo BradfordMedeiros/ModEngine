@@ -689,6 +689,19 @@ void createScene(EditorDetails& details){
   modlog("editor", "create scene placeholder\n");
   modassert(false, "create scene not yet implemented");
 }
+void saveScene(EditorDetails& details){
+  modlog("editor", "save scene placeholder:\n");
+  if (!details.activeSceneId.has_value()){
+    modlog("editor", "no active scene not saving");
+    return;
+  }
+
+  auto oldSceneFile  = mainApi -> listSceneFiles(details.activeSceneId.value()).at(0);
+
+  modlog("editor", "saving scene: " + std::to_string(details.activeSceneId.value()) + " (file = " + oldSceneFile + ")");
+  mainApi -> saveScene(false, details.activeSceneId.value(), std::nullopt);
+  mainApi -> sendNotifyMessage("alert", "saved scene: " + std::to_string(details.activeSceneId.value()));
+}
 
 void reloadHud(EditorDetails& details){
   auto playerHud = getDataValue(details, "player-hud");
@@ -1214,6 +1227,7 @@ std::map<std::string, std::function<void(EditorDetails&)>> buttonToAction = {
   { "reload-hud", reloadHud },
   { "submit-debug-vis", submitDebugVisualization },
   { "create-scene", createScene },
+  { "save-scene", saveScene },
 };
 
 void maybePerformAction(EditorDetails& details, GameobjAttributes& objattr){

@@ -61,7 +61,7 @@ struct CustomApiBindings {
   void (*sendNotifyMessage)(std::string message, AttributeValue amount);
   double (*timeSeconds)(bool realtime);
   double (*timeElapsed)();
-  void (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename);
+  bool (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename);
   void (*saveHeightmap)(objid id, std::optional<std::string> filename);
   std::map<std::string, std::string> (*listServers)();
   std::string (*connectServer)(std::string server);

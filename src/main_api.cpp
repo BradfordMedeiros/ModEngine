@@ -188,15 +188,16 @@ bool isNotWriteProtectedFile(std::string& fileToSave){
 }
 
 // @TODO - save all the scenes in the world
-void saveScene(bool includeIds, objid sceneId, std::optional<std::string> filename){
+bool saveScene(bool includeIds, objid sceneId, std::optional<std::string> filename){
   auto fileToSave = sceneFileForSceneId(world, sceneId);    // MAYBE SHOULD CREATE A CACHE OF WHAT FILE WAS WHAT SCENE?
   fileToSave = filename.has_value() ? filename.value() : fileToSave;
   std::cout << "saving scene id: " << sceneId << " to file: " << fileToSave << std::endl;
   if (isNotWriteProtectedFile(fileToSave)){
     saveFile(fileToSave, serializeScene(world, sceneId, includeIds));
-  }else{
-    std::cout << "WARNING: CANNOT SAVE: " << fileToSave << " because is a protected file" << std::endl;
+    return true;
   }
+  std::cout << "WARNING: CANNOT SAVE: " << fileToSave << " because is a protected file" << std::endl;
+  return false;
 }
 
 void saveHeightmap(objid id, std::optional<std::string> filename){
