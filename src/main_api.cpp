@@ -1076,6 +1076,6 @@ void tickScheduledTasks(){
     idsToRemove.insert(i);  
   }
   removeScheduledTask(idsToRemove);
-  modlog("scheduled tasks", "num tasks: " + std::to_string(scheduledTasks.size()));
+  //modlog("scheduled tasks", "num tasks: " + std::to_string(scheduledTasks.size()));
 }
 

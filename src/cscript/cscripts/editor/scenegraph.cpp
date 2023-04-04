@@ -288,6 +288,20 @@ void selectTextureItem(EditorScenegraph& scenegraph, bool isAlt){
   }
 }
 
+void selectRawscene(EditorScenegraph& scenegraph, bool isAlt){
+	auto element = getElementForSelectedIndex(scenegraph);
+	auto sceneFile = element.elementName;
+	modlog("editor", "scenegraph selectRawscene selected index: " + std::to_string(scenegraph.selectedIndex) + ", sceneFile = " + sceneFile);
+
+	auto managedScenes = mainApi -> listScenes(std::optional<std::vector<std::string>>({ "editable" }));
+  for (auto sceneId : managedScenes){
+    mainApi -> unloadScene(sceneId);
+  }
+	mainApi -> loadScene(sceneFile, {}, std::nullopt, std::optional<std::vector<std::string>>({ "editable" }));
+
+}
+
+
 void selectRawItem(EditorScenegraph& scenegraph, bool isAlt){
 	modlog("editor", "scenegraph selectRawItem: " + std::to_string(scenegraph.selectedIndex));
 	auto element = getElementForSelectedIndex(scenegraph);
@@ -376,7 +390,7 @@ std::map<std::string, ModeDepGraph> modeToGetDepGraph {
 	}},
 	{ "rawscenes", ModeDepGraph {
 			.getGraph = getRawSceneList,
-			.handleItemSelected = doNothing,
+			.handleItemSelected = selectRawscene,
 			.showSceneIds = false,
 			.onObjectSelected = onObjDoNothing,
 	}},
@@ -657,7 +671,7 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
 	binding.onScrollCallback = [](objid scriptId, void* data, double amount) -> void{
 		EditorScenegraph* scenegraph = static_cast<EditorScenegraph*>(data);
 		scenegraph -> didScroll = true;
-		scenegraph -> offset = std::min(scenegraph -> minOffset, static_cast<float>(scenegraph -> offset + (amount * 0.04f)));
+		scenegraph -> offset = std::min(scenegraph -> minOffset, static_cast<float>(scenegraph -> offset + (amount * 0.1f)));
 	};
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {

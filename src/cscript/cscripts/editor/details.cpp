@@ -705,8 +705,12 @@ void saveScene(EditorDetails& details){
   auto oldSceneFile  = mainApi -> listSceneFiles(details.activeSceneId.value()).at(0);
 
   modlog("editor", "saving scene: " + std::to_string(details.activeSceneId.value()) + " (file = " + oldSceneFile + ")");
-  mainApi -> saveScene(false, details.activeSceneId.value(), std::nullopt);
-  mainApi -> sendNotifyMessage("alert", "saved scene: " + std::to_string(details.activeSceneId.value()) + " (file = " + oldSceneFile + ")");
+  bool didSave = mainApi -> saveScene(false, details.activeSceneId.value(), std::nullopt);
+  if (didSave){
+    mainApi -> sendNotifyMessage("alert", "saved scene: " + std::to_string(details.activeSceneId.value()) + " (file = " + oldSceneFile + ")");
+  }else{
+    mainApi -> sendNotifyMessage("alert", "could not save scene: " + std::to_string(details.activeSceneId.value()) + " (file = " + oldSceneFile + ")");
+  }
 }
 
 void reloadHud(EditorDetails& details){
