@@ -382,10 +382,27 @@ AttributeValue inverseSpecialTransform(std::string key, AttributeValue& value){
   return value;
 }
 
-void refillStore(EditorDetails& details, objid gameobj){
-   auto oldAutoSaveValueAttr = getDataValue(details, "auto-save");
-   auto oldAutoSaveValue = oldAutoSaveValueAttr.has_value() ? std::get_if<std::string>(&oldAutoSaveValueAttr.value()) : NULL;
+bool getBoolValue(EditorDetails& details, std::string key, std::string on, std::string off, bool defaultValue){
+  auto oldValueAttr = getDataValue(details, key);
+  if (!oldValueAttr.has_value()){
+    return defaultValue;
+  }
+  auto strValue = std::get_if<std::string>(&oldValueAttr.value());
+  if (!strValue){
+    return defaultValue;
+  }
+  if (*strValue == on){
+    return true;
+  }
+  if (*strValue == off){
+    return false;
+  }
+  return defaultValue;
+}
 
+void refillStore(EditorDetails& details, objid gameobj){
+   auto oldAutoSaveValue = getBoolValue(details, "auto-save", "enabled", "disabled", false);
+   auto oldPlayModeValue = getBoolValue(details, "play-mode-on", "on", "off", false);
 
    clearStore(details);
    updateStoreValue(details, "object_name", mainApi -> getGameObjNameForId(gameobj).value());
@@ -398,9 +415,9 @@ void refillStore(EditorDetails& details, objid gameobj){
    updateStoreValue(details, "meta-numscenes", mainApi -> listScenes({}).size());
    updateStoreValue(details, "runtime-id", std::to_string(gameobj));
    updateStoreValue(details, "runtime-sceneid", std::to_string(mainApi -> listSceneId(gameobj)));
-   updateStoreValue(details, "play-mode-on", details.playModeEnabled ? "on" : "off");
+   updateStoreValue(details, "play-mode-on", oldPlayModeValue ? "on" : "off");
    updateStoreValue(details, "pause-mode-on", details.pauseModeEnabled ? "on" : "off");
-   updateStoreValue(details, "auto-save", oldAutoSaveValue ? *oldAutoSaveValue : "disabled");
+   updateStoreValue(details, "auto-save", oldAutoSaveValue ? "enabled" : "disabled");
    for (auto &state : mainApi -> getWorldState()){
       auto keyname =  std::string("world:") + state.object + ":" + state.attribute;
       updateStoreValue(details, keyname, specialTransform(keyname, state.value));
@@ -702,8 +719,15 @@ void saveScene(EditorDetails& details){
     return;
   }
 
+  //play-mode", details.playModeEnabled ? "true" : "false");
+  auto playMode = getDataValue(details, "play-mode-on").value();
+  auto playModeStr = std::get_if<std::string>(&playMode);
+  bool playModeEnabled = playModeStr && *playModeStr == "on";
+  if (playModeEnabled){
+    mainApi -> sendNotifyMessage("alert", "cannot save in play mode");
+    return;
+  }
   auto oldSceneFile  = mainApi -> listSceneFiles(details.activeSceneId.value()).at(0);
-
   modlog("editor", "saving scene: " + std::to_string(details.activeSceneId.value()) + " (file = " + oldSceneFile + ")");
   bool didSave = mainApi -> saveScene(false, details.activeSceneId.value(), std::nullopt);
   if (didSave){

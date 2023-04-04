@@ -629,6 +629,8 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
 		scenegraph -> depgraphType = getStrAttr(attr, "depgraph").value();;
 		auto textureName = getStrAttr(attr, "gentexture").value();
 		scenegraph -> textureId = mainApi -> createTexture(textureName, 1000, 1000, id);
+		mainApi -> clearTexture(scenegraph -> textureId.value(), std::nullopt, glm::vec4(0.1f, 0.1f, 0.1f, 0.5f), std::nullopt);
+
 		onGraphChange(*scenegraph);
     return scenegraph;
 	};
@@ -671,7 +673,7 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
 	binding.onScrollCallback = [](objid scriptId, void* data, double amount) -> void{
 		EditorScenegraph* scenegraph = static_cast<EditorScenegraph*>(data);
 		scenegraph -> didScroll = true;
-		scenegraph -> offset = std::min(scenegraph -> minOffset, static_cast<float>(scenegraph -> offset + (amount * 0.1f)));
+		scenegraph -> offset = std::min(scenegraph -> minOffset, static_cast<float>(scenegraph -> offset + (amount * 0.5f)));
 	};
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
