@@ -27,11 +27,9 @@ const float marginLeft = margin;
 const float marginBottom = margin;
 
 void renderAlerts(Alerts& alerts, int yoffset, std::deque<AlertMessage>& buffer){
-	std::cout << "buffer size: " << buffer.size() << std::endl;
 	for (int i = 0; i < buffer.size(); i++){
 		auto message = buffer.at(i);
 		auto textToDraw = amountToDraw(message.message, message.time, 100);
-		std::cout << "trying to draw: " << textToDraw << std::endl;
 
 		mainApi -> drawText(
 			textToDraw, 

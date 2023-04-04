@@ -894,9 +894,9 @@
           "data" => [
             "key" => "autosave", 
             "value" => [
-              "binding" => "world:skybox:enable",  
-              "binding-on" => "true",
-              "binding-off" => "false",
+              "binding" => "auto-save",  
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
             ],
           ],
         ],

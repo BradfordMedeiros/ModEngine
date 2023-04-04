@@ -18,6 +18,7 @@ struct EditorDetails {
   std::optional<objid> managedSelectionMode;
 
   std::map<std::string, DataValue> dataValues;
+  bool ctrlHeld;
 };
 
 std::string uniqueName(){
@@ -382,6 +383,10 @@ AttributeValue inverseSpecialTransform(std::string key, AttributeValue& value){
 }
 
 void refillStore(EditorDetails& details, objid gameobj){
+   auto oldAutoSaveValueAttr = getDataValue(details, "auto-save");
+   auto oldAutoSaveValue = oldAutoSaveValueAttr.has_value() ? std::get_if<std::string>(&oldAutoSaveValueAttr.value()) : NULL;
+
+
    clearStore(details);
    updateStoreValue(details, "object_name", mainApi -> getGameObjNameForId(gameobj).value());
    auto gameobjAttr = mainApi -> getGameObjectAttr(gameobj);
@@ -395,6 +400,7 @@ void refillStore(EditorDetails& details, objid gameobj){
    updateStoreValue(details, "runtime-sceneid", std::to_string(mainApi -> listSceneId(gameobj)));
    updateStoreValue(details, "play-mode-on", details.playModeEnabled ? "on" : "off");
    updateStoreValue(details, "pause-mode-on", details.pauseModeEnabled ? "on" : "off");
+   updateStoreValue(details, "auto-save", oldAutoSaveValue ? *oldAutoSaveValue : "disabled");
    for (auto &state : mainApi -> getWorldState()){
       auto keyname =  std::string("world:") + state.object + ":" + state.attribute;
       updateStoreValue(details, keyname, specialTransform(keyname, state.value));
@@ -700,7 +706,7 @@ void saveScene(EditorDetails& details){
 
   modlog("editor", "saving scene: " + std::to_string(details.activeSceneId.value()) + " (file = " + oldSceneFile + ")");
   mainApi -> saveScene(false, details.activeSceneId.value(), std::nullopt);
-  mainApi -> sendNotifyMessage("alert", "saved scene: " + std::to_string(details.activeSceneId.value()));
+  mainApi -> sendNotifyMessage("alert", "saved scene: " + std::to_string(details.activeSceneId.value()) + " (file = " + oldSceneFile + ")");
 }
 
 void reloadHud(EditorDetails& details){
@@ -1253,6 +1259,14 @@ void onSlide(EditorDetails& details, objid id, float slideAmount, GameobjAttribu
   submitAndPopulateData(details);
 }
 
+void setInterval(objid id, float delayTimeMs, void* data, std::function<void(void* data)> fn){
+  mainApi -> schedule(id, delayTimeMs, data, [fn, data, delayTimeMs, id](void*) -> void {
+    fn(data);
+    setInterval(id, delayTimeMs, data, fn);
+  });
+} 
+
+
 CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("native/details", api);
 
@@ -1267,6 +1281,23 @@ CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
     details -> pauseModeEnabled = true;
     details -> managedSelectionMode = std::nullopt;
     details -> dataValues = {};
+    details -> ctrlHeld = false;
+
+
+    setInterval(id, 5000, NULL, [details](void*) -> void {
+      modlog("editor", "save scene");
+      auto autoSaveData = getDataValue(*details, "auto-save");
+      if (!autoSaveData.has_value()){
+        return;
+      }
+      auto autoSave = autoSaveData.value();
+      auto autoSaveStr = std::get_if<std::string>(&autoSave);
+      modassert(autoSaveStr, "autosave not a string");
+      if (*autoSaveStr == "enabled"){
+        saveScene(*details);
+      }
+    });
+
     return details;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -1333,6 +1364,19 @@ CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
       (key == 262 || key == 263 || key == 264 || key == 265 || key == 259 || key == 261) // /* arrow, backspace, delete
     ){
       processFocusedElement(*details, key);
+    }
+
+    if (key == 341){
+      if (action == 1){
+        details -> ctrlHeld = true;
+      }else {
+        details -> ctrlHeld = false;
+      }
+    }
+
+    std::cout << "Key is: " << key << std::endl;
+    if (details -> ctrlHeld && key == 'S' && action == 1){
+      saveScene(*details);
     }
   };
 

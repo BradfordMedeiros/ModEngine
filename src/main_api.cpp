@@ -439,17 +439,23 @@ std::vector<std::string> listHeightmaps(){
 std::vector<std::string> listHeightmapBrushes(){
   return { listFilesWithExtensions("./res/brush", { "png", "jpg" }) };
 }
+std::vector<std::string> listSceneFiles(){
+  return { listFilesWithExtensions("./res/scenes", { "rawscene" }) };
+}
+
 std::vector<std::string> listResources(std::string resourceType){
   if (resourceType == "sounds"){
     return listSoundFiles();
   }else if (resourceType == "textures"){
-    return listTextures();
+     return listSceneFiles();
   }else if (resourceType == "models"){
     return listModels();
   }else if (resourceType == "heightmaps"){
     return listHeightmaps();
   }else if (resourceType == "heightmap-brushes"){
     return listHeightmapBrushes();
+  }else if (resourceType == "scenefiles"){
+    return listSceneFiles();
   }
   modassert(false, "invalid resource type: " + resourceType);
   return {};
@@ -1063,12 +1069,13 @@ void tickScheduledTasks(){
     //std::cout << "task time: " << task.time << ", currTime = " << currTime << std::endl;
     auto shouldExecuteTask = currTime > task.time;
     if (!shouldExecuteTask){
-     return;
+      continue;
     }
     modlog("SCHEDULER", "executing scheduled task, owner = " + std::to_string(task.ownerId));
     task.fn(task.data); // if this wasn't copied, this could screw up the loop
     idsToRemove.insert(i);  
   }
   removeScheduledTask(idsToRemove);
+  modlog("scheduled tasks", "num tasks: " + std::to_string(scheduledTasks.size()));
 }
 

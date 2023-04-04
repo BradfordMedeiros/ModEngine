@@ -1519,7 +1519,6 @@ std::vector<InputDispatch> inputFns = {
       applyStyles(tokens, styles);
       auto serializedContent = serializeSceneTokens(tokens);
       std::cout << serializedContent << std::endl;
-
     }
   },
   InputDispatch{

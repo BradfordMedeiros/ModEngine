@@ -139,6 +139,57 @@ std::vector<SceneDependency> getTextureList(EditorScenegraph& scenegraph){
 	}
 	return deps;
 }
+std::vector<SceneDependency> getMockSceneList(EditorScenegraph& scenegraph){
+	auto idCreator = makeIdCreator();
+	return { 
+		SceneDependency { 
+			.element = "Scenes", 
+			.depends = "scene-mock", 
+			.elementScene = 0, 
+			.dependsScene = 0,
+			.parentId = createId(idCreator, "Scenes", 0),
+			.childId = createId(idCreator, "scene-mock", 0),
+		} 
+	};
+}
+std::vector<SceneDependency> getSceneList(EditorScenegraph& scenegraph){
+	auto idCreator = makeIdCreator();
+	auto editorScenes = mainApi -> listScenes(std::nullopt);
+
+	std::vector<SceneDependency> deps;
+	for (auto &sceneId : editorScenes){
+	  auto scenefilename  = mainApi -> listSceneFiles(sceneId).at(0);
+	  auto elementName = std::string("[") + std::to_string(sceneId) + "] " + scenefilename;
+
+		deps.push_back(SceneDependency {
+			.element = "scenes",
+			.depends = elementName,
+			.elementScene = 0,
+			.dependsScene = 0,
+			.parentId = createId(idCreator, "scenes", 0),
+			.childId = createId(idCreator, elementName, 0),
+		});
+	}
+	return deps;
+}
+
+std::vector<SceneDependency> getRawSceneList(EditorScenegraph& scenegraph){
+	std::vector<SceneDependency> deps;
+	auto idCreator = makeIdCreator();
+	for (auto &scenefile : mainApi -> listResources("scenefiles")){
+		deps.push_back(SceneDependency {
+			.element = "rawscenes",
+			.depends = scenefile,
+			.elementScene = 0,
+			.dependsScene = 0,
+			.parentId = createId(idCreator, "rawscenes", 0),
+			.childId = createId(idCreator, scenefile, 0),
+		});
+	}
+	return deps;
+}
+
+
 
 std::vector<SceneDependency> getRawExplorerList(EditorScenegraph& scenegraph){
 	auto attr = mainApi -> getGameObjectAttr(scenegraph.mainObjId);
@@ -308,6 +359,24 @@ std::map<std::string, ModeDepGraph> modeToGetDepGraph {
 	{ "textures", ModeDepGraph {
 			.getGraph = getTextureList,
 			.handleItemSelected = selectTextureItem,
+			.showSceneIds = false,
+			.onObjectSelected = onObjDoNothing,
+	}},
+	{ "mock-scenes", ModeDepGraph {
+			.getGraph = getMockSceneList,
+			.handleItemSelected = doNothing,
+			.showSceneIds = false,
+			.onObjectSelected = onObjDoNothing,
+	}},
+	{ "scenes", ModeDepGraph {
+			.getGraph = getSceneList,
+			.handleItemSelected = doNothing,
+			.showSceneIds = false,
+			.onObjectSelected = onObjDoNothing,
+	}},
+	{ "rawscenes", ModeDepGraph {
+			.getGraph = getRawSceneList,
+			.handleItemSelected = doNothing,
 			.showSceneIds = false,
 			.onObjectSelected = onObjDoNothing,
 	}},
