@@ -1,4 +1,4 @@
-#include "./createtexture.h"
+#include "./performance_graph.h"
 
 const char* textureName = "graphs-testplot";
 const float xRangeSecs = 10;
@@ -112,8 +112,8 @@ void plotPoint(CreateTexture& createTexture, float x, float y){
 }
 
 
-CScriptBinding cscriptCreateTextureBinding(CustomApiBindings& api){
-  auto binding = createCScriptBinding("native/createtexture", api);
+CScriptBinding cscriptCreatePerformanceGraphBinding(CustomApiBindings& api){
+  auto binding = createCScriptBinding("native/performance_graph", api);
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     CreateTexture* createTexture = new CreateTexture;
     createTexture -> pointX = 0.f;
