@@ -629,7 +629,7 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
 		scenegraph -> depgraphType = getStrAttr(attr, "depgraph").value();;
 		auto textureName = getStrAttr(attr, "gentexture").value();
 		scenegraph -> textureId = mainApi -> createTexture(textureName, 1000, 1000, id);
-		mainApi -> clearTexture(scenegraph -> textureId.value(), std::nullopt, glm::vec4(0.1f, 0.1f, 0.1f, 0.5f), std::nullopt);
+		mainApi -> clearTexture(scenegraph -> textureId.value(), std::nullopt, glm::vec4(0.f, 0.f, 0.f, 0.f), std::nullopt);
 
 		onGraphChange(*scenegraph);
     return scenegraph;

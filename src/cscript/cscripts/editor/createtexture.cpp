@@ -88,7 +88,7 @@ void addPermaData(CreateTexture& createTexture){
 }
 
 void refreshGraph(CreateTexture& createTexture){
-	mainApi -> clearTexture(createTexture.textureId.value(), std::nullopt, std::nullopt, std::nullopt);
+	mainApi -> clearTexture(createTexture.textureId.value(), std::nullopt, glm::vec4(0.f, 0.f, 0.f, 0.f), std::nullopt);
 	addPermaData(createTexture);
 }
 
