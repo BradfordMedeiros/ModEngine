@@ -696,8 +696,17 @@
       ],
     ],
     "object_details" => [
-      "title" => "Object Details",
       "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Object Details",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
         [ "type" => "label", 
           "data" => [
             "key" => "Current Object", 
@@ -838,6 +847,16 @@
         [
           "type" => "label",
           "data" => [
+            "key" => "Scene Info",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
             "key" => "Number of Scenes",
             "readonly" => true,
             "value" => [
@@ -969,8 +988,17 @@
       ],
     ],
     "performance" => [
-      "title" => "Performance",
       "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Performance",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
         [
           "type" => "list",
           "data" => [
@@ -985,6 +1013,16 @@
     ],
     "world" => [
       "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "World Settings",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
         [
           "type" => "numeric",
           "data" => [
@@ -1132,6 +1170,16 @@
     ],
     "rendering" => [
       "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Rendering",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
         [
           "type" => "checkbox",
           "data" => [
@@ -1293,6 +1341,16 @@
     ],
     "models" => [
       "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Models",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
         [
           "type" => "label",
           "data" => [
