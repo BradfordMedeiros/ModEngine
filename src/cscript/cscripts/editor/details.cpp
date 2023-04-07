@@ -1432,6 +1432,9 @@ CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
 
   binding.onObjectSelected = [](int32_t id, void* data, int32_t index, glm::vec3 color) -> void {
     EditorDetails* details = static_cast<EditorDetails*>(data);
+    if(!mainApi -> getGameObjNameForId(index).has_value()){
+      return;
+    }
     auto attr = mainApi -> getGameObjectAttr(index);
     handleActiveScene(*details, mainApi -> listSceneId(index), attr);  // pull this into a seperate script, don't like the idea of the editor managing this 
     onDetailsObjectSelected(id, data, index);
