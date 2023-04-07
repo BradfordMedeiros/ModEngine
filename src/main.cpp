@@ -1906,7 +1906,10 @@ int main(int argc, char* argv[]){
 
     Color pixelColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     if (shouldCallItemSelected){
-      cBindings.onObjectSelected(state.groupSelection ? getGroupId(world.sandbox, selectTargetId) : selectTargetId, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
+      auto id = state.groupSelection ? getGroupId(world.sandbox, selectTargetId) : selectTargetId;
+      if (idExists(world.sandbox, id)){
+        cBindings.onObjectSelected(id, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
+      }
       shouldCallItemSelected = false;
     }
 
