@@ -99,9 +99,9 @@ void removeLinesByOwner(LineData& lineData, objid owner){
   lineData.lineColors = lineColors;
 }
 void removeTempText(LineData& lineData){
-  std::vector<TextDrawingOptions> newText;
+  std::vector<ShapeData> newText;
   for (auto &text : lineData.text){
-    if (text.permaText){
+    if (text.perma){
       newText.push_back(text);
     }
   }
@@ -152,8 +152,8 @@ void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigne
   }
 }
 
-void addTextData(LineData& lineData, TextDrawingOptions text){
-  lineData.text.push_back(text);
+void addShapeData(LineData& lineData, ShapeData shapeData){
+  lineData.text.push_back(shapeData);
 }
 
 
@@ -169,20 +169,16 @@ float convertTextNdiFontsize(float height, float width, float fontsize, bool isn
   return fontsize;
 }
 
-void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::string)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width){
+void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::string)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect){
   //std::cout << "text number: " << lineData.text.size() << std::endl;
   for (auto &text : lineData.text){
     if (textureIdSame(text.textureId, textureId)){
       //std::cout << "drawing words: " << text.word << std::endl;
       glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(text.tint));
-      auto coords = convertTextNDICoords(text.left, text.top, height, width, text.ndi);
-      auto adjustedFontSize = convertTextNdiFontsize(height, width, text.fontSize, text.ndi);
-      FontFamily& fontFamily = fontFamilyByName(text.fontFamily.has_value() ? text.fontFamily.value() : "");
       if (text.selectionId.has_value()){
         //std::cout << "selection id value: " << text.selectionId.value() << std::endl;
         auto id = text.selectionId.value();
         auto color = getColorFromGameobject(id);
-
         Color colorTypeColor {
           .r = color.x,
           .g = color.y, 
@@ -196,7 +192,31 @@ void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::functio
       }else{
         glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0)));
       }
-      drawWords(uiShaderProgram, fontFamily, text.word, coords.x, coords.y, adjustedFontSize);  
+
+      auto textShapeData = std::get_if<TextShapeData>(&text.shapeData);
+      auto rectShapeData = std::get_if<RectShapeData>(&text.shapeData);
+      if (textShapeData != NULL){
+        modassert(textShapeData, "shape data is not text");
+        auto coords = convertTextNDICoords(textShapeData -> left, textShapeData ->  top, height, width, text.ndi);
+        auto adjustedFontSize = convertTextNdiFontsize(height, width, textShapeData -> fontSize, text.ndi);
+        FontFamily& fontFamily = fontFamilyByName(textShapeData -> fontFamily.has_value() ? textShapeData -> fontFamily.value() : "");
+
+        drawWords(uiShaderProgram, fontFamily, textShapeData -> word, coords.x, coords.y, adjustedFontSize);          
+      }else if (rectShapeData != NULL){
+        modassert(text.ndi, "non-ndi rect drawing not supported"); 
+        float centerXNdi = rectShapeData -> centerX;
+        float centerYNdi = rectShapeData -> centerY;
+        float widthNdi = rectShapeData -> width;
+        float heightNdi = rectShapeData -> height;
+
+        glm::mat4 scaledAndTranslated = glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(centerXNdi, centerYNdi, 0.f)), glm::vec3(widthNdi, heightNdi, 1.f));
+        glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(scaledAndTranslated));
+        drawMesh(unitXYRect, uiShaderProgram);
+
+      }else {
+        modassert(false, "draw shape data type not yet implemented");
+      }
+
     }
   }
 }

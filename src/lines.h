@@ -17,16 +17,29 @@ struct LineDrawingOptions {
   bool permaLine;
 };
 
-struct TextDrawingOptions  {
+struct TextShapeData {
   std::string word;
+  std::optional<std::string> fontFamily;
+  unsigned int fontSize;
   float left;
   float top;
-  unsigned int fontSize;
+};
+
+struct RectShapeData {
+  float centerX;
+  float centerY;
+  float width;
+  float height;
+};
+
+typedef std::variant<TextShapeData, RectShapeData> ShapeDataInfo;
+
+struct ShapeData  {
+  ShapeDataInfo shapeData;
   std::optional<unsigned int> textureId;
-  bool permaText;
+  bool perma;
   bool ndi;
   glm::vec4 tint;
-  std::optional<std::string> fontFamily;
   std::optional<objid> selectionId;
 };
 
@@ -37,7 +50,7 @@ struct LineByColor {
 };
 struct LineData {
   std::vector<LineByColor> lineColors;;
-  std::vector<TextDrawingOptions> text;
+  std::vector<ShapeData> text;
 };
 
 LineData createLines();
@@ -49,8 +62,8 @@ void removeLinesByOwner(LineData& lineData, objid owner);
 
 void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigned int> textureId);
 
-void addTextData(LineData& lineData, TextDrawingOptions text);
-void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::string)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width);
+void addShapeData(LineData& lineData, ShapeData text);
+void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::string)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect);
 
 void disposeTempBufferedData(LineData& lineData);
 

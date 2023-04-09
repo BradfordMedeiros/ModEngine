@@ -364,16 +364,18 @@ void handleClipboardSelect(){
 
 void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId){
   //std::cout << "draw text: " << word << ": perma? " << permatext << std::endl;
-  addTextData(lineData, TextDrawingOptions{
-    .word = word,
-    .left = left,
-    .top = top,
-    .fontSize = fontSize,
+  addShapeData(lineData, ShapeData{
+    .shapeData = TextShapeData {
+      .word = word,
+      .fontFamily = fontFamily,
+      .fontSize = fontSize,
+      .left = left,
+      .top = top,
+    },
     .textureId = textureId,
-    .permaText = permatext,
+    .perma = permatext,
     .ndi = ndi,
     .tint = tint.has_value() ? tint.value() : glm::vec4(1.f, 1.f, 1.f, 1.f),
-    .fontFamily = fontFamily,
     .selectionId = selectionId,
   });
 }
@@ -396,6 +398,23 @@ FontFamily& fontFamilyByName(std::string name){
 }
 int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, UiTextCursor cursor, std::string fontFamilyName, bool drawBoundingOnly){
   return drawWordsRelative(shaderProgram, fontFamilyByName(fontFamilyName), fullModelTransform(world.sandbox, id), word, 0, 0, fontSize, offsetDelta, align, wrap, virtualization, cursor.cursorIndex, cursor.cursorIndexLeft, cursor.highlightLength, drawBoundingOnly);
+}
+
+void drawRect(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId){
+  //std::cout << "draw text: " << word << ": perma? " << permatext << std::endl;
+  addShapeData(lineData, ShapeData{
+    .shapeData = RectShapeData {
+      .centerX = centerX,
+      .centerY = centerY,
+      .width = width,
+      .height = height,
+    },
+    .textureId = textureId,
+    .perma = perma,
+    .ndi = ndi,
+    .tint = tint.has_value() ? tint.value() : glm::vec4(1.f, 1.f, 1.f, 1.f),
+    .selectionId = selectionId,
+  });
 }
 
 std::vector<std::string> listAnimations(int32_t id){

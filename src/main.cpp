@@ -213,6 +213,9 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   glUniform4fv(glGetUniformLocation(uiShaderProgram, "selectionId"), 1, glm::value_ptr(getColorFromGameobject(0)));
   glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0)));
 
+  glEnable(GL_BLEND);
+  glDisable(GL_DEPTH_TEST);
+
   //std::cout << "screenspace: lines" << std::endl;
   drawAllLines(lineData, uiShaderProgram, texture.textureId);
 
@@ -222,7 +225,7 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
 
   //auto ortho = glm::ortho(0.0f, (float)texSize.width, 0.0f, (float)texSize.height, -1.0f, 1.0f);  
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
-  drawTextData(lineData, uiShaderProgram, fontFamilyByName, texture.textureId,  texSize.height, texSize.width);
+  drawShapeData(lineData, uiShaderProgram, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultMeshes.unitXYRect);
 }
 
 void handlePaintingModifiesViewport(UVCoord uvsToPaint){
@@ -1353,6 +1356,7 @@ int main(int argc, char* argv[]){
     .getObjectsByAttr = getObjectsByAttr,
     .setActiveCamera = setActiveCamera,
     .drawText = drawText,
+    .drawRect = drawRect,
     .drawLine = addLineNextCycle,
     .freeLine = freeLine,
     .getGameObjNameForId = getGameObjectName,
@@ -2040,7 +2044,7 @@ int main(int argc, char* argv[]){
       effectiveCrosshair = crosshairSprite;
     }
     renderUI(effectiveCrosshair, pixelColor, showCursor);
-    drawTextData(lineData, uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth);
+    drawShapeData(lineData, uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultMeshes.unitXYRect);
     disposeTempBufferedData(lineData);
     glEnable(GL_DEPTH_TEST);
 

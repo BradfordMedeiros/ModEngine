@@ -110,6 +110,8 @@ void drawTextNdi(std::string word, float left, float top, unsigned int fontSize)
 FontFamily& fontFamilyByName(std::string name);
 int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, UiTextCursor cursor, std::string fontFamilyName, bool drawBoundingOnly);
 
+void drawRect(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId);
+
 std::vector<std::string> listAnimations(int32_t id);
 void playAnimation(int32_t id, std::string animationToPlay, bool loop);
 void stopAnimation(int32_t id);
