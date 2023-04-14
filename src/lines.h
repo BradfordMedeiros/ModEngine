@@ -1,9 +1,6 @@
 #ifndef MOD_LINES
 #define MOD_LINES
 
-#include "./common/util.h"
-#include "./scene/common/util/types.h"
-#include "./scene/common/mesh.h"
 #include "./scene/sprites/sprites.h"
 #include "./colorselection.h"
 #include <glad/glad.h>

@@ -1,7 +1,6 @@
 #ifndef MOD_BENCHSTATS
 #define MOD_BENCHSTATS
 
-#include <vector>
 #include "./common/util.h"
 
 // TODO -> this should be how all the values in benchmark come from

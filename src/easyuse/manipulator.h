@@ -1,9 +1,6 @@
 #ifndef MOD_MANIPULATOR
 #define MOD_MANIPULATOR
 
-#include <functional>
-#include <optional>
-#include "../translations.h"
 #include "./manipulator_drawing.h"
 
 struct InitialDragRotation {

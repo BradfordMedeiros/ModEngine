@@ -4,12 +4,10 @@
 #include <GLFW/glfw3.h>
 #include <queue>          
 
-#include "./scene/scene.h"
 #include "./scene/scene_object.h"
 #include "./state.h"
 #include "./scene/physics.h"
 #include "./scene/sprites/sprites.h"
-#include "./scene/types/sound.h"
 #include "./network/servers.h"
 #include "./network/activemanager.h"
 #include "./scene/sysinterface.h"
@@ -22,7 +20,6 @@
 #include "./layers.h"
 #include "./benchstats.h"
 #include "./lines.h"
-#include "./colorselection.h"
 #include "./sql/sql.h"
 
 float getTotalTime();

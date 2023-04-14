@@ -2,7 +2,6 @@
 #define MOD_WORLDLOADER
 
 #include <iostream>
-#include <vector>
 #include <functional>
 #include <map>
 #include "./common/util.h"
