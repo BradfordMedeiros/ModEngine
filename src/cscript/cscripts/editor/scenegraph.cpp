@@ -15,10 +15,10 @@ struct EditorScenegraph {
 	objid mainObjId;
 	bool didScroll;
 	float offset;
-	float maxOffset;
-	float minOffset;
+	std::optional<float> minOffset;
+	std::optional<float> maxOffset;
+
 	int selectedIndex;
-	int maxIndex;
 
 	std::string depgraphType;
 	std::optional<std::vector<SceneDependency>> depGraph;
@@ -431,6 +431,9 @@ float calcY(int depth, int fontsize, float offset){
 const int mappingInterval = 5000;
 void doDrawList(EditorScenegraph& scenegraph, SceneDrawList& drawList, bool showSceneIds){
 	modlog("editor", "scenegraph - offset: " + std::to_string(scenegraph.offset));
+	scenegraph.maxOffset = std::nullopt;
+	scenegraph.minOffset = std::nullopt;
+	//scenegraph.minOffset = 0;
 	for (auto &drawElement : drawList.elements){
 		auto mappingNumber = drawElement.mappingNumber + scenegraph.baseNumber + mappingInterval;
 		if (mappingNumber > (scenegraph.baseNumber + 2 * mappingInterval)){
@@ -451,6 +454,21 @@ void doDrawList(EditorScenegraph& scenegraph, SceneDrawList& drawList, bool show
 				mappingNumber
 			);
 		}
+
+		auto yOffset = calcY(drawElement.height, scenegraph.fontSize, scenegraph.offset);
+		if (!scenegraph.maxOffset.has_value()){
+			scenegraph.maxOffset = yOffset;
+		}
+		if (!scenegraph.minOffset.has_value()){
+			scenegraph.minOffset = yOffset;
+		}
+		if (yOffset > scenegraph.maxOffset.value()){
+			scenegraph.maxOffset = yOffset;
+		}
+		if (yOffset < scenegraph.minOffset){
+			scenegraph.minOffset = yOffset;
+		}
+		std::cout << "editor scenegraph scrollbar offset: " << yOffset << " name = " << drawElement.elementName << std::endl;
 		mainApi -> drawText(
 			showSceneIds ? (drawElement.elementName + " (" + std::to_string(drawElement.sceneId) + ")") : drawElement.elementName, 
 			calcX(drawElement.depth + 1, scenegraph.fontSize), 
@@ -580,6 +598,53 @@ SceneDrawList drawListFromDepGraph(EditorScenegraph& scenegraph){
 }
 
 
+void drawScrollbar(EditorScenegraph& scenegraph){
+	float maxOffsetAdjusted = scenegraph.maxOffset.value() + scenegraph.offset;
+	float minOffsetAdjusted = scenegraph.minOffset.value() + scenegraph.offset;
+	float displayLength = maxOffsetAdjusted - minOffsetAdjusted;
+	float ratio = 2.f / displayLength;
+
+	if (!scenegraph.maxOffset.has_value()){
+		return;
+	}
+	//modlog("editor", "scrollbar: percentage: " + std::to_string(ratio) + ", maxoffset" + std::to_string(scenegraph.maxOffset.value()) + ", minoffset  " + std::to_string(scenegraph.minOffset.value()) +  ",  offset = " + std::to_string(scenegraph.offset));
+	//modlog("editor", "scrollbar: adjusted: maxoffsetadjusted = " + std::to_string(scenegraph.maxOffset.value() + scenegraph.offset) + ", minOffsetadjusted = " + std::to_string(scenegraph.minOffset.value() + scenegraph.offset));
+	//modlog("editor", "scrollbar length: " + std::to_string(displayLength));
+	//std::cout << "scrollbar : offset = " << scenegraph.offset << ", displayLength = " << displayLength << ", scrollAmount" << scrollAmount << ", maxscroll = " << minScrollAmount << std::endl;
+
+	// y goes from [-1, 1]
+	// length of bar should be 2 * % of content to show
+	// yoffset should be contentoffset
+	float barHeight = 2 * ratio;
+	float topOfBar = barHeight * 0.5f;
+	float distanceToTop = 1.f - topOfBar;
+	float scrollAmount = 2.f * scenegraph.offset / displayLength;
+	float minScrollAmount = -2.f + (barHeight);
+
+	mainApi -> drawRect(
+		0.95f, 
+		0, 
+		0.02, 
+		2, 
+		false,
+		glm::vec4(0.f, 0.f, 0.f, 1.f), 
+		scenegraph.textureId.value(), 
+		true, 
+		std::nullopt
+	);
+	mainApi -> drawRect(
+		0.95f, 
+		distanceToTop + std::max(scrollAmount, minScrollAmount), 
+		0.01, 
+		barHeight, 
+		false,
+		glm::vec4(0.4f, 0.4f, 0.4f, 1.f), 
+		scenegraph.textureId.value(), 
+		true, 
+		std::nullopt
+	);
+}
+
 bool drawTitle = false;
 void onGraphChange(EditorScenegraph& scenegraph){
 	refreshDepGraph(scenegraph);
@@ -597,6 +662,8 @@ void onGraphChange(EditorScenegraph& scenegraph){
 	drawList.elements.at(scenegraph.selectedIndex).isSelected = true;
 	modlog("editor", "draw list size: " + std::to_string(drawList.elements.size()) + ", selected index = " + std::to_string(scenegraph.selectedIndex));
 	doDrawList(scenegraph, drawList, modeToGetDepGraph.at(scenegraph.depgraphType).showSceneIds);
+
+	drawScrollbar(scenegraph);
 }
 
 void toggleExpanded(EditorScenegraph& scenegraph, int index){
@@ -616,8 +683,8 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
     scenegraph -> mainObjId = id;
     scenegraph -> didScroll = false;
     scenegraph -> offset = 0.f;
-    scenegraph -> maxOffset = 0.f;
-    scenegraph -> minOffset = 0.f;
+    scenegraph -> minOffset = std::nullopt;
+    scenegraph -> maxOffset = std::nullopt;
     scenegraph -> selectedIndex = 0;
     scenegraph -> depGraph = std::nullopt;
     scenegraph -> textureId = std::nullopt;
@@ -673,7 +740,8 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
 	binding.onScrollCallback = [](objid scriptId, void* data, double amount) -> void{
 		EditorScenegraph* scenegraph = static_cast<EditorScenegraph*>(data);
 		scenegraph -> didScroll = true;
-		scenegraph -> offset = std::min(scenegraph -> minOffset, static_cast<float>(scenegraph -> offset + (amount * 0.5f)));
+		scenegraph -> offset = std::min(0.f, static_cast<float>(scenegraph -> offset + (amount * 0.5f)));
+
 	};
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
