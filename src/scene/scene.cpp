@@ -1192,6 +1192,10 @@ void setAttributes(World& world, objid id, GameobjAttributes& attr){
   bool oldPhysicsEnabled = obj.physicsOptions.enabled;
   setAllAttributes(obj, attr, util);
   bool newPhysicsEnabled = obj.physicsOptions.enabled;
+
+  auto autoserializerFields = getObjautoserializerFields(obj.name); 
+  auto additionalAttr = getAdditionalAttr(attr, autoserializerFields); // this should also filter out object attributes 
+  mergeAttributes(obj.additionalAttr, additionalAttr);
   afterAttributesSet(world, id, obj, attr.vecAttr.vec3.find("physics_velocity") != attr.vecAttr.vec3.end(), oldPhysicsEnabled != newPhysicsEnabled || shouldRebuildPhysics);
 }
 void setProperty(World& world, objid id, std::vector<Property>& properties){

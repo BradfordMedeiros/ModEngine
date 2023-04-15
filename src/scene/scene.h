@@ -15,6 +15,7 @@
 #include "./types/ainav.h"
 #include "./sprites/sprites.h"
 #include "./common/util/meshgen.h"
+#include "./scene_sandbox.h"
 
 struct World {
   physicsEnv physicsEnvironment;

@@ -70,8 +70,6 @@ std::optional<UpdatedValue> getUpdatedValue(EditorDetails& details, std::string&
   auto oldValueFloat = std::get_if<float>(&oldValue.value());
 
   auto newValueStr = std::get_if<std::string>(&newValue);
-  auto newValueVec3 = std::get_if<glm::vec3>(&newValue);
-  auto newValueVec4 = std::get_if<glm::vec4>(&newValue);
   auto newValueFloat = std::get_if<float>(&newValue);
 
   if (detailBindingIndex.has_value()){
@@ -833,8 +831,8 @@ void togglePlayMode(EditorDetails& details){
   }
   details.playModeEnabled = !details.playModeEnabled;
   details.pauseModeEnabled = true;
-  updateStoreValue(details, "play-mode-on", details.playModeEnabled ? "on" : "off");
-  modlog("editor", "play mode: " + details.playModeEnabled ? "true" : "false");
+  updateStoreValue(details, "play-mode-on", (details.playModeEnabled ? "on" : "off"));
+  modlog("editor", std::string("play mode: ") + (details.playModeEnabled ? "true" : "false"));
   mainApi -> sendNotifyMessage("alert", details.playModeEnabled ? "true" : "false");
   mainApi -> sendNotifyMessage("play-mode", details.playModeEnabled ? "true" : "false");
 }
@@ -920,7 +918,6 @@ struct CursorUpdate {
 CursorUpdate newCursorIndex(DetailsUpdateType& eventType, int oldIndex, int newTextLength, int oldOffset, int wrapAmount, std::string& oldCursorDir, int oldHighlightLength){
   auto distanceOnLine = oldIndex - oldOffset;
   auto lastEndingOnRight = distanceOnLine == (wrapAmount - 1);
-  auto lastEndingOnLeft = distanceOnLine == 0;
   auto oldCursorDirLeft = oldCursorDir == "left";
   auto newCursorDir = oldCursorDir;
   auto highlightLength = oldHighlightLength;
@@ -1056,7 +1053,6 @@ void updateText(EditorDetails& details, objid obj, std::string& text, CursorUpda
 
   auto detailBinding = getStrAttr(attr, "details-binding");
   auto detailBindingIndex = optionalInt(getFloatAttr(attr, "details-binding-index"));
-  auto detailBindingType = getStrAttr(attr, "details-editable-type");
 
   GameobjAttributes newAttr {
     .stringAttributes = { {"cursor-dir", cursorDir}, { "value", text } },

@@ -4,8 +4,8 @@ const char* textureName = "graphs-testplot";
 const float xRangeSecs = 10;
 const float yRange = 400;
 const std::vector<float> gridLines = { 0.5f, 0.25f, 0.f, -0.5f };
-const char* statname = "fps";
 const float minDrawingTime = 0.05f;
+std::string statname = "fps";
 
 
 extern CustomApiBindings* mainApi;

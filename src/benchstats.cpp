@@ -26,7 +26,7 @@ void registerStat(unsigned int stat, AttributeValue amount){
 AttributeValue statValue(unsigned int stat){
   return stats.at(stat).amount;
 }
-AttributeValue statValue(std::string name){
+AttributeValue statValue(std::string& name){
 	for (int i = 0; i < stats.size(); i++){
 		auto stat = stats.at(i);
 		if (stat.name == name){

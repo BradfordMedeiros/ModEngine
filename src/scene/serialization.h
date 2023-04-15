@@ -79,6 +79,7 @@ void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAtt
 
 AttributeValue parsePropertySuffix(std::string key, std::string value);
 
+GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes, std::set<std::string>& autoserializerFields);
 GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes, std::set<std::string> objautoserializerFields);
 
 #endif

@@ -988,9 +988,10 @@ SCM scmParseAttr(SCM attrString){
   return fromAttributeValue(attrValue);
 }
 
-AttributeValue (*_runStats)(std::string field);
+AttributeValue (*_runStats)(std::string& field);
 SCM scmRunStats(SCM value){
-  auto stat = _runStats(scm_to_locale_string(value));
+  std::string statName = scm_to_locale_string(value);
+  auto stat = _runStats(statName);
   return fromAttributeValue(stat);
 }
 
@@ -1471,7 +1472,7 @@ void createStaticSchemeBindings(
   unsigned int (*createTexture)(std::string name, unsigned int width, unsigned int height, objid ownerId),
   void (*freeTexture)(std::string name, objid ownerId),
   void (*clearTexture)(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color, std::optional<std::string> texture),
-  AttributeValue (*runStats)(std::string field),
+  AttributeValue (*runStats)(std::string& field),
   unsigned int (*scmStat)(std::string),
   void (*logStat)(unsigned int, AttributeValue amount),
   void (*installMod)(std::string layer),

@@ -317,8 +317,8 @@ glm::vec2 parseVec2(std::string positionRaw){;
 std::vector<float> parseFloatVec(std::string value){
   std::vector<float> floats;
   auto values = filterWhitespace(split(value, ' '));
-  for (auto value : values){
-    floats.push_back(std::atof(value.c_str()));
+  for (auto strValue : values){
+    floats.push_back(std::atof(strValue.c_str()));
   }
   return floats;
 }
@@ -552,9 +552,9 @@ AttributeValue interpolateAttribute(AttributeValue key1, AttributeValue key2, fl
   }
   auto attr2 = std::get_if<float>(&key1);
   if (attr2 != NULL){
-    auto attr2 = std::get_if<float>(&key2);
-    assert(attr2 != NULL);
-    return *attr1 + *attr2;
+    auto attr2Float = std::get_if<float>(&key2);
+    assert(attr2Float != NULL);
+    return *attr1 + *attr2Float;
   }
   assert(false);
   return key1;
@@ -651,9 +651,7 @@ bool aboutEqual(AttributeValue one, AttributeValue two){
   return false;
 }
 
-bool isIdentityVec(glm::vec3 scale){
-  return scale.x = 1 && scale.y == 1 && scale.z == 1;
-}
+
 bool isIdentityVec(glm::vec4 vec){
   return vec.x = 1 && vec.y == 1 && vec.z == 1 && vec.w == 1;
 }
