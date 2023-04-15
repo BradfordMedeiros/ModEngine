@@ -282,8 +282,6 @@ Transformation getTransformationFromMatrix(glm::mat4 matrix){
 }
 
 RotationPosition rotateOverAxis(RotationPosition object, RotationPosition axis, float rotationRadians, std::optional<std::function<glm::quat(glm::quat)>> snapRotate){
-  auto objectMatrix = matrixFromComponents(glm::mat4(1.f), object.position, glm::vec3(1.f, 1.f, 1.f), object.rotation);
-
   auto fromAxis = object.position - axis.position;
   auto objectTranslation = glm::translate(glm::mat4(1.f), fromAxis);
   auto axisRotation = glm::rotate(glm::mat4(1.f), -1 * rotationRadians, directionFromQuat(axis.rotation));

@@ -212,7 +212,6 @@ std::vector<AutoSerialize> gameobjSerializer {
 
 
 void assertCoreType(AttributeValueType type, std::string& fieldname, std::string& payload){
-  AttributeValueType serializerType;
   auto autoserializer = serializerByName(gameobjSerializer, fieldname);
   if (autoserializer.has_value()){
     auto serializerType = typeForSerializer(autoserializer.value());

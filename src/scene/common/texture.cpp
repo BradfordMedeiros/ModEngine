@@ -5,7 +5,6 @@ Texture loadTextureEmpty(int textureWidth, int textureHeight, int numChannels){
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
   
-  GLint format = GL_RGBA;
   bool numChannelsValid = (numChannels == 3 || numChannels == 4);
   if (!numChannelsValid){
     std::cout << "Num channels: " << numChannels << " (width, height) = (" << textureWidth << ", " << textureHeight << ") " << std::endl;

@@ -84,7 +84,6 @@ std::string serializeVoxelDefault(World& world, Voxels& voxelData){
     .voxel = voxelData,
   };
 
-  std::set<std::string> voxelFields = {};
   std::string name = "]default_voxel";
   auto gameobj = gameObjectFromFields(name, -1, {}, getObjautoserializerFields(name));
   std::vector<std::string> children;

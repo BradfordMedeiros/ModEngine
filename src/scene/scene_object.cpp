@@ -28,14 +28,10 @@ std::optional<PortalInfo> getPortalInfo(World& world, objid id){
   auto parsedSceneId = 0;
   std::string parsedSearchName = "";
   auto hasParsedName = extractSceneIdFromName(portalObject -> camera, &parsedSceneId, &parsedSearchName);
-  
-  std::string cameraName = hasParsedName ? parsedSearchName : portalObject -> camera; 
   auto sceneId = hasParsedName ? parsedSceneId : getGameObjectH(world.sandbox, id).sceneId;
 
   auto cameraId = getGameObject(world, portalObject -> camera, sceneId).id;
   auto cameraFullTransform = fullTransformation(world.sandbox, cameraId);
-  
-  auto portalGameObject = getGameObject(world, id);
   auto portalFullTransform = fullTransformation(world.sandbox, id);
 
   PortalInfo info {
@@ -669,8 +665,8 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   }
 
   //std::cout << "anchor direction: " << std::endl;
-  auto anchorHorzCentered = layoutObject -> anchor.horizontal == UILayoutFlowNone;
-  auto anchorVertCentered = layoutObject -> anchor.vertical == UILayoutFlowNone;
+  //auto anchorHorzCentered = layoutObject -> anchor.horizontal == UILayoutFlowNone;
+  //auto anchorVertCentered = layoutObject -> anchor.vertical == UILayoutFlowNone;
 
   //std::cout << "anchor centered(horz, vert) : " << (anchorHorzCentered ? "true" : "false") << " , " << (anchorVertCentered ? "true" : "false") << std::endl;
   //std::cout << "------------------------------" << std::endl;

@@ -314,7 +314,6 @@ bool hasLayoutTable(){
   auto result = mainApi -> executeSqlQuery(query, &validSql);
   modassert(validSql, "error executing sql query");
 
-  bool tableExists = false;
   for (auto row : result){
     if (row.at(0) == "layout"){
       return true;

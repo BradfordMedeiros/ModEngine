@@ -91,7 +91,6 @@ VoxelState parseVoxelState(std::string voxelState, std::string voxelTextures, un
   auto textureStrings = split(voxelTextures, '|');
   auto textureList = split(textureStrings.at(0), ',');
 
-  auto textureListString = textureStrings.at(0);
   std::vector<int> texturePerVoxel;
   for (char textureData : textureStrings.at(1)){
     texturePerVoxel.push_back(atoi(&textureData));
