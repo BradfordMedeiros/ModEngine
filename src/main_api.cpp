@@ -8,7 +8,6 @@ extern engineState state;
 extern GameObject defaultCamera;
 extern std::vector<FontFamily> fontFamily;
 extern Mesh* crosshairSprite;
-extern Mesh defaultCrosshairSprite;
 extern unsigned int uiShaderProgram;
 extern float initialTime;
 extern std::queue<StringAttribute> channelMessages;

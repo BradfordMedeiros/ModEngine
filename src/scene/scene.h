@@ -75,7 +75,6 @@ bool objectHasAttribute(World& world, objid id, std::string type, std::optional<
 void setAttributes(World& world, objid id, GameobjAttributes& attr);
 void setProperty(World& world, objid id, std::vector<Property>& properties);
 AttributeValue interpolateAttribute(AttributeValue key1, AttributeValue key2, float percentage);
-AttributeValue parsePropertySuffix(std::string key, std::string value);
 std::string serializePropertySuffix(std::string key, AttributeValue value);
 
 std::optional<std::string> getTextureById(World& world, int id);

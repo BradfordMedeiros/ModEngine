@@ -153,6 +153,8 @@ struct engineState {
 
   glm::vec2 infoTextOffset;
 
+  bool useYAxis;
+
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

@@ -6,7 +6,6 @@ extern engineState state;
 extern CScriptBindingCallbacks cBindings;
 extern bool disableInput;
 extern KeyRemapper keyMapper;
-extern bool useYAxis;
 extern DrawingParams drawParams;
 extern glm::mat4 view;
 extern GameObject defaultCamera;
@@ -208,13 +207,13 @@ void onJoystick(std::vector<JoyStickInfo> infos){
 void expandVoxelUp(){
   for (auto voxelData : getSelectedVoxels()){
     std::cout << "voxels: expand voxel up" << std::endl;
-    expandVoxels(voxelData.voxelPtr -> voxel, 0, useYAxis ? -1 : 0, !useYAxis ? -1 : 0);
+    expandVoxels(voxelData.voxelPtr -> voxel, 0, state.useYAxis ? -1 : 0, !state.useYAxis ? -1 : 0);
   }
 }
 void expandVoxelDown(){
   for (auto voxelData : getSelectedVoxels()){
     std::cout << "voxels: expand voxel down" << std::endl;
-    expandVoxels(voxelData.voxelPtr -> voxel , 0, useYAxis ? 1 : 0, !useYAxis ? 1 : 0);
+    expandVoxels(voxelData.voxelPtr -> voxel , 0, state.useYAxis ? 1 : 0, !state.useYAxis ? 1 : 0);
   }  
 }
 void expandVoxelLeft(){

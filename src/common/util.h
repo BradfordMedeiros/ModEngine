@@ -280,6 +280,9 @@ void assertTodo(std::string message);
   #define MODTODO(m) ;
 #endif
 
+#define VAL(x) #x
+#define STR(macro) VAL(macro)   // stringified the value, eg for include 
+
 enum MODLOG_LEVEL { MODLOG_INFO = 0, MODLOG_WARNING = 1, MODLOG_ERROR = 2 };
 void modlog(const char* identifier, const char* value, MODLOG_LEVEL level = MODLOG_INFO);
 void modlog(const char* identifier, std::string value, MODLOG_LEVEL level = MODLOG_INFO);

@@ -453,6 +453,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .easyUse = createEasyUse(),
     .worldpaused = false,
     .infoTextOffset = glm::ivec2(0, 0),
+    .useYAxis = true,
 	};
 	return state;
 }

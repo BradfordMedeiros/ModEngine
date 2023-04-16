@@ -11,8 +11,6 @@
 #include "./scene/common/textures_gen.h"
 #include "./sql/shell.h"
 
-#define VAL(x) #x
-#define STR(macro) VAL(macro)
 #ifdef ADDITIONAL_SRC_HEADER
   #include STR(ADDITIONAL_SRC_HEADER)
 #endif
@@ -48,10 +46,7 @@ engineState state = getDefaultState(1920, 1080);
 World world;
 RenderStages renderStages;
 DefaultMeshes defaultMeshes;  
-
-Mesh* defaultCrosshairSprite;
 Mesh* crosshairSprite;
-
 
 SysInterface interface;
 std::string textureFolderPath;
@@ -115,9 +110,8 @@ TimePlayback timePlayback(
 
 std::string sqlDirectory = "./res/data/sql/";
 
-bool useYAxis = true;
 void onDebugKey(){
-  useYAxis = !useYAxis;
+  state.useYAxis = !state.useYAxis;
   if (timePlayback.isPaused()){
     timePlayback.play();
   }else{
@@ -126,13 +120,12 @@ void onDebugKey(){
 }
 
 unsigned int textureToPaint = -1;
-bool canPaint = false;
 
-void applyPainting(objid id){
+void applyPainting(objid id, bool* _canPaint){
   auto texture = textureForId(world, id);
   if (texture.has_value()){
     textureToPaint = texture.value().textureId;
-    canPaint = true;
+    *_canPaint = true;
   }
   //std::cout << "texture id is: " << texture.textureId << std::endl;
 }
@@ -198,7 +191,7 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
 
 }
 
-void handlePaintingModifiesViewport(UVCoord uvsToPaint){
+void handlePaintingModifiesViewport(UVCoord uvsToPaint, bool canPaint){
   if (!canPaint || !state.shouldPaint){
     return;
   }
@@ -270,7 +263,7 @@ objid createManipulator(){
 bool selectItemCalled = false;
 bool shouldCallItemSelected = false;
 bool mappingClickCalled = false;
-void selectItem(objid selectedId, int layerSelectIndex, int groupId){
+void selectItem(objid selectedId, int layerSelectIndex, int groupId, bool* canPaint){
   std::cout << "SELECT ITEM CALLED!" << std::endl;
   modlog("selection", (std::string("select item called") + ", selectedId = " + std::to_string(selectedId) + ", layerSelectIndex = " + std::to_string(layerSelectIndex)).c_str());
   if (!showCursor || disableInput){
@@ -286,7 +279,7 @@ void selectItem(objid selectedId, int layerSelectIndex, int groupId){
   if (idToUse == getManipulatorId(state.manipulatorState)){
     return;
   }
-  applyPainting(selectedId);
+  applyPainting(selectedId, canPaint);
   applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);
   shouldCallItemSelected = true;
 
@@ -1497,7 +1490,6 @@ int main(int argc, char* argv[]){
    // this texture used for default textures, could make font mesh texture optional or something
   fontFamily = loadFontMeshes(readFontFile(fontPaths), world.textures.at("./res/textures/wood.jpg").texture);
 
-  defaultCrosshairSprite = &world.meshes.at("./res/textures/crosshairs/crosshair008.png").mesh;
   setCrosshairSprite();  // needs to be after create world since depends on these meshes being loaded
 
   if (state.skybox != ""){
@@ -1522,6 +1514,7 @@ int main(int argc, char* argv[]){
     .lightMesh = &world.meshes.at("../gameresources/build/objtypes/light.gltf").mesh,
     .emitter = &world.meshes.at("../gameresources/build/objtypes/emitter.gltf").mesh,
     .nav = &world.meshes.at("./res/models/ui/node.obj").mesh,
+    .defaultCrosshairSprite = &world.meshes.at("./res/textures/crosshairs/crosshair008.png").mesh,
   };
 
   loadAllTextures();
@@ -1587,6 +1580,8 @@ int main(int argc, char* argv[]){
   long long totalFrames = 0;
   float speedMultiplier = result["fps-speed"].as<int>() / 1000.f;
   std::cout << "speed multiplier: "  << speedMultiplier << std::endl;
+
+  bool canPaint = false;
 
   assert(!hasFramelimit || !fpsFixed);
   assert(fpsLag < 0 || !fpsFixed);
@@ -1732,7 +1727,7 @@ int main(int argc, char* argv[]){
         auto layerSelectThreeCond = layerSelectIndex == -3 && mappingClickCalled;
         std::cout << "cond1 = " << (layerSelectNegOne ? "true" : "false") << ", condtwo = " << (layerSelectThreeCond ? "true" : "false") << ", selectindex " << layerSelectIndex << ", mapping = " << mappingClickCalled << std::endl;
         if (!(layerSelectNegOne || layerSelectThreeCond) && !state.selectionDisabled){
-          selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId));
+          selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId), &canPaint);
         }
       }else{
         std::cout << "INFO: select item called -> id not in scene! - " << selectTargetId<< std::endl;
@@ -1786,9 +1781,9 @@ int main(int argc, char* argv[]){
       }
     }
     if (cursorForLayer == "none"){
-      defaultCrosshairSprite = NULL;
+      defaultMeshes.defaultCrosshairSprite = NULL;
     }else{
-      defaultCrosshairSprite = &world.meshes.at(cursorForLayer).mesh;
+      defaultMeshes.defaultCrosshairSprite = &world.meshes.at(cursorForLayer).mesh;
     }
 
     onManipulatorUpdate(
@@ -1844,7 +1839,7 @@ int main(int argc, char* argv[]){
     glEnable(GL_BLEND);
     /////////////////////
 
-    handlePaintingModifiesViewport(uvCoord);
+    handlePaintingModifiesViewport(uvCoord, canPaint);
 
 
     glViewport(0, 0, state.resolution.x, state.resolution.y);
@@ -2007,7 +2002,7 @@ int main(int argc, char* argv[]){
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
-    Mesh* effectiveCrosshair = defaultCrosshairSprite;
+    Mesh* effectiveCrosshair = defaultMeshes.defaultCrosshairSprite;
     if (crosshairSprite != NULL){
       effectiveCrosshair = crosshairSprite;
     }
