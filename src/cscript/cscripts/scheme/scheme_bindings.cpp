@@ -244,7 +244,6 @@ SCM scmMakeObjectAttr(SCM scmName, SCM scmAttributes, SCM scmSceneId){
   auto sceneIdDefined = !scm_is_eq(scmSceneId, SCM_UNDEFINED);
   auto sceneId = sceneIdDefined ? scm_to_int32(scmSceneId) : _listSceneId(currentModuleId());
   auto attrs = scmToAttributes(scmAttributes);
-  std::map<std::string, GameobjAttributes> submodelAttributes;
   std::optional<objid> id = _makeObjectAttr(sceneId, scm_to_locale_string(scmName), attrs.attr, attrs.submodelAttributes);
   if (!id.has_value()){
     return SCM_BOOL_F;

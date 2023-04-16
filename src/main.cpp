@@ -303,8 +303,6 @@ void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2,
   auto obj2Id = getIdForCollisionObject(world, obj2);
   modassert(obj1Id.has_value(), "on object enter, obj1Id does not exist");
   modassert(obj2Id.has_value(), "on object enter, obj2Id does not exist");
-  auto obj1Name = getGameObject(world, obj1Id.value()).name;
-  auto obj2Name = getGameObject(world, obj2Id.value()).name;
   maybeTeleportObjects(world, obj1Id.value(), obj2Id.value());
   cBindings.onCollisionEnter(obj1Id.value(), obj2Id.value(), contactPos, normal, normal * glm::vec3(-1.f, -1.f, -1.f)); 
 }
