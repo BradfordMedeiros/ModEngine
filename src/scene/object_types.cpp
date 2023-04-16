@@ -556,7 +556,7 @@ int renderObject(
 
   auto customObj = std::get_if<GameObjectNil>(&toRender);
   if (customObj != NULL){
-    int vertexCount;
+    auto vertexCount = 0;
     if (showDebugMask & 0b10000000){
       vertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     }
@@ -566,7 +566,7 @@ int renderObject(
 
   auto prefabObj = std::get_if<GameObjectPrefab>(&toRender);
   if (prefabObj != NULL){
-    int vertexCount;
+    auto vertexCount = 0;
     if (showDebugMask & 0b10000000){
       vertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     }
