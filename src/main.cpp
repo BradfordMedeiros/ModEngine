@@ -17,6 +17,7 @@
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
+unsigned int uiShaderProgram;
 unsigned int quadVAO;
 unsigned int quadVAO3D;
 
@@ -72,8 +73,6 @@ std::map<objid, unsigned int> portalIdCache;
 
 glm::mat4 orthoProj;
 glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);  
-
-unsigned int uiShaderProgram;
 
 CScriptBindingCallbacks cBindings;
 
@@ -1457,7 +1456,6 @@ int main(int argc, char* argv[]){
     allTexturesToLoad.push_back(layer.cursor);
   }
 
-
   world = createWorld(
     onObjectEnter, 
     onObjectLeave, 
@@ -1482,11 +1480,8 @@ int main(int argc, char* argv[]){
   );
 
   auto fontPaths = result["font"].as<std::vector<std::string>>();
-  std::cout << "INFO: FONT: loading font paths (" << fontPaths.size() <<") - ";
-  for (auto &fontPath : fontPaths){
-    std::cout << fontPath << " ";
-  }
-  std::cout << std::endl;
+  std::cout << "INFO: FONT: loading font paths (" << fontPaths.size() <<") - " << print(fontPaths) << std::endl;
+
    // this texture used for default textures, could make font mesh texture optional or something
   fontFamily = loadFontMeshes(readFontFile(fontPaths), world.textures.at("./res/textures/wood.jpg").texture);
 
@@ -1545,9 +1540,7 @@ int main(int argc, char* argv[]){
 
   auto defaultCameraName = result["camera"].as<std::string>();
   if (defaultCameraName != ""){
-    auto ids =  getByName(world.sandbox, defaultCameraName);
-    auto sceneForId = sceneId(world.sandbox, ids.at(0));
-    setActiveCamera(defaultCameraName, sceneForId);
+    setActiveCamera(defaultCameraName, sceneId(world.sandbox, getByName(world.sandbox, defaultCameraName).at(0)));
   }
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
