@@ -109,21 +109,12 @@ TimePlayback timePlayback(
 
 std::string sqlDirectory = "./res/data/sql/";
 
-void onDebugKey(){
-  state.useYAxis = !state.useYAxis;
-  if (timePlayback.isPaused()){
-    timePlayback.play();
-  }else{
-    timePlayback.pause();
-  }
-}
-
-unsigned int textureToPaint = -1;
+std::optional<Texture> textureToPaint = std::optional<Texture>(std::nullopt);
 
 void applyPainting(objid id, bool* _canPaint){
   auto texture = textureForId(world, id);
+  textureToPaint = texture;
   if (texture.has_value()){
-    textureToPaint = texture.value().textureId;
     *_canPaint = true;
   }
   //std::cout << "texture id is: " << texture.textureId << std::endl;
@@ -186,18 +177,16 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   //auto ortho = glm::ortho(0.0f, (float)texSize.width, 0.0f, (float)texSize.height, -1.0f, 1.0f);  
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
   drawShapeData(lineData, uiShaderProgram, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultMeshes.unitXYRect);
-
-
 }
 
 void handlePaintingModifiesViewport(UVCoord uvsToPaint, bool canPaint){
-  if (!canPaint || !state.shouldPaint){
+  if (!canPaint || !state.shouldPaint || !textureToPaint.has_value()){
     return;
   }
 
   glUseProgram(drawingProgram); 
 
-  glBindTexture(GL_TEXTURE_2D, textureToPaint);
+  glBindTexture(GL_TEXTURE_2D, textureToPaint.value().textureId);
   int w, h;
   int miplevel = 0;
   glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_WIDTH, &w);
@@ -206,7 +195,7 @@ void handlePaintingModifiesViewport(UVCoord uvsToPaint, bool canPaint){
   glViewport(0, 0, w, h);
 
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToPaint, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToPaint.value().textureId, 0);
 
   glUniformMatrix4fv(glGetUniformLocation(drawingProgram, "model"), 1, GL_FALSE, glm::value_ptr(
     glm::scale(

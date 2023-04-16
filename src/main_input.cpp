@@ -17,6 +17,7 @@ extern SysInterface interface;
 extern GLFWwindow* window;
 extern LineData lineData;
 extern ManipulatorTools tools;
+extern TimePlayback timePlayback;
 
 std::string dumpDebugInfo(bool fullInfo){
   auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
@@ -1374,7 +1375,12 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      //onDebugKey();
+      state.useYAxis = !state.useYAxis;
+      if (timePlayback.isPaused()){
+        timePlayback.play();
+      }else{
+        timePlayback.pause();
+      }
       std::cout << "group selection: " << state.groupSelection << std::endl;
       //state.groupSelection = !state.groupSelection;
     }
