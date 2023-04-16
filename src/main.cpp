@@ -111,14 +111,6 @@ std::string sqlDirectory = "./res/data/sql/";
 
 std::optional<Texture> textureToPaint = std::optional<Texture>(std::nullopt);
 
-void applyPainting(objid id, bool* _canPaint){
-  auto texture = textureForId(world, id);
-  textureToPaint = texture;
-  if (texture.has_value()){
-    *_canPaint = true;
-  }
-  //std::cout << "texture id is: " << texture.textureId << std::endl;
-}
 
 void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId, bool blend){
   auto texSize = getTextureSizeInfo(texture);
@@ -179,8 +171,8 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   drawShapeData(lineData, uiShaderProgram, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultMeshes.unitXYRect);
 }
 
-void handlePaintingModifiesViewport(UVCoord uvsToPaint, bool canPaint){
-  if (!canPaint || !state.shouldPaint || !textureToPaint.has_value()){
+void handlePaintingModifiesViewport(UVCoord uvsToPaint){
+  if (!state.shouldPaint || !textureToPaint.has_value()){
     return;
   }
 
@@ -251,7 +243,7 @@ objid createManipulator(){
 bool selectItemCalled = false;
 bool shouldCallItemSelected = false;
 bool mappingClickCalled = false;
-void selectItem(objid selectedId, int layerSelectIndex, int groupId, bool* canPaint){
+void selectItem(objid selectedId, int layerSelectIndex, int groupId){
   std::cout << "SELECT ITEM CALLED!" << std::endl;
   modlog("selection", (std::string("select item called") + ", selectedId = " + std::to_string(selectedId) + ", layerSelectIndex = " + std::to_string(layerSelectIndex)).c_str());
   if (!showCursor || disableInput){
@@ -267,7 +259,7 @@ void selectItem(objid selectedId, int layerSelectIndex, int groupId, bool* canPa
   if (idToUse == getManipulatorId(state.manipulatorState)){
     return;
   }
-  applyPainting(selectedId, canPaint);
+  textureToPaint = textureForId(world, selectedId);
   applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);
   shouldCallItemSelected = true;
 
@@ -1563,8 +1555,6 @@ int main(int argc, char* argv[]){
   float speedMultiplier = result["fps-speed"].as<int>() / 1000.f;
   std::cout << "speed multiplier: "  << speedMultiplier << std::endl;
 
-  bool canPaint = false;
-
   assert(!hasFramelimit || !fpsFixed);
   assert(fpsLag < 0 || !fpsFixed);
   assert(!hasFramelimit || speedMultiplier == 1000);
@@ -1709,7 +1699,7 @@ int main(int argc, char* argv[]){
         auto layerSelectThreeCond = layerSelectIndex == -3 && mappingClickCalled;
         std::cout << "cond1 = " << (layerSelectNegOne ? "true" : "false") << ", condtwo = " << (layerSelectThreeCond ? "true" : "false") << ", selectindex " << layerSelectIndex << ", mapping = " << mappingClickCalled << std::endl;
         if (!(layerSelectNegOne || layerSelectThreeCond) && !state.selectionDisabled){
-          selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId), &canPaint);
+          selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId));
         }
       }else{
         std::cout << "INFO: select item called -> id not in scene! - " << selectTargetId<< std::endl;
@@ -1821,7 +1811,7 @@ int main(int argc, char* argv[]){
     glEnable(GL_BLEND);
     /////////////////////
 
-    handlePaintingModifiesViewport(uvCoord, canPaint);
+    handlePaintingModifiesViewport(uvCoord);
 
 
     glViewport(0, 0, state.resolution.x, state.resolution.y);
