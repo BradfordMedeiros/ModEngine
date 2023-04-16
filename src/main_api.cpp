@@ -1100,6 +1100,8 @@ void tickScheduledTasks(){
 
 
 // probably belong in a new file main_util
+/////////////////////////////////////////////////////
+
 objid createManipulator(){
   GameobjAttributes manipulatorAttr {
       .stringAttributes = {
@@ -1153,3 +1155,37 @@ LayerInfo getLayerForId(objid id){
   return layerByName(getGameObject(world, id).layer);
 }
 
+
+struct ExtractSuffix {
+  std::string suffix;
+  std::string rest;
+};
+ExtractSuffix extractSuffix(std::string& value, char delimeter){
+  auto tagSplit = split(value, delimeter);
+  auto tagRest = tagSplit.size() > 1 ? join(subvector(tagSplit, 0, tagSplit.size() - 1), delimeter) : value;
+  auto tagPart = tagSplit.size() > 1 ? tagSplit.at(tagSplit.size() -1) : "";
+  return ExtractSuffix {
+    .suffix = tagPart,
+    .rest = tagRest,
+  };
+}
+std::vector<ParsedLoadScene> parseSceneArgs(std::vector<std::string>& rawScenes){
+  std::vector<ParsedLoadScene> parsedScenes;
+  for (auto rawScene : rawScenes){
+    // :scenename
+    // =tag1,tag2,tag3 
+    auto tagExtract = extractSuffix(rawScene, '=');
+    auto tags = split(tagExtract.suffix, '.');
+    auto scenenameExtract = extractSuffix(tagExtract.rest, ':');
+    std::optional<std::string> sceneFileName = scenenameExtract.suffix.size() > 0 ? std::optional<std::string>(scenenameExtract.suffix) : std::nullopt;
+    auto sceneToLoad = scenenameExtract.rest;
+  
+    ParsedLoadScene parsedScene {
+      .sceneToLoad = sceneToLoad,
+      .sceneFileName = sceneFileName,
+      .tags = tags,
+    };
+    parsedScenes.push_back(parsedScene);
+  }
+  return parsedScenes;
+}
