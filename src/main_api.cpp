@@ -15,7 +15,6 @@ extern std::queue<StringAttribute> channelMessages;
 extern float now;
 extern float deltaTime;
 
-extern std::string rawSceneFile;
 extern bool bootStrapperMode;
 extern NetCode netcode;
 extern DrawingParams drawParams;

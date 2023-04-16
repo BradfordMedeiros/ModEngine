@@ -37,8 +37,6 @@ std::string shaderFolderPath;
 
 bool disableInput = false;
 int numChunkingGridCells = 0;
-bool useChunkingSystem = false;
-std::string rawSceneFile;
 bool bootStrapperMode = false;
 NetCode netcode { };
 
@@ -46,17 +44,18 @@ engineState state = getDefaultState(1920, 1080);
 
 World world;
 RenderStages renderStages;
+
 DefaultMeshes defaultMeshes;  
+std::vector<FontFamily> fontFamily;
 Mesh* crosshairSprite;
 
 SysInterface interface;
+KeyRemapper keyMapper;
 float now = 0;
 float deltaTime = 0.0f; // Time between current frame and last frame
 int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
 
 DynamicLoading dynamicLoading;
-
-std::vector<FontFamily> fontFamily;
 
 glm::mat4 view;
 unsigned int framebufferTexture;
@@ -76,7 +75,6 @@ glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);
 CScriptBindingCallbacks cBindings;
 
 std::queue<StringAttribute> channelMessages;
-KeyRemapper keyMapper;
 extern std::vector<InputDispatch> inputFns;
 
 std::map<std::string, objid> activeLocks;
@@ -993,7 +991,7 @@ int main(int argc, char* argv[]){
   numChunkingGridCells = result["grid"].as<int>();
 
   std::string worldfile = result["world"].as<std::string>();
-  useChunkingSystem = worldfile != "";
+  bool useChunkingSystem = worldfile != "";
 
   auto parsedArgs = result["args"].as<std::vector<std::string>>();
   for (auto arg : parsedArgs){
@@ -1050,9 +1048,7 @@ int main(int argc, char* argv[]){
   }
 
   auto layers = parseLayerInfo(result["layers"].as<std::string>(), interface.readFile);
-
   auto rawScenes = result["rawscene"].as<std::vector<std::string>>();
-  rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";
 
   keyMapper = readMapping(result["mapping"].as<std::string>(), inputFns, interface.readFile);
 
