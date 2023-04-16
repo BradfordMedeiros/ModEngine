@@ -1,10 +1,10 @@
 #ifndef MOD_LINES
 #define MOD_LINES
 
-#include "./scene/sprites/sprites.h"
-#include "./colorselection.h"
 #include <glad/glad.h>
 #include "glm/ext.hpp"
+#include "./scene/sprites/sprites.h"
+#include "./colorselection.h"
 
 struct LineDrawingOptions {
   Line line;

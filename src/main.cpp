@@ -50,7 +50,6 @@ DefaultMeshes defaultMeshes;
 Mesh* crosshairSprite;
 
 SysInterface interface;
-std::string textureFolderPath;
 float now = 0;
 float deltaTime = 0.0f; // Time between current frame and last frame
 int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
@@ -108,7 +107,6 @@ TimePlayback timePlayback(
 ); 
 
 std::string sqlDirectory = "./res/data/sql/";
-
 std::optional<Texture> textureToPaint = std::optional<Texture>(std::nullopt);
 
 
@@ -259,7 +257,8 @@ void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2)
 
 // This is wasteful, as obviously I shouldn't be loading in all the textures on load, but ok for now. 
 // This shoiuld really just be creating a list of names, and then the cycle above should cycle between possible textures to load, instead of what is loaded 
-void loadAllTextures(){
+void loadAllTextures(std::string& textureFolderPath){
+  loadTextureWorld(world, "./res/models/box/grid.png", -1);
   for (auto texturePath : listFilesWithExtensions(textureFolderPath, { "png", "jpg" })){
     loadTextureWorld(world, texturePath, -1);
   }
@@ -382,7 +381,6 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
   glUniform3fv(glGetUniformLocation(shader, "ambientAmount"), 1, glm::value_ptr(glm::vec3(state.ambient)));
   glUniform1f(glGetUniformLocation(shader, "bloomThreshold"),  state.bloomThreshold);
-
 
   setRenderUniformData(shader, uniforms);
 }
@@ -595,12 +593,6 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
 
-float offsetPerLineMargin = 0.02f;
-float fontOffsetPerLine(float fontsize){
-  // 1000.f => 2.f height, width
-  return -1 * (fontsize / 500.f + offsetPerLineMargin);
-}
-
 void renderUI(Mesh* crosshairSprite, Color pixelColor, bool showCursor){
   glUseProgram(uiShaderProgram);
   glEnable(GL_BLEND);
@@ -618,8 +610,8 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor, bool showCursor){
     return;
   }
 
-
-  float offsetPerLine = fontOffsetPerLine(state.fontsize);
+  const float offsetPerLineMargin = 0.02f;
+  float offsetPerLine = -1 * (state.fontsize / 500.f + offsetPerLineMargin);
   float uiYOffset = (1.f + 3 * offsetPerLine) + state.infoTextOffset.y;
   float uiXOffset = (-1.f - offsetPerLine) + state.infoTextOffset.x;
   
@@ -1072,7 +1064,7 @@ int main(int argc, char* argv[]){
   bootStrapperMode = result["bootstrapper"].as<bool>();
 
   shaderFolderPath = result["shader"].as<std::string>();
-  textureFolderPath = result["texture"].as<std::string>();
+  auto textureFolderPath = result["texture"].as<std::string>();
   const std::string framebufferShaderPath = "./res/shaders/framebuffer";
   const std::string uiShaderPath = result["uishader"].as<std::string>();
   showDebugInfo = result["info"].as<bool>();
@@ -1444,8 +1436,7 @@ int main(int argc, char* argv[]){
     .defaultCrosshairSprite = &world.meshes.at("./res/textures/crosshairs/crosshair008.png").mesh,
   };
 
-  loadAllTextures();
-  loadTextureWorld(world, "./res/models/box/grid.png", -1);
+  loadAllTextures(textureFolderPath);
 
   GLFWimage images[1]; 
   images[0].pixels = stbi_load(state.iconpath.c_str(), &images[0].width, &images[0].height, 0, 4); //rgba channels 
@@ -1545,7 +1536,6 @@ int main(int argc, char* argv[]){
     registerStat(numObjectsStat, numObjects);
     registerStat(scenesLoadedStat, getNumberScenesLoaded(world.sandbox));
     logBenchmarkTick(benchmark, deltaTime, numObjects, numTriangles);
-
 
     if (frameCount == 60){
       frameCount = 0;
