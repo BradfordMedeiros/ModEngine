@@ -209,37 +209,6 @@ void handleTerrainPainting(UVCoord uvCoord, objid hoveredId){
   }
 }
 
-
-ManipulatorSelection onManipulatorSelected(){
-  std::vector<objid> ids;
-  for (auto &id : selectedIds(state.editor)){
-    if (getLayerForId(id).selectIndex != -2){
-      ids.push_back(id);
-    }
-  }
-  return ManipulatorSelection {
-    .mainObj = ids.size() > 0 ? std::optional<objid>(ids.at(ids.size() - 1)) : std::optional<objid>(std::nullopt),
-    .selectedIds = ids,
-  }; 
-}
-
-objid createManipulator(){
-  GameobjAttributes manipulatorAttr {
-      .stringAttributes = {
-        {"mesh", "./res/models/ui/manipulator.gltf" }, 
-        {"layer", "scale" },
-      },
-      .numAttributes = {},
-      .vecAttr = { .vec3 = {}, .vec4 = {} },
-  };
-  std::map<std::string, GameobjAttributes> submodelAttributes = {
-    {"manipulator/xaxis", { GameobjAttributes { .vecAttr = { .vec4 = {{ "tint", glm::vec4(1.f, 1.f, 0.f, 0.8f) }} }}}},
-    {"manipulator/yaxis", { GameobjAttributes { .vecAttr = { .vec4 = {{ "tint", glm::vec4(1.f, 0.f, 1.f, 0.8f) }} }}}},
-    {"manipulator/zaxis", { GameobjAttributes { .vecAttr = { .vec4 = {{ "tint", glm::vec4(0.f, 0.f, 1.f, 0.8f) }} }}}},
-  };
-  return makeObjectAttr(0, "manipulator", manipulatorAttr, submodelAttributes).value();
-}
-
 bool selectItemCalled = false;
 bool shouldCallItemSelected = false;
 bool mappingClickCalled = false;
@@ -933,10 +902,6 @@ objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid
   return addLineToNextCycle(lineData, fromPos, toPos, permaline, owner, GREEN, std::nullopt);
 }
 
-void freeLine(objid lineId){
-  freeLine(lineData, lineId);
-}
-
 void onGLFWEerror(int error, const char* description){
   std::cerr << "Error: " << description << std::endl;
 }
@@ -1299,7 +1264,7 @@ int main(int argc, char* argv[]){
     .drawText = drawText,
     .drawRect = drawRect,
     .drawLine = addLineNextCycle,
-    .freeLine = freeLine,
+    .freeLine = [](objid lineId) -> void { freeLine(lineData, lineId); } ,
     .getGameObjNameForId = getGameObjectName,
     .getGameObjectAttr = getGameObjectAttr,
     .setGameObjectAttr = setGameObjectAttr,

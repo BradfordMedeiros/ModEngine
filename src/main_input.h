@@ -26,10 +26,6 @@ struct JoyStickInfo {
 std::string dumpDebugInfo(bool fullInfo = true);
 void debugInfo(std::string infoType, std::string filepath);
 
-glm::mat4 projectionFromLayer(LayerInfo& layer);
-LayerInfo layerByName(std::string layername);
-LayerInfo getLayerForId(objid id);
-
 glm::vec2 ndiCoord();
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos);
 void onMouseEventsUpdate();
