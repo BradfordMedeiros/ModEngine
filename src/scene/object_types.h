@@ -216,6 +216,7 @@ struct DefaultMeshes {
   Mesh* emitter;
   Mesh* nav;
   Mesh* defaultCrosshairSprite;
+  Mesh* crosshairSprite;
 };
 
 int renderObject(

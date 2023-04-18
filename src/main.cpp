@@ -45,55 +45,49 @@ RenderStages renderStages;
 
 DefaultMeshes defaultMeshes;  
 std::vector<FontFamily> fontFamily;
-Mesh* crosshairSprite;
 
 SysInterface interface;
 KeyRemapper keyMapper;
+CScriptBindingCallbacks cBindings;
+
+float initialTime = 0;
 float now = 0;
 float deltaTime = 0.0f; // Time between current frame and last frame
 int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
 
 DynamicLoading dynamicLoading;
 
-glm::mat4 view;
 unsigned int framebufferTexture;
 unsigned int framebufferTexture2;
 unsigned int framebufferTexture3;
 unsigned int fbo;
+const int numPortalTextures = 16;
+unsigned int portalTextures[16];
+const int numDepthTextures = 32;
 unsigned int depthTextures[32];
 unsigned int textureDepthTextures[1];
 
-const int numPortalTextures = 16;
-unsigned int portalTextures[16];
 std::map<objid, unsigned int> portalIdCache;
-
 std::optional<Texture> textureToPaint = std::optional<Texture>(std::nullopt);
+int activeDepthTexture = 0; // 0th depth texture is the main depth texture used for eg z buffer other buffers are for the lights
 
-// 0th depth texture is the main depth texture used for eg z buffer
-// other buffers are for the lights
-const int numDepthTextures = 32;
-int activeDepthTexture = 0;
-
+glm::mat4 view;
 glm::mat4 orthoProj;
 const glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);  
 
-CScriptBindingCallbacks cBindings;
 
 std::queue<StringAttribute> channelMessages;
 extern std::vector<InputDispatch> inputFns;
-
 std::map<std::string, objid> activeLocks;
-
 LineData lineData = createLines();
 
 auto fpsStat = statName("fps");
 auto numObjectsStat = statName("object-count");
 auto scenesLoadedStat = statName("scenes-loaded");
 
+std::map<std::string, std::string> args;
 DrawingParams drawParams = getDefaultDrawingParams();
 Benchmark benchmark;
-
-float initialTime = 0;
 WorldTiming timings;
 
 TimePlayback timePlayback(
@@ -105,7 +99,6 @@ TimePlayback timePlayback(
 ); 
 
 std::string sqlDirectory = "./res/data/sql/";
-std::map<std::string, std::string> args;
 
 void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId, bool blend){
   auto texSize = getTextureSizeInfo(texture);
@@ -1382,14 +1375,7 @@ int main(int argc, char* argv[]){
     allTexturesToLoad
   );
 
-  auto fontPaths = result["font"].as<std::vector<std::string>>();
-  std::cout << "INFO: FONT: loading font paths (" << fontPaths.size() <<") - " << print(fontPaths) << std::endl;
-
    // this texture used for default textures, could make font mesh texture optional or something
-  fontFamily = loadFontMeshes(readFontFile(fontPaths), world.textures.at("./res/textures/wood.jpg").texture);
-
-  setCrosshairSprite();  // needs to be after create world since depends on these meshes being loaded
-
   if (state.skybox != ""){
     loadSkybox(world, state.skybox); 
   }
@@ -1413,7 +1399,13 @@ int main(int argc, char* argv[]){
     .emitter = &world.meshes.at("../gameresources/build/objtypes/emitter.gltf").mesh,
     .nav = &world.meshes.at("./res/models/ui/node.obj").mesh,
     .defaultCrosshairSprite = &world.meshes.at("./res/textures/crosshairs/crosshair008.png").mesh,
+    .crosshairSprite = NULL,
   };
+
+  auto fontPaths = result["font"].as<std::vector<std::string>>();
+  std::cout << "INFO: FONT: loading font paths (" << fontPaths.size() <<") - " << print(fontPaths) << std::endl;
+  fontFamily = loadFontMeshes(readFontFile(fontPaths), world.textures.at("./res/textures/wood.jpg").texture);
+  setCrosshairSprite();  // needs to be after create world since depends on these meshes being loaded
 
   loadAllTextures(textureFolderPath);
 
@@ -1888,8 +1880,8 @@ int main(int argc, char* argv[]){
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
     Mesh* effectiveCrosshair = defaultMeshes.defaultCrosshairSprite;
-    if (crosshairSprite != NULL){
-      effectiveCrosshair = crosshairSprite;
+    if (defaultMeshes.crosshairSprite != NULL){
+      effectiveCrosshair = defaultMeshes.crosshairSprite;
     }
     renderUI(effectiveCrosshair, pixelColor, showCursor);
     drawShapeData(lineData, uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultMeshes.unitXYRect);

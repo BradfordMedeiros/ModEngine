@@ -7,7 +7,7 @@ extern WorldTiming timings;
 extern engineState state;
 extern GameObject defaultCamera;
 extern std::vector<FontFamily> fontFamily;
-extern Mesh* crosshairSprite;
+extern DefaultMeshes defaultMeshes;
 extern unsigned int uiShaderProgram;
 extern float initialTime;
 extern std::queue<StringAttribute> channelMessages;
@@ -611,10 +611,10 @@ void setState(std::string stateName){
 
 void  setCrosshairSprite(){
   if (state.crosshair == ""){
-    crosshairSprite = NULL;
+    defaultMeshes.crosshairSprite = NULL;
     return;
   }
-  crosshairSprite = &world.meshes.at(state.crosshair).mesh;
+  defaultMeshes.crosshairSprite = &world.meshes.at(state.crosshair).mesh;
 }
 
 void windowPositionCallback(GLFWwindow* window, int xpos, int ypos){
