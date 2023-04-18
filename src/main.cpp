@@ -32,11 +32,9 @@ GameObject defaultCamera = GameObject {
 };
 
 bool showDebugInfo = false;
-bool showCursor = false;
 std::string shaderFolderPath;
 
 bool disableInput = false;
-int numChunkingGridCells = 0;
 bool bootStrapperMode = false;
 NetCode netcode { };
 
@@ -69,8 +67,15 @@ const int numPortalTextures = 16;
 unsigned int portalTextures[16];
 std::map<objid, unsigned int> portalIdCache;
 
+std::optional<Texture> textureToPaint = std::optional<Texture>(std::nullopt);
+
+// 0th depth texture is the main depth texture used for eg z buffer
+// other buffers are for the lights
+const int numDepthTextures = 32;
+int activeDepthTexture = 0;
+
 glm::mat4 orthoProj;
-glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);  
+const glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);  
 
 CScriptBindingCallbacks cBindings;
 
@@ -84,11 +89,6 @@ LineData lineData = createLines();
 auto fpsStat = statName("fps");
 auto numObjectsStat = statName("object-count");
 auto scenesLoadedStat = statName("scenes-loaded");
-
-// 0th depth texture is the main depth texture used for eg z buffer
-// other buffers are for the lights
-const int numDepthTextures = 32;
-int activeDepthTexture = 0;
 
 DrawingParams drawParams = getDefaultDrawingParams();
 Benchmark benchmark;
@@ -105,8 +105,7 @@ TimePlayback timePlayback(
 ); 
 
 std::string sqlDirectory = "./res/data/sql/";
-std::optional<Texture> textureToPaint = std::optional<Texture>(std::nullopt);
-
+std::map<std::string, std::string> args;
 
 void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId, bool blend){
   auto texSize = getTextureSizeInfo(texture);
@@ -206,13 +205,12 @@ void handleTerrainPainting(UVCoord uvCoord, objid hoveredId){
 }
 
 bool selectItemCalled = false;
-bool shouldCallItemSelected = false;
-bool mappingClickCalled = false;
-void selectItem(objid selectedId, int layerSelectIndex, int groupId){
+bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCursor){
   std::cout << "SELECT ITEM CALLED!" << std::endl;
+  bool shouldCallBindingOnObjectSelected = false;
   modlog("selection", (std::string("select item called") + ", selectedId = " + std::to_string(selectedId) + ", layerSelectIndex = " + std::to_string(layerSelectIndex)).c_str());
   if (!showCursor || disableInput){
-    return;
+    return shouldCallBindingOnObjectSelected;
   }
   auto idToUse = state.groupSelection ? groupId : selectedId;
   auto selectedSubObj = getGameObject(world, selectedId);
@@ -222,17 +220,18 @@ void selectItem(objid selectedId, int layerSelectIndex, int groupId){
     onManipulatorSelectItem(state.manipulatorState, idToUse, selectedSubObj.name);
   }
   if (idToUse == getManipulatorId(state.manipulatorState)){
-    return;
+    return shouldCallBindingOnObjectSelected;
   }
   textureToPaint = textureForId(world, selectedId);
   applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);
-  shouldCallItemSelected = true;
+  shouldCallBindingOnObjectSelected = true;
 
   if (layerSelectIndex >= 0){
     setSelectedIndex(state.editor, idToUse, selectedObject.name, !state.multiselect);
     state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";  
   }
   setActiveObj(state.editor, idToUse);
+  return shouldCallBindingOnObjectSelected;
 }
 
 
@@ -512,7 +511,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   return numTriangles;
 }
 
-void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
+void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model, int numChunkingGridCells){
   auto projection = projectionFromLayer(world.sandbox.layers.at(0));
   glUseProgram(shaderProgram);
   glEnable(GL_DEPTH_TEST);
@@ -615,7 +614,8 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor, bool showCursor){
   
   auto currentFramerate = static_cast<int>(unwrapAttr<float>(statValue(fpsStat)));
   //std::cout << "offsets: " << uiXOffset << " " << uiYOffset << std::endl;
-  drawTextNdi(std::to_string(currentFramerate) + state.additionalText, uiXOffset, uiYOffset + offsetPerLine, state.fontsize + 1);
+  std::string additionalText =  "     <" + std::to_string((int)(255 * state.hoveredItemColor.r)) + ","  + std::to_string((int)(255 * state.hoveredItemColor.g)) + " , " + std::to_string((int)(255 * state.hoveredItemColor.b)) + ">  " + " --- " + state.selectedName;
+  drawTextNdi(std::to_string(currentFramerate) + additionalText, uiXOffset, uiYOffset + offsetPerLine, state.fontsize + 1);
 
   std::string manipulatorAxisString;
   if (state.manipulatorAxis == XAXIS){
@@ -689,20 +689,12 @@ void onObjDelete(objid id){
   removeScheduledTaskByOwner({ id });
 }
 
-std::map<std::string, std::string> args;
-
-
 float exposureAmount(){
   float elapsed = now - state.exposureStart;
   float amount = elapsed / 1.f;   
   float exposureA = glm::clamp(amount, 0.f, 1.f);
   float effectiveExposure = glm::mix(state.oldExposure, state.targetExposure, exposureA);
   return effectiveExposure;
-}
-
-float getViewspaceDepth(glm::mat4& transView, objid elementId){
-  auto viewPosition = transView * fullModelTransform(world.sandbox, elementId);
-  return getTransformationFromMatrix(viewPosition).position.z;
 }
 
 struct RenderContext {
@@ -714,7 +706,6 @@ struct RenderContext {
   Transformation cameraTransform;
   std::optional<glm::mat4> projection;
 };
-
 
 int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   int triangles = 0;
@@ -841,6 +832,11 @@ std::vector<glm::mat4> renderShadowMaps(RenderContext& context){
     renderWithProgram(lightRenderContext, renderStages.shadowmap);
   }
   return lightMatrixs;
+}
+
+float getViewspaceDepth(glm::mat4& transView, objid elementId){
+  auto viewPosition = transView * fullModelTransform(world.sandbox, elementId);
+  return getTransformationFromMatrix(viewPosition).position.z;
 }
 
 RenderStagesDofInfo getDofInfo(bool* _shouldRender){
@@ -988,7 +984,7 @@ int main(int argc, char* argv[]){
 
   bool dumpPhysics = result["dumpphysics"].as<bool>();
   bool headlessmode = result["headlessmode"].as<bool>();
-  numChunkingGridCells = result["grid"].as<int>();
+  int numChunkingGridCells = result["grid"].as<int>();
 
   std::string worldfile = result["world"].as<std::string>();
   bool useChunkingSystem = worldfile != "";
@@ -1011,23 +1007,12 @@ int main(int argc, char* argv[]){
     return loopSqlShell(sqlDirectory);
   }
 
+  bool mappingClickCalled = false;
+
 
   interface = SysInterface {
     .loadCScript = [](std::string script, objid id, objid sceneId) -> void {
-      //    .onCreateCustomElement = createCustomObj,
-      /*  if (script == "native/basic_test"){
-     return;
-       }
-      auto name = getGameObject(world, id).name;
-      std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
-     loadScript(script, id, sceneId, bootStrapperMode, false /*freescript*/ ;
       loadCScript(id, script.c_str(), sceneId, bootStrapperMode, false);
-      /*  /*if (script == "native/basic_test"){
-        return;
-      }
-       auto name = getGameObject(world, id).name;
-      std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
-      loadScript(script, id, sceneId, bootStrapperMode, false);*/
     },
     .unloadCScript = [](std::string scriptpath, objid id) -> void {
       unloadCScript(id);
@@ -1064,7 +1049,7 @@ int main(int argc, char* argv[]){
   const std::string framebufferShaderPath = "./res/shaders/framebuffer";
   const std::string uiShaderPath = result["uishader"].as<std::string>();
   showDebugInfo = result["info"].as<bool>();
-  showCursor = result["cursor"].as<bool>();
+  bool showCursor = result["cursor"].as<bool>();
   
   auto benchmarkFile = result["benchmark"].as<std::string>();
   auto shouldBenchmark = benchmarkFile != "";
@@ -1341,11 +1326,9 @@ int main(int argc, char* argv[]){
   BulletDebugDrawer drawer(addLineNextCycle);
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
 
-
   if(bootStrapperMode){
     netcode = initNetCode(cBindings.onPlayerJoined, cBindings.onPlayerLeave, interface.readFile);
   }
-
 
   std::vector<std::string> defaultMeshesToLoad {
     "./res/models/ui/node.obj",
@@ -1609,7 +1592,7 @@ int main(int argc, char* argv[]){
     state.hoveredIdInScene = idExists(world.sandbox, hoveredId);
     state.lastHoverIndex = state.currentHoverIndex;
     state.currentHoverIndex = hoveredId;
-    state.additionalText = "     <" + std::to_string((int)(255 * hoveredItemColor.r)) + ","  + std::to_string((int)(255 * hoveredItemColor.g)) + " , " + std::to_string((int)(255 * hoveredItemColor.b)) + ">  " + " --- " + state.selectedName;
+    state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b);
 
     bool selectItemCalledThisFrame = selectItemCalled;
 
@@ -1617,6 +1600,7 @@ int main(int argc, char* argv[]){
     auto shouldSelectItem = selectItemCalled || (state.editor.forceSelectIndex != 0);
     state.editor.forceSelectIndex = 0;
 
+    bool shouldCallBindingOnObjectSelected = false;
     if ((selectTargetId != getManipulatorId(state.manipulatorState)) && shouldSelectItem && !state.shouldTerrainPaint){
       std::cout << "INFO: select item called" << std::endl;
 
@@ -1629,7 +1613,7 @@ int main(int argc, char* argv[]){
         auto layerSelectThreeCond = layerSelectIndex == -3 && mappingClickCalled;
         std::cout << "cond1 = " << (layerSelectNegOne ? "true" : "false") << ", condtwo = " << (layerSelectThreeCond ? "true" : "false") << ", selectindex " << layerSelectIndex << ", mapping = " << mappingClickCalled << std::endl;
         if (!(layerSelectNegOne || layerSelectThreeCond) && !state.selectionDisabled){
-          selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId));
+          shouldCallBindingOnObjectSelected = selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId), showCursor);
         }
       }else{
         std::cout << "INFO: select item called -> id not in scene! - " << selectTargetId<< std::endl;
@@ -1774,11 +1758,10 @@ int main(int argc, char* argv[]){
       /////////////////
 
     Color pixelColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
-    if (shouldCallItemSelected){
+    if (shouldCallBindingOnObjectSelected){
       auto id = state.groupSelection ? getGroupId(world.sandbox, selectTargetId) : selectTargetId;
       modassert(idExists(world.sandbox, id), "id does not exist for objectSelected");
       cBindings.onObjectSelected(id, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
-      shouldCallItemSelected = false;
     }
 
     if (state.lastHoverIndex != state.currentHoverIndex){
@@ -1804,7 +1787,7 @@ int main(int argc, char* argv[]){
       cBindings.onMessage(message.strTopic, message.strValue);
     }
 
-    renderVector(shaderProgram, view, glm::mat4(1.0f));
+    renderVector(shaderProgram, view, glm::mat4(1.0f), numChunkingGridCells);
     portalIdCache.clear();
  
 

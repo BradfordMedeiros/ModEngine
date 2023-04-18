@@ -39,6 +39,7 @@ struct engineState {
   int32_t lastHoverIndex;
   bool hoveredIdInScene;
   bool lastHoveredIdInScene;
+  glm::vec3 hoveredItemColor;
 
   unsigned int activeCamera;
   CamInterpolation cameraInterp;
