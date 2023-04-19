@@ -314,10 +314,10 @@ std::vector<ObjectStateMapping> mapping = {
       if (selectedIndexStr != NULL){
         int index =  std::atoi(selectedIndexStr -> c_str());
         std::cout << "selected index: " << index << std::endl;
-        state.editor.forceSelectIndex = index;
+        state.forceSelectIndex = index;
       }
     },
-    .getAttr = [](engineState& state) -> AttributeValue { return serializeFloat(state.editor.forceSelectIndex); },
+    .getAttr = [](engineState& state) -> AttributeValue { return serializeFloat(state.forceSelectIndex); },
     .object = "editor",
     .attribute = "selected-index",
   },
@@ -417,7 +417,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .screenshotPath = "",
     .highlight = true,
     .multiselect = false,
-    .editor = EditorContent{ .forceSelectIndex = 0, .activeObj = 0 },
+    .editor = EditorContent{ .activeObj = 0 },
     .isRecording = false,
     .recordingIndex = -1,
     .renderMode = RENDER_FINAL,
@@ -455,6 +455,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .worldpaused = false,
     .infoTextOffset = glm::ivec2(0, 0),
     .useYAxis = true,
+    .forceSelectIndex = 0,
 	};
 	return state;
 }

@@ -23,6 +23,7 @@ DefaultResources defaultResources {};
 
 bool showDebugInfo = false;
 std::string shaderFolderPath;
+std::string sqlDirectory = "./res/data/sql/";
 
 bool disableInput = false;
 bool bootStrapperMode = false;
@@ -36,11 +37,6 @@ SysInterface interface;
 KeyRemapper keyMapper;
 CScriptBindingCallbacks cBindings;
 
-float initialTime = 0;
-float now = 0;
-float deltaTime = 0.0f; // Time between current frame and last frame
-int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
-
 unsigned int framebufferTexture;
 unsigned int framebufferTexture2;
 unsigned int framebufferTexture3;
@@ -50,6 +46,12 @@ unsigned int portalTextures[16];
 const int numDepthTextures = 32;
 unsigned int depthTextures[32];
 unsigned int textureDepthTextures[1];
+
+float initialTime = 0;
+float now = 0;
+float deltaTime = 0.0f; // Time between current frame and last frame
+int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
+bool selectItemCalled = false;
 
 std::map<objid, unsigned int> portalIdCache;
 std::optional<Texture> textureToPaint = std::optional<Texture>(std::nullopt);
@@ -82,7 +84,6 @@ TimePlayback timePlayback(
   []() -> void {}
 ); 
 
-std::string sqlDirectory = "./res/data/sql/";
 
 void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId, bool blend){
   auto texSize = getTextureSizeInfo(texture);
@@ -181,7 +182,6 @@ void handleTerrainPainting(UVCoord uvCoord, objid hoveredId){
   }
 }
 
-bool selectItemCalled = false;
 bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCursor){
   std::cout << "SELECT ITEM CALLED!" << std::endl;
   bool shouldCallBindingOnObjectSelected = false;
@@ -514,7 +514,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model, int numC
   if (showDebugInfo){
     drawCoordinateSystem(100.f);
     glDisable(GL_DEPTH_TEST);
-    drawTraversalPositions(lineData);   
+    //drawTraversalPositions(lineData);   
     drawAllLines(lineData, shaderProgram, std::nullopt);
   }
 
@@ -629,13 +629,6 @@ void signalHandler(int signum) {
     printBacktrace();
   }
   exit(signum);  
-}
-
-void onObjDelete(objid id){
- std::cout << "deleted obj id: " << id << std::endl;
-  maybeResetCamera(id);
-  unsetSelectedIndex(state.editor, id, true);
-  removeScheduledTaskByOwner({ id });
 }
 
 float exposureAmount(){
@@ -1317,7 +1310,10 @@ int main(int argc, char* argv[]){
       cBindings.onObjectAdded(obj.id);
     },
     [](objid id, bool isNet) -> void {
-      onObjDelete(id);
+      std::cout << "deleted obj id: " << id << std::endl;
+      maybeResetCamera(id);
+      unsetSelectedIndex(state.editor, id, true);
+      removeScheduledTaskByOwner({ id });
       netObjectDelete(id, isNet, netcode, bootStrapperMode);
       cBindings.onObjectRemoved(id);
       freeTexture(id);
@@ -1547,17 +1543,37 @@ int main(int argc, char* argv[]){
     Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     auto hoveredId = getIdFromColor(hoveredItemColor);
 
-    state.lastHoveredIdInScene = state.hoveredIdInScene;
-    state.hoveredIdInScene = idExists(world.sandbox, hoveredId);
-    state.lastHoverIndex = state.currentHoverIndex;
-    state.currentHoverIndex = hoveredId;
-    state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b);
+    state.lastHoveredIdInScene = state.hoveredIdInScene;  // stateupdate
+    state.hoveredIdInScene = idExists(world.sandbox, hoveredId);   // stateupdate
+    state.lastHoverIndex = state.currentHoverIndex; // stateupdate
+    state.currentHoverIndex = hoveredId; // stateupdate
+    state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate
+
+    std::string cursorForLayer("./res/textures/crosshairs/crosshair008.png");
+    if (state.hoveredIdInScene){
+      auto hoveredLayer = getLayerForId(hoveredId);
+      if (hoveredLayer.cursor != ""){
+        cursorForLayer = hoveredLayer.cursor;
+      }
+    }
+    if (cursorForLayer == "none"){
+      defaultResources.defaultMeshes.defaultCrosshairSprite = NULL;
+    }else{
+      defaultResources.defaultMeshes.defaultCrosshairSprite = &world.meshes.at(cursorForLayer).mesh;
+    }
+        // stateupdate
+    Mesh* effectiveCrosshair = defaultResources.defaultMeshes.defaultCrosshairSprite;
+    if (defaultResources.defaultMeshes.crosshairSprite != NULL){
+      effectiveCrosshair = defaultResources.defaultMeshes.crosshairSprite;
+    }
+
 
     bool selectItemCalledThisFrame = selectItemCalled;
+    selectItemCalled = false;  // reset the state
 
-    auto selectTargetId = state.editor.forceSelectIndex == 0 ? hoveredId : state.editor.forceSelectIndex;
-    auto shouldSelectItem = selectItemCalled || (state.editor.forceSelectIndex != 0);
-    state.editor.forceSelectIndex = 0;
+    auto selectTargetId = state.forceSelectIndex == 0 ? hoveredId : state.forceSelectIndex;
+    auto shouldSelectItem = selectItemCalledThisFrame || (state.forceSelectIndex != 0);
+    state.forceSelectIndex = 0; // stateupdate
 
     bool shouldCallBindingOnObjectSelected = false;
     if ((selectTargetId != getManipulatorId(state.manipulatorState)) && shouldSelectItem && !state.shouldTerrainPaint){
@@ -1578,8 +1594,8 @@ int main(int argc, char* argv[]){
         std::cout << "INFO: select item called -> id not in scene! - " << selectTargetId<< std::endl;
         cBindings.onObjectUnselected();
       }
-      selectItemCalled = false;
     }
+
     auto ndiCoords = ndiCoord();
     if (state.editor.activeObj != 0){
       applyUICoord(
@@ -1618,18 +1634,6 @@ int main(int argc, char* argv[]){
       );
     }
 
-    std::string cursorForLayer("./res/textures/crosshairs/crosshair008.png");
-    if (state.hoveredIdInScene){
-      auto hoveredLayer = getLayerForId(hoveredId);
-      if (hoveredLayer.cursor != ""){
-        cursorForLayer = hoveredLayer.cursor;
-      }
-    }
-    if (cursorForLayer == "none"){
-      defaultResources.defaultMeshes.defaultCrosshairSprite = NULL;
-    }else{
-      defaultResources.defaultMeshes.defaultCrosshairSprite = &world.meshes.at(cursorForLayer).mesh;
-    }
 
     onManipulatorUpdate(
       state.manipulatorState, 
@@ -1723,7 +1727,7 @@ int main(int argc, char* argv[]){
       cBindings.onObjectSelected(id, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
     }
 
-    if (state.lastHoverIndex != state.currentHoverIndex){
+    if (state.lastHoverIndex != state.currentHoverIndex){  
       if (idExists(world.sandbox, state.lastHoverIndex)){
         cBindings.onObjectHover(state.lastHoverIndex, false);
       }
@@ -1732,8 +1736,8 @@ int main(int argc, char* argv[]){
       }
     }
 
-    handleInput(window);
-    glfwPollEvents();
+    handleInput(window);  // stateupdate
+    glfwPollEvents();     // stateupdate
     
     cBindings.onFrame();
     while (!channelMessages.empty()){
@@ -1846,10 +1850,6 @@ int main(int argc, char* argv[]){
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
-    Mesh* effectiveCrosshair = defaultResources.defaultMeshes.defaultCrosshairSprite;
-    if (defaultResources.defaultMeshes.crosshairSprite != NULL){
-      effectiveCrosshair = defaultResources.defaultMeshes.crosshairSprite;
-    }
     renderUI(effectiveCrosshair, pixelColor, showCursor);
     drawShapeData(lineData, uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect);
     disposeTempBufferedData(lineData);

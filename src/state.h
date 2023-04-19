@@ -156,6 +156,7 @@ struct engineState {
 
   bool useYAxis;
 
+  objid forceSelectIndex;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
