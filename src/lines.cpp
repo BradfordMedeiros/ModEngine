@@ -4,6 +4,8 @@ LineData createLines(){
   return LineData {
     .lineColors = {},
     .text = {},
+    .traversalPositions = {},
+    .parentTraversalPositions = {},
   };
 }
 
@@ -219,5 +221,20 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::functi
 void disposeTempBufferedData(LineData& lineData){
   removeTempText(lineData);
   removeTempLines(lineData);
+
+  lineData.traversalPositions.clear();
+  lineData.parentTraversalPositions.clear();
 }
 
+void addTraversalPosition(LineData& lineData, glm::mat4 modelMatrix, glm::mat4 parentMatrix){
+  lineData.traversalPositions.push_back(getTransformationFromMatrix(modelMatrix).position);
+  lineData.parentTraversalPositions.push_back(getTransformationFromMatrix(parentMatrix).position);
+}
+
+void drawTraversalPositions(LineData& lineData){
+  for (int i = 0; i < lineData.traversalPositions.size(); i++){
+    auto fromPos = lineData.traversalPositions.at(i);
+    auto toPos = lineData.parentTraversalPositions.at(i);
+    addLineToNextCycle(lineData, fromPos, toPos, false, 0, GREEN, std::nullopt);
+  }
+}

@@ -48,6 +48,10 @@ struct LineByColor {
 struct LineData {
   std::vector<LineByColor> lineColors;;
   std::vector<ShapeData> text;
+
+
+  std::vector<glm::vec3> traversalPositions;
+  std::vector<glm::vec3> parentTraversalPositions;
 };
 
 LineData createLines();
@@ -64,5 +68,7 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::functi
 
 void disposeTempBufferedData(LineData& lineData);
 
+void addTraversalPosition(LineData& lineData, glm::mat4 modelMatrix, glm::mat4 parentMatrix);
+void drawTraversalPositions(LineData& lineData);
 
 #endif

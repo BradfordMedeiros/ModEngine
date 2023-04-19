@@ -241,25 +241,6 @@ void loadAllTextures(std::string& textureFolderPath){
   }*/
 }
 
-
-std::vector<glm::vec3> traversalPositions;
-std::vector<glm::vec3> parentTraversalPositions;
-void addPositionToRender(glm::mat4 modelMatrix, glm::mat4 parentMatrix){
-  //traversalPositions.push_back(getTransformationFromMatrix(modelMatrix).position);
-  //parentTraversalPositions.push_back(getTransformationFromMatrix(parentMatrix).position);
-}
-void clearTraversalPositions(){
-  traversalPositions.clear();
-  parentTraversalPositions.clear();
-}
-void drawTraversalPositions(){
-  for (int i = 0; i < traversalPositions.size(); i++){
-    auto fromPos = traversalPositions.at(i);
-    auto toPos = parentTraversalPositions.at(i);
-    addLineToNextCycle(lineData, fromPos, toPos, false, 0, GREEN, std::nullopt);
-  }
-}
-
 // Kind of crappy since the uniforms don't unset their values after rendering, but order should be deterministic so ... ok
 void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
   for (auto &uniform : uniforms.intUniforms){
@@ -349,13 +330,12 @@ glm::vec3 getTintIfSelected(bool isSelected){
   return glm::vec3(1.f, 1.f, 1.f);
 }
 
-int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, bool textBoundingOnly){
+int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, bool textBoundingOnly, bool shouldAddTraversalPosition = false){
   glUseProgram(shaderProgram);
-  clearTraversalPositions();
   int numTriangles = 0;
   int numDepthClears = 0;
 
-  traverseSandboxByLayer(world.sandbox, [&world, &numDepthClears, shaderProgram, allowShaderOverride, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition, textBoundingOnly](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
+  traverseSandboxByLayer(world.sandbox, [&world, &numDepthClears, shaderProgram, allowShaderOverride, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition, textBoundingOnly, shouldAddTraversalPosition](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
     assert(id >= 0);
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
@@ -367,7 +347,9 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       numDepthClears++;
     }
 
-    addPositionToRender(modelMatrix, parentModelMatrix);
+    if (shouldAddTraversalPosition){
+      addTraversalPosition(lineData, modelMatrix, parentModelMatrix);
+    }
 
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
 
@@ -464,7 +446,9 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     }
     glStencilFunc(GL_ALWAYS, 1, 0xFF);
     glClear(GL_STENCIL_BUFFER_BIT);
-    addPositionToRender(modelMatrix, parentModelMatrix);
+    if (shouldAddTraversalPosition){
+      addTraversalPosition(lineData, modelMatrix, parentModelMatrix);
+    }
   });
   
   auto maxExpectedClears = numUniqueDepthLayers(world.sandbox.layers);
@@ -530,7 +514,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model, int numC
   if (showDebugInfo){
     drawCoordinateSystem(100.f);
     glDisable(GL_DEPTH_TEST);
-    drawTraversalPositions();   
+    drawTraversalPositions(lineData);   
     drawAllLines(lineData, shaderProgram, std::nullopt);
   }
 
@@ -738,7 +722,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     if (renderStep.renderWorld){
       // important - redundant call to glUseProgram
       glm::mat4* projection = context.projection.has_value() ? &context.projection.value() : NULL;
-      auto worldTriangles = renderWorld(context.world, renderStep.shader, renderStep.allowShaderOverride, projection, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraTransform.position, renderStep.textBoundingOnly);
+      auto worldTriangles = renderWorld(context.world, renderStep.shader, renderStep.allowShaderOverride, projection, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraTransform.position, renderStep.textBoundingOnly, true);
       triangles += worldTriangles;
     }
     glDisable(GL_STENCIL_TEST);
@@ -1389,9 +1373,7 @@ int main(int argc, char* argv[]){
       .crosshairSprite = NULL,
     }
   };
-
   setCrosshairSprite();  // needs to be after create world since depends on these meshes being loaded
-
   loadAllTextures(textureFolderPath);
 
   GLFWimage images[1]; 
