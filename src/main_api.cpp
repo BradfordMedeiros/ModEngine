@@ -5,9 +5,7 @@ extern RenderStages renderStages;
 extern SysInterface interface;
 extern WorldTiming timings;
 extern engineState state;
-extern GameObject defaultCamera;
-extern std::vector<FontFamily> fontFamily;
-extern DefaultMeshes defaultMeshes;
+extern DefaultResources defaultResources;
 extern unsigned int uiShaderProgram;
 extern float initialTime;
 extern std::queue<StringAttribute> channelMessages;
@@ -385,14 +383,14 @@ void drawTextNdi(std::string word, float left, float top, unsigned int fontSize)
 }
 
 FontFamily& fontFamilyByName(std::string name){
-  for (auto &family : fontFamily){
+  for (auto &family : defaultResources.fontFamily){
     //std::cout << "Comparing " << name << " to " << family.name << std::endl;
     if (family.name == name){
       return family;
     }
   }
   //modassert(false, "ERROR invalid font family name");
-  return fontFamily.at(0);
+  return defaultResources.fontFamily.at(0);
 }
 int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, UiTextCursor cursor, std::string fontFamilyName, bool drawBoundingOnly){
   return drawWordsRelative(shaderProgram, fontFamilyByName(fontFamilyName), fullModelTransform(world.sandbox, id), word, 0, 0, fontSize, offsetDelta, align, wrap, virtualization, cursor.cursorIndex, cursor.cursorIndexLeft, cursor.highlightLength, drawBoundingOnly);
@@ -611,10 +609,10 @@ void setState(std::string stateName){
 
 void  setCrosshairSprite(){
   if (state.crosshair == ""){
-    defaultMeshes.crosshairSprite = NULL;
+    defaultResources.defaultMeshes.crosshairSprite = NULL;
     return;
   }
-  defaultMeshes.crosshairSprite = &world.meshes.at(state.crosshair).mesh;
+  defaultResources.defaultMeshes.crosshairSprite = &world.meshes.at(state.crosshair).mesh;
 }
 
 void windowPositionCallback(GLFWwindow* window, int xpos, int ypos){
@@ -716,7 +714,7 @@ objid listSceneId(int32_t id){
 
 Transformation getCameraTransform(){
   if (state.useDefaultCamera || state.activeCameraObj == NULL){
-    return defaultCamera.transformation;
+    return defaultResources.defaultCamera.transformation;
   }
   if (state.cameraInterp.shouldInterpolate){
     auto lerpAmount = (now - state.cameraInterp.startingTime) / state.cameraInterp.length;
@@ -793,13 +791,13 @@ void moveCamera(glm::vec3 offset, std::optional<bool> relative){
   bool isRelative = !relative.has_value() || relative.value() == true;
   if (isRelative){
     if (state.activeCameraObj == NULL){
-      defaultCamera.transformation.position = moveRelative(defaultCamera.transformation.position, defaultCamera.transformation.rotation, glm::vec3(offset), false);
+      defaultResources.defaultCamera.transformation.position = moveRelative(defaultResources.defaultCamera.transformation.position, defaultResources.defaultCamera.transformation.rotation, glm::vec3(offset), false);
     }else{
       setGameObjectPosition(state.activeCameraObj ->id, moveRelative(state.activeCameraObj -> transformation.position, state.activeCameraObj -> transformation.rotation, glm::vec3(offset), false));
     }
   }else{
     if (state.activeCameraObj == NULL){
-      defaultCamera.transformation.position = offset;
+      defaultResources.defaultCamera.transformation.position = offset;
     }else{
       setGameObjectPosition(state.activeCameraObj ->id, offset);
     }
@@ -810,14 +808,14 @@ void moveCamera(glm::vec3 offset){
 }
 void rotateCamera(float xoffset, float yoffset){
   if (state.activeCameraObj == NULL){
-    defaultCamera.transformation.rotation = setFrontDelta(defaultCamera.transformation.rotation, xoffset, yoffset, 0, 0.1);
+    defaultResources.defaultCamera.transformation.rotation = setFrontDelta(defaultResources.defaultCamera.transformation.rotation, xoffset, yoffset, 0, 0.1);
   }else{
     setGameObjectRotation(state.activeCameraObj ->id, setFrontDelta(state.activeCameraObj -> transformation.rotation, xoffset, yoffset, 0, 0.1));
   }
 }
 void setCameraRotation(glm::quat orientation){
   if (state.activeCameraObj == NULL){
-    defaultCamera.transformation.rotation = orientation;
+    defaultResources.defaultCamera.transformation.rotation = orientation;
   }else{
     setGameObjectRotation(state.activeCameraObj ->id, orientation);
   }

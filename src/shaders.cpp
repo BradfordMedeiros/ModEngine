@@ -80,6 +80,11 @@ unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentSh
    return shaderProgramId;
 }
 
+struct ShaderStringVals {
+  std::optional<std::string> vertex;
+  std::optional<std::string> fragment;
+};
+
 ShaderStringVals parseShaderString(std::string& shaderString){
   // format: fragment, vertex (whitespace trimmed). 
   auto values = filterWhitespace(split(shaderString, ','));
@@ -88,4 +93,21 @@ ShaderStringVals parseShaderString(std::string& shaderString){
     .vertex = values.size() > 1 ? values.at(1) : std::optional<std::string>(std::nullopt),
     .fragment = values.size() > 0 ? values.at(0) : std::optional<std::string>(std::nullopt),
   };
+}
+
+GLint getShaderByShaderString(std::map<std::string, GLint>& shaderstringToId, std::string shaderString, GLint shaderProgram, bool allowShaderOverride, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile, bool* _loadedShader){
+  *_loadedShader = false;
+  if (shaderString == "" || !allowShaderOverride){
+    return shaderProgram;
+  }
+  if (shaderstringToId.find(shaderString) == shaderstringToId.end()){
+    auto parsedShaderString = parseShaderString(shaderString);
+    auto vertexShaderPath = parsedShaderString.vertex.has_value() ? parsedShaderString.vertex.value() : shaderFolderPath + "/vertex.glsl";
+    auto fragmentShaderPath = parsedShaderString.fragment.has_value() ? parsedShaderString.fragment.value() : shaderFolderPath + "/fragment.glsl";
+
+    auto shaderId = loadShader(vertexShaderPath, fragmentShaderPath, readFile);
+    shaderstringToId[shaderString] = shaderId;
+    *_loadedShader = true;
+  }
+  return shaderstringToId.at(shaderString);
 }

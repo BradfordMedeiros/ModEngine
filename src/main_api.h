@@ -22,6 +22,14 @@
 #include "./lines.h"
 #include "./sql/sql.h"
 
+struct DefaultResources {
+  GameObject defaultCamera;
+  unsigned int quadVAO;  
+  unsigned int quadVAO3D; 
+  std::vector<FontFamily> fontFamily;
+  DefaultMeshes defaultMeshes;
+};
+
 float getTotalTime();
 
 NetworkPacket toNetworkPacket(UdpPacket& packet);

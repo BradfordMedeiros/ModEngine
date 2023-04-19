@@ -8,7 +8,7 @@ extern bool disableInput;
 extern KeyRemapper keyMapper;
 extern DrawingParams drawParams;
 extern glm::mat4 view;
-extern GameObject defaultCamera;
+extern DefaultResources defaultResources;
 extern float deltaTime;
 extern Benchmark benchmark;
 extern bool selectItemCalled;
@@ -390,7 +390,7 @@ void onMouseButton(){
   auto proj = projectionFromLayer(layer);
   auto rayDirection = getCursorRayDirection(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
   Line line = {
-    .fromPos = defaultCamera.transformation.position,
+    .fromPos = defaultResources.defaultCamera.transformation.position,
     .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
   };
   handleVoxelRaycast(world, id, line.fromPos, line.toPos, drawParams.activeTextureIndex);

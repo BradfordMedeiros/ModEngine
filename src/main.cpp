@@ -18,18 +18,8 @@
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
 unsigned int uiShaderProgram;
-unsigned int quadVAO;
-unsigned int quadVAO3D;
 
-GameObject defaultCamera = GameObject {
-  .id = -1,
-  .name = "defaultCamera",
-  .transformation = Transformation {
-    .position = glm::vec3(0.f, 0.f, 0.f),
-    .scale = glm::vec3(1.0f, 1.0f, 1.0f),
-    .rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)),
-  }
-};
+DefaultResources defaultResources {};
 
 bool showDebugInfo = false;
 std::string shaderFolderPath;
@@ -42,10 +32,6 @@ engineState state = getDefaultState(1920, 1080);
 
 World world;
 RenderStages renderStages;
-
-DefaultMeshes defaultMeshes;  
-std::vector<FontFamily> fontFamily;
-
 SysInterface interface;
 KeyRemapper keyMapper;
 CScriptBindingCallbacks cBindings;
@@ -54,8 +40,6 @@ float initialTime = 0;
 float now = 0;
 float deltaTime = 0.0f; // Time between current frame and last frame
 int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
-
-DynamicLoading dynamicLoading;
 
 unsigned int framebufferTexture;
 unsigned int framebufferTexture2;
@@ -69,17 +53,10 @@ unsigned int textureDepthTextures[1];
 
 std::map<objid, unsigned int> portalIdCache;
 std::optional<Texture> textureToPaint = std::optional<Texture>(std::nullopt);
-int activeDepthTexture = 0; // 0th depth texture is the main depth texture used for eg z buffer other buffers are for the lights
 
 glm::mat4 view;
 glm::mat4 orthoProj;
 const glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);  
-
-
-std::queue<StringAttribute> channelMessages;
-extern std::vector<InputDispatch> inputFns;
-std::map<std::string, objid> activeLocks;
-LineData lineData = createLines();
 
 auto fpsStat = statName("fps");
 auto numObjectsStat = statName("object-count");
@@ -88,7 +65,14 @@ auto scenesLoadedStat = statName("scenes-loaded");
 std::map<std::string, std::string> args;
 DrawingParams drawParams = getDefaultDrawingParams();
 Benchmark benchmark;
+DynamicLoading dynamicLoading;
 WorldTiming timings;
+
+std::queue<StringAttribute> channelMessages;
+extern std::vector<InputDispatch> inputFns;     
+std::map<std::string, objid> activeLocks;
+LineData lineData = createLines();
+std::map<std::string, GLint> shaderstringToId;
 
 TimePlayback timePlayback(
   initialTime, 
@@ -135,7 +119,7 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
       glm::mat4(1.0f), 
       glm::vec3(2.f, 2.f, 2.f)
     )));
-    drawMesh(*defaultMeshes.unitXYRect, uiShaderProgram, clearTextureId.value());
+    drawMesh(*defaultResources.defaultMeshes.unitXYRect, uiShaderProgram, clearTextureId.value());
     glEnable(GL_DEPTH_TEST);
   }
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
@@ -156,7 +140,7 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
 
   //auto ortho = glm::ortho(0.0f, (float)texSize.width, 0.0f, (float)texSize.height, -1.0f, 1.0f);  
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
-  drawShapeData(lineData, uiShaderProgram, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultMeshes.unitXYRect);
+  drawShapeData(lineData, uiShaderProgram, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect);
 }
 
 void handlePaintingModifiesViewport(UVCoord uvsToPaint){
@@ -187,7 +171,7 @@ void handlePaintingModifiesViewport(UVCoord uvsToPaint){
   glUniform4fv(glGetUniformLocation(drawingProgram, "tint"), 1, glm::value_ptr(drawParams.tint));
 
   glBindTexture(GL_TEXTURE_2D, activeTextureId());
-  glBindVertexArray(quadVAO);
+  glBindVertexArray(defaultResources.quadVAO);
   glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 void handleTerrainPainting(UVCoord uvCoord, objid hoveredId){
@@ -274,23 +258,6 @@ void drawTraversalPositions(){
     auto toPos = parentTraversalPositions.at(i);
     addLineToNextCycle(lineData, fromPos, toPos, false, 0, GREEN, std::nullopt);
   }
-}
-
-std::map<std::string, GLint> shaderstringToId;
-GLint getShaderByShaderString(std::string shaderString, GLint shaderProgram, bool allowShaderOverride){
-  if (shaderString == "" || !allowShaderOverride){
-    return shaderProgram;
-  }
-  if (shaderstringToId.find(shaderString) == shaderstringToId.end()){
-    auto parsedShaderString = parseShaderString(shaderString);
-    auto vertexShaderPath = parsedShaderString.vertex.has_value() ? parsedShaderString.vertex.value() : shaderFolderPath + "/vertex.glsl";
-    auto fragmentShaderPath = parsedShaderString.fragment.has_value() ? parsedShaderString.fragment.value() : shaderFolderPath + "/fragment.glsl";
-
-    auto shaderId = loadShader(vertexShaderPath, fragmentShaderPath, interface.readFile);
-    shaderstringToId[shaderString] = shaderId;
-    sendNotifyMessage("alert", std::string("loaded shader: ") + shaderString);
-  }
-  return shaderstringToId.at(shaderString);
 }
 
 // Kind of crappy since the uniforms don't unset their values after rendering, but order should be deterministic so ... ok
@@ -403,7 +370,12 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     addPositionToRender(modelMatrix, parentModelMatrix);
 
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
-    auto newShader = getShaderByShaderString(shader, shaderProgram, allowShaderOverride);
+
+    bool loadedNewShader = false;
+    auto newShader = getShaderByShaderString(shaderstringToId, shader, shaderProgram, allowShaderOverride, shaderFolderPath, interface.readFile,  &loadedNewShader);
+    if (loadedNewShader){
+      sendNotifyMessage("alert", std::string("loaded shader: ") + shader);
+    }
 
     // todo -> need to just cache last shader value (or sort?) so don't abuse shader swapping (ok for now i guess)
     MODTODO("improve shader state switches by looking into some sort of caching");
@@ -472,7 +444,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
           glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(modelMatrix, pos)));
           return drawSphere();
         },
-        defaultMeshes,
+        defaultResources.defaultMeshes,
         renderCustomObj,
         getGameObjectPos,
         textBoundingOnly
@@ -484,7 +456,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     if (isPortal && portalTextureInCache && isPerspectivePortal){
       glUseProgram(framebufferProgram); 
       glDisable(GL_DEPTH_TEST);
-      glBindVertexArray(quadVAO);
+      glBindVertexArray(defaultResources.quadVAO);
       glBindTexture(GL_TEXTURE_2D,  portalIdCache.at(id));
       glDrawArrays(GL_TRIANGLES, 0, 6);
       glEnable(GL_DEPTH_TEST);
@@ -621,8 +593,8 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor, bool showCursor){
     manipulatorAxisString = "noaxis";
   }
   drawTextNdi("manipulator axis: " + manipulatorAxisString, uiXOffset, uiYOffset + offsetPerLine * 2, state.fontsize);
-  drawTextNdi("position: " + print(defaultCamera.transformation.position), uiXOffset, uiYOffset + offsetPerLine * 3, state.fontsize);
-  drawTextNdi("rotation: " + print(defaultCamera.transformation.rotation), uiXOffset, uiYOffset + offsetPerLine * 4, state.fontsize);
+  drawTextNdi("position: " + print(defaultResources.defaultCamera.transformation.position), uiXOffset, uiYOffset + offsetPerLine * 3, state.fontsize);
+  drawTextNdi("rotation: " + print(defaultResources.defaultCamera.transformation.rotation), uiXOffset, uiYOffset + offsetPerLine * 4, state.fontsize);
 
   float ndiX = 2 * (state.cursorLeft / (float)state.resolution.x) - 1.f;
   float ndiY = -2 * (state.cursorTop / (float)state.resolution.y) + 1.f;
@@ -752,7 +724,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
       setShaderData(renderStep.shader, ndiOrtho, glm::mat4(1.f), lights, false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjview, glm::vec3(0.f, 0.f, 0.f), uniforms);
       glActiveTexture(GL_TEXTURE0); 
       glBindTexture(GL_TEXTURE_2D, renderStep.quadTexture);
-      glBindVertexArray(quadVAO3D);
+      glBindVertexArray(defaultResources.quadVAO3D);
       glDrawArrays(GL_TRIANGLES, 0, 6);      
     }
 
@@ -773,7 +745,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
 
     if (renderStep.renderQuad){
       glBindTexture(GL_TEXTURE_2D, renderStep.quadTexture);
-      glBindVertexArray(quadVAO);
+      glBindVertexArray(defaultResources.quadVAO);
       glDrawArrays(GL_TRIANGLES, 0, 6);      
     }
   )
@@ -1111,8 +1083,6 @@ int main(int argc, char* argv[]){
     return -1;
   }
 
-  quadVAO = loadFullscreenQuadVAO();
-  quadVAO3D = loadFullscreenQuadVAO3D();
   //////////////////////////////
 
   auto onFramebufferSizeChange = [](GLFWwindow* window, int width, int height) -> void {
@@ -1388,23 +1358,38 @@ int main(int argc, char* argv[]){
   initialTime = fpsFixed  ? 0 : glfwGetTime();
 
   timings = createWorldTiming(initialTime);
-  defaultMeshes = DefaultMeshes{
-    .nodeMesh = &world.meshes.at("./res/models/ui/node.obj").mesh,
-    .portalMesh = &world.meshes.at("./res/models/box/plane.dae").mesh,
-    .cameraMesh = &world.meshes.at("../gameresources/build/objtypes/camera.gltf").mesh, 
-    .voxelCubeMesh = &world.meshes.at("./res/models/unit_rect/unit_rect.obj").mesh,
-    .unitXYRect = &world.meshes.at("./res/models/controls/unitxy.obj").mesh,
-    .soundMesh = &world.meshes.at("../gameresources/build/objtypes/sound.gltf").mesh,
-    .lightMesh = &world.meshes.at("../gameresources/build/objtypes/light.gltf").mesh,
-    .emitter = &world.meshes.at("../gameresources/build/objtypes/emitter.gltf").mesh,
-    .nav = &world.meshes.at("./res/models/ui/node.obj").mesh,
-    .defaultCrosshairSprite = &world.meshes.at("./res/textures/crosshairs/crosshair008.png").mesh,
-    .crosshairSprite = NULL,
-  };
+
 
   auto fontPaths = result["font"].as<std::vector<std::string>>();
   std::cout << "INFO: FONT: loading font paths (" << fontPaths.size() <<") - " << print(fontPaths) << std::endl;
-  fontFamily = loadFontMeshes(readFontFile(fontPaths), world.textures.at("./res/textures/wood.jpg").texture);
+  defaultResources = DefaultResources {
+    .defaultCamera = GameObject {
+      .id = -1,
+      .name = "defaultCamera",
+      .transformation = Transformation {
+        .position = glm::vec3(0.f, 0.f, 0.f),
+        .scale = glm::vec3(1.0f, 1.0f, 1.0f),
+        .rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)),
+      }  // default resource
+    },
+    .quadVAO = loadFullscreenQuadVAO(),
+    .quadVAO3D = loadFullscreenQuadVAO3D(),
+    .fontFamily = loadFontMeshes(readFontFile(fontPaths), world.textures.at("./res/textures/wood.jpg").texture),
+    .defaultMeshes = DefaultMeshes{
+      .nodeMesh = &world.meshes.at("./res/models/ui/node.obj").mesh,
+      .portalMesh = &world.meshes.at("./res/models/box/plane.dae").mesh,
+      .cameraMesh = &world.meshes.at("../gameresources/build/objtypes/camera.gltf").mesh, 
+      .voxelCubeMesh = &world.meshes.at("./res/models/unit_rect/unit_rect.obj").mesh,
+      .unitXYRect = &world.meshes.at("./res/models/controls/unitxy.obj").mesh,
+      .soundMesh = &world.meshes.at("../gameresources/build/objtypes/sound.gltf").mesh,
+      .lightMesh = &world.meshes.at("../gameresources/build/objtypes/light.gltf").mesh,
+      .emitter = &world.meshes.at("../gameresources/build/objtypes/emitter.gltf").mesh,
+      .nav = &world.meshes.at("./res/models/ui/node.obj").mesh,
+      .defaultCrosshairSprite = &world.meshes.at("./res/textures/crosshairs/crosshair008.png").mesh,
+      .crosshairSprite = NULL,
+    }
+  };
+
   setCrosshairSprite();  // needs to be after create world since depends on these meshes being loaded
 
   loadAllTextures(textureFolderPath);
@@ -1659,9 +1644,9 @@ int main(int argc, char* argv[]){
       }
     }
     if (cursorForLayer == "none"){
-      defaultMeshes.defaultCrosshairSprite = NULL;
+      defaultResources.defaultMeshes.defaultCrosshairSprite = NULL;
     }else{
-      defaultMeshes.defaultCrosshairSprite = &world.meshes.at(cursorForLayer).mesh;
+      defaultResources.defaultMeshes.defaultCrosshairSprite = &world.meshes.at(cursorForLayer).mesh;
     }
 
     onManipulatorUpdate(
@@ -1873,18 +1858,18 @@ int main(int argc, char* argv[]){
       }
     }
     glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
-    glBindVertexArray(quadVAO);
+    glBindVertexArray(defaultResources.quadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
-    Mesh* effectiveCrosshair = defaultMeshes.defaultCrosshairSprite;
-    if (defaultMeshes.crosshairSprite != NULL){
-      effectiveCrosshair = defaultMeshes.crosshairSprite;
+    Mesh* effectiveCrosshair = defaultResources.defaultMeshes.defaultCrosshairSprite;
+    if (defaultResources.defaultMeshes.crosshairSprite != NULL){
+      effectiveCrosshair = defaultResources.defaultMeshes.crosshairSprite;
     }
     renderUI(effectiveCrosshair, pixelColor, showCursor);
-    drawShapeData(lineData, uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultMeshes.unitXYRect);
+    drawShapeData(lineData, uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect);
     disposeTempBufferedData(lineData);
     glEnable(GL_DEPTH_TEST);
 
