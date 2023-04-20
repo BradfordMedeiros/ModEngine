@@ -62,4 +62,7 @@ struct RotationPosition {
 RotationPosition rotateOverAxis(RotationPosition object, RotationPosition axis, float rotationRadians, std::optional<std::function<glm::quat(glm::quat)>> snapRotate);
 std::optional<glm::vec3> findPlaneIntersection(glm::vec3 anypointOnPlane, glm::vec3 planeNormal, glm::vec3 rayPosition, glm::vec3 rayDirection);
 
+glm::vec3 calcOffsetFromRotation(glm::vec3 position, std::optional<glm::vec3> offset, glm::quat rotation);
+glm::vec3 calcOffsetFromRotationReverse(glm::vec3 position, std::optional<glm::vec3> offset, glm::quat rotation);
+
 #endif 

@@ -122,6 +122,11 @@ std::string sceneFileForSceneId(World& world, objid sceneId);
 std::optional<std::string> sceneNameForSceneId(World& world, objid sceneId);
 std::vector<std::string> sceneTagsForSceneId(World& world, objid sceneId);
 
+glm::vec3 gameobjectPosition(World& world, objid id, bool isWorld);
+glm::vec3 gameobjectScale(World& world, objid id, bool isWorld);
+glm::quat gameobjectRotation(World& world, objid id, bool isWorld);
+Transformation gameobjectTransformation(World& world, objid id, bool isWorld);
+
 void loadSkybox(World& world, std::string skyboxpath);
 
 std::string getType(std::string name);

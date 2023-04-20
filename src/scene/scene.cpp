@@ -13,11 +13,8 @@ std::optional<objid> getGameObjectByNamePrefix(World& world, std::string name, o
 }
 GameObject& getGameObject(World& world, std::string name, objid sceneId){
   auto obj = maybeGetGameObjectByName(world.sandbox, name, sceneId, false);
-  if (obj.has_value()){
-    return *obj.value();
-  }
-  std::cout << "gameobject : " << name << " does not exist" << std::endl;
-  assert(false);
+  modassert(obj.has_value(), std::string("gameobject : ") + name + " does not exist");
+  return *obj.value();
 }
 
 NameAndMeshObjName getMeshesForGroupId(World& world, objid groupId){
@@ -27,7 +24,6 @@ NameAndMeshObjName getMeshesForGroupId(World& world, objid groupId){
   NameAndMeshObjName nameAndMeshes = {
     .objnames = objnames,
     .meshNames = meshNames,
-    .meshes = meshes
   };
   for (auto id : getIdsInGroup(world.sandbox, groupId)){
     auto meshesForId = getMeshesForId(world.objectMapping, id);
@@ -144,20 +140,6 @@ GroupPhysicsInfo getPhysicsInfoForGroup(World& world, objid id){
     .physicsOptions = getGameObject(world.sandbox, groupId).physicsOptions,
   };  
   return groupInfo;
-}
-
-glm::vec3 calcOffsetFromRotation(glm::vec3 position, std::optional<glm::vec3> offset, glm::quat rotation){
-  if (!offset.has_value()){
-    return position;
-  }
-  return position + rotation * offset.value();
-}
-
-glm::vec3 calcOffsetFromRotationReverse(glm::vec3 position, std::optional<glm::vec3> offset, glm::quat rotation){
-  if (!offset.has_value()){
-    return position;
-  }
-  return position - rotation * offset.value();
 }
 
 // TODO - physics bug - physicsOptions location/rotation/scale is not relative to parent 
@@ -445,8 +427,6 @@ void freeAnimationsForOwner(World& world, objid id){
   world.animations.erase(id);
 }
 
-
-
 void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ownerId){
   if (world.meshes.find(meshPath) != world.meshes.end()){
     world.meshes.at(meshPath).owners.insert(ownerId);
@@ -649,11 +629,7 @@ World createWorld(
   for (auto &spriteMesh : spriteMeshes){
     addSpriteMesh(world, spriteMesh);
   }
-
   loadSkybox(world, ""); 
-
-  auto generatedMesh = generateTestMesh();
-  loadMeshData(world, "testmesh", generatedMesh, -1);
   return world;
 }
 
@@ -1095,49 +1071,8 @@ GameobjAttributes objectAttributes(World& world, objid id){
 }
 
 bool objectHasAttribute(World& world, objid id, std::string type, std::optional<AttributeValue> value){
-  bool valueExists = value.has_value();
   auto attrs = objectAttributes(world, id);
-  if (attrs.stringAttributes.find(type) != attrs.stringAttributes.end()){
-    if (!valueExists){
-      return true;
-    }
-    auto valueStr = std::get_if<std::string>(&value.value());
-    if (valueStr == NULL){
-      return false;
-    }
-    return attrs.stringAttributes.at(type) == *valueStr;
-  }
-  if (attrs.numAttributes.find(type) != attrs.numAttributes.end()){
-    if (!valueExists){
-      return true;
-    }
-    auto valueFloat = std::get_if<float>(&value.value());
-    if (valueFloat == NULL){
-      return false;
-    }
-    return attrs.numAttributes.at(type) == *valueFloat;
-  }
-  if (attrs.vecAttr.vec3.find(type) != attrs.vecAttr.vec3.end()){
-    if (!valueExists){
-      return true;
-    }
-    auto vecFloat = std::get_if<glm::vec3>(&value.value());
-    if (vecFloat == NULL){
-      return false;
-    }
-    return attrs.vecAttr.vec3.at(type) == *vecFloat;
-  }  
-  if (attrs.vecAttr.vec4.find(type) != attrs.vecAttr.vec4.end()){
-    if (!valueExists){
-      return true;
-    }
-    auto vecFloat = std::get_if<glm::vec4>(&value.value());
-    if (vecFloat == NULL){
-      return false;
-    }
-    return attrs.vecAttr.vec4.at(type) == *vecFloat;
-  }  
-  return false;
+  return hasAttribute(attrs, type, value);
 }
 
 void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool velocitySet, bool physicsEnableChanged){
@@ -1365,19 +1300,7 @@ void callbackEntities(World& world){
 // Should speed up attribute getting/setting, esp single attribute here  
 std::optional<AttributeValue> getSingleAttribute(World& world, objid id, std::string attribute){
   auto allAttrs = objectAttributes(world, id);
-  if (allAttrs.numAttributes.find(attribute) != allAttrs.numAttributes.end()){
-    return allAttrs.numAttributes.at(attribute);
-  }
-  if (allAttrs.stringAttributes.find(attribute) != allAttrs.stringAttributes.end()){
-    return allAttrs.stringAttributes.at(attribute);
-  }
-  if (allAttrs.vecAttr.vec3.find(attribute) != allAttrs.vecAttr.vec3.end()){
-    return allAttrs.vecAttr.vec3.at(attribute);
-  }
-  if (allAttrs.vecAttr.vec4.find(attribute) != allAttrs.vecAttr.vec4.end()){
-    return allAttrs.vecAttr.vec4.at(attribute);
-  }
-  return std::nullopt;
+  return getAttribute(allAttrs, attribute);
 }
 
 GameobjAttributes gameobjAttrFromValue(std::string& field, AttributeValue value){
@@ -1512,4 +1435,30 @@ std::optional<std::string> sceneNameForSceneId(World& world, objid sceneId){
 
 std::vector<std::string> sceneTagsForSceneId(World& world, objid sceneId){
   return world.sandbox.sceneIdToSceneMetadata.at(sceneId).tags;
+}
+
+////////////
+glm::vec3 gameobjectPosition(World& world, objid id, bool isWorld){
+  if (isWorld){
+    return fullTransformation(world.sandbox, id).position;
+  }
+  return getGameObject(world, id).transformation.position;   // fix relative reference
+}
+//glm::vec3 gameobjectScale(World& world, objid id, bool isWorld){
+//
+//}
+
+glm::quat gameobjectRotation(World& world, objid id, bool isWorld){
+  if (isWorld){
+    return fullTransformation(world.sandbox, id).rotation;
+  }
+  return getGameObject(world, id).transformation.rotation;
+}
+
+Transformation gameobjectTransformation(World& world, objid id, bool isWorld){
+  if (isWorld){
+    return fullTransformation(world.sandbox, id);
+  }
+  modassert(false, "not yet implemented");
+  return Transformation{};
 }

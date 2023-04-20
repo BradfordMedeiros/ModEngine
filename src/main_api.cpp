@@ -183,7 +183,6 @@ bool isNotWriteProtectedFile(std::string& fileToSave){
   return allowedToSave;
 }
 
-// @TODO - save all the scenes in the world
 bool saveScene(bool includeIds, objid sceneId, std::optional<std::string> filename){
   auto fileToSave = sceneFileForSceneId(world, sceneId);    // MAYBE SHOULD CREATE A CACHE OF WHAT FILE WAS WHAT SCENE?
   fileToSave = filename.has_value() ? filename.value() : fileToSave;
@@ -286,14 +285,13 @@ void setGameObjectAttr(int32_t id, GameobjAttributes& attr){
   setAttributes(world, id, attr);
 }
 
+
+//////////////////////////////////////////////////////////////
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld){
-  if (isWorld){
-    return fullTransformation(world.sandbox, index).position;
-  }
-  return getGameObject(world, index).transformation.position;
+  return gameobjectPosition(world, index, isWorld);
 }
 glm::vec3 getGameObjectPos(int32_t index){
-  return getGameObjectPosition(index, true);
+  return getGameObjectPosition(index, true); 
 }
 void setGameObjectPosition(int32_t index, glm::vec3 pos){ // sets the absolutePosition
   physicsTranslateSet(world, index, pos, false);
@@ -301,28 +299,29 @@ void setGameObjectPosition(int32_t index, glm::vec3 pos){ // sets the absolutePo
 void setGameObjectPositionRelative(int32_t index, glm::vec3 pos){
   physicsTranslateSet(world, index, pos, true);
 }
+
 glm::vec3 getGameObjectScale(int32_t index){
   return getGameObject(world, index).transformation.scale;
 }
 void setGameObjectScale(int32_t index, glm::vec3 scale){
   physicsScaleSet(world, index, scale);
 }
-void setGameObjectRotation(int32_t index, glm::quat rotation){
-  physicsRotateSet(world, index, rotation, false);
-}
 
-void setGameObjectRotationRelative(int32_t index, glm::quat rotation){
-  physicsRotateSet(world, index, rotation, true);
-}
 glm::quat getGameObjectRotation(int32_t index, bool isWorld){
-  if (isWorld){
-    return fullTransformation(world.sandbox, index).rotation;
-  }
-  return getGameObject(world, index).transformation.rotation;
+  return gameobjectRotation(world, index, isWorld);
 }
 glm::quat getGameObjectRotationRelative(int32_t index){
   return getGameObjectRotation(index, false);
 }
+void setGameObjectRotation(int32_t index, glm::quat rotation){
+  physicsRotateSet(world, index, rotation, false);
+}
+void setGameObjectRotationRelative(int32_t index, glm::quat rotation){
+  physicsRotateSet(world, index, rotation, true);
+}
+
+///////////////////////
+
 
 std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes){
   AttrChildrenPair attrWithChildren {
@@ -724,11 +723,11 @@ Transformation getCameraTransform(){
       state.activeCameraData = &getCamera(world, state.activeCameraObj -> id);
       cBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
     }
-    auto oldCameraPosition = fullTransformation(world.sandbox, state.activeCameraObj -> id);
-    auto newCameraPosition = fullTransformation(world.sandbox, state.cameraInterp.targetCam);
+    auto oldCameraPosition = gameobjectTransformation(world, state.activeCameraObj -> id, true);
+    auto newCameraPosition = gameobjectTransformation(world, state.cameraInterp.targetCam, true);
     return interpolate(oldCameraPosition, newCameraPosition, lerpAmount, lerpAmount, lerpAmount);
   }
-  return fullTransformation(world.sandbox, state.activeCameraObj -> id);
+  return gameobjectTransformation(world, state.activeCameraObj -> id, true);
 }
 void maybeResetCamera(int32_t id){
   if (state.activeCameraObj != NULL &&  id == state.activeCameraObj -> id){

@@ -233,9 +233,11 @@ void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2)
 // This shoiuld really just be creating a list of names, and then the cycle above should cycle between possible textures to load, instead of what is loaded 
 void loadAllTextures(std::string& textureFolderPath){
   loadTextureWorld(world, "./res/models/box/grid.png", -1);
+  loadTextureWorld(world, "./res/textures/wood.jpg", -1);
   for (auto texturePath : listFilesWithExtensions(textureFolderPath, { "png", "jpg" })){
     loadTextureWorld(world, texturePath, -1);
   }
+
   /*for (auto texturePath : listFilesWithExtensions("/home/brad/automate/mosttrusted/gameresources/build/", { "png", "jpg" })){
     loadTextureWorld(world, texturePath, -1);
   }*/
@@ -1324,6 +1326,8 @@ int main(int argc, char* argv[]){
     defaultMeshesToLoad,
     allTexturesToLoad
   );
+  loadAllTextures(textureFolderPath);
+
 
    // this texture used for default textures, could make font mesh texture optional or something
   if (state.skybox != ""){
@@ -1370,7 +1374,6 @@ int main(int argc, char* argv[]){
     }
   };
   setCrosshairSprite();  // needs to be after create world since depends on these meshes being loaded
-  loadAllTextures(textureFolderPath);
 
   GLFWimage images[1]; 
   images[0].pixels = stbi_load(state.iconpath.c_str(), &images[0].width, &images[0].height, 0, 4); //rgba channels 

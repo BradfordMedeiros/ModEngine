@@ -732,12 +732,73 @@ std::optional<AttributeValue> getAttr(GameobjAttributes& objAttr, std::string ke
   return std::nullopt;
 }
 
+std::optional<AttributeValue> getAttribute(GameobjAttributes& allAttrs, std::string& attribute){
+  if (allAttrs.numAttributes.find(attribute) != allAttrs.numAttributes.end()){
+    return allAttrs.numAttributes.at(attribute);
+  }
+  if (allAttrs.stringAttributes.find(attribute) != allAttrs.stringAttributes.end()){
+    return allAttrs.stringAttributes.at(attribute);
+  }
+  if (allAttrs.vecAttr.vec3.find(attribute) != allAttrs.vecAttr.vec3.end()){
+    return allAttrs.vecAttr.vec3.at(attribute);
+  }
+  if (allAttrs.vecAttr.vec4.find(attribute) != allAttrs.vecAttr.vec4.end()){
+    return allAttrs.vecAttr.vec4.at(attribute);
+  }
+  return std::nullopt;
+}
+
 bool hasAttribute(GameobjAttributes& attributes, std::string attr){
   bool hasStrAttr = attributes.stringAttributes.find(attr) != attributes.stringAttributes.end();
   bool hasFloatAttr = attributes.numAttributes.find(attr) != attributes.numAttributes.end();
   bool hasVec3Attr = attributes.vecAttr.vec3.find(attr) != attributes.vecAttr.vec3.end();
   bool hasVec4Attr = attributes.vecAttr.vec4.find(attr) != attributes.vecAttr.vec4.end();
   return hasStrAttr || hasFloatAttr || hasVec3Attr || hasVec4Attr;
+}
+
+bool hasAttribute(GameobjAttributes& attrs, std::string& type, std::optional<AttributeValue>& value){
+  bool valueExists = value.has_value();
+  if (attrs.stringAttributes.find(type) != attrs.stringAttributes.end()){
+    if (!valueExists){
+      return true;
+    }
+    auto valueStr = std::get_if<std::string>(&value.value());
+    if (valueStr == NULL){
+      return false;
+    }
+    return attrs.stringAttributes.at(type) == *valueStr;
+  }
+  if (attrs.numAttributes.find(type) != attrs.numAttributes.end()){
+    if (!valueExists){
+      return true;
+    }
+    auto valueFloat = std::get_if<float>(&value.value());
+    if (valueFloat == NULL){
+      return false;
+    }
+    return attrs.numAttributes.at(type) == *valueFloat;
+  }
+  if (attrs.vecAttr.vec3.find(type) != attrs.vecAttr.vec3.end()){
+    if (!valueExists){
+      return true;
+    }
+    auto vecFloat = std::get_if<glm::vec3>(&value.value());
+    if (vecFloat == NULL){
+      return false;
+    }
+    return attrs.vecAttr.vec3.at(type) == *vecFloat;
+  }  
+  if (attrs.vecAttr.vec4.find(type) != attrs.vecAttr.vec4.end()){
+    if (!valueExists){
+      return true;
+    }
+    auto vecFloat = std::get_if<glm::vec4>(&value.value());
+    if (vecFloat == NULL){
+      return false;
+    }
+    return attrs.vecAttr.vec4.at(type) == *vecFloat;
+  }  
+  return false;
 }
 
 bool maybeSetVec3FromAttr(glm::vec3* _valueToUpdate, const char* field, GameobjAttributes& attributes){

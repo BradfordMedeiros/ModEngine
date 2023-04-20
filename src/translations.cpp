@@ -340,3 +340,17 @@ float atanRadians360(float x, float y){
   }
   return angle;
 }
+
+glm::vec3 calcOffsetFromRotation(glm::vec3 position, std::optional<glm::vec3> offset, glm::quat rotation){
+  if (!offset.has_value()){
+    return position;
+  }
+  return position + rotation * offset.value();
+}
+
+glm::vec3 calcOffsetFromRotationReverse(glm::vec3 position, std::optional<glm::vec3> offset, glm::quat rotation){
+  if (!offset.has_value()){
+    return position;
+  }
+  return position - rotation * offset.value();
+}

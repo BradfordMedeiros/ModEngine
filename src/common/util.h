@@ -200,8 +200,13 @@ std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string ke
 std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key);
 std::optional<glm::vec3> getVec3Attr(GameobjAttributes& objAttr, std::string key);
 std::optional<glm::vec4> getVec4Attr(GameobjAttributes& objAttr, std::string key);
+
+// Below two are redundant, should eliminate one
 std::optional<AttributeValue> getAttr(GameobjAttributes& objAttr, std::string key);
+std::optional<AttributeValue> getAttribute(GameobjAttributes& allAttrs, std::string& attribute);
+
 bool hasAttribute(GameobjAttributes& attributes, std::string attr);
+bool hasAttribute(GameobjAttributes& attrs, std::string& type, std::optional<AttributeValue>& value);
 bool maybeSetVec3FromAttr(glm::vec3* _valueToUpdate, const char* field, GameobjAttributes& attributes);
 bool maybeSetVec4FromAttr(glm::vec4* _valueToUpdate, const char* field, GameobjAttributes& attributes);
 std::optional<int> optionalInt(std::optional<float> value);
