@@ -809,7 +809,7 @@ std::vector<InputDispatch> inputFns = {
         std::vector<Transformation> transforms;
         for (auto id : voxels){
           voxelBodies.push_back(getVoxel(world, id).value() -> voxel);
-          transforms.push_back(getGameObject(world, id).transformation);
+          transforms.push_back(gameobjectTransformation(world, id, false));
         }
         auto voxelData = joinVoxels(voxelBodies, transforms);
         std::cout << "serialized voxel: \n" << serializeVoxelDefault(world, voxelData) << std::endl;

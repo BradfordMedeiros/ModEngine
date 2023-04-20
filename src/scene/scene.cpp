@@ -1452,13 +1452,12 @@ glm::quat gameobjectRotation(World& world, objid id, bool isWorld){
   if (isWorld){
     return fullTransformation(world.sandbox, id).rotation;
   }
-  return getGameObject(world, id).transformation.rotation;
+  return getGameObject(world, id).transformation.rotation;  // fix relative reference
 }
 
 Transformation gameobjectTransformation(World& world, objid id, bool isWorld){
   if (isWorld){
     return fullTransformation(world.sandbox, id);
   }
-  modassert(false, "not yet implemented");
-  return Transformation{};
+  return calcRelativeTransform(world.sandbox, id);
 }

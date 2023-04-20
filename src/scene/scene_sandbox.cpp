@@ -489,6 +489,7 @@ GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name, objid scene
   return objh;
 }
 
+
 // What position should the gameobject be based upon the two absolute transform of parent and child
 Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId, objid parentId){
   auto absTransformCache = matrixFromComponents(sandbox.mainScene.absoluteTransforms.at(childId).transform); 
@@ -508,6 +509,14 @@ Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId, objid
   //std::cout << std::endl;
 
   return getTransformationFromMatrix(relativeTransform);
+}
+
+Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId){
+  auto parentId = getGameObjectH(sandbox, childId).parentId;
+  if (parentId == -1){
+    return sandbox.mainScene.absoluteTransforms.at(childId).transform;
+  }
+  return calcRelativeTransform(sandbox, childId, parentId);
 }
 
 // What should the absolute transform be given a parents absolute and a relative child transform

@@ -135,4 +135,6 @@ void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation)
 
 std::set<objid> updateSandbox(SceneSandbox& sandbox);
 
+Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId);
+
 #endif 
