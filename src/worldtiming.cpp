@@ -38,7 +38,7 @@ void tickAnimations(World& world, WorldTiming& timings, float elapsedTime){
   //std::cout << "num animations: " << timings.animations.playbacks.size() << std::endl;
 }
 
-Animation getAnimation(World& world, int32_t groupId, std::string animationToPlay){  
+std::optional<Animation> getAnimation(World& world, int32_t groupId, std::string animationToPlay){  
   Animation noAnimation { };
   for (auto animation :  world.animations.at(groupId)){
     if (animation.name == animationToPlay){
@@ -51,8 +51,7 @@ Animation getAnimation(World& world, int32_t groupId, std::string animationToPla
     std::cout << animation.name << " ";
   }
   std::cout << std::endl;
-  assert(false);
-  return  noAnimation;  // @todo probably use optional here.
+  return  std::nullopt;  // @todo probably use optional here.
 }
 
 
@@ -100,7 +99,7 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
     timings.animations.playbacks.erase(groupId);
   }
 
-  auto animation = getAnimation(world, groupId, animationToPlay);
+  auto animation = getAnimation(world, groupId, animationToPlay).value();
   std::string animationname = animation.name;
   float animLength = animationLengthSeconds(animation);
   std::cout << "adding animation: " << animationname << " length: " << animLength << std::endl;

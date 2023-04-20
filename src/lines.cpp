@@ -53,7 +53,7 @@ objid addLineToNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos,
   }else if (color == RED){
     return addLineToNextCycleTint(lineData, fromPos, toPos, permaline, owner, glm::vec4(1.f, 0.f, 0.f, 1.f), textureId, std::nullopt);
   }
-  assert(false);
+  modassert(false, "invalid color for addLineToNextCycle");
   return 0;
 }
 
