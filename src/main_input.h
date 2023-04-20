@@ -17,6 +17,7 @@
 #include "./renderstages.h"
 #include "./scene/styles.h"
 #include "./lines.h"
+#include "./main_util.h"
 
 struct JoyStickInfo {
   int index;

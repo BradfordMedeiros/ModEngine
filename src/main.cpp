@@ -5,6 +5,7 @@
 #include "./scene/common/vectorgfx.h"
 #include "./netscene.h"
 #include "./main_test.h"
+#include "./main_util.h"
 #include "./cscript/cscripts/cscript_sample.h"
 #include "./cscript/cscripts/cscript_scheme.h"
 #include "./cscript/cscripts/editor/editor_scripts.h"
