@@ -54,6 +54,27 @@ std::optional<Animation> getAnimation(World& world, int32_t groupId, std::string
   return  std::nullopt;  // @todo probably use optional here.
 }
 
+glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
+  auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId, false);
+  assert(gameobj.has_value());
+ 
+  auto groupTransform = fullModelTransform(sandbox, gameobj.value() -> id);
+  auto modelTransform = fullModelTransform(sandbox, id);
+  // group * something = model (aka aX = b, so X = inv(A) * B)
+  // inverse(group) * model
+  //auto groupToModel =  modelTransform * glm::inverse(groupTransform); 
+  auto groupToModel =  glm::inverse(groupTransform) * modelTransform; 
+
+  auto resultCheck = groupTransform * groupToModel;
+  if (false && resultCheck != modelTransform){
+    std::cout << "group_to_model = " << print(groupToModel) << std::endl;
+    std::cout << "result_check = " << print(resultCheck) << std::endl;
+    std::cout << "model_transform = " << print(modelTransform) << std::endl;
+    assert(false);
+  }
+  return groupToModel;
+}
+
 
 glm::mat4 getModelMatrix(World& world, objid idScene, std::string name, std::string skeletonRoot){
   auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene, false);

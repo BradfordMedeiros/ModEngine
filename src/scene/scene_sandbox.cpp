@@ -689,27 +689,6 @@ glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
 Transformation fullTransformation(SceneSandbox& sandbox, objid id){
   return getTransformationFromMatrix(fullModelTransform(sandbox, id));
 }
-glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
-  auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId, false);
-  assert(gameobj.has_value());
- 
-  auto groupTransform = fullModelTransform(sandbox, gameobj.value() -> id);
-  auto modelTransform = fullModelTransform(sandbox, id);
-  // group * something = model (aka aX = b, so X = inv(A) * B)
-  // inverse(group) * model
-  //auto groupToModel =  modelTransform * glm::inverse(groupTransform); 
-  auto groupToModel =  glm::inverse(groupTransform) * modelTransform; 
-
-  auto resultCheck = groupTransform * groupToModel;
-  if (false && resultCheck != modelTransform){
-    std::cout << "group_to_model = " << print(groupToModel) << std::endl;
-    std::cout << "result_check = " << print(resultCheck) << std::endl;
-    std::cout << "model_transform = " << print(modelTransform) << std::endl;
-    assert(false);
-  }
-  return groupToModel;
-}
-
 
 SceneDeserialization deserializeScene(objid sceneId, std::string content, std::function<objid()> getNewObjectId, std::vector<Style>& styles, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields){
   auto tokens = parseFormat(content);
