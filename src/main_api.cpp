@@ -538,8 +538,8 @@ void stopRecording(objid id){
 
 void tickRecordings(float time){
   for (auto &[id, activeRecording] : activeRecordings){
-    auto gameobject = getGameObject(world, activeRecording.targetObj);
-    saveRecordingIndex(activeRecording.recording, "position", gameobject.transformation.position, time);
+    auto localTransform = gameobjectTransformation(world, activeRecording.targetObj, false);
+    saveRecordingIndex(activeRecording.recording, "position", localTransform.position, time);
   } 
 
   std::vector<objid> recordingsToRemove;
@@ -792,7 +792,8 @@ void moveCamera(glm::vec3 offset, std::optional<bool> relative){
     if (state.activeCameraObj == NULL){
       defaultResources.defaultCamera.transformation.position = moveRelative(defaultResources.defaultCamera.transformation.position, defaultResources.defaultCamera.transformation.rotation, glm::vec3(offset), false);
     }else{
-      setGameObjectPosition(state.activeCameraObj ->id, moveRelative(state.activeCameraObj -> transformation.position, state.activeCameraObj -> transformation.rotation, glm::vec3(offset), false));
+      auto cameraLocalTransform = gameobjectTransformation(world, state.activeCameraObj -> id, false);
+      setGameObjectPosition(state.activeCameraObj ->id, moveRelative(cameraLocalTransform.position, cameraLocalTransform.rotation, glm::vec3(offset), false));
     }
   }else{
     if (state.activeCameraObj == NULL){

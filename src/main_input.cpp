@@ -844,7 +844,8 @@ std::vector<InputDispatch> inputFns = {
         auto voxel = getVoxel(world, objectId.value());
         if (voxel.has_value()){
           auto voxels = voxel.value();
-          auto voxelFragments = splitVoxel(voxels -> voxel, getGameObject(world, objectId.value()).transformation, 2);
+          auto localTransform = gameobjectTransformation(world, objectId.value(), false);
+          auto voxelFragments = splitVoxel(voxels -> voxel, localTransform, 2);
           auto newVoxels = groupVoxelChunks(voxelFragments);
           std::cout << "Voxel fragments size: " << voxelFragments.size() << std::endl;
           std::cout << "New Voxels size: " << newVoxels.size() << std::endl;
