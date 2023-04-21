@@ -809,7 +809,8 @@ void rotateCamera(float xoffset, float yoffset){
   if (state.activeCameraObj == NULL){
     defaultResources.defaultCamera.transformation.rotation = setFrontDelta(defaultResources.defaultCamera.transformation.rotation, xoffset, yoffset, 0, 0.1);
   }else{
-    setGameObjectRotation(state.activeCameraObj ->id, setFrontDelta(state.activeCameraObj -> transformation.rotation, xoffset, yoffset, 0, 0.1));
+    auto cameraRelativeRotation = gameobjectRotation(world, state.activeCameraObj -> id, false);
+    setGameObjectRotation(state.activeCameraObj ->id, setFrontDelta(cameraRelativeRotation, xoffset, yoffset, 0, 0.1));
   }
 }
 void setCameraRotation(glm::quat orientation){

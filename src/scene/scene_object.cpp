@@ -379,7 +379,7 @@ std::vector<calcPositionNewPosition>  calcPositions(World& world, glm::vec3 root
       }
       //std::cout << "(boundingWidth = " << boundingWidth << ", objectWidth = " << objectWidth << ")" << std::endl;
 
-      glm::vec3 newPos = obj.transformation.position;
+      glm::vec3 newPos = gameobjectPosition(world, obj.id, false); 
       newPos.x = left;
       newPos.y = vertical;
       newPositions.push_back(calcPositionNewPosition{
