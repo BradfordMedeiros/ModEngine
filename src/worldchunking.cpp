@@ -134,7 +134,8 @@ std::vector<VoxelChunkFragment> fragmentsForVoxelname(World& world, std::string&
   }
   // todo -> probably should be full transformation right
   // but that depends on it being hooked up to scenegraph which this isn't...
-  return splitVoxel(voxelObj -> voxel, gameobjPair.gameobj.transformation, 2);
+  auto transformation = gameobjectTransformation(world, gameobjPair.gameobj.id, false);
+  return splitVoxel(voxelObj -> voxel, transformation, 2);
 }
 
 void joinFragmentsInScenefile(World& world, std::string& scenefile){

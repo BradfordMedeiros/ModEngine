@@ -1082,7 +1082,8 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool veloci
   }
   //std::cout << "rigid bodies new: " << world.rigidbodys.size() << std::endl;
 
-  physicsLocalTransformSet(world, id, gameobj.transformation);
+  auto transformation = gameobjectTransformation(world, id, false);
+  physicsLocalTransformSet(world, id, transformation);
   btRigidBody* body = world.rigidbodys.find(id) != world.rigidbodys.end() ? world.rigidbodys.at(id).body : NULL;
 
   if (body != NULL){
