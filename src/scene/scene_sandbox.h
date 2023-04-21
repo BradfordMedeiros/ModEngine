@@ -32,8 +32,18 @@ struct Scene {
   std::map<objid, GameObjectH> idToGameObjectsH;
   std::map<objid, std::map<std::string, objid>> sceneToNameToId;
 
-  std::map<objid, TransformCacheElement> absoluteTransforms;
+  std::unordered_map<objid, TransformCacheElement> absoluteTransforms; 
+  //std::map<objid, glm::vec3> constraints;
+
 };
+
+// no parent:
+// add ot absolute transforms (as value = position)
+
+// with parent 
+// add to constraint
+// add to absolute transforms (as value = position + contstaint)
+// when update position of anything -> update absolute transform
 
 struct SceneDeserialization {
   Scene scene;

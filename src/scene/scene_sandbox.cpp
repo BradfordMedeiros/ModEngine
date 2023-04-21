@@ -39,9 +39,7 @@ void enforceRootObjects(Scene& scene){
 
 AttrChildrenPair rootGameObject(){
   return AttrChildrenPair{
-    .attr = GameobjAttributes {
-      .stringAttributes = {{"physics", "disabled"}}
-    },
+    .attr = GameobjAttributes {},
     .children = {},
   };
 }
@@ -292,15 +290,13 @@ void traverseSceneObjects(Scene& scene, std::function<void(objid, glm::mat4, glm
 }
 void traverseSceneByLayer(Scene& scene, std::vector<LayerInfo> layers, std::function<void(objid, glm::mat4, glm::mat4, LayerInfo&, std::string)> onObject){
   std::vector<traversalData> datum;
-
-  traverseSceneObjects(scene, [&datum](objid foundId, glm::mat4 modelMatrix, glm::mat4 parentMatrix) -> void {
+  for (auto &[id, transformCacheElement] :  scene.absoluteTransforms){
     datum.push_back(traversalData{
-      .id = foundId,
-      .modelMatrix = modelMatrix,
-      .parentMatrix = parentMatrix,
+      .id = id,
+      .modelMatrix = matrixFromComponents(transformCacheElement.transform),
+      .parentMatrix = glm::mat4(1.f),
     });
-  });
-  
+  }
   for (auto layer : layers){      // @TODO could organize this before to not require pass on each frame
     for (auto data : datum){
       auto gameobject = scene.idToGameObjects.at(data.id);
@@ -373,7 +369,11 @@ std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<s
 SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields){
   Scene mainScene {
     .rootId = 0,
-    .sceneToNameToId = {{ 0, {}}}
+    .idToGameObjects = {},
+    .idToGameObjectsH = {},
+    .sceneToNameToId = {{ 0, {}}},
+    .absoluteTransforms = {},
+    //.constraints = {},
   };
   std::sort(std::begin(layers), std::end(layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
 
