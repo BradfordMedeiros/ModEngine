@@ -1422,7 +1422,7 @@ Properties getProperties(World& world, objid id){
   return properties;
 }
 void setProperties(World& world, objid id, Properties& properties){
-  getGameObject(world, id).transformation = properties.transformation;
+  physicsLocalTransformSet(world, id, properties.transformation);
 }
 
 std::string sceneFileForSceneId(World& world, objid sceneId){
@@ -1459,5 +1459,6 @@ Transformation gameobjectTransformation(World& world, objid id, bool isWorld){
   if (isWorld){
     return fullTransformation(world.sandbox, id);
   }
-  return calcRelativeTransform(world.sandbox, id);
+  return getGameObject(world, id).transformation;
+  //return calcRelativeTransform(world.sandbox, id);
 }

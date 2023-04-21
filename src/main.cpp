@@ -595,10 +595,10 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor, bool showCursor){
   auto selectedValue = latestSelected(state.editor);
   if (selectedValue.has_value()){
     auto selectedIndex = selectedValue.value();
-    auto obj = getGameObject(world, selectedIndex);
-    position = print(obj.transformation.position);
-    scale = print(obj.transformation.scale);
-    rotation = serializeQuat(obj.transformation.rotation);
+    auto transformation = gameobjectTransformation(world, selectedIndex, false);
+    position = print(transformation.position);
+    scale = print(transformation.scale);
+    rotation = serializeQuat(transformation.rotation);
   }
 
   drawTextNdi("position: " + position, uiXOffset, uiYOffset + offsetPerLine * 6, state.fontsize);
