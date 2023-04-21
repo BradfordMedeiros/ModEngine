@@ -34,7 +34,7 @@ struct physicsOpts {
 struct GameObject {
   objid id;
   std::string name;
-  Transformation constraint;
+  Transformation transformation;
   physicsOpts physicsOptions;  // Should remove this and just get it from the physics system (probably)
   std::string lookat;
   std::string layer;

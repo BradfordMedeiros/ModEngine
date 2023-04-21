@@ -301,7 +301,7 @@ void setGameObjectPositionRelative(int32_t index, glm::vec3 pos){
 }
 
 glm::vec3 getGameObjectScale(int32_t index){
-  return getGameObject(world, index).transformation.scale;
+  return gameobjectScale(world, index, false);
 }
 void setGameObjectScale(int32_t index, glm::vec3 scale){
   physicsScaleSet(world, index, scale);

@@ -411,7 +411,7 @@ std::vector<calcPositionNewPosition>  calcPositions(World& world, glm::vec3 root
         effectiveSpacing = minSpacing;
       }
 
-      glm::vec3 newPos = obj.transformation.position;
+      glm::vec3 newPos = gameobjectTransformation(world, obj.id, false).position;
       newPos.x = horizontal;
       newPos.y = top;
       newPositions.push_back(calcPositionNewPosition{

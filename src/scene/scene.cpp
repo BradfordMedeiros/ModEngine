@@ -1418,7 +1418,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
 
 Properties getProperties(World& world, objid id){
   Properties properties {
-    .transformation = getGameObject(world, id).transformation,
+    .transformation =  gameobjectTransformation(world, id, false),
   };
   return properties;
 }
@@ -1445,9 +1445,12 @@ glm::vec3 gameobjectPosition(World& world, objid id, bool isWorld){
   }
   return getGameObject(world, id).transformation.position;   // fix relative reference
 }
-//glm::vec3 gameobjectScale(World& world, objid id, bool isWorld){
-//
-//}
+glm::vec3 gameobjectScale(World& world, objid id, bool isWorld){
+  if (isWorld){
+    return fullTransformation(world.sandbox, id).scale;
+  }
+  return getGameObject(world, id).transformation.scale;   // fix relative reference
+}
 
 glm::quat gameobjectRotation(World& world, objid id, bool isWorld){
   if (isWorld){
