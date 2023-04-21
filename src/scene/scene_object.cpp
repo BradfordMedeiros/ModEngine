@@ -79,7 +79,9 @@ void teleportObject(World& world, objid objectId, objid portalId){
   if (!portalInfo.has_value()){
     return;
   }
-  auto portalView = glm::inverse(renderPortalView(portalInfo.value(), gameobject.transformation));
+
+  auto transformation = gameobjectTransformation(world, gameobject.id, false);
+  auto portalView = glm::inverse(renderPortalView(portalInfo.value(), transformation));
   auto newTransform = getTransformationFromMatrix(portalView);
   auto newPosition = newTransform.position;
   physicsTranslateSet(world, objectId, newPosition, false);
@@ -239,7 +241,7 @@ void setObjectDimensions(World& world, std::vector<objid>& ids, float width, flo
       // @TODO this is resizing based upon first mesh only, which is questionable
       auto newScale = getScaleEquivalent(meshObj -> meshesToRender.at(0).boundInfo, width, height, depth);   // this is correlated to logic in scene//getPhysicsInfoForGameObject, needs to be fixed
       std::cout << "new scale: (" << newScale.x << ", " << newScale.y << ", " << newScale.z << ")" << std::endl;
-      getGameObject(world, selected).transformation.scale = newScale;
+      physicsScaleSet(world, selected, newScale);
     } 
   }  
 }

@@ -1463,6 +1463,6 @@ Transformation gameobjectTransformation(World& world, objid id, bool isWorld){
   if (isWorld){
     return fullTransformation(world.sandbox, id);
   }
-  return getGameObject(world, id).transformation;
+  return getGameObject(world, id).transformation;   // fix relative reference
   //return calcRelativeTransform(world.sandbox, id);
 }

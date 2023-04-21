@@ -49,7 +49,8 @@ void applyImpulse(int32_t index, glm::vec3 impulse){
 void applyImpulseRel(int32_t index, glm::vec3 impulse){
   auto rigidBody = getRigidBody(index);
   if (rigidBody != NULL){
-    glm::vec3 relativeImpulse = calculateRelativeOffset(getGameObject(world, index).transformation.rotation, impulse, true);
+    auto relativeRotation = gameobjectRotation(world, index, false);
+    glm::vec3 relativeImpulse = calculateRelativeOffset(relativeRotation, impulse, true);
     applyImpulse(rigidBody, relativeImpulse);
   }
 }
