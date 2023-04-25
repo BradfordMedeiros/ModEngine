@@ -389,7 +389,7 @@ FontFamily& fontFamilyByName(std::string name){
       return family;
     }
   }
-  //modassert(false, "ERROR invalid font family name");
+  //modassert(false, "ERROR invalid font family name: " + (name.size() == 0 ? "<empty>" : ("[" + name + "]")));
   return defaultResources.fontFamily.at(0);
 }
 int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, UiTextCursor cursor, std::string fontFamilyName, bool drawBoundingOnly){

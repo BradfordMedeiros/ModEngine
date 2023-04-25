@@ -515,7 +515,6 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
       auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
       sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
         .transform = newTransform,
-        .dirty = false,
       };
     }
   }
@@ -533,11 +532,32 @@ void addObjectToCache(SceneSandbox& sandbox, objid id){
   );
   sandbox.mainScene.absoluteTransforms[id] = TransformCacheElement {
     .transform = getTransformationFromMatrix(elementMatrix),
-    .dirty = true,
   };
 }
 void removeObjectFromCache(Scene& mainScene, objid id){
   mainScene.absoluteTransforms.erase(id);
+}
+
+void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
+  std::cout << "should update id: " << updatedId << std::endl;
+
+  // do a breath first search, and then update it in that order
+
+
+  for (auto &[id, transform] : sandbox.mainScene.absoluteTransforms){
+    if (id != updatedId){
+      //continue;
+    }
+    auto parentId = getGameObjectH(sandbox, id).parentId;
+    if (parentId != -1){
+      auto currentConstraint = getGameObject(sandbox, id).transformation;
+      auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
+      sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
+        .transform = newTransform,
+      };
+    }
+  }
+
 }
 
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
@@ -545,13 +565,12 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
   auto parentId = getGameObjectH(sandbox, id).parentId;
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform =  transform,
-    .dirty = true,
   };
   if (parentId != -1){
     auto oldRelativeTransform = calcRelativeTransform(sandbox, id);
     getGameObject(sandbox, id).transformation = oldRelativeTransform;  
   }
-  updateSandbox(sandbox);
+  updateAllChildrenPositions(sandbox, id);
 }
 
 void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform){
@@ -560,9 +579,8 @@ void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation tra
   auto newTransform = calcAbsoluteTransform(sandbox, parentId, transform);
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
-    .dirty = true,
   };
-  updateSandbox(sandbox);
+  updateAllChildrenPositions(sandbox, id);
 }
 
 void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){

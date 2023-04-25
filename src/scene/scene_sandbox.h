@@ -22,7 +22,6 @@ struct GameObjectH {
 
 struct TransformCacheElement {
   Transformation transform;
-  bool dirty;
 };
 
 struct Scene {
@@ -30,9 +29,7 @@ struct Scene {
   std::map<objid, GameObject> idToGameObjects;
   std::map<objid, GameObjectH> idToGameObjectsH;
   std::map<objid, std::map<std::string, objid>> sceneToNameToId;
-
   std::unordered_map<objid, TransformCacheElement> absoluteTransforms; 
-
 };
 
 // no parent:
