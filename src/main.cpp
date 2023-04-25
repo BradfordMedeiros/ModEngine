@@ -877,6 +877,12 @@ const GLFWvidmode* mode = NULL;
 int main(int argc, char* argv[]){
   signal(SIGABRT, signalHandler);  
 
+  std::string argsString = "";
+  for (int i = 0; i < argc; i++){
+    argsString += std::string(argv[i]) + " ";
+  }
+  modlog("command", argsString);
+
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
    ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))
@@ -1335,9 +1341,7 @@ int main(int argc, char* argv[]){
     loadSkybox(world, state.skybox); 
   }
 
-  for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
-    loadCScript(getUniqueObjId(), script.c_str(), -1, bootStrapperMode, true);
-  }
+
 
   bool fpsFixed = result["fps-fixed"].as<bool>();
   initialTime = fpsFixed  ? 0 : glfwGetTime();
@@ -1374,6 +1378,9 @@ int main(int argc, char* argv[]){
       .crosshairSprite = NULL,
     }
   };
+
+
+
   setCrosshairSprite();  // needs to be after create world since depends on these meshes being loaded
 
   GLFWimage images[1]; 
@@ -1387,6 +1394,10 @@ int main(int argc, char* argv[]){
     return 0;
   }
 
+  for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
+    loadCScript(getUniqueObjId(), script.c_str(), -1, bootStrapperMode, true);
+  }
+  
   std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
   for (auto parsedScene : parseSceneArgs(rawScenes)){
     loadScene(parsedScene.sceneToLoad, {}, parsedScene.sceneFileName, parsedScene.tags);
