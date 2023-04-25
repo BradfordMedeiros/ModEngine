@@ -25,6 +25,7 @@ objid sandboxAddToScene(Scene& scene, objid sceneId, objid parentId, std::string
 void enforceParentRelationship(Scene& scene, objid id, objid parentId){
   scene.idToGameObjectsH.at(id).parentId = parentId;
   scene.idToGameObjectsH.at(parentId).children.insert(id);
+  //scene.constraints[id] = scene.idToGameObjects.at(id).transformation;
 }
 
 void enforceRootObjects(Scene& scene){
@@ -344,7 +345,6 @@ SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std
     .idToGameObjectsH = {},
     .sceneToNameToId = {{ 0, {}}},
     .absoluteTransforms = {},
-    //.constraints = {},
   };
   std::sort(std::begin(layers), std::end(layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
 
@@ -507,54 +507,20 @@ Transformation calcAbsoluteTransform(SceneSandbox& sandbox, objid parentId, Tran
 // Returns elemenets are the ids that were not explicitly updated by calling code, and therefore may need to be updated by calling code 
 // In practice this means they need to update the actual physics trasform since this code recalculated it from the scenegraph
 std::set<objid> updateSandbox(SceneSandbox& sandbox){
-  //std::set<objid> dirtiedElements;
-  //std::set<objid> newUpdatedElements;
+  std::cout << "Update sandbox" << std::endl;
   for (auto &[id, transform] : sandbox.mainScene.absoluteTransforms){
-    getGameObject(sandbox, id).transformation = calcRelativeTransform(sandbox, id);
+    auto parentId = getGameObjectH(sandbox, id).parentId;
+    if (parentId != -1){
+      auto currentConstraint = getGameObject(sandbox, id).transformation;
+      auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
+      sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
+        .transform = newTransform,
+        .dirty = false,
+      };
+    }
   }
-  //for (auto &[id, transform] : sandbox.mainScene.absoluteTransforms){
-  //  if (id == 0){
-  //    continue;
-  //  }
-  //  if (transform.updateType != UPDATE_NONE){
-  //    dirtiedElements.insert(id);
-  //  }
-  //}
-  //std::set<objid> alreadyUpdated;
-  //for (auto element : dirtiedElements){
-  //  //std::cout << "dirty element: " << element << std::endl;
-  //  updateTraverse(sandbox.mainScene, element, [&sandbox, &alreadyUpdated, &dirtiedElements, &newUpdatedElements](objid id) -> bool {
-  //    if (dirtiedElements.find(id) == dirtiedElements.end()){
-  //      newUpdatedElements.insert(id);
-  //    }
-  //    if (alreadyUpdated.find(id) != alreadyUpdated.end()){
-  //      //std::cout << "id: " << id << " was already updated" << std::endl;
-  //      return false;
-  //    }
-  //    TransformCacheElement& element = sandbox.mainScene.absoluteTransforms.at(id);
-//
-//  //    auto parentId = getGameObjectH(sandbox, id).parentId;
-//  //    if(element.updateType != UPDATE_ABSOLUTE){ // element needs to be updated based on its old relative constraint
-//  //      auto gameobj = getGameObject(sandbox, id);
-//  //      //std::cout << "updated: " << id << " - " << gameobj.name << std::endl;
-//  //      auto relativeTransform = gameobj.transformation;
-//  //      element.transform = calcAbsoluteTransform(sandbox, parentId, relativeTransform);
-//  //    }else if (element.updateType == UPDATE_ABSOLUTE){
-//  //      // if the element was updated
-//  //      //std::cout << "> updating: " << getGameObject(sandbox, id).name << " - " << print(getGameObject(sandbox, id).transformation.position) << std::endl;
-//  //      getGameObject(sandbox, id).transformation = calcRelativeTransform(sandbox, id, parentId);
-//  //    }
-//  //    //std::cout << "updated: " << id << " - " << print (getGameObject(sandbox, id).transformation.position) << std::endl;
-//
-//  //    element.updateType = UPDATE_NONE;
-//  //    alreadyUpdated.insert(id);
-//  //    return true;
-//  //  });
-//  //}
-//
-//  //return newUpdatedElements;
   return {};
-}//
+}
 
 
 void addObjectToCache(SceneSandbox& sandbox, objid id){
@@ -567,9 +533,8 @@ void addObjectToCache(SceneSandbox& sandbox, objid id){
   );
   sandbox.mainScene.absoluteTransforms[id] = TransformCacheElement {
     .transform = getTransformationFromMatrix(elementMatrix),
+    .dirty = true,
   };
-  updateSandbox(sandbox);
-
 }
 void removeObjectFromCache(Scene& mainScene, objid id){
   mainScene.absoluteTransforms.erase(id);
@@ -577,10 +542,16 @@ void removeObjectFromCache(Scene& mainScene, objid id){
 
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   //std::cout << "updating: " << id << " (" << getGameObject(sandbox, id).name << ") - " << print(transform.position) << std::endl;
-
+  auto parentId = getGameObjectH(sandbox, id).parentId;
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform =  transform,
+    .dirty = true,
   };
+  if (parentId != -1){
+    auto oldRelativeTransform = calcRelativeTransform(sandbox, id);
+    getGameObject(sandbox, id).transformation = oldRelativeTransform;  
+  }
+  updateSandbox(sandbox);
 }
 
 void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform){
@@ -589,7 +560,9 @@ void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation tra
   auto newTransform = calcAbsoluteTransform(sandbox, parentId, transform);
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
+    .dirty = true,
   };
+  updateSandbox(sandbox);
 }
 
 void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
