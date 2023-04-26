@@ -544,11 +544,14 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
       continue;
     }
     if (parentId != -1){
-      auto currentConstraint = getGameObject(sandbox, id).transformation;
-      auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
-      sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
-        .transform = newTransform,
-      };
+      GameObject& gameobj = getGameObject(sandbox, id);
+      if (gameobj.physicsOptions.isStatic || !gameobj.physicsOptions.enabled){
+         auto currentConstraint = gameobj.transformation;
+         auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
+         sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
+           .transform = newTransform,
+         };       
+      }
     }
   }
 
