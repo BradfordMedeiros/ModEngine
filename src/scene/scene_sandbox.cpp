@@ -355,6 +355,7 @@ SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std
   SceneSandbox sandbox {
     .mainScene = mainScene,
     .layers = layers,
+    .updatedIds = {},
   };
   addObjectToCache(sandbox, rootObjId);
 
@@ -502,14 +503,46 @@ Transformation calcAbsoluteTransform(SceneSandbox& sandbox, objid parentId, Tran
   return getTransformationFromMatrix(finalTransform);
 }
 
+std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId){
+  std::vector<objid> ids;
+  std::queue<objid> idsToVisit;  // shouldn't actually be needed since no common children
+  std::set<objid> visited;
 
-// Might be better conceptually thought of as "enforceParentConstraints"
-// Returns elemenets are the ids that were not explicitly updated by calling code, and therefore may need to be updated by calling code 
-// In practice this means they need to update the actual physics trasform since this code recalculated it from the scenegraph
-std::set<objid> updateSandbox(SceneSandbox& sandbox){
-  std::cout << "Update sandbox" << std::endl;
-  for (auto &[id, transform] : sandbox.mainScene.absoluteTransforms){
+  auto currentId = updatedId;
+  idsToVisit.push(currentId);
+
+  while (idsToVisit.size() > 0){
+    auto idToVisit = idsToVisit.front();
+    ids.push_back(idToVisit);
+    visited.insert(idToVisit);
+    idsToVisit.pop();
+    auto objH = sandbox.mainScene.idToGameObjectsH.at(idToVisit);
+    for (objid id : objH.children){
+      if (visited.count(id) == 0){
+        idsToVisit.push(id);
+      }
+    }    
+  }
+  //
+
+  return ids;
+}
+void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
+  std::cout << "should update id: " << updatedId << std::endl;
+
+  // do a breath first search, and then update it in that order
+  auto updatedIdElements = bfsElementAndChildren(sandbox, updatedId);
+  std::cout << "should update: " << print(updatedIdElements) << std::endl;
+  for (auto id : updatedIdElements){
+    if (id != updatedId){
+      sandbox.updatedIds.insert(id);  
+    }
     auto parentId = getGameObjectH(sandbox, id).parentId;
+    if (
+      sandbox.mainScene.absoluteTransforms.find(id) == sandbox.mainScene.absoluteTransforms.end() ||
+      sandbox.mainScene.absoluteTransforms.find(parentId) == sandbox.mainScene.absoluteTransforms.end()){
+      continue;
+    }
     if (parentId != -1){
       auto currentConstraint = getGameObject(sandbox, id).transformation;
       auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
@@ -518,7 +551,13 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
       };
     }
   }
-  return {};
+
+}
+
+std::set<objid> updateSandbox(SceneSandbox& sandbox){
+  std::set<objid> oldUpdated = sandbox.updatedIds;
+  sandbox.updatedIds = {};
+  return oldUpdated;
 }
 
 
@@ -533,32 +572,13 @@ void addObjectToCache(SceneSandbox& sandbox, objid id){
   sandbox.mainScene.absoluteTransforms[id] = TransformCacheElement {
     .transform = getTransformationFromMatrix(elementMatrix),
   };
+  updateAllChildrenPositions(sandbox, id);
 }
 void removeObjectFromCache(Scene& mainScene, objid id){
   mainScene.absoluteTransforms.erase(id);
 }
 
-void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
-  std::cout << "should update id: " << updatedId << std::endl;
 
-  // do a breath first search, and then update it in that order
-
-
-  for (auto &[id, transform] : sandbox.mainScene.absoluteTransforms){
-    if (id != updatedId){
-      //continue;
-    }
-    auto parentId = getGameObjectH(sandbox, id).parentId;
-    if (parentId != -1){
-      auto currentConstraint = getGameObject(sandbox, id).transformation;
-      auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
-      sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
-        .transform = newTransform,
-      };
-    }
-  }
-
-}
 
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   //std::cout << "updating: " << id << " (" << getGameObject(sandbox, id).name << ") - " << print(transform.position) << std::endl;

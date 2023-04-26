@@ -198,6 +198,16 @@ std::string print(std::vector<std::string>& values){
   return stream.str();
 }
 
+std::string print(std::vector<objid>& values){
+  std::stringstream stream;
+  stream << "[ ";
+  for (auto &value : values){
+    stream << value << " ";
+  }
+  stream << "]";
+  return stream.str();
+}
+
 std::string rawprint(glm::quat quat){
   std::stringstream stream;
   stream << quat.x << " " << quat.y << " " << quat.z << " " << quat.w;

@@ -57,6 +57,8 @@ struct SceneSandbox {
   std::map<objid, SceneMetadata> sceneIdToSceneMetadata;
   Scene mainScene;
   std::vector<LayerInfo> layers;
+
+  std::set<objid> updatedIds;
 };
 
 std::vector<std::string> childnames(SceneSandbox& sandbox, GameObjectH& gameobjecth);

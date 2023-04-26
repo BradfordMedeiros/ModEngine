@@ -43,6 +43,10 @@ enum ManipulatorMode { NONE, ROTATE, TRANSLATE, SCALE };
 enum Axis { NOAXIS, XAXIS, YAXIS, ZAXIS };
 enum SNAPPING_MODE { SNAP_CONTINUOUS, SNAP_ABSOLUTE, SNAP_RELATIVE };
 
+typedef int32_t objid;
+objid getUniqueObjId();
+std::string getUniqueObjectName(std::string& prefix);
+
 std::string print(bool value);
 std::string print(glm::vec3 vec);
 std::string print(glm::vec4 vec);
@@ -54,6 +58,7 @@ std::string print(glm::mat4 mat);
 std::string print(glm::mat3 mat);
 std::string print(glm::mat2 mat);
 std::string print(std::vector<std::string>& values);
+std::string print(std::vector<objid>& values);
 glm::vec3 parseVec(std::string positionRaw);
 glm::vec4 parseVec4(std::string positionRaw);
 bool maybeParseVec(std::string positionRaw, glm::vec3& _vec);
@@ -80,9 +85,6 @@ std::string serializeQuat(glm::quat rotation);
 float maxvalue(float x, float y, float z);
 int maxvalue(int x, int y, int z);
 
-typedef int32_t objid;
-objid getUniqueObjId();
-std::string getUniqueObjectName(std::string& prefix);
 
 enum AttributeValueType { ATTRIBUTE_VEC3, ATTRIBUTE_VEC4, ATTRIBUTE_STRING, ATTRIBUTE_FLOAT };
 typedef std::variant<glm::vec3, glm::vec4, std::string, float> AttributeValue;
