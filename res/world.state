@@ -7,11 +7,11 @@
 # nav     =  0b 1000000
 # soe more options in object_types.cpp renderObject
 editor:debug:true
-editor:debugmask:126  # this & the above number determines if the debug object should show
+#editor:debugmask:126  # this & the above number determines if the debug object should show
 
-#editor:debugmask:254
+editor:debugmask:8
 
-world:paused:false  # true / false
+#world:paused:true  # true / false
 
 diffuse:enabled:true
 specular:enabled:true
@@ -21,8 +21,9 @@ bloom:threshold:3
 bloomblur:amount:1
 #exposure:amount:0.8
 pbr:enabled:false
-shadows:enabled:true
+shadows:enabled:false
 shadows:intensity:0.7
+attenuation:enabled:false
 
 exposure:enabled:false
 gamma:enabled:false
@@ -41,7 +42,7 @@ fog:maxcutoff:0.9999
 ### Effects ###
 #dof:state:enabled
 skybox:texture:./res/textures/skyboxs/desert/
-skybox:color:0.5 0 0.5
+skybox:color:0.2 0.2 0.2
 skybox:enable:true
 ###############################
 
@@ -57,14 +58,14 @@ rendering:fontsize:6
 
 
 ### input stuff ###
-mouse:cursor:normal   # normal, hidden, capture
+mouse:cursor:capture   # normal, hidden, capture
 
 #window:name:ModEngine Editor
-#window:icon:./res/textures/wood.jpg
+window:icon:./res/textures/wood.jpg
 
 #skybox:color:0.1 0.1 0.1
 
-#rendering:cull:disabled
+rendering:cull:disabled
 
 #editor:showgrid:true
 editor:gridsize:40
@@ -80,10 +81,18 @@ tools:snap-rotate:relative     # none relative absolute
 tools:scale-group:group
 #tools:position-relative:true
 
+tools:terrainpaint-amount:1
+tools:terrainpaint-radius:1
+tools:terrainpaint-smoothing:false
+tools:terrainpaint-brush:./res/brush/ramp_5x5.png
+
 #editor:snapscale-index:0
 #editor:snapangle-index:10
 
 
-debug:textoffset:1.5 -1.2
+
+debug:textoffset:0 -1.2
 
 editor:groupselection:true
+
+sound:volume:0.2
