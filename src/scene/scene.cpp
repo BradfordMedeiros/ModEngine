@@ -1443,20 +1443,20 @@ glm::vec3 gameobjectPosition(World& world, objid id, bool isWorld){
   if (isWorld){
     return fullTransformation(world.sandbox, id).position;
   }
-  return getGameObject(world, id).transformation.position;   // fix relative reference
+  return calcRelativeTransform(world.sandbox, id).position; // getGameObject(world, id).transformation.position;   // fix relative reference
 }
 glm::vec3 gameobjectScale(World& world, objid id, bool isWorld){
   if (isWorld){
     return fullTransformation(world.sandbox, id).scale;
   }
-  return getGameObject(world, id).transformation.scale;   // fix relative reference
+  return calcRelativeTransform(world.sandbox, id).scale;   // fix relative reference
 }
 
 glm::quat gameobjectRotation(World& world, objid id, bool isWorld){
   if (isWorld){
     return fullTransformation(world.sandbox, id).rotation;
   }
-  return getGameObject(world, id).transformation.rotation;  // fix relative reference
+  return calcRelativeTransform(world.sandbox, id).rotation;  // fix relative reference
 }
 
 Transformation gameobjectTransformation(World& world, objid id, bool isWorld){

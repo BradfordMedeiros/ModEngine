@@ -20,10 +20,8 @@ struct GameObjectH {
   objid sceneId;
 };
 
-enum TransformUpdateType { UPDATE_NONE, UPDATE_ABSOLUTE, UPDATE_RECALC_RELATIVE };
 struct TransformCacheElement {
   Transformation transform;
-  TransformUpdateType updateType;
 };
 
 struct Scene {
@@ -31,9 +29,16 @@ struct Scene {
   std::map<objid, GameObject> idToGameObjects;
   std::map<objid, GameObjectH> idToGameObjectsH;
   std::map<objid, std::map<std::string, objid>> sceneToNameToId;
-
-  std::map<objid, TransformCacheElement> absoluteTransforms;
+  std::unordered_map<objid, TransformCacheElement> absoluteTransforms; 
 };
+
+// no parent:
+// add ot absolute transforms (as value = position)
+
+// with parent 
+// add to constraint
+// add to absolute transforms (as value = position + contstaint)
+// when update position of anything -> update absolute transform
 
 struct SceneDeserialization {
   Scene scene;
@@ -52,6 +57,8 @@ struct SceneSandbox {
   std::map<objid, SceneMetadata> sceneIdToSceneMetadata;
   Scene mainScene;
   std::vector<LayerInfo> layers;
+
+  std::set<objid> updatedIds;
 };
 
 std::vector<std::string> childnames(SceneSandbox& sandbox, GameObjectH& gameobjecth);
