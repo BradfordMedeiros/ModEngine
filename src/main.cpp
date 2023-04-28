@@ -1513,6 +1513,7 @@ int main(int argc, char* argv[]){
       { forward.x, forward.y, forward.z},
       { up.x, up.y, up.z }
     );
+    setVolume(state.volume);
     
     view = renderView(viewTransform.position, viewTransform.rotation);
     glViewport(0, 0, state.resolution.x, state.resolution.y);

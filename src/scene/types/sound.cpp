@@ -10,6 +10,17 @@ void stopSoundSystem(){
   alutExit();
 }
 
+float getVolume(){
+  ALfloat oldVolume;
+  alGetListenerf(AL_GAIN, &oldVolume);
+  return oldVolume;
+}
+
+void setVolume(float volume){
+  modassert(volume >= 0 && volume <=1, "set listener volume invalid volume");
+  alListenerf(AL_GAIN, volume);
+}
+
 void playSource(ALuint source, std::optional<float> volume, std::optional<glm::vec3> position){
   ALfloat oldVolume;
   ALfloat x;
@@ -17,7 +28,7 @@ void playSource(ALuint source, std::optional<float> volume, std::optional<glm::v
   ALfloat z;
 
   if (volume.has_value()){
-    alGetListenerf(AL_GAIN, &oldVolume);
+    alGetSourcef(source, AL_GAIN, &oldVolume);
     setSoundVolume(source, volume.value());
   }
   if (position.has_value()){

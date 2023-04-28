@@ -324,6 +324,7 @@ std::vector<ObjectStateMapping> mapping = {
   simpleBoolSerializer("world", "paused", offsetof(engineState, worldpaused)),
   simpleVec2Serializer("debug", "textoffset", offsetof(engineState, infoTextOffset), std::nullopt),
   simpleBoolSerializer("editor", "groupselection", offsetof(engineState, groupSelection)),
+  simpleFloatSerializer("sound", "volume", offsetof(engineState, volume)),
 };  
 
 void setState(engineState& state, ObjectValue& value, float now){
@@ -456,6 +457,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .infoTextOffset = glm::ivec2(0, 0),
     .useYAxis = true,
     .forceSelectIndex = 0,
+    .volume = 1.f,
 	};
 	return state;
 }
