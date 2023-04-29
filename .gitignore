@@ -7,3 +7,5 @@ res/scenes/chunks
 res/scenes/editor/editor.rawscene
 res/scenes/editor/dock/*.rawscene
 lib
+perf/perf.data
+perf/perf.data.old
