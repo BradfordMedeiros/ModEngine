@@ -9,4 +9,4 @@ then
 fi
 
 echo "$@"
-(cd ../ && perf record -F 99 -ag --output=./perf/perf.data -- ./build/modengine "$@")
+(cd ../ && perf record  -g --output=./perf/perf.data -- ./build/modengine "$@")
