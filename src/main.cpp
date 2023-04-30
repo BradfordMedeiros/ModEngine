@@ -516,10 +516,10 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model, int numC
 
   if (showDebugInfo){
     drawCoordinateSystem(100.f);
-    glDisable(GL_DEPTH_TEST);
-    //drawTraversalPositions(lineData);   
-    drawAllLines(lineData, shaderProgram, std::nullopt);
   }
+  glDisable(GL_DEPTH_TEST);
+    //drawTraversalPositions(lineData);   
+  drawAllLines(lineData, shaderProgram, std::nullopt);
 
 }
 
