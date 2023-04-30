@@ -494,6 +494,7 @@ Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId){
 
 // What should the absolute transform be given a parents absolute and a relative child transform
 Transformation calcAbsoluteTransform(SceneSandbox& sandbox, objid parentId, Transformation transform){
+  modassert(parentId != -1, "scene sandbox - calc absolute Transform - parent id should not be -1");
   Transformation parentTransform = sandbox.mainScene.absoluteTransforms.at(parentId).transform;
 
   glm::mat4 parentMatrix = matrixFromComponents(parentTransform);
@@ -599,7 +600,7 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
 void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   auto parentId = getGameObjectH(sandbox, id).parentId;
   getGameObject(sandbox, id).transformation = transform;
-  auto newTransform = calcAbsoluteTransform(sandbox, parentId, transform);
+  auto newTransform = parentId == -1 ? transform : calcAbsoluteTransform(sandbox, parentId, transform);
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
   };

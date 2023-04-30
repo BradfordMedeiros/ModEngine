@@ -9,3 +9,4 @@ res/scenes/editor/dock/*.rawscene
 lib
 perf/perf.data
 perf/perf.data.old
+perf/.perf.data
