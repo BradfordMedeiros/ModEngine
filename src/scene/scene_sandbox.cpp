@@ -529,11 +529,10 @@ std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId)
   return ids;
 }
 void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
-  std::cout << "should update id: " << updatedId << std::endl;
-
+  //std::cout << "should update id: " << updatedId << std::endl;
   // do a breath first search, and then update it in that order
   auto updatedIdElements = bfsElementAndChildren(sandbox, updatedId);
-  std::cout << "should update: " << print(updatedIdElements) << std::endl;
+  //std::cout << "should update: " << print(updatedIdElements) << std::endl;
   for (auto id : updatedIdElements){
     if (id != updatedId){
       sandbox.updatedIds.insert(id);  
@@ -756,6 +755,7 @@ void makeParent(SceneSandbox& sandbox, objid child, objid parent){
       objh.sceneId = parentObjH.sceneId;
     }
   }
+  updateAllChildrenPositions(sandbox, parent); // TODO - only update the newly parented children
 }
 
 std::optional<objid> listParentObjId(SceneSandbox& sandbox, objid sceneId){

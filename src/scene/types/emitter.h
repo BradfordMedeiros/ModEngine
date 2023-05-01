@@ -27,6 +27,7 @@ struct NewParticleOptions {
   std::optional<glm::quat> orientation; 
   std::optional<glm::vec3> velocity;
   std::optional<glm::vec3> angularVelocity;
+  std::optional<objid> parentId;
 };
 
 enum EmitterDeleteBehavior { EMITTER_NOTYPE, EMITTER_DELETE, EMITTER_ORPHAN, EMITTER_FINISH };
