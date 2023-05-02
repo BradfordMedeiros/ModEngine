@@ -1340,10 +1340,7 @@ void applyAttributeDelta(World& world, objid id, std::string field, AttributeVal
   setAttributes(world, id, attrValue);
 }
 
-std::string print(Transformation& transform){
-  return std::string(" [pos = " + print(transform.position) + ", scale = " + print(transform.scale) + ", rot = " + serializeQuat(transform.rotation) +  "]");
-}
-
+extern bool displayDebug;
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, bool paused){
   if (!paused){
     updateEmitters(
@@ -1377,10 +1374,11 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
         }
 
         auto oldTransformation = gameobjectTransformation(world, objectAdded, true);
-
    
         if (particleOpts.parentId.has_value()){
           modlog("emitters", "parent to id: " + std::to_string(particleOpts.parentId.value()));
+
+          displayDebug = true;
 
           auto constraint = getGameObject(world.sandbox, objectAdded).transformation;
           std::cout << "old transform: " << print(oldTransformation) << std::endl;
@@ -1393,9 +1391,10 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
             .rotation = oldTransformation.rotation,
           });
 
+          displayDebug = false;
+
           auto newTransformation = gameobjectTransformation(world, objectAdded, true);
-          modassert(aboutEqual(oldTransformation.position, newTransformation.position), std::string("transforms.position not equal: old = ") + print(oldTransformation.position) + ", new = " + print(newTransformation.position));
-          modassert(aboutEqual(oldTransformation.scale, newTransformation.scale), std::string("transforms.scale not equal: old = ") + print(oldTransformation.scale) + ", new = " + print(newTransformation.scale));
+          modassert(aboutEqual(oldTransformation.position, newTransformation.position) && aboutEqual(oldTransformation.scale, newTransformation.scale), std::string("transforms not equal: old = ") + print(oldTransformation) + ", new = " + print(newTransformation));
         }
         return objectAdded;
       }, 

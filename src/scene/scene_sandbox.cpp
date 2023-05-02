@@ -463,25 +463,16 @@ GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name, objid scene
 }
 
 
+Transformation calcRelativeTransform(Transformation& child, Transformation& parent){
+  auto absTransformCache = matrixFromComponents(child); 
+  auto parentTransform = matrixFromComponents(parent);
+  auto relativeTransform = glm::inverse(parentTransform) * absTransformCache;
+  return getTransformationFromMatrix(relativeTransform);
+}
+
 // What position should the gameobject be based upon the two absolute transform of parent and child
 Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId, objid parentId){
-  auto absTransformCache = matrixFromComponents(sandbox.mainScene.absoluteTransforms.at(childId).transform); 
-  auto parentTransform = matrixFromComponents(sandbox.mainScene.absoluteTransforms.at(parentId).transform);
-
-  //std::cout << "parent transform: " << std::endl;
-  //printTransformInformation(getTransformationFromMatrix(parentTransform));
-
-  //auto relativeTransform = glm::inverse(parentTransform) * absTransformCache;
-  auto relativeTransform = glm::inverse(parentTransform) * absTransformCache;
-
-  //std::cout << "child transform: " << std::endl;
-  //printTransformInformation(getTransformationFromMatrix(absTransformCache));
-
-  //std::cout << "rel transform: " << std::endl;
-  //printTransformInformation(getTransformationFromMatrix(relativeTransform));
-  //std::cout << std::endl;
-
-  return getTransformationFromMatrix(relativeTransform);
+  return calcRelativeTransform(sandbox.mainScene.absoluteTransforms.at(childId).transform, sandbox.mainScene.absoluteTransforms.at(parentId).transform);
 }
 
 Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId){
@@ -528,6 +519,9 @@ std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId)
 
   return ids;
 }
+
+bool displayDebug = false;
+
 void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
   //std::cout << "should update id: " << updatedId << std::endl;
   // do a breath first search, and then update it in that order
@@ -544,6 +538,9 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
       continue;
     }
     if (parentId != -1){
+      if (displayDebug){
+        std::cout << "update child - (" << id << ", " << parentId << ")" << std::endl;
+      }
       GameObject& gameobj = getGameObject(sandbox, id);
       if (gameobj.physicsOptions.isStatic || !gameobj.physicsOptions.enabled){
          auto currentConstraint = gameobj.transformation;
@@ -581,17 +578,27 @@ void removeObjectFromCache(Scene& mainScene, objid id){
   mainScene.absoluteTransforms.erase(id);
 }
 
-
-
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   //std::cout << "updating: " << id << " (" << getGameObject(sandbox, id).name << ") - " << print(transform.position) << std::endl;
   auto parentId = getGameObjectH(sandbox, id).parentId;
+
+  if (displayDebug){
+    std::cout << "update absolute transform: " << id << ", position = " << print(transform) << std::endl;
+  }
+
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform =  transform,
   };
+
   if (parentId != -1){
+    if (displayDebug){
+      std::cout << "parent absolute transform: " << print(sandbox.mainScene.absoluteTransforms.at(parentId).transform) << std::endl;
+    }
     auto oldRelativeTransform = calcRelativeTransform(sandbox, id);
-    getGameObject(sandbox, id).transformation = oldRelativeTransform;  
+    getGameObject(sandbox, id).transformation = oldRelativeTransform;
+    if (displayDebug){
+      std::cout << "update relative transform: " << print(oldRelativeTransform) << std::endl;
+    }
   }
   updateAllChildrenPositions(sandbox, id);
 }

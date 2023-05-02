@@ -354,3 +354,11 @@ glm::vec3 calcOffsetFromRotationReverse(glm::vec3 position, std::optional<glm::v
   }
   return position - rotation * offset.value();
 }
+
+std::string print(Transformation& transform){
+  return std::string(" [pos = " + print(transform.position) + ", scale = " + print(transform.scale) + ", rot = " + serializeQuat(transform.rotation) +  "]");
+}
+
+bool testOnlyAboutEqual(Transformation& transform1, Transformation& transform2){
+  return aboutEqual(transform1.position, transform2.position) && aboutEqual(transform1.scale, transform2.scale);
+}

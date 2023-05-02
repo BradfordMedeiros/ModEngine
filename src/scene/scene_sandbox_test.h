@@ -10,5 +10,6 @@ void sandboxMakeParentPosition();
 void sandboxUpdateParentRelative();
 void sandboxUpdateParentAbsolute();
 void sandboxUpdateParentAndChildRelative();
+void sandboxRelativeTransform();
 
 #endif

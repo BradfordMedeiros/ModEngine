@@ -64,5 +64,7 @@ std::optional<glm::vec3> findPlaneIntersection(glm::vec3 anypointOnPlane, glm::v
 
 glm::vec3 calcOffsetFromRotation(glm::vec3 position, std::optional<glm::vec3> offset, glm::quat rotation);
 glm::vec3 calcOffsetFromRotationReverse(glm::vec3 position, std::optional<glm::vec3> offset, glm::quat rotation);
+std::string print(Transformation& transform);
+bool testOnlyAboutEqual(Transformation& transform1, Transformation& transform2);
 
 #endif 
