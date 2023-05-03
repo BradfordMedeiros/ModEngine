@@ -145,6 +145,7 @@ void sandboxRelativeTransform(){
   };
 
   // there are potentially multiple answers with rotations, but these are one
+  // easiest to reason about by drawing out, remember the coord system 
   std::vector<RelativeTransformTest> tests = {
     RelativeTransformTest { 
       .child = Transformation { .position = glm::vec3(0.f, 0.f, 0.f), .scale = glm::vec3(1.f, 1.f, 1.f), .rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)) },
@@ -161,13 +162,17 @@ void sandboxRelativeTransform(){
       .parent = Transformation { .position = glm::vec3(0.f, 0.f, 0.f), .scale = glm::vec3(1.f, 1.f, 1.f), .rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)) },
       .relative = Transformation { .position = glm::vec3(1.f, 2.f, 3.f), .scale = glm::vec3(-1.f, -2.f, -3.f), .rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 180.f)) },
     },
-
-
     RelativeTransformTest { 
-      .child = Transformation { .position = glm::vec3(10.f, 0.f, 0.f), .scale = glm::vec3(1.f, 1.f, 1.f), .rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)) },
-      .parent = Transformation { .position = glm::vec3(-20.f, 30.f, 0.f), .scale = glm::vec3(1.f, 1.f, 1.f), .rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)) },
-      .relative = Transformation { .position = glm::vec3(1.f, 2.f, 3.f), .scale = glm::vec3(-1.f, -2.f, -3.f), .rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)) },
+      .child = Transformation { .position = glm::vec3(0.f, 0.f, 0.f), .scale = glm::vec3(1.f, 1.f, 1.f), .rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)) },
+      .parent = Transformation { .position = glm::vec3(30.f, -30.f, 0.f), .scale = glm::vec3(10.f, 10.f, 10.f), .rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)) },
+      .relative = Transformation { .position = glm::vec3(-3.f, 3.f, 0.f), .scale = glm::vec3(0.1f, 0.1f, 0.1f), .rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)) },
     },
+    RelativeTransformTest { 
+      .child = Transformation { .position = glm::vec3(0.f, 0.f, 0.f), .scale = glm::vec3(1.f, 1.f, 1.f), .rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)) },
+      .parent = Transformation { .position = glm::vec3(30.f, -30.f, 0.f), .scale = glm::vec3(10.f, 10.f, 10.f), .rotation = parseQuat(glm::vec4(0.f, 0.f, 1.f, 0.f)) },
+      .relative = Transformation { .position = glm::vec3(3.f, 3.f, 0.f), .scale = glm::vec3(0.1f, 0.1f, 0.1f), .rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)) },
+    },
+
 
   //update absolute transform: 133473277, position =  [pos =  , scale = 0.2 0.2 0.2, rot = -8.9407e-08 1 0 45]
   //parent absolute transform:  [pos = -20 -30 0, scale = 100 100 10, rot = 0 -1 -1.78814e-07 0]
