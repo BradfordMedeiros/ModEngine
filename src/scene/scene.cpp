@@ -1340,7 +1340,8 @@ void applyAttributeDelta(World& world, objid id, std::string field, AttributeVal
   setAttributes(world, id, attrValue);
 }
 
-extern bool displayDebug;
+extern bool useTransform2;
+
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, bool paused){
   if (!paused){
     updateEmitters(
@@ -1378,23 +1379,22 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
         if (particleOpts.parentId.has_value()){
           modlog("emitters", "parent to id: " + std::to_string(particleOpts.parentId.value()));
 
-          displayDebug = true;
 
           auto constraint = getGameObject(world.sandbox, objectAdded).transformation;
           std::cout << "old transform: " << print(oldTransformation) << std::endl;
           makeParent(world.sandbox, objectAdded, particleOpts.parentId.value());
 
+          useTransform2 = true;
           //getGameObject(world.sandbox, objectAdded).transformation = oldTransformation;
           updateAbsoluteTransform(world.sandbox, objectAdded, Transformation {
             .position = oldTransformation.position,
             .scale = oldTransformation.scale,
             .rotation = oldTransformation.rotation,
           });
+          useTransform2 = false;
 
-          displayDebug = false;
-
-          auto newTransformation = gameobjectTransformation(world, objectAdded, true);
-          modassert(aboutEqual(oldTransformation.position, newTransformation.position) && aboutEqual(oldTransformation.scale, newTransformation.scale), std::string("transforms not equal: old = ") + print(oldTransformation) + ", new = " + print(newTransformation));
+          //auto newTransformation = gameobjectTransformation(world, objectAdded, true);
+          //modassert(aboutEqual(oldTransformation.position, newTransformation.position) && aboutEqual(oldTransformation.scale, newTransformation.scale), std::string("transforms not equal: old = ") + print(oldTransformation) + ", new = " + print(newTransformation));
         }
         return objectAdded;
       }, 

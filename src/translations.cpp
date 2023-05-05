@@ -80,7 +80,7 @@ float zDepth(float nearPlane, float farPlane, float depth){
 }
 
 glm::vec3 projectCursorAtDepth(glm::mat4 projection, glm::mat4 view, float nearPlane, float farPlane, glm::vec2 cursorPos, glm::vec2 screensize, float depth){
-  auto zValue = zDepth(nearPlane, farPlane, depth);  // don't use hardcoded clip planes
+  auto zValue = zDepth(nearPlane, farPlane, depth);  
   auto worldpos = glm::unProjectNO (glm::vec3((screensize.x - cursorPos.x), cursorPos.y, zValue), view, projection, glm::vec4(0, 0, screensize.x, screensize.y));
   return worldpos;
 }
@@ -266,13 +266,38 @@ glm::mat4 matrixFromComponents(Transformation transformation){
   return matrixFromComponents(glm::mat4(1.f), transformation.position, transformation.scale, transformation.rotation);
 }
 
+
+
+void modDecompose(glm::mat4& matrix, glm::vec3& pos, glm::quat& rot, glm::vec3& scale){
+  glm::vec3 skew;
+  glm::vec4 perspective;
+  glm::decompose(matrix, scale, rot, pos, skew, perspective);
+}
+void modDecompose2(glm::mat4& matrix, glm::vec3& pos, glm::quat& rot, glm::vec3& scale){
+    pos = matrix[3];
+    for(int i = 0; i < 3; i++){
+      scale[i] = glm::length(glm::vec3(matrix[i]));
+    }
+    glm::mat3 rotation(
+      glm::vec3(matrix[0]) / scale[0],
+      glm::vec3(matrix[1]) / scale[1],
+      glm::vec3(matrix[2]) / scale[2]
+    );
+    rot = glm::quat_cast(rotation);
+}
+
+// These are hackey, some numerical precision issues.  They should be interchangable but aren't.  
+// Should figure out what's wrong. 
+bool useTransform2 = false;
 Transformation getTransformationFromMatrix(glm::mat4 matrix){
   glm::vec3 scale;
   glm::quat rotation;
   glm::vec3 translation;
-  glm::vec3 skew;
-  glm::vec4 perspective;
-  glm::decompose(matrix, scale, rotation, translation, skew, perspective);
+  if (useTransform2){
+    modDecompose2(matrix, translation, rotation, scale);
+  }else{
+    modDecompose(matrix, translation, rotation, scale);
+  }
   Transformation transform = {
     .position = translation,
     .scale = scale,

@@ -1,7 +1,7 @@
 #include "./scene_sandbox.h"
 
 void addObjectToCache(SceneSandbox& sandbox, objid id);
-void removeObjectFromCache(Scene& mainScene, objid id);
+void removeObjectFromCache(SceneSandbox& sandbox, objid id);
 
 objid sandboxAddToScene(Scene& scene, objid sceneId, objid parentId, std::string name, GameObject& gameobjectObj){
   modassert(name == gameobjectObj.name, "name does not match gameobjectObj name");
@@ -237,7 +237,7 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objec
     auto sceneId = scene.idToGameObjectsH.at(id).sceneId;
     scene.idToGameObjects.erase(id);
     scene.idToGameObjectsH.erase(id);
-    removeObjectFromCache(scene, id);
+    removeObjectFromCache(sandbox, id);
 
     std::cout << "scene id: " << sceneId << std::endl;
     std::cout << "object name: " << objectName << std::endl;
@@ -462,7 +462,6 @@ GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name, objid scene
   return objh;
 }
 
-
 Transformation calcRelativeTransform(Transformation& child, Transformation& parent){
   auto absTransformCache = matrixFromComponents(child); 
   auto parentTransform = matrixFromComponents(parent);
@@ -520,8 +519,6 @@ std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId)
   return ids;
 }
 
-bool displayDebug = false;
-
 void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
   //std::cout << "should update id: " << updatedId << std::endl;
   // do a breath first search, and then update it in that order
@@ -538,9 +535,6 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
       continue;
     }
     if (parentId != -1){
-      if (displayDebug){
-        std::cout << "update child - (" << id << ", " << parentId << ")" << std::endl;
-      }
       GameObject& gameobj = getGameObject(sandbox, id);
       if (gameobj.physicsOptions.isStatic || !gameobj.physicsOptions.enabled){
          auto currentConstraint = gameobj.transformation;
@@ -574,31 +568,24 @@ void addObjectToCache(SceneSandbox& sandbox, objid id){
   };
   updateAllChildrenPositions(sandbox, id);
 }
-void removeObjectFromCache(Scene& mainScene, objid id){
-  mainScene.absoluteTransforms.erase(id);
+void removeObjectFromCache(SceneSandbox& sandbox, objid id){
+  sandbox.mainScene.absoluteTransforms.erase(id);
+  sandbox.updatedIds.erase(id);
 }
 
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
-  //std::cout << "updating: " << id << " (" << getGameObject(sandbox, id).name << ") - " << print(transform.position) << std::endl;
   auto parentId = getGameObjectH(sandbox, id).parentId;
-
-  if (displayDebug){
-    std::cout << "update absolute transform: " << id << ", position = " << print(transform) << std::endl;
-  }
 
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform =  transform,
   };
 
   if (parentId != -1){
-    if (displayDebug){
-      std::cout << "parent absolute transform: " << print(sandbox.mainScene.absoluteTransforms.at(parentId).transform) << std::endl;
-    }
     auto oldRelativeTransform = calcRelativeTransform(sandbox, id);
     getGameObject(sandbox, id).transformation = oldRelativeTransform;
-    if (displayDebug){
-      std::cout << "update relative transform: " << print(oldRelativeTransform) << std::endl;
-    }
+    //modassert(!aboutEqual(oldRelativeTransform.scale.x, 0.f), "0 scale for x component");
+    //modassert(!aboutEqual(oldRelativeTransform.scale.y, 0.f), "0 scale for y component");
+    //modassert(!aboutEqual(oldRelativeTransform.scale.z, 0.f), "0 scale for z component");
   }
   updateAllChildrenPositions(sandbox, id);
 }
