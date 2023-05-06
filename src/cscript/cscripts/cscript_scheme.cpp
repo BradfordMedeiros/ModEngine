@@ -72,7 +72,6 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api, std::function<std::s
     api.setGameObjectAttr,
     api.getGameObjectPos,
     api.setGameObjectPosition,
-    api.setGameObjectPos,
     api.getGameObjectRotation,
     api.setGameObjectRot,
     api.setFrontDelta,

@@ -99,7 +99,7 @@ CScriptBinding cscriptDialogMoveBinding(CustomApiBindings& api){
   		if (dialogMove -> gridSize.has_value()){
   			position = calculateSnapToGrid(position, dialogMove -> gridSize.value(), dialogMove -> gridOffset.has_value() ? dialogMove -> gridOffset.value() : 0);
   		}
-      mainApi -> setGameObjectPos(dialogMove -> objSelected.value(), position);;
+      mainApi -> setGameObjectPosition(dialogMove -> objSelected.value(), position, true);
   		mainApi -> enforceLayout(id);
   	}
   };

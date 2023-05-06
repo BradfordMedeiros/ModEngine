@@ -839,7 +839,7 @@ void onGLFWEerror(int error, const char* description){
 
 ManipulatorTools tools {
   .getPosition = getGameObjectPos,
-  .setPosition = setGameObjectPosition,
+  .setPosition = setGameObjectPos,
   .getScale = getGameObjectScale,
   .setScale = setGameObjectScale,
   .getRotation = getGameObjectRotationRelative,
@@ -1178,7 +1178,6 @@ int main(int argc, char* argv[]){
     .setGameObjectAttr = setGameObjectAttr,
     .getGameObjectPos = getGameObjectPosition,
     .setGameObjectPosition = setGameObjectPos,
-    .setGameObjectPos = setGameObjectPosition,
     .getGameObjectRotation = getGameObjectRotation,
     .setGameObjectRot = setGameObjectRotationRelative,
     .setFrontDelta = setFrontDelta,

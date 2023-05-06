@@ -107,7 +107,7 @@ void manipulatorEnsureExists(ManipulatorData& manipulatorState, ManipulatorTools
   auto manipulatorId = manipulatorState.manipulatorId;
   auto selectedObjs = tools.getSelectedIds();
   modassert(selectedObjs.mainObj.has_value(), "manipulator selected obj main value does not have a value");
-  tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()));
+  tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()), true);
 }
 
 
@@ -256,7 +256,7 @@ void updateManipulatorToCurrentObjTranslate(ManipulatorData& manipulatorState, M
   auto manipulatorId = manipulatorState.manipulatorId;
   auto selectedObjs = tools.getSelectedIds();
   modassert(selectedObjs.mainObj.has_value(), "manipulator selected obj main value does not have a value");
-  tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()));
+  tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()), true);
   if (!update.options.relativePositionMode){
     tools.setRotation(manipulatorId, MOD_ORIENTATION_FORWARD);
   }else{
@@ -267,7 +267,7 @@ void updateManipulatorToCurrentObjScale(ManipulatorData& manipulatorState, Manip
   auto manipulatorId = manipulatorState.manipulatorId;
   auto selectedObjs = tools.getSelectedIds();
   modassert(selectedObjs.mainObj.has_value(), "manipulator selected obj main value does not have a value");
-  tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()));
+  tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()), true);
   tools.setRotation(manipulatorState.manipulatorId, tools.getRotation(selectedObjs.mainObj.value()));
 }
 
@@ -309,7 +309,7 @@ std::vector<ManipulatorState> manipulatorStates = {
       auto oldManipulatorPos = getInitialTransformation(manipulatorState, manipulatorState.manipulatorId).position;
       auto manipulatorPos =  (update.options.manipulatorPositionMode == SNAP_ABSOLUTE) ? tools.snapPosition(oldManipulatorPos + positionDiff) : (oldManipulatorPos + positionDiff);
       auto actualPositionDiff = manipulatorPos - oldManipulatorPos;
-      tools.setPosition(manipulatorState.manipulatorId, manipulatorPos);
+      tools.setPosition(manipulatorState.manipulatorId, manipulatorPos, true);
 
       auto translateMirror = update.options.translateMirror && update.selectedObjs.selectedIds.size() > 1;
       if (translateMirror){
@@ -327,7 +327,7 @@ std::vector<ManipulatorState> manipulatorStates = {
           }
         }
         auto newPosition = oldPosition + deltaPosition;
-        tools.setPosition(targetId, newPosition);
+        tools.setPosition(targetId, newPosition, true);
       }
     },
     .nextStates = {
@@ -386,7 +386,7 @@ std::vector<ManipulatorState> manipulatorStates = {
           auto scaledOffsetFromMean = scaleRatio * offsetFromMean;
           std::cout << "scale ratio: " << print(scaleRatio) << std::endl;
           std::cout << "mean position: " << print(initialTransform.position - manipulatorState.meanPosition.value()) << std::endl;
-          tools.setPosition(targetId, manipulatorState.meanPosition.value() + scaledOffsetFromMean);
+          tools.setPosition(targetId, manipulatorState.meanPosition.value() + scaledOffsetFromMean, true);
         }
         tools.setScale(targetId, relativeScale);
       }
@@ -458,7 +458,7 @@ std::vector<ManipulatorState> manipulatorStates = {
             rotationDiff,
             snapFn
           );
-          tools.setPosition(targetId, newTargetRotPos.position);
+          tools.setPosition(targetId, newTargetRotPos.position, true);
           tools.setRotation(targetId, newTargetRotPos.rotation);
         }
     },

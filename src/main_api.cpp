@@ -294,14 +294,9 @@ glm::vec3 getGameObjectPosition(int32_t index, bool isWorld){
 glm::vec3 getGameObjectPos(int32_t index){
   return getGameObjectPosition(index, true); 
 }
-void setGameObjectPosition(int32_t index, glm::vec3 pos){ // sets the absolutePosition
-  physicsTranslateSet(world, index, pos, false);
-}
+
 void setGameObjectPos(int32_t index, glm::vec3 pos, bool isWorld){
   physicsTranslateSet(world, index, pos, !isWorld);
-}
-void setGameObjectPositionRelative(int32_t index, glm::vec3 pos){
-  physicsTranslateSet(world, index, pos, true);
 }
 
 glm::vec3 getGameObjectScale(int32_t index){
@@ -797,13 +792,13 @@ void moveCamera(glm::vec3 offset, std::optional<bool> relative){
       defaultResources.defaultCamera.transformation.position = moveRelative(defaultResources.defaultCamera.transformation.position, defaultResources.defaultCamera.transformation.rotation, glm::vec3(offset), false);
     }else{
       auto cameraLocalTransform = gameobjectTransformation(world, state.activeCameraObj -> id, false);
-      setGameObjectPosition(state.activeCameraObj ->id, moveRelative(cameraLocalTransform.position, cameraLocalTransform.rotation, glm::vec3(offset), false));
+      setGameObjectPos(state.activeCameraObj ->id, moveRelative(cameraLocalTransform.position, cameraLocalTransform.rotation, glm::vec3(offset), false), true);
     }
   }else{
     if (state.activeCameraObj == NULL){
       defaultResources.defaultCamera.transformation.position = offset;
     }else{
-      setGameObjectPosition(state.activeCameraObj ->id, offset);
+      setGameObjectPos(state.activeCameraObj ->id, offset, true);
     }
   }
 }

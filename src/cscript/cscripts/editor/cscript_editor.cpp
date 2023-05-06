@@ -537,13 +537,13 @@ void maybeHandleSidePanelDrop(EditorData& editorData, objid id){
     bool didUpdate = updateSnapPos(editorData, snappingIndex, sceneId);
     if (didUpdate){
       auto snappingPos = snappingPositions.at(snappingIndex).snappingPosition;
-      mainApi -> setGameObjectPos(id, glm::vec3(snappingPos.x, pos.y, pos.z));
+      mainApi -> setGameObjectPosition(id, glm::vec3(snappingPos.x, pos.y, pos.z), true);
       mainApi -> enforceLayout(id);
     }else{
       auto currSnapIndex = getCurrSnapForScene(editorData, sceneId);
       if (currSnapIndex.has_value()){
         auto snappingPos = snappingPositions.at(currSnapIndex.value()).snappingPosition;
-        mainApi -> setGameObjectPos(id, glm::vec3(snappingPos.x, pos.y, pos.z));
+        mainApi -> setGameObjectPosition(id, glm::vec3(snappingPos.x, pos.y, pos.z), true);
         mainApi -> enforceLayout(id);
       }
     }
