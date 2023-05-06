@@ -295,7 +295,7 @@ int renderObject(
   std::function<int(glm::vec3)> drawSphere,
   DefaultMeshes& defaultMeshes,
   std::function<void(int)> onRender,
-  std::function<glm::vec3(objid)> fullPosition,
+  std::function<glm::vec3(objid, bool)> getPosition,
   bool selectionMode
 ){
   GameObjectObj& toRender = mapping.at(id);
@@ -514,7 +514,7 @@ int renderObject(
       layoutVertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     }
     if (layoutObj -> showBackpanel){
-      auto position = fullPosition(id);
+      auto position = getPosition(id, true);
       bool hasBorder = layoutObj -> border.hasBorder;
       auto borderSize = layoutObj -> border.borderSize;
       glm::vec3 minusScale = hasBorder ? glm::vec3(borderSize, borderSize, borderSize) : glm::vec3(0.f, 0.f, 0.f);  

@@ -431,7 +431,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
         },
         defaultResources.defaultMeshes,
         renderCustomObj,
-        getGameObjectPos,
+        getGameObjectPosition,
         textBoundingOnly
       );
       numTriangles = numTriangles + trianglesDrawn;
@@ -838,7 +838,7 @@ void onGLFWEerror(int error, const char* description){
 }
 
 ManipulatorTools tools {
-  .getPosition = getGameObjectPos,
+  .getPosition = [](objid id) -> glm::vec3 { return getGameObjectPosition(id, true); },
   .setPosition = setGameObjectPos,
   .getScale = getGameObjectScale,
   .setScale = setGameObjectScale,

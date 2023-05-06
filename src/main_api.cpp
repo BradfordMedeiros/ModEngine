@@ -291,9 +291,6 @@ void setGameObjectAttr(int32_t id, GameobjAttributes& attr){
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld){
   return gameobjectPosition(world, index, isWorld);
 }
-glm::vec3 getGameObjectPos(int32_t index){
-  return getGameObjectPosition(index, true); 
-}
 
 void setGameObjectPos(int32_t index, glm::vec3 pos, bool isWorld){
   physicsTranslateSet(world, index, pos, !isWorld);
