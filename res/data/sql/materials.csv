@@ -1,4 +1,4 @@
 material:STRING,particle:STRING,hit-sound:STRING,walk-sound:STRING,hit-particle:STRING
-default,,./res/sounds/sample.wav,./res/sounds/sample.wav,+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+tint:1 0 0 1;+scale:0.2 0.2 0.2
-wood,,./res/sounds/thud.wav,./res/sounds/thud.wav,+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+tint:0 1 0 1;+scale:0.2 0.2 0.2
-metal,,./res/sounds/sample.wav,./res/sounds/sample.wav,+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+tint:0 0 1 1;+scale:0.2 0.2 0.2
+default,,./res/sounds/sample.wav,./res/sounds/sample.wav,+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+tint:1 0 0 1
+wood,,./res/sounds/thud.wav,./res/sounds/thud.wav,+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+tint:0 1 0 1
+metal,,./res/sounds/sample.wav,./res/sounds/sample.wav,+mesh:../gameresources/build/primitives/plane_xy_1x1.gltf;+tint:0 0 1 1

@@ -479,6 +479,7 @@ SCM scmGetGameObjectPosWorld(SCM value){
   return vec3ToScmList(_getGameObjectPos(getGameobjId(value), true));
 }
 
+void (*_setGameObjectPosition)(int32_t index, glm::vec3 pos, bool world);
 void (*setGameObjectPosn)(int32_t index, glm::vec3 pos);
 SCM setGameObjectPosition(SCM value, SCM positon){
   auto x = scm_to_double(scm_list_ref(positon, scm_from_int64(0)));   
@@ -488,12 +489,11 @@ SCM setGameObjectPosition(SCM value, SCM positon){
   return SCM_UNSPECIFIED;
 }
 
-void (*setGameObjectPosnRel)(int32_t index, glm::vec3 pos);
 SCM setGameObjectPositionRel(SCM value, SCM position){
   auto x = scm_to_double(scm_list_ref(position, scm_from_int64(0)));   
   auto y = scm_to_double(scm_list_ref(position, scm_from_int64(1)));
   auto z = scm_to_double(scm_list_ref(position, scm_from_int64(2)));
-  setGameObjectPosnRel(getGameobjId(value), glm::vec3(x, y, z));
+  _setGameObjectPosition(getGameobjId(value), glm::vec3(x, y, z), false);
   return SCM_UNSPECIFIED;
 }
 
@@ -1423,8 +1423,8 @@ void createStaticSchemeBindings(
   GameobjAttributes getGameObjectAttr(int32_t id),
   void (*setGameObjectAttr)(int32_t id, GameobjAttributes& attr),
   glm::vec3 (*getGameObjectPos)(int32_t index, bool world),
+  void (*setGameObjectPosition)(int32_t index, glm::vec3 pos, bool world),
   void (*setGameObjectPos)(int32_t index, glm::vec3 pos),
-  void (*setGameObjectPosRelative)(int32_t index, glm::vec3 pos),
   glm::quat (*getGameObjectRotation)(int32_t index, bool world),
   void (*setGameObjectRot)(int32_t index, glm::quat rotation),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
@@ -1528,7 +1528,7 @@ void createStaticSchemeBindings(
 
   _getGameObjectPos = getGameObjectPos;
   setGameObjectPosn = setGameObjectPos;
-  setGameObjectPosnRel = setGameObjectPosRelative;
+  _setGameObjectPosition = setGameObjectPosition;
   _getGameObjectRotation = getGameObjectRotation;
   setGameObjectRotn = setGameObjectRot;
   

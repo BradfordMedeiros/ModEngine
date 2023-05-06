@@ -37,8 +37,8 @@ struct CustomApiBindings {
   GameobjAttributes (*getGameObjectAttr)(int32_t id);
   void (*setGameObjectAttr)(int32_t id, GameobjAttributes& attr);
   glm::vec3 (*getGameObjectPos)(int32_t index, bool world);
+  void (*setGameObjectPosition)(int32_t index, glm::vec3 pos, bool world);
   void (*setGameObjectPos)(int32_t index, glm::vec3 pos);
-  void (*setGameObjectPosRelative)(int32_t index, glm::vec3 pos);
   glm::quat (*getGameObjectRotation)(int32_t index, bool world);
   void (*setGameObjectRot)(int32_t index, glm::quat rotation);
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta);

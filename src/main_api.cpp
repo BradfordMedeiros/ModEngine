@@ -297,6 +297,9 @@ glm::vec3 getGameObjectPos(int32_t index){
 void setGameObjectPosition(int32_t index, glm::vec3 pos){ // sets the absolutePosition
   physicsTranslateSet(world, index, pos, false);
 }
+void setGameObjectPos(int32_t index, glm::vec3 pos, bool isWorld){
+  physicsTranslateSet(world, index, pos, !isWorld);
+}
 void setGameObjectPositionRelative(int32_t index, glm::vec3 pos){
   physicsTranslateSet(world, index, pos, true);
 }

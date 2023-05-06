@@ -91,6 +91,7 @@ void setGameObjectAttr(int32_t id, GameobjAttributes& attr);
 
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld);
 glm::vec3 getGameObjectPos(int32_t index);
+void setGameObjectPos(int32_t index, glm::vec3 pos, bool isWorld);
 void setGameObjectPosition(int32_t index, glm::vec3 pos);
 void setGameObjectPositionRelative(int32_t index, glm::vec3 pos);
 
