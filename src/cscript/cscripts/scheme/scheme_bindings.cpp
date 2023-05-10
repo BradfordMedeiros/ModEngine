@@ -503,9 +503,9 @@ SCM scmGetGameObjectRotation(SCM value){
 SCM getGameObjectRotationWorld(SCM value){
   return scmQuatToSCM(_getGameObjectRotation(getGameobjId(value), true));
 }
-void (*setGameObjectRotn)(int32_t index, glm::quat rotation);
+void (*setGameObjectRotn)(int32_t index, glm::quat rotation, bool isWorld);
 SCM setGameObjectRotation(SCM value, SCM rotation){
-  setGameObjectRotn(getGameobjId(value), scmListToQuat(rotation));
+  setGameObjectRotn(getGameobjId(value), scmListToQuat(rotation), false);
   return SCM_UNSPECIFIED;
 }
 
@@ -519,7 +519,7 @@ SCM setGameObjectRotationDelta(SCM value, SCM deltaYaw, SCM deltaPitch, SCM delt
   auto deltaR = scm_to_double(deltaRoll); 
 
   glm::quat newOrientation = _setFrontDelta(rot, deltaY, deltaP, deltaR, 0.1);
-  setGameObjectRotn(id, newOrientation);
+  setGameObjectRotn(id, newOrientation, false);
 
   return SCM_UNSPECIFIED;
 }
@@ -1424,7 +1424,7 @@ void createStaticSchemeBindings(
   glm::vec3 (*getGameObjectPos)(int32_t index, bool world),
   void (*setGameObjectPosition)(int32_t index, glm::vec3 pos, bool world),
   glm::quat (*getGameObjectRotation)(int32_t index, bool world),
-  void (*setGameObjectRot)(int32_t index, glm::quat rotation),
+  void (*setGameObjectRot)(int32_t index, glm::quat rotation, bool world),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
   glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance),
   glm::vec3 (*moveRelativeVec)(glm::vec3 pos, glm::quat orientation, glm::vec3 distance),

@@ -90,15 +90,13 @@ GameobjAttributes getGameObjectAttr(int32_t id);
 void setGameObjectAttr(int32_t id, GameobjAttributes& attr);
 
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld);
-void setGameObjectPos(int32_t index, glm::vec3 pos, bool isWorld);
+void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld);
 
 glm::vec3 getGameObjectScale(int32_t index);
 void setGameObjectScale(int32_t index, glm::vec3 scale);
 
 glm::quat getGameObjectRotation(int32_t index, bool isWorld);
-glm::quat getGameObjectRotationRelative(int32_t index); // relative
-void setGameObjectRotation(int32_t index, glm::quat rotation);
-void setGameObjectRotationRelative(int32_t index, glm::quat rotation);
+void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld);
 
 std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes);
 void removeObjectById(int32_t id);

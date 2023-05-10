@@ -292,7 +292,7 @@ glm::vec3 getGameObjectPosition(int32_t index, bool isWorld){
   return gameobjectPosition(world, index, isWorld);
 }
 
-void setGameObjectPos(int32_t index, glm::vec3 pos, bool isWorld){
+void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld){
   physicsTranslateSet(world, index, pos, !isWorld);
 }
 
@@ -306,15 +306,14 @@ void setGameObjectScale(int32_t index, glm::vec3 scale){
 glm::quat getGameObjectRotation(int32_t index, bool isWorld){
   return gameobjectRotation(world, index, isWorld);
 }
-glm::quat getGameObjectRotationRelative(int32_t index){
-  return getGameObjectRotation(index, false);
+
+void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld){
+  physicsRotateSet(world, index, rotation, !isWorld);
 }
 void setGameObjectRotation(int32_t index, glm::quat rotation){
   physicsRotateSet(world, index, rotation, false);
 }
-void setGameObjectRotationRelative(int32_t index, glm::quat rotation){
-  physicsRotateSet(world, index, rotation, true);
-}
+
 
 ///////////////////////
 
@@ -789,13 +788,13 @@ void moveCamera(glm::vec3 offset, std::optional<bool> relative){
       defaultResources.defaultCamera.transformation.position = moveRelative(defaultResources.defaultCamera.transformation.position, defaultResources.defaultCamera.transformation.rotation, glm::vec3(offset), false);
     }else{
       auto cameraLocalTransform = gameobjectTransformation(world, state.activeCameraObj -> id, false);
-      setGameObjectPos(state.activeCameraObj ->id, moveRelative(cameraLocalTransform.position, cameraLocalTransform.rotation, glm::vec3(offset), false), true);
+      setGameObjectPosition(state.activeCameraObj ->id, moveRelative(cameraLocalTransform.position, cameraLocalTransform.rotation, glm::vec3(offset), false), true);
     }
   }else{
     if (state.activeCameraObj == NULL){
       defaultResources.defaultCamera.transformation.position = offset;
     }else{
-      setGameObjectPos(state.activeCameraObj ->id, offset, true);
+      setGameObjectPosition(state.activeCameraObj ->id, offset, true);
     }
   }
 }

@@ -839,11 +839,11 @@ void onGLFWEerror(int error, const char* description){
 
 ManipulatorTools tools {
   .getPosition = [](objid id) -> glm::vec3 { return getGameObjectPosition(id, true); },
-  .setPosition = setGameObjectPos,
+  .setPosition = setGameObjectPosition,
   .getScale = getGameObjectScale,
   .setScale = setGameObjectScale,
-  .getRotation = getGameObjectRotationRelative,
-  .setRotation = setGameObjectRotationRelative,
+  .getRotation = [](objid id) -> glm::quat { return getGameObjectRotation(id, false); },
+  .setRotation = [](objid id, glm::quat rot) -> void { setGameObjectRotation(id, rot, false); },
   .snapPosition = [&state](glm::vec3 pos) -> glm::vec3 {
     return snapTranslate(state.easyUse, pos);
   },
@@ -1177,9 +1177,9 @@ int main(int argc, char* argv[]){
     .getGameObjectAttr = getGameObjectAttr,
     .setGameObjectAttr = setGameObjectAttr,
     .getGameObjectPos = getGameObjectPosition,
-    .setGameObjectPosition = setGameObjectPos,
+    .setGameObjectPosition = setGameObjectPosition,
     .getGameObjectRotation = getGameObjectRotation,
-    .setGameObjectRot = setGameObjectRotationRelative,
+    .setGameObjectRot = setGameObjectRotation,
     .setFrontDelta = setFrontDelta,
     .moveRelative = moveRelative,
     .moveRelativeVec = moveRelative,
