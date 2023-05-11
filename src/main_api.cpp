@@ -310,9 +310,6 @@ glm::quat getGameObjectRotation(int32_t index, bool isWorld){
 void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld){
   physicsRotateSet(world, index, rotation, !isWorld);
 }
-void setGameObjectRotation(int32_t index, glm::quat rotation){
-  physicsRotateSet(world, index, rotation, false);
-}
 
 
 ///////////////////////
@@ -806,14 +803,14 @@ void rotateCamera(float xoffset, float yoffset){
     defaultResources.defaultCamera.transformation.rotation = setFrontDelta(defaultResources.defaultCamera.transformation.rotation, xoffset, yoffset, 0, 0.1);
   }else{
     auto cameraRelativeRotation = gameobjectRotation(world, state.activeCameraObj -> id, false);
-    setGameObjectRotation(state.activeCameraObj ->id, setFrontDelta(cameraRelativeRotation, xoffset, yoffset, 0, 0.1));
+    setGameObjectRotation(state.activeCameraObj ->id, setFrontDelta(cameraRelativeRotation, xoffset, yoffset, 0, 0.1), true);
   }
 }
 void setCameraRotation(glm::quat orientation){
   if (state.activeCameraObj == NULL){
     defaultResources.defaultCamera.transformation.rotation = orientation;
   }else{
-    setGameObjectRotation(state.activeCameraObj ->id, orientation);
+    setGameObjectRotation(state.activeCameraObj ->id, orientation, true);
   }
 }
 
