@@ -26,7 +26,6 @@ bool showDebugInfo = false;
 std::string shaderFolderPath;
 std::string sqlDirectory = "./res/data/sql/";
 
-bool disableInput = false;
 bool bootStrapperMode = false;
 NetCode netcode { };
 
@@ -187,7 +186,7 @@ bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCu
   std::cout << "SELECT ITEM CALLED!" << std::endl;
   bool shouldCallBindingOnObjectSelected = false;
   modlog("selection", (std::string("select item called") + ", selectedId = " + std::to_string(selectedId) + ", layerSelectIndex = " + std::to_string(layerSelectIndex)).c_str());
-  if (!showCursor || disableInput){
+  if (!showCursor || state.disableInput){
     return shouldCallBindingOnObjectSelected;
   }
   auto idToUse = state.groupSelection ? groupId : selectedId;
@@ -1009,10 +1008,9 @@ int main(int argc, char* argv[]){
   benchmark = createBenchmark(shouldBenchmark);
 
   std::cout << "LIFECYCLE: program starting" << std::endl;
-  disableInput = result["noinput"].as<bool>();
 
   state.fullscreen = result["fullscreen"].as<bool>(); // merge flags and world.state concept
-  setInitialState(state, "./res/world.state", now, interface.readFile); 
+  setInitialState(state, "./res/world.state", now, interface.readFile, result["noinput"].as<bool>()); 
 
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);

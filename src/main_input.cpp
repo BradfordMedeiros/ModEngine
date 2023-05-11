@@ -108,7 +108,7 @@ glm::vec2 ndiCoord(){
 
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
   //std::cout << "mouse events: " << xpos << ", " << ypos << std::endl;
-  onMouse(disableInput,  state, xpos, ypos, rotateCamera); 
+  onMouse(state.disableInput,  state, xpos, ypos, rotateCamera); 
 }
 
 void onMouse(int button, int action, int mods){
@@ -118,7 +118,7 @@ void onMouse(int button, int action, int mods){
     state.mouseIsDown = false;
   }
 
-  mouse_button_callback(disableInput, state, button, action, mods, onMouseButton);
+  mouse_button_callback(state.disableInput, state, button, action, mods, onMouseButton);
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
     selectItemCalled = true;
     onManipulatorMouseDown(state.manipulatorState);
@@ -438,7 +438,8 @@ void handleInput(GLFWwindow* window){
     glfwSetWindowShouldClose(window, true);
   }
   processControllerInput(keyMapper, moveCamera, deltaTime, keyCharCallback, onJoystick);
-  if (!disableInput){    // we return after escape, so escape still quits
+
+  if (!state.disableInput){    // we return after escape, so escape still quits
     bool lockSuccess = lock("input", 0);
     if (lockSuccess){
       processKeyBindings(window, keyMapper);

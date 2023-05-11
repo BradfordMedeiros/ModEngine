@@ -325,6 +325,7 @@ std::vector<ObjectStateMapping> mapping = {
   simpleVec2Serializer("debug", "textoffset", offsetof(engineState, infoTextOffset), std::nullopt),
   simpleBoolSerializer("editor", "groupselection", offsetof(engineState, groupSelection)),
   simpleFloatSerializer("sound", "volume", offsetof(engineState, volume)),
+  simpleBoolSerializer("editor", "disableinput", offsetof(engineState, disableInput)),
 };  
 
 void setState(engineState& state, ObjectValue& value, float now){
@@ -458,11 +459,14 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .useYAxis = true,
     .forceSelectIndex = 0,
     .volume = 1.f,
+    .disableInput = false,
 	};
 	return state;
 }
 
-void setInitialState(engineState& state, std::string file, float now, std::function<std::string(std::string)> readFile){
+void setInitialState(engineState& state, std::string file, float now, std::function<std::string(std::string)> readFile, bool disableInput){
+  state.disableInput = disableInput;
+
   auto tokens = parseFormat(readFile(file));
   for (auto &token : tokens){
     ObjectValue objValue {
@@ -473,7 +477,6 @@ void setInitialState(engineState& state, std::string file, float now, std::funct
     setState(state, objValue, now); 
   }
 }
-
 
 std::vector<ObjectValue> getState(engineState& state){
   std::vector<ObjectValue> values;
