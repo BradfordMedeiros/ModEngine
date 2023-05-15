@@ -1,0 +1,339 @@
+#include "./cscript.h"
+
+/* This should be temporary to try out rendering in C++ 
+   Should port the scheme scripting to C++, and then these just become ordinary api methods
+*/
+
+std::vector<CScriptBinding> bindings = {};
+
+void registerAllBindings(std::vector<CScriptBinding> pluginBindings){
+  std::set<std::string> names;
+  for (auto &plugin : pluginBindings){
+    bindings.push_back(plugin);
+    if (names.count(plugin.bindingMatcher) > 0){
+      std::cout << "plugin matcher duplicate: " << plugin.bindingMatcher << std::endl;
+      assert(false);
+    }
+    names.insert(plugin.bindingMatcher);
+  }
+}
+
+struct CustomObjInstance {
+  int id;
+  std::string name;
+  int runlevel;
+  void* data;
+  CScriptBinding* cScriptBinding;
+  bool shouldRemove;
+};
+std::vector<CustomObjInstance> customObjInstances = {};
+
+bool patternMatchesScriptName(std::string pattern, std::string scriptname){
+  std::basic_regex reg(pattern);
+  auto matches = std::regex_match(scriptname, reg);
+  return matches;
+}
+
+/* matching strategy: matches based upon registration order, * is a wildcard which matches anything*/
+CScriptBinding* getCScriptBinding(const char* name){
+  for (auto &customObj : bindings){
+    if (patternMatchesScriptName(customObj.bindingMatcher, name)){
+      return &customObj;
+    }
+  }
+  modassert(false, std::string("could not match script named: ") + name);
+  return NULL;
+}
+
+
+
+int indexForRunLevel(std::vector<CustomObjInstance>& instances, int runlevel){
+  if (instances.size() == 0){
+    return 0;
+  }
+  int runLevel = instances.at(0).runlevel;
+  int index = 0;
+  for (index = 0; index < instances.size(); index++){
+    if (runlevel < instances.at(index).runlevel){
+      break;
+    }
+  }
+  return index;
+}
+
+CustomObjInstance* getCustomObjInstance(int id){
+  for (int i = 0; i < customObjInstances.size(); i++){
+    CustomObjInstance& instance = customObjInstances.at(i);
+    if (instance.id == id){
+      return &instance;
+    }
+  }
+  return NULL;
+}
+std::vector<CustomObjInstance> insertIntoCustomObj(std::vector<CustomObjInstance>& instances, CustomObjInstance& instance){
+  std::vector<CustomObjInstance> newInstances = {};
+  auto indexToInsert = indexForRunLevel(instances, instance.runlevel);
+  for (int i = 0; i < indexToInsert; i++){
+    newInstances.push_back(instances.at(i));
+  }
+  newInstances.push_back(instance);
+  for (int i = indexToInsert; i < instances.size(); i++){
+    newInstances.push_back(instances.at(i));
+  }
+  return newInstances;
+}
+void markRemoveCustomObjInstance(int id){
+  for (int i = 0; i < customObjInstances.size(); i++){
+    if (customObjInstances.at(i).id == id){
+      customObjInstances.at(i).shouldRemove = true;
+    }
+  }
+}
+void onFrameRemoveInvalidInstances(){
+  std::vector<CustomObjInstance> newInstances = {};
+  for (int i = 0; i < customObjInstances.size(); i++){
+    if (!customObjInstances.at(i).shouldRemove){
+      newInstances.push_back(customObjInstances.at(i));
+    }
+  }
+  customObjInstances = newInstances;
+}
+
+std::string print(std::vector<CustomObjInstance>& instances){
+  std::string value = "[";
+  for (auto &instance : instances){
+    value += " " + instance.name;
+  }
+  value += " ]";
+  return value;
+}
+
+void loadCScript(int id, const char* name, int sceneId, bool bootstrapperMode, bool isFreeScript){
+  //assert(customObjInstances.find(id) == customObjInstances.end());
+  auto parsedScript = parseCScriptName(std::string(name));
+  auto binding = getCScriptBinding(parsedScript.scriptname.c_str());
+  auto data = binding -> create(parsedScript.scriptname, id, sceneId, bootstrapperMode, isFreeScript);
+  auto indexToInsert = indexForRunLevel(customObjInstances, parsedScript.runlevel);
+  CustomObjInstance instance {
+    .id = id,
+    .name = parsedScript.scriptname,
+    .runlevel = parsedScript.runlevel,
+    .data = data,
+    .cScriptBinding = binding,
+    .shouldRemove = false,
+  };
+
+  customObjInstances = insertIntoCustomObj(customObjInstances, instance);
+
+  std::cout << "load cscript: " << print(customObjInstances) << std::endl;
+}
+void unloadCScript(int id){
+  auto objInstance = getCustomObjInstance(id);
+  if (objInstance != NULL){ 
+    auto binding = objInstance -> cScriptBinding;
+    binding -> remove(objInstance -> name, id, objInstance -> data);
+    markRemoveCustomObjInstance(id);
+  }
+  std::cout << "unload cscript: " << print(customObjInstances) << std::endl;
+}
+void renderCustomObj(int id){
+  //auto instanceExists = customObjInstances.find(id) != customObjInstances.end();
+  //if (instanceExists){
+  //  auto objInstance = customObjInstances.at(id);
+  //  auto binding = objInstance.cScriptBinding;
+  //  binding -> render(objInstance.data);   
+  //}
+}
+
+//// Callbacks ////
+
+void onCFrameAllScripts(){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onFrame(objInstance.id, objInstance.data);
+    }
+  }
+}
+
+void onCCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onCollisionEnter(objInstance.id, objInstance.data, obj1, obj2, pos, normal, oppositeNormal);
+    }
+  }
+}
+void onCCollisionExitAllScripts(int32_t obj1, int32_t obj2){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onCollisionExit(objInstance.id, objInstance.data, obj1, obj2);
+    }
+  }
+}
+void onCMouseCallbackAllScripts(int button, int action, int mods){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onMouseCallback(objInstance.id, objInstance.data, button, action, mods);
+    }
+  }
+}
+void onCMouseMoveCallbackAllScripts(double xPos, double yPos, float xNdc, float yNdc){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onMouseMoveCallback(objInstance.id, objInstance.data, xPos, yPos, xNdc, yNdc);
+    }
+  }
+}
+void onCScrollCallbackAllScripts(double amount){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onScrollCallback(objInstance.id, objInstance.data, amount);
+    }
+  }
+}
+void onCObjectSelectedAllScripts(int32_t index, glm::vec3 color){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onObjectSelected(objInstance.id, objInstance.data, index, color);
+    }
+  }
+}
+void onCObjectUnselectedAllScripts(){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onObjectUnselected(objInstance.id, objInstance.data);
+    }
+  }
+}
+void onCObjectHoverAllScripts(int32_t index, bool isHover){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if (binding != NULL){
+      binding -> onObjectHover(objInstance.id, objInstance.data, index, isHover);
+    }
+  }
+}
+void onCMappingAllScripts(int32_t index){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if (binding != NULL){
+      binding -> onMapping(objInstance.id, objInstance.data, index);
+    }
+  }
+}
+
+void onCKeyCallbackAllScripts(int key, int scancode, int action, int mods){
+  for (auto &objInstance: customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if (binding != NULL){
+      binding -> onKeyCallback(objInstance.id, objInstance.data, key, scancode, action, mods);
+    }
+  }
+}
+void onCKeyCharCallbackAllScripts(unsigned int codepoint){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onKeyCharCallback(objInstance.id, objInstance.data, codepoint);
+    }
+  }
+}
+
+void onCCameraSystemChangeAllScripts(std::string camera, bool usingBuiltInCamera){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onCameraSystemChange(objInstance.id, camera, usingBuiltInCamera);
+    }
+  }
+}
+void onCMessageAllScripts(std::string& topic, AttributeValue& value){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onMessage(objInstance.id, objInstance.data, topic, value);
+    }
+  }
+}
+
+void onCTcpMessageAllScripts(std::string& message){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onTcpMessage(objInstance.id, message);
+    }
+  }
+}
+void onCUdpMessageAllScripts(std::string& message){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onUdpMessage(objInstance.id, message);
+    }
+  }
+}
+
+void onCPlayerJoinedAllScripts(std::string& connectionHash){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onPlayerJoined(objInstance.id, connectionHash);
+    }
+  }
+}
+void onCPlayerLeaveAllScripts(std::string& connectionHash){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onPlayerLeave(objInstance.id, connectionHash);
+    }
+  }
+}
+void onCObjectAddedAllScripts(objid idAdded){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onObjectAdded(objInstance.id, objInstance.data, idAdded);
+    }
+  }
+}
+void onCObjectRemovedAllScripts(objid idRemoved){
+  for (auto &objInstance : customObjInstances){
+    auto binding = objInstance.cScriptBinding;
+    if(binding != NULL){
+      binding -> onObjectRemoved(objInstance.id, objInstance.data, idRemoved);
+    }
+  }
+}
+
+CScriptBindingCallbacks getCScriptBindingCallbacks(){
+  return CScriptBindingCallbacks {
+    .onFrame = onCFrameAllScripts,
+    .onCollisionEnter = onCCollisionEnterAllScripts,
+    .onCollisionExit = onCCollisionExitAllScripts,
+    .onMouseCallback = onCMouseCallbackAllScripts,
+    .onMouseMoveCallback = onCMouseMoveCallbackAllScripts,
+    .onScrollCallback = onCScrollCallbackAllScripts,
+    .onObjectSelected = onCObjectSelectedAllScripts,
+    .onObjectUnselected = onCObjectUnselectedAllScripts,
+    .onObjectHover = onCObjectHoverAllScripts,
+    .onMapping = onCMappingAllScripts,
+    .onKeyCallback = onCKeyCallbackAllScripts,
+    .onKeyCharCallback = onCKeyCharCallbackAllScripts,
+    .onCameraSystemChange = onCCameraSystemChangeAllScripts,
+    .onMessage = onCMessageAllScripts,
+    .onTcpMessage = onCTcpMessageAllScripts,
+    .onUdpMessage = onCUdpMessageAllScripts,
+    .onPlayerJoined = onCPlayerJoinedAllScripts,
+    .onPlayerLeave = onCPlayerLeaveAllScripts,
+    .onObjectAdded = onCObjectAddedAllScripts,
+    .onObjectRemoved = onCObjectRemovedAllScripts,
+  };
+}

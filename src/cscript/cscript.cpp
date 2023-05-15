@@ -6,6 +6,7 @@
 
 std::vector<CScriptBinding> bindings = {};
 
+
 void registerAllBindings(std::vector<CScriptBinding> pluginBindings){
   std::set<std::string> names;
   for (auto &plugin : pluginBindings){
@@ -20,6 +21,7 @@ void registerAllBindings(std::vector<CScriptBinding> pluginBindings){
 
 struct CustomObjInstance {
   std::string name;
+  int runlevel;
   void* data;
   CScriptBinding* cScriptBinding;
 };
@@ -29,6 +31,23 @@ bool patternMatchesScriptName(std::string pattern, std::string scriptname){
   std::basic_regex reg(pattern);
   auto matches = std::regex_match(scriptname, reg);
   return matches;
+}
+
+struct ParsedCscriptName {
+  std::string scriptname;
+  int runlevel;
+};
+
+ParsedCscriptName parseCScriptName(std::string name){
+  auto values = carAndRest(name, ':');
+  int runlevel = 0;
+  if (values.second != ""){
+    runlevel = std::atoi(values.second.c_str());
+  }
+  return ParsedCscriptName {
+    .scriptname = values.first,
+    .runlevel = runlevel,
+  };
 }
 
 /* matching strategy: matches based upon registration order, * is a wildcard which matches anything*/
@@ -44,10 +63,12 @@ CScriptBinding* getCScriptBinding(const char* name){
 
 void loadCScript(int id, const char* name, int sceneId, bool bootstrapperMode, bool isFreeScript){
   assert(customObjInstances.find(id) == customObjInstances.end());
-  auto binding = getCScriptBinding(name);
-  auto data = binding -> create(name, id, sceneId, bootstrapperMode, isFreeScript);
+  auto parsedScript = parseCScriptName(name);
+  auto binding = getCScriptBinding(parsedScript.scriptname.c_str());
+  auto data = binding -> create(parsedScript.scriptname.c_str(), id, sceneId, bootstrapperMode, isFreeScript);
   customObjInstances[id] = CustomObjInstance {
-    .name = name,
+    .name = parsedScript.scriptname,
+    .runlevel = parsedScript.runlevel,
     .data = data,
     .cScriptBinding = binding,
   };
