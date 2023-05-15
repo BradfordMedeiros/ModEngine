@@ -133,6 +133,12 @@ std::string join(std::vector<std::string> values, char delimeter){
   }
   return value;
 }
+std::pair<std::string, std::string> carAndRest(std::string& strToSplit, char delimeter){
+  auto splitValues = split(strToSplit, delimeter);
+  auto rest = subvector(splitValues, 1, splitValues.size());
+  return { splitValues.at(0), join(rest, delimeter) };
+}
+
 std::vector<std::string> subvector(std::vector<std::string>& values, int indexLow, int indexHigh){
   std::vector<std::string> subvec;
   for (int i = indexLow; i < indexHigh; i++){
