@@ -1495,6 +1495,7 @@ int main(int argc, char* argv[]){
       timePlayback.setElapsedTime(deltaTime);
     }
 
+
     onWorldFrame(world, deltaTime, timePlayback.currentTime, enablePhysics, dumpPhysics, state.worldpaused);
     auto time = getTotalTime();
     tickRecordings(time);
@@ -1753,6 +1754,8 @@ int main(int argc, char* argv[]){
     glfwPollEvents();     // stateupdate
     
     cBindings.onFrame();
+    afterFrameForScripts();
+    
     while (!channelMessages.empty()){
       auto message = channelMessages.front();
       channelMessages.pop();
