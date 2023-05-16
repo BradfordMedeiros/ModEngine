@@ -149,9 +149,7 @@ void afterFrameForScripts(){
     }
   }
   customObjInstances = newInstances;
-
-  std::cout << "scripts: " << print(customObjInstances) << std::endl;
-
+  //std::cout << "scripts: " << print(customObjInstances) << std::endl;
 }
 
 void renderCustomObj(int id){

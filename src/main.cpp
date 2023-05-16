@@ -840,9 +840,9 @@ ManipulatorTools tools {
   .getPosition = [](objid id) -> glm::vec3 { return getGameObjectPosition(id, true); },
   .setPosition = setGameObjectPosition,
   .getScale = getGameObjectScale,
-  .setScale = setGameObjectScale,
+  .setScale = [](int32_t index, glm::vec3 scale) -> void { setGameObjectScale(index, scale, true); },
   .getRotation = [](objid id) -> glm::quat { return getGameObjectRotation(id, false); },
-  .setRotation = [](objid id, glm::quat rot) -> void { setGameObjectRotation(id, rot, false); },
+  .setRotation = [](objid id, glm::quat rot) -> void { setGameObjectRotation(id, rot, true); },
   .snapPosition = [&state](glm::vec3 pos) -> glm::vec3 {
     return snapTranslate(state.easyUse, pos);
   },
@@ -1178,6 +1178,7 @@ int main(int argc, char* argv[]){
     .setGameObjectPosition = setGameObjectPosition,
     .getGameObjectRotation = getGameObjectRotation,
     .setGameObjectRot = setGameObjectRotation,
+    .setGameObjectScale = setGameObjectScale,
     .setFrontDelta = setFrontDelta,
     .moveRelative = moveRelative,
     .moveRelativeVec = moveRelative,

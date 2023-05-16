@@ -299,7 +299,8 @@ void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld){
 glm::vec3 getGameObjectScale(int32_t index){
   return gameobjectScale(world, index, false);
 }
-void setGameObjectScale(int32_t index, glm::vec3 scale){
+void setGameObjectScale(int32_t index, glm::vec3 scale, bool isWorld){
+  modassert(isWorld, "relative set scale not yet supported");
   physicsScaleSet(world, index, scale);
 }
 

@@ -241,16 +241,18 @@ void setRotation(btRigidBody* body, glm::quat rotation){
   body -> getMotionState() -> setWorldTransform(transform);
   body -> setWorldTransform(transform);
 }
-void setScale(btRigidBody* body, float width, float height, float depth){
+void setScale(physicsEnv& env, btRigidBody* body, float width, float height, float depth){
   body -> getCollisionShape() -> setLocalScaling(btVector3(width, height, depth));
+  env.dynamicsWorld -> removeRigidBody(body);   // if we don't add or remove it just gets stuck in the air...
+  env.dynamicsWorld -> addRigidBody(body, 1, 0);
 }
 glm::vec3 getScale(btRigidBody* body){
   return btToGlm(body -> getCollisionShape() -> getLocalScaling());
 }
 
-void setTransform(btRigidBody* body, glm::vec3 pos, glm::vec3 scale, glm::quat rotation){
+void setTransform(physicsEnv& env, btRigidBody* body, glm::vec3 pos, glm::vec3 scale, glm::quat rotation){
   setPosition(body, pos);
-  setScale(body, scale.x, scale.y, scale.z);
+  setScale(env, body, scale.x, scale.y, scale.z);
   setRotation(body, rotation);
 }
     

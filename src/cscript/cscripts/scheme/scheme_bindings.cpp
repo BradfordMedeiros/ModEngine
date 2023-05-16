@@ -509,6 +509,15 @@ SCM setGameObjectRotation(SCM value, SCM rotation){
   return SCM_UNSPECIFIED;
 }
 
+void (*_setGameObjectScale)(int32_t index, glm::vec3 scale, bool world);
+SCM scmSetGameObjectScale(SCM value, SCM positon) {  // absolute
+  auto x = scm_to_double(scm_list_ref(positon, scm_from_int64(0)));   
+  auto y = scm_to_double(scm_list_ref(positon, scm_from_int64(1)));
+  auto z = scm_to_double(scm_list_ref(positon, scm_from_int64(2)));
+  _setGameObjectScale(getGameobjId(value), glm::vec3(x, y, z), true);
+  return SCM_UNSPECIFIED;
+}
+
 glm::quat (*_setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta);
 SCM setGameObjectRotationDelta(SCM value, SCM deltaYaw, SCM deltaPitch, SCM deltaRoll){
   int32_t id = getGameobjId(value);
@@ -1280,6 +1289,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("gameobj-rot-world", 1, 0, 0, (void *)getGameObjectRotationWorld);
   scm_c_define_gsubr("gameobj-setrot!", 2, 0, 0, (void *)setGameObjectRotation);
   scm_c_define_gsubr("gameobj-setrotd!", 4, 0, 0, (void *)setGameObjectRotationDelta);
+  scm_c_define_gsubr("gameobj-setscale!", 2, 0, 0, (void *)scmSetGameObjectScale);
 
   scm_c_define_gsubr("gameobj-id", 1, 0, 0, (void *)getGameObjectId);
   scm_c_define_gsubr("gameobj-name", 1, 0, 0, (void *)getGameObjNameForIdFn);
@@ -1425,6 +1435,7 @@ void createStaticSchemeBindings(
   void (*setGameObjectPosition)(int32_t index, glm::vec3 pos, bool world),
   glm::quat (*getGameObjectRotation)(int32_t index, bool world),
   void (*setGameObjectRot)(int32_t index, glm::quat rotation, bool world),
+  void (*setGameObjectScale)(int32_t index, glm::vec3 scale, bool world),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
   glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance),
   glm::vec3 (*moveRelativeVec)(glm::vec3 pos, glm::quat orientation, glm::vec3 distance),
@@ -1528,6 +1539,7 @@ void createStaticSchemeBindings(
   _setGameObjectPosition = setGameObjectPosition;
   _getGameObjectRotation = getGameObjectRotation;
   setGameObjectRotn = setGameObjectRot;
+  _setGameObjectScale = setGameObjectScale;
   
   _setFrontDelta = setFrontDelta;
   _moveRelative = moveRelative;

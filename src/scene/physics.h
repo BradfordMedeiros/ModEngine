@@ -70,9 +70,9 @@ void setPosition(btRigidBody* body, glm::vec3);
 glm::vec3 getPosition(btRigidBody* rigidbody);
 void setRotation(btRigidBody* body, glm::quat rotation);
 glm::quat getRotation(btRigidBody* body);
-void setScale(btRigidBody* body, float width, float height, float depth);
+void setScale(physicsEnv& env, btRigidBody* body, float width, float height, float depth);
 glm::vec3 getScale(btRigidBody* body);
-void setTransform(btRigidBody* body, glm::vec3 pos, glm::vec3 scale, glm::quat rotation);
+void setTransform(physicsEnv& env, btRigidBody* body, glm::vec3 pos, glm::vec3 scale, glm::quat rotation);
 
 void applyImpulse(btRigidBody* body, glm::vec3 force);
 void clearImpulse(btRigidBody* body);

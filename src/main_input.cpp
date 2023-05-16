@@ -306,7 +306,7 @@ void handleSnapEasy(objid id, bool left){
   }else if (state.manipulatorMode == SCALE){
     auto objScale = getGameObjectScale(id);
     auto snapAmount = left ? snapScaleDown(state.easyUse, state.snappingMode, objScale, state.manipulatorAxis) : snapScaleUp(state.easyUse, state.snappingMode, objScale, state.manipulatorAxis);
-    setGameObjectScale(id, snapAmount);  // THis might be wrong
+    setGameObjectScale(id, snapAmount, true);  // THis might be wrong
     std::cout << "WARNING: SNAP TRANSLATE SET INPUT HANDLING MIGHT BE WRONG (world vs local)" << std::endl;
   }
 }

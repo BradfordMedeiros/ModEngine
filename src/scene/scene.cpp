@@ -866,7 +866,7 @@ void addSerialObjectsToWorld(
     auto phys = addPhysicsBody(world, id, true, modelVerts); 
     if (phys.body != NULL){   // why do I need this?
       auto transform = fullTransformation(world.sandbox, id);
-      setTransform(phys.body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation), transform.scale, transform.rotation);
+      setTransform(world.physicsEnvironment, phys.body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation), transform.scale, transform.rotation);
     }  
   }
 
@@ -1217,7 +1217,7 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
     //auto newScale = collisionInfo;
     auto newScale = scale;             // this should be reconsidered how this relates to transformation.scale
     auto body =  world.rigidbodys.at(index).body;
-    setScale(body, newScale.x, newScale.y, newScale.z);
+    setScale(world.physicsEnvironment, body, newScale.x, newScale.y, newScale.z);
     std::cout << "physics scale set physics: " << index << " - " << print(scale) << std::endl;
   }
   world.entitiesToUpdate.insert(index);
@@ -1234,7 +1234,7 @@ void physicsLocalTransformSet(World& world, objid index, Transformation transfor
     PhysicsValue& phys = world.rigidbodys.at(index);
     auto body = phys.body;
     auto fullTransform = fullTransformation(world.sandbox, index);
-    setTransform(body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
+    setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
   }
 }
 
@@ -1429,7 +1429,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body =  phys.body;
       auto fullTransform = fullTransformation(world.sandbox, index);
-      setTransform(body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
+      setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
     }
   }
   
