@@ -410,7 +410,7 @@ public:
       const btCollisionObject* obj = colObj1Wrap -> m_collisionObject;
       std::cout << "object hitpoint" << obj << std::endl;
       auto median = btToGlm((point.getPositionWorldOnA() + point.getPositionWorldOnB()) / 2.f);
-      auto normal = glm::normalize(btToGlm(point.m_normalWorldOnB));
+      auto normal  = quatFromDirection(btToGlm(point.m_normalWorldOnB));
       this -> callback(obj, median, normal);
       return 0;
     }
