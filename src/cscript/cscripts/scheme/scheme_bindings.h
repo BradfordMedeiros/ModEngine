@@ -73,6 +73,7 @@ void createStaticSchemeBindings(
   std::optional<objid> (*makeObjectAttr)(objid sceneId, std::string name, GameobjAttributes& attr, std::map<std::string, GameobjAttributes>& submodelAttributes),
   void (*makeParent)(objid child, objid parent),
   std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance),
+  std::vector<HitObject> (*contactTest)(objid id),
   void (*saveScreenshot)(std::string),
   void (*setState)(std::string),
   void (*setFloatState)(std::string stateName, float value),

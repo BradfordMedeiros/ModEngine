@@ -242,9 +242,10 @@ void setRotation(btRigidBody* body, glm::quat rotation){
   body -> setWorldTransform(transform);
 }
 void setScale(physicsEnv& env, btRigidBody* body, float width, float height, float depth){
+  int mask = body -> getBroadphaseProxy() -> m_collisionFilterMask;
   body -> getCollisionShape() -> setLocalScaling(btVector3(width, height, depth));
   env.dynamicsWorld -> removeRigidBody(body);   // if we don't add or remove it just gets stuck in the air...
-  env.dynamicsWorld -> addRigidBody(body, 1, 0);
+  env.dynamicsWorld -> addRigidBody(body, 1, mask);  // todo preserve physics mask
 }
 glm::vec3 getScale(btRigidBody* body){
   return btToGlm(body -> getCollisionShape() -> getLocalScaling());
@@ -355,11 +356,21 @@ void deinitPhysics(physicsEnv env){
 class AllHitsRayResultCallbackCustomFilter : public btCollisionWorld::AllHitsRayResultCallback {
 public:
   AllHitsRayResultCallbackCustomFilter(btVector3 x, btVector3 y) : btCollisionWorld::AllHitsRayResultCallback(x,y) {}
-  bool needsCollision(btBroadphaseProxy* proxy0) const;
+  bool needsCollision(btBroadphaseProxy* proxy0) const override;
 };
 
 bool AllHitsRayResultCallbackCustomFilter::needsCollision(btBroadphaseProxy* proxy0) const {
   return true;
+}
+
+
+std::optional<objid> getIdForRigidBody(std::map<objid, PhysicsValue>& rigidbodys, const btCollisionObject* obj){
+  for (auto &[id, physicsObj] : rigidbodys){
+    if (physicsObj.body == obj){
+      return id;
+    }
+  }
+  return std::nullopt;
 }
 
 std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, PhysicsValue>& rigidbodys, glm::vec3 posFrom, glm::quat direction, float maxDistance){
@@ -375,19 +386,52 @@ std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, PhysicsValue>& r
     const btCollisionObject* obj = result.m_collisionObjects[i];
     auto hitPoint = btPosFrom.lerp(btPosTo, result.m_hitFractions[i]);
     auto hitNormal = result.m_hitNormalWorld[i];
-    bool found = false;
-    for (auto &[objid, physicsObj] : rigidbodys){
-      if (physicsObj.body == obj){
-        hitobjects.push_back(HitObject{
-          .id = objid,
-          .point = btToGlm(hitPoint),  
-          .normal = quatFromDirection(btToGlm(hitNormal)),
-        });
-        found = true;
+    hitobjects.push_back(
+      HitObject {
+        .id = getIdForRigidBody(rigidbodys, obj).value(),
+        .point = btToGlm(hitPoint),  
+        .normal = quatFromDirection(btToGlm(hitNormal)),
       }
-    }
-    assert(found);
+    );    
   } 
   assert(hitobjects.size() == result.m_hitFractions.size());
+  return hitobjects;
+}
+
+class ContactResultCallback : public btCollisionWorld::ContactResultCallback
+{
+public:
+    std::function<void(const btCollisionObject* obj, glm::vec3, glm::quat)> callback;
+    virtual btScalar addSingleResult(
+      btManifoldPoint& point,
+      const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0,
+      const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1
+    ) override{
+      const btCollisionObject* obj = colObj1Wrap -> m_collisionObject;
+      std::cout << "object hitpoint" << obj << std::endl;
+      auto median = btToGlm((point.getPositionWorldOnA() + point.getPositionWorldOnB()) / 2.f);
+      auto normal = glm::normalize(btToGlm(point.m_normalWorldOnB));
+      this -> callback(obj, median, normal);
+      return 0;
+    }
+    virtual bool needsCollision(btBroadphaseProxy* proxy) const override {
+      return true;
+    } ;
+};
+
+std::vector<HitObject> contactTest(physicsEnv& env, std::map<objid, PhysicsValue>& rigidbodys, btRigidBody* body){
+  auto contactCallback = ContactResultCallback();
+
+  std::vector<HitObject> hitobjects = {};
+  contactCallback.callback = [&rigidbodys, &hitobjects, body](const btCollisionObject* obj, glm::vec3 pos, glm::quat normal) -> void {
+    auto id = getIdForRigidBody(rigidbodys, obj).value();
+    modassert(id != getIdForRigidBody(rigidbodys, body).value(), "contact id is the same as id provided to contact test");
+    hitobjects.push_back(HitObject {
+      .id = id,
+      .point = pos,
+      .normal = normal,
+    });
+  };
+  env.dynamicsWorld -> contactTest(body, contactCallback);
   return hitobjects;
 }

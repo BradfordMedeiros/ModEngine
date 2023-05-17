@@ -105,6 +105,7 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api, std::function<std::s
     api.makeObjectAttr,
     api.makeParent,
     api.raycast,
+    api.contactTest,
     api.saveScreenshot,
     api.setState,
     api.setFloatState,

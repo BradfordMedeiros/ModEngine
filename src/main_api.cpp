@@ -555,6 +555,10 @@ std::vector<HitObject> raycastW(glm::vec3 pos, glm::quat direction, float maxDis
   return raycast(world, pos, direction, maxDistance);
 }
 
+std::vector<HitObject> contactTest(objid id){
+  return contactTest(world, id);
+}
+
 glm::vec3 moveRelative(glm::vec3 posFrom, glm::quat orientation, float distance){
   return moveRelative(posFrom, orientation, glm::vec3(0.f, 0.f, -1 * distance), false);
 }

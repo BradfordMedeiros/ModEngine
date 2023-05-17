@@ -759,6 +759,22 @@ SCM scmRaycast(SCM pos, SCM direction, SCM distance){
   return list;
 }
 
+std::vector<HitObject> (*_contactTest)(objid id);
+SCM scmContactTest(SCM scmId){
+  modassert(false, "not yet implemented");
+  auto hitObjects = _contactTest(scm_to_int32(scmId));
+  SCM list = scm_make_list(scm_from_unsigned_integer(hitObjects.size()), scm_from_unsigned_integer(0));
+  for (int i = 0; i < hitObjects.size(); i++){
+    auto hitObject = hitObjects.at(i);
+    auto idAndHitPoint = scm_make_list(scm_from_unsigned_integer(3), scm_from_unsigned_integer(0));
+    scm_list_set_x(idAndHitPoint, scm_from_unsigned_integer(0), scm_from_int32(hitObject.id));
+    scm_list_set_x(idAndHitPoint, scm_from_unsigned_integer(1), vec3ToScmList(hitObject.point));
+    scm_list_set_x(idAndHitPoint, scm_from_unsigned_integer(2), scmQuatToSCM(hitObject.normal));
+    scm_list_set_x(list, scm_from_unsigned_integer(i), idAndHitPoint);
+  }
+  return list;
+}
+
 void (*_saveScreenshot)(std::string filepath);
 SCM scmSaveScreenshot(SCM filepath){
   _saveScreenshot(scm_to_locale_string(filepath));
@@ -1342,6 +1358,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("make-parent", 2, 0, 0, (void*)scmMakeParent);
 
   scm_c_define_gsubr("raycast", 3, 0, 0, (void*)scmRaycast);
+  scm_c_define_gsubr("contact-test", 1, 0, 0, (void*)scmContactTest);
 
   if (!isFreeScript){
     scm_c_define("mainobj", createGameObject(id));
@@ -1466,6 +1483,7 @@ void createStaticSchemeBindings(
   std::optional<objid> (*makeObjectAttr)(objid sceneId, std::string name, GameobjAttributes& attr, std::map<std::string, GameobjAttributes>& submodelAttributes),
   void (*makeParent)(objid child, objid parent),
   std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance),
+  std::vector<HitObject> (*contactTest)(objid id),
   void (*saveScreenshot)(std::string),
   void (*setState)(std::string),
   void (*setFloatState)(std::string stateName, float value),
@@ -1580,6 +1598,7 @@ void createStaticSchemeBindings(
   _makeParent = makeParent;
 
   _raycast = raycast;
+  _contactTest = contactTest;
 
   _saveScreenshot = saveScreenshot;
   _setState = setState;

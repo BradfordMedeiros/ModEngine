@@ -1212,6 +1212,7 @@ int main(int argc, char* argv[]){
     .makeObjectAttr = makeObjectAttr,
     .makeParent = makeParent,
     .raycast = raycastW,
+    .contactTest = contactTest,
     .saveScreenshot = takeScreenshot,
     .setState = setState,
     .setFloatState = setFloatState,

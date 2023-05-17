@@ -222,6 +222,14 @@ std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direct
   return raycast(world.physicsEnvironment, world.rigidbodys, posFrom, direction, maxDistance);
 }
 
+std::vector<HitObject> contactTest(World& world, objid id){
+  if (world.rigidbodys.find(id) == world.rigidbodys.end()){
+    modlog("contact test", "warning - contact test on a non-rigidbody");
+    return {};
+  }
+  return contactTest(world.physicsEnvironment, world.rigidbodys, world.rigidbodys.at(id).body);
+}
+
 std::optional<Texture> textureForId(World& world, objid id){
   return textureForId(world.objectMapping, id);
 }

@@ -38,6 +38,7 @@ GameObjectCamera& getCamera(World& world, objid id);
 glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target);
 
 std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance);
+std::vector<HitObject> contactTest(World& world, objid id);
 std::optional<Texture> textureForId(World& world, objid id);
 void setObjectDimensions(World& world, std::vector<objid>& ids, float width, float height, float depth);
 

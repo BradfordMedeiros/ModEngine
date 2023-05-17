@@ -62,6 +62,7 @@ btRigidBody* addRigidBodyExact(physicsEnv& env, std::vector<glm::vec3>& verts, g
 btRigidBody* addRigidBodyVoxel(physicsEnv& env, glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts);
 btRigidBody* addRigidBodyHeightmap(physicsEnv& env, glm::vec3 pos, glm::quat rotation, bool isStatic, rigidBodyOpts opts, float* data, int width, int height, glm::vec3 scaling, float minHeight, float maxHeight);
 
+
 void rmRigidBody(physicsEnv& env, btRigidBody* body);
 
 void updateRigidBodyOpts(physicsEnv& env, btRigidBody* body, rigidBodyOpts opts);
@@ -88,5 +89,7 @@ ModAABB getModAABB(btRigidBody* body);
 void printRigidBodyInfo(btRigidBody* body);
 
 std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, PhysicsValue>& rigidbodys, glm::vec3 posFrom, glm::quat direction, float maxDistance);
+std::vector<HitObject> contactTest(physicsEnv& env, std::map<objid, PhysicsValue>& rigidbodys, btRigidBody* body);
+
 
 #endif 
