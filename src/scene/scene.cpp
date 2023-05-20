@@ -1347,7 +1347,10 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     updateEmitters(
       world.emitters, 
       timeElapsed,
-      [&world](std::string name, std::string templateName, GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions particleOpts) -> objid {      
+      [&world](std::string name, std::string templateName, GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions particleOpts) -> std::optional<objid> {     
+        if (particleOpts.parentId.has_value() && !idExists(world.sandbox, particleOpts.parentId.value())){
+          return std::nullopt;
+        } 
         std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
         attributes.vecAttr.vec3["position"] = particleOpts.position.has_value() ?  particleOpts.position.value() : fullTransformation(world.sandbox, emitterNodeId).position;
         if (particleOpts.velocity.has_value()){

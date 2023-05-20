@@ -113,7 +113,7 @@ float calcLifetimeEffect(float timeElapsed, float totalDuration, std::vector<flo
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<objid(std::string emitterName, std::string templateName, GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions newParticleOpts)> addParticle, 
+  std::function<std::optional<objid>(std::string emitterName, std::string templateName, GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions newParticleOpts)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 ){   
@@ -189,14 +189,15 @@ void updateEmitters(
         newParticleOpts = emitter.forceParticles.front();
         emitter.forceParticles.pop_front();
       }
-      emitter.currentParticles+= 1; 
 
       auto particleId = addParticle(emitter.name, emitter.templateName, emitter.particleAttributes, emitter.submodelAttributes, emitter.emitterNodeId, newParticleOpts);
-
-      emitter.particles.push_back(ActiveParticle {
-        .id = particleId,
-        .spawntime = currentTime,
-      });
+      if (particleId.has_value()){
+        emitter.particles.push_back(ActiveParticle {
+          .id = particleId.value(),
+          .spawntime = currentTime,
+        });
+      }
+      emitter.currentParticles+= 1; 
       emitter.lastSpawnTime = currentTime;
       std::cout << "INFO: particles: adding particle" << std::endl;
     }
