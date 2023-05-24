@@ -253,6 +253,13 @@ std::string print(glm::mat2 mat){
   "]";
 }
 
+std::string print(std::optional<std::string> value){
+  if (!value.has_value()){
+    return "[no value]";
+  }
+  return value.value();
+}
+
 bool maybeParseFloat(std::string value, float& _number){
   try {
     std::string::size_type parsedSize;
@@ -549,6 +556,7 @@ std::string print(AttributeValue& value){
   modassert(false, "invalid attribute type");
   return "";
 }
+
 
 AttributeValue interpolateAttribute(AttributeValue key1, AttributeValue key2, float percentage){  
   assert(percentage <= 1.f && percentage >= 0.f);
