@@ -14,20 +14,17 @@ std::vector<std::filesystem::path> getAllFilesInDirectory(std::string& directory
 }
 
 
-SingleFileWatch addWatchOnFile(int inotifyFd, std::filesystem::path& filePath){
+SingleFileWatch addWatchOnFile(int inotifyFd, std::filesystem::path& filePath, int* maxFd, fd_set* fds){
     int watchDescriptor = inotify_add_watch(inotifyFd, filePath.c_str(), IN_ATTRIB | IN_MODIFY);
     modassert(watchDescriptor != -1, "error adding watch");
 
     SingleFileWatch singleFileWatch {};
     singleFileWatch.watchDescriptor = watchDescriptor;
 
-    fd_set fds;
-    FD_ZERO(&singleFileWatch.fds);
-    FD_SET(inotifyFd, &fds);
-    int maxFd = inotifyFd;
+    FD_ZERO(fds);
+    FD_SET(inotifyFd, fds);
+    *maxFd = inotifyFd;
 
-    singleFileWatch.maxFd = maxFd;
-    singleFileWatch.fds = fds;
     singleFileWatch.filepath = std::filesystem::canonical(filePath).string();
     return singleFileWatch;
 }
@@ -50,8 +47,11 @@ std::optional<FileWatch> watchFiles(std::string directory, float debouncePeriodS
 
     int inotifyFdDir = inotify_init();
 
+    fd_set fds;
     FileWatch filewatch {
         .inotifyFd = inotifyFd,
+        .maxFd = 0,
+        .fds = fds,
         .inotifyFdDir = inotifyFdDir,
     };
     for (auto &filePath : getAllFilesInDirectory(directory)){
@@ -59,10 +59,12 @@ std::optional<FileWatch> watchFiles(std::string directory, float debouncePeriodS
         auto filePathName = std::filesystem::canonical(filePath).string();
         modlog("filewatch", std::string("added watch on ") + filePathName);
        
-        auto fd = std::filesystem::is_directory(filePath) ? inotifyFdDir : inotifyFd;
-        auto singleFileWatch = addWatchOnFile(fd, filePath);
-        filewatch.fileWatches[singleFileWatch.watchDescriptor] = singleFileWatch;
-
+        auto isDirectory = std::filesystem::is_directory(filePath);
+        auto fd = isDirectory ? inotifyFdDir : inotifyFd;
+        if (!isDirectory){
+          auto singleFileWatch = addWatchOnFile(fd, filePath, &filewatch.maxFd, &filewatch.fds);
+          filewatch.fileWatches[singleFileWatch.watchDescriptor] = singleFileWatch;
+        }
     }
 
     return filewatch;
@@ -75,10 +77,10 @@ void getChangedFilesFromWatch(std::optional<FileWatch>& filewatchOpt, std::set<s
             .tv_sec = 0,
             .tv_usec = 0,
         };
-        int numReady = select(singleFileWatch.maxFd + 1, &singleFileWatch.fds, NULL, NULL, &timeout);
+        int numReady = select(filewatch.maxFd + 1, &filewatch.fds, NULL, NULL, &timeout);
         modassert(numReady != -1, "got -1 for select, should look up what this means");
 
-    if (FD_ISSET(filewatch.inotifyFd, &singleFileWatch.fds)) {
+    if (FD_ISSET(filewatch.inotifyFd, &filewatch.fds)) {
             constexpr int bufferSize = 4096;
             char buffer[bufferSize];
 

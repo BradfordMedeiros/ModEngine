@@ -11,13 +11,14 @@
 
 struct SingleFileWatch {
 	std::string filepath;
-	fd_set fds;
 	int watchDescriptor;
-	int maxFd;
 };
 
 struct FileWatch {
 	int inotifyFd;
+	int maxFd;
+	fd_set fds;
+
 	int inotifyFdDir;
 	std::unordered_map<int, SingleFileWatch> fileWatches;
 };
