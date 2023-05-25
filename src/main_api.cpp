@@ -1097,7 +1097,7 @@ void tickScheduledTasks(){
 void handleChangedResourceFiles(std::set<std::string> changedFiles){
   for (auto &file : changedFiles){
     if (getFileType(file) == IMAGE_EXTENSION){
-       std::cout << "placeholder update resource: " << file << std::endl;
+      maybeReloadTextureWorld(world, file);
     }
   }
 }

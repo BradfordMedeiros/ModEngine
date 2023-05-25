@@ -26,6 +26,7 @@ Texture loadTextureEmpty(int textureWidth, int textureHeight, int numChannels);
 Texture loadTextureData(unsigned char* data, int textureWidth, int textureHeight, int numChannels);
 Texture loadTextureDataRed(unsigned char* data, int textureWidth, int textureHeight);
 Texture loadTexture(std::string textureFilePath);
+void replaceTexture(Texture& texture, std::string& textureFilePath, bool allowFail);
 Texture loadCubemapTexture(std::string textureFilePathRoot);
 void updateTextureData(Texture& texture, unsigned char* data, int textureWidth, int textureHeight);
 void saveTextureData(std::string filepath, char* data, int width, int height);

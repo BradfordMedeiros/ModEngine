@@ -86,6 +86,26 @@ Texture loadTexture(std::string textureFilePath){
   return texture;
 }
 
+void replaceTexture(Texture& texture, std::string& textureFilePath, bool allowFail){
+  int textureWidth, textureHeight, numChannels;
+  int forcedChannels = 4;
+  stbi_set_flip_vertically_on_load(true);
+  unsigned char* data = stbi_load(textureFilePath.c_str(), &textureWidth, &textureHeight, &numChannels, forcedChannels); 
+  if (!data){
+    if (!allowFail){
+      throw std::runtime_error("failed loading texture " + textureFilePath + ", reason: " + stbi_failure_reason());
+    }
+    std::cout << "warning: failed loading texture" << std::endl;
+  }
+  modassert(textureWidth > 0, "ERROR - loadTextureData - texture width must be > 0");
+  modassert(textureHeight > 0, "ERROR - loadTextureData - height width must be > 0");
+
+  glBindTexture(GL_TEXTURE_2D, texture.textureId);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  stbi_image_free(data);
+}
+
 Texture loadCubemapTextureData(std::vector<unsigned char*> data, std::vector<int> textureWidth, std::vector<int> textureHeight, std::vector<int> numChannels){
   unsigned int texture;
   glGenTextures(1, &texture);

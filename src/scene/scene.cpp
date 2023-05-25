@@ -356,6 +356,16 @@ Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid owner
   return texture;  
 }
 
+void maybeReloadTextureWorld(World& world, std::string texturepath){
+  if (world.textures.find(texturepath) == world.textures.end()){
+    modlog("scene", std::string("texture not reloaded because does not exist: ") + texturepath);
+    return;
+  }
+  modlog("scene", std::string("texture attempt reload: ") + texturepath);
+  replaceTexture(world.textures.at(texturepath).texture, texturepath, true);
+  modlog("scene", std::string("texture reloaded: ") + texturepath);
+}
+
 Texture loadSkyboxWorld(World& world, std::string texturepath, objid ownerId){
   if (world.textures.find(texturepath) != world.textures.end()){
     world.textures.at(texturepath).owners.insert(ownerId);
