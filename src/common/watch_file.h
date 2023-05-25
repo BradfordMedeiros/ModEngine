@@ -9,13 +9,21 @@
 #include <unistd.h>
 #include "./util.h"
 
-struct FileWatch {
+struct SingleFileWatch {
+	std::string filepath;
 	fd_set fds;
-	int inotifyFd;
 	int watchDescriptor;
 	int maxFd;
 };
 
+struct FileWatch {
+	int inotifyFd;
+	int inotifyFdDir;
+	std::unordered_map<int, SingleFileWatch> fileWatches;
+};
+
+
+// 
 std::optional<FileWatch> watchFiles(std::string directory, float debouncePeriodSeconds = 1.f);
 void closeWatch(std::optional<FileWatch> filewatch);
 std::set<std::string> pollChangedFiles(std::optional<FileWatch>& filewatch);
