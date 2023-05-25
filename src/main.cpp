@@ -11,6 +11,7 @@
 #include "./cscript/cscripts/editor/editor_scripts.h"
 #include "./scene/common/textures_gen.h"
 #include "./sql/shell.h"
+#include "./common/watch_file.h"
 
 #ifdef ADDITIONAL_SRC_HEADER
   #include STR(ADDITIONAL_SRC_HEADER)
@@ -918,6 +919,7 @@ int main(int argc, char* argv[]){
    ("log", "List of logs to display", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("loglevel", "Log level", cxxopts::value<int>()->default_value("0"))
    ("sqlshell", "Launch into sql shell", cxxopts::value<bool>()->default_value("false"))
+   ("watch", "Watch file system for resource changes", cxxopts::value<std::string>()->default_value(""))
    ("h,help", "Print help")
   ;        
 
@@ -956,6 +958,9 @@ int main(int argc, char* argv[]){
   if (result["sqlshell"].as<bool>()){
     return loopSqlShell(sqlDirectory);
   }
+
+  auto filewatch = watchFiles(result["watch"].as<std::string>());
+
 
   bool mappingClickCalled = false;
 
@@ -1499,6 +1504,8 @@ int main(int argc, char* argv[]){
 
 
     onWorldFrame(world, deltaTime, timePlayback.currentTime, enablePhysics, dumpPhysics, state.worldpaused);
+    handleChangedResourceFiles(pollChangedFiles(filewatch));
+
     auto time = getTotalTime();
     tickRecordings(time);
     tickScheduledTasks();

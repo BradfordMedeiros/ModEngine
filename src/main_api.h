@@ -212,4 +212,6 @@ void tickScheduledTasks();
 void removeScheduledTask(std::set<objid> ids);
 void removeScheduledTaskByOwner(std::set<objid> ids);
 
+void handleChangedResourceFiles(std::set<std::string> changedFiles);
+
 #endif

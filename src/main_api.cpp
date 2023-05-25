@@ -1092,3 +1092,12 @@ void tickScheduledTasks(){
   removeScheduledTask(idsToRemove);
   //modlog("scheduled tasks", "num tasks: " + std::to_string(scheduledTasks.size()));
 }
+
+
+void handleChangedResourceFiles(std::set<std::string> changedFiles){
+  for (auto &file : changedFiles){
+    if (getFileType(file) == IMAGE_EXTENSION){
+       std::cout << "placeholder update resource: " << file << std::endl;
+    }
+  }
+}
