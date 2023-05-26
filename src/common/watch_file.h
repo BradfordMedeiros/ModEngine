@@ -22,13 +22,15 @@ struct Watcher {
 };
 
 struct FileWatch {
+	std::optional<float> debouncePeriodSeconds;
 	Watcher files;
+	std::unordered_map<std::string, float> timeFileChanged;
 };
 
 
 // 
-std::optional<FileWatch> watchFiles(std::string directory, float debouncePeriodSeconds = 1.f);
+std::optional<FileWatch> watchFiles(std::string directory, std::optional<float> debouncePeriodSeconds = std::nullopt);
 void closeWatch(std::optional<FileWatch> filewatch);
-std::set<std::string> pollChangedFiles(std::optional<FileWatch>& filewatch);
+std::set<std::string> pollChangedFiles(std::optional<FileWatch>& filewatch, float currentTime);
 
 #endif 

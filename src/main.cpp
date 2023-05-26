@@ -959,7 +959,7 @@ int main(int argc, char* argv[]){
     return loopSqlShell(sqlDirectory);
   }
 
-  auto filewatch = watchFiles(result["watch"].as<std::string>());
+  auto filewatch = watchFiles(result["watch"].as<std::string>(), 1.f);
 
 
   bool mappingClickCalled = false;
@@ -1504,7 +1504,7 @@ int main(int argc, char* argv[]){
 
 
     onWorldFrame(world, deltaTime, timePlayback.currentTime, enablePhysics, dumpPhysics, state.worldpaused);
-    handleChangedResourceFiles(pollChangedFiles(filewatch));
+    handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
 
     auto time = getTotalTime();
     tickRecordings(time);

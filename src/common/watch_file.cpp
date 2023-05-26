@@ -36,7 +36,7 @@ SingleFileWatch addWatchOnFile(int inotifyFd, std::filesystem::path& filePath, i
 // when directory watch indicates new file, add new watch to that
 
 
-std::optional<FileWatch> watchFiles(std::string directory, float debouncePeriodSeconds){
+std::optional<FileWatch> watchFiles(std::string directory, std::optional<float> debouncePeriodSeconds){
     if (directory == ""){
 	   return std::nullopt;
     }
@@ -48,11 +48,13 @@ std::optional<FileWatch> watchFiles(std::string directory, float debouncePeriodS
     modassert(inotifyFd != -1, "failure initializing watch files");
 
     FileWatch filewatch {
+        .debouncePeriodSeconds = debouncePeriodSeconds,
         .files = Watcher {
             .inotifyFd = inotifyFd,
             .maxFd = 0,
             .fds = fds,
         },
+        .timeFileChanged = {},
     };
     for (auto &filePath : getAllFilesInDirectory(directory)){
         std::cout << "File is: " << std::filesystem::canonical(filePath).string() << std::endl;
@@ -104,11 +106,27 @@ void closeWatch(std::optional<FileWatch> filewatch){
     }
 }
 
-std::set<std::string> pollChangedFiles(std::optional<FileWatch>& filewatch){
+std::set<std::string> pollChangedFiles(std::optional<FileWatch>& filewatch, float currentTime){
     if (!filewatch.has_value()){
         return {};
     }
     std::set<std::string> changedFiles;
     getChangedFilesFromWatch(filewatch, changedFiles);
-	return changedFiles;
+    if (!filewatch.value().debouncePeriodSeconds.has_value()){
+        return changedFiles;
+    }
+
+    for (auto &changedFile : changedFiles){
+        filewatch.value().timeFileChanged[changedFile] = currentTime;
+    }
+    std::set<std::string> debouncedChangedFiles;
+    for (auto &[file, lastChangeTime] : filewatch.value().timeFileChanged){
+        if ((currentTime - lastChangeTime) >= filewatch.value().debouncePeriodSeconds.value()){
+            debouncedChangedFiles.insert(file);
+        }
+    }
+    for (auto &file : debouncedChangedFiles){
+        filewatch.value().timeFileChanged.erase(file);
+    }
+	return debouncedChangedFiles;
 }
