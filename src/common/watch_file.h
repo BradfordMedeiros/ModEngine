@@ -14,13 +14,16 @@ struct SingleFileWatch {
 	int watchDescriptor;
 };
 
-struct FileWatch {
+struct Watcher {
 	int inotifyFd;
 	int maxFd;
 	fd_set fds;
+	std::unordered_map<int, std::string> fileWatches;
+};
 
-	int inotifyFdDir;
-	std::unordered_map<int, SingleFileWatch> fileWatches;
+struct FileWatch {
+	Watcher files;
+	Watcher dirs;
 };
 
 
