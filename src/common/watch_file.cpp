@@ -14,8 +14,8 @@ std::vector<std::filesystem::path> getAllFilesInDirectory(std::string& directory
 }
 
 
-SingleFileWatch addWatchOnFile(int inotifyFd, std::filesystem::path& filePath, int* maxFd, fd_set* fds){
-    int watchDescriptor = inotify_add_watch(inotifyFd, filePath.c_str(), IN_ATTRIB | IN_MODIFY);
+SingleFileWatch addWatchOnFile(int inotifyFd, std::filesystem::path& filePath, int* maxFd, fd_set* fds, uint32_t mask){
+    int watchDescriptor = inotify_add_watch(inotifyFd, filePath.c_str(), mask);
     modassert(watchDescriptor != -1, "error adding watch");
 
     SingleFileWatch singleFileWatch {};
@@ -47,20 +47,11 @@ std::optional<FileWatch> watchFiles(std::string directory, float debouncePeriodS
     int inotifyFd = inotify_init();
     modassert(inotifyFd != -1, "failure initializing watch files");
 
-    fd_set fdsDir;
-    int inotifyFdDir = inotify_init();
-    modassert(inotifyFdDir != -1, "failure initializing watch files dir");
-
     FileWatch filewatch {
         .files = Watcher {
             .inotifyFd = inotifyFd,
             .maxFd = 0,
             .fds = fds,
-        },
-        .dirs = Watcher {
-            .inotifyFd = inotifyFdDir,
-            .maxFd = 0,
-            .fds = fdsDir,
         },
     };
     for (auto &filePath : getAllFilesInDirectory(directory)){
@@ -70,14 +61,12 @@ std::optional<FileWatch> watchFiles(std::string directory, float debouncePeriodS
        
         auto isDirectory = std::filesystem::is_directory(filePath);
         if (!isDirectory){
-          auto singleFileWatch = addWatchOnFile(filewatch.files.inotifyFd, filePath, &filewatch.files.maxFd, &filewatch.files.fds);
+          auto singleFileWatch = addWatchOnFile(filewatch.files.inotifyFd, filePath, &filewatch.files.maxFd, &filewatch.files.fds, IN_ATTRIB | IN_MODIFY);
           filewatch.files.fileWatches[singleFileWatch.watchDescriptor] = singleFileWatch.filepath;
-        }else{
-          auto singleFileWatch = addWatchOnFile(filewatch.dirs.inotifyFd, filePath, &filewatch.dirs.maxFd, &filewatch.dirs.fds);
-          filewatch.dirs.fileWatches[singleFileWatch.watchDescriptor] = singleFileWatch.filepath;
         }
     }
 
+    modlog("watcher", std::string("starting watching files, total watches: ") + std::to_string(filewatch.files.fileWatches.size()));
     return filewatch;
 }
 
@@ -103,6 +92,7 @@ void getChangedFilesFromWatch(std::optional<FileWatch>& filewatchOpt, std::set<s
         }
     }
 }
+
 
 void closeWatch(std::optional<FileWatch> filewatch){
     if (!filewatch.has_value()){

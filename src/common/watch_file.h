@@ -23,7 +23,6 @@ struct Watcher {
 
 struct FileWatch {
 	Watcher files;
-	Watcher dirs;
 };
 
 
