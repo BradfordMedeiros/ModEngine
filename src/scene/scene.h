@@ -68,7 +68,14 @@ objid addObjectToScene(World& world, objid sceneId, std::string name, AttrChildr
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId);
 
 void removeObjectFromScene(World& world, objid id);
-void copyObjectToScene(World& world, objid id);
+bool copyObjectToScene(World& world, objid id);
+
+struct SingleObjDeserialization {
+  std::string name;
+  AttrChildrenPair attrWithChildren;
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+};
+std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serializedObj, objid id, bool useObjId);
 
 GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameobj);
 GameobjAttributes objectAttributes(World& world, objid id);

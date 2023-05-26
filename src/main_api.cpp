@@ -330,7 +330,10 @@ std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttr
 }
 
 void copyObject(int32_t id){
-  copyObjectToScene(world, id);
+  bool success = copyObjectToScene(world, id);
+  if (!success){
+    sendNotifyMessage("alert", std::string("failure copying object: ") + std::to_string(id));
+  }
 }
 void handleCopy(){
   modlog("clipboard", "pasting objects");
