@@ -160,6 +160,7 @@ struct engineState {
 
   float volume;
   bool disableInput;
+  bool escapeQuits;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

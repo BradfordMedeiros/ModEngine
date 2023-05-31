@@ -434,7 +434,7 @@ void drop_callback(GLFWwindow* window, int count, const char** paths){
 }
 
 void handleInput(GLFWwindow* window){
-  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
+  if (state.escapeQuits && glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
     glfwSetWindowShouldClose(window, true);
   }
   processControllerInput(keyMapper, moveCamera, deltaTime, keyCharCallback, onJoystick);

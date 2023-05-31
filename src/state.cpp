@@ -460,6 +460,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .forceSelectIndex = 0,
     .volume = 1.f,
     .disableInput = false,
+    .escapeQuits = false,
 	};
 	return state;
 }
