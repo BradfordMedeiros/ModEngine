@@ -630,6 +630,7 @@ void drawScrollbar(EditorScenegraph& scenegraph){
 		glm::vec4(0.f, 0.f, 0.f, 1.f), 
 		scenegraph.textureId.value(), 
 		true, 
+		std::nullopt,
 		std::nullopt
 	);
 	mainApi -> drawRect(
@@ -641,6 +642,7 @@ void drawScrollbar(EditorScenegraph& scenegraph){
 		glm::vec4(0.4f, 0.4f, 0.4f, 1.f), 
 		scenegraph.textureId.value(), 
 		true, 
+		std::nullopt,
 		std::nullopt
 	);
 }

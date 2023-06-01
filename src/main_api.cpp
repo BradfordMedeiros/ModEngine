@@ -391,7 +391,7 @@ int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontS
   return drawWordsRelative(shaderProgram, fontFamilyByName(fontFamilyName), fullModelTransform(world.sandbox, id), word, 0, 0, fontSize, offsetDelta, align, wrap, virtualization, cursor.cursorIndex, cursor.cursorIndexLeft, cursor.highlightLength, drawBoundingOnly);
 }
 
-void drawRect(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId){
+void drawRect(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture){
   //std::cout << "draw text: " << word << ": perma? " << permatext << std::endl;
   addShapeData(lineData, ShapeData{
     .shapeData = RectShapeData {
@@ -399,6 +399,7 @@ void drawRect(float centerX, float centerY, float width, float height, bool perm
       .centerY = centerY,
       .width = width,
       .height = height,
+      .texture = texture,
     },
     .textureId = textureId,
     .perma = perma,

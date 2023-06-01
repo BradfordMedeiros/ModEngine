@@ -167,7 +167,7 @@ float convertTextNdiFontsize(float height, float width, float fontsize, bool isn
   return fontsize;
 }
 
-void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::string)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect){
+void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::string)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId){
   //std::cout << "text number: " << lineData.text.size() << std::endl;
   for (auto &text : lineData.text){
     if (textureIdSame(text.textureId, textureId)){
@@ -209,8 +209,15 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::functi
 
         glm::mat4 scaledAndTranslated = glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(centerXNdi, centerYNdi, 0.f)), glm::vec3(widthNdi, heightNdi, 1.f));
         glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(scaledAndTranslated));
-        drawMesh(unitXYRect, uiShaderProgram);
 
+        unsigned int textureId = -1;
+        if (rectShapeData -> texture.has_value()){
+          auto texId = getTextureId(rectShapeData -> texture.value());
+          if (texId.has_value()){
+            textureId = texId.value();
+          }
+        }
+        drawMesh(unitXYRect, uiShaderProgram, textureId);
       }else {
         modassert(false, "draw shape data type not yet implemented");
       }

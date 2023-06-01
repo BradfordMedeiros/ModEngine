@@ -15,5 +15,6 @@ glm::mat4 projectionFromLayer(LayerInfo& layer);
 LayerInfo layerByName(std::string layername);
 LayerInfo getLayerForId(objid id);
 std::vector<ParsedLoadScene> parseSceneArgs(std::vector<std::string>& rawScenes);
+std::optional<unsigned int> getTextureId(std::string& texture);
 
 #endif

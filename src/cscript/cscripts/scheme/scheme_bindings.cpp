@@ -317,13 +317,14 @@ SCM scmDrawTextNdi(SCM word, SCM left, SCM top, SCM fontSize, SCM opt1, SCM opt2
 }
 
 
-void (*_drawRect)(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId);
-SCM scmDrawRect(SCM centerX, SCM centerY, SCM width, SCM height, SCM opt1, SCM opt2, SCM opt3, SCM opt4){
-  auto optVals = optionalValues({ OPTIONAL_VALUE_VEC4, OPTIONAL_VALUE_BOOL, OPTIONAL_VALUE_UNSIGNED_INT, OPTIONAL_VALUE_UNSIGNED_INT }, { opt1, opt2, opt3, opt4 });
+void (*_drawRect)(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture);
+SCM scmDrawRect(SCM centerX, SCM centerY, SCM width, SCM height, SCM opt1, SCM opt2, SCM opt3, SCM opt4, SCM opt5){
+  auto optVals = optionalValues({ OPTIONAL_VALUE_VEC4, OPTIONAL_VALUE_BOOL, OPTIONAL_VALUE_UNSIGNED_INT, OPTIONAL_VALUE_UNSIGNED_INT, OPTIONAL_VALUE_STRING }, { opt1, opt2, opt3, opt4, opt5});
   auto tint = optionalTypeFromVariant<glm::vec4>(optVals.at(0));
   auto perma = getOptValue<bool>(optVals.at(1), false);
   auto textureId = optionalTypeFromVariant<unsigned int>(optVals.at(2));
   auto selectionId = optionalTypeFromVariant<unsigned int>(optVals.at(3));
+  auto textureStr = optionalTypeFromVariant<std::string>(optVals.at(4));
 
   _drawRect(
     scm_to_double(centerX),
@@ -334,7 +335,8 @@ SCM scmDrawRect(SCM centerX, SCM centerY, SCM width, SCM height, SCM opt1, SCM o
     tint,
     textureId,
     true,
-    selectionId
+    selectionId,
+    textureStr
   );
   return SCM_UNSPECIFIED;
 }
@@ -1292,7 +1294,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
  
   scm_c_define_gsubr("draw-text", 4, 5, 0, (void*)scmDrawText);
   scm_c_define_gsubr("draw-text-ndi", 4, 5, 0, (void*)scmDrawTextNdi);
-  scm_c_define_gsubr("draw-rect", 4, 4, 0, (void*)scmDrawRect);
+  scm_c_define_gsubr("draw-rect", 4, 5, 0, (void*)scmDrawRect);
   scm_c_define_gsubr("draw-line", 2, 3, 0, (void*)scmDrawLine);
   scm_c_define_gsubr("free-line", 1, 0, 0, (void*)scmFreeLine);
 
@@ -1442,7 +1444,7 @@ void createStaticSchemeBindings(
   std::vector<int32_t> (*getObjectsByAttr)(std::string, std::optional<AttributeValue>, std::optional<int32_t>),
   void (*setActiveCamera)(int32_t cameraId, float interpolationTime),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamil, std::optional<objid> selectionId),
-  void (*drawRect)(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId),
+  void (*drawRect)(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture),
   int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth),
   void (*freeLine)(int32_t lineid),
   std::optional<std::string> (*getGameObjNameForId)(int32_t id),
