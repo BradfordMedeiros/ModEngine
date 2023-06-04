@@ -122,7 +122,8 @@ void playSound(std::string sound);
 
 std::vector<std::string> listResources(std::string resourceType);
 
-void sendNotifyMessage(std::string message, AttributeValue value);
+void sendNotifyMessage(std::string message, std::any value);
+void sendAlert(std::string message);
 
 double timeSeconds(bool realtime);
 double timeElapsed();

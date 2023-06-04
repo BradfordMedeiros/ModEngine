@@ -17,6 +17,7 @@
 #include <iostream>
 #include <map>
 #include <set>
+#include <any>
 #include <queue>
 #include <execinfo.h>
 
@@ -117,7 +118,7 @@ struct ScenegraphDebug {
 
 struct StringAttribute {
   std::string strTopic;
-  AttributeValue strValue;
+  std::any strValue;
 };
 
 struct HitObject {
@@ -267,8 +268,8 @@ typedef void(*keycharcallback)(unsigned int codepoint);
 typedef std::function<void(int32_t id, void* data, unsigned int codepoint)> id_keycharcallback;
 typedef void(*stringboolFunc)(std::string, bool value);
 typedef std::function<void(int32_t id, std::string, bool value)> id_stringboolFunc;
-typedef void(*string2func)(std::string&, AttributeValue&);
-typedef std::function<void(int32_t, void*, std::string&, AttributeValue&)> id_string2func;
+typedef void(*string2func)(std::string&, std::any&);
+typedef std::function<void(int32_t, void*, std::string&, std::any&)> id_string2func;
 typedef void(*stringfunc)(std::string&);
 typedef std::function<void(int32_t, std::string&)> id_stringfunc;
 

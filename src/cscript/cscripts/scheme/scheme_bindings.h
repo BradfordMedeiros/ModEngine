@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <glm/gtx/compatibility.hpp>
+#include <any>
 #include "./scriptmanager.h"      // need to eliminate the circular relationship here
 #include "./scheme_util.h"
 #include "../../../common/util.h"
@@ -56,7 +57,7 @@ void createStaticSchemeBindings(
   std::vector<std::string>(*listClips)(),
   void (*playClip)(std::string, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position),
   std::vector<std::string> (*listResources)(std::string),
-  void (*sendNotifyMessage)(std::string message, AttributeValue value),
+  void (*sendNotifyMessage)(std::string message, std::any value),
   double (*timeSeconds)(bool realtime),
   double (*timeElapsed)(),
   bool (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename),

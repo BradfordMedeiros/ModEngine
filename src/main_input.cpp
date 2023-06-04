@@ -595,7 +595,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = [&state]() -> void {
       std::cout << "mode set to translate" << std::endl;
       state.manipulatorMode = TRANSLATE;
-      sendNotifyMessage("alert", "mode: translate");
+      sendAlert("mode: translate");
     }
   },
   InputDispatch{
@@ -606,7 +606,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = [&state]() -> void {
       std::cout << "mode set to rotate" << std::endl;
       state.manipulatorMode = ROTATE;
-      sendNotifyMessage("alert", "mode: rotate");
+      sendAlert("mode: rotate");
     }
   },
   InputDispatch{
@@ -617,7 +617,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = [&state]() -> void {
       std::cout << "mode set to scale" << std::endl;
       state.manipulatorMode = SCALE;
-      sendNotifyMessage("alert", "mode: scale");
+      sendAlert("mode: scale");
     }
   },
   InputDispatch{
@@ -930,7 +930,7 @@ std::vector<InputDispatch> inputFns = {
       state.cameraFast = !state.cameraFast;
       std::cout << "camera fast: " << state.cameraFast << std::endl;
       cameraSpeed = state.cameraFast ? 1.f : 0.1f;
-      sendNotifyMessage("alert", std::string("camera speed: ") + (state.cameraFast ? "fast" : "slow"));
+      sendAlert(std::string("camera speed: ") + (state.cameraFast ? "fast" : "slow"));
     }
   },  
   InputDispatch{
@@ -995,7 +995,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = []() -> void {
       snapCameraDown(setCameraRotation);
-      sendNotifyMessage("alert", "snap camera: -y");
+      sendAlert("snap camera: -y");
     }
   },
   InputDispatch{
@@ -1005,7 +1005,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = []() -> void {
       onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_DOWN);
-      sendNotifyMessage("alert", "set orientation: -y");
+      sendAlert("set orientation: -y");
     }
   },
   InputDispatch{
@@ -1015,7 +1015,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = []() -> void {
       snapCameraLeft(setCameraRotation);
-      sendNotifyMessage("alert", "snap camera: -x");
+      sendAlert("snap camera: -x");
     }
   },
   InputDispatch{
@@ -1025,7 +1025,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = []() -> void {
       onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_LEFT);
-      sendNotifyMessage("alert", "set orientation: -x");
+      sendAlert("set orientation: -x");
     }
   },
   InputDispatch{
@@ -1035,7 +1035,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = []() -> void {
       snapCameraRight(setCameraRotation);
-      sendNotifyMessage("alert", "snap camera: +x");
+      sendAlert("snap camera: +x");
     }
   },
   InputDispatch{
@@ -1045,7 +1045,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = []() -> void {
       onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_RIGHT);
-      sendNotifyMessage("alert", "set orientation: +x");
+      sendAlert("set orientation: +x");
     }
   },
   InputDispatch{
@@ -1055,7 +1055,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = []() -> void {
       snapCameraForward(setCameraRotation);
-      sendNotifyMessage("alert", "snap camera: -z");
+      sendAlert("snap camera: -z");
     }
   },
   InputDispatch{
@@ -1065,7 +1065,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = []() -> void {
       onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_FORWARD);
-      sendNotifyMessage("alert", "set orientation: -z");
+      sendAlert("set orientation: -z");
     }
   },
   InputDispatch{
@@ -1075,7 +1075,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = []() -> void {
       snapCameraUp(setCameraRotation);
-      sendNotifyMessage("alert", "snap camera: +y");
+      sendAlert("snap camera: +y");
     }
   },
   InputDispatch{
@@ -1085,7 +1085,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = []() -> void {
       onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_UP);
-      sendNotifyMessage("alert", "set orientation: +y");
+      sendAlert("set orientation: +y");
     }
   },
   InputDispatch{
@@ -1095,7 +1095,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = []() -> void {
       snapCameraBackward(setCameraRotation);
-      sendNotifyMessage("alert", "snap camera: +z");
+      sendAlert("snap camera: +z");
     }
   },
   InputDispatch{
@@ -1105,7 +1105,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = []() -> void {
       onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_BACK);
-      sendNotifyMessage("alert", "set orientation: +z");
+      sendAlert("set orientation: +z");
     }
   },
   InputDispatch{
@@ -1115,7 +1115,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       std::cout << dumpDebugInfo(false) << std::endl;
-      sendNotifyMessage("alert", "*dumped debug data to console*");
+      sendAlert("*dumped debug data to console*");
     }
   },
   InputDispatch{
@@ -1147,27 +1147,27 @@ std::vector<InputDispatch> inputFns = {
       if (state.manipulatorMode == TRANSLATE){
         if (state.manipulatorPositionMode == SNAP_CONTINUOUS){
           state.manipulatorPositionMode = SNAP_RELATIVE;
-          sendNotifyMessage("alert", std::string("snap positions: on - relative"));
+          sendAlert("snap positions: on - relative");
         }else if (state.manipulatorPositionMode == SNAP_RELATIVE){
           state.manipulatorPositionMode = SNAP_ABSOLUTE;
-          sendNotifyMessage("alert", std::string("snap positions: on - absolute"));
+          sendAlert("snap positions: on - absolute");
         }else if (state.manipulatorPositionMode == SNAP_ABSOLUTE){
           state.manipulatorPositionMode = SNAP_CONTINUOUS;
-          sendNotifyMessage("alert", std::string("snap positions: off"));
+          sendAlert("snap positions: off");
         }
       }else if (state.manipulatorMode == SCALE){
         state.snapManipulatorScales = !state.snapManipulatorScales;
-        sendNotifyMessage("alert", std::string("snap scales: ") + (state.snapManipulatorScales ? "enabled" : "disabled"));
+        sendAlert(std::string("snap scales: ") + (state.snapManipulatorScales ? "enabled" : "disabled"));
       }else if (state.manipulatorMode == ROTATE){
         if (state.rotateMode == SNAP_CONTINUOUS){
           state.rotateMode = SNAP_RELATIVE;
-          sendNotifyMessage("alert", std::string("snap rotate: on - relative"));
+          sendAlert("snap rotate: on - relative");
         }else if (state.rotateMode == SNAP_RELATIVE){
           state.rotateMode = SNAP_ABSOLUTE;
-          sendNotifyMessage("alert", std::string("snap rotate: on - absolute"));
+          sendAlert("snap rotate: on - absolute");
         }else if (state.rotateMode == SNAP_ABSOLUTE){
           state.rotateMode = SNAP_CONTINUOUS;
-          sendNotifyMessage("alert", std::string("snap rotate: off"));
+          sendAlert("snap rotate: off");
         }
       }
     }
@@ -1181,7 +1181,7 @@ std::vector<InputDispatch> inputFns = {
       if (state.manipulatorMode == TRANSLATE){
       }else if (state.manipulatorMode == SCALE){
         state.preserveRelativeScale = !state.preserveRelativeScale;
-        sendNotifyMessage("alert", std::string("scale preserve relative: ") + (state.preserveRelativeScale ? "enabled" : "disabled"));
+        sendAlert(std::string("scale preserve relative: ") + (state.preserveRelativeScale ? "enabled" : "disabled"));
       }else if (state.manipulatorMode == ROTATE){
       }
     }
@@ -1196,10 +1196,10 @@ std::vector<InputDispatch> inputFns = {
       }else if (state.manipulatorMode == SCALE){
         if (state.scalingGroup == INDIVIDUAL_SCALING){
           state.scalingGroup = GROUP_SCALING;
-          sendNotifyMessage("alert", "scaling grouping: group");
+          sendAlert("scaling grouping: group");
         }else if (state.scalingGroup == GROUP_SCALING){
           state.scalingGroup = INDIVIDUAL_SCALING;
-          sendNotifyMessage("alert", "scaling grouping: individual");
+          sendAlert("scaling grouping: individual");
         }
       }else if (state.manipulatorMode == ROTATE){
       }
@@ -1213,7 +1213,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       state.enableBloom = !state.enableBloom;
       std::cout << "bloom: " << state.enableBloom << std::endl;
-      sendNotifyMessage("alert", std::string("bloom: ") + (state.enableBloom ? "enabled" : "disabled"));
+      sendAlert(std::string("bloom: ") + (state.enableBloom ? "enabled" : "disabled"));
     }
   },
   InputDispatch{
@@ -1224,7 +1224,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       state.enableDiffuse = !state.enableDiffuse;
       std::cout << "diffuse: " << state.enableDiffuse << std::endl;
-      sendNotifyMessage("alert", std::string("diffuse: ") + (state.enableDiffuse ? "enabled" : "disabled"));
+      sendAlert(std::string("diffuse: ") + (state.enableDiffuse ? "enabled" : "disabled"));
     }
   },
   InputDispatch{
@@ -1235,7 +1235,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       state.enableSpecular = !state.enableSpecular;
       std::cout << "specular: " << state.enableSpecular << std::endl;
-      sendNotifyMessage("alert", std::string("specular: ") + (state.enableSpecular ? "enabled" : "disabled"));
+      sendAlert(std::string("specular: ") + (state.enableSpecular ? "enabled" : "disabled"));
     }
   },
   InputDispatch{
@@ -1265,7 +1265,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       state.manipulatorAxis = XAXIS;
-      sendNotifyMessage("alert", "axis: XAXIS");
+      sendAlert("axis: XAXIS");
     }
   },
   InputDispatch{
@@ -1275,7 +1275,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       state.manipulatorAxis = YAXIS;
-      sendNotifyMessage("alert", "axis: YAXIS");
+      sendAlert("axis: YAXIS");
     }
   },
   InputDispatch{
@@ -1285,7 +1285,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       state.manipulatorAxis = ZAXIS;
-      sendNotifyMessage("alert", "axis: ZAXIS");
+      sendAlert("axis: ZAXIS");
     }
   },
   InputDispatch{
@@ -1474,11 +1474,11 @@ std::vector<InputDispatch> inputFns = {
       }
       toggleCursor(state.cursorBehavior);
       if (state.cursorBehavior == CURSOR_NORMAL){
-        sendNotifyMessage("alert", std::string("capture cursor: cursor normal"));
+        sendAlert("capture cursor: cursor normal");
       }else if (state.cursorBehavior == CURSOR_CAPTURE){
-        sendNotifyMessage("alert", std::string("capture cursor: cursor capture"));
+        sendAlert("capture cursor: cursor capture");
       }else if (state.cursorBehavior == CURSOR_HIDDEN){
-        sendNotifyMessage("alert", std::string("capture cursor: cursor hidden"));
+        sendAlert("capture cursor: cursor hidden");
       }
       
     }

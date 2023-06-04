@@ -716,7 +716,7 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::functi
         std::cout << "id: " << id << " is now not focused" << std::endl;
         uiControl -> common.isFocused = false;
         if (uiControl -> common.onBlur != ""){
-          sendNotify(uiControl -> common.onBlur, "");
+          sendNotify(uiControl -> common.onBlur, std::string(""));
         }
       }
 
@@ -724,7 +724,7 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::functi
         std::cout << "id: " << id << " is now focused" << std::endl;
         uiControl -> common.isFocused = true;
         if (uiControl -> common.onFocus != ""){
-          sendNotify(uiControl -> common.onFocus, "");
+          sendNotify(uiControl -> common.onFocus, std::string(""));
         }
       }
     }

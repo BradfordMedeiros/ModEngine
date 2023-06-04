@@ -85,10 +85,12 @@ CScriptBinding cscriptAlertsBinding(CustomApiBindings& api){
     filterExpiredMessages(*alerts); // probably shouldn't be done every frame
   };
 
-  binding.onMessage = [](objid scriptId, void* data, std::string& topic, AttributeValue& value) -> void {
+  binding.onMessage = [](objid scriptId, void* data, std::string& topic, std::any& anyValue) -> void {
     Alerts* alerts = static_cast<Alerts*>(data);
     if (topic == "alert"){
-    	auto strValue = std::get_if<std::string>(&value);
+    	AttributeValue* value = std::any_cast<AttributeValue>(&anyValue);
+    	modassert(value, "cscript editor - any cast invalid, not attribute value");
+    	auto strValue = std::get_if<std::string>(value);
     	modassert(strValue, "alert value was not a string");
     	alerts -> messageBuffer.push_back(AlertMessage {
     		.message = *strValue,

@@ -630,17 +630,20 @@ CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
     }
   };
 
-  binding.onMessage = [](objid scriptId, void* data, std::string& topic, AttributeValue& value) -> void {
+  binding.onMessage = [](objid scriptId, void* data, std::string& topic, std::any& anyValue) -> void {
+    AttributeValue* value = std::any_cast<AttributeValue>(&anyValue);
+    modassert(value, "cscript editor - any cast invalid, not attribute value");
+
     EditorData* editorData = static_cast<EditorData*>(data);
     if (topic == "dialogmove-drag-stop"){
-      auto idStr = std::get_if<std::string>(&value);
+      auto idStr = std::get_if<std::string>(value);
       maybeHandleSidePanelDrop(*editorData, std::atoi(idStr -> c_str()));
     }else if (topic == "dock-self-remove"){
       modlog("editor", "should unload the dock because x was clicked");
-      auto idStr = std::get_if<std::string>(&value);
+      auto idStr = std::get_if<std::string>(value);
       maybeUnloadSidepanelByScene(*editorData, mainApi -> listSceneId(std::atoi(idStr -> c_str())));
     }else if (topic == "play-mode"){
-      auto valueStr = std::get_if<std::string>(&value);
+      auto valueStr = std::get_if<std::string>(value);
       tintThemeColors(*valueStr == "true", mainApi -> listSceneId(scriptId));
     }
   };

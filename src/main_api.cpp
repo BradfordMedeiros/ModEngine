@@ -332,7 +332,7 @@ std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttr
 void copyObject(int32_t id){
   bool success = copyObjectToScene(world, id);
   if (!success){
-    sendNotifyMessage("alert", std::string("failure copying object: ") + std::to_string(id));
+    sendAlert(std::string("failure copying object: ") + std::to_string(id));
   }
 }
 void handleCopy(){
@@ -342,12 +342,12 @@ void handleCopy(){
 void handleClipboardSelect(){
   auto numObject = state.editor.selectedObjs.size();
   if (numObject == 0 && state.editor.clipboardObjs.size() > 0){
-    sendNotifyMessage("alert", "cleared clipboard");
+    sendAlert("cleared clipboard");
   }
   else if (numObject == 1){
-    sendNotifyMessage("alert", "copied object to clipboard");
+    sendAlert("copied object to clipboard");
   }else if (numObject > 1){
-    sendNotifyMessage("alert", "copied objects to clipboard");
+    sendAlert("copied objects to clipboard");
   }
   modlog("clipboard", "copied objects to clipboard");
   setClipboardFromSelected(state.editor);
@@ -472,11 +472,15 @@ std::vector<std::string> listResources(std::string resourceType){
   return {};
 }
 
-void sendNotifyMessage(std::string message, AttributeValue value){
+void sendNotifyMessage(std::string message, std::any value){
   channelMessages.push(StringAttribute {
     .strTopic = message,
     .strValue = value,
   });
+}
+
+void sendAlert(std::string message){
+  sendNotifyMessage("alert", message);
 }
 
 double timeSeconds(bool realtime){
@@ -642,7 +646,7 @@ void setCulling(bool cullEnabled){
     glDisable(GL_CULL_FACE);  
   }
   std::cout << "culling enabled: " << state.cullEnabled << std::endl;
-  sendNotifyMessage("alert", std::string("culling toggled: ") + (cullEnabled ? "enabled" : "disabled"));
+  sendAlert(std::string("culling toggled: ") + (cullEnabled ? "enabled" : "disabled"));
 }
 void setWorldState(std::vector<ObjectValue> values){
   std::vector<ObjectValue> renderStagesValues;

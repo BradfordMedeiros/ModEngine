@@ -94,3 +94,4 @@ std::vector<ParsedLoadScene> parseSceneArgs(std::vector<std::string>& rawScenes)
 std::optional<unsigned int> getTextureId(std::string& texture){
   return world.textures.at(texture).texture.textureId;
 }
+

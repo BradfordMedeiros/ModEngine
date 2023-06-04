@@ -130,7 +130,7 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   glUniform4fv(glGetUniformLocation(uiShaderProgram, "selectionId"), 1, glm::value_ptr(getColorFromGameobject(0)));
   glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0)));
 
- // glEnable(GL_BLEND);
+  //glEnable(GL_BLEND);
   glDisable(GL_DEPTH_TEST);
 
   //std::cout << "screenspace: lines" << std::endl;
@@ -359,7 +359,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     bool loadedNewShader = false;
     auto newShader = getShaderByShaderString(shaderstringToId, shader, shaderProgram, allowShaderOverride, shaderFolderPath, interface.readFile,  &loadedNewShader);
     if (loadedNewShader){
-      sendNotifyMessage("alert", std::string("loaded shader: ") + shader);
+      sendAlert(std::string("loaded shader: ") + shader);
     }
 
     // todo -> need to just cache last shader value (or sort?) so don't abuse shader swapping (ok for now i guess)

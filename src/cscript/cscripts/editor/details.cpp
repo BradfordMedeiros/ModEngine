@@ -722,16 +722,16 @@ void saveScene(EditorDetails& details){
   auto playModeStr = std::get_if<std::string>(&playMode);
   bool playModeEnabled = playModeStr && *playModeStr == "on";
   if (playModeEnabled){
-    mainApi -> sendNotifyMessage("alert", "cannot save in play mode");
+    mainApi -> sendNotifyMessage("alert", std::string("cannot save in play mode"));
     return;
   }
   auto oldSceneFile  = mainApi -> listSceneFiles(details.activeSceneId.value()).at(0);
   modlog("editor", "saving scene: " + std::to_string(details.activeSceneId.value()) + " (file = " + oldSceneFile + ")");
   bool didSave = mainApi -> saveScene(false, details.activeSceneId.value(), std::nullopt);
   if (didSave){
-    mainApi -> sendNotifyMessage("alert", "saved scene: " + std::to_string(details.activeSceneId.value()) + " (file = " + oldSceneFile + ")");
+    mainApi -> sendNotifyMessage("alert", std::string("saved scene: ") + std::to_string(details.activeSceneId.value()) + " (file = " + oldSceneFile + ")");
   }else{
-    mainApi -> sendNotifyMessage("alert", "could not save scene: " + std::to_string(details.activeSceneId.value()) + " (file = " + oldSceneFile + ")");
+    mainApi -> sendNotifyMessage("alert", std::string("could not save scene: ") + std::to_string(details.activeSceneId.value()) + " (file = " + oldSceneFile + ")");
   }
 }
 
@@ -833,8 +833,8 @@ void togglePlayMode(EditorDetails& details){
   details.pauseModeEnabled = true;
   updateStoreValue(details, "play-mode-on", (details.playModeEnabled ? "on" : "off"));
   modlog("editor", std::string("play mode: ") + (details.playModeEnabled ? "true" : "false"));
-  mainApi -> sendNotifyMessage("alert", details.playModeEnabled ? "true" : "false");
-  mainApi -> sendNotifyMessage("play-mode", details.playModeEnabled ? "true" : "false");
+  mainApi -> sendNotifyMessage("alert", std::string(details.playModeEnabled ? "true" : "false"));
+  mainApi -> sendNotifyMessage("play-mode", std::string(details.playModeEnabled ? "true" : "false"));
 }
 
 void togglePauseMode(EditorDetails& details){
@@ -1329,41 +1329,44 @@ CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
     delete details;
   };
 
-  binding.onMessage = [](objid scriptId, void* data, std::string& topic, AttributeValue& value) -> void {
+  binding.onMessage = [](objid scriptId, void* data, std::string& topic, std::any& anyValue) -> void {
+    AttributeValue* value = std::any_cast<AttributeValue>(&anyValue);
+    modassert(value, "cscript details - any cast invalid, not attribute value");
+
     EditorDetails* details = static_cast<EditorDetails*>(data);
     if (topic == "debug-details"){
       modlog("editor", "details - data values: [" + print(details -> dataValues) + "]");
     }else if (topic == "explorer-sound-final"){
       if (uiDisabled(*details)){ return; }
-      updateDialogValues("load-sound", value);
+      updateDialogValues("load-sound", *value);
       submitAndPopulateData(*details);
     }else if (topic == "explorer-heightmap-brush-final"){
       if (uiDisabled(*details)){ return; }
-      updateDialogValues("load-heightmap-brush", value);
+      updateDialogValues("load-heightmap-brush", *value);
       submitAndPopulateData(*details);
     }else if (topic == "explorer-heightmap-final"){
       if (uiDisabled(*details)){ return; }
-      updateDialogValues("load-heightmap", value);
+      updateDialogValues("load-heightmap", *value);
       submitAndPopulateData(*details);
     }else if (topic == "active-scene-id"){
-      auto strValue = std::get_if<std::string>(&value);
+      auto strValue = std::get_if<std::string>(value);
       modassert(strValue, "active-scene-id: str value is null");
       details -> activeSceneId = std::atoi(strValue -> c_str());
     }else if (topic == "editor-button-on"){
       if (uiDisabled(*details)){ return; }
-      auto strValue = std::get_if<std::string>(&value);
+      auto strValue = std::get_if<std::string>(value);
       modassert(strValue, "editor-button-on: str value is null");
       toggleButtonBinding(*details, std::atoi(strValue -> c_str()), true);
       submitAndPopulateData(*details);
     }else if (topic == "editor-button-off"){
       if (uiDisabled(*details)){ return; }
-      auto strValue = std::get_if<std::string>(&value);
+      auto strValue = std::get_if<std::string>(value);
       modassert(strValue, "editor-button-off: str value is null");
       toggleButtonBinding(*details, std::atoi(strValue -> c_str()), false);
       submitAndPopulateData(*details);
     }else if (topic == "details-editable-slide"){
       if (uiDisabled(*details)){ return; }
-      auto strValue = std::get_if<std::string>(&value);
+      auto strValue = std::get_if<std::string>(value);
       modassert(strValue, "details-editable-slide: str value is null");
       auto sliderId = std::atoi(strValue -> c_str());
       auto attr = mainApi -> getGameObjectAttr(sliderId);

@@ -297,7 +297,7 @@ void onCCameraSystemChangeAllScripts(std::string camera, bool usingBuiltInCamera
     binding -> onCameraSystemChange(objInstance.instanceId, camera, usingBuiltInCamera);
   }
 }
-void onCMessageAllScripts(std::string& topic, AttributeValue& value){
+void onCMessageAllScripts(std::string& topic, std::any& value){
   for (auto &objInstance : customObjInstances){
     if (objInstance.shouldRemove){
       continue;

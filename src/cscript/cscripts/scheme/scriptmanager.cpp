@@ -221,13 +221,16 @@ void onCameraSystemChangeAllScripts(int32_t scriptId, std::string camera, bool u
   onCameraSystemChange(camera, usingBuiltInCamera);  
 }
 
-void onMessageAllScripts(objid scriptId, void* data, std::string& topic, AttributeValue& value){
+void onMessageAllScripts(objid scriptId, void* data, std::string& topic, std::any& value){
   auto scriptModule = moduleForId(scriptId);
   if (!scriptModule.isvalid){
     return;
   }
   scm_set_current_module(scriptModule.module);
-  onAttrMessage(topic, value);
+
+  AttributeValue* attrValue = std::any_cast<AttributeValue>(&value);
+  modassert(attrValue, "on message all scripts - any value was not AttributeValue");
+  onAttrMessage(topic, *attrValue);
 }
 
 void onTcpMessageAllScripts(objid scriptId, std::string& message){

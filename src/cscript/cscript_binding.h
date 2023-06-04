@@ -3,6 +3,7 @@
 
 #include <string>
 #include <functional>
+#include <any>
 #include <glm/gtx/compatibility.hpp>
 #include "../common/util.h"
 #include "../sql/sql.h"  // ideally move this away from being a direct dependency
@@ -59,7 +60,7 @@ struct CustomApiBindings {
 
   ///////////
   std::vector<std::string> (*listResources)(std::string);
-  void (*sendNotifyMessage)(std::string message, AttributeValue amount);
+  void (*sendNotifyMessage)(std::string message, std::any value);
   double (*timeSeconds)(bool realtime);
   double (*timeElapsed)();
   bool (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename);

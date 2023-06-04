@@ -116,22 +116,25 @@ CScriptBinding cscriptExplorerLoaderBinding(CustomApiBindings& api){
   	delete explorerLoader;
   };
 
-  binding.onMessage = [](objid scriptId, void* data, std::string& topic, AttributeValue& value) -> void {
+  binding.onMessage = [](objid scriptId, void* data, std::string& topic, std::any& anyValue) -> void {
+    AttributeValue* value = std::any_cast<AttributeValue>(&anyValue);
+    modassert(value, "cscript explorer loaded - any cast invalid, not attribute value");
+
   	EditorExplorerLoader* explorerLoader = static_cast<EditorExplorerLoader*>(data);
   	if (topic == "explorer-sound"){
-  		auto val = std::get_if<std::string>(&value);
+  		auto val = std::get_if<std::string>(value);
   		modassert(val, "explorer-sound value must be string");
   		explorerLoader -> explorerSoundValue = *val;
   	}else if (topic == "explorer-heightmap"){
-  		auto val = std::get_if<std::string>(&value);
+  		auto val = std::get_if<std::string>(value);
   		modassert(val, "explorer-heightmap value must be string");
   		explorerLoader -> explorerHeightmapValue = *val;
   	}else if (topic == "explorer-heightmap-brush"){
-  		auto val = std::get_if<std::string>(&value);
+  		auto val = std::get_if<std::string>(value);
   		modassert(val, "explorer-heightmap-brush value must be string");
   		explorerLoader -> explorerHeightmapBrushValue = *val;
   	}else if (topic == "explorer"){
-  		auto val = std::get_if<std::string>(&value);
+  		auto val = std::get_if<std::string>(value);
   		modassert(val, "explorer key value must be a string");
   		if (*val == "explorer-ok"){
         if (explorerLoader -> explorerSoundValue.has_value()){
