@@ -117,7 +117,7 @@ CScriptBinding cscriptExplorerLoaderBinding(CustomApiBindings& api){
   };
 
   binding.onMessage = [](objid scriptId, void* data, std::string& topic, std::any& anyValue) -> void {
-    AttributeValue* value = anycast<AttributeValue>(&anyValue);
+    AttributeValue* value = anycast<AttributeValue>(anyValue);
     modassert(value, "cscript explorer loaded - any cast invalid, not attribute value");
 
   	EditorExplorerLoader* explorerLoader = static_cast<EditorExplorerLoader*>(data);

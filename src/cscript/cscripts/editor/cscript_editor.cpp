@@ -631,7 +631,7 @@ CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
   };
 
   binding.onMessage = [](objid scriptId, void* data, std::string& topic, std::any& anyValue) -> void {
-    AttributeValue* value = anycast<AttributeValue>(&anyValue);
+    AttributeValue* value = anycast<AttributeValue>(anyValue);
     modassert(value, "cscript editor - any cast invalid, not attribute value");
 
     EditorData* editorData = static_cast<EditorData*>(data);

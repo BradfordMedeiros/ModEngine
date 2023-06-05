@@ -158,3 +158,4 @@ CScriptBinding cscriptCreatePerformanceGraphBinding(CustomApiBindings& api){
 
   return binding;
 }
+
