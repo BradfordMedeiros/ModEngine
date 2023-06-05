@@ -1330,7 +1330,7 @@ CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
   };
 
   binding.onMessage = [](objid scriptId, void* data, std::string& topic, std::any& anyValue) -> void {
-    AttributeValue* value = std::any_cast<AttributeValue>(&anyValue);
+    AttributeValue* value = anycast<AttributeValue>(&anyValue);
     modassert(value, "cscript details - any cast invalid, not attribute value");
 
     EditorDetails* details = static_cast<EditorDetails*>(data);
