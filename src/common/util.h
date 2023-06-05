@@ -332,4 +332,16 @@ struct ModAABB {
   glm::vec3 max;
 };
 
+template <typename T>
+T* anycast(std::any& anyValue){
+  try {
+    T* value = std::any_cast<T>(&anyValue);
+    //modassert(value, std::string("anycast value was NULL: ") + anyValue.type().name());
+    return value;
+  }catch(...){
+    return NULL;
+  }
+}
+
+
 #endif

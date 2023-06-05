@@ -228,9 +228,33 @@ void onMessageAllScripts(objid scriptId, void* data, std::string& topic, std::an
   }
   scm_set_current_module(scriptModule.module);
 
-  AttributeValue* attrValue = std::any_cast<AttributeValue>(&value);
-  modassert(attrValue, "on message all scripts - any value was not AttributeValue");
-  onAttrMessage(topic, *attrValue);
+  AttributeValue* attrValue = anycast<AttributeValue>(value);
+  if (attrValue){
+    onAttrMessage(topic, *attrValue);
+    return;
+  }
+  std::string* strValue = anycast<std::string>(value);
+  if (strValue){
+    onAttrMessage(topic, *strValue);
+    return;
+  }
+  float* floatValue = anycast<float>(value);
+  if (floatValue){
+    onAttrMessage(topic, *floatValue);
+    return;
+  }
+  glm::vec3* vec3Value = anycast<glm::vec3>(value);
+  if (vec3Value){
+    onAttrMessage(topic, *vec3Value);
+    return;
+  }
+  glm::vec4* vec4Value = anycast<glm::vec4>(value);
+  if (vec4Value){
+    onAttrMessage(topic, *vec4Value);
+    return;
+  }
+
+  std::cout << "warning: on message scheme, no conversion for: " << topic << std::endl;
 }
 
 void onTcpMessageAllScripts(objid scriptId, std::string& message){

@@ -1194,7 +1194,6 @@ void onCameraSystemChange(std::string camera, bool usingBuiltInCamera){
 }
 
 void onAttrMessage(std::string message, AttributeValue value){
-  modassert(false, "this needs to be updated to not depend upon being an attribute value");
   const char* function = "onMessage";
   if (symbolDefined(function)){
     SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
