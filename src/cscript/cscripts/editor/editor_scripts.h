@@ -9,5 +9,6 @@
 #include "./details.h"
 #include "./alert.h"
 #include "./performance_graph.h"
+#include "./perf-visualize.h"
 
 #endif

@@ -1267,6 +1267,7 @@ int main(int argc, char* argv[]){
     cscriptDetailsBinding(pluginApi),
     cscriptAlertsBinding(pluginApi),
     cscriptCreatePerformanceGraphBinding(pluginApi),
+    cscriptCreatePerfVisualizeBinding(pluginApi),
   };
   #ifdef ADDITIONAL_SRC_HEADER
     auto userBindings = getUserBindings(pluginApi);
