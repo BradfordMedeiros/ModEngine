@@ -78,6 +78,7 @@ struct CustomApiBindings {
   void (*makeParent)(objid child, objid parent);
   std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance);
   std::vector<HitObject> (*contactTest)(objid id);
+  std::vector<HitObject> (*contactTestShape)(glm::vec3 pos, glm::quat orientation, glm::vec3 scale);
   void (*saveScreenshot)(std::string);
   void (*setState)(std::string);
   void (*setFloatState)(std::string stateName, float value);

@@ -139,6 +139,7 @@ void saveRecording(objid recordingId, std::string filepath);
 
 std::vector<HitObject> raycastW(glm::vec3 pos, glm::quat direction, float maxDistance);
 std::vector<HitObject> contactTest(objid id);
+std::vector<HitObject> contactTestShape(glm::vec3 pos, glm::quat orientation, glm::vec3 scale);
 glm::vec3 moveRelative(glm::vec3, glm::quat orientation, float distance);
 glm::vec3 moveRelative(glm::vec3 posFrom, glm::quat orientation, glm::vec3 vec);
 

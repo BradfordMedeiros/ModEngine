@@ -205,10 +205,12 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad, std::vecto
       rigidBody = addRigidBodySphere(
         world.physicsEnvironment, 
         calcOffsetFromRotation(physicsInfo.transformation.position, groupPhysicsInfo.physicsInfo.offset, physicsInfo.transformation.rotation),
-        maxvalue(
-          (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), 
-          (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , 
-          (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)
+        calculateRadiusForScale(
+          glm::vec3(
+            (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), 
+            (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin), 
+            (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)
+          )
         ) / 2.f,                             
         physicsInfo.transformation.rotation,
         physicsOptions.isStatic,
@@ -948,7 +950,7 @@ void removeObjectFromScene(World& world, objid objectId){
   std::cout << "removing object: " << objectId << objectId << " " << getGameObject(world, objectId).name << std::endl;
   for (auto gameobjId : getIdsInGroup(world.sandbox, objectId)){
     if (!idExists(world.sandbox, gameobjId)){
-      std::cout << "id does not exist: " << gameobjId << std::endl;
+      //std::cout << "id does not exist: " << gameobjId << std::endl;
       //assert(false);
       continue;
     }

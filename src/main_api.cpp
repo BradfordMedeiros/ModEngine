@@ -567,6 +567,10 @@ std::vector<HitObject> contactTest(objid id){
   return contactTest(world, id);
 }
 
+std::vector<HitObject> contactTestShape(glm::vec3 pos, glm::quat orientation, glm::vec3 scale){
+  return contactTestShape(world.physicsEnvironment, world.rigidbodys, pos, orientation, scale);
+}
+
 glm::vec3 moveRelative(glm::vec3 posFrom, glm::quat orientation, float distance){
   return moveRelative(posFrom, orientation, glm::vec3(0.f, 0.f, -1 * distance), false);
 }

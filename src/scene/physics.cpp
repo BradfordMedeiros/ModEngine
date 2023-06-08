@@ -408,7 +408,7 @@ public:
       const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1
     ) override{
       const btCollisionObject* obj = colObj1Wrap -> m_collisionObject;
-      std::cout << "object hitpoint" << obj << std::endl;
+      //std::cout << "object hitpoint" << obj << std::endl;
       auto median = btToGlm((point.getPositionWorldOnA() + point.getPositionWorldOnB()) / 2.f);
       auto normal  = quatFromDirection(btToGlm(point.m_normalWorldOnB));
       this -> callback(obj, median, normal);
@@ -434,4 +434,44 @@ std::vector<HitObject> contactTest(physicsEnv& env, std::map<objid, PhysicsValue
   };
   env.dynamicsWorld -> contactTest(body, contactCallback);
   return hitobjects;
+}
+
+
+// Create way to do visualization for this, add more shape types currently only sphere
+std::vector<HitObject> contactTestShape(physicsEnv& env, std::map<objid, PhysicsValue>& rigidbodys, glm::vec3 pos, glm::quat orientation, glm::vec3 scale){
+  static rigidBodyOpts opts {
+    .linear = glm::vec3(1.f, 1.f, 1.f),
+    .angular = glm::vec3(1.f, 1.f, 1.f),
+    .gravity = glm::vec3(0.f, -9.81f, 0.f),
+    .friction = 1.f,
+    .restitution = 1.f,
+    .mass = 1.f,
+    .layer = 1.f,
+    .velocity = glm::vec3(1.f, 1.f, 1.f),
+    .angularVelocity = glm::vec3(1.f, 1.f, 1.f),
+  };
+
+  auto body = addRigidBodySphere(env, pos, 1.f, orientation, true, true, scale, opts);
+  setPosition(body, pos);
+  setRotation(body, orientation);
+
+  std::vector<HitObject> hitobjects = {};
+
+  auto contactCallback = ContactResultCallback();
+  contactCallback.callback = [&rigidbodys, &hitobjects, body](const btCollisionObject* obj, glm::vec3 pos, glm::quat normal) -> void {
+    modassert(obj != body, "invalid body...made contact with itself?");
+    auto id = getIdForRigidBody(rigidbodys, obj).value();
+    hitobjects.push_back(HitObject {
+      .id = id,
+      .point = pos,
+      .normal = normal,
+    });
+  };
+  env.dynamicsWorld -> contactTest(body, contactCallback);
+  rmRigidBody(env, body);
+  return hitobjects;
+}
+
+float calculateRadiusForScale(glm::vec3 scale){
+  return (maxvalue(scale.x, scale.y, scale.z) / 2.f);
 }
