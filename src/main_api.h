@@ -18,7 +18,7 @@
 #include "./renderstages.h"
 #include "./cscript/cscript.h"
 #include "./layers.h"
-#include "./benchstats.h"
+#include "./perf/benchstats.h"
 #include "./lines.h"
 #include "./sql/sql.h"
 

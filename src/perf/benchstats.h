@@ -1,7 +1,7 @@
 #ifndef MOD_BENCHSTATS
 #define MOD_BENCHSTATS
 
-#include "./common/util.h"
+#include "../common/util.h"
 
 // TODO -> this should be how all the values in benchmark come from
 // then benchmark would just be the aggregator 

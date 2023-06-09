@@ -61,9 +61,9 @@ glm::mat4 view;
 glm::mat4 orthoProj;
 const glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);  
 
-auto fpsStat = statName("fps");
-auto numObjectsStat = statName("object-count");
-auto scenesLoadedStat = statName("scenes-loaded");
+auto fpsStat = 0;
+auto numObjectsStat = 0;
+auto scenesLoadedStat = 0;
 
 std::map<std::string, std::string> args;
 DrawingParams drawParams = getDefaultDrawingParams();
@@ -1459,6 +1459,9 @@ int main(int argc, char* argv[]){
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   setShouldProfile(shouldBenchmark);
+  fpsStat = statName("fps");
+  numObjectsStat = statName("object-count");
+  scenesLoadedStat = statName("scenes-loaded");
 
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
