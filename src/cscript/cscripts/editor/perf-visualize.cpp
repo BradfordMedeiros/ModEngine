@@ -8,28 +8,12 @@ struct PerfVisualize {
 	
 };
 
-struct FrameRenderSample {
-	double currentTime;
-	double totalFrameTime;
-	std::vector<double> time;
-};
-
-FrameRenderSample generateSamples(){
-	auto time = mainApi -> timeSeconds(true);
-	double totalFrameTime = 0.015;  // ~60fps 
-	return FrameRenderSample {
-		.currentTime = time,
-		.totalFrameTime = totalFrameTime,
-		.time = { 0.010f, 0.005f },
-	};
-}
-
 const double totalWidthSeconds = 20;
 const double maxHeightSeconds = 0.1;  // ~ 1 fps 
 const std::vector<glm::vec4> colorPatterns = { 
-	glm::vec4(1.f, 0.f, 0.f, 0.8f), 
-	glm::vec4(0.f, 1.f, 0.f, 0.8f), 
-	glm::vec4(0.f, 0.f, 1.f, 0.8f) 
+	glm::vec4(1.f, 0.f, 0.f, 1.f), 
+	glm::vec4(0.f, 1.f, 0.f, 1.f), 
+	glm::vec4(0.f, 0.f, 1.f, 1.f) 
 };
 
 CScriptBinding cscriptCreatePerfVisualizeBinding(CustomApiBindings& api){
@@ -44,32 +28,33 @@ CScriptBinding cscriptCreatePerfVisualizeBinding(CustomApiBindings& api){
   //	delete perfVisualize;
   //};
 
-
-
   binding.onFrame = [](int32_t id, void* data) -> void {
   	//PerfVisualize* perfVisualize = static_cast<PerfVisualize*>(data);
-  	auto sample = generateSamples();
+  	return; /*
+  	auto sample = mainApi -> getFrameInfo();
+
+  	float adjustedTime = fmod(sample.currentTime, totalWidthSeconds);
   	auto width = sample.totalFrameTime / totalWidthSeconds;
 
   	float stackedHeight = 0.f;
   	for (int i = 0; i < sample.time.size(); i++){
-  		auto time = sample.time.at(i);
-  		double x = sample.currentTime / totalWidthSeconds;
-  		double xRight = (sample.currentTime + time) / totalWidthSeconds;
+  		double time = sample.time.at(i);
+  		double x = adjustedTime / totalWidthSeconds;  
+  		double xRight = (adjustedTime + time) / totalWidthSeconds;	
   		double y = stackedHeight;
   		double yTop = stackedHeight + (time / maxHeightSeconds);
    		stackedHeight = yTop;
 
-   		float width = (xRight - x);
-   		float halfWidth = width * 0.5f;
-   		float height = (yTop - y);
-   		float halfHeight = height * 0.5f;
+   		double width = (xRight - x);
+   		double halfWidth = width * 0.5f;
+   		double height = (yTop - y);
+   		double halfHeight = height * 0.5f;
 
    		mainApi -> drawRect(
-				-1.f + x + halfWidth, 
-				y + halfHeight, 
-				width,  
-				height, 
+				-1.f + 2 * (x + halfWidth), 
+				-1.f + 2 * (y + halfHeight), 
+				2 * width,  
+				2 * height, 
 				true,
 				colorPatterns.at(i % 3), 
 				std::nullopt, 
@@ -77,7 +62,7 @@ CScriptBinding cscriptCreatePerfVisualizeBinding(CustomApiBindings& api){
 				std::nullopt,
 				std::nullopt
 			);
-  	}
+  	}*/
 
   };
 

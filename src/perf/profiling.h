@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <vector>
-#include "./util.h"
+#include "../common/util.h"
 #include <GLFW/glfw3.h>
 
 #define PROFILE( PROFILE_NAME, BODY ... ) \

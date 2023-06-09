@@ -10,7 +10,7 @@
 #include "./drawing.h"
 #include "./colorselection.h"
 #include "./benchmark.h"
-#include "./common/profiling.h"
+#include "./perf/profiling.h"
 #include "./easyuse/manipulator.h"
 #include "./worldchunking.h"
 #include "./scene/scene_offline.h"
