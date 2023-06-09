@@ -1253,6 +1253,7 @@ int main(int argc, char* argv[]){
     .click = dispatchClick,
     .moveMouse = moveMouse,
     .schedule = schedule,
+    .getFrameInfo = getFrameInfo,
   };
 
 

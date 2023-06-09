@@ -1113,3 +1113,4 @@ void handleChangedResourceFiles(std::set<std::string> changedFiles){
     }
   }
 }
+

@@ -343,5 +343,11 @@ T* anycast(std::any& anyValue){
   }
 }
 
+struct FrameInfo {
+  double currentTime;
+  double totalFrameTime;
+  std::vector<double> time;
+};
+
 
 #endif

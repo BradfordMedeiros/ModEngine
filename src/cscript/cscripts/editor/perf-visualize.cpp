@@ -8,6 +8,8 @@ struct PerfVisualize {
 	
 };
 
+
+
 const double totalWidthSeconds = 20;
 const double maxHeightSeconds = 0.1;  // ~ 1 fps 
 const std::vector<glm::vec4> colorPatterns = { 
@@ -30,7 +32,6 @@ CScriptBinding cscriptCreatePerfVisualizeBinding(CustomApiBindings& api){
 
   binding.onFrame = [](int32_t id, void* data) -> void {
   	//PerfVisualize* perfVisualize = static_cast<PerfVisualize*>(data);
-  	return; /*
   	auto sample = mainApi -> getFrameInfo();
 
   	float adjustedTime = fmod(sample.currentTime, totalWidthSeconds);
@@ -62,7 +63,7 @@ CScriptBinding cscriptCreatePerfVisualizeBinding(CustomApiBindings& api){
 				std::nullopt,
 				std::nullopt
 			);
-  	}*/
+  	}
 
   };
 
