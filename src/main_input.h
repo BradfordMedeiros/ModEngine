@@ -9,7 +9,7 @@
 #include "./keymapper.h"
 #include "./drawing.h"
 #include "./colorselection.h"
-#include "./benchmark.h"
+#include "./perf/benchmark.h"
 #include "./perf/profiling.h"
 #include "./easyuse/manipulator.h"
 #include "./worldchunking.h"
