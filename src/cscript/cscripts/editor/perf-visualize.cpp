@@ -15,7 +15,10 @@ const double maxHeightSeconds = 0.1;  // ~ 1 fps
 const std::vector<glm::vec4> colorPatterns = { 
 	glm::vec4(1.f, 0.f, 0.f, 1.f), 
 	glm::vec4(0.f, 1.f, 0.f, 1.f), 
-	glm::vec4(0.f, 0.f, 1.f, 1.f) 
+	glm::vec4(0.f, 0.f, 1.f, 1.f), 
+	glm::vec4(1.f, 0.f, 1.f, 1.f), 
+	glm::vec4(0.f, 1.f, 1.f, 1.f), 
+
 };
 
 CScriptBinding cscriptCreatePerfVisualizeBinding(CustomApiBindings& api){
@@ -51,18 +54,22 @@ CScriptBinding cscriptCreatePerfVisualizeBinding(CustomApiBindings& api){
    		double height = (yTop - y);
    		double halfHeight = height * 0.5f;
 
+   		auto color = colorPatterns.at(i % colorPatterns.size());
    		mainApi -> drawRect(
 				-1.f + 2 * (x + halfWidth), 
 				-1.f + 2 * (y + halfHeight), 
 				2 * width,  
 				2 * height, 
 				true,
-				colorPatterns.at(i % 3), 
+				color, 
 				std::nullopt, 
 				true, 
 				std::nullopt,
 				std::nullopt
 			);
+
+    	mainApi -> drawText(sample.labels.at(i), 0, 0.2 + i * 0.1, 8, false, color, std::nullopt, true, std::nullopt, std::nullopt);
+
   	}
 
   };
