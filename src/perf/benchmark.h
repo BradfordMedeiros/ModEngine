@@ -21,6 +21,5 @@ Benchmark createBenchmark(bool shouldBenchmark);
 void logBenchmarkTick(Benchmark& benchmark, float frametime, int numObjects, int numTriangles);
 std::string benchmarkResult(Benchmark& benchmark);
 
-FrameInfo getFrameInfo();
 
 #endif

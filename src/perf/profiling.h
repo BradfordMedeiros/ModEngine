@@ -16,4 +16,6 @@ int startProfile(const char* description);
 void stopProfile(int id);
 std::string dumpProfiling();
 
+FrameInfo getFrameInfo();
+
 #endif

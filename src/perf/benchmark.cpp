@@ -109,13 +109,3 @@ std::string benchmarkResult(Benchmark& benchmark){
 }
 
 
-// mock for now, needs implementation
-FrameInfo getFrameInfo(){
-  auto time = timeSeconds(true);
-  double totalFrameTime = 0.015;  // ~60fps 
-  return FrameInfo {
-    .currentTime = time,
-    .totalFrameTime = totalFrameTime,
-    .time = { 0.01, 0.005},
-  };
-}
