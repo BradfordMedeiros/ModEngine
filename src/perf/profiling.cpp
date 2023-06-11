@@ -29,7 +29,15 @@ FrameStackInfo frameStack {
   .breakdown = {},
   .up = NULL,
 };
+
 FrameStackInfo* currentStack = &frameStack;
+FrameStackInfo lastFrame = FrameStackInfo {
+  .description = "",
+  .startTime = 0.f,
+  .stopTime = 0.f,
+  .breakdown = {},
+  .up = NULL,
+};
 
 void printFrameStack(FrameStackInfo& frame, int depth = 0){
   std::cout << std::endl;
@@ -72,8 +80,8 @@ int startProfile(const char* description){
     currentStack = &currentStack -> breakdown.at(currentStack -> breakdown.size() -1);
   }
 
-  std::cout << "print stack frame start" << std::string(description) << std::endl;
-  printFrameStack(frameStack);
+  //std::cout << "print stack frame start" << std::string(description) << std::endl;
+  //printFrameStack(frameStack);
   return profiles.size() - 1;
 }
 void stopProfile(int id){
@@ -86,8 +94,13 @@ void stopProfile(int id){
 
   modassert(std::string(profile.description) == currentStack -> description, "invalid stop profile, doesn't match framestack: " + std::string(profile.description));
   currentStack -> stopTime = currentTime;
+
+  bool isStopFrame = std::string(profile.description) == "FRAME";
+  if (isStopFrame){
+    lastFrame = *currentStack;
+  }
   currentStack = currentStack -> up;
-  if (std::string(profile.description) == "FRAME"){
+  if (isStopFrame){
     currentStack -> breakdown = {};
   }
 }
@@ -101,17 +114,26 @@ std::string dumpProfiling(){
 }
 
 
-
 // mock for now, needs implementation
 FrameInfo getFrameInfo(){
-  //auto time = timeSeconds(true);
+  auto currentTime = lastFrame.startTime;
+  auto totalFrameTime = lastFrame.stopTime.value() - lastFrame.startTime;
 
-  // this just gets the relative frame times for the top level frame 
-  std::cout << std::endl << std::endl;
+  std::vector<double> time;
+  std::vector<const char*> labels;
+  for (int i = 0; i < lastFrame.breakdown.size(); i++){
+    FrameStackInfo& frameInfo = lastFrame.breakdown.at(i);
+    time.push_back(frameInfo.stopTime.value() - frameInfo.startTime);
+    labels.push_back(frameInfo.description);
+  }
+
+  //printFrameStack(lastFrame, 0);
+  // this just gets the relative frame times for the top level frame -
+  //std::cout << std::endl << std::endl;
   return FrameInfo {
-    .currentTime = 1.f,
-    .totalFrameTime = 1.f,
-    .time = {},
-    .labels = {},
+    .currentTime = currentTime,
+    .totalFrameTime = totalFrameTime,
+    .time = time,
+    .labels = labels,
   };
 }

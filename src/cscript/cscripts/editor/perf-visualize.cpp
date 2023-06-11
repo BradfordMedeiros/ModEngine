@@ -11,7 +11,7 @@ struct PerfVisualize {
 
 
 const double totalWidthSeconds = 20;
-const double maxHeightSeconds = 0.1;  // ~ 1 fps 
+const double maxHeightSeconds = 0.020;  // ~ 50 fps 
 const std::vector<glm::vec4> colorPatterns = { 
 	glm::vec4(1.f, 0.f, 0.f, 1.f), 
 	glm::vec4(0.f, 1.f, 0.f, 1.f), 
@@ -20,6 +20,22 @@ const std::vector<glm::vec4> colorPatterns = {
 	glm::vec4(0.f, 1.f, 1.f, 1.f), 
 
 };
+
+void printFrameInfo(FrameInfo& frameInfo){
+  std::cout << "current time: " << frameInfo.currentTime << std::endl;
+  std::cout << "totalFrameTime: " << frameInfo.totalFrameTime << std::endl;
+  std::cout << "time: ";
+  for (auto time : frameInfo.time){
+    std::cout << time << " ";
+  }
+  std::cout << std::endl;
+  std::cout << "labels: ";
+  for (auto label : frameInfo.labels){
+    std::cout << label << " ";
+  }
+  std::cout << std::endl;
+}
+
 
 CScriptBinding cscriptCreatePerfVisualizeBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("native/perfviz", api);
@@ -33,9 +49,14 @@ CScriptBinding cscriptCreatePerfVisualizeBinding(CustomApiBindings& api){
   //	delete perfVisualize;
   //};
 
+  binding.onKeyCharCallback = [](int32_t id, void* data, unsigned int key) -> void {
+  	auto frameInfo = mainApi -> getFrameInfo();
+  	printFrameInfo(frameInfo);
+  };
   binding.onFrame = [](int32_t id, void* data) -> void {
   	//PerfVisualize* perfVisualize = static_cast<PerfVisualize*>(data);
   	auto sample = mainApi -> getFrameInfo();
+  	//printFrameInfo(sample);
 
   	float adjustedTime = fmod(sample.currentTime, totalWidthSeconds);
   	auto width = sample.totalFrameTime / totalWidthSeconds;
