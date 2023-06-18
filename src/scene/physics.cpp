@@ -158,6 +158,7 @@ void setPhysicsOptions(btRigidBody* body, rigidBodyOpts& opts){
   body -> setGravity(glmToBt(opts.gravity));
   body -> setFriction(opts.friction);
   body -> setRestitution(opts.restitution);
+  body -> setDamping(opts.linearDamping, body -> getAngularDamping());
 
   auto collisionFlags = body -> getCollisionFlags();
   auto isStatic = (collisionFlags | btCollisionObject::CF_KINEMATIC_OBJECT) ==  collisionFlags; 
@@ -449,6 +450,7 @@ std::vector<HitObject> contactTestShape(physicsEnv& env, std::map<objid, Physics
     .layer = 1.f,
     .velocity = glm::vec3(1.f, 1.f, 1.f),
     .angularVelocity = glm::vec3(1.f, 1.f, 1.f),
+    .linearDamping = 0.f,
   };
 
   auto body = addRigidBodySphere(env, pos, 1.f, orientation, true, true, scale, opts);

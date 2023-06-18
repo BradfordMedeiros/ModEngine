@@ -127,6 +127,12 @@ std::vector<AutoSerialize> gameobjSerializer {
     .field = "physics_linear",
     .defaultValue = glm::vec3(1.f, 1.f, 1.f),
   },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObject, physicsOptions.linearDamping),
+    .structOffsetFiller = std::nullopt,
+    .field = "physics_damping_linear",
+    .defaultValue = 0.f,
+  },
   AutoSerializeVec3 {
     .structOffset = offsetof(GameObject, physicsOptions.angularFactor),
     .structOffsetFiller = std::nullopt,

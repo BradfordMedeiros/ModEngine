@@ -170,6 +170,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad, std::vecto
       .layer = physicsOptions.layer,
       .velocity = physicsOptions.velocity,
       .angularVelocity = physicsOptions.angularVelocity,
+      .linearDamping = physicsOptions.linearDamping,
     };
 
     if (isHeightmapObj){
@@ -1107,6 +1108,7 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool veloci
       .mass = gameobj.physicsOptions.mass,
       .layer = gameobj.physicsOptions.layer,
       .velocity = velocitySet ? std::optional(gameobj.physicsOptions.velocity) : std::nullopt,    // velocity is not updated so this will reset the vel
+      .linearDamping = gameobj.physicsOptions.linearDamping,
     };
     updateRigidBodyOpts(world.physicsEnvironment, body, opts);
   }

@@ -4,7 +4,7 @@ glm::quat setFrontDelta(glm::quat orientation, float deltaYaw, float deltaPitch,
   glm::quat pitch  = angleAxis(-1 * deltaPitch * delta, glm::vec3(1.0f, 0.0f, 0.0f)) ;
   glm::quat yaw = glm::angleAxis(-1 * deltaYaw * delta,  glm::vec3(0.0f, 1.0f, 0.0f));
   glm::quat roll = glm::angleAxis(-1 * deltaRoll * delta,  glm::vec3(0.0f, 0.0f, 1.0f));
-  return roll * yaw * orientation * pitch;                                      
+  return roll * (yaw * (orientation * pitch));                                      
 }
 
 glm::vec3 calculateRelativeOffset(glm::quat orientation, glm::vec3 offset, bool xzPlaneOnly){

@@ -51,6 +51,7 @@ struct rigidBodyOpts {
   float layer;
   std::optional<glm::vec3> velocity;
   std::optional<glm::vec3> angularVelocity;
+  float linearDamping;
 };
 
 btRigidBody* addRigidBodyRect(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts);
