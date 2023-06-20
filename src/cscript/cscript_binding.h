@@ -115,7 +115,7 @@ struct CustomApiBindings {
   void (*moveMouse)(glm::vec2 ndi);
   void (*schedule)(objid id, float delayTimeMs, void* data, std::function<void(void*)> fn);
   FrameInfo (*getFrameInfo)();
-
+  RotationDirection (*getCursorInfoWorld)(float ndix, float ndiy);
   //std::vector<func_t> registerGuileFns
 };
 

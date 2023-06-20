@@ -350,5 +350,10 @@ struct FrameInfo {
   std::vector<const char*> labels;
 };
 
+struct RotationDirection {
+  glm::vec3 position;
+  glm::vec3 direction;
+  glm::vec3 viewDir;
+};
 
 #endif

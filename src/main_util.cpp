@@ -2,6 +2,7 @@
 
 extern World world;
 extern engineState state;
+extern glm::mat4 view;
 
 objid createManipulator(){
   GameobjAttributes manipulatorAttr {
@@ -55,6 +56,12 @@ LayerInfo layerByName(std::string layername){
 LayerInfo getLayerForId(objid id){
   return layerByName(getGameObject(world, id).layer);
 }
+RotationDirection getCursorInfoWorld(float ndix, float ndiy){
+  auto layer = world.sandbox.layers.at(0);
+  auto projection = projectionFromLayer(layer);
+  auto positionAndRotation = getCursorInfoWorld(projection, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight, -1.f);
+  return positionAndRotation;
+}
 
 
 struct ExtractSuffix {
@@ -94,4 +101,5 @@ std::vector<ParsedLoadScene> parseSceneArgs(std::vector<std::string>& rawScenes)
 std::optional<unsigned int> getTextureId(std::string& texture){
   return world.textures.at(texture).texture.textureId;
 }
+
 

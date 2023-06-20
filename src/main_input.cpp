@@ -379,7 +379,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 }
 
-void onMouseButton(){    
+
+void onMouseButton(){
   std::cout << scenegraphAsDotFormat(world.sandbox, world.objectMapping) << std::endl;
   
   auto id = state.currentHoverIndex;

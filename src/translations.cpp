@@ -65,14 +65,32 @@ float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBa
 }
 
 
-// I think this is wrong, test with manupulator rotation visualization
-glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorBottom, float screenWidth, float screenHeight){
+RotationDirection getCursorInfoWorldNdi(glm::mat4 projection, glm::mat4 view, float screenXPosNdi, float screenYPosNdi, float zDistance){
+  auto positionFrom4 = glm::inverse(view) * glm::vec4(0.f, 0.f, 0.f, 1.0);
+  glm::vec3 positionFrom(positionFrom4.x, positionFrom4.y, positionFrom4.z);
+
   glm::mat4 inversionMatrix = glm::inverse(projection * view);
+  glm::vec4 direction = inversionMatrix * glm::vec4(screenXPosNdi, screenYPosNdi, zDistance, 1.0f);
+
+  auto viewDir = glm::inverse(view) * glm::vec4(0.f, 0.f, -1.f, 0.f);
+  return RotationDirection {
+    .position = positionFrom + glm::vec3(direction.x, direction.y, direction.z),
+    .direction = glm::normalize(glm::vec3(direction.x, direction.y, direction.z)),
+    .viewDir = glm::normalize(glm::vec3(viewDir.x, viewDir.y, viewDir.z)),
+  };
+}
+
+RotationDirection getCursorInfoWorld(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorBottom, float screenWidth, float screenHeight, float zDistance){
   float screenXPosNdi = convertBase(cursorLeft, 0.f, screenWidth, -1.f, 1.f);
   float screenYPosNdi = convertBase(cursorBottom, 0.f, screenHeight, -1.f, 1.f);
-  glm::vec4 direction = inversionMatrix * glm::vec4(screenXPosNdi, screenYPosNdi, 1.0f, 1.0f);
+  return getCursorInfoWorldNdi(projection, view, screenXPosNdi, screenYPosNdi, zDistance);
+}
+
+// I think this is wrong, test with manupulator rotation visualization
+glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorBottom, float screenWidth, float screenHeight){
+  auto positionAndRotation = getCursorInfoWorld(projection, view, cursorLeft, cursorBottom, screenWidth, screenHeight, 1.f /* why 1.f? */);
   //std::cout << "direction is: " << print(glm::vec3(direction.x, direction.y, direction.z)) << std::endl;
-  return glm::normalize(glm::vec3(direction.x, direction.y, direction.z));
+  return positionAndRotation.direction;
 }
 
 float zDepth(float nearPlane, float farPlane, float depth){

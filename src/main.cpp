@@ -1254,6 +1254,7 @@ int main(int argc, char* argv[]){
     .moveMouse = moveMouse,
     .schedule = schedule,
     .getFrameInfo = getFrameInfo,
+    .getCursorInfoWorld = getCursorInfoWorld,
   };
 
 
