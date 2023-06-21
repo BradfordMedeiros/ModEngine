@@ -871,6 +871,18 @@ ManipulatorTools tools {
 };
 
 
+std::optional<objid> idAtCoord(float ndix, float ndiy){ // don't like binding framebuffer for this.  Need to isolate rendering from code so don't have to unbind / rebind framebuffer
+  glBindFramebuffer(GL_FRAMEBUFFER, renderStages.selection.fbo);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderStages.selection.colorAttachment0, 0);
+  auto pixelCoord = ndiToPixelCoord(glm::vec2(ndix, ndiy), state.resolution);
+  auto id = getIdFromPixelCoord(pixelCoord.x, pixelCoord.y);
+  if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
+    return std::nullopt;
+  }
+  return id;
+}
+
+
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
 const GLFWvidmode* mode = NULL;
@@ -1261,6 +1273,7 @@ int main(int argc, char* argv[]){
     .schedule = schedule,
     .getFrameInfo = getFrameInfo,
     .getCursorInfoWorld = getCursorInfoWorld,
+    .idAtCoord = idAtCoord,
   };
 
 
