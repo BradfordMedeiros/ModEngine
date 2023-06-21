@@ -66,6 +66,7 @@ RenderStages loadRenderStages(
   unsigned int framebufferTexture, 
   unsigned int framebufferTexture2,
   unsigned int framebufferTexture3,
+  unsigned int framebufferTexture4,
   unsigned int* depthTextures, int numDepthTextures,
   unsigned int* portalTextures, int numPortalTextures,
   RenderShaders shaders,

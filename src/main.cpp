@@ -41,6 +41,7 @@ CScriptBindingCallbacks cBindings;
 unsigned int framebufferTexture;
 unsigned int framebufferTexture2;
 unsigned int framebufferTexture3;
+unsigned int framebufferTexture4;
 unsigned int fbo;
 const int numPortalTextures = 16;
 unsigned int portalTextures[16];
@@ -1061,6 +1062,8 @@ int main(int argc, char* argv[]){
   genFramebufferTexture(&framebufferTexture3, state.resolution.x, state.resolution.y);
   //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, framebufferTexture3, 0);
 
+  genFramebufferTexture(&framebufferTexture4, state.resolution.x, state.resolution.y);
+
   generateDepthTextures(depthTextures, numDepthTextures, state.resolution.x, state.resolution.y);
   generateDepthTextures(textureDepthTextures, 1, state.resolution.x, state.resolution.y);
 
@@ -1092,6 +1095,9 @@ int main(int argc, char* argv[]){
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
      glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
+     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+     glBindTexture(GL_TEXTURE_2D, framebufferTexture4);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
      updateDepthTexturesSize(depthTextures, numDepthTextures, state.resolution.x, state.resolution.y);
@@ -1137,7 +1143,7 @@ int main(int argc, char* argv[]){
   unsigned int basicProgram = loadShader(basicShaderPath + "/vertex.glsl", basicShaderPath+ "/fragment.glsl", interface.readFile);
 
   renderStages = loadRenderStages(fbo, 
-    framebufferTexture, framebufferTexture2, framebufferTexture3, 
+    framebufferTexture, framebufferTexture2, framebufferTexture3, framebufferTexture4,
     depthTextures, numDepthTextures,
     portalTextures, numPortalTextures,
     RenderShaders {
@@ -1860,6 +1866,9 @@ int main(int argc, char* argv[]){
     }else if (state.renderMode == RENDER_PORTAL){
       assert(state.textureIndex <= numPortalTextures && state.textureIndex >= 0);
       glBindTexture(GL_TEXTURE_2D, portalTextures[state.textureIndex]);  
+    }else if (state.renderMode == RENDER_SELECTION){
+      assert(state.textureIndex >= 0);
+      glBindTexture(GL_TEXTURE_2D, framebufferTexture4);  
     }else if (state.renderMode == RENDER_PAINT){
       //glBindTexture(GL_TEXTURE_2D, textureToPaint);
       glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-scenegraph_selection_texture").texture.textureId);

@@ -244,7 +244,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
 // Should make all rendering steps use stages and specify ordering in this
 RenderStages loadRenderStages(
   unsigned int fbo, 
-  unsigned int framebufferTexture, unsigned int framebufferTexture2, unsigned int framebufferTexture3,
+  unsigned int framebufferTexture, unsigned int framebufferTexture2, unsigned int framebufferTexture3, unsigned int framebufferTexture4,
   unsigned int* depthTextures, int numDepthTextures,
   unsigned int* portalTextures, int numPortalTextures,
   RenderShaders shaders,
@@ -256,7 +256,7 @@ RenderStages loadRenderStages(
     .name = "RENDERING-SELECTION",
     .enable = true,
     .fbo = fbo,
-    .colorAttachment0 = framebufferTexture,
+    .colorAttachment0 = framebufferTexture4,
     .colorAttachment1 = framebufferTexture2,  // this stores UV coord
     .depthTextureIndex = 0,
     .shader = shaders.selectionProgram,

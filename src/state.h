@@ -9,7 +9,7 @@
 #include "./easyuse/manipulator.h"
 #include "./scene/scene.h"
 
-enum RENDER_MODE { RENDER_FINAL, RENDER_PORTAL, RENDER_PAINT, RENDER_DEPTH, RENDER_BLOOM, RENDER_GRAPHS };
+enum RENDER_MODE { RENDER_FINAL, RENDER_PORTAL, RENDER_PAINT, RENDER_DEPTH, RENDER_BLOOM, RENDER_GRAPHS, RENDER_SELECTION};
 std::string renderModeAsStr(RENDER_MODE mode);
 
 struct CamInterpolation {
