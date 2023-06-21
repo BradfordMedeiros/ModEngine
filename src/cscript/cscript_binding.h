@@ -110,6 +110,7 @@ struct CustomApiBindings {
   sql::SqlQuery (*compileSqlQuery)(std::string queryString, std::vector<std::string> bindValues);
   std::vector<std::vector<std::string>> (*executeSqlQuery)(sql::SqlQuery& query, bool* valid);
   std::vector<objid> (*selected)();
+  void (*setSelected)(std::optional<std::set<objid>> id);
 
   void (*click)(int button, int action);
   void (*moveMouse)(glm::vec2 ndi);

@@ -9,7 +9,7 @@ bool isInSelectedItems(std::vector<EditorItem> items, objid id){
   return false;
 }
 
-void setSelectedIndex(EditorContent& editor, objid id, std::string name, bool reset){
+void setSelectedIndex(EditorContent& editor, objid id, bool reset){
   std::cout << "INFO: EDITOR: ADD SELECTED INDEX" << std::endl;
   bool inSelected = isInSelectedItems(editor.selectedObjs, id);
   if (reset){
@@ -19,7 +19,6 @@ void setSelectedIndex(EditorContent& editor, objid id, std::string name, bool re
       editor.selectedObjs = {};
       editor.selectedObjs.push_back(EditorItem {
         .id = id,
-        .name = name,
       });
     }
   }else{
@@ -28,7 +27,6 @@ void setSelectedIndex(EditorContent& editor, objid id, std::string name, bool re
     }else {
       editor.selectedObjs.push_back(EditorItem {
         .id = id,
-        .name = name,
       });
     }
   }

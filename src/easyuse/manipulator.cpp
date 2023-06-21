@@ -13,7 +13,6 @@ ManipulatorData createManipulatorData(){
     .initialDragPosition = std::nullopt,
     .initialTransforms = {},
     .rotationAmount = 0.f,
-
   };
 }
 

@@ -206,7 +206,7 @@ bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCu
   shouldCallBindingOnObjectSelected = true;
 
   if (layerSelectIndex >= 0){
-    setSelectedIndex(state.editor, idToUse, selectedObject.name, !state.multiselect);
+    setSelectedIndex(state.editor, idToUse, !state.multiselect);
     state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";  
   }
   setActiveObj(state.editor, idToUse);
@@ -882,6 +882,15 @@ std::optional<objid> idAtCoord(float ndix, float ndiy){ // don't like binding fr
   return id;
 }
 
+void setSelected(std::optional<std::set<objid>> ids){
+  clearSelectedIndexs(state.editor);
+  for (auto id : ids.value()){
+    if (getManipulatorId(state.manipulatorState) == id){
+      continue;
+    }
+    setSelectedIndex(state.editor, id, !state.multiselect);
+  }
+}
 
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
@@ -1268,6 +1277,7 @@ int main(int argc, char* argv[]){
     .selected = []() -> std::vector<objid> {
       return selectedIds(state.editor);
     },
+    .setSelected = setSelected,
     .click = dispatchClick,
     .moveMouse = moveMouse,
     .schedule = schedule,
