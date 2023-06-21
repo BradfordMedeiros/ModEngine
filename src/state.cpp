@@ -21,6 +21,9 @@ std::string renderModeAsStr(RENDER_MODE mode){
   if (mode == RENDER_GRAPHS){
     return "graphs";
   }
+  if (mode == RENDER_SELECTION){
+    return "selection";
+  }
   modassert(false, "invalid render mode");
   return "";
 }
