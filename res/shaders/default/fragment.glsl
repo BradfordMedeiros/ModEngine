@@ -216,7 +216,8 @@ void main(){
 
     if (hasNormalTexture){
       vec3 normalTexColor = texture(normalTexture, adjustedTexCoord).rgb ;
-      normal = normalize(TangentToWorld * vec3(normalTexColor.r * 2 - 1, normalTexColor.g * 2 - 1, normalTexColor.b * 2 - 1));
+      //normal = normalize(TangentToWorld * vec3(normalTexColor.r * 2 - 1, normalTexColor.g * 2 - 1, normalTexColor.b * 2 - 1));
+      normal = normalize(transpose(TangentToWorld) * vec3(normalTexColor.r * 2 - 1, normalTexColor.g * 2 - 1, normalTexColor.b * 2 - 1));
     }
 
     /*if (hasNormalTexture){
