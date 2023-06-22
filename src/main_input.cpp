@@ -45,28 +45,6 @@ void debugInfo(std::string infoType, std::string filepath){
   saveFile(filepath, dumpDebugInfo(false));
 }
 
-void processManipulatorForId(objid id){
-  if (id == -1 || !idExists(world.sandbox, id)){
-    return;
-  }
-
-  if (state.manipulatorMode == TRANSLATE){
-    applyPhysicsTranslation(world, id, state.offsetX, state.offsetY, state.manipulatorAxis);
-  }else if (state.manipulatorMode == SCALE){
-    applyPhysicsScaling(world, id, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
-  }else if (state.manipulatorMode == ROTATE){
-    applyPhysicsRotation(world, id, state.offsetX, state.offsetY, state.manipulatorAxis);
-  } 
-}
-
-void processManipulator(){
-  if (state.enableManipulator){
-    for (auto id : selectedIds(state.editor)){
-      processManipulatorForId(id);
-    }
-  }
-}
-
 void onMouse(bool disableInput,  engineState& state, double xpos, double ypos, void(*rotateCamera)(float, float)){
     if(state.firstMouse){
         state.lastX = xpos;
@@ -447,7 +425,6 @@ void handleInput(GLFWwindow* window){
       unlock("input", 0);
     }
   }
-  processManipulator();
 }
 
 void printControllerDebug(const unsigned char* buttons, int buttonCount){

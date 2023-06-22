@@ -64,49 +64,13 @@ float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBa
   return ((value - fromBaseLow) * ((toBaseHigh - toBaseLow) / (fromBaseHigh - fromBaseLow))) + toBaseLow;
 }
 
-/*RotationDirection getCursorInfoWorldNdi(glm::mat4 projection, glm::mat4 view, float screenXPosNdi, float screenYPosNdi, float zDistance){
-  auto positionFrom4 = glm::inverse(view) * glm::vec4(0.f, 0.f, 0.f, 1.0);
-  glm::vec3 positionFrom(positionFrom4.x, positionFrom4.y, positionFrom4.z);
-
-  glm::mat4 inversionMatrix = glm::inverse(projection * view);
-  glm::vec4 direction = inversionMatrix * glm::vec4(screenXPosNdi, screenYPosNdi, zDistance, 1.0f);
-  auto cursorOffset = glm::inverse(projection) * glm::vec4(screenXPosNdi, screenYPosNdi, 0.f, 1.0f);
-  auto viewDir = glm::inverse(view) * glm::vec4(0.f, 0.f, -1.f, 1.f);
-
-  return RotationDirection {
-    .position = positionFrom + glm::vec3(cursorOffset.x, cursorOffset.y, cursorOffset.z),
-    .direction = glm::normalize(glm::vec3(direction.x, direction.y, direction.z)),
-    .viewDir = glm::normalize(glm::vec3(viewDir.x, viewDir.y, viewDir.z)),
-  };
-}*/
 
 RotationDirection getCursorInfoWorldNdi(glm::mat4 projection, glm::mat4 view, float screenXPosNdi, float screenYPosNdi, float zDistance){
   auto positionFrom4 = glm::inverse(view) * glm::vec4(0.f, 0.f, 0.f, 1.0);
   glm::vec3 positionFrom(positionFrom4.x, positionFrom4.y, positionFrom4.z);
 
   glm::mat4 inversionMatrix = glm::inverse(projection * view);
-  glm::vec4 direction = glm::inverse(projection) * glm::vec4(screenXPosNdi, screenYPosNdi, 0.f, 0.0f);
-
-  glm::vec4 direction2 = inversionMatrix * glm::vec4(screenXPosNdi, screenYPosNdi, 0.f, 0.0f);
-
-
-  auto viewDir = glm::inverse(view) * glm::vec4(0.f, 0.f, -1.f, 0.f);
-  return RotationDirection {
-    .position = positionFrom,
-    .position2 = glm::vec3(direction2.x, direction2.y, direction2.z),
-    .direction = glm::normalize(glm::vec3(direction.x, direction.y, direction.z)),
-    .viewDir = glm::normalize(glm::vec3(viewDir.x, viewDir.y, viewDir.z)),
-  };
-
-
-}
-
-RotationDirection getCursorInfoWorldNdi1(glm::mat4 projection, glm::mat4 view, float screenXPosNdi, float screenYPosNdi, float zDistance){
-  auto positionFrom4 = glm::inverse(view) * glm::vec4(0.f, 0.f, 0.f, 1.0);
-  glm::vec3 positionFrom(positionFrom4.x, positionFrom4.y, positionFrom4.z);
-
-  glm::mat4 inversionMatrix = glm::inverse(projection);
-  glm::vec4 direction = inversionMatrix * glm::vec4(screenXPosNdi, screenYPosNdi, 0.f, 0.0f);
+  glm::vec4 direction = inversionMatrix * glm::vec4(screenXPosNdi, screenYPosNdi, zDistance, 1.0f);
 
   auto viewDir = glm::inverse(view) * glm::vec4(0.f, 0.f, -1.f, 0.f);
   return RotationDirection {
@@ -119,7 +83,7 @@ RotationDirection getCursorInfoWorldNdi1(glm::mat4 projection, glm::mat4 view, f
 RotationDirection getCursorInfoWorld(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorBottom, float screenWidth, float screenHeight, float zDistance){
   float screenXPosNdi = convertBase(cursorLeft, 0.f, screenWidth, -1.f, 1.f);
   float screenYPosNdi = convertBase(cursorBottom, 0.f, screenHeight, -1.f, 1.f);
-  return getCursorInfoWorldNdi1(projection, view, screenXPosNdi, screenYPosNdi, zDistance);
+  return getCursorInfoWorldNdi(projection, view, screenXPosNdi, screenYPosNdi, zDistance);
 }
 
 // I think this is wrong, test with manupulator rotation visualization
