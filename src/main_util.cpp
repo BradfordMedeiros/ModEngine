@@ -59,7 +59,11 @@ LayerInfo getLayerForId(objid id){
 RotationDirection getCursorInfoWorld(float ndix, float ndiy){
   auto layer = world.sandbox.layers.at(0);
   auto projection = projectionFromLayer(layer);
-  auto positionAndRotation = getCursorInfoWorld(projection, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight, -1.f);
+  float screenXPosNdi = ndix;
+  float screenYPosNdi = ndiy;
+  //float screenXPosNdi = convertBase(state.cursorLeft, 0.f, state.currentScreenWidth, -1.f, 1.f);
+  //float screenYPosNdi = convertBase(state.currentScreenHeight - state.cursorTop, 0.f, state.currentScreenHeight, -1.f, 1.f);
+  auto positionAndRotation = getCursorInfoWorldNdi(projection, view, screenXPosNdi, screenYPosNdi, -1.f);
   return positionAndRotation;
 }
 
