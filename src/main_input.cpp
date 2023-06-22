@@ -147,12 +147,8 @@ void mouse_button_callback(bool disableInput, engineState& state, int button, in
     return;
   }
   if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
-    state.enableManipulator = true;
     handleSerialization();
     onSelectNullItem();
-  }
-  if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE){
-    state.enableManipulator = false;
   }
 
   if (button == GLFW_MOUSE_BUTTON_MIDDLE){

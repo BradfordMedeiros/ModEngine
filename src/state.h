@@ -47,7 +47,6 @@ struct engineState {
   std::string additionalText;
  
   ManipulatorData manipulatorState;
-  bool enableManipulator;
   ManipulatorMode manipulatorMode;
   Axis manipulatorAxis;
   objid manipulatorLineId;
