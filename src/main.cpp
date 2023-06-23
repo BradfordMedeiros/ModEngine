@@ -879,6 +879,10 @@ std::optional<objid> idAtCoord(float ndix, float ndiy){ // don't like binding fr
   if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
     return std::nullopt;
   }
+  if (!idExists(world.sandbox, id)){
+    //modassert(false, std::string("id does not exist: ") + std::to_string(id));
+    return std::nullopt;
+  }
   return id;
 }
 
