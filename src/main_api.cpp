@@ -20,6 +20,7 @@ extern DynamicLoading dynamicLoading;
 extern std::map<std::string, objid> activeLocks;
 extern CScriptBindingCallbacks cBindings;
 extern LineData lineData;
+extern Transformation viewTransform;
 
 extern GLFWwindow* window;
 extern GLFWmonitor* monitor;
@@ -783,6 +784,10 @@ void setActiveCamera(std::string name, objid sceneId){
   setActiveCamera(object.value(), -1);
 }
 
+Transformation getView(){
+  return viewTransform;
+}
+
 void nextCamera(){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
   if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
@@ -840,6 +845,10 @@ void playSoundState(std::string source, objid sceneId, std::optional<float> volu
     std::cout << "ERROR: no source named: " << source << " in scene: " << sceneId << std::endl;
     assert(false);
   }
+}
+
+void stopSoundState(std::string source, objid sceneId){
+  //modassert(false, "stop sound state not yet implemented");
 }
 
 unsigned int activeTextureId(){

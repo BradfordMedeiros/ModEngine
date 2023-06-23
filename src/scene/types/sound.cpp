@@ -44,8 +44,9 @@ void playSource(ALuint source, std::optional<float> volume, std::optional<glm::v
   if (position.has_value()){
     setSoundPosition(source, x, y, z);
   }
-
 }
+
+
 std::vector<std::string> listSounds(){
   std::vector<std::string> sounds;
   for (auto [soundname, _ ] : soundBuffers){

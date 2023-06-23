@@ -58,6 +58,11 @@ bool selectItemCalled = false;
 std::map<objid, unsigned int> portalIdCache;
 std::optional<Texture> textureToPaint = std::optional<Texture>(std::nullopt);
 
+Transformation viewTransform {
+  .position = glm::vec3(0.f, 0.f, 0.f),
+  .scale = glm::vec3(1.f, 1.f, 1.f),
+  .rotation = quatFromDirection(glm::vec3(0.f, 0.f, -1.f)),
+};
 glm::mat4 view;
 glm::mat4 orthoProj;
 const glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);  
@@ -1203,6 +1208,7 @@ int main(int argc, char* argv[]){
     .getObjectsByType = getObjectsByType,
     .getObjectsByAttr = getObjectsByAttr,
     .setActiveCamera = setActiveCamera,
+    .getView = getView,
     .drawText = drawText,
     .drawRect = drawRect,
     .drawLine = addLineNextCycle,
@@ -1230,6 +1236,7 @@ int main(int argc, char* argv[]){
     .playAnimation = playAnimation,
     .listClips = listSounds,
     .playClip = playSoundState,
+    .stopClip = stopSoundState,
     .listResources = listResources,
     .sendNotifyMessage = sendNotifyMessage,
     .timeSeconds = timeSeconds,
@@ -1551,7 +1558,7 @@ int main(int argc, char* argv[]){
     tickScheduledTasks();
 
     onNetCode(world, netcode, onClientMessage, bootStrapperMode);
-    auto viewTransform = getCameraTransform();
+    viewTransform = getCameraTransform();
 
     auto forward = calculateRelativeOffset(viewTransform.rotation, {0, 0, -1 }, false);
     auto up  = calculateRelativeOffset(viewTransform.rotation, {0, 1, 0 }, false);

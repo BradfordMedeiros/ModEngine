@@ -24,12 +24,13 @@ struct CustomApiBindings {
   void (*sendLoadScene)(int32_t id);
   void (*createScene)(std::string scenename);
   void (*deleteScene)(std::string scenename);
-  void (*moveCamera)(glm::vec3, std::optional<bool> relative);
-  void (*rotateCamera)(float xoffset, float yoffset);
+  void (*moveCamera)(glm::vec3, std::optional<bool> relative);  // this should be deleted - move through normal methods instead
+  void (*rotateCamera)(float xoffset, float yoffset);           // should be deleted - move a camera instead
   void (*removeObjectById)(int32_t id);
   std::vector<int32_t> (*getObjectsByType)(std::string);
   std::vector<int32_t> (*getObjectsByAttr)(std::string, std::optional<AttributeValue>, std::optional<int32_t>);
   void (*setActiveCamera)(int32_t cameraId, float interpolationTime);
+  Transformation (*getView)();
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId);
   void (*drawRect)(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture);
   int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth);
@@ -57,6 +58,7 @@ struct CustomApiBindings {
   void (*playAnimation)(int32_t id, std::string animationToPlay, bool loop);
   std::vector<std::string>(*listClips)();
   void (*playClip)(std::string, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
+  void (*stopClip)(std::string source, objid sceneId);
 
   ///////////
   std::vector<std::string> (*listResources)(std::string);

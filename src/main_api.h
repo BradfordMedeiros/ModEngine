@@ -44,6 +44,8 @@ Transformation getCameraTransform();
 void maybeResetCamera(int32_t id);
 void setActiveCamera(int32_t cameraId, float interpolationTime);
 void setActiveCamera(std::string name, objid sceneId);
+Transformation getView();
+
 void nextCamera();
 void moveCamera(glm::vec3 offset, std::optional<bool> relative);  
 void moveCamera(glm::vec3 offset);
@@ -119,6 +121,7 @@ void stopAnimation(int32_t id);
 
 std::vector<std::string> listSounds(int32_t id);
 void playSound(std::string sound);
+void stopSoundState(std::string source, objid sceneId);
 
 std::vector<std::string> listResources(std::string resourceType);
 

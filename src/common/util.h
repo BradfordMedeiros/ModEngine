@@ -62,6 +62,7 @@ std::string print(glm::mat2 mat);
 std::string print(std::vector<std::string>& values);
 std::string print(std::vector<objid>& values);
 std::string print(std::optional<std::string> value);
+std::string print(std::set<objid> id);
 
 glm::vec3 parseVec(std::string positionRaw);
 glm::vec4 parseVec4(std::string positionRaw);
@@ -354,6 +355,12 @@ struct RotationDirection {
   glm::vec3 position;
   glm::vec3 direction;
   glm::vec3 viewDir;
+};
+
+struct Transformation {
+  glm::vec3 position;
+  glm::vec3 scale;
+  glm::quat rotation;
 };
 
 #endif

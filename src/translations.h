@@ -48,12 +48,6 @@ glm::quat axisToOrientation(Axis axis);
 const float MODPI = 3.1416f;
 float atanRadians360(float x, float y);
 
-struct Transformation {
-  glm::vec3 position;
-  glm::vec3 scale;
-  glm::quat rotation;
-};
-
 glm::mat4 matrixFromComponents(glm::mat4 initialModel, glm::vec3 position, glm::vec3 scale, glm::quat rotation);
 glm::mat4 matrixFromComponents(Transformation transformation);
 Transformation getTransformationFromMatrix(glm::mat4 matrix);

@@ -253,6 +253,16 @@ std::string print(glm::mat2 mat){
   "]";
 }
 
+std::string print(std::set<objid> values){
+  std::stringstream stream;
+  stream << "[ ";
+  for (auto &value : values){
+    stream << value << " ";
+  }
+  stream << "]";
+  return stream.str();
+}
+
 std::string print(std::optional<std::string> value){
   if (!value.has_value()){
     return "[no value]";
