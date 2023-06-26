@@ -1550,8 +1550,8 @@ int main(int argc, char* argv[]){
     }
 
 
-    viewTransform = getCameraTransform();
     onWorldFrame(world, deltaTime, timePlayback.currentTime, enablePhysics, dumpPhysics, state.worldpaused, viewTransform);
+
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
 
     auto time = getTotalTime();
@@ -1567,6 +1567,8 @@ int main(int argc, char* argv[]){
       { forward.x, forward.y, forward.z},
       { up.x, up.y, up.z }
     );
+    viewTransform = getCameraTransform();
+
     setVolume(state.volume);
     
     view = renderView(viewTransform.position, viewTransform.rotation);
