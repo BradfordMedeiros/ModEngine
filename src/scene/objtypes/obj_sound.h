@@ -9,6 +9,7 @@ struct GameObjectSound{
   std::string clip;  
   ALuint source;
   bool loop;
+  bool center;
   float volume;
 };
 

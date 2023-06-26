@@ -8,6 +8,13 @@ std::vector<AutoSerialize> soundAutoserializer {
     .offString = "false",
     .defaultValue = false,
   },
+  AutoSerializeBool {
+    .structOffset = offsetof(GameObjectSound, center),
+    .field = "center",
+    .onString = "true",
+    .offString = "false",
+    .defaultValue = false,
+  },
   AutoSerializeCustom {
     .structOffset = 0,
     .field = "clip",

@@ -793,11 +793,16 @@ void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<glm::ve
 }
 
 
-void updatePosition(std::map<objid, GameObjectObj>& mapping, objid id, glm::vec3 position){
+void updatePosition(std::map<objid, GameObjectObj>& mapping, objid id, glm::vec3 position, Transformation& viewTransform){
   auto object = mapping.at(id); 
   auto soundObj = std::get_if<GameObjectSound>(&object);
   if (soundObj != NULL){
-    setSoundPosition(soundObj -> source, position.x, position.y, position.z);
+    if (soundObj -> center){
+      setSoundPosition(soundObj -> source, viewTransform.position.x, viewTransform.position.y, viewTransform.position.z);
+    }else{
+      setSoundPosition(soundObj -> source, position.x, position.y, position.z);
+    }
+    
   }
 }
 
@@ -806,6 +811,16 @@ void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id, std::opti
   auto soundObj = std::get_if<GameObjectSound>(&object);
   if (soundObj != NULL){
     playSource(soundObj -> source, volume, position);
+  }else{
+    std::cout << "WARNING: " << id << " is not a sound object" << std::endl;
+  }
+}
+
+void stopSoundState(std::map<objid, GameObjectObj>& mapping, objid id){
+  auto object = mapping.at(id);
+  auto soundObj = std::get_if<GameObjectSound>(&object);
+  if (soundObj != NULL){
+    stopSource(soundObj -> source);
   }else{
     std::cout << "WARNING: " << id << " is not a sound object" << std::endl;
   }

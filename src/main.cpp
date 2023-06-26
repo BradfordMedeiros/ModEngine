@@ -1550,7 +1550,8 @@ int main(int argc, char* argv[]){
     }
 
 
-    onWorldFrame(world, deltaTime, timePlayback.currentTime, enablePhysics, dumpPhysics, state.worldpaused);
+    viewTransform = getCameraTransform();
+    onWorldFrame(world, deltaTime, timePlayback.currentTime, enablePhysics, dumpPhysics, state.worldpaused, viewTransform);
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
 
     auto time = getTotalTime();
@@ -1558,7 +1559,6 @@ int main(int argc, char* argv[]){
     tickScheduledTasks();
 
     onNetCode(world, netcode, onClientMessage, bootStrapperMode);
-    viewTransform = getCameraTransform();
 
     auto forward = calculateRelativeOffset(viewTransform.rotation, {0, 0, -1 }, false);
     auto up  = calculateRelativeOffset(viewTransform.rotation, {0, 1, 0 }, false);

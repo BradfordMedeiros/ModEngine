@@ -46,6 +46,10 @@ void playSource(ALuint source, std::optional<float> volume, std::optional<glm::v
   }
 }
 
+void stopSource(ALuint source){
+  alSourceStop(source);
+}
+
 
 std::vector<std::string> listSounds(){
   std::vector<std::string> sounds;

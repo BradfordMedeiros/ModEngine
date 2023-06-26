@@ -848,7 +848,14 @@ void playSoundState(std::string source, objid sceneId, std::optional<float> volu
 }
 
 void stopSoundState(std::string source, objid sceneId){
-  //modassert(false, "stop sound state not yet implemented");
+  std::cout << "Info: stop sound: " << source << std::endl;
+  auto gameobj = getGameObjectByName(source, sceneId, false);
+  if (gameobj.has_value()){
+    stopSoundState(world.objectMapping, gameobj.value()); 
+  }else{
+    std::cout << "ERROR: no source named: " << source << " in scene: " << sceneId << std::endl;
+    assert(false);
+  }
 }
 
 unsigned int activeTextureId(){

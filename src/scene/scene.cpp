@@ -1269,10 +1269,10 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, Physic
   }
 }
 
-void updateSoundPositions(World& world){
-  forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
+void updateSoundPositions(World& world, Transformation& viewTransform){
+  forEveryGameobj(world.sandbox, [&world, &viewTransform](objid id, GameObject& gameobj) -> void {
     auto absolutePosition = fullTransformation(world.sandbox, id).position;
-    updatePosition(world.objectMapping, id, absolutePosition);
+    updatePosition(world.objectMapping, id, absolutePosition, viewTransform);
   });
 }
 
@@ -1355,7 +1355,7 @@ void applyAttributeDelta(World& world, objid id, std::string field, AttributeVal
 
 extern bool useTransform2;
 
-void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, bool paused){
+void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, bool paused, Transformation& viewTransform){
   if (!paused){
     updateEmitters(
       world.emitters, 
@@ -1435,7 +1435,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   stepPhysicsSimulation(world.physicsEnvironment, timestep, paused, enablePhysics);
   updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);  
   
-  updateSoundPositions(world);
+  updateSoundPositions(world, viewTransform);
   enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
   
   auto updatedIds = updateSandbox(world.sandbox);  

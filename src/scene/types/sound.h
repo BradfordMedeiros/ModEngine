@@ -20,6 +20,7 @@ void stopSoundSystem();
 ALuint loadSoundState(std::string filepath);
 void unloadSoundState(ALuint source, std::string filepath);
 void playSource(ALuint source, std::optional<float> volume, std::optional<glm::vec3> position);
+void stopSource(ALuint source);
 
 float getVolume();
 void setVolume(float volume);
