@@ -425,6 +425,7 @@ std::vector<std::string> listAnimations(int32_t id){
 
 void playAnimation(int32_t id, std::string animationToPlay, bool loop){
   modassert(!loop, "play animation does not yet support loop");
+  modassert(idExists(world.sandbox, id), std::string("play animation, id does not exist: " + std::to_string(id)));
   addAnimation(world, timings, id, animationToPlay);
 }
 
@@ -854,7 +855,7 @@ void stopSoundState(std::string source, objid sceneId){
     stopSoundState(world.objectMapping, gameobj.value()); 
   }else{
     std::cout << "ERROR: no source named: " << source << " in scene: " << sceneId << std::endl;
-    assert(false);
+    //assert(false);
   }
 }
 
