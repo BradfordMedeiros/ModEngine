@@ -424,9 +424,9 @@ std::vector<std::string> listAnimations(int32_t id){
 }
 
 void playAnimation(int32_t id, std::string animationToPlay, bool loop){
-  modassert(!loop, "play animation does not yet support loop");
   modassert(idExists(world.sandbox, id), std::string("play animation, id does not exist: " + std::to_string(id)));
-  addAnimation(world, timings, id, animationToPlay);
+  modlog("animation", std::string("play animation: ") + animationToPlay + ", for id = " + std::to_string(id));
+  addAnimation(world, timings, id, animationToPlay, timeSeconds(false), loop);
 }
 
 void stopAnimation(int32_t id){

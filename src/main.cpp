@@ -622,6 +622,9 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor, bool showCursor){
   drawTextNdi(std::string("num gameobjects: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(numObjectsStat)))), uiXOffset, uiYOffset + offsetPerLine * 15, state.fontsize);
   drawTextNdi(std::string("num scenes loaded: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(scenesLoadedStat)))), uiXOffset, uiYOffset + offsetPerLine * 16, state.fontsize);
   drawTextNdi(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + offsetPerLine * 17, state.fontsize);
+  drawTextNdi(std::string("time: ") + std::to_string(timeSeconds(false)), uiXOffset, uiYOffset + offsetPerLine * 18, state.fontsize);
+  drawTextNdi(std::string("realtime: ") + std::to_string(timeSeconds(true)), uiXOffset, uiYOffset + offsetPerLine * 19, state.fontsize);
+
 }
 
 void onClientMessage(std::string message){
@@ -1234,6 +1237,7 @@ int main(int argc, char* argv[]){
     .getModAABB = getModAABB,
     .listAnimations = listAnimations,
     .playAnimation = playAnimation,
+    .stopAnimation = stopAnimation,
     .listClips = listSounds,
     .playClip = playSoundState,
     .stopClip = stopSoundState,

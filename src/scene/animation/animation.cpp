@@ -30,7 +30,10 @@ KeyIndex findKeyIndex(std::vector<KeyType>& keys, float currentTick){
       }
     }
     int nextKeyIndex = i + 1;
-    assert(nextKeyIndex < keys.size());
+    if (nextKeyIndex >= keys.size()){
+      nextKeyIndex = keys.size() - 1;
+    }
+    modassert(nextKeyIndex < keys.size(), std::string("find key index error, next key index: ") + std::to_string(nextKeyIndex) + ", keys size = " + std::to_string(keys.size()));
     auto nextKey = keys[nextKeyIndex];
     if (key.mTime <= currentTick && nextKey.mTime > currentTick){    // mTime is in ticks
       primaryTick = i;
@@ -79,6 +82,8 @@ std::vector<AnimationPose> animationPosesAtTime(Animation& animation, float curr
   std::vector<AnimationPose> poses;
   auto currentTick = currentTime * animation.ticksPerSecond;                                  // 200 ticks / 100 ticks per second = 2 seconds
   //printAnimationInfo(animation, currentTime, elapsedTime, currentTick);
+
+  modlog("animation", std::string("current time: ") + std::to_string(currentTime) + ", " + std::string("current tick: ") + std::to_string(currentTick));
 
   for (auto channel : animation.channels){
     auto keyInfo = keyInfoForTick(channel, currentTick);

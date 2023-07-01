@@ -56,6 +56,7 @@ struct CustomApiBindings {
   std::optional<ModAABB> (*getModAABB)(int32_t index); 
   std::vector<std::string> (*listAnimations)(int32_t id);
   void (*playAnimation)(int32_t id, std::string animationToPlay, bool loop);
+  void (*stopAnimation)(int32_t id);
   std::vector<std::string>(*listClips)();
   void (*playClip)(std::string, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
   void (*stopClip)(std::string source, objid sceneId);
