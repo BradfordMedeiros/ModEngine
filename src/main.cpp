@@ -85,7 +85,7 @@ std::map<std::string, GLint> shaderstringToId;
 
 TimePlayback timePlayback(
   initialTime, 
-  [](float currentTime, float elapsedTime) -> void {
+  [](float currentTime, float _, float elapsedTime) -> void {
     tickAnimations(world, timings, elapsedTime);
   }, 
   []() -> void {}

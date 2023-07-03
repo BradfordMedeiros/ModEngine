@@ -83,7 +83,7 @@ std::vector<AnimationPose> animationPosesAtTime(Animation& animation, float curr
   auto currentTick = currentTime * animation.ticksPerSecond;                                  // 200 ticks / 100 ticks per second = 2 seconds
   //printAnimationInfo(animation, currentTime, elapsedTime, currentTick);
 
-  modlog("animation", std::string("current time: ") + std::to_string(currentTime) + ", " + std::string("current tick: ") + std::to_string(currentTick));
+  //modlog("animation", std::string("current time: ") + std::to_string(currentTime) + ", " + std::string("current tick: ") + std::to_string(currentTick));
 
   for (auto channel : animation.channels){
     auto keyInfo = keyInfoForTick(channel, currentTick);

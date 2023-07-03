@@ -128,7 +128,7 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
 
   TimePlayback playback(
     initialTime, 
-    [&world, &timings, animation, groupId, idScene, rootname, initialTime, loop](float currentTime, float elapsedTime) -> void { 
+    [&world, &timings, animation, groupId, idScene, rootname, loop](float currentTime, float initTime, float elapsedTime) -> void { 
       // might be better to not have this check here and instead just assume obj exists,
       // remove animation when del object, but for now!
       if (!idExists(world.sandbox, groupId)){  // why are we doing this check here?
@@ -136,16 +136,22 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
         return;
       }
 
-      modlog("animation", "ticking animation for groupid: " + std::to_string(groupId));
+      //modlog("animation", "ticking animation for groupid: " + std::to_string(groupId));
+      modlog("animation", std::string("current time: ") + std::to_string(currentTime - initTime));
       auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
-      playbackAnimation(animation, meshNameToMeshes, currentTime - initialTime, elapsedTime, scopeGetModelMatrix(world, idScene), scopeSetPose(world, idScene), rootname);
+      playbackAnimation(animation, meshNameToMeshes, currentTime - initTime, elapsedTime, scopeGetModelMatrix(world, idScene), scopeSetPose(world, idScene), rootname);
     }, 
-    [groupId, &timings, animationname]() -> void { 
+    [groupId, &timings, animationname, loop]() -> void { 
       std::cout << "INFO: onfinish: " << animationname << " remove: " << groupId << std::endl;
-      timings.playbacksToRemove.push_back(groupId);
+      if (!loop){
+        timings.playbacksToRemove.push_back(groupId);
+      }else{
+        // /modassert(false, "should have restarted the playback");
+        modlog("animation", "on animation finish");
+      }
     },
     animLength,
-    PAUSE
+    loop ? RESTART : PAUSE
   );  
   timings.animations.playbacks[groupId] = playback;
 }
