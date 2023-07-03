@@ -116,7 +116,7 @@ int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontS
 void drawRect(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture);
 
 std::vector<std::string> listAnimations(int32_t id);
-void playAnimation(int32_t id, std::string animationToPlay, bool loop);
+void playAnimation(int32_t id, std::string animationToPlay, AnimationType animationType);
 void stopAnimation(int32_t id);
 
 std::vector<std::string> listSounds(int32_t id);

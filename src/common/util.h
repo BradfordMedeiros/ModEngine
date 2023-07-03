@@ -363,4 +363,7 @@ struct Transformation {
   glm::quat rotation;
 };
 
+enum AnimationType { ONESHOT, LOOP, FORWARDS };
+
+
 #endif

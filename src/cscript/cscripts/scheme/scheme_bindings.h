@@ -53,7 +53,7 @@ void createStaticSchemeBindings(
   void (*applyImpulseRel)(int32_t index, glm::vec3 impulse),
   void (*clearImpulse)(int32_t index),
   std::vector<std::string> (*listAnimations)(int32_t id),
-  void playAnimation(int32_t id, std::string animationToPlay, bool loop),
+  void playAnimation(int32_t id, std::string animationToPlay, AnimationType animationType),
   std::vector<std::string>(*listClips)(),
   void (*playClip)(std::string, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position),
   std::vector<std::string> (*listResources)(std::string),

@@ -423,10 +423,10 @@ std::vector<std::string> listAnimations(int32_t id){
   return animationNames;
 }
 
-void playAnimation(int32_t id, std::string animationToPlay, bool loop){
+void playAnimation(int32_t id, std::string animationToPlay, AnimationType animationType){
   modassert(idExists(world.sandbox, id), std::string("play animation, id does not exist: " + std::to_string(id)));
   modlog("animation", std::string("play animation: ") + animationToPlay + ", for id = " + std::to_string(id));
-  addAnimation(world, timings, id, animationToPlay, timeSeconds(false), loop);
+  addAnimation(world, timings, id, animationToPlay, timeSeconds(false), animationType);
 }
 
 void stopAnimation(int32_t id){
