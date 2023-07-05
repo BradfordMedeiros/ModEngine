@@ -22,40 +22,6 @@ void resetMeshBones(World& world, objid groupId){
   }
 }
 
-bool resetInitialPose = true;
-void tickAnimations(World& world, WorldTiming& timings, float elapsedTime){
-  //std::cout << "animations num active playbacks: " << timings.animations.playbacks.size() << std::endl;
-  for (auto &[id, playback] : timings.animations.playbacks){
-    playback.setElapsedTime(elapsedTime);
-  }
-  //std::cout << "animations num active playbacks: " << timings.animations.playbacks.size() << std::endl;
-
-  for (auto groupId : timings.playbacksToRemove){
-    if (resetInitialPose && idExists(world.sandbox, groupId)){
-      resetMeshBones(world, groupId);
-    }
-    timings.animations.playbacks.erase(groupId);
-    //modlog("animation", std::string("playbacks to remove, removing: ") + std::to_string(groupId));
-  }
-  timings.playbacksToRemove.clear();
-}
-
-std::optional<Animation> getAnimation(World& world, int32_t groupId, std::string animationToPlay){  
-  Animation noAnimation { };
-  for (auto animation :  world.animations.at(groupId)){
-    if (animation.name == animationToPlay){
-      return animation;
-    }
-  }
-  std::cout << "ERROR: no animation found named: " << animationToPlay << std::endl;
-  std::cout << "ERROR INFO: existing animation names [" << world.animations.at(groupId).size() << "] - ";
-  for (auto animation : world.animations.at(groupId)){
-    std::cout << animation.name << " ";
-  }
-  std::cout << std::endl;
-  return  std::nullopt;  // @todo probably use optional here.
-}
-
 glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
   auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId, false);
   assert(gameobj.has_value());
@@ -106,6 +72,71 @@ std::function<void(std::string name, glm::mat4 pose)> scopeSetPose(World& world,
   };
 }
 
+bool resetInitialPose = true;
+void tickAnimations(World& world, WorldTiming& timings, float currentTime){
+  //std::cout << "animations num active playbacks: " << timings.animations.playbacks.size() << std::endl;
+  for (auto &[id, playback] : timings.animations.playbacks){
+
+    // might be better to not have this check here and instead just assume obj exists,
+    // remove animation when del object, but for now!
+    if (!idExists(world.sandbox, playback.groupId)){  // why are we doing this check here?
+      timings.playbacksToRemove.push_back(playback.groupId);
+      modlog("animation", "removed playbacks because of internal group id");
+      return;
+    }
+    modlog("animation", "ticking animation for groupid: " + std::to_string(playback.groupId));
+    auto meshNameToMeshes = getMeshesForGroupId(world, playback.groupId);  
+    playbackAnimation(playback.animation, meshNameToMeshes, currentTime - playback.initTime, scopeGetModelMatrix(world, playback.idScene), scopeSetPose(world, playback.idScene), playback.rootname);
+  }
+
+
+  for (auto &[id, playback] : timings.animations.playbacks){
+    float timeElapsed = currentTime - playback.initTime;
+    if (timeElapsed > playback.animLength){
+      modlog("animation", "on animation finish");
+      if (playback.animationType == ONESHOT){
+        timings.playbacksToRemove.push_back(playback.groupId);
+        continue;
+      }else if (playback.animationType == LOOP){
+        playback.initTime = currentTime;
+        continue;
+      }else if (playback.animationType == FORWARDS){
+        // do nothing
+        continue;
+      }
+      modassert(false, "invalid animationType");
+    }
+  }
+
+  std::cout << "num playbacks: " << timings.animations.playbacks.size() << std::endl;
+
+  for (auto groupId : timings.playbacksToRemove){
+    if (resetInitialPose && idExists(world.sandbox, groupId)){
+      resetMeshBones(world, groupId);
+    }
+    timings.animations.playbacks.erase(groupId);
+    //modlog("animation", std::string("playbacks to remove, removing: ") + std::to_string(groupId));
+  }
+  timings.playbacksToRemove.clear();
+}
+
+std::optional<Animation> getAnimation(World& world, int32_t groupId, std::string animationToPlay){  
+  Animation noAnimation { };
+  for (auto animation :  world.animations.at(groupId)){
+    if (animation.name == animationToPlay){
+      return animation;
+    }
+  }
+  std::cout << "ERROR: no animation found named: " << animationToPlay << std::endl;
+  std::cout << "ERROR INFO: existing animation names [" << world.animations.at(groupId).size() << "] - ";
+  for (auto animation : world.animations.at(groupId)){
+    std::cout << animation.name << " ";
+  }
+  std::cout << std::endl;
+  return  std::nullopt;  // @todo probably use optional here.
+}
+
+
 void updateBonePose(World& world, objid id){
   auto groupId = getGroupId(world.sandbox, id);
   auto idScene = sceneId(world.sandbox, groupId);
@@ -135,36 +166,20 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
   }
 
   auto animation = getAnimation(world, groupId, animationToPlay).value();
+
   std::string animationname = animation.name;
   float animLength = animationLengthSeconds(animation);
   modlog("animation", std::string("adding animation: ") + animationname + ", length = " + std::to_string(animLength) + ", numticks = " + std::to_string(animation.duration) + ", ticks/s = " + std::to_string(animation.ticksPerSecond));
 
-  TimePlayback playback(
-    initialTime, 
-    [&world, &timings, animation, groupId, idScene, rootname](float currentTime, float initTime, float elapsedTime) -> void { 
-      // might be better to not have this check here and instead just assume obj exists,
-      // remove animation when del object, but for now!
-      if (!idExists(world.sandbox, groupId)){  // why are we doing this check here?
-        timings.playbacksToRemove.push_back(groupId);
-        modlog("animation", "removed playbacks because of internal group id");
-        return;
-      }
-      //modlog("animation", "ticking animation for groupid: " + std::to_string(groupId));
-      auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
-      playbackAnimation(animation, meshNameToMeshes, currentTime - initTime, elapsedTime, scopeGetModelMatrix(world, idScene), scopeSetPose(world, idScene), rootname);
-    }, 
-    [groupId, &timings, animationname, animationType]() -> void { 
-      std::cout << "INFO: onfinish: " << animationname << " remove: " << groupId << std::endl;
-      if (animationType == ONESHOT){
-        timings.playbacksToRemove.push_back(groupId);
-      }else{
-        modlog("animation", "on animation finish");
-      }
-    },
-    animLength,
-    animationType == LOOP ? RESTART : PAUSE
-  );
-  timings.animations.playbacks[groupId] = playback;
+  timings.animations.playbacks[groupId] = AnimationData {
+    .groupId = groupId,
+    .idScene = idScene,
+    .rootname = rootname,
+    .animation = animation,
+    .animLength = animLength,
+    .animationType = animationType,
+    .initTime = initialTime,
+  };
 }
 
 void removeAnimation(World& world, WorldTiming& timings, objid id){

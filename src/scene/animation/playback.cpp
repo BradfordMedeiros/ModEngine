@@ -15,12 +15,27 @@ void playbackAnimation(
   Animation animation,  
   NameAndMeshObjName meshNameToMeshes,  
   float currentTime, 
-  float elapsedTime, 
   std::function<glm::mat4(std::string, std::string)> getModelMatrix,
   std::function<void(std::string, glm::mat4)> setPose,
   std::string rootname
 ){  
-  auto posesForTick = animationPosesAtTime(animation, currentTime, elapsedTime);
+  auto posesForTick = animationPosesAtTime(animation, currentTime);
+  for (auto pose : posesForTick){
+    //printMatrixInformation(pose.pose, std::string("SET_CHANNEL:") + pose.channelName);
+    setPose(pose.channelName, pose.pose);
+  }
+  updateBonePoses(meshNameToMeshes, getModelMatrix, rootname);
+}
+
+void playbackAnimationBlend(
+  Animation animation,  
+  NameAndMeshObjName meshNameToMeshes,  
+  float currentTime, 
+  std::function<glm::mat4(std::string, std::string)> getModelMatrix,
+  std::function<void(std::string, glm::mat4)> setPose,
+  std::string rootname
+){  
+  auto posesForTick = animationPosesAtTime(animation, currentTime);
   for (auto pose : posesForTick){
     //printMatrixInformation(pose.pose, std::string("SET_CHANNEL:") + pose.channelName);
     setPose(pose.channelName, pose.pose);

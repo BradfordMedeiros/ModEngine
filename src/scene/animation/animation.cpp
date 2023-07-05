@@ -76,12 +76,12 @@ Transformation secondaryPoseFromKeyInfo(AnimationChannel& channel, KeyInfo& keyI
 }
 
 bool shouldInterpolate = true;
-std::vector<AnimationPose> animationPosesAtTime(Animation& animation, float currentTime, float elapsedTime){
+std::vector<AnimationPose> animationPosesAtTime(Animation& animation, float currentTime){
   assert(animation.ticksPerSecond != 0);                                                      // some models can have 0 ticks, probably should just set a default rate for these
 
   std::vector<AnimationPose> poses;
   auto currentTick = currentTime * animation.ticksPerSecond;                                  // 200 ticks / 100 ticks per second = 2 seconds
-  //printAnimationInfo(animation, currentTime, elapsedTime, currentTick);
+  //printAnimationInfo(animation, currentTime,currentTick);
 
   //modlog("animation", std::string("current time: ") + std::to_string(currentTime) + ", " + std::string("current tick: ") + std::to_string(currentTick));
 

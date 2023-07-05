@@ -4,12 +4,22 @@
 #include <iostream>
 #include <map>
 #include "./scene/animation/playback.h"
-#include "./scene/animation/timeplayback.h"
 #include "./scene/animation/recorder.h"
 #include "./scene/scene.h"
 
+struct AnimationData {
+  objid groupId;
+  objid idScene;
+  std::string rootname;
+  Animation animation;
+  float animLength;
+  AnimationType animationType;
+
+  float initTime;
+};
+
 struct AnimationState {
-  std::map<int32_t, TimePlayback> playbacks;
+  std::map<int32_t, AnimationData> playbacks;
 };
 
 struct WorldTiming {
@@ -19,7 +29,7 @@ struct WorldTiming {
 };
 
 WorldTiming createWorldTiming(float initialTime);
-void tickAnimations(World& world, WorldTiming& timings, float elapsedTime);
+void tickAnimations(World& world, WorldTiming& timings, float currentTime);
 void updateBonePose(World& world, objid id);
 
 void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay, float initialTime, AnimationType animationType);
