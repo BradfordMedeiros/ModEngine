@@ -16,13 +16,13 @@ void playbackAnimation(
   float currentTime, 
   NameAndMeshObjName meshNameToMeshes,  
   std::function<glm::mat4(std::string, std::string)> getModelMatrix,
-  std::function<void(std::string, glm::mat4)> setPose,
+  std::function<void(std::string, Transformation)> setPose,
   std::string rootname
 ){  
   auto posesForTick = animationPosesAtTime(animation, currentTime);
   for (auto pose : posesForTick){
     //printMatrixInformation(pose.pose, std::string("SET_CHANNEL:") + pose.channelName);
-    setPose(pose.channelName, transformToGlm(pose.pose));
+    setPose(pose.channelName, pose.pose);
   }
   updateBonePoses(meshNameToMeshes, getModelMatrix, rootname);
 }
@@ -100,7 +100,7 @@ void playbackAnimationBlend(
   float blendFactor,
   NameAndMeshObjName meshNameToMeshes,  
   std::function<glm::mat4(std::string, std::string)> getModelMatrix,
-  std::function<void(std::string, glm::mat4)> setPose,
+  std::function<void(std::string, Transformation)> setPose,
   std::string rootname
 ){ 
   std::cout << "blend: a factor is: " << currentTime << ", " << blendFactor << std::endl;
@@ -110,7 +110,7 @@ void playbackAnimationBlend(
 
   for (auto pose : combinedPoses){
     //printMatrixInformation(pose.pose, std::string("SET_CHANNEL:") + pose.channelName);
-    setPose(pose.channelName, transformToGlm(pose.pose));
+    setPose(pose.channelName, pose.pose);
   }
   updateBonePoses(meshNameToMeshes, getModelMatrix, rootname);
 }

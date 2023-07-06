@@ -12,7 +12,7 @@ void playbackAnimation(
   float currentTime, 
   NameAndMeshObjName meshNameToMeshes, 
   std::function<glm::mat4(std::string, std::string)> getModelMatrix,
-  std::function<void(std::string, glm::mat4)> setPose,
+  std::function<void(std::string, Transformation)> setPose,
   std::string rootname
 );
 
@@ -24,7 +24,7 @@ void playbackAnimationBlend(
   float blendFactor,
   NameAndMeshObjName meshNameToMeshes, 
   std::function<glm::mat4(std::string, std::string)> getModelMatrix,
-  std::function<void(std::string, glm::mat4)> setPose,
+  std::function<void(std::string, Transformation)> setPose,
   std::string rootname
 );
 
