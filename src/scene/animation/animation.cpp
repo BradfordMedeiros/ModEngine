@@ -87,7 +87,7 @@ std::vector<AnimationPose> animationPosesAtTime(Animation& animation, float curr
 
   for (auto channel : animation.channels){
     auto keyInfo = keyInfoForTick(channel, currentTick);
-    glm::mat4 newNodePose = transformToGlm(
+    Transformation newNodeTransformation = (
       shouldInterpolate ? 
       interpolate(
         primaryPoseFromKeyInfo(channel, keyInfo), 
@@ -100,7 +100,7 @@ std::vector<AnimationPose> animationPosesAtTime(Animation& animation, float curr
     );
     poses.push_back(AnimationPose{
       .channelName = channel.nodeName,
-      .pose = newNodePose,
+      .pose = newNodeTransformation,
     });
   }
   return poses;

@@ -73,10 +73,10 @@ std::function<void(std::string name, glm::mat4 pose)> scopeSetPose(World& world,
 }
 
 bool resetInitialPose = true;
+bool enableBlending = true;
 void tickAnimations(World& world, WorldTiming& timings, float currentTime){
   //std::cout << "animations num active playbacks: " << timings.animations.playbacks.size() << std::endl;
   for (auto &[id, playback] : timings.animations.playbacks){
-
     // might be better to not have this check here and instead just assume obj exists,
     // remove animation when del object, but for now!
     if (!idExists(world.sandbox, playback.groupId)){  // why are we doing this check here?
@@ -85,8 +85,36 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
       return;
     }
     modlog("animation", "ticking animation for groupid: " + std::to_string(playback.groupId));
-    auto meshNameToMeshes = getMeshesForGroupId(world, playback.groupId);  
-    playbackAnimation(playback.animation, meshNameToMeshes, currentTime - playback.initTime, scopeGetModelMatrix(world, playback.idScene), scopeSetPose(world, playback.idScene), playback.rootname);
+    auto meshNameToMeshes = getMeshesForGroupId(world, playback.groupId);
+
+    if (enableBlending && playback.blendData.has_value()){
+      float timeElapsedBlendStart = currentTime - playback.blendData.value().blendStartTime;
+      float aFactor = glm::min(1.f, timeElapsedBlendStart / 0.5f);
+
+      // if afactor > 1.f or something like that, could get rid of the old animation value
+
+      //modassert(false, "blend not yet supported");
+      playbackAnimationBlend(
+        playback.animation,
+        playback.blendData.value().animation, 
+        currentTime - playback.initTime,
+        currentTime - playback.blendData.value().oldAnimationInit, 
+        aFactor,
+        meshNameToMeshes, 
+        scopeGetModelMatrix(world, playback.idScene), 
+        scopeSetPose(world, playback.idScene), 
+        playback.rootname
+      );
+    }else{
+      playbackAnimation(
+        playback.animation, 
+        currentTime - playback.initTime, 
+        meshNameToMeshes, 
+        scopeGetModelMatrix(world, playback.idScene), 
+        scopeSetPose(world, playback.idScene), 
+        playback.rootname
+      );
+    }
   }
 
 
@@ -159,10 +187,23 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
   auto groupId = getGroupId(world.sandbox, id);
   auto rootname = getGameObject(world, groupId).name;
   auto idScene = sceneId(world.sandbox, groupId);
+
+  std::optional<BlendAnimationData> blendData = std::nullopt;
   if (timings.animations.playbacks.find(groupId) != timings.animations.playbacks.end()){
     modlog("animation", std::string("removing playback: ") + std::to_string(groupId));
+
+    auto oldAnimation = timings.animations.playbacks.at(groupId).animation;
+    auto oldInit = timings.animations.playbacks.at(groupId).initTime;
+
+    blendData = BlendAnimationData {
+      .oldAnimationInit = oldInit,
+      .blendStartTime = initialTime,
+      .animation = oldAnimation,
+    };
+
     timings.animations.playbacks.erase(groupId);
     invalidatePlaybackToRemove(timings, groupId);
+
   }
 
   auto animation = getAnimation(world, groupId, animationToPlay).value();
@@ -179,6 +220,8 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
     .animLength = animLength,
     .animationType = animationType,
     .initTime = initialTime,
+
+    .blendData = blendData,
   };
 }
 

@@ -7,6 +7,12 @@
 #include "./scene/animation/recorder.h"
 #include "./scene/scene.h"
 
+struct BlendAnimationData {
+  float oldAnimationInit;
+  float blendStartTime;
+  Animation animation;
+};
+
 struct AnimationData {
   objid groupId;
   objid idScene;
@@ -14,8 +20,10 @@ struct AnimationData {
   Animation animation;
   float animLength;
   AnimationType animationType;
-
   float initTime;
+
+
+  std::optional<BlendAnimationData> blendData;
 };
 
 struct AnimationState {

@@ -8,7 +8,7 @@
 
 struct AnimationPose {
   std::string channelName;
-  glm::mat4 pose;
+  Transformation pose;
 };
 
 std::vector<AnimationPose> animationPosesAtTime(Animation& animation, float currentTime);
