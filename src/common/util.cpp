@@ -213,6 +213,23 @@ std::string print(std::vector<objid>& values){
   stream << "]";
   return stream.str();
 }
+std::string print(std::vector<bool>& values){
+  std::string strValue = "[";
+  for (auto value : values){
+    strValue += " " + print(value);
+  }
+  strValue += " ]";
+  return strValue;
+}
+
+std::string print(std::set<objid>& values){
+  std::string strValue = "[";
+  for (auto value : values){
+    strValue += " " + std::to_string(value);
+  }
+  strValue += " ]";
+  return strValue;
+}
 
 std::string rawprint(glm::quat quat){
   std::stringstream stream;

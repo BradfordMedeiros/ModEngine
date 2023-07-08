@@ -957,6 +957,9 @@ void removeObjectFromScene(World& world, objid objectId){
     }
     auto idsToRemove = idsToRemoveFromScenegraph(world.sandbox, gameobjId);
     for (auto id : idsToRemove){
+      if (!idExists(world.sandbox, id)){ // needed b/c removeobjectbyid could remove other entities in scene
+        continue;
+      }
       auto gameobj = getGameObject(world, id);
       auto name = gameobj.name;
       auto scriptName = gameobj.script;
@@ -987,6 +990,9 @@ void removeSceneFromWorld(World& world, objid sceneId){
   }
 
   for (auto objectId : listObjInScene(world.sandbox, sceneId)){
+    if (!idExists(world.sandbox, objectId)){  // this is needed b/c removeobject by id can in turn end up removing other entities
+      continue;
+    }
     auto gameobj = getGameObject(world, objectId);
     auto name = gameobj.name;
     auto scriptName = gameobj.script;

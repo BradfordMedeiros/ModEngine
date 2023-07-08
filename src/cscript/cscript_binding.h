@@ -59,6 +59,7 @@ struct CustomApiBindings {
   void (*stopAnimation)(int32_t id);
   std::vector<std::string>(*listClips)();
   void (*playClip)(std::string, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
+  void (*playClipById)(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
   void (*stopClip)(std::string source, objid sceneId);
 
   ///////////
@@ -121,6 +122,7 @@ struct CustomApiBindings {
   FrameInfo (*getFrameInfo)();
   RotationDirection (*getCursorInfoWorld)(float ndix, float ndiy);
   std::optional<objid> (*idAtCoord)(float ndix, float ndiy);
+  bool (*gameobjExists)(objid id);
   //std::vector<func_t> registerGuileFns
 };
 

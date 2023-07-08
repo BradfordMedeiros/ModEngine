@@ -1240,6 +1240,7 @@ int main(int argc, char* argv[]){
     .stopAnimation = stopAnimation,
     .listClips = listSounds,
     .playClip = playSoundState,
+    .playClipById = playSoundState,
     .stopClip = stopSoundState,
     .listResources = listResources,
     .sendNotifyMessage = sendNotifyMessage,
@@ -1299,6 +1300,7 @@ int main(int argc, char* argv[]){
     .getFrameInfo = getFrameInfo,
     .getCursorInfoWorld = getCursorInfoWorld,
     .idAtCoord = idAtCoord,
+    .gameobjExists = gameobjExists,
   };
 
 
@@ -1827,6 +1829,9 @@ int main(int argc, char* argv[]){
       }
       cBindings.onMessage(message.strTopic, message.strValue);
     }
+    doRemoveQueuedRemovals();
+    doUnloadScenes();
+
 
     renderVector(shaderProgram, view, glm::mat4(1.0f), numChunkingGridCells);
     portalIdCache.clear();
@@ -1907,7 +1912,6 @@ int main(int argc, char* argv[]){
       assert(state.textureIndex <= numPortalTextures && state.textureIndex >= 0);
       glBindTexture(GL_TEXTURE_2D, portalTextures[state.textureIndex]);  
     }else if (state.renderMode == RENDER_SELECTION){
-      assert(state.textureIndex >= 0);
       glBindTexture(GL_TEXTURE_2D, framebufferTexture4);  
     }else if (state.renderMode == RENDER_PAINT){
       //glBindTexture(GL_TEXTURE_2D, textureToPaint);

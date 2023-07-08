@@ -70,6 +70,8 @@ std::optional<objid> sceneIdByName(std::string name);
 objid rootIdForScene(objid sceneId);
 
 void unloadScene(int32_t sceneId);
+void doUnloadScenes();
+
 void unloadAllScenes();
 void resetScene(std::optional<objid> sceneId);
 bool saveScene(bool includeIds, objid sceneId, std::optional<std::string> filename);
@@ -85,6 +87,7 @@ void deleteScene(std::string scenename);
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos);
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2);
 
+bool gameobjExists(objid id);
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit);
 std::vector<int32_t> getObjectsByType(std::string type);
 std::vector<int32_t> getObjectsByAttr(std::string type, std::optional<AttributeValue> value, std::optional<int32_t> sceneId);
@@ -103,6 +106,8 @@ void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld);
 
 std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes);
 void removeObjectById(int32_t id);
+void doRemoveQueuedRemovals();
+
 void copyObject(int32_t id);
 void handleCopy();
 void handleClipboardSelect();
@@ -167,6 +172,7 @@ void setFloatState(std::string stateName, float value);
 void setIntState(std::string stateName, int value);
 
 void playSoundState(std::string source, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
+void playSoundState(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
 
 unsigned int activeTextureId();
 

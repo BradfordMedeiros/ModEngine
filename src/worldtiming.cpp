@@ -135,9 +135,7 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
       modassert(false, "invalid animationType");
     }
   }
-
-  std::cout << "num playbacks: " << timings.animations.playbacks.size() << std::endl;
-
+  //std::cout << "num playbacks: " << timings.animations.playbacks.size() << std::endl;
   for (auto groupId : timings.playbacksToRemove){
     if (resetInitialPose && idExists(world.sandbox, groupId)){
       resetMeshBones(world, groupId);

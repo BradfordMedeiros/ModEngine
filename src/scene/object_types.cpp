@@ -251,6 +251,9 @@ void removeObject(
   std::function<void()> rmEmitter,
   std::function<void(objid)> unloadScene
 ){
+  if (mapping.find(id) == mapping.end()){
+    return;
+  }
   auto Object = mapping.at(id); 
   auto variantIndex = Object.index();
   for (auto &objType : objTypes){
@@ -807,6 +810,9 @@ void updatePosition(std::map<objid, GameObjectObj>& mapping, objid id, glm::vec3
 }
 
 void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position){
+  if (mapping.find(id) == mapping.end()){
+    return;
+  }
   auto object = mapping.at(id);
   auto soundObj = std::get_if<GameObjectSound>(&object);
   if (soundObj != NULL){
@@ -817,6 +823,9 @@ void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id, std::opti
 }
 
 void stopSoundState(std::map<objid, GameObjectObj>& mapping, objid id){
+  if (mapping.find(id) == mapping.end()){
+    return;
+  }
   auto object = mapping.at(id);
   auto soundObj = std::get_if<GameObjectSound>(&object);
   if (soundObj != NULL){

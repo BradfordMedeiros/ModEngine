@@ -96,7 +96,6 @@ void unloadCScript(int id){
   if (objInstance){
     auto binding = objInstance -> cScriptBinding;
     binding -> remove(objInstance -> name, id, objInstance -> data); 
-  //  customObjInstances.erase(id); 
     objInstance -> shouldRemove = true;
   }
 }

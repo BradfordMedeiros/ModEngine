@@ -33,6 +33,10 @@ float getTotalTime(){
   return now - initialTime;
 }
 
+bool gameobjExists(objid id){
+  return idExists(world.sandbox, id);
+}
+
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit){    
   return getGameObjectByNamePrefix(world, name, sceneId, sceneIdExplicit);
 }
@@ -146,9 +150,17 @@ objid rootIdForScene(objid sceneId){
   return rootIdForScene(world.sandbox, sceneId);
 }
 
+std::vector<int32_t> queuedUnloadScenes = {};
+
 void unloadScene(int32_t sceneId){  
   std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;
-  removeSceneFromWorld(world, sceneId);
+  queuedUnloadScenes.push_back(sceneId);
+}
+void doUnloadScenes(){
+  for (auto sceneId : queuedUnloadScenes){
+    removeSceneFromWorld(world, sceneId);
+  }
+  queuedUnloadScenes = {};
 }
 void unloadAllScenes(){
   removeAllScenesFromWorld(world);
@@ -434,8 +446,15 @@ void stopAnimation(int32_t id){
   removeAnimation(world, timings, id);
 }
 
+std::vector<objid> objectsQueuedForRemoval = {};
 void removeObjectById(objid id){
-  removeObjectFromScene(world, id);
+  objectsQueuedForRemoval.push_back(id);
+}
+void doRemoveQueuedRemovals(){
+  for (auto id : objectsQueuedForRemoval){
+    removeObjectFromScene(world, id);
+  }
+  objectsQueuedForRemoval = {};
 }
 
 std::vector<std::string> listModels(){
@@ -836,6 +855,11 @@ void setCameraRotation(glm::quat orientation){
   }else{
     setGameObjectRotation(state.activeCameraObj ->id, orientation, true);
   }
+}
+
+
+void playSoundState(objid id, std::optional<float> volume, std::optional<glm::vec3> position){
+  playSoundState(world.objectMapping, id, volume, position); 
 }
 
 void playSoundState(std::string source, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position){
