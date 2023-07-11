@@ -765,7 +765,9 @@ void addObjectToWorld(
       if (data == NULL){
         ModelData data = loadModelPath(world, name, meshName); 
         idToModelVertexs[id] = getVertexsFromModelData(data);
-        world.animations[id] = data.animations;
+        if (data.animations.size() > 0){
+          world.animations[id] = data.animations;
+        }
 
         for (auto [meshId, meshData] : data.meshIdToMeshData){
           auto meshPath = nameForMeshId(meshName, meshId);
@@ -804,7 +806,6 @@ void addObjectToWorld(
       return sceneId;
     };
 
-    std::cout << "rootname create mesh: " << name << std::endl;
     if (returnObjectOnly){
       ObjectTypeUtil util {
         .id = id,

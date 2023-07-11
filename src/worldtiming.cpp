@@ -147,7 +147,9 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
 }
 
 std::optional<Animation> getAnimation(World& world, int32_t groupId, std::string animationToPlay){  
-  Animation noAnimation { };
+  if (world.animations.find(groupId) == world.animations.end()){
+    return std::nullopt;
+  }
   for (auto animation :  world.animations.at(groupId)){
     if (animation.name == animationToPlay){
       return animation;
