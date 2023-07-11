@@ -36,6 +36,7 @@ struct Mesh {
 
 struct MeshRef {
   std::set<objid> owners;
+  std::set<std::string> textureRefs;
   Mesh mesh;
 };
 

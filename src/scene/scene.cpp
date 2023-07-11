@@ -443,13 +443,19 @@ void freeAnimationsForOwner(World& world, objid id){
 void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ownerId){
   if (world.meshes.find(meshPath) != world.meshes.end()){
     world.meshes.at(meshPath).owners.insert(ownerId);
+    for (auto &textureRef : world.meshes.at(meshPath).textureRefs){
+      world.textures.at(textureRef).owners.insert(ownerId);
+    }
   }else{
+    std::set<std::string> textureRefs = {};
     world.meshes[meshPath] = MeshRef {
-      .owners = { ownerId }, 
-      .mesh = loadMesh("./res/textures/default.jpg", meshData, [&world, ownerId](std::string texture) -> Texture {
+      .owners = { ownerId },
+      .mesh = loadMesh("./res/textures/default.jpg", meshData, [&world, &textureRefs, &meshPath, ownerId](std::string texture) -> Texture {
+        textureRefs.insert(texture);
         return loadTextureWorld(world, texture, ownerId);
       })  
     };
+    world.meshes.at(meshPath).textureRefs = textureRefs;
   }
 }
 
@@ -473,12 +479,16 @@ void addSpriteMesh(World& world, std::string meshPath){
   if (world.meshes.find(meshPath) != world.meshes.end()){
     world.meshes.at(meshPath).owners.insert(ownerId);
   }else{
+    std::set<std::string> textureRefs = {};
     world.meshes[meshPath] = MeshRef {
-      .owners = { ownerId }, 
-      .mesh = loadSpriteMesh(meshPath, [&world, ownerId](std::string texture) -> Texture {
+      .owners = { ownerId },
+      .textureRefs = textureRefs,
+      .mesh = loadSpriteMesh(meshPath, [&world, &textureRefs, ownerId](std::string texture) -> Texture {
+        textureRefs.insert(texture);
         return loadTextureWorld(world, texture, ownerId);
       })
     };
+    world.meshes.at(meshPath).textureRefs = textureRefs;
   }
 }
 
@@ -518,20 +528,27 @@ void loadSkybox(World& world, std::string skyboxpath){
   if (world.meshes.find("skybox") != world.meshes.end()){
     freeMeshRef(world, "skybox");
   }
+
+  std::set<std::string> textureRefs = {};
   world.meshes["skybox"] = MeshRef {
     .owners = { -1 },
+    .textureRefs = {},
     .mesh = loadSkybox(
       "./res/textures/default.jpg", 
       "./res/models/skybox.obj",
       skyboxpath, 
-      [&world](std::string texture) -> Texture {
+      [&world, &textureRefs](std::string texture) -> Texture {
+        textureRefs.insert(texture);
         return loadTextureWorld(world, texture, -1);
       },
-      [&world](std::string texture) -> Texture {
+      [&world, &textureRefs](std::string texture) -> Texture {
+        textureRefs.insert(texture);
         return loadSkyboxWorld(world, texture, -1);
       }
     )
   };
+  world.meshes.at("skybox").textureRefs = textureRefs;
+
 }
 
 extern std::vector<AutoSerialize> meshAutoserializer;
