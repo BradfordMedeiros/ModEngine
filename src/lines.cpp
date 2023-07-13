@@ -185,9 +185,10 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::functi
         };
         auto restoredId = getIdFromColor(colorTypeColor);
         //std::cout << "color is: " << print(colorTypeColor) << " - " << id << " - " << restoredId << std::endl;
-        glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(id)));
-
+        glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid"), 1, glm::value_ptr(color));
+        glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid2"), 1, glm::value_ptr(color));
       }else{
+        glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(0)));
         glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0)));
       }
 

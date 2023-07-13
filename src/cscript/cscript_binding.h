@@ -121,7 +121,7 @@ struct CustomApiBindings {
   void (*schedule)(objid id, float delayTimeMs, void* data, std::function<void(void*)> fn);
   FrameInfo (*getFrameInfo)();
   RotationDirection (*getCursorInfoWorld)(float ndix, float ndiy);
-  std::optional<objid> (*idAtCoord)(float ndix, float ndiy);
+  std::optional<objid> (*idAtCoord)(float ndix, float ndiy, bool onlyGameObjId);
   bool (*gameobjExists)(objid id);
   //std::vector<func_t> registerGuileFns
 };

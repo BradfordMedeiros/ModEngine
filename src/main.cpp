@@ -730,6 +730,9 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
       auto worldTriangles = renderWorld(context.world, renderStep.shader, renderStep.allowShaderOverride, projection, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraTransform.position, renderStep.textBoundingOnly, true);
       triangles += worldTriangles;
     }
+
+    drawShapeData(lineData, renderStep.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId);
+
     glDisable(GL_STENCIL_TEST);
 
     if (renderStep.renderQuad){
@@ -737,6 +740,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
       glBindVertexArray(defaultResources.quadVAO);
       glDrawArrays(GL_TRIANGLES, 0, 6);      
     }
+
   )
   return triangles;
 }
@@ -879,7 +883,7 @@ ManipulatorTools tools {
 };
 
 
-std::optional<objid> idAtCoord(float ndix, float ndiy){ // don't like binding framebuffer for this.  Need to isolate rendering from code so don't have to unbind / rebind framebuffer
+std::optional<objid> idAtCoord(float ndix, float ndiy, bool onlyGameObjId){ // don't like binding framebuffer for this.  Need to isolate rendering from code so don't have to unbind / rebind framebuffer
   glBindFramebuffer(GL_FRAMEBUFFER, renderStages.selection.fbo);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderStages.selection.colorAttachment0, 0);
   auto pixelCoord = ndiToPixelCoord(glm::vec2(ndix, ndiy), state.resolution);
@@ -887,7 +891,7 @@ std::optional<objid> idAtCoord(float ndix, float ndiy){ // don't like binding fr
   if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
     return std::nullopt;
   }
-  if (!idExists(world.sandbox, id)){
+  if (onlyGameObjId && !idExists(world.sandbox, id)){
     //modassert(false, std::string("id does not exist: ") + std::to_string(id));
     return std::nullopt;
   }
@@ -1613,6 +1617,8 @@ int main(int argc, char* argv[]){
     // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
     renderWithProgram(renderContext, renderStages.selection);
 
+    disposeTempBufferedData(lineData);
+
     //std::cout << "cursor pos: " << state.cursorLeft << " " << state.cursorTop << std::endl;
     auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
     //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
@@ -1938,7 +1944,6 @@ int main(int argc, char* argv[]){
     renderUI(effectiveCrosshair, pixelColor, showCursor);
 
     drawShapeData(lineData, uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId);
-    disposeTempBufferedData(lineData);
     glEnable(GL_DEPTH_TEST);
 
     if (state.takeScreenshot){
