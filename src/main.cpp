@@ -731,8 +731,6 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
       triangles += worldTriangles;
     }
 
-    drawShapeData(lineData, renderStep.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId);
-
     glDisable(GL_STENCIL_TEST);
 
     if (renderStep.renderQuad){
@@ -1616,6 +1614,11 @@ int main(int argc, char* argv[]){
     updateRenderStages(renderStages, dofInfo);
     // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
     renderWithProgram(renderContext, renderStages.selection);
+
+    glUniformMatrix4fv(glGetUniformLocation(renderStages.selection.shader, "projview"), 1, GL_FALSE, glm::value_ptr(ndiOrtho));
+    glDisable(GL_DEPTH_TEST);
+    drawShapeData(lineData, renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId);
+    glEnable(GL_DEPTH_TEST);
 
     disposeTempBufferedData(lineData);
 
