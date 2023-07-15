@@ -1804,6 +1804,7 @@ int main(int argc, char* argv[]){
 
     numTriangles = renderWithProgram(renderContext, renderStages.main);
     Color colorFromSelection = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+    renderVector(shaderProgram, view, glm::mat4(1.0f), numChunkingGridCells);
 
       /////////////////
 
@@ -1822,6 +1823,7 @@ int main(int argc, char* argv[]){
         cBindings.onObjectHover(state.currentHoverIndex, true);
       }
     }
+
 
     handleInput(window);  // stateupdate
     glfwPollEvents();     // stateupdate
@@ -1842,7 +1844,6 @@ int main(int argc, char* argv[]){
     doUnloadScenes();
 
 
-    renderVector(shaderProgram, view, glm::mat4(1.0f), numChunkingGridCells);
     portalIdCache.clear();
  
 
