@@ -422,6 +422,20 @@ void drawRect(float centerX, float centerY, float width, float height, bool perm
   });
 }
 
+void drawLine2D(glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture){
+  addShapeData(lineData, ShapeData{
+    .shapeData = LineShapeData {
+      .fromPos = fromPos,
+      .toPos = toPos,
+    },
+    .textureId = textureId,
+    .perma = perma,
+    .ndi = ndi,
+    .tint = tint.has_value() ? tint.value() : glm::vec4(1.f, 1.f, 1.f, 1.f),
+    .selectionId = selectionId,
+  });
+}
+
 std::vector<std::string> listAnimations(int32_t id){
   std::vector<std::string> animationNames;
   auto groupId = getGroupId(world.sandbox, id);

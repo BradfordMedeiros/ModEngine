@@ -339,12 +339,12 @@ glm::vec3 getTintIfSelected(bool isSelected){
   return glm::vec3(1.f, 1.f, 1.f);
 }
 
-int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, bool textBoundingOnly, bool shouldAddTraversalPosition = false){
+int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, bool textBoundingOnly){
   glUseProgram(shaderProgram);
   int numTriangles = 0;
   int numDepthClears = 0;
 
-  traverseSandboxByLayer(world.sandbox, [&world, &numDepthClears, shaderProgram, allowShaderOverride, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition, textBoundingOnly, shouldAddTraversalPosition](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
+  traverseSandboxByLayer(world.sandbox, [&world, &numDepthClears, shaderProgram, allowShaderOverride, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition, textBoundingOnly](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
     assert(id >= 0);
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
@@ -354,10 +354,6 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       state.depthBufferLayer = layer.depthBufferLayer;
       glClear(GL_DEPTH_BUFFER_BIT);
       numDepthClears++;
-    }
-
-    if (shouldAddTraversalPosition){
-      addTraversalPosition(lineData, modelMatrix, parentModelMatrix);
     }
 
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
@@ -455,9 +451,6 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     }
     glStencilFunc(GL_ALWAYS, 1, 0xFF);
     glClear(GL_STENCIL_BUFFER_BIT);
-    if (shouldAddTraversalPosition){
-      addTraversalPosition(lineData, modelMatrix, parentModelMatrix);
-    }
   });
   
   auto maxExpectedClears = numUniqueDepthLayers(world.sandbox.layers);
@@ -524,7 +517,6 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model, int numC
     drawCoordinateSystem(100.f);
   }
   glDisable(GL_DEPTH_TEST);
-    //drawTraversalPositions(lineData);   
   drawAllLines(lineData, shaderProgram, std::nullopt);
 
 }
@@ -727,7 +719,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     if (renderStep.renderWorld){
       // important - redundant call to glUseProgram
       glm::mat4* projection = context.projection.has_value() ? &context.projection.value() : NULL;
-      auto worldTriangles = renderWorld(context.world, renderStep.shader, renderStep.allowShaderOverride, projection, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraTransform.position, renderStep.textBoundingOnly, true);
+      auto worldTriangles = renderWorld(context.world, renderStep.shader, renderStep.allowShaderOverride, projection, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraTransform.position, renderStep.textBoundingOnly);
       triangles += worldTriangles;
     }
 
@@ -1216,6 +1208,7 @@ int main(int argc, char* argv[]){
     .getView = getView,
     .drawText = drawText,
     .drawRect = drawRect,
+    .drawLine2D = drawLine2D,
     .drawLine = addLineNextCycle,
     .freeLine = [](objid lineId) -> void { freeLine(lineData, lineId); } ,
     .getGameObjNameForId = getGameObjectName,

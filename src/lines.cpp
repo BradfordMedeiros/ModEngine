@@ -3,9 +3,7 @@
 LineData createLines(){
   return LineData {
     .lineColors = {},
-    .text = {},
-    .traversalPositions = {},
-    .parentTraversalPositions = {},
+    .shapes = {},
   };
 }
 
@@ -96,15 +94,15 @@ void removeLinesByOwner(LineData& lineData, objid owner){
   }
   lineData.lineColors = lineColors;
 }
-void removeTempText(LineData& lineData){
-  std::vector<ShapeData> newText;
-  for (auto &text : lineData.text){
-    if (text.perma){
-      newText.push_back(text);
+void removeTempShapeData(LineData& lineData){
+  std::vector<ShapeData> newShapes;
+  for (auto &shape : lineData.shapes){
+    if (shape.perma){
+      newShapes.push_back(shape);
     }
   }
-  lineData.text.clear();
-  lineData.text = newText;
+  lineData.shapes.clear();
+  lineData.shapes = newShapes;
 }
 void removeTempLines(LineData& lineData){
   std::vector<LineByColor> lineColors;
@@ -151,7 +149,7 @@ void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigne
 }
 
 void addShapeData(LineData& lineData, ShapeData shapeData){
-  lineData.text.push_back(shapeData);
+  lineData.shapes.push_back(shapeData);
 }
 
 
@@ -169,13 +167,13 @@ float convertTextNdiFontsize(float height, float width, float fontsize, bool isn
 
 void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::string)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId){
   //std::cout << "text number: " << lineData.text.size() << std::endl;
-  for (auto &text : lineData.text){
-    if (textureIdSame(text.textureId, textureId)){
+  for (auto &shape : lineData.shapes){
+    if (textureIdSame(shape.textureId, textureId)){
       //std::cout << "drawing words: " << text.word << std::endl;
-      glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(text.tint));
-      if (text.selectionId.has_value()){
+      glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(shape.tint));
+      if (shape.selectionId.has_value()){
         //std::cout << "selection id value: " << text.selectionId.value() << std::endl;
-        auto id = text.selectionId.value();
+        auto id = shape.selectionId.value();
         auto color = getColorFromGameobject(id);
         Color colorTypeColor {
           .r = color.x,
@@ -192,17 +190,18 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::functi
         glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0)));
       }
 
-      auto textShapeData = std::get_if<TextShapeData>(&text.shapeData);
-      auto rectShapeData = std::get_if<RectShapeData>(&text.shapeData);
+      auto textShapeData = std::get_if<TextShapeData>(&shape.shapeData);
+      auto rectShapeData = std::get_if<RectShapeData>(&shape.shapeData);
+      auto lineShapeData = std::get_if<LineShapeData>(&shape.shapeData);
       if (textShapeData != NULL){
         modassert(textShapeData, "shape data is not text");
-        auto coords = convertTextNDICoords(textShapeData -> left, textShapeData ->  top, height, width, text.ndi);
-        auto adjustedFontSize = convertTextNdiFontsize(height, width, textShapeData -> fontSize, text.ndi);
+        auto coords = convertTextNDICoords(textShapeData -> left, textShapeData ->  top, height, width, shape.ndi);
+        auto adjustedFontSize = convertTextNdiFontsize(height, width, textShapeData -> fontSize, shape.ndi);
         FontFamily& fontFamily = fontFamilyByName(textShapeData -> fontFamily.has_value() ? textShapeData -> fontFamily.value() : "");
 
         drawWords(uiShaderProgram, fontFamily, textShapeData -> word, coords.x, coords.y, adjustedFontSize);          
       }else if (rectShapeData != NULL){
-        modassert(text.ndi, "non-ndi rect drawing not supported"); 
+        modassert(shape.ndi, "non-ndi rect drawing not supported"); 
         float centerXNdi = rectShapeData -> centerX;
         float centerYNdi = rectShapeData -> centerY;
         float widthNdi = rectShapeData -> width;
@@ -219,7 +218,22 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::functi
           }
         }
         drawMesh(unitXYRect, uiShaderProgram, textureId);
-      }else {
+      }else if (lineShapeData != NULL){
+        modassert(shape.ndi, "non-ndi line drawing not supported"); 
+        glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+
+        glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
+        glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+
+        std::vector<Line> lines;
+        lines.push_back(Line {
+          .fromPos = lineShapeData -> fromPos,
+          .toPos = lineShapeData -> toPos,
+        });
+        //glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(lineByColor.tint));
+        drawLines(lines, 2); 
+      }
+      else {
         modassert(false, "draw shape data type not yet implemented");
       }
 
@@ -227,22 +241,6 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::functi
   }
 }
 void disposeTempBufferedData(LineData& lineData){
-  removeTempText(lineData);
+  removeTempShapeData(lineData);
   removeTempLines(lineData);
-
-  lineData.traversalPositions.clear();
-  lineData.parentTraversalPositions.clear();
-}
-
-void addTraversalPosition(LineData& lineData, glm::mat4 modelMatrix, glm::mat4 parentMatrix){
-  lineData.traversalPositions.push_back(getTransformationFromMatrix(modelMatrix).position);
-  lineData.parentTraversalPositions.push_back(getTransformationFromMatrix(parentMatrix).position);
-}
-
-void drawTraversalPositions(LineData& lineData){
-  for (int i = 0; i < lineData.traversalPositions.size(); i++){
-    auto fromPos = lineData.traversalPositions.at(i);
-    auto toPos = lineData.parentTraversalPositions.at(i);
-    addLineToNextCycle(lineData, fromPos, toPos, false, 0, GREEN, std::nullopt);
-  }
 }

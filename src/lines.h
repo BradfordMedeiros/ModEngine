@@ -30,7 +30,12 @@ struct RectShapeData {
   std::optional<std::string> texture;
 };
 
-typedef std::variant<TextShapeData, RectShapeData> ShapeDataInfo;
+struct LineShapeData {
+  glm::vec3 fromPos;
+  glm::vec3 toPos;
+};
+
+typedef std::variant<TextShapeData, RectShapeData, LineShapeData> ShapeDataInfo;
 
 struct ShapeData  {
   ShapeDataInfo shapeData;
@@ -48,11 +53,7 @@ struct LineByColor {
 };
 struct LineData {
   std::vector<LineByColor> lineColors;;
-  std::vector<ShapeData> text;
-
-
-  std::vector<glm::vec3> traversalPositions;
-  std::vector<glm::vec3> parentTraversalPositions;
+  std::vector<ShapeData> shapes;
 };
 
 LineData createLines();
@@ -68,8 +69,5 @@ void addShapeData(LineData& lineData, ShapeData text);
 void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::string)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId);
 
 void disposeTempBufferedData(LineData& lineData);
-
-void addTraversalPosition(LineData& lineData, glm::mat4 modelMatrix, glm::mat4 parentMatrix);
-void drawTraversalPositions(LineData& lineData);
 
 #endif
