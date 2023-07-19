@@ -23,7 +23,6 @@ unsigned int uiShaderProgram;
 
 DefaultResources defaultResources {};
 
-bool showDebugInfo = false;
 std::string shaderFolderPath;
 std::string sqlDirectory = "./res/data/sql/";
 
@@ -480,7 +479,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model, int numC
 
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
-  if (showDebugInfo && numChunkingGridCells > 0){
+  if (state.showDebug && numChunkingGridCells > 0){
     float offset = ((numChunkingGridCells % 2) == 0) ? (dynamicLoading.mappingInfo.chunkSize / 2) : 0;
     drawGrid3D(numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
     glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.05, 1.f, 0.f, 1.f)));
@@ -513,7 +512,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model, int numC
   ////////////////
   
 
-  if (showDebugInfo){
+  if (state.showDebug){
     drawCoordinateSystem(100.f);
   }
   glDisable(GL_DEPTH_TEST);
@@ -553,7 +552,7 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor, bool showCursor){
       drawSpriteAround(uiShaderProgram, *crosshairSprite, location.x, location.y, 0.05, 0.05);
     }
   }
-  if (!showDebugInfo){
+  if (!state.showDebug){
     return;
   }
 
@@ -584,7 +583,7 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor, bool showCursor){
   float ndiX = 2 * (state.cursorLeft / (float)state.resolution.x) - 1.f;
   float ndiY = -2 * (state.cursorTop / (float)state.resolution.y) + 1.f;
 
-  drawTextNdi("cursor: (" + std::to_string(ndiX) + " | " + std::to_string(ndiY) + ") - " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.resolution.x) + "||" + std::to_string(state.resolution.y) + ")", uiXOffset, uiYOffset + + offsetPerLine * 5, state.fontsize);
+  drawTextNdi("cursor: (" + std::to_string(ndiX) + " | " + std::to_string(ndiY) + ") - " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.resolution.x) + "||" + std::to_string(state.resolution.y) + ")", uiXOffset, uiYOffset + offsetPerLine * 5, state.fontsize);
   
   std::string position = "n/a";
   std::string scale = "n/a";
@@ -625,7 +624,7 @@ void onClientMessage(std::string message){
 
 bool wroteCrash = false;
 void signalHandler(int signum) {
-  if (showDebugInfo && !wroteCrash){
+  if (state.showDebug && !wroteCrash){
     wroteCrash = true;
     auto crashFile = "./build/crash.info";
     std::cout << "wrote crash file: " << crashFile << std::endl;
@@ -1031,7 +1030,6 @@ int main(int argc, char* argv[]){
   auto textureFolderPath = result["texture"].as<std::string>();
   const std::string framebufferShaderPath = "./res/shaders/framebuffer";
   const std::string uiShaderPath = result["uishader"].as<std::string>();
-  showDebugInfo = result["info"].as<bool>();
   bool showCursor = result["cursor"].as<bool>();
   
   auto benchmarkFile = result["benchmark"].as<std::string>();
