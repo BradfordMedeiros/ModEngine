@@ -6,7 +6,7 @@
 # emitter =  0b  100000
 # nav     =  0b 1000000
 # soe more options in object_types.cpp renderObject
-editor:debug:true
+editor:debug:false
 #editor:debugmask:126  # this & the above number determines if the debug object should show
 
 editor:debugmask:8
@@ -67,7 +67,7 @@ window:icon:./res/textures/wood.jpg
 
 rendering:cull:disabled
 
-#editor:showgrid:true
+editor:showgrid:true
 editor:gridsize:40
 editor:snaptranslate-index:0
 tools:manipulator-mode:translate
@@ -96,3 +96,4 @@ debug:textoffset:0 -1.2
 editor:groupselection:true
 
 sound:volume:0.2
+sound:mute:false

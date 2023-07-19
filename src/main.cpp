@@ -1568,7 +1568,7 @@ int main(int argc, char* argv[]){
     );
     viewTransform = getCameraTransform();
 
-    setVolume(state.volume);
+    setVolume(state.muteSound ? 0.f : state.volume);
     
     view = renderView(viewTransform.position, viewTransform.rotation);
     glViewport(0, 0, state.resolution.x, state.resolution.y);

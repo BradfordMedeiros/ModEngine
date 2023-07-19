@@ -328,6 +328,7 @@ std::vector<ObjectStateMapping> mapping = {
   simpleVec2Serializer("debug", "textoffset", offsetof(engineState, infoTextOffset), std::nullopt),
   simpleBoolSerializer("editor", "groupselection", offsetof(engineState, groupSelection)),
   simpleFloatSerializer("sound", "volume", offsetof(engineState, volume)),
+  simpleBoolSerializer("sound", "mute", offsetof(engineState, muteSound)),
   simpleBoolSerializer("editor", "disableinput", offsetof(engineState, disableInput)),
 };  
 
@@ -461,6 +462,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .useYAxis = true,
     .forceSelectIndex = 0,
     .volume = 1.f,
+    .muteSound = false,
     .disableInput = false,
     .escapeQuits = false,
 	};

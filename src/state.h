@@ -158,6 +158,8 @@ struct engineState {
   objid forceSelectIndex;
 
   float volume;
+  bool muteSound;
+  
   bool disableInput;
   bool escapeQuits;
 };
