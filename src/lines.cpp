@@ -170,6 +170,7 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::functi
   for (auto &shape : lineData.shapes){
     if (textureIdSame(shape.textureId, textureId)){
       //std::cout << "drawing words: " << text.word << std::endl;
+      glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
       glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(shape.tint));
       if (shape.selectionId.has_value()){
         //std::cout << "selection id value: " << text.selectionId.value() << std::endl;
@@ -209,6 +210,7 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::functi
 
         glm::mat4 scaledAndTranslated = glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(centerXNdi, centerYNdi, 0.f)), glm::vec3(widthNdi, heightNdi, 1.f));
         glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(scaledAndTranslated));
+        glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
 
         unsigned int textureId = -1;
         if (rectShapeData -> texture.has_value()){

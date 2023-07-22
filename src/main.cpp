@@ -468,7 +468,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model, int numC
   // this list is incomplete, it probably would be better to just use a separate shader maybe too
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projview"), 1, GL_FALSE, glm::value_ptr(projection * view));    
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
-  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.05, 1.f, 0.f, 1.f)));
+  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.05, 1.f, 0.f, 0.1f)));
   glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);    
   glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), 0);  
   glUniform1i(glGetUniformLocation(shaderProgram, "hasDiffuseTexture"), false);
@@ -482,7 +482,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model, int numC
   if (state.showDebug && numChunkingGridCells > 0){
     float offset = ((numChunkingGridCells % 2) == 0) ? (dynamicLoading.mappingInfo.chunkSize / 2) : 0;
     drawGrid3D(numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
-    glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.05, 1.f, 0.f, 1.f)));
+    glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.05, 1.f, 0.f, 0.1f)));
   }
 
   //////////////////
@@ -497,7 +497,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model, int numC
           if (state.manipulatorAxis == XAXIS){
             drawGridXY(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z);  
           }else if (state.manipulatorAxis == YAXIS){
-            drawGridXY(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z);  
+            drawGridXZ(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z);  
           }else if (state.manipulatorAxis == ZAXIS){
             drawGridYZ(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z);  
           }else{
