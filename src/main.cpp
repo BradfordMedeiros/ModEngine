@@ -1674,45 +1674,6 @@ int main(int argc, char* argv[]){
       }
     }
 
-    auto ndiCoords = ndiCoord();
-    if (state.editor.activeObj != 0){
-      applyUICoord(
-        world.objectMapping,
-        [&adjustedCoords](glm::vec2 coord) -> glm::vec2 {
-          auto pixelCoord = ndiToPixelCoord(coord, state.resolution);
-          auto uv = getUVCoord(pixelCoord.x, pixelCoord.y);
-          //std::cout << "get uv coord: " << print(coord) << " - " << print(pixelCoord) << " adjusted: " << print(adjustedCoords) <<  std::endl;
-          return glm::vec2(uv.x, uv.y);
-        },
-        [](glm::vec2 coord) -> objid {
-          auto pixelCoord = ndiToPixelCoord(coord, state.resolution);
-          auto id = getIdFromPixelCoord(pixelCoord.x, pixelCoord.y);
-          if (id < 0){
-            return -1;
-          }
-          return id;
-        },
-        [](objid id) -> glm::quat {
-          return getGameObjectRotation(id, true);
-        },
-        [](std::string topic, std::string value) -> void { 
-          StringAttribute message {
-            .strTopic = topic,
-            .strValue = value,
-          };
-          channelMessages.push(message);
-        }, 
-        state.editor.activeObj,
-        hoveredId < 0 ? -1 : hoveredId,
-        selectItemCalledThisFrame,
-        uvCoord.x, 
-        uvCoord.y,
-        ndiCoords.x, 
-        ndiCoords.y
-      );
-    }
-
-
     onManipulatorUpdate(
       state.manipulatorState, 
       projectionFromLayer(layers.at(0)),

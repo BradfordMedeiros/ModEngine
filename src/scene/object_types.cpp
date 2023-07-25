@@ -155,15 +155,6 @@ std::vector<ObjectType> objTypes = {
     .removeObject = removeDoNothing,
   },
   ObjectType {
-    .name = "slider",
-    .variantType = getVariantIndex(GameObjectUISlider{}),
-    .createObj = createUISlider,
-    .objectAttributes = convertElementValue<GameObjectUISlider>(getUISliderAttributes), 
-    .setAttributes = convertElementSetValue<GameObjectUISlider>(setUISliderAttributes),
-    .serialize = convertSerialize<GameObjectUISlider>(serializeSlider),
-    .removeObject = removeDoNothing,
-  },
-  ObjectType {
     .name = "heightmap",
     .variantType = getVariantIndex(GameObjectHeightmap{}),
     .createObj = createHeightmap,
@@ -474,22 +465,6 @@ int renderObject(
     return uiObj -> common.mesh.numTriangles;   
   }
 
-  auto uiSliderObj = std::get_if<GameObjectUISlider>(&toRender);
-  if (uiSliderObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), 1 - uiSliderObj -> percentage);  
-    drawMesh(uiSliderObj -> common.mesh, shaderProgram, uiSliderObj -> texture.textureId, uiSliderObj -> opacityTexture.textureId);
-    if (uiSliderObj -> showBackpanel){
-      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, glm::vec3(0.f, 0.f, -0.001f)))); // nudge so always renders behind
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(uiSliderObj -> backpanelTint));
-      drawMesh(uiSliderObj -> common.mesh, shaderProgram, -1, -1);
-    }
-    return uiSliderObj -> common.mesh.numTriangles;  
-  }
-
   auto textObj = std::get_if<GameObjectUIText>(&toRender);
   if (textObj != NULL){
     glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
@@ -733,68 +708,6 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::functi
     }
   }
 }
-
-void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<void(std::string)> applyText){
-  /*for (auto &[uiId, obj] : mapping){
-    auto uiControl = std::get_if<GameObjectUI>(&obj);
-    if (uiControl != NULL && uiControl -> isFocused){
-      auto oldText = uiControl -> text;
-      uiControl -> text = oldText + key;
-      applyText(uiControl -> text);
-    }
-  }*/
-}
-
-// probably need to figure out which one is being held down 
-// then build vec1 when select down
-// then get vec2 and vec3 diff 
-// compare to bounding width, and convert to percentage
-
-void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<glm::vec2(glm::vec2)> getUVCoord, std::function<objid(glm::vec2)> getIdByNdi, std::function<glm::quat(objid)> getRotation, std::function<void(std::string, std::string)> onSliderPercentage, objid id, objid hoveredId, bool selectItemCalled, float uvx, float uvy, float ndiX, float ndiY){
-  //std::cout << "apply uv coord: " << id << ", " << hoveredId << ", " << selectItemCalled << std::endl;
-  //std::cout << "apply uv coord: uvx << " " << uvy << ", " << ndiX << ", " << ndiY << std::endl;
-
-  for (auto &[uiId, obj] : mapping){
-    auto uiControl = std::get_if<GameObjectUISlider>(&obj);
-    if (uiControl != NULL && uiId == id){
-      // check if had initial press
-      if (selectItemCalled){
-        uiControl -> uvCoord = glm::vec2(ndiX, ndiY);  // should be dotproduct between the forward vector and ndiVector thing
-        return;
-      }
-
-      if (/*ndiId != id*/ hoveredId != id){ 
-        auto rotation = getRotation(id);
-        auto diffNdi = glm::vec2(ndiX, ndiY) - uiControl -> uvCoord.value();
-        auto diffNdiRotated = glm::inverse(rotation) * glm::vec3(diffNdi.x, diffNdi.y, 0.f);;
-        auto newNdi3 = rotation * glm::vec3(diffNdiRotated.x, 0.f, 0.f); // should have better projection fn
-        auto newNdi = glm::vec2(uiControl -> uvCoord.value().x + newNdi3.x, uiControl -> uvCoord.value().y + newNdi3.y);
-        auto ndiId = getIdByNdi(newNdi);
-        if (ndiId == id){
-          //std::cout << "should project uv coord now" << std::endl;
-          auto uvCoord = getUVCoord(newNdi);
-          uiControl -> percentage = uvCoord.x;
-        }else{
-          //std::cout << "no project uv available" << std::endl;
-          auto right = rotation * glm::vec3(1.f, 0.f, 0.f);
-          if (glm::dot(newNdi3, right) > 0){ // this is wrong, should take into account rotation
-            uiControl -> percentage = 1;
-          }else{
-            uiControl -> percentage = 0;
-          }          
-        }  
-      }else {
-        //std::cout << "uv coord default" << std::endl;   // if projection fn is better this can go away
-        auto uvCoord = getUVCoord(glm::vec2(ndiX, ndiY));
-        uiControl -> percentage = uvCoord.x;
-      }
-      if (uiControl -> onSlide != ""){
-        onSliderPercentage(uiControl -> onSlide, std::to_string(id));
-      }
-    }
-  }
-}
-
 
 void updatePosition(std::map<objid, GameObjectObj>& mapping, objid id, glm::vec3 position, Transformation& viewTransform){
   auto object = mapping.at(id); 
