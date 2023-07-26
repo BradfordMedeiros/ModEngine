@@ -146,15 +146,6 @@ std::vector<ObjectType> objTypes = {
     .removeObject = removeDoNothing,
   },
   ObjectType {
-    .name = "ui",
-    .variantType = getVariantIndex(GameObjectUIButton{}),
-    .createObj = createUIButton,
-    .objectAttributes = convertElementValue<GameObjectUIButton>(getUIButtonAttributes),
-    .setAttributes = convertElementSetValue<GameObjectUIButton>(setUIButtonAttributes),
-    .serialize = convertSerialize<GameObjectUIButton>(serializeButton),
-    .removeObject = removeDoNothing,
-  },
-  ObjectType {
     .name = "heightmap",
     .variantType = getVariantIndex(GameObjectHeightmap{}),
     .createObj = createHeightmap,
@@ -449,22 +440,6 @@ int renderObject(
     return numTriangles;
   }
 
-  auto uiObj = std::get_if<GameObjectUIButton>(&toRender);
-  if (uiObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    if (uiObj -> hasOnTint && uiObj -> toggleOn){
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(uiObj -> onTint));
-    }else{
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(uiObj -> tint));
-    }
-    auto textureOverloadId = uiObj -> toggleOn ? uiObj -> onTexture.textureId : uiObj -> offTexture.textureId;
-    drawMesh(uiObj -> common.mesh, shaderProgram, textureOverloadId); 
-    return uiObj -> common.mesh.numTriangles;   
-  }
-
   auto textObj = std::get_if<GameObjectUIText>(&toRender);
   if (textObj != NULL){
     glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
@@ -673,40 +648,6 @@ std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, obj
     std::cout << "WARNING: " << id << " is mesh obj and does not have a mesh" << std::endl;
   }
   return std::nullopt;
-}
-
-// This should be pulled out into standardized fn hooks
-void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string, std::string)> sendNotify){
-  for (auto &[uiId, obj] : mapping){
-    auto uiControl = std::get_if<GameObjectUIButton>(&obj);
-    if (uiControl != NULL){
-      if (id == uiId && uiControl -> canToggle){
-        uiControl -> toggleOn = !uiControl -> toggleOn;
-        if (uiControl -> toggleOn && uiControl -> onToggleOn != ""){
-          sendNotify(uiControl -> onToggleOn, std::to_string(id));
-        }else if (uiControl -> onToggleOff != ""){
-          sendNotify(uiControl -> onToggleOff, std::to_string(id));
-        }
-      }
-
-      if (uiControl -> common.isFocused && id != uiId){
-
-        std::cout << "id: " << id << " is now not focused" << std::endl;
-        uiControl -> common.isFocused = false;
-        if (uiControl -> common.onBlur != ""){
-          sendNotify(uiControl -> common.onBlur, std::string(""));
-        }
-      }
-
-      if (!uiControl -> common.isFocused && id == uiId){
-        std::cout << "id: " << id << " is now focused" << std::endl;
-        uiControl -> common.isFocused = true;
-        if (uiControl -> common.onFocus != ""){
-          sendNotify(uiControl -> common.onFocus, std::string(""));
-        }
-      }
-    }
-  }
 }
 
 void updatePosition(std::map<objid, GameObjectObj>& mapping, objid id, glm::vec3 position, Transformation& viewTransform){

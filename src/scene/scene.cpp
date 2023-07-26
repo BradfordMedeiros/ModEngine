@@ -79,11 +79,6 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
     boundInfo = navmeshObj -> mesh.boundInfo;
   }
 
-  auto uiButtonObj = std::get_if<GameObjectUIButton>(&gameObjV);
-  if (uiButtonObj != NULL){
-    boundInfo = uiButtonObj -> common.mesh.boundInfo;
-  }
-
   auto layoutObj = std::get_if<GameObjectUILayout>(&gameObjV);
   if (layoutObj != NULL){
     boundInfo = layoutObj -> boundInfo;
@@ -559,7 +554,6 @@ extern std::vector<AutoSerialize> navconnAutoserializer;
 extern std::vector<AutoSerialize> uiLayoutAutoserializer;
 extern std::vector<AutoSerialize> textAutoserializer;
 extern std::vector<AutoSerialize> geoAutoserializer;
-extern std::vector<AutoSerialize> uiButtonAutoserializer;
 extern std::vector<AutoSerialize> prefabAutoserializer;
 std::set<std::string> getObjautoserializerFields(std::string& name){
   auto type = getType(name);
@@ -589,8 +583,6 @@ std::set<std::string> getObjautoserializerFields(std::string& name){
     return serializerFieldNames(textAutoserializer);
   }else if (type == "layout"){
     return serializerFieldNames(uiLayoutAutoserializer);
-  }else if (type == "ui"){
-    return serializerFieldNames(uiButtonAutoserializer);
   }else if (type == "geo"){
     return serializerFieldNames(geoAutoserializer);
   }else if (type == "custom"){

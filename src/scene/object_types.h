@@ -16,7 +16,6 @@
 #include "./objtypes/obj_sound.h"
 #include "./objtypes/obj_text.h"
 #include "./objtypes/obj_uilayout.h"
-#include "./objtypes/obj_uibutton.h"
 #include "./objtypes/obj_navconn.h"
 #include "./objtypes/obj_navmesh.h"
 #include "./objtypes/obj_heightmap.h"
@@ -50,7 +49,6 @@ typedef std::variant<
   GameObjectHeightmap,
   GameObjectNavmesh,
   GameObjectNavConns,
-  GameObjectUIButton,
   GameObjectUIText,
   GameObjectUILayout,
   GameObjectGeo,
@@ -121,11 +119,6 @@ static Field navconnectionField {
   .type = "navconnection",
 };
 
-static Field uiButtonField {
-  .prefix = '*',
-  .type = "ui",
-};
-
 static Field uiTextField {
   .prefix = ')',
   .type = "text",
@@ -164,7 +157,6 @@ static std::vector fields = {
   heightmap, 
   navmeshField, 
   navconnectionField, 
-  uiButtonField, 
   uiTextField,
   uiLayoutField,
   geoField,
@@ -251,7 +243,6 @@ std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, o
 std::map<objid, GameObjectHeightmap*> getHeightmaps(std::map<objid, GameObjectObj>& mapping);
 bool isNavmesh(std::map<objid, GameObjectObj>& mapping, objid id);
 std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id);
-void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string, std::string)> sendNotify);
 void updatePosition(std::map<objid, GameObjectObj>& mapping, objid, glm::vec3 position, Transformation& viewTransform);
 void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position);
 void stopSoundState(std::map<objid, GameObjectObj>& mapping, objid id);

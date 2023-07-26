@@ -206,7 +206,6 @@ bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCu
     return shouldCallBindingOnObjectSelected;
   }
   textureToPaint = textureForId(world, selectedId);
-  applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);
   shouldCallBindingOnObjectSelected = true;
 
   if (layerSelectIndex >= 0){
