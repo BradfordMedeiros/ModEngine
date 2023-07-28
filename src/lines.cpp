@@ -225,7 +225,6 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::functi
         glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
 
         glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
-        glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
 
         std::vector<Line> lines;
         lines.push_back(Line {
