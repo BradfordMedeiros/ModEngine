@@ -79,11 +79,6 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
     boundInfo = navmeshObj -> mesh.boundInfo;
   }
 
-  auto layoutObj = std::get_if<GameObjectUILayout>(&gameObjV);
-  if (layoutObj != NULL){
-    boundInfo = layoutObj -> boundInfo;
-  }
-
   bool hasOffset = false;
   auto textObj = std::get_if<GameObjectUIText>(&gameObjV);
   if (textObj != NULL){
@@ -551,7 +546,6 @@ extern std::vector<AutoSerialize> emitterAutoserializer;
 extern std::vector<AutoSerialize> heightmapAutoserializer;
 extern std::vector<AutoSerialize> navmeshAutoserializer;
 extern std::vector<AutoSerialize> navconnAutoserializer;
-extern std::vector<AutoSerialize> uiLayoutAutoserializer;
 extern std::vector<AutoSerialize> textAutoserializer;
 extern std::vector<AutoSerialize> geoAutoserializer;
 extern std::vector<AutoSerialize> prefabAutoserializer;
@@ -581,8 +575,6 @@ std::set<std::string> getObjautoserializerFields(std::string& name){
     return serializerFieldNames(navconnAutoserializer);
   }else if (type == "text"){
     return serializerFieldNames(textAutoserializer);
-  }else if (type == "layout"){
-    return serializerFieldNames(uiLayoutAutoserializer);
   }else if (type == "geo"){
     return serializerFieldNames(geoAutoserializer);
   }else if (type == "custom"){

@@ -202,8 +202,8 @@ void changePopover(EditorData& editorData, std::string elementName, std::string 
   editorData.currOption = uiOption;
 
   auto dialogId = mainApi -> getGameObjectByName("(dialog", sceneId, true);
-  mainApi -> enforceLayout(dialogId.value()); // wait....why need two passed?
-  mainApi -> enforceLayout(dialogId.value());
+  //mainApi -> enforceLayout(dialogId.value()); // wait....why need two passed?
+  //mainApi -> enforceLayout(dialogId.value());
 }
 
 
@@ -348,9 +348,7 @@ objid loadSidePanel(std::string scene, std::optional<glm::vec3> pos, bool moveab
 
   auto sceneId = mainApi -> loadScene(scene, additionalTokens, std::nullopt, tags);
   auto testPanelId = mainApi -> getGameObjectByName("(test_panel", sceneId, false);
-  if (testPanelId.has_value()){
-    mainApi -> enforceLayout(testPanelId.value());
-  }
+
   return sceneId;
 }
 
@@ -388,7 +386,7 @@ void changeSidepanel(EditorData& editorData, int snappingIndex, std::string scen
   auto testPanelId = mainApi -> getGameObjectByName("(test_panel", sidePanelSceneId, false);
   bool didUpdate = updateSnapPos(editorData, snappingIndex, sidePanelSceneId);
   modassert(didUpdate, "could not load sidepanel, was occupied");
-  mainApi -> enforceLayout(testPanelId.value());
+  //mainApi -> enforceLayout(testPanelId.value());
   doPrintSnapPos(editorData);
 }
 
@@ -538,13 +536,13 @@ void maybeHandleSidePanelDrop(EditorData& editorData, objid id){
     if (didUpdate){
       auto snappingPos = snappingPositions.at(snappingIndex).snappingPosition;
       mainApi -> setGameObjectPosition(id, glm::vec3(snappingPos.x, pos.y, pos.z), true);
-      mainApi -> enforceLayout(id);
+      //mainApi -> enforceLayout(id);
     }else{
       auto currSnapIndex = getCurrSnapForScene(editorData, sceneId);
       if (currSnapIndex.has_value()){
         auto snappingPos = snappingPositions.at(currSnapIndex.value()).snappingPosition;
         mainApi -> setGameObjectPosition(id, glm::vec3(snappingPos.x, pos.y, pos.z), true);
-        mainApi -> enforceLayout(id);
+        //mainApi -> enforceLayout(id);
       }
     }
   }
@@ -587,9 +585,9 @@ CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
     auto row2Id = mainApi -> getGameObjectByName("(row2", sceneId, false);
     auto row3Id = mainApi -> getGameObjectByName("(row3", sceneId, false);
     auto menubarId = mainApi -> getGameObjectByName("(menubar", sceneId, false);
-    mainApi -> enforceLayout(row2Id.value());
-    mainApi -> enforceLayout(row3Id.value());
-    mainApi -> enforceLayout(menubarId.value());
+    //mainApi -> enforceLayout(row2Id.value());
+    //mainApi -> enforceLayout(row3Id.value());
+    //mainApi -> enforceLayout(menubarId.value());
     return editorData;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {

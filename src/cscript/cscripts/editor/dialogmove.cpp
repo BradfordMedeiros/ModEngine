@@ -52,7 +52,7 @@ CScriptBinding cscriptDialogMoveBinding(CustomApiBindings& api){
  		dialogMove -> gridSize = args.find("gridsize") != args.end() ? std::optional<float>(std::atof(args.at("gridsize").c_str())) : std::nullopt;
  		dialogMove -> gridOffset = args.find("gridoffset") != args.end() ? std::optional<float>(std::atof(args.at("gridoffset").c_str())) : std::nullopt;
 
-		mainApi -> enforceLayout(id);
+		//mainApi -> enforceLayout(id);
     return dialogMove;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
@@ -100,7 +100,7 @@ CScriptBinding cscriptDialogMoveBinding(CustomApiBindings& api){
   			position = calculateSnapToGrid(position, dialogMove -> gridSize.value(), dialogMove -> gridOffset.has_value() ? dialogMove -> gridOffset.value() : 0);
   		}
       mainApi -> setGameObjectPosition(dialogMove -> objSelected.value(), position, true);
-  		mainApi -> enforceLayout(id);
+  		//mainApi -> enforceLayout(id);
   	}
   };
 

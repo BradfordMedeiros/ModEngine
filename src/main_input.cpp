@@ -958,16 +958,6 @@ std::vector<InputDispatch> inputFns = {
       //std::cout << "draw points: " << state.drawPoints << std::endl;
     }
   },*/
-  InputDispatch{
-    .sourceKey = ';',  
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = []() -> void {
-      std::cout << "enforcing layouts" << std::endl;
-      enforceAllLayouts(world);
-    }
-  },
 
   InputDispatch{
     .sourceKey = 322,  

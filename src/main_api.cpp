@@ -983,10 +983,6 @@ void removeLocks(objid owner){
   }
 }
 
-void enforceLayout(objid layoutId){
-  enforceLayout(world, layoutId);
-}
-
 void takeScreenshot(std::string filepath){
   state.takeScreenshot = true;
   state.screenshotPath = filepath;

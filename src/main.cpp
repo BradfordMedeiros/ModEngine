@@ -1270,7 +1270,6 @@ int main(int argc, char* argv[]){
     .setWorldState = setWorldState,
     .getWorldState = getWorldState,
     .setLayerState = setLayerState,
-    .enforceLayout = enforceLayout,
     .createTexture = createTexture,
     .freeTexture = freeTexture,
     .clearTexture = clearTexture,

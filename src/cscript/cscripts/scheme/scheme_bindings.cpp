@@ -845,12 +845,6 @@ SCM scmSetLayerState(SCM value){
   return SCM_UNSPECIFIED;
 }
 
-void (*_enforceLayout)(objid);
-SCM scmEnforceLayout(SCM value){
-  _enforceLayout(toUnsignedInt(value));
-  return SCM_UNSPECIFIED;
-}
-
 unsigned int  (*_createTexture)(std::string name, unsigned int width, unsigned int height, objid ownerId);
 SCM scmCreateTexture(SCM name, SCM width, SCM height){
   auto textureId = _createTexture(scm_to_locale_string(name), toUnsignedInt(width), toUnsignedInt(height), currentModuleId());
@@ -1374,8 +1368,6 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
 
   scm_c_define_gsubr("set-layer", 1, 0, 0, (void*)scmSetLayerState);
 
-  scm_c_define_gsubr("enforce-layout", 1, 0, 0, (void*)scmEnforceLayout);
-
   scm_c_define_gsubr("create-texture", 3, 0, 0, (void*)scmCreateTexture);
   scm_c_define_gsubr("free-texture", 1, 0, 0, (void*)scmFreeTexture);
   scm_c_define_gsubr("clear-texture", 1, 3, 0, (void*)scmClearTexture);
@@ -1502,7 +1494,6 @@ void createStaticSchemeBindings(
   void (*setWorldState)(std::vector<ObjectValue> values),
   std::vector<ObjectValue> (*getWorldState)(),
   void (*setLayerState)(std::vector<StrValues> values),
-  void (*enforceLayout)(objid layoutId),
   unsigned int (*createTexture)(std::string name, unsigned int width, unsigned int height, objid ownerId),
   void (*freeTexture)(std::string name, objid ownerId),
   void (*clearTexture)(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color, std::optional<std::string> texture),
@@ -1607,7 +1598,6 @@ void createStaticSchemeBindings(
   _setWorldState = setWorldState;
   _getWorldState = getWorldState;
   _setLayerState = setLayerState;
-  _enforceLayout = enforceLayout;
 
   _createTexture = createTexture;
   _freeTexture = freeTexture;

@@ -423,10 +423,6 @@ void refillStore(EditorDetails& details, objid gameobj){
    populateSqlData(details);
 }
 
-void enforceLayouts(EditorDetails& details){
-  auto id = mainApi -> getGameObjectByName("(test_panel", details.editorSceneId, true).value();
-  mainApi -> enforceLayout(id);
-}
 void populateData(EditorDetails& details){
   for (auto &bindingElementId : mainApi -> getObjectsByAttr("details-binding", std::nullopt, std::nullopt)){
     auto attr = mainApi -> getGameObjectAttr(bindingElementId);
@@ -443,7 +439,6 @@ void populateData(EditorDetails& details){
     auto bindingOn = getAttr(attr, "details-binding-on");
     updateToggleBinding(details, bindingElementId, detailBinding.value(), optionalInt(detailBindingIndex), bindingOn);
   }
-  enforceLayouts(details);
 }
 
 

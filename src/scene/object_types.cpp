@@ -128,15 +128,6 @@ std::vector<ObjectType> objTypes = {
     .removeObject = removeDoNothing,
   },
   ObjectType {
-    .name = "layout",
-    .variantType = getVariantIndex(GameObjectUILayout{}),
-    .createObj = createUILayout,
-    .objectAttributes = convertElementValue<GameObjectUILayout>(getUILayoutAttributes),
-    .setAttributes = convertElementSetValue<GameObjectUILayout>(setUILayoutAttributes),
-    .serialize = convertSerialize<GameObjectUILayout>(serializeLayout),
-    .removeObject = removeDoNothing,
-  },
-  ObjectType {
     .name = "navconnection",
     .variantType = getVariantIndex(GameObjectNavConns{}),
     .createObj = createNavConns,
@@ -450,44 +441,6 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(textObj -> tint));
     return drawWord(shaderProgram, id, textObj -> value, 1000.f /* 1000.f => -1,1 range for each quad */, textObj -> deltaOffset, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor, textObj -> fontFamily, selectionMode);
-  }
-
-  auto layoutObj = std::get_if<GameObjectUILayout>(&toRender);
-  if (layoutObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
-    glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
-
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(layoutObj -> texture.textureoffset));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(layoutObj -> texture.texturetiling));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(layoutObj -> texture.texturesize));
-
-    int layoutVertexCount = 0;
-    if (showDebugMask & 0b10000000){
-      layoutVertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
-    }
-    if (layoutObj -> showBackpanel){
-      auto position = getPosition(id, true);
-      bool hasBorder = layoutObj -> border.hasBorder;
-      auto borderSize = layoutObj -> border.borderSize;
-      glm::vec3 minusScale = hasBorder ? glm::vec3(borderSize, borderSize, borderSize) : glm::vec3(0.f, 0.f, 0.f);  
-      auto innerScale = layoutBackpanelModelTransform(*layoutObj, minusScale, position);
-      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(innerScale));
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(layoutObj -> tint));
-      drawMesh(*defaultMeshes.unitXYRect, shaderProgram, layoutObj -> texture.loadingInfo.textureId, -1, drawPoints);   
-      if (hasBorder){
-        auto outerScale = layoutBackpanelModelTransform(*layoutObj, glm::vec3(0.f, 0.f, 0.f), position);
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(outerScale));
-        glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(layoutObj -> border.borderColor));
-        drawMesh(*defaultMeshes.unitXYRect, shaderProgram, -1, -1, drawPoints);      
-      }
- 
-      layoutVertexCount += defaultMeshes.unitXYRect -> numTriangles;  // todo get vertex count from the drawmesh calls
-      if (hasBorder){
-        layoutVertexCount += defaultMeshes.unitXYRect -> numTriangles;
-      }
-    }
-    return layoutVertexCount;
   }
 
   auto geoObj = std::get_if<GameObjectGeo>(&toRender);

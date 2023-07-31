@@ -15,7 +15,6 @@
 #include "./objtypes/obj_light.h"
 #include "./objtypes/obj_sound.h"
 #include "./objtypes/obj_text.h"
-#include "./objtypes/obj_uilayout.h"
 #include "./objtypes/obj_navconn.h"
 #include "./objtypes/obj_navmesh.h"
 #include "./objtypes/obj_heightmap.h"
@@ -50,7 +49,6 @@ typedef std::variant<
   GameObjectNavmesh,
   GameObjectNavConns,
   GameObjectUIText,
-  GameObjectUILayout,
   GameObjectGeo,
   GameObjectNil,
   GameObjectPrefab
@@ -124,11 +122,6 @@ static Field uiTextField {
   .type = "text",
 };
 
-static Field uiLayoutField {
-  .prefix = '(',
-  .type = "layout",
-};
-
 static Field geoField {
   .prefix = '<',
   .type = "geo",
@@ -158,7 +151,6 @@ static std::vector fields = {
   navmeshField, 
   navconnectionField, 
   uiTextField,
-  uiLayoutField,
   geoField,
   customField,
   prefabField,

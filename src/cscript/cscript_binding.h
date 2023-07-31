@@ -100,7 +100,6 @@ struct CustomApiBindings {
   void (*setWorldState)(std::vector<ObjectValue> values);
   std::vector<ObjectValue> (*getWorldState)();
   void (*setLayerState)(std::vector<StrValues> values);
-  void (*enforceLayout)(objid layoutId);
 
   unsigned int  (*createTexture)(std::string name, unsigned int width, unsigned int height, objid ownerId);
   void (*freeTexture)(std::string name, objid ownerId);
