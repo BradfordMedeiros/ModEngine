@@ -494,7 +494,7 @@ std::vector<std::string> listResources(std::string resourceType){
   if (resourceType == "sounds"){
     return listSoundFiles();
   }else if (resourceType == "textures"){
-     return listSceneFiles();
+    return listTextures();
   }else if (resourceType == "models"){
     return listModels();
   }else if (resourceType == "heightmaps"){
