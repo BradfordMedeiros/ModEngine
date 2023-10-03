@@ -319,6 +319,25 @@ glm::vec4 parseVec4(std::string positionRaw){
   in >> x >> y >> z >> w;
   return glm::vec4(x, y, z, w);  
 }
+bool maybeParseVec2(std::string positionRaw, glm::vec2& _vec){
+  auto parts = filterWhitespace(split(positionRaw, ' '));
+  if (parts.size() != 3){
+    return false;
+  }
+  float vecParts[2] = { 0, 0 };
+  for (int i = 0; i < 2; i++){
+    float number;
+    bool isFloat = maybeParseFloat(parts.at(i), number);
+    if (!isFloat){
+      return false;
+    }
+    vecParts[i] = number;
+  }
+  _vec.x = vecParts[0];
+  _vec.y = vecParts[1];
+  return true;
+}
+
 bool maybeParseVec(std::string positionRaw, glm::vec3& _vec){
   auto parts = filterWhitespace(split(positionRaw, ' '));
   if (parts.size() != 3){

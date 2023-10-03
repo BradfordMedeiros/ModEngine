@@ -70,6 +70,8 @@ glm::vec4 parseVec4(std::string positionRaw);
 bool maybeParseVec(std::string positionRaw, glm::vec3& _vec);
 bool maybeParseVec4(std::string positionRaw, glm::vec4& _vec);
 glm::vec2 parseVec2(std::string positionRaw);
+bool maybeParseVec2(std::string positionRaw, glm::vec2& _vec);
+
 std::vector<float> parseFloatVec(std::string value);
 bool maybeParseBool(std::string value, bool* _value);
 bool maybeParseFloat(std::string value, float& _number);
