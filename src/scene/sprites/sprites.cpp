@@ -304,7 +304,7 @@ DrawingInfoValues computeDrawingInfo(FontFamily& fontFamily, std::string word, f
       };
       drawingInfo.push_back(info);
     }else{
-      std::cout << "missed character: " << (int)character << std::endl;
+      std::cout << "missed character: " << (int)character << ", char = " << character << ", in = " << word << std::endl;
       modassert(false, "draw sprite font mesh not found");
     }
 
