@@ -39,7 +39,6 @@ void printFrameInfo(FrameInfo& frameInfo){
 
 CScriptBinding cscriptCreatePerfVisualizeBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("native/perfviz", api);
-
   //binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
   //	PerfVisualize* perfVisualize = new PerfVisualize;
   //  return perfVisualize;

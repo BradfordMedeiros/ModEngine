@@ -15,6 +15,7 @@
 #ifdef ADDITIONAL_SRC_HEADER
   #include STR(ADDITIONAL_SRC_HEADER)
 #endif
+CustomApiBindings* mainApi;
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -1294,15 +1295,10 @@ int main(int argc, char* argv[]){
   };
 
 
+  mainApi = &pluginApi;
+
   std::vector<CScriptBinding> pluginBindings = { 
     sampleBindingPlugin(pluginApi), 
-    cscriptEditorBinding(pluginApi),
-    cscriptDialogMoveBinding(pluginApi),
-    cscriptScenegraphBinding(pluginApi),
-    cscriptExplorerLoaderBinding(pluginApi),
-    cscriptExploreBinding(pluginApi),
-    cscriptDetailsBinding(pluginApi),
-    cscriptAlertsBinding(pluginApi),
     cscriptCreatePerformanceGraphBinding(pluginApi),
     cscriptCreatePerfVisualizeBinding(pluginApi),
   };
