@@ -1,5 +1,4 @@
 #include <iostream>
-#include <libguile.h>
 #include "./sql.h"
 #include "./sqlparse.h"
 

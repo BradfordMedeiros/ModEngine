@@ -72,10 +72,6 @@ std::vector<TestCase> tests = {
     .test = modlayerPathTest,
   },
   TestCase {
-    .name = "optionalValueDataTest",
-    .test = optionalValueDataTest,
-  },
-  TestCase {
     .name = "planeIntersectionTest",
     .test = planeIntersectionTest,
   },

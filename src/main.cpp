@@ -7,7 +7,6 @@
 #include "./main_test.h"
 #include "./main_util.h"
 #include "./cscript/cscripts/cscript_sample.h"
-#include "./cscript/cscripts/cscript_scheme.h"
 #include "./cscript/cscripts/editor/editor_scripts.h"
 #include "./scene/common/textures_gen.h"
 #include "./sql/shell.h"
@@ -1297,7 +1296,6 @@ int main(int argc, char* argv[]){
 
   std::vector<CScriptBinding> pluginBindings = { 
     sampleBindingPlugin(pluginApi), 
-    cscriptSchemeBinding(pluginApi, interface.modlayerPath),
     cscriptEditorBinding(pluginApi),
     cscriptDialogMoveBinding(pluginApi),
     cscriptScenegraphBinding(pluginApi),
