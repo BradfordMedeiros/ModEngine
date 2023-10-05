@@ -871,6 +871,9 @@ ManipulatorTools tools {
 };
 
 
+// Might be nice to have batched version of this so I can do it, say, by reading the texture object directly
+// basically find a way to bypass a draw call per idAtCoord query
+// Maybe look at READ_BUFFER
 std::optional<objid> idAtCoord(float ndix, float ndiy, bool onlyGameObjId){ // don't like binding framebuffer for this.  Need to isolate rendering from code so don't have to unbind / rebind framebuffer
   glBindFramebuffer(GL_FRAMEBUFFER, renderStages.selection.fbo);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderStages.selection.colorAttachment0, 0);
