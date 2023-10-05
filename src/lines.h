@@ -66,7 +66,7 @@ void removeLinesByOwner(LineData& lineData, objid owner);
 void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigned int> textureId);
 
 void addShapeData(LineData& lineData, ShapeData text);
-void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::string)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId);
+void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::string)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram);
 
 void disposeTempBufferedData(LineData& lineData);
 

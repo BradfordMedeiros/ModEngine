@@ -147,7 +147,7 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
 
   //auto ortho = glm::ortho(0.0f, (float)texSize.width, 0.0f, (float)texSize.height, -1.0f, 1.0f);  
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
-  drawShapeData(lineData, uiShaderProgram, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId);
+  drawShapeData(lineData, uiShaderProgram, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
 }
 
 void handlePaintingModifiesViewport(UVCoord uvsToPaint){
@@ -1603,7 +1603,7 @@ int main(int argc, char* argv[]){
 
     glUniformMatrix4fv(glGetUniformLocation(renderStages.selection.shader, "projview"), 1, GL_FALSE, glm::value_ptr(ndiOrtho));
     glDisable(GL_DEPTH_TEST);
-    drawShapeData(lineData, renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId);
+    drawShapeData(lineData, renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
     glEnable(GL_DEPTH_TEST);
 
     disposeTempBufferedData(lineData);
@@ -1892,9 +1892,10 @@ int main(int argc, char* argv[]){
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
-    renderUI(effectiveCrosshair, pixelColor, showCursor);
-
-    drawShapeData(lineData, uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId);
+    if (state.renderMode == RENDER_FINAL){
+      renderUI(effectiveCrosshair, pixelColor, showCursor);
+      drawShapeData(lineData, uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
+    }
     glEnable(GL_DEPTH_TEST);
 
     if (state.takeScreenshot){

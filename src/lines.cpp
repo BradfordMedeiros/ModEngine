@@ -165,9 +165,12 @@ float convertTextNdiFontsize(float height, float width, float fontsize, bool isn
   return fontsize;
 }
 
-void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::string)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId){
+void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::string)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram){
   //std::cout << "text number: " << lineData.text.size() << std::endl;
   for (auto &shape : lineData.shapes){
+    if (selectionProgram && !shape.selectionId.has_value()){
+      continue;
+    }
     if (textureIdSame(shape.textureId, textureId)){
       //std::cout << "drawing words: " << text.word << std::endl;
       glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
