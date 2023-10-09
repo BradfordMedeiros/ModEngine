@@ -340,3 +340,19 @@ bool isPrefab(World& world, objid id){
   auto prefabObject = std::get_if<GameObjectPrefab>(&objectPrefab);
   return prefabObject != NULL;
 }
+
+std::optional<objid> prefabId(World& world, objid id){
+  if (isPrefab(world, id)){
+    return id;
+  }
+
+  // maybe add an assertion here that the scene is a prefab scene? 
+  auto parentObjId = listParentObjId(world.sandbox, sceneId(world.sandbox, id));
+  if (!parentObjId.has_value()){
+    return std::nullopt;
+  }
+  if (!isPrefab(world, parentObjId.value())){
+    return std::nullopt;
+  }
+  return parentObjId; 
+}
