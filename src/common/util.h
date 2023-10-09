@@ -208,6 +208,7 @@ struct GameobjAttributes {
 
 std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key);
 std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key);
+std::optional<int> getIntFromAttr(GameobjAttributes& objAttr, std::string key);
 std::optional<glm::vec3> getVec3Attr(GameobjAttributes& objAttr, std::string key);
 std::optional<glm::vec4> getVec4Attr(GameobjAttributes& objAttr, std::string key);
 
@@ -340,7 +341,7 @@ template <typename T>
 T* anycast(std::any& anyValue){
   try {
     T* value = std::any_cast<T>(&anyValue);
-    modassert(value, std::string("anycast value was NULL: ") + anyValue.type().name());
+    //modassert(value, std::string("anycast value was NULL: ") + anyValue.type().name());
     return value;
   }catch(...){
     return NULL;

@@ -233,6 +233,9 @@ void maybePruneScenes(SceneSandbox& sandbox){
 void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects){  
   for (auto id : objects){
     Scene& scene = sandbox.mainScene;
+    if (scene.idToGameObjects.find(id) == scene.idToGameObjects.end()){
+      continue;
+    }
     std::string objectName = scene.idToGameObjects.at(id).name;
     auto sceneId = scene.idToGameObjectsH.at(id).sceneId;
     scene.idToGameObjects.erase(id);

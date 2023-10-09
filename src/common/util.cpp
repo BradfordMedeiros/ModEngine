@@ -767,6 +767,15 @@ std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key){
   return std::nullopt;
 }
 
+std::optional<int> getIntFromAttr(GameobjAttributes& objAttr, std::string key){
+  if (objAttr.numAttributes.find(key) != objAttr.numAttributes.end()){
+    float numValue = objAttr.numAttributes.at(key);
+    int value = static_cast<int>(numValue);
+    return value;
+  }
+  return std::nullopt;
+}
+
 std::optional<glm::vec3> getVec3Attr(GameobjAttributes& objAttr, std::string key){
    if (objAttr.vecAttr.vec3.find(key) != objAttr.vecAttr.vec3.end()){
     return objAttr.vecAttr.vec3.at(key);

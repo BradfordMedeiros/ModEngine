@@ -471,6 +471,22 @@ void doRemoveQueuedRemovals(){
   objectsQueuedForRemoval = {};
 }
 
+std::optional<objid> prefabId(objid id){
+  if (isPrefab(world, id)){
+    return id;
+  }
+  // maybe add an assertion here that the scene is a prefab scene? 
+  auto parentObjId = listParentObjId(world.sandbox, listSceneId(id));
+  if (!parentObjId.has_value()){
+    return std::nullopt;
+  }
+  if (!isPrefab(world, parentObjId.value())){
+    return std::nullopt;
+  }
+  // check to see if this is actually a prefab
+  return parentObjId;
+}
+
 std::vector<std::string> listModels(){
   return listFilesWithExtensions("./res/models", { "obj", "dae" });
 }

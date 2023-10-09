@@ -56,4 +56,6 @@ struct TextureAndName {
 std::vector<TextureAndName> worldTextures(World& world);
 void setTexture(World& world, objid index, std::string textureName);
 
+bool isPrefab(World& world, objid id);
+
 #endif

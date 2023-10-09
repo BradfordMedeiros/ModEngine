@@ -108,6 +108,8 @@ std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttr
 void removeObjectById(int32_t id);
 void doRemoveQueuedRemovals();
 
+std::optional<objid> prefabId(objid id);
+
 void copyObject(int32_t id);
 void handleCopy();
 void handleClipboardSelect();

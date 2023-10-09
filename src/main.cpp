@@ -1295,6 +1295,8 @@ int main(int argc, char* argv[]){
     .getCursorInfoWorld = getCursorInfoWorld,
     .idAtCoord = idAtCoord,
     .gameobjExists = gameobjExists,
+    .prefabId = prefabId,
+
   };
 
 

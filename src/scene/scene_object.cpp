@@ -334,3 +334,9 @@ void setTexture(World& world, objid index, std::string textureName){
     }
   }
 }
+
+bool isPrefab(World& world, objid id){
+  GameObjectObj& objectPrefab = world.objectMapping.at(id);
+  auto prefabObject = std::get_if<GameObjectPrefab>(&objectPrefab);
+  return prefabObject != NULL;
+}
