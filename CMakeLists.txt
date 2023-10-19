@@ -69,11 +69,6 @@ else()
     add_definitions(-DINCLUDE_OPENAL)
   endif()
 
-  set(NO_INCLUDE_GUILE TRUE)
-  if (NOT NO_INCLUDE_GUILE)
-    add_definitions(-DINCLUDE_GUILE)
-  endif()
-
   set(NO_INCLUDE_CXXOPTS TRUE)
   if (NOT NO_INCLUDE_CXXOPTS)
     add_definitions(-DINCLUDE_CXXOPTS)
@@ -160,14 +155,6 @@ if (NOT NO_INCLUDE_OPENAL)
   target_link_libraries(${PROJECT_NAME} "alut")
 else()
   message("MODBUILD - Not Including OpenAl")
-endif()
-
-if (NOT NO_INCLUDE_GUILE)
-  message("MODBUILD - Including Guile")
-  target_link_libraries(${PROJECT_NAME} "guile-2.2")
-  target_include_directories(${PROJECT_NAME} PRIVATE "/usr/include/guile/2.2")
-else()
-  message("MODBUILD - Not Including Guile")
 endif()
 
 
