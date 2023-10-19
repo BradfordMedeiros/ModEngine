@@ -86,25 +86,6 @@ void testpass(std::string target){
   }
 #endif
 
-#ifdef INCLUDE_GUILE
- #include <libguile.h>
-
-  void guileTest(){
-  	int listSize = 3;
-  	SCM list = scm_make_list(scm_from_unsigned_integer(listSize), scm_from_unsigned_integer(0));
-  	for (int i = 0; i < listSize; i++){
-      scm_list_set_x (list, scm_from_unsigned_integer(i), scm_from_int32(i * 100)); 
-  	}
-  	auto numElements = scm_to_int32(scm_length(list));
-  	assert(numElements == listSize);
-  	for (int i = 0; i < numElements; i++){
-      auto value = scm_to_int32(scm_list_ref(list, scm_from_unsigned_integer(i)));
-   	  assert(value == i * 100);
-   	}
-  	testpass("Guile");
-  }
-#endif
-
 #ifdef INCLUDE_CXXOPTS
   #include <cxxopts.hpp>
   void cxxoptsTest(int argc, char* argv[]){
@@ -204,10 +185,6 @@ int main(int argc, char* argv[]){
 
 	#ifdef INCLUDE_OPENAL
 		openAlTest();
-	#endif
-
-	#ifdef INCLUDE_GUILE
-		guileTest();
 	#endif
 
 	#ifdef INCLUDE_CXXOPTS
