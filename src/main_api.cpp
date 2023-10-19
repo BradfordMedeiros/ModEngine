@@ -150,6 +150,10 @@ objid rootIdForScene(objid sceneId){
   return rootIdForScene(world.sandbox, sceneId);
 }
 
+objid rootSceneId(){
+  return rootSceneId(world.sandbox);
+}
+
 std::vector<int32_t> queuedUnloadScenes = {};
 
 void unloadScene(int32_t sceneId){  
@@ -450,6 +454,9 @@ std::vector<std::string> listAnimations(int32_t id){
 }
 
 void playAnimation(int32_t id, std::string animationToPlay, AnimationType animationType){
+  //if (!idExists(world.sandbox, id)){
+  //  return;
+  //}
   modassert(idExists(world.sandbox, id), std::string("play animation, id does not exist: " + std::to_string(id)));
   modlog("animation", std::string("play animation: ") + animationToPlay + ", for id = " + std::to_string(id));
   addAnimation(world, timings, id, animationToPlay, timeSeconds(false), animationType);

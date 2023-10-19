@@ -835,3 +835,7 @@ std::optional<objid> sceneIdByName(SceneSandbox& sandbox, std::string name){
   }
   return std::nullopt;
 }
+
+objid rootSceneId(SceneSandbox& sandbox){
+  return sandbox.mainScene.idToGameObjectsH.at(sandbox.mainScene.rootId).sceneId;
+}

@@ -212,7 +212,7 @@ void emitNewParticle(EmitterSystem& system, objid emitterNodeId, NewParticleOpti
       return;
     }
   }
-  assert(false);
+  modassert(false, std::string("could not find emitter: ") + std::to_string(emitterNodeId));
 }
 
 void setEmitterEnabled(EmitterSystem& system, objid emitterNodeId, bool enabled){

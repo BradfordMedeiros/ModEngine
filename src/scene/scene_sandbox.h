@@ -144,4 +144,6 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox);
 Transformation calcRelativeTransform(Transformation& child, Transformation& parent);
 Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId);
 
+objid rootSceneId(SceneSandbox& sandbox);
+
 #endif 

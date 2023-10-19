@@ -452,11 +452,8 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   });
   
   auto maxExpectedClears = numUniqueDepthLayers(world.sandbox.layers);
-  if (numDepthClears > maxExpectedClears){
-    std::cout << "num clears: " << numDepthClears << std::endl;
-    std::cout << "num unique depth clears: " << maxExpectedClears << std::endl;
-    assert(false);
-  }
+  modassert(numDepthClears <= maxExpectedClears, std::string("numDepthClears = ") + std::to_string(numDepthClears) + std::string(", expected = ") + std::to_string(maxExpectedClears));
+ 
   return numTriangles;
 }
 
@@ -1195,6 +1192,7 @@ int main(int argc, char* argv[]){
     .childScenes = childScenes,
     .sceneIdByName = sceneIdByName,
     .rootIdForScene = rootIdForScene,
+    .rootSceneId = rootSceneId,
     .scenegraph = scenegraph,
     .sendLoadScene = sendLoadScene,
     .createScene = createScene,
