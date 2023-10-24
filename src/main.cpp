@@ -507,7 +507,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model, int numC
 
   ////////////////
   
-
+  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 0.f, 1.f, 1.f)));     
   if (state.showDebug){
     drawCoordinateSystem(100.f);
   }
@@ -827,7 +827,7 @@ objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid
   return addLineToNextCycleTint(lineData, fromPos, toPos, permaline, owner, color, textureId, linewidth);
 }
 
-objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner){
+objid addLineNextCyclePhysicsDebug(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner){
   return addLineToNextCycle(lineData, fromPos, toPos, permaline, owner, GREEN, std::nullopt);
 }
 
@@ -1314,7 +1314,7 @@ int main(int argc, char* argv[]){
   registerAllBindings(pluginBindings);
   cBindings = getCScriptBindingCallbacks();
 
-  BulletDebugDrawer drawer(addLineNextCycle);
+  BulletDebugDrawer drawer(addLineNextCyclePhysicsDebug);
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
 
   if(bootStrapperMode){
@@ -1543,6 +1543,7 @@ int main(int argc, char* argv[]){
       timePlayback.setElapsedTime(deltaTime);
     }
 
+    disposeTempBufferedData(lineData);
 
     onWorldFrame(world, deltaTime, timePlayback.currentTime, enablePhysics, dumpPhysics, state.worldpaused, viewTransform);
 
@@ -1605,8 +1606,6 @@ int main(int argc, char* argv[]){
     glDisable(GL_DEPTH_TEST);
     drawShapeData(lineData, renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
     glEnable(GL_DEPTH_TEST);
-
-    disposeTempBufferedData(lineData);
 
     //std::cout << "cursor pos: " << state.cursorLeft << " " << state.cursorTop << std::endl;
     auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
