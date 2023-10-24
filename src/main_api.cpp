@@ -33,8 +33,17 @@ float getTotalTime(){
   return now - initialTime;
 }
 
+std::vector<objid> objectsQueuedForRemoval = {};
 bool gameobjExists(objid id){
-  return idExists(world.sandbox, id);
+  if (!idExists(world.sandbox, id)){
+    return false;
+  }
+  for (auto idToRemove : objectsQueuedForRemoval){
+    if (id == idToRemove){
+      return false;
+    }
+  }
+  return true;
 }
 
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit){    
@@ -467,7 +476,6 @@ void stopAnimation(int32_t id){
   removeAnimation(world, timings, id);
 }
 
-std::vector<objid> objectsQueuedForRemoval = {};
 void removeObjectById(objid id){
   objectsQueuedForRemoval.push_back(id);
 }
