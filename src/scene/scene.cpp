@@ -718,6 +718,19 @@ std::string serializeObject(World& world, objid id, bool includeSubmodelAttr, st
   return serializedData;
 }
 
+void updatePhysicsFromSandbox(World& world){
+  auto updatedIds = updateSandbox(world.sandbox);  
+  for (auto index : updatedIds){
+    auto transform = fullTransformation(world.sandbox, index);
+    if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+      PhysicsValue& phys = world.rigidbodys.at(index);
+      auto body =  phys.body;
+      auto fullTransform = fullTransformation(world.sandbox, index);
+      setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
+    }
+  }
+}
+
 void addObjectToWorld(
   World& world, 
   objid sceneId, 
@@ -796,6 +809,7 @@ void addObjectToWorld(
       auto sceneId = addSceneToWorld(world, sceneFile, addedTokens, std::nullopt, std::nullopt, std::nullopt);  // should make original obj the parent
       auto rootId = rootIdForScene(world.sandbox, sceneId);
       makeParent(world.sandbox, rootId, id);
+      updatePhysicsFromSandbox(world);
       return sceneId;
     };
 
@@ -1437,18 +1451,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   
   updateSoundPositions(world, viewTransform);
   enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
-  
-  auto updatedIds = updateSandbox(world.sandbox);  
-  for (auto index : updatedIds){
-    auto transform = fullTransformation(world.sandbox, index);
-    if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-      PhysicsValue& phys = world.rigidbodys.at(index);
-      auto body =  phys.body;
-      auto fullTransform = fullTransformation(world.sandbox, index);
-      setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
-    }
-  }
-  
+  updatePhysicsFromSandbox(world);
   callbackEntities(world);
 
   onObjectFrame(world.objectMapping, [&world](std::string texturepath, unsigned char* data, int textureWidth, int textureHeight) -> void {

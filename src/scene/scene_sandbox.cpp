@@ -522,7 +522,7 @@ std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId)
   return ids;
 }
 
-void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
+void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool justAdded = false){
   //std::cout << "should update id: " << updatedId << std::endl;
   // do a breath first search, and then update it in that order
   auto updatedIdElements = bfsElementAndChildren(sandbox, updatedId);
@@ -539,7 +539,7 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
     }
     if (parentId != -1){
       GameObject& gameobj = getGameObject(sandbox, id);
-      if (gameobj.physicsOptions.isStatic || !gameobj.physicsOptions.enabled){
+      if (gameobj.physicsOptions.isStatic || !gameobj.physicsOptions.enabled || justAdded /* this is so when you spawn it, the relative transform determines where it goes */){
          auto currentConstraint = gameobj.transformation;
          auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
          sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
@@ -569,7 +569,7 @@ void addObjectToCache(SceneSandbox& sandbox, objid id){
   sandbox.mainScene.absoluteTransforms[id] = TransformCacheElement {
     .transform = getTransformationFromMatrix(elementMatrix),
   };
-  updateAllChildrenPositions(sandbox, id);
+  updateAllChildrenPositions(sandbox, id, true);
 }
 void removeObjectFromCache(SceneSandbox& sandbox, objid id){
   sandbox.mainScene.absoluteTransforms.erase(id);
@@ -752,7 +752,7 @@ void makeParent(SceneSandbox& sandbox, objid child, objid parent){
       objh.sceneId = parentObjH.sceneId;
     }
   }
-  updateAllChildrenPositions(sandbox, parent); // TODO - only update the newly parented children
+  updateAllChildrenPositions(sandbox, parent, true); // TODO - only update the newly parented children
 }
 
 std::optional<objid> listParentObjId(SceneSandbox& sandbox, objid sceneId){
