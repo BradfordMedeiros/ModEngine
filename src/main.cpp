@@ -222,6 +222,7 @@ void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2,
   auto obj2Id = getIdForCollisionObject(world, obj2);
   modassert(obj1Id.has_value(), "on object enter, obj1Id does not exist");
   modassert(obj2Id.has_value(), "on object enter, obj2Id does not exist");
+  modassert(gameobjExists(obj1Id.value()) && gameobjExists(obj2Id.value()), "on Object Enter, gameobj does not exist");
   maybeTeleportObjects(world, obj1Id.value(), obj2Id.value());
   cBindings.onCollisionEnter(obj1Id.value(), obj2Id.value(), contactPos, normal, normal * glm::vec3(-1.f, -1.f, -1.f)); 
 }
@@ -230,6 +231,7 @@ void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2)
   auto obj2Id = getIdForCollisionObject(world, obj2);
   modassert(obj1Id.has_value(), "on object leave, obj1Id does not exist");
   modassert(obj2Id.has_value(), "on object leave, obj2Id does not exist");
+  modassert(gameobjExists(obj1Id.value()) && gameobjExists(obj2Id.value()), "on Object Enter, gameobj does not exist");
   cBindings.onCollisionExit(obj1Id.value(), obj2Id.value());
 }
 
