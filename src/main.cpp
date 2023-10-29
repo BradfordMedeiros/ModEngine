@@ -1543,7 +1543,6 @@ int main(int argc, char* argv[]){
       timePlayback.setElapsedTime(deltaTime);
     }
 
-    disposeTempBufferedData(lineData);
 
     onWorldFrame(world, deltaTime, timePlayback.currentTime, enablePhysics, dumpPhysics, state.worldpaused, viewTransform);
 
@@ -1606,6 +1605,7 @@ int main(int argc, char* argv[]){
     glDisable(GL_DEPTH_TEST);
     drawShapeData(lineData, renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
     glEnable(GL_DEPTH_TEST);
+
 
     //std::cout << "cursor pos: " << state.cursorLeft << " " << state.cursorTop << std::endl;
     auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
@@ -1770,6 +1770,7 @@ int main(int argc, char* argv[]){
       }
     }
 
+    disposeTempBufferedData(lineData);
 
     handleInput(window);  // stateupdate
     glfwPollEvents();     // stateupdate
