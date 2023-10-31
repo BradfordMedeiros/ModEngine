@@ -243,10 +243,12 @@ void setRotation(btRigidBody* body, glm::quat rotation){
   body -> setWorldTransform(transform);
 }
 void setScale(physicsEnv& env, btRigidBody* body, float width, float height, float depth){
-  int mask = body -> getBroadphaseProxy() -> m_collisionFilterMask;
   body -> getCollisionShape() -> setLocalScaling(btVector3(width, height, depth));
-  env.dynamicsWorld -> removeRigidBody(body);   // if we don't add or remove it just gets stuck in the air...
-  env.dynamicsWorld -> addRigidBody(body, 1, mask);  // todo preserve physics mask
+  env.dynamicsWorld -> updateSingleAabb(body);
+
+  // this use to be instead of update singleaabb see ff6d5292f275e725e37cf527e89a28e09c4ef241
+  //env.dynamicsWorld -> removeRigidBody(body);   // if we don't add or remove it just gets stuck in the air...
+  //env.dynamicsWorld -> addRigidBody(body, 1, mask);  // todo preserve physics mask
 }
 glm::vec3 getScale(btRigidBody* body){
   return btToGlm(body -> getCollisionShape() -> getLocalScaling());
