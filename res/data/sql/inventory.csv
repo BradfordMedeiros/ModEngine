@@ -1,4 +1,4 @@
 inventory.item:STRING,inventory.count:INT
 gold,100
-pistol,1
+pistol,1000
 scrapgun,100

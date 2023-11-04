@@ -6,12 +6,12 @@
 # emitter =  0b  100000
 # nav     =  0b 1000000
 # soe more options in object_types.cpp renderObject
-editor:debug:false
+editor:debug:true
 #editor:debugmask:126  # this & the above number determines if the debug object should show
 
 editor:debugmask:8
 
-#world:paused:true  # true / false
+world:paused:true  # true / false
 
 diffuse:enabled:true
 specular:enabled:true
@@ -58,7 +58,7 @@ rendering:fontsize:6
 
 
 ### input stuff ###
-mouse:cursor:capture   # normal, hidden, capture
+mouse:cursor:normal   # normal, hidden, capture
 
 #window:name:ModEngine Editor
 window:icon:./res/textures/wood.jpg
@@ -69,7 +69,7 @@ rendering:cull:disabled
 
 editor:showgrid:true
 editor:gridsize:40
-editor:snaptranslate-index:0
+editor:snaptranslate-index:4
 tools:manipulator-mode:translate
 tools:manipulator-axis:x
 

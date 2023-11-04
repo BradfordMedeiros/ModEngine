@@ -1,0 +1,23 @@
+- teleporter gun (shoot teleport pad, can teleport to it by pressing a button)
+- colored barrier that only allows certain object colors to pass by 
+	- can tint box to solve puzzle
+	- can tint telefrag device
+- node thing to be able to create electric fences 
+- missle that you launch and can guide
+- portal gun 
+- run gun to attach to objects together
+- camera device
+- snake to send ahead and view next area 
+
+https://www.youtube.com/watch?v=dBmIkEvEBtA&ab_channel=GameMaker%27sToolkit
+
+
+
+
+========
+grind rails
+maintain veloicty with button 
+that button stops strafing (mostly)
+
+
+frictionless(or low) sliding, based on material 

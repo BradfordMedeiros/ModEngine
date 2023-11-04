@@ -3,15 +3,18 @@
 platform:mesh:./res/models/box/box.obj
 platform:scale:100 1 100
 platform:position:0 -10 0
+platform:physics:enabled
 
 box:mesh:./res/models/box/box.obj
-box:position:0 5 0
-box:physics_type:dynamic
-box:child:follower
+box:position:1 5 0
+box:physics:enabled
+box:child:follower,thing
 
 follower:mesh:./res/models/box/box.obj
-follower:position:3 0 0
+follower:position:1 0 0
 follower:physics_type:dynamic
+follower:physics:enabled
 
 thing:mesh:./res/models/box/box.obj
 thing:physics:disabled
+thing:position:0 2 0

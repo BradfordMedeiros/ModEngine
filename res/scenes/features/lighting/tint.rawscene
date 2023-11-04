@@ -1,0 +1,70 @@
+# Generated scene 
+box1-copy-1312027712-copy-2031020809:mesh:../gameresources/build/generated/block_x1x1x1.gltf
+box1-copy-1312027712-copy-2031020809:normal-texture:/home/brad/gamedev/mosttrusted/gameresources/build/textures/clean/hardwood.normal.jpg
+box1-copy-1312027712-copy-2031020809:physics:enabled
+box1-copy-1312027712-copy-2031020809:physics_type:dynamic
+box1-copy-1312027712-copy-2031020809:physics_velocity:0 -9605.24 0
+box1-copy-1312027712-copy-2031020809:position:0.03 -4.70447e+06 -15
+box1-copy-1312027712-copy-2031020809:scale:1.09138 1 1.1653
+box1-copy-1312027712-copy-2031020809:texture:../gameresources/build/textures/clean/hardwood.jpg
+box1-copy-1312027712-copy-2031020809-copy-624061729-copy-111310828:mesh:../gameresources/build/generated/block_x1x1x1.gltf
+box1-copy-1312027712-copy-2031020809-copy-624061729-copy-111310828:normal-texture:/home/brad/gamedev/mosttrusted/gameresources/build/textures/clean/hardwood.normal.jpg
+box1-copy-1312027712-copy-2031020809-copy-624061729-copy-111310828:physics:enabled
+box1-copy-1312027712-copy-2031020809-copy-624061729-copy-111310828:physics_type:dynamic
+box1-copy-1312027712-copy-2031020809-copy-624061729-copy-111310828:physics_velocity:0 -8464.04 0
+box1-copy-1312027712-copy-2031020809-copy-624061729-copy-111310828:position:0.03 -3.65336e+06 -15
+box1-copy-1312027712-copy-2031020809-copy-624061729-copy-111310828:scale:1.00742 1 1.27316
+box1-copy-1312027712-copy-2031020809-copy-624061729-copy-111310828:texture:../gameresources/build/textures/clean/hardwood.jpg
+box1-copy-1804583741-copy-1947451632-copy-1542014617:mesh:../gameresources/build/generated/block_x1x1x1.gltf
+box1-copy-1804583741-copy-1947451632-copy-1542014617:normal-texture:/home/brad/gamedev/mosttrusted/gameresources/build/textures/clean/cherrybark.normal.jpg
+box1-copy-1804583741-copy-1947451632-copy-1542014617:physics:enabled
+box1-copy-1804583741-copy-1947451632-copy-1542014617:position:-39.79 -1.05 42.95
+box1-copy-1804583741-copy-1947451632-copy-1542014617:scale:14.6566 7.68 11.5543
+box1-copy-1804583741-copy-1947451632-copy-1542014617:texture:../gameresources/build/textures/clean/cherrybark.jpg
+box1:mesh:../gameresources/build/generated/block_x1x1x1.gltf
+box1:normal-texture:/home/brad/gamedev/mosttrusted/ModEngine/res/models/box/grid.normal.png
+box1:physics:enabled
+box1:position:-41.85 0 -80.44
+box1:scale:12.76 19.6069 10.13
+box1:texture:./res/models/box/grid.png
+box1-copy-1312027712-copy-2031020809-copy-624061729:mesh:../gameresources/build/generated/block_x1x1x1.gltf
+box1-copy-1312027712-copy-2031020809-copy-624061729:normal-texture:/home/brad/gamedev/mosttrusted/gameresources/build/textures/clean/hardwood.normal.jpg
+box1-copy-1312027712-copy-2031020809-copy-624061729:physics:enabled
+box1-copy-1312027712-copy-2031020809-copy-624061729:physics_type:dynamic
+box1-copy-1312027712-copy-2031020809-copy-624061729:physics_velocity:0 -9046.31 0
+box1-copy-1312027712-copy-2031020809-copy-624061729:position:0.0301856 -4.17313e+06 -14.9994
+box1-copy-1312027712-copy-2031020809-copy-624061729:scale:1.03795 1 1.1382
+box1-copy-1312027712-copy-2031020809-copy-624061729:texture:../gameresources/build/textures/clean/hardwood.jpg
+box1-copy-1804583741-copy-831851705-copy-322523563:mesh:../gameresources/build/generated/block_x1x1x1.gltf
+box1-copy-1804583741-copy-831851705-copy-322523563:physics:enabled
+box1-copy-1804583741-copy-831851705-copy-322523563:physics_type:dynamic
+box1-copy-1804583741-copy-831851705-copy-322523563:physics_velocity:0 -10267 0
+box1-copy-1804583741-copy-831851705-copy-322523563:position:-0.67 -5.37488e+06 -15.36
+box1-copy-1804583741-copy-831851705-copy-322523563:texture:../gameresources/build/textures/clean/hardwood.jpg
+box1-copy-1804583741:mesh:../gameresources/build/generated/block_x1x1x1.gltf
+box1-copy-1804583741:normal-texture:/home/brad/gamedev/mosttrusted/ModEngine/res/heightmaps/default.normal.jpg
+box1-copy-1804583741:physics:enabled
+box1-copy-1804583741:position:4.07 -7.06 -17.94
+box1-copy-1804583741:scale:114.948 7.09 156.804
+box1-copy-1804583741:texture:./res/heightmaps/default.jpg
+box1-copy-1804583741-copy-1947451632:mesh:../gameresources/build/generated/block_x1x1x1.gltf
+box1-copy-1804583741-copy-1947451632:normal-texture:/home/brad/gamedev/mosttrusted/gameresources/build/textures/clean/cherrybark.normal.jpg
+box1-copy-1804583741-copy-1947451632:physics:enabled
+box1-copy-1804583741-copy-1947451632:position:56.69 19.77 57.46
+box1-copy-1804583741-copy-1947451632:scale:34.7361 89.55 11.5543
+box1-copy-1804583741-copy-1947451632:texture:../gameresources/build/textures/clean/cherrybark.jpg
+!light-900353961:angle:-10
+!light-900353961:position:0 2.06 -20.15
+box1-copy-1804583741-copy-1947451632-copy-1542014617-copy-983978207:mesh:../gameresources/build/generated/block_x1x1x1.gltf
+box1-copy-1804583741-copy-1947451632-copy-1542014617-copy-983978207:normal-texture:/home/brad/gamedev/mosttrusted/gameresources/build/textures/clean/hardwood.normal.jpg
+box1-copy-1804583741-copy-1947451632-copy-1542014617-copy-983978207:physics:enabled
+box1-copy-1804583741-copy-1947451632-copy-1542014617-copy-983978207:position:9.01 -0.4 -8.1
+box1-copy-1804583741-copy-1947451632-copy-1542014617-copy-983978207:rotation:-3.63991e-08 0.71934 -0.694658 0
+box1-copy-1804583741-copy-1947451632-copy-1542014617-copy-983978207:scale:14.6566 21.8764 11.5543
+box1-copy-1804583741-copy-1947451632-copy-1542014617-copy-983978207:texture:../gameresources/build/textures/clean/hardwood.jpg
+box1-copy-1452160324-copy-32034449:mesh:../gameresources/build/generated/block_x1x1x1.gltf
+box1-copy-1452160324-copy-32034449:normal-texture:/home/brad/gamedev/mosttrusted/gameresources/build/textures/clean/cherrybark.normal.jpg
+box1-copy-1452160324-copy-32034449:physics:enabled
+box1-copy-1452160324-copy-32034449:position:58.56 0 -75.42
+box1-copy-1452160324-copy-32034449:scale:12.76 14.5236 16.95
+box1-copy-1452160324-copy-32034449:texture:../gameresources/build/textures/clean/cherrybark.jpg

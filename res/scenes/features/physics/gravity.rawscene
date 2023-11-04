@@ -1,0 +1,19 @@
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -15 0
+platform:physics:enabled
+platform:physics_gravity:0 -2 0
+
+box:mesh:./res/models/box/box.obj
+box:position:0 15 0
+box:physics:enabled
+box:physics_type:dynamic
+box:physics_gravity:0 -30 0
+
+
+box2:mesh:./res/models/box/box.obj
+box2:position:0 5 0
+box2:physics:enabled
+box2:physics_type:dynamic
+box2:physics_gravity:0 -30 0
