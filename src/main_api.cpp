@@ -807,6 +807,7 @@ void setActiveCamera(int32_t cameraId, float interpolationTime){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
   if (! (std::find(cameraIndexs.begin(), cameraIndexs.end(), cameraId) != cameraIndexs.end())){
     std::cout << "index: " << cameraId << " is not a valid index" << std::endl;
+    modassert(false, "invalid camera");
     return;
   }
 
