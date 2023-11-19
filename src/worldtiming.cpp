@@ -84,7 +84,7 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
       modlog("animation", "removed playbacks because of internal group id");
       return;
     }
-    modlog("animation", "ticking animation for groupid: " + std::to_string(playback.groupId));
+    //modlog("animation", "ticking animation for groupid: " + std::to_string(playback.groupId));
     auto meshNameToMeshes = getMeshesForGroupId(world, playback.groupId);
 
     if (enableBlending && playback.blendData.has_value()){
