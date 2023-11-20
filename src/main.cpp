@@ -1219,6 +1219,7 @@ int main(int argc, char* argv[]){
     .setGameObjectPosition = setGameObjectPosition,
     .getGameObjectRotation = getGameObjectRotation,
     .setGameObjectRot = setGameObjectRotation,
+    .getGameObjectScale = getGameObjectScale2,
     .setGameObjectScale = setGameObjectScale,
     .setFrontDelta = setFrontDelta,
     .moveRelative = moveRelative,

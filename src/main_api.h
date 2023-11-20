@@ -100,6 +100,7 @@ glm::vec3 getGameObjectPosition(int32_t index, bool isWorld);
 void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld);
 
 glm::vec3 getGameObjectScale(int32_t index);
+glm::vec3 getGameObjectScale2(int32_t index, bool isWorld);
 void setGameObjectScale(int32_t index, glm::vec3 scale, bool isWorld);
 
 glm::quat getGameObjectRotation(int32_t index, bool isWorld);

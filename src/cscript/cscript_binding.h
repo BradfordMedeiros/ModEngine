@@ -45,6 +45,7 @@ struct CustomApiBindings {
   void (*setGameObjectPosition)(int32_t index, glm::vec3 pos, bool world);
   glm::quat (*getGameObjectRotation)(int32_t index, bool world);
   void (*setGameObjectRot)(int32_t index, glm::quat rotation, bool world);
+  glm::vec3 (*getGameObjectScale)(int32_t index, bool world);
   void (*setGameObjectScale)(int32_t index, glm::vec3 scale, bool world);
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta);
   glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance);
