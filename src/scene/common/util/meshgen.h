@@ -8,6 +8,7 @@
 #include "./types.h"
 #include "../../../translations.h"
 
+Vertex createVertex(glm::vec3 position, glm::vec2 texCoords);
 MeshData generateMesh(std::vector<glm::vec3>& face, std::vector<glm::vec3>& points);
 
 #endif

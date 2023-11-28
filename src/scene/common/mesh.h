@@ -75,4 +75,6 @@ void freeMesh(Mesh& mesh);
 unsigned int loadFullscreenQuadVAO();  // TODO - maybe make an unload...but in practice we just load it and keep it so whatever
 unsigned int loadFullscreenQuadVAO3D();
 
+std::vector<glm::vec3> readVertsFromMeshVao(Mesh& mesh);
+
 #endif 

@@ -342,3 +342,7 @@ unsigned int loadFullscreenQuadVAO3D(){
 
   return quadVAO;
 }
+
+std::vector<glm::vec3> readVertsFromMeshVao(Mesh& mesh){
+  return {};
+}

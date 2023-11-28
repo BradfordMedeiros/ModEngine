@@ -183,11 +183,11 @@ glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target){
 
   bool found = false;
   for (auto &[_, obj] : world.objectMapping){
-    auto navConn = std::get_if<GameObjectNavConns>(&obj);
-    if (navConn != NULL){
-      navgraph = navConn -> navgraph;
-      found = true;
-    }
+    //auto navConn = std::get_if<GameObjectNavConns>(&obj);
+    //if (navConn != NULL){
+    //  navgraph = navConn -> navgraph;
+    //  found = true;
+    //}
   }
   assert(found);
 

@@ -100,9 +100,13 @@ btRigidBody* createRigidBodyHull(physicsEnv& env, std::vector<glm::vec3>& verts,
 }
 
 btRigidBody* createRigidBodyExact(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
-  assert(verts.size() % 3 == 0);
+  modassert(verts.size() % 3 == 0, std::string("create rigid body exact, verts not multiple of 3, got  ") + std::to_string(verts.size()));
+  modassert(verts.size() >= 3, std::string("create rigid body exact, not enough verts, got  ") + std::to_string(verts.size()));
+  modlog("ridig body exact, added verts number", std::to_string((int)verts.size()));
+
   btTriangleMesh*  trimesh = new btTriangleMesh();
   for (int i = 0; i < verts.size(); i+=3){
+    modlog("physics rigid body exact-  adding vert", print(verts.at(i)) + " ");
     trimesh -> addTriangle(glmToBt(verts.at(i)), glmToBt(verts.at(i + 1)), glmToBt(verts.at(i + 2)));
   }
   btTriangleMeshShape* shape = new btBvhTriangleMeshShape(trimesh, true);  
