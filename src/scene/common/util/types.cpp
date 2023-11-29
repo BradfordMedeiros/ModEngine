@@ -77,3 +77,7 @@ Transformation interpolate(Transformation transform1, Transformation transform2,
     .rotation = glm::slerp(transform1.rotation,  transform2.rotation, rotamount),
   };
 }
+
+std::string print(Vertex& vertex){
+  return std::string("[ pos =  ") + print(vertex.position) + ", normal = " + print(vertex.normal) + ", texCoords = " + print(vertex.texCoords) + "]";
+}

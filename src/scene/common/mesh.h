@@ -32,6 +32,7 @@ struct Mesh {
   BoundInfo boundInfo;
   std::vector<Bone> bones;
   int numTriangles;
+  int numVertices;  // if this is < 0, invalid don't depend on
 };
 
 struct MeshRef {
@@ -75,6 +76,6 @@ void freeMesh(Mesh& mesh);
 unsigned int loadFullscreenQuadVAO();  // TODO - maybe make an unload...but in practice we just load it and keep it so whatever
 unsigned int loadFullscreenQuadVAO3D();
 
-std::vector<glm::vec3> readVertsFromMeshVao(Mesh& mesh);
+std::vector<Vertex> readVertsFromMeshVao(Mesh& mesh);
 
 #endif 
