@@ -128,7 +128,9 @@ GroupPhysicsInfo getPhysicsInfoForGroup(World& world, objid id){
 }
 
 // TODO - physics bug - physicsOptions location/rotation/scale is not relative to parent 
-PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad, std::vector<glm::vec3> verts){
+PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad, std::optional<std::vector<glm::vec3>> vertOpts){
+  auto verts = vertOpts.has_value() ? vertOpts.value() : std::vector<glm::vec3>();
+
   auto groupPhysicsInfo = getPhysicsInfoForGroup(world, id);
   if (!groupPhysicsInfo.physicsOptions.enabled){
     return PhysicsValue { .body = NULL, .offset = std::nullopt };
@@ -545,7 +547,6 @@ extern std::vector<AutoSerialize> voxelAutoserializer;
 extern std::vector<AutoSerialize> emitterAutoserializer;
 extern std::vector<AutoSerialize> heightmapAutoserializer;
 extern std::vector<AutoSerialize> navmeshAutoserializer;
-extern std::vector<AutoSerialize> navconnAutoserializer;
 extern std::vector<AutoSerialize> textAutoserializer;
 extern std::vector<AutoSerialize> geoAutoserializer;
 extern std::vector<AutoSerialize> prefabAutoserializer;
@@ -571,8 +572,6 @@ std::set<std::string> getObjautoserializerFields(std::string& name){
     return serializerFieldNames(heightmapAutoserializer);
   }else if (type == "navmesh"){
     return serializerFieldNames(navmeshAutoserializer);
-  }else if (type == "navconnection"){
-    return serializerFieldNames(navconnAutoserializer);
   }else if (type == "text"){
     return serializerFieldNames(textAutoserializer);
   }else if (type == "geo"){
@@ -879,8 +878,8 @@ void addSerialObjectsToWorld(
     return;
   }
 
+  std::optional<std::vector<glm::vec3>> modelVerts = std::nullopt;
   for (auto &id : idsAdded){
-    std::vector<glm::vec3> modelVerts = {};
     if (idToModelVertexs.find(id) != idToModelVertexs.end()){
       modelVerts = idToModelVertexs.at(id);
     }

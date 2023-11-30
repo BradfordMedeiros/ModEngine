@@ -14,7 +14,7 @@ struct MeshgenConfig {
 Vertex createVertex(glm::vec3 position, glm::vec2 texCoords){
   Vertex vertex {
     .position = position,
-    .normal = glm::vec3(0.f, 0.f, 0.f),
+    .normal = glm::vec3(0.f, 0.f, 0.f),  // TODO - calculate normal properly
     .texCoords = texCoords,
   };
   for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){

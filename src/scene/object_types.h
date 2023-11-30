@@ -15,7 +15,6 @@
 #include "./objtypes/obj_light.h"
 #include "./objtypes/obj_sound.h"
 #include "./objtypes/obj_text.h"
-#include "./objtypes/obj_navconn.h"
 #include "./objtypes/obj_navmesh.h"
 #include "./objtypes/obj_heightmap.h"
 #include "./objtypes/obj_emitter.h"
@@ -47,7 +46,6 @@ typedef std::variant<
   GameObjectEmitter,
   GameObjectHeightmap,
   GameObjectNavmesh,
-  GameObjectNavConns,
   GameObjectUIText,
   GameObjectGeo,
   GameObjectNil,
@@ -112,11 +110,6 @@ static Field navmeshField {
   .type = "navmesh",
 };
 
-static Field navconnectionField {
-  .prefix = '\'',
-  .type = "navconnection",
-};
-
 static Field uiTextField {
   .prefix = ')',
   .type = "text",
@@ -149,7 +142,6 @@ static std::vector fields = {
   emitterField, 
   heightmap, 
   navmeshField, 
-  navconnectionField, 
   uiTextField,
   geoField,
   customField,

@@ -128,15 +128,6 @@ std::vector<ObjectType> objTypes = {
     .removeObject = removeDoNothing,
   },
   ObjectType {
-    .name = "navconnection",
-    .variantType = getVariantIndex(GameObjectNavConns{}),
-    .createObj = createNavConns,
-    .objectAttributes = nothingObjAttr,
-    .setAttributes = nothingSetObjAttr,
-    .serialize = serializeNotImplemented,
-    .removeObject = removeDoNothing,
-  },
-  ObjectType {
     .name = "heightmap",
     .variantType = getVariantIndex(GameObjectHeightmap{}),
     .createObj = createHeightmap,
@@ -390,45 +381,15 @@ int renderObject(
   }
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&toRender);
-  if (navmeshObj != NULL && (showDebugMask & 0b1000000)){
-    return renderDefaultNode(shaderProgram, *defaultMeshes.nav);
-  }
-
-  auto navconnObj = std::get_if<GameObjectNavConns>(&toRender);
-  if (navconnObj != NULL &&  (showDebugMask & 0b1000000)){
-    int numTriangles = 0;
-
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+  if (navmeshObj != NULL){
+    glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
+    glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    drawMesh(*defaultMeshes.nav, shaderProgram); 
-    numTriangles = numTriangles + defaultMeshes.nav -> numTriangles;
-
-    auto navPoints = aiAllPoints(navconnObj -> navgraph);
-
-    for (auto navPoint : navPoints){
-      std::cout << "points: " << print(navPoint.fromPoint) << ", " << print(navPoint.toPoint) << std::endl;
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
-      glUniformMatrix4fv(
-        glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(
-          glm::scale(glm::translate(glm::mat4(1.0f), navPoint.fromPoint), glm::vec3(10.f, 1.f, 10.f))
-        )
-      );
-      drawMesh(*defaultMeshes.nav, shaderProgram);
-      numTriangles = numTriangles + defaultMeshes.nav -> numTriangles;
-
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
-      glUniformMatrix4fv(
-        glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(
-          glm::scale(glm::translate(glm::mat4(1.0f), navPoint.toPoint), glm::vec3(5.f, 2.f, 10.f))
-        )
-      );
-      drawMesh(*defaultMeshes.nav, shaderProgram);
-      numTriangles = numTriangles + defaultMeshes.nav -> numTriangles;
-    }
-    std::cout << std::endl;
-    return numTriangles;
+    drawMesh(navmeshObj -> mesh, shaderProgram, -1);    
+    return navmeshObj -> mesh.numTriangles;
   }
 
   auto textObj = std::get_if<GameObjectUIText>(&toRender);

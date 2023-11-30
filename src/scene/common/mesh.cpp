@@ -104,6 +104,7 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
     .boundInfo = meshData.boundInfo,
     .bones = meshData.bones,
     .numTriangles = numTriangles,
+    .numVertices = meshData.vertices.size(),
   }; 
 
   return mesh; 
@@ -153,6 +154,7 @@ Mesh load2DMesh(std::string imagePath, float vertices[], unsigned int indices[],
     .boundInfo = boundInfo,
     .bones = bones,
     .numTriangles = numIndices / 3,
+    .numVertices = -1,
   };
 
   return mesh;
@@ -341,4 +343,22 @@ unsigned int loadFullscreenQuadVAO3D(){
 
 
   return quadVAO;
+}
+
+std::vector<Vertex> readVertsFromMeshVao(Mesh& mesh){
+  if (mesh.numVertices <= 0){
+    modassert(false, "no vertices in mesh vao");
+    return {};
+  }
+  glBindBuffer(GL_ARRAY_BUFFER, mesh.VBOPointer);
+
+  std::vector<Vertex> vertices;
+  vertices.resize(mesh.numVertices);
+
+
+  std::cout << "num vertices read: " << mesh.numVertices << std::endl;
+  glGetBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * mesh.numVertices, &(vertices[0]));
+
+
+  return vertices;
 }

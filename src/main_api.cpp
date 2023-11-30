@@ -859,7 +859,7 @@ void nextCamera(){
   setActiveCamera(activeCameraId, -1);
 }
 void moveCamera(glm::vec3 offset, std::optional<bool> relative){
-  return;
+  //return;
   bool isRelative = !relative.has_value() || relative.value() == true;
   if (isRelative){
     if (state.activeCameraObj == NULL){
