@@ -127,14 +127,36 @@ GroupPhysicsInfo getPhysicsInfoForGroup(World& world, objid id){
   return groupInfo;
 }
 
+std::vector<glm::vec3> vertsForId(World& world, objid id){
+  auto meshes = getMeshesForId(world.objectMapping, id).meshes;
+  if (meshes.size() == 0){
+    std::cout << "no meshes for: " << getGameObject(world, id).name << std::endl;
+    return {};
+  }
+  std::vector<glm::vec3> vertPositions;
+  auto vertices = readVertsFromMeshVao(meshes.at(0));
+  for (auto &vertex : vertices){
+    vertPositions.push_back(vertex.position);
+  }
+  return vertPositions;
+}
+
 // TODO - physics bug - physicsOptions location/rotation/scale is not relative to parent 
-PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad, std::optional<std::vector<glm::vec3>> vertOpts){
-  auto verts = vertOpts.has_value() ? vertOpts.value() : std::vector<glm::vec3>();
+PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
+  auto verts = vertsForId(world, id);
 
   auto groupPhysicsInfo = getPhysicsInfoForGroup(world, id);
   if (!groupPhysicsInfo.physicsOptions.enabled){
     return PhysicsValue { .body = NULL, .offset = std::nullopt };
   }
+
+  if (verts.size() == 0){
+    return  PhysicsValue {
+      .body = NULL,
+      .offset = std::nullopt,
+    };
+  }
+
 
   btRigidBody* rigidBody = NULL;
 
@@ -312,7 +334,7 @@ void updatePhysicsBody(World& world, objid id){
     assert(rigidBody != NULL);
     rmRigidBody(world, id);
   }
-  addPhysicsBody(world, id, false, {});
+  addPhysicsBody(world, id, false);
 }
 
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
@@ -738,7 +760,6 @@ void addObjectToWorld(
   std::string topName,
   std::function<objid()> getId,
   GameobjAttributes attr,
-  std::map<objid, std::vector<glm::vec3>>& idToModelVertexs,
   std::map<std::string, GameobjAttributes>& submodelAttributes,
   ModelData* data,
   std::string rootMeshName,
@@ -762,14 +783,13 @@ void addObjectToWorld(
       std::cout << "Custom texture loading: " << texturepath << std::endl;
       return loadTextureWorld(world, texturepath, id);
     };
-    auto ensureMeshLoaded = [&world, sceneId, id, name, topName, getId, &attr, &idToModelVertexs, &submodelAttributes, data, &rootMeshName, returnObjectOnly, &returnobjs](std::string meshName, bool* _isRoot) -> std::vector<std::string> {
+    auto ensureMeshLoaded = [&world, sceneId, id, name, topName, getId, &attr, &submodelAttributes, data, &rootMeshName, returnObjectOnly, &returnobjs](std::string meshName, bool* _isRoot) -> std::vector<std::string> {
       *_isRoot = data == NULL;
       if (meshName == ""){
         return {};
       }
       if (data == NULL){
         ModelData data = loadModelPath(world, name, meshName); 
-        idToModelVertexs[id] = getVertexsFromModelData(data);
         if (data.animations.size() > 0){
           world.animations[id] = data.animations;
         }
@@ -795,7 +815,7 @@ void addObjectToWorld(
 
         std::cout << "id is: " << id << std::endl;
         for (auto &[name, objAttr] : newSerialObjs){
-          addObjectToWorld(world, sceneId, objAttr.id, name, topName, getId, objAttr.attr, idToModelVertexs, submodelAttributes, &data, meshName, returnObjectOnly, returnobjs);
+          addObjectToWorld(world, sceneId, objAttr.id, name, topName, getId, objAttr.attr, submodelAttributes, &data, meshName, returnObjectOnly, returnobjs);
         }
         std::cout << std::endl;
         return meshNamesForNode(data, meshName, name);
@@ -866,24 +886,19 @@ void addSerialObjectsToWorld(
   //  std::cout << "submodel attr: " << name << std::endl;
   //}
 
-  std::map<objid, std::vector<glm::vec3>> idToModelVertexs;
   for (auto &[name, objAttr] : nameToAttr){
     // Warning: getNewObjectId will mutate the idsAdded.  
     //std::cout << "add serial: " << name << std::endl;
     //std::cout << print(objAttr.attr) << std::endl;
     //std::cout << std::endl;
-    addObjectToWorld(world, sceneId, objAttr.id, name, name, getNewObjectId, objAttr.attr, idToModelVertexs, submodelAttributes, NULL, "", returnObjectOnly, gameobjObjs);
+    addObjectToWorld(world, sceneId, objAttr.id, name, name, getNewObjectId, objAttr.attr, submodelAttributes, NULL, "", returnObjectOnly, gameobjObjs);
   }
   if (returnObjectOnly){
     return;
   }
 
-  std::optional<std::vector<glm::vec3>> modelVerts = std::nullopt;
   for (auto &id : idsAdded){
-    if (idToModelVertexs.find(id) != idToModelVertexs.end()){
-      modelVerts = idToModelVertexs.at(id);
-    }
-    auto phys = addPhysicsBody(world, id, true, modelVerts); 
+    auto phys = addPhysicsBody(world, id, true); 
     if (phys.body != NULL){   // why do I need this?
       auto transform = fullTransformation(world.sandbox, id);
       setTransform(world.physicsEnvironment, phys.body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation), transform.scale, transform.rotation);

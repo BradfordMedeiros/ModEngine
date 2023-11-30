@@ -1096,8 +1096,16 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      state.printKeyStrokes = !state.printKeyStrokes;
-      std::cout << "print key strokes: " << state.printKeyStrokes << std::endl;
+      //state.printKeyStrokes = !state.printKeyStrokes;
+      //std::vector<glm::vec3> readVertsFromMeshVao(Mesh& mesh){
+      //
+      auto mesh = world.meshes.at("./res/models/unit_rect/unit_rect.obj").mesh;
+      auto vertices = readVertsFromMeshVao(mesh);
+      std::cout << "vertex size: " << vertices.size() << std::endl;
+      for (auto &vertex : vertices){
+        std::cout << print(vertex) << " ";
+      }
+      std::cout << std::endl;
     }
   },
   InputDispatch{

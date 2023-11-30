@@ -27,6 +27,12 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
   glEnableVertexAttribArray(0);  
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, position));
  
+  std::cout << " load model - " << meshData.vertices.size() << ", " << meshData.indices.size() << " [" << std::endl;
+  for (auto index : meshData.indices){
+    std::cout << "index: " << index << " -- " << print(meshData.vertices.at(index)) << std::endl;
+  }
+  std::cout << "]" << std::endl;
+
   Texture texture;
   if (meshData.hasDiffuseTexture){
     texture = ensureLoadTexture(meshData.diffuseTexturePath); 
@@ -81,9 +87,6 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
     glEnableVertexAttribArray(4 + NUM_BONES_PER_VERTEX + i);
     glVertexAttribPointer(4 + NUM_BONES_PER_VERTEX + i, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) (offsetof(Vertex, boneWeights) + (sizeof(float) * i)));
   }
-
-
-
   
   Mesh mesh = {
     .VAOPointer = VAO,
@@ -105,6 +108,7 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
     .bones = meshData.bones,
     .numTriangles = numTriangles,
     .numVertices = meshData.vertices.size(),
+    .numIndices = meshData.indices.size(),
   }; 
 
   return mesh; 
@@ -155,6 +159,7 @@ Mesh load2DMesh(std::string imagePath, float vertices[], unsigned int indices[],
     .bones = bones,
     .numTriangles = numIndices / 3,
     .numVertices = -1,
+    .numIndices = -1,
   };
 
   return mesh;
@@ -346,7 +351,19 @@ unsigned int loadFullscreenQuadVAO3D(){
 }
 
 std::vector<Vertex> readVertsFromMeshVao(Mesh& mesh){
-  if (mesh.numVertices <= 0){
+
+  //std::vector<glm::vec3> getVertexsFromModelData(ModelData& data){
+  //std::vector<glm::vec3> vertexs;
+  //  for (auto [id, meshData] : data.meshIdToMeshData){
+  //    for (auto index : meshData.indices){
+  //      vertexs.push_back(meshData.vertices.at(index).position);
+  //    }
+  //  }
+  //  return vertexs;
+  //}
+
+
+  if (mesh.numVertices <= 0 || mesh.numIndices <= 0){
     modassert(false, "no vertices in mesh vao");
     return {};
   }
@@ -355,10 +372,30 @@ std::vector<Vertex> readVertsFromMeshVao(Mesh& mesh){
   std::vector<Vertex> vertices;
   vertices.resize(mesh.numVertices);
 
-
   std::cout << "num vertices read: " << mesh.numVertices << std::endl;
   glGetBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * mesh.numVertices, &(vertices[0]));
 
 
-  return vertices;
+  std::vector<unsigned int> indices;
+  indices.resize(mesh.numIndices);
+
+  unsigned int EBO;
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.EBOPointer);
+  glGetBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(unsigned int) * mesh.numIndices, &(indices[0]));
+
+  std::vector<Vertex> vertexs;
+  for (auto index : indices){
+    vertexs.push_back(vertices.at(index));
+  }
+
+  std::cout << "readVertsFromMeshVao  - " << vertices.size() << ", " << indices.size() << " [" << std::endl;
+  for (auto index : indices){
+    std::cout << "index: " << index << " -- " << print(vertices.at(index)) << std::endl;
+  }
+  std::cout << "]" << std::endl;
+
+  std::cout << "num vertices out: " << vertexs.size() << ", num indicies was: " << mesh.numIndices << std::endl;
+  modassert(vertexs.size() % 3 == 0, "vertices must be a multiple of 3");
+
+  return vertexs;
 }
