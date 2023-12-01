@@ -236,7 +236,6 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
     );
   }else if (physicsOptions.shape == CONVEXHULL){
     auto verts = vertsForId(world, id);
-    modassert(verts.size() == 0, "rigid body shape exact - but no verts");
     if (verts.size() == 0){
        return PhysicsValue { .body = NULL, .offset = std::nullopt };
     }
@@ -257,7 +256,6 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
     );
   }else if (physicsOptions.shape == SHAPE_EXACT){
     auto verts = vertsForId(world, id);
-    modassert(verts.size() == 0, "rigid body shape exact - but no verts");
     if (verts.size() == 0){
        return PhysicsValue { .body = NULL, .offset = std::nullopt };
     }
