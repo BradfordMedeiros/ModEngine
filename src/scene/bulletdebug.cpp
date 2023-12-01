@@ -6,7 +6,6 @@ BulletDebugDrawer::BulletDebugDrawer(int32_t(*drawLine)(glm::vec3 fromPos, glm::
 }
 BulletDebugDrawer::~BulletDebugDrawer(){}
 
-
 void BulletDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor){
   this -> debugDrawLine(btToGlm(from), btToGlm(to), false, 0);
 }
@@ -18,8 +17,9 @@ void BulletDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const bt
   assert(false);
 }
 void BulletDebugDrawer::drawTriangle(const btVector3& a, const btVector3& b, const btVector3& c, const btVector3& color, btScalar alpha){
-  std::cout << "CRITICAL DEBUG WARNING: DRAW TRIANGLE: not yet implemented" << std::endl;
-  //assert(false);
+  this -> debugDrawLine(btToGlm(a), btToGlm(b), false, 0);
+  this -> debugDrawLine(btToGlm(a), btToGlm(c), false, 0);
+  this -> debugDrawLine(btToGlm(b), btToGlm(c), false, 0);
 }
 void BulletDebugDrawer::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color){
   std::cout << "CRITICAL DEBUG WARNING: DRAW CONTACT POINT: not yet implemented" << std::endl;
