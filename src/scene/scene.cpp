@@ -127,10 +127,22 @@ GroupPhysicsInfo getPhysicsInfoForGroup(World& world, objid id){
   return groupInfo;
 }
 
+std::vector<glm::vec3> vertsForId(World& world, objid id){
+  auto meshes = getMeshesForId(world.objectMapping, id).meshes;
+  if (meshes.size() == 0){
+    std::cout << "no meshes for: " << getGameObject(world, id).name << std::endl;
+    return {};
+  }
+  std::vector<glm::vec3> vertPositions;
+  auto vertices = readVertsFromMeshVao(meshes.at(0));
+  for (auto &vertex : vertices){
+    vertPositions.push_back(vertex.position);
+  }
+  return vertPositions;
+}
+
 // TODO - physics bug - physicsOptions location/rotation/scale is not relative to parent 
 PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad, std::optional<std::vector<glm::vec3>> vertOpts){
-  auto verts = vertOpts.has_value() ? vertOpts.value() : std::vector<glm::vec3>();
-
   auto groupPhysicsInfo = getPhysicsInfoForGroup(world, id);
   if (!groupPhysicsInfo.physicsOptions.enabled){
     return PhysicsValue { .body = NULL, .offset = std::nullopt };
@@ -241,6 +253,11 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad, std::optio
         opts
       );
     }else if (physicsOptions.shape == CONVEXHULL){
+      auto verts = vertOpts.has_value() ? vertOpts.value() : std::vector<glm::vec3>();
+      if (verts.size() == 0){
+         return PhysicsValue { .body = NULL, .offset = std::nullopt };
+      }
+
       // This is a hack, but it should be ok.  UpdatePhysicsBody really only need to apply for voxels and heightmaps as of writing this
       // I don't have easy scope to the list of verts here, so I'd rather not reload the model (or really keep them in mem for no reason) just 
       // for this, which is unused.  Probably should just change the usage of the voxel/heightmap refresh code eventually.
@@ -257,6 +274,13 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad, std::optio
         opts
       );
     }else if (physicsOptions.shape == SHAPE_EXACT){
+      auto verts = vertOpts.has_value() ? vertOpts.value() : std::vector<glm::vec3>();
+      //auto verts = vertsForId(world, id);
+
+      if (verts.size() == 0){
+         return PhysicsValue { .body = NULL, .offset = std::nullopt };
+      }
+
       assert(initialLoad);
       std::cout << "INFO: PHYSICS: ADDING SHAPE_EXACT RIGID BODY" << std::endl;
       rigidBody = addRigidBodyExact(
