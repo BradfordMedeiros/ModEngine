@@ -1,23 +1,23 @@
 platform:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
 platform:position:0 -10 0
 platform:scale:100 100 1
-platform:rotation:0 -1 0
 platform:texture:../gameresources/textures/wood.jpg
 platform:physics_restitution:1
+platform:physics:enabled
 
-box:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+box:mesh:../gameresources/build/primitives/sphere.gltf
 box:position:-140 50 0
-box:rotation:0 -1 0
 box:texture:../gameresources/textures/wood.jpg
 box:physics_type:dynamic
 box:physics_shape:shape_sphere
-box:physics_mass:5
-box:scale:5 5 20
+box:physics:enabled
+box:scale:5 5 5
 
+#
 ramp:mesh:../gameresources/build/uncategorized/ramp.gltf
 ramp:scale:15 15 15
 ramp:position:0 -13 0
-ramp:texture:./res/textures/blacktop.jpg
-ramp:physics_shape:shape_exact
-ramp:physics:enabled
-ramp:physics_type:static
+ramp/Cube:physics_shape:shape_exact
+ramp/Cube:physics:enabled
+ramp/Cube:physics_type:static
+ramp/Cube:texture:./res/textures/blacktop.jpg

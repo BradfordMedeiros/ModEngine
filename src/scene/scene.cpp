@@ -110,22 +110,6 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
   return info;
 }
 
-GroupPhysicsInfo getPhysicsInfoForGroup(World& world, objid id){
-  auto groupId = getGroupId(world.sandbox, id);
-  bool isRoot = groupId == id;
-  if (!isRoot){
-    return GroupPhysicsInfo {
-      .isRoot = isRoot,
-    };
-  }
-
-  GroupPhysicsInfo groupInfo {
-    .isRoot = isRoot,
-    .physicsInfo = getPhysicsInfoForGameObject(world, groupId),
-    .physicsOptions = getGameObject(world.sandbox, groupId).physicsOptions,
-  };  
-  return groupInfo;
-}
 
 std::vector<glm::vec3> vertsForId(World& world, objid id){
   auto meshes = getMeshesForId(world.objectMapping, id).meshes;
@@ -142,9 +126,9 @@ std::vector<glm::vec3> vertsForId(World& world, objid id){
 }
 
 // TODO - physics bug - physicsOptions location/rotation/scale is not relative to parent 
-PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad, std::optional<std::vector<glm::vec3>> vertOpts){
-  auto groupPhysicsInfo = getPhysicsInfoForGroup(world, id);
-  if (!groupPhysicsInfo.physicsOptions.enabled){
+PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
+  auto physicsOptions = getGameObject(world.sandbox, id).physicsOptions;
+  if (!physicsOptions.enabled){
     return PhysicsValue { .body = NULL, .offset = std::nullopt };
   }
 
@@ -155,162 +139,158 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad, std::optio
   GameObjectHeightmap* heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
   bool isHeightmapObj = heightmapObj != NULL;
 
-  if (groupPhysicsInfo.isRoot){
-    auto physicsOptions = groupPhysicsInfo.physicsOptions;
-    auto physicsInfo = groupPhysicsInfo.physicsInfo;
+  auto physicsInfo =  getPhysicsInfoForGameObject(world, id);
 
-    rigidBodyOpts opts = {
-      .linear = physicsOptions.linearFactor,
-      .angular = physicsOptions.angularFactor,
-      .gravity = physicsOptions.gravity,
-      .friction = physicsOptions.friction,
-      .restitution = physicsOptions.restitution,
-      .mass = physicsOptions.mass,
-      .layer = physicsOptions.layer,
-      .velocity = physicsOptions.velocity,
-      .angularVelocity = physicsOptions.angularVelocity,
-      .linearDamping = physicsOptions.linearDamping,
-    };
+  rigidBodyOpts opts = {
+    .linear = physicsOptions.linearFactor,
+    .angular = physicsOptions.angularFactor,
+    .gravity = physicsOptions.gravity,
+    .friction = physicsOptions.friction,
+    .restitution = physicsOptions.restitution,
+    .mass = physicsOptions.mass,
+    .layer = physicsOptions.layer,
+    .velocity = physicsOptions.velocity,
+    .angularVelocity = physicsOptions.angularVelocity,
+    .linearDamping = physicsOptions.linearDamping,
+  };
 
-    if (isHeightmapObj){
-      rigidBody = addRigidBodyHeightmap(
-        world.physicsEnvironment,
-        calcOffsetFromRotation(physicsInfo.transformation.position, groupPhysicsInfo.physicsInfo.offset, physicsInfo.transformation.rotation),
-        physicsInfo.transformation.rotation,
-        physicsOptions.isStatic,
-        opts,
-        heightmapObj -> heightmap.data,
-        heightmapObj -> heightmap.width, 
-        heightmapObj -> heightmap.height,
-        physicsInfo.transformation.scale,
-        heightmapObj -> heightmap.minHeight,
-        heightmapObj -> heightmap.maxHeight
-      );
-    }else if (physicsOptions.shape == BOX || (!isVoxelObj && physicsOptions.shape == AUTOSHAPE)){
-      std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ")" << std::endl;
-      rigidBody = addRigidBodyRect(
-        world.physicsEnvironment, 
-        calcOffsetFromRotation(physicsInfo.transformation.position, groupPhysicsInfo.physicsInfo.offset, physicsInfo.transformation.rotation), 
-        physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin, 
-        physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin, 
-        physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin,
-        physicsInfo.transformation.rotation,
-        physicsOptions.isStatic,
-        physicsOptions.hasCollisions,
-        physicsInfo.transformation.scale, 
-        opts
-      );
-    }else if (physicsOptions.shape == SPHERE){
-      std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
-      rigidBody = addRigidBodySphere(
-        world.physicsEnvironment, 
-        calcOffsetFromRotation(physicsInfo.transformation.position, groupPhysicsInfo.physicsInfo.offset, physicsInfo.transformation.rotation),
-        calculateRadiusForScale(
-          glm::vec3(
-            (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), 
-            (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin), 
-            (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)
-          )
-        ) / 2.f,                             
-        physicsInfo.transformation.rotation,
-        physicsOptions.isStatic,
-        physicsOptions.hasCollisions,
-        physicsInfo.transformation.scale,
-        opts
-      );
-    }else if (physicsOptions.shape == CAPSULE){
-      std::cout << "INFO: PHYSICS: ADDING CAPSULE RIGID BODY" << std::endl;
-      rigidBody = addRigidBodyCapsule(
-        world.physicsEnvironment,
-        maxvalue(
+  if (isHeightmapObj){
+    rigidBody = addRigidBodyHeightmap(
+      world.physicsEnvironment,
+      calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
+      physicsInfo.transformation.rotation,
+      physicsOptions.isStatic,
+      opts,
+      heightmapObj -> heightmap.data,
+      heightmapObj -> heightmap.width, 
+      heightmapObj -> heightmap.height,
+      physicsInfo.transformation.scale,
+      heightmapObj -> heightmap.minHeight,
+      heightmapObj -> heightmap.maxHeight
+    );
+  }else if (physicsOptions.shape == BOX || (!isVoxelObj && physicsOptions.shape == AUTOSHAPE)){
+    std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ")" << std::endl;
+    rigidBody = addRigidBodyRect(
+      world.physicsEnvironment, 
+      calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation), 
+      physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin, 
+      physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin, 
+      physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin,
+      physicsInfo.transformation.rotation,
+      physicsOptions.isStatic,
+      physicsOptions.hasCollisions,
+      physicsInfo.transformation.scale, 
+      opts
+    );
+  }else if (physicsOptions.shape == SPHERE){
+    std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
+    rigidBody = addRigidBodySphere(
+      world.physicsEnvironment, 
+      calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
+      calculateRadiusForScale(
+        glm::vec3(
           (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), 
-          0.f,
+          (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin), 
           (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)
-        ) / 2.f,
-        (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) ,
-        calcOffsetFromRotation(physicsInfo.transformation.position, groupPhysicsInfo.physicsInfo.offset, physicsInfo.transformation.rotation),
-        physicsInfo.transformation.rotation,
-        physicsOptions.isStatic,
-        physicsOptions.hasCollisions,
-        physicsInfo.transformation.scale,
-        opts
-      );
-    }else if (physicsOptions.shape == CYLINDER){
-      std::cout << "INFO: PHYSICS: ADDING CYLINDER RIGID BODY" << std::endl;
-      rigidBody = addRigidBodyCylinder(
-        world.physicsEnvironment,
-        maxvalue(
-          (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), 
-          0.f,
-          (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)
-        ) / 2.f,
-        (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin),
-        calcOffsetFromRotation(physicsInfo.transformation.position, groupPhysicsInfo.physicsInfo.offset, physicsInfo.transformation.rotation),
-        physicsInfo.transformation.rotation,
-        physicsOptions.isStatic,
-        physicsOptions.hasCollisions,
-        physicsInfo.transformation.scale,
-        opts
-      );
-    }else if (physicsOptions.shape == CONVEXHULL){
-      auto verts = vertOpts.has_value() ? vertOpts.value() : std::vector<glm::vec3>();
-      if (verts.size() == 0){
-         return PhysicsValue { .body = NULL, .offset = std::nullopt };
-      }
-
-      // This is a hack, but it should be ok.  UpdatePhysicsBody really only need to apply for voxels and heightmaps as of writing this
-      // I don't have easy scope to the list of verts here, so I'd rather not reload the model (or really keep them in mem for no reason) just 
-      // for this, which is unused.  Probably should just change the usage of the voxel/heightmap refresh code eventually.
-      assert(initialLoad);  
-      std::cout << "INFO: PHYSICS: ADDING CONVEXHULL RIGID BODY" << std::endl;
-      rigidBody = addRigidBodyHull(
-        world.physicsEnvironment,
-        verts,
-        calcOffsetFromRotation(physicsInfo.transformation.position, groupPhysicsInfo.physicsInfo.offset, physicsInfo.transformation.rotation),
-        physicsInfo.transformation.rotation,
-        physicsOptions.isStatic,
-        physicsOptions.hasCollisions,
-        physicsInfo.transformation.scale,
-        opts
-      );
-    }else if (physicsOptions.shape == SHAPE_EXACT){
-      auto verts = vertOpts.has_value() ? vertOpts.value() : std::vector<glm::vec3>();
-      //auto verts = vertsForId(world, id);
-
-      if (verts.size() == 0){
-         return PhysicsValue { .body = NULL, .offset = std::nullopt };
-      }
-
-      assert(initialLoad);
-      std::cout << "INFO: PHYSICS: ADDING SHAPE_EXACT RIGID BODY" << std::endl;
-      rigidBody = addRigidBodyExact(
-        world.physicsEnvironment,
-        verts,
-        calcOffsetFromRotation(physicsInfo.transformation.position, groupPhysicsInfo.physicsInfo.offset, physicsInfo.transformation.rotation),
-        physicsInfo.transformation.rotation,
-        physicsOptions.isStatic,
-        physicsOptions.hasCollisions,
-        physicsInfo.transformation.scale,
-        opts
-      );
-    }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
-      std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
-      rigidBody = addRigidBodyVoxel(
-        world.physicsEnvironment, 
-        calcOffsetFromRotation(physicsInfo.transformation.position, groupPhysicsInfo.physicsInfo.offset, physicsInfo.transformation.rotation),
-        physicsInfo.transformation.rotation,
-        getVoxelBodies(std::get_if<GameObjectVoxel>(&toRender) -> voxel),
-        physicsOptions.isStatic,
-        physicsOptions.hasCollisions,
-        physicsInfo.transformation.scale,
+        )
+      ) / 2.f,                             
+      physicsInfo.transformation.rotation,
+      physicsOptions.isStatic,
+      physicsOptions.hasCollisions,
+      physicsInfo.transformation.scale,
+      opts
+    );
+  }else if (physicsOptions.shape == CAPSULE){
+    std::cout << "INFO: PHYSICS: ADDING CAPSULE RIGID BODY" << std::endl;
+    rigidBody = addRigidBodyCapsule(
+      world.physicsEnvironment,
+      maxvalue(
+        (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), 
+        0.f,
+        (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)
+      ) / 2.f,
+      (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) ,
+      calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
+      physicsInfo.transformation.rotation,
+      physicsOptions.isStatic,
+      physicsOptions.hasCollisions,
+      physicsInfo.transformation.scale,
+      opts
+    );
+  }else if (physicsOptions.shape == CYLINDER){
+    std::cout << "INFO: PHYSICS: ADDING CYLINDER RIGID BODY" << std::endl;
+    rigidBody = addRigidBodyCylinder(
+      world.physicsEnvironment,
+      maxvalue(
+        (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), 
+        0.f,
+        (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)
+      ) / 2.f,
+      (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin),
+      calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
+      physicsInfo.transformation.rotation,
+      physicsOptions.isStatic,
+      physicsOptions.hasCollisions,
+      physicsInfo.transformation.scale,
+      opts
+    );
+  }else if (physicsOptions.shape == CONVEXHULL){
+    auto verts = vertsForId(world, id);
+    modassert(verts.size() == 0, "rigid body shape exact - but no verts");
+    if (verts.size() == 0){
+       return PhysicsValue { .body = NULL, .offset = std::nullopt };
+    }
+    // This is a hack, but it should be ok.  UpdatePhysicsBody really only need to apply for voxels and heightmaps as of writing this
+    // I don't have easy scope to the list of verts here, so I'd rather not reload the model (or really keep them in mem for no reason) just 
+    // for this, which is unused.  Probably should just change the usage of the voxel/heightmap refresh code eventually.
+    assert(initialLoad);  
+    std::cout << "INFO: PHYSICS: ADDING CONVEXHULL RIGID BODY" << std::endl;
+    rigidBody = addRigidBodyHull(
+      world.physicsEnvironment,
+      verts,
+      calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
+      physicsInfo.transformation.rotation,
+      physicsOptions.isStatic,
+      physicsOptions.hasCollisions,
+      physicsInfo.transformation.scale,
+      opts
+    );
+  }else if (physicsOptions.shape == SHAPE_EXACT){
+    auto verts = vertsForId(world, id);
+    modassert(verts.size() == 0, "rigid body shape exact - but no verts");
+    if (verts.size() == 0){
+       return PhysicsValue { .body = NULL, .offset = std::nullopt };
+    }
+    assert(initialLoad);
+    std::cout << "INFO: PHYSICS: ADDING SHAPE_EXACT RIGID BODY" << std::endl;
+    rigidBody = addRigidBodyExact(
+      world.physicsEnvironment,
+      verts,
+      calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
+      physicsInfo.transformation.rotation,
+      physicsOptions.isStatic,
+      physicsOptions.hasCollisions,
+      physicsInfo.transformation.scale,
+      opts
+    );
+  }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
+    std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
+    rigidBody = addRigidBodyVoxel(
+      world.physicsEnvironment, 
+      calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
+      physicsInfo.transformation.rotation,
+      getVoxelBodies(std::get_if<GameObjectVoxel>(&toRender) -> voxel),
+      physicsOptions.isStatic,
+      physicsOptions.hasCollisions,
+      physicsInfo.transformation.scale,
         opts
       );
     }
-  }
+  
 
   PhysicsValue phys {
     .body = NULL,
-    .offset = groupPhysicsInfo.physicsInfo.offset,
+    .offset = physicsInfo.offset,
   };
   if (rigidBody != NULL){
     phys.body = rigidBody;
@@ -336,7 +316,7 @@ void updatePhysicsBody(World& world, objid id){
     assert(rigidBody != NULL);
     rmRigidBody(world, id);
   }
-  addPhysicsBody(world, id, false, {});
+  world.rigidbodys.at(id) = addPhysicsBody(world, id, false);
 }
 
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
@@ -762,7 +742,6 @@ void addObjectToWorld(
   std::string topName,
   std::function<objid()> getId,
   GameobjAttributes attr,
-  std::map<objid, std::vector<glm::vec3>>& idToModelVertexs,
   std::map<std::string, GameobjAttributes>& submodelAttributes,
   ModelData* data,
   std::string rootMeshName,
@@ -786,14 +765,13 @@ void addObjectToWorld(
       std::cout << "Custom texture loading: " << texturepath << std::endl;
       return loadTextureWorld(world, texturepath, id);
     };
-    auto ensureMeshLoaded = [&world, sceneId, id, name, topName, getId, &attr, &idToModelVertexs, &submodelAttributes, data, &rootMeshName, returnObjectOnly, &returnobjs](std::string meshName, bool* _isRoot) -> std::vector<std::string> {
+    auto ensureMeshLoaded = [&world, sceneId, id, name, topName, getId, &attr, &submodelAttributes, data, &rootMeshName, returnObjectOnly, &returnobjs](std::string meshName, bool* _isRoot) -> std::vector<std::string> {
       *_isRoot = data == NULL;
       if (meshName == ""){
         return {};
       }
       if (data == NULL){
         ModelData data = loadModelPath(world, name, meshName); 
-        idToModelVertexs[id] = getVertexsFromModelData(data);
         if (data.animations.size() > 0){
           world.animations[id] = data.animations;
         }
@@ -819,7 +797,7 @@ void addObjectToWorld(
 
         std::cout << "id is: " << id << std::endl;
         for (auto &[name, objAttr] : newSerialObjs){
-          addObjectToWorld(world, sceneId, objAttr.id, name, topName, getId, objAttr.attr, idToModelVertexs, submodelAttributes, &data, meshName, returnObjectOnly, returnobjs);
+          addObjectToWorld(world, sceneId, objAttr.id, name, topName, getId, objAttr.attr, submodelAttributes, &data, meshName, returnObjectOnly, returnobjs);
         }
         std::cout << std::endl;
         return meshNamesForNode(data, meshName, name);
@@ -890,24 +868,19 @@ void addSerialObjectsToWorld(
   //  std::cout << "submodel attr: " << name << std::endl;
   //}
 
-  std::map<objid, std::vector<glm::vec3>> idToModelVertexs;
   for (auto &[name, objAttr] : nameToAttr){
     // Warning: getNewObjectId will mutate the idsAdded.  
     //std::cout << "add serial: " << name << std::endl;
     //std::cout << print(objAttr.attr) << std::endl;
     //std::cout << std::endl;
-    addObjectToWorld(world, sceneId, objAttr.id, name, name, getNewObjectId, objAttr.attr, idToModelVertexs, submodelAttributes, NULL, "", returnObjectOnly, gameobjObjs);
+    addObjectToWorld(world, sceneId, objAttr.id, name, name, getNewObjectId, objAttr.attr, submodelAttributes, NULL, "", returnObjectOnly, gameobjObjs);
   }
   if (returnObjectOnly){
     return;
   }
 
-  std::optional<std::vector<glm::vec3>> modelVerts = std::nullopt;
   for (auto &id : idsAdded){
-    if (idToModelVertexs.find(id) != idToModelVertexs.end()){
-      modelVerts = idToModelVertexs.at(id);
-    }
-    auto phys = addPhysicsBody(world, id, true, modelVerts); 
+    auto phys = addPhysicsBody(world, id, true); 
     if (phys.body != NULL){   // why do I need this?
       auto transform = fullTransformation(world.sandbox, id);
       setTransform(world.physicsEnvironment, phys.body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation), transform.scale, transform.rotation);

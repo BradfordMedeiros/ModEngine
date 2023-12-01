@@ -81,3 +81,12 @@ Transformation interpolate(Transformation transform1, Transformation transform2,
 std::string print(Vertex& vertex){
   return std::string("[ pos =  ") + print(vertex.position) + ", normal = " + print(vertex.normal) + ", texCoords = " + print(vertex.texCoords) + "]";
 }
+
+void compareEqualVertices(std::vector<glm::vec3>& verts1, std::vector<glm::vec3>& verts2){
+  modassert(verts1.size() == verts2.size(), "vertices not same size, size1 = " + std::to_string(verts1.size()) + ", size2 = " + std::to_string(verts2.size()));
+  for (int i = 0; i < verts1.size(); i++){
+    if (!aboutEqual(verts1.at(i), verts2.at(i))){
+      modassert(false, "vertices not equal");
+    }
+  }
+}

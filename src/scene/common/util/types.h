@@ -81,5 +81,6 @@ Transformation interpolate(Transformation transform1, Transformation transform2,
 
 
 std::string print(Vertex& vertex);
+void compareEqualVertices(std::vector<glm::vec3>& verts1, std::vector<glm::vec3>& verts2);
 
 #endif
