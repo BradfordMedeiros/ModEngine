@@ -357,9 +357,8 @@ std::vector<Vertex> readVertsFromMeshVao(Mesh& mesh){
   std::vector<Vertex> vertices;
   vertices.resize(mesh.numVertices);
 
-  std::cout << "num vertices read: " << mesh.numVertices << std::endl;
+  //std::cout << "num vertices read: " << mesh.numVertices << std::endl;
   glGetBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * mesh.numVertices, &(vertices[0]));
-
 
   std::vector<unsigned int> indices;
   indices.resize(mesh.numIndices);
@@ -373,13 +372,13 @@ std::vector<Vertex> readVertsFromMeshVao(Mesh& mesh){
     vertexs.push_back(vertices.at(index));
   }
 
-  std::cout << "readVertsFromMeshVao  - " << vertices.size() << ", " << indices.size() << " [" << std::endl;
-  for (auto index : indices){
-    std::cout << "index: " << index << " -- " << print(vertices.at(index)) << std::endl;
-  }
-  std::cout << "]" << std::endl;
-
-  std::cout << "num vertices out: " << vertexs.size() << ", num indicies was: " << mesh.numIndices << std::endl;
+  //std::cout << "readVertsFromMeshVao  - " << vertices.size() << ", " << indices.size() << " [" << std::endl;
+  //for (auto index : indices){
+  //  std::cout << "index: " << index << " -- " << print(vertices.at(index)) << std::endl;
+  //}
+  //std::cout << "]" << std::endl;
+//
+  //std::cout << "num vertices out: " << vertexs.size() << ", num indicies was: " << mesh.numIndices << std::endl;
   modassert(vertexs.size() % 3 == 0, "vertices must be a multiple of 3");
 
   return vertexs;
