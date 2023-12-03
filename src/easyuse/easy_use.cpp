@@ -2,24 +2,49 @@
 
 EasyUseInfo createEasyUse(){
   return EasyUseInfo {
-    .currentAngleIndex = 0,
+    .currentAngle = 45,
     .currentTranslateIndex = 0,
     .currentScaleIndex = 0,
   };
 }
 
 static std::vector<int> snapAngles = { 1, 5, 15, 30, 45, 90, 180 };
+
+std::optional<int> findAngleIndex(int angle){
+  for (int i = 0; i < snapAngles.size(); i++){
+    if (angle == snapAngles.at(i)){
+      return i;
+    }
+  }
+  return std::nullopt;
+}
+
 void setSnapAngleUp(EasyUseInfo& easyUse){
-  easyUse.currentAngleIndex = (easyUse.currentAngleIndex + 1) % snapAngles.size();
-  std::cout << "Snap angle is now: " << snapAngles.at(easyUse.currentAngleIndex) << std::endl;
+  auto currentAngleIndex = findAngleIndex(easyUse.currentAngle);
+  if (!currentAngleIndex.has_value()){
+    easyUse.currentAngle = snapAngles.at(0);
+    return;
+  }
+  int nextAngleIndex = (currentAngleIndex.value() + 1) % snapAngles.size();
+  easyUse.currentAngle = snapAngles.at(nextAngleIndex);
+  std::cout << "Snap angle is now: " << easyUse.currentAngle << std::endl;
 }
 void setSnapAngleDown(EasyUseInfo& easyUse){
-  easyUse.currentAngleIndex = (easyUse.currentAngleIndex - 1);
-  if (easyUse.currentAngleIndex < 0){
-    easyUse.currentAngleIndex = snapAngles.size() - 1;
+  auto currentAngleIndex = findAngleIndex(easyUse.currentAngle);
+  if (!currentAngleIndex.has_value()){
+    easyUse.currentAngle = snapAngles.at(0);
+    return;
   }
-  std::cout << "Snap angle is now: " << snapAngles.at(easyUse.currentAngleIndex) << std::endl;
+
+  int nextAngleIndex = currentAngleIndex.value() - 1;
+  if (nextAngleIndex < 0){
+    nextAngleIndex = snapAngles.size() - 1;
+  }
+  
+  easyUse.currentAngle = snapAngles.at(nextAngleIndex);
+  std::cout << "Snap angle is now: " << easyUse.currentAngle << std::endl;
 }
+
 float getClosestAngle(float angle, int snapAngle, bool isUp){
   int numIterations = (360 / snapAngle) + 1;
   float current = angle < 0 ? (360 + angle) : angle;
@@ -45,7 +70,7 @@ float getClosestAngle(float angle, int snapAngle, bool isUp){
 }
 glm::quat snapAngle(EasyUseInfo& easyUse, glm::quat angle, Axis rotationAxis, bool isUp, SNAPPING_MODE mode){
   glm::vec3 euler = glm::degrees(glm::eulerAngles(angle));
-  auto deltaAngle = snapAngles.at(easyUse.currentAngleIndex);
+  auto deltaAngle = easyUse.currentAngle;
   if (mode == SNAP_RELATIVE){
     auto multiplier = isUp ? 1.f : -1.f;
     if (rotationAxis == NOAXIS || rotationAxis == XAXIS){
@@ -137,7 +162,8 @@ glm::vec3 snapVector(glm::vec3 position, float snapAmount){
 }
 
 glm::quat snapRotate(EasyUseInfo& easyUse, glm::quat newRotation, Axis snapAxis, float extraRadians){
-  auto deltaAngle = snapAngles.at(easyUse.currentAngleIndex);
+  std::cout << "snap rotate, angle is: " << easyUse.currentAngle << std::endl;
+  auto deltaAngle = easyUse.currentAngle;
   bool snapX = snapAxis == XAXIS || snapAxis == NOAXIS;
   bool snapY = snapAxis == YAXIS || snapAxis == NOAXIS;
   bool snapZ = snapAxis == ZAXIS || snapAxis == NOAXIS;

@@ -308,7 +308,7 @@ std::vector<ObjectStateMapping> mapping = {
   simpleIntSerializer("rendering", "fontsize", offsetof(engineState, fontsize)),
   simpleBoolSerializer("editor", "showgrid", offsetof(engineState, showGrid)),
   simpleIntSerializer("editor", "gridsize", offsetof(engineState, gridSize)),
-  simpleIntSerializer("editor", "snapangle-index", offsetof(engineState, easyUse.currentAngleIndex)),
+  simpleFloatSerializer("editor", "snapangle", offsetof(engineState, easyUse.currentAngle)),
   simpleIntSerializer("editor", "snaptranslate-index", offsetof(engineState, easyUse.currentTranslateIndex)),
   simpleIntSerializer("editor", "snapscale-index", offsetof(engineState, easyUse.currentScaleIndex)),
   ObjectStateMapping {

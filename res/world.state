@@ -87,7 +87,7 @@ tools:terrainpaint-smoothing:false
 tools:terrainpaint-brush:./res/brush/ramp_5x5.png
 
 #editor:snapscale-index:0
-#editor:snapangle-index:10
+editor:snapangle:10
 
 
 

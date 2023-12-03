@@ -8,7 +8,7 @@
 #include "../translations.h"
 
 struct EasyUseInfo {
-	int currentAngleIndex;
+	float currentAngle;
 	int currentTranslateIndex;
 	int currentScaleIndex;
 };
