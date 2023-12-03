@@ -9,7 +9,7 @@
 
 struct EasyUseInfo {
 	float currentAngle;
-	int currentTranslateIndex;
+	float currentTranslate;
 	int currentScaleIndex;
 };
 
