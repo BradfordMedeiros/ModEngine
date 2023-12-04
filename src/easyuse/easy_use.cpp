@@ -5,6 +5,7 @@ EasyUseInfo createEasyUse(){
     .currentAngle = 45.f,
     .currentTranslate = 0.1f,
     .currentScale = 0.01f,
+    .orientation = std::nullopt,
   };
 }
 
@@ -271,8 +272,11 @@ glm::vec3 snapScale(EasyUseInfo& easyUse, glm::vec3 scale){
   return snapVector(scale, easyUse.currentScale);
 }
 
-float getSnapTranslateSize(EasyUseInfo& easyUse){
-  return easyUse.currentTranslate;
+SnapCoordSystem getSnapTranslateSize(EasyUseInfo& easyUse){
+  return SnapCoordSystem {
+    .orientation = easyUse.orientation,
+    .size = easyUse.currentTranslate,
+  };
 }
 
 void setSnapEasyUseUp(EasyUseInfo& easyUse, ManipulatorMode manipulatorMode){
@@ -293,6 +297,10 @@ void setSnapEasyUseDown(EasyUseInfo& easyUse, ManipulatorMode manipulatorMode){
   }else if (manipulatorMode == SCALE){
     setSnapScaleDown(easyUse);
   }
+}
+
+void setSnapCoordinateSystem(EasyUseInfo& easyUse, glm::quat orientation){
+  easyUse.orientation = orientation;
 }
 
 

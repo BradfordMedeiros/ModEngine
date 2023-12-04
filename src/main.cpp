@@ -488,16 +488,17 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model, int numC
     for (auto id : selectedIds(state.editor)){
       auto selectedObj = id;
       if (selectedObj != -1){
-        float snapGridSize = getSnapTranslateSize(state.easyUse);
+        auto snapCoord = getSnapTranslateSize(state.easyUse);
+        float snapGridSize = snapCoord.size;
         if (snapGridSize > 0){
           auto position = getGameObjectPosition(selectedObj, false);
 
           if (state.manipulatorAxis == XAXIS){
-            drawGridXY(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z);  
+            drawGridXY(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z, snapCoord.orientation);  
           }else if (state.manipulatorAxis == YAXIS){
-            drawGridXZ(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z);  
+            drawGridXZ(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z, snapCoord.orientation);  
           }else if (state.manipulatorAxis == ZAXIS){
-            drawGridYZ(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z);  
+            drawGridYZ(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z, snapCoord.orientation);  
           }else{
             drawGrid3D(state.gridSize, snapGridSize, position.x, position.y, position.z);  
           }

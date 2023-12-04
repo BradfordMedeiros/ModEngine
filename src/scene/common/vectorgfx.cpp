@@ -57,7 +57,17 @@ int drawSphere(){                  // lots of repeat code here, should generaliz
   return drawLines(allLines);
 }
 
-void drawGridXY(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ){   
+void applyOrientationToLines(std::vector<Line>& allLines, std::optional<glm::quat> orientation){
+  if (!orientation.has_value()){
+    return;
+  }
+  for (auto &line : allLines){
+    line.fromPos = orientation.value() * line.fromPos;
+    line.toPos = orientation.value() * line.toPos;
+  }
+}
+
+void drawGridXY(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ, std::optional<glm::quat> orientation){   
   float centeringOffsetX = -1.f * (cellSize * numCellsWidth) / 2.f;
   float centeringOffsetY = -1.f * (cellSize * numCellsHeight) / 2.f;
 
@@ -74,10 +84,11 @@ void drawGridXY(int numCellsWidth, int numCellsHeight, float cellSize, float off
       .toPos = glm::vec3(centeringOffsetX + (i * cellSize) + offsetX, centeringOffsetY + (numCellsHeight * cellSize) + offsetY, 0 + offsetZ),
     });
   }
+  applyOrientationToLines(allLines, orientation);
   drawLines(allLines);
 }
 
-void drawGridXZ(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ){
+void drawGridXZ(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ, std::optional<glm::quat> orientation){
   float centeringOffsetX = -1.f * (cellSize * numCellsWidth) / 2.f;
   float centeringOffsetZ = -1.f * (cellSize * numCellsHeight) / 2.f;
 
@@ -94,10 +105,11 @@ void drawGridXZ(int numCellsWidth, int numCellsHeight, float cellSize, float off
       .toPos = glm::vec3(centeringOffsetX + (i * cellSize) + offsetX, offsetY, centeringOffsetZ + (numCellsHeight * cellSize) +  offsetZ),
     });
   }
+  applyOrientationToLines(allLines, orientation);
   drawLines(allLines);
 }
 
-void drawGridYZ(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ){
+void drawGridYZ(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ, std::optional<glm::quat> orientation){
   float centeringOffsetY = -1.f * (cellSize * numCellsWidth) / 2.f;
   float centeringOffsetZ = -1.f * (cellSize * numCellsHeight) / 2.f;
 
@@ -114,17 +126,18 @@ void drawGridYZ(int numCellsWidth, int numCellsHeight, float cellSize, float off
       .toPos = glm::vec3(offsetX, (i * cellSize) + centeringOffsetY + offsetY, centeringOffsetZ + (numCellsHeight * cellSize) +  offsetZ),
     });
   }
+  applyOrientationToLines(allLines, orientation);
   drawLines(allLines);
 }
 
 void drawGrid3D(int numCellsWidth, float cellSize, float offsetX, float offsetY, float offsetZ){
   for (int i = 0; i <= numCellsWidth; i++){
     float centeredOffsetY = -1.f * (numCellsWidth * cellSize) / 2.f;
-    drawGridXZ(numCellsWidth, numCellsWidth, cellSize, offsetX, centeredOffsetY + i * cellSize + offsetY, offsetZ);
+    drawGridXZ(numCellsWidth, numCellsWidth, cellSize, offsetX, centeredOffsetY + i * cellSize + offsetY, offsetZ, std::nullopt);
   }
   for (int i = 0; i <= numCellsWidth; i++){
     float centeredOffsetZ = -1.f * (numCellsWidth * cellSize) / 2.f;
-    drawGridXY(numCellsWidth, numCellsWidth, cellSize, offsetX, offsetY, centeredOffsetZ + i * cellSize + offsetZ);
+    drawGridXY(numCellsWidth, numCellsWidth, cellSize, offsetX, offsetY, centeredOffsetZ + i * cellSize + offsetZ, std::nullopt);
   }
 }
 
