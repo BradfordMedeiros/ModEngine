@@ -845,13 +845,13 @@ ManipulatorTools tools {
   .setScale = [](int32_t index, glm::vec3 scale) -> void { setGameObjectScale(index, scale, true); },
   .getRotation = [](objid id) -> glm::quat { return getGameObjectRotation(id, false); },
   .setRotation = [](objid id, glm::quat rot) -> void { setGameObjectRotation(id, rot, true); },
-  .snapPosition = [&state](glm::vec3 pos) -> glm::vec3 {
+  .snapPosition = [](glm::vec3 pos) -> glm::vec3 {
     return snapTranslate(state.easyUse, pos);
   },
-  .snapScale = [&state](glm::vec3 scale) -> glm::vec3 {
+  .snapScale = [](glm::vec3 scale) -> glm::vec3 {
     return snapScale(state.easyUse, scale);
   },
-  .snapRotate = [&state](glm::quat rot, Axis snapAxis, float extraRadians) -> glm::quat {
+  .snapRotate = [](glm::quat rot, Axis snapAxis, float extraRadians) -> glm::quat {
     return snapRotate(state.easyUse, rot, snapAxis, extraRadians);
   },
   .drawLine = [](glm::vec3 frompos, glm::vec3 topos, LineColor color) -> void {
@@ -859,6 +859,9 @@ ManipulatorTools tools {
       state.manipulatorLineId = getUniqueObjId();
     }
     addLineToNextCycle(lineData, frompos, topos, true, state.manipulatorLineId, color, std::nullopt);
+  },
+  .getSnapRotation = []() -> std::optional<glm::quat> { 
+    return getSnapTranslateSize(state.easyUse).orientation; 
   },
   .clearLines = []() -> void {
     if (state.manipulatorLineId != 0){
@@ -1358,10 +1361,10 @@ int main(int argc, char* argv[]){
   world = createWorld(
     onObjectEnter, 
     onObjectLeave, 
-    [&world](GameObject& obj) -> void {
+    [](GameObject& obj) -> void {
       netObjectUpdate(world, obj, netcode, bootStrapperMode);
     }, 
-    [&world](GameObject& obj) -> void {
+    [](GameObject& obj) -> void {
       netObjectCreate(world, obj, netcode, bootStrapperMode);
       cBindings.onObjectAdded(obj.id);
     },

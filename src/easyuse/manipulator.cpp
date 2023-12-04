@@ -257,9 +257,14 @@ void updateManipulatorToCurrentObjTranslate(ManipulatorData& manipulatorState, M
   modassert(selectedObjs.mainObj.has_value(), "manipulator selected obj main value does not have a value");
   tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()), true);
   if (!update.options.relativePositionMode){
-    tools.setRotation(manipulatorId, MOD_ORIENTATION_FORWARD);
+    auto snapRotation = tools.getSnapRotation();
+    if (snapRotation.has_value()){
+      tools.setRotation(manipulatorId, snapRotation.value());
+    }else{
+      tools.setRotation(manipulatorId, MOD_ORIENTATION_FORWARD);
+    }
   }else{
-    tools.setRotation(manipulatorState.manipulatorId, tools.getRotation(selectedObjs.mainObj.value()));
+    tools.setRotation(manipulatorId, tools.getRotation(selectedObjs.mainObj.value()));
   }
 }
 void updateManipulatorToCurrentObjScale(ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update){

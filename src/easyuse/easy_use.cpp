@@ -299,7 +299,7 @@ void setSnapEasyUseDown(EasyUseInfo& easyUse, ManipulatorMode manipulatorMode){
   }
 }
 
-void setSnapCoordinateSystem(EasyUseInfo& easyUse, glm::quat orientation){
+void setSnapCoordinateSystem(EasyUseInfo& easyUse, std::optional<glm::quat> orientation){
   easyUse.orientation = orientation;
 }
 

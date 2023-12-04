@@ -20,6 +20,7 @@ struct ManipulatorTools {
   std::function<glm::vec3(glm::vec3)> snapScale;
   std::function<glm::quat(glm::quat, Axis, float)> snapRotate;
   std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine;
+  std::function<std::optional<glm::quat>()> getSnapRotation;
   std::function<void()> clearLines;
   std::function<void(objid)> removeObjectById; 
   std::function<objid(void)> makeManipulator;
