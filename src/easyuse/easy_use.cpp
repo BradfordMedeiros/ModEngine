@@ -4,7 +4,7 @@ EasyUseInfo createEasyUse(){
   return EasyUseInfo {
     .currentAngle = 45.f,
     .currentTranslate = 0.1f,
-    .currentScaleIndex = 0,
+    .currentScale = 0.01f,
   };
 }
 
@@ -229,26 +229,46 @@ glm::vec3 snapTranslate(EasyUseInfo& easyUse, glm::vec3 position){
 }
 
 static std::vector<float> snapScales = { 0.01, 0.1, 0.5, 1, 5, 10 };
+
+std::optional<int> findScaleIndex(float scale){
+  for (int i = 0; i < snapScales.size(); i++){
+    if (aboutEqual(scale, snapScales.at(i))){
+      return i;
+    }
+  }
+  return std::nullopt;
+}
 void setSnapScaleUp(EasyUseInfo& easyUse){
-  easyUse.currentScaleIndex = (easyUse.currentScaleIndex + 1) % snapScales.size();
-  std::cout << "Snap scale is now: " << snapScales.at(easyUse.currentScaleIndex) << std::endl;
+  auto index = findScaleIndex(easyUse.currentScale);
+  if (!index.has_value()){
+    easyUse.currentScale = snapScales.at(0);
+    return;
+  }
+  easyUse.currentScale = snapScales.at((index.value() + 1) % snapScales.size());
+  std::cout << "Snap scale is now: " << easyUse.currentScale << std::endl;
 }
 void setSnapScaleDown(EasyUseInfo& easyUse){
-  easyUse.currentScaleIndex = (easyUse.currentScaleIndex - 1);
-  if (easyUse.currentScaleIndex < 0){
-    easyUse.currentScaleIndex = snapScales.size() - 1;
+  auto index = findScaleIndex(easyUse.currentScale);
+  if (!index.has_value()){
+    easyUse.currentScale = snapScales.at(0);
+    return;
   }
-  std::cout << "Snap scale is now: " << snapScales.at(easyUse.currentScaleIndex) << std::endl;
+  auto nextIndex = index.value() - 1;
+  if (nextIndex < 0){
+    nextIndex = snapScales.size() - 1;
+  }
+  easyUse.currentScale = snapScales.at(nextIndex);
+  std::cout << "Snap scale is now: " << easyUse.currentScale << std::endl;
 }
 glm::vec3 snapScaleUp(EasyUseInfo& easyUse, SNAPPING_MODE mode, glm::vec3 currentScale, Axis translationAxis){
-  return snapVector(currentScale, translationAxis, true, snapScales.at(easyUse.currentScaleIndex), mode);
+  return snapVector(currentScale, translationAxis, true, easyUse.currentScale, mode);
 }
 glm::vec3 snapScaleDown(EasyUseInfo& easyUse, SNAPPING_MODE mode, glm::vec3 currentScale, Axis translationAxis){
-  return snapVector(currentScale, translationAxis, false, snapScales.at(easyUse.currentScaleIndex), mode);
+  return snapVector(currentScale, translationAxis, false, easyUse.currentScale, mode);
 }
 glm::vec3 snapScale(EasyUseInfo& easyUse, glm::vec3 scale){
-  auto snapAmount = snapScales.at(easyUse.currentScaleIndex);
-  return snapVector(scale, snapAmount);
+  std::cout << "snap scale, scale is: " << easyUse.currentScale << std::endl;
+  return snapVector(scale, easyUse.currentScale);
 }
 
 float getSnapTranslateSize(EasyUseInfo& easyUse){

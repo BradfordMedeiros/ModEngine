@@ -310,7 +310,7 @@ std::vector<ObjectStateMapping> mapping = {
   simpleIntSerializer("editor", "gridsize", offsetof(engineState, gridSize)),
   simpleFloatSerializer("editor", "snapangle", offsetof(engineState, easyUse.currentAngle)),
   simpleFloatSerializer("editor", "snaptranslate", offsetof(engineState, easyUse.currentTranslate)),
-  simpleIntSerializer("editor", "snapscale-index", offsetof(engineState, easyUse.currentScaleIndex)),
+  simpleFloatSerializer("editor", "snapscale", offsetof(engineState, easyUse.currentScale)),
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto selectedIndexStr = std::get_if<std::string>(&value);

@@ -10,7 +10,7 @@
 struct EasyUseInfo {
 	float currentAngle;
 	float currentTranslate;
-	int currentScaleIndex;
+	float currentScale;
 };
 
 EasyUseInfo createEasyUse();
@@ -31,6 +31,8 @@ float getSnapTranslateSize(EasyUseInfo& easyUse);
 
 void setSnapEasyUseUp(EasyUseInfo& easyUse, ManipulatorMode manipulatorMode);
 void setSnapEasyUseDown(EasyUseInfo& easyUse, ManipulatorMode manipulatorMode);
+
+void setSnapCoordinateSystem(glm::vec3 offset, glm::quat orientation);
 
 void snapCameraForward(std::function<void(glm::quat)> orientation);
 void snapCameraBackward(std::function<void(glm::quat)> orientation);

@@ -69,7 +69,6 @@ rendering:cull:disabled
 
 editor:showgrid:true
 editor:gridsize:40
-editor:snaptranslate-index:4
 tools:manipulator-mode:translate
 tools:manipulator-axis:x
 
@@ -86,8 +85,9 @@ tools:terrainpaint-radius:1
 tools:terrainpaint-smoothing:false
 tools:terrainpaint-brush:./res/brush/ramp_5x5.png
 
-#editor:snapscale-index:0
+editor:snapscale:1
 editor:snapangle:10
+editor:snaptranslate:1.7
 
 
 
