@@ -152,7 +152,7 @@ Transformation getInitialTransformation(ManipulatorData& manipulatorState, objid
   return Transformation {};
 }
 
-glm::vec3 projectAndVisualize(ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update){
+glm::vec3 projectAndVisualize(ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update, bool applyOrientation){
   auto selectedObjs = tools.getSelectedIds();
   modassert(selectedObjs.mainObj.has_value(), "should not be in translate state with the obj selected");
   ProjectCursorDebugInfo projectCursorInfo{};
@@ -164,7 +164,7 @@ glm::vec3 projectAndVisualize(ManipulatorData& manipulatorState, ManipulatorTool
     manipulatorState.manipulatorObject, 
     getInitialTransformation(manipulatorState, selectedObjs.mainObj.value()).position, 
     &projectCursorInfo,
-    tools.getSnapRotation()
+    applyOrientation ? tools.getSnapRotation() : std::nullopt
   );
   drawProjectionVisualization(tools.drawLine, projectCursorInfo);
   return projectedPosition;
@@ -311,7 +311,7 @@ std::vector<ManipulatorState> manipulatorStates = {
     .onState = [](ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update) -> void {
       modassert(update.selectedObjs.mainObj.has_value(), "cannot have no obj selected in this mode");
       
-      auto projectedPositionRaw = projectAndVisualize(manipulatorState, tools, update);
+      auto projectedPositionRaw = projectAndVisualize(manipulatorState, tools, update, true);
       if (!manipulatorState.initialDragPosition.has_value()){
          manipulatorState.initialDragPosition = projectedPositionRaw;
       }
@@ -368,7 +368,7 @@ std::vector<ManipulatorState> manipulatorStates = {
       modassert(update.selectedObjs.mainObj.has_value(), "cannot have no obj selected in this mode");
       modassert(manipulatorState.manipulatorId != 0, "manipulator must exist in this mode");
 
-      auto projectedPosition = projectAndVisualize(manipulatorState, tools, update);
+      auto projectedPosition = projectAndVisualize(manipulatorState, tools, update, false);
       if (!manipulatorState.initialDragPosition.has_value()){
          manipulatorState.initialDragPosition = projectedPosition;
       }
