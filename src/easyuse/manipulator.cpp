@@ -48,35 +48,37 @@ void onManipulatorMouseRelease(ManipulatorData& manipulatorState){
 
 void onManipulatorEvent(ManipulatorData& manipulatorState, ManipulatorTools& tools, MANIPULATOR_EVENT event){
   auto selectedObjs = tools.getSelectedIds();
+  auto snapRotation = tools.getSnapRotation();
+  auto adjustedOrientation = snapRotation.has_value() ? snapRotation.value() : MOD_ORIENTATION_FORWARD;
   if (event == OBJECT_ORIENT_UP){
     modlog("manipulator", "event - object_orient_up");
     for (auto id: selectedObjs.selectedIds){
-      tools.setRotation(id, quatFromDirection(glm::vec3(0.f, 1.f, 0.f)));
+      tools.setRotation(id, adjustedOrientation * quatFromDirection(glm::vec3(0.f, 1.f, 0.f)));
     }
   }else if (event == OBJECT_ORIENT_DOWN){
     modlog("manipulator", "event - object_orient_down");
     for (auto id: selectedObjs.selectedIds){
-      tools.setRotation(id, quatFromDirection(glm::vec3(0.f, -1.f, 0.f)));
+      tools.setRotation(id, adjustedOrientation * quatFromDirection(glm::vec3(0.f, -1.f, 0.f)));
     }
   }else if (event == OBJECT_ORIENT_RIGHT){
     modlog("manipulator", "event - object_orient_right");
     for (auto id: selectedObjs.selectedIds){
-      tools.setRotation(id, quatFromDirection(glm::vec3(1.f, 0.f, 0.f)));
+      tools.setRotation(id, adjustedOrientation * quatFromDirection(glm::vec3(1.f, 0.f, 0.f)));
     }
   }else if (event == OBJECT_ORIENT_LEFT){
     modlog("manipulator", "event - object_orient_left");
     for (auto id: selectedObjs.selectedIds){
-      tools.setRotation(id, quatFromDirection(glm::vec3(-1.f, 0.f, 0.f)));
+      tools.setRotation(id, adjustedOrientation * quatFromDirection(glm::vec3(-1.f, 0.f, 0.f)));
     }
   }else if (event == OBJECT_ORIENT_FORWARD){
     modlog("manipulator", "event - object_orient_forward");
     for (auto id: selectedObjs.selectedIds){
-      tools.setRotation(id, quatFromDirection(glm::vec3(0.f, 0.f, -1.f)));
+      tools.setRotation(id, adjustedOrientation * quatFromDirection(glm::vec3(0.f, 0.f, -1.f)));
     }
   }else if (event == OBJECT_ORIENT_BACK){
     modlog("manipulator", "event - object_orient_back");
     for (auto id: selectedObjs.selectedIds){
-      tools.setRotation(id, quatFromDirection(glm::vec3(0.f, 0.f, 1.f)));
+      tools.setRotation(id, adjustedOrientation * quatFromDirection(glm::vec3(0.f, 0.f, 1.f)));
     }
   }
 }
