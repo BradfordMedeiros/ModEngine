@@ -534,6 +534,13 @@ AttributeValue parseAttributeValue(std::string payload){
   if (isVec){
     return vec;
   }
+
+  glm::vec4 vec4(0.f, 0.f, 0.f, 0.f);
+  bool isVec4 = maybeParseVec4(payload, vec4);
+  if (isVec4){
+    return vec4;
+  }
+
   float number = 0.f;
   bool isFloat = maybeParseFloat(payload, number);
   if (isFloat){

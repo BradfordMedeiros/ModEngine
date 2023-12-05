@@ -912,12 +912,6 @@ std::vector<InputDispatch> inputFns = {
       std::cout << "camera fast: " << state.cameraFast << std::endl;
       cameraSpeed = state.cameraFast ? 1.f : 0.1f;
       sendAlert(std::string("camera speed: ") + (state.cameraFast ? "fast" : "slow"));
-
-      static bool enableNonDefault = false;
-      enableNonDefault = !enableNonDefault;
-
-      setSnapCoordinateSystem(state.easyUse, enableNonDefault ? quatFromDirection(glm::vec3(1.f, 0.f, -1.f)) : std::optional<glm::quat>(std::nullopt));
-
     }
   },  
   InputDispatch{

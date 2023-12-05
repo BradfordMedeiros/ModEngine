@@ -311,6 +311,21 @@ std::vector<ObjectStateMapping> mapping = {
   simpleFloatSerializer("editor", "snapangle", offsetof(engineState, easyUse.currentAngle)),
   simpleFloatSerializer("editor", "snaptranslate", offsetof(engineState, easyUse.currentTranslate)),
   simpleFloatSerializer("editor", "snapscale", offsetof(engineState, easyUse.currentScale)),
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto vec4Rotation = std::get_if<glm::vec4>(&value);
+      modassert(vec4Rotation, "vec4 rotation is null");
+      setSnapCoordinateSystem(state.easyUse, parseQuat(*vec4Rotation));
+    },
+    .getAttr = [](engineState& state) -> AttributeValue { 
+      if (state.easyUse.orientation.has_value()){
+        return serializeQuat(state.easyUse.orientation.value()); 
+      }
+      return glm::vec4(0.f, 0.f, -1.f, 0.f);
+    },
+    .object = "editor",
+    .attribute = "grid",
+  },
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto selectedIndexStr = std::get_if<std::string>(&value);

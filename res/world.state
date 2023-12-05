@@ -69,12 +69,15 @@ rendering:cull:disabled
 
 editor:showgrid:true
 editor:gridsize:40
+editor:grid:1 0 -1 0
+
+
 tools:manipulator-mode:translate
 tools:manipulator-axis:x
 
 #tools:preserve-scale:true
 tools:snap-position:relative    # none relative absolute
-#tools:position-mirror:true  # true/false     
+tools:position-mirror:true  # true/false     
 #tools:snap-scale:true
 tools:snap-rotate:relative     # none relative absolute
 tools:scale-group:group
