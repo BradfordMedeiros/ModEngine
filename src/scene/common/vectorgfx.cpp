@@ -74,17 +74,25 @@ void drawGridXY(int numCellsWidth, int numCellsHeight, float cellSize, float off
   std::vector<Line> allLines;
   for (unsigned int i = 0 ; i < (numCellsHeight + 1); i++){
     allLines.push_back(Line {                                                   
-      .fromPos = glm::vec3(centeringOffsetX + offsetX, centeringOffsetY + (i * cellSize) + offsetY, 0 + offsetZ), 
-      .toPos = glm::vec3(centeringOffsetX + (numCellsWidth * cellSize) + offsetX, centeringOffsetY + (i * cellSize) + offsetY, 0 + offsetZ),
+      .fromPos = glm::vec3(centeringOffsetX, centeringOffsetY + (i * cellSize), 0), 
+      .toPos = glm::vec3(centeringOffsetX + (numCellsWidth * cellSize), centeringOffsetY + (i * cellSize), 0),
     });
   }
   for (unsigned int i = 0 ; i < (numCellsWidth + 1); i++){
     allLines.push_back(Line { 
-      .fromPos = glm::vec3(centeringOffsetX + (i * cellSize) + offsetX, centeringOffsetY + offsetY, 0 + offsetZ), 
-      .toPos = glm::vec3(centeringOffsetX + (i * cellSize) + offsetX, centeringOffsetY + (numCellsHeight * cellSize) + offsetY, 0 + offsetZ),
+      .fromPos = glm::vec3(centeringOffsetX + (i * cellSize), centeringOffsetY, 0), 
+      .toPos = glm::vec3(centeringOffsetX + (i * cellSize), centeringOffsetY + (numCellsHeight * cellSize), 0),
     });
   }
   applyOrientationToLines(allLines, orientation);
+  for (auto &line : allLines){
+    line.fromPos.x += offsetX;
+    line.fromPos.y += offsetY;
+    line.fromPos.z += offsetZ;
+    line.toPos.x += offsetX;
+    line.toPos.y += offsetY;
+    line.toPos.z += offsetZ;
+  }
   drawLines(allLines);
 }
 
@@ -95,17 +103,26 @@ void drawGridXZ(int numCellsWidth, int numCellsHeight, float cellSize, float off
   std::vector<Line> allLines;
   for (unsigned int i = 0 ; i < (numCellsHeight + 1); i++){
     allLines.push_back(Line {                                                   
-      .fromPos = glm::vec3(centeringOffsetX + offsetX, offsetY, centeringOffsetZ + (i * cellSize) + offsetZ), 
-      .toPos = glm::vec3(centeringOffsetX + (numCellsWidth * cellSize) + offsetX, offsetY, centeringOffsetZ + (i * cellSize) + offsetZ),
+      .fromPos = glm::vec3(centeringOffsetX, 0.f, centeringOffsetZ + (i * cellSize) + 0.f), 
+      .toPos = glm::vec3(centeringOffsetX + (numCellsWidth * cellSize), 0.f, centeringOffsetZ + (i * cellSize)),
     });
   }
   for (unsigned int i = 0 ; i < (numCellsWidth + 1); i++){
     allLines.push_back(Line { 
-      .fromPos = glm::vec3(centeringOffsetX + (i * cellSize) + offsetX, 0 + offsetY, centeringOffsetZ + offsetZ), 
-      .toPos = glm::vec3(centeringOffsetX + (i * cellSize) + offsetX, offsetY, centeringOffsetZ + (numCellsHeight * cellSize) +  offsetZ),
+      .fromPos = glm::vec3(centeringOffsetX + (i * cellSize), 0 , centeringOffsetZ), 
+      .toPos = glm::vec3(centeringOffsetX + (i * cellSize), 0.f, centeringOffsetZ + (numCellsHeight * cellSize)),
     });
   }
+
   applyOrientationToLines(allLines, orientation);
+  for (auto &line : allLines){
+    line.fromPos.x += offsetX;
+    line.fromPos.y += offsetY;
+    line.fromPos.z += offsetZ;
+    line.toPos.x += offsetX;
+    line.toPos.y += offsetY;
+    line.toPos.z += offsetZ;
+  }
   drawLines(allLines);
 }
 
@@ -116,17 +133,25 @@ void drawGridYZ(int numCellsWidth, int numCellsHeight, float cellSize, float off
   std::vector<Line> allLines;
   for (unsigned int i = 0 ; i < (numCellsHeight + 1); i++){
     allLines.push_back(Line {                                                   
-      .fromPos = glm::vec3(offsetX, centeringOffsetY + offsetY, centeringOffsetZ + (i * cellSize) + offsetZ), 
-      .toPos = glm::vec3(offsetX, (numCellsWidth * cellSize) + centeringOffsetY + offsetY, centeringOffsetZ + (i * cellSize) + offsetZ),
+      .fromPos = glm::vec3(0.f, centeringOffsetY, centeringOffsetZ + (i * cellSize)), 
+      .toPos = glm::vec3(0.f, (numCellsWidth * cellSize) + centeringOffsetY, centeringOffsetZ + (i * cellSize)),
     });
   }
   for (unsigned int i = 0 ; i < (numCellsWidth + 1); i++){
     allLines.push_back(Line { 
-      .fromPos = glm::vec3(offsetX, (i * cellSize) + centeringOffsetY + offsetY, centeringOffsetZ + offsetZ), 
-      .toPos = glm::vec3(offsetX, (i * cellSize) + centeringOffsetY + offsetY, centeringOffsetZ + (numCellsHeight * cellSize) +  offsetZ),
+      .fromPos = glm::vec3(0.f, (i * cellSize) + centeringOffsetY, centeringOffsetZ), 
+      .toPos = glm::vec3(0.f, (i * cellSize) + centeringOffsetY, centeringOffsetZ + (numCellsHeight * cellSize)),
     });
   }
   applyOrientationToLines(allLines, orientation);
+  for (auto &line : allLines){
+    line.fromPos.x += offsetX;
+    line.fromPos.y += offsetY;
+    line.fromPos.z += offsetZ;
+    line.toPos.x += offsetX;
+    line.toPos.y += offsetY;
+    line.toPos.z += offsetZ;
+  }
   drawLines(allLines);
 }
 
