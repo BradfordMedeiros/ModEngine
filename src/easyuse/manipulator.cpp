@@ -243,9 +243,9 @@ bool isPositivePartition(glm::vec3 meanPosition, glm::vec3 position, Axis axis){
   return true;
 }
 
-void visualizePartitionPlane(ManipulatorData& manipulatorState, ManipulatorTools& tools, glm::vec3 meanPosition){
+void visualizePartitionPlane(ManipulatorData& manipulatorState, ManipulatorTools& tools, glm::vec3 meanPosition, glm::quat adjustedOrientation){
   float size = 100.f;
-  auto orientation = axisToOrientation(manipulatorState.manipulatorObject);
+  auto orientation = adjustedOrientation * axisToOrientation(manipulatorState.manipulatorObject);
   auto cornerBottomLeft = size * (orientation * glm::vec3 (-1.f, -1.f, 0.f)) + meanPosition;
   auto cornerTopLeft = size * (orientation * glm::vec3 (-1.f, 1.f, 0.f)) + meanPosition;
   auto cornerTopRight = size * (orientation * glm::vec3 (1.f, 1.f, 0.f)) + meanPosition;
@@ -328,7 +328,8 @@ std::vector<ManipulatorState> manipulatorStates = {
 
       auto translateMirror = update.options.translateMirror && update.selectedObjs.selectedIds.size() > 1;
       if (translateMirror){
-        visualizePartitionPlane(manipulatorState, tools, meanPosition);  
+        auto orientation = tools.getSnapRotation();
+        visualizePartitionPlane(manipulatorState, tools, meanPosition, orientation.has_value() ? orientation.value() : MOD_ORIENTATION_FORWARD);  
       }
 
       auto mainObjOnPositivePartition = isPositivePartition(meanPosition, getInitialTransformation(manipulatorState, update.selectedObjs.mainObj.value()).position, manipulatorState.manipulatorObject);
