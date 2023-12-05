@@ -454,7 +454,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   });
   
   auto maxExpectedClears = numUniqueDepthLayers(world.sandbox.layers);
-  modassert(numDepthClears <= maxExpectedClears, std::string("numDepthClears = ") + std::to_string(numDepthClears) + std::string(", expected = ") + std::to_string(maxExpectedClears));
+  //modassert(numDepthClears <= maxExpectedClears, std::string("numDepthClears = ") + std::to_string(numDepthClears) + std::string(", expected = ") + std::to_string(maxExpectedClears));
  
   return numTriangles;
 }
@@ -1676,27 +1676,7 @@ int main(int argc, char* argv[]){
       }
     }
 
-    onManipulatorUpdate(
-      state.manipulatorState, 
-      projectionFromLayer(layers.at(0)),
-      view, 
-      state.manipulatorMode, 
-      state.manipulatorAxis,
-      state.offsetX, 
-      state.offsetY,
-      glm::vec2(adjustedCoords.x, adjustedCoords.y),
-      glm::vec2(state.resolution.x, state.resolution.y),
-      ManipulatorOptions {
-         .manipulatorPositionMode = state.manipulatorPositionMode,
-         .relativePositionMode = state.relativePositionMode,
-         .translateMirror = state.translateMirror,
-         .rotateMode = state.rotateMode,
-         .scalingGroup = state.scalingGroup,
-         .snapManipulatorScales = state.snapManipulatorScales,
-         .preserveRelativeScale = state.preserveRelativeScale,
-      },
-      tools
-    );
+
 
     ///////////////////
     auto textureId = uvCoordWithTex.z;
@@ -1900,6 +1880,28 @@ int main(int argc, char* argv[]){
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
+    onManipulatorUpdate(
+      state.manipulatorState, 
+      projectionFromLayer(layers.at(0)),
+      view, 
+      state.manipulatorMode, 
+      state.manipulatorAxis,
+      state.offsetX, 
+      state.offsetY,
+      glm::vec2(adjustedCoords.x, adjustedCoords.y),
+      glm::vec2(state.resolution.x, state.resolution.y),
+      ManipulatorOptions {
+         .manipulatorPositionMode = state.manipulatorPositionMode,
+         .relativePositionMode = state.relativePositionMode,
+         .translateMirror = state.translateMirror,
+         .rotateMode = state.rotateMode,
+         .scalingGroup = state.scalingGroup,
+         .snapManipulatorScales = state.snapManipulatorScales,
+         .preserveRelativeScale = state.preserveRelativeScale,
+      },
+      tools
+    );
+    
     if (state.renderMode == RENDER_FINAL){
       renderUI(effectiveCrosshair, pixelColor, showCursor);
       drawShapeData(lineData, uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);

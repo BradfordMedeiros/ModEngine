@@ -211,7 +211,7 @@ bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2F
   return false;
 }
 
-glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec3 lockvalues, ProjectCursorDebugInfo* _debugInfo){
+glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec3 lockvalues, ProjectCursorDebugInfo* _debugInfo, std::optional<glm::quat> orientation){
   auto positionFrom4 = glm::inverse(view) * glm::vec4(0.f, 0.f, 0.f, 1.0);
   glm::vec3 positionFrom(positionFrom4.x, positionFrom4.y, positionFrom4.z);
   auto selectDir = getCursorRayDirection(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y);
@@ -223,6 +223,10 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
     targetDir = glm::vec3(0.f, 1.f, 0.f);
   }else if (manipulatorAxis == ZAXIS){
     targetDir = glm::vec3(0.f, 0.f, -1.f);
+  }
+
+  if (orientation.has_value()){
+    targetDir = orientation.value() * targetDir;
   }
 
   auto radians = glm::acos(glm::dot(selectDir, glm::normalize(targetDir)));
@@ -244,17 +248,26 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
   auto distanceToAdjTarget = glm::distance(positionFrom, adjTargetPos);
   auto distanceFinal = distanceToAdjTarget / glm::sin(radians);
   auto offsetFinal = selectDir * distanceFinal;
-  auto finalPosition = positionFrom + offsetFinal;
 
   if (manipulatorAxis == XAXIS){
-    lockvalues.x = finalPosition.x;
+    offsetFinal.y = 0.f;
+    offsetFinal.z = 0.f;
   }
   if (manipulatorAxis == YAXIS){
-    lockvalues.y = finalPosition.y;
+    offsetFinal.x = 0.f;
+    offsetFinal.z = 0.f;
   }
   if (manipulatorAxis == ZAXIS){
-    lockvalues.z = finalPosition.z;
+    offsetFinal.x = 0.f;
+    offsetFinal.y = 0.f;
   }
+
+  if (orientation.has_value()){
+    offsetFinal = orientation.value() * offsetFinal;
+  }
+
+  auto finalPosition = positionFrom + offsetFinal;
+
 
   if (_debugInfo != NULL){
     _debugInfo -> positionFrom = positionFrom;
@@ -264,7 +277,7 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
     _debugInfo -> selectDir = selectDir;
     _debugInfo -> targetAxis = targetDir;
   }
-  return lockvalues;
+  return finalPosition;
 }
 
 glm::quat quatFromDirection(glm::vec3 direction){ 

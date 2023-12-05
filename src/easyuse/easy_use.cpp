@@ -165,10 +165,11 @@ glm::vec3 snapVectorAxis(EasyUseInfo& easyUse, glm::vec3 current, Axis translati
 }
 
 glm::vec3 snapVector(glm::vec3 position, float snapAmount){
-  float newX = getClosestPosition(position.x, snapAmount);    
+  float newX = getClosestPosition(position.x, snapAmount);
   float newY = getClosestPosition(position.y, snapAmount);    
   float newZ = getClosestPosition(position.z, snapAmount);    
   auto snappedPosition = glm::vec3(newX, newY, newZ);
+
   //std::cout << "Current snapAmount: " << snapAmount << std::endl;
   //std::cout << "rounding:" << print(position) << " to " << print(snappedPosition) << std::endl;
   return snappedPosition;
@@ -236,7 +237,15 @@ glm::vec3 snapTranslateDown(EasyUseInfo& easyUse, SNAPPING_MODE mode, glm::vec3 
 
 glm::vec3 snapTranslate(EasyUseInfo& easyUse, glm::vec3 position){
   std::cout << "snap translate, translate is: " << easyUse.currentTranslate << std::endl;
-  return snapVector(position, easyUse.currentTranslate);
+  if (easyUse.orientation.has_value()){
+    position = easyUse.orientation.value() * position;
+  }
+  auto snappedPosition = snapVector(position, easyUse.currentTranslate);
+  if (easyUse.orientation.has_value()){
+    snappedPosition = glm::inverse(easyUse.orientation.value()) * snappedPosition;
+  }
+
+  return snappedPosition;
 }
 
 static std::vector<float> snapScales = { 0.01, 0.1, 0.5, 1, 5, 10 };

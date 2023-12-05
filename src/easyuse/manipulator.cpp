@@ -154,7 +154,16 @@ glm::vec3 projectAndVisualize(ManipulatorData& manipulatorState, ManipulatorTool
   auto selectedObjs = tools.getSelectedIds();
   modassert(selectedObjs.mainObj.has_value(), "should not be in translate state with the obj selected");
   ProjectCursorDebugInfo projectCursorInfo{};
-  auto projectedPosition =  projectCursorPositionOntoAxis(update.projection, update.cameraViewMatrix, update.cursorPos, update.screensize, manipulatorState.manipulatorObject, getInitialTransformation(manipulatorState, selectedObjs.mainObj.value()).position, &projectCursorInfo);
+  auto projectedPosition =  projectCursorPositionOntoAxis(
+    update.projection, 
+    update.cameraViewMatrix, 
+    update.cursorPos, 
+    update.screensize, 
+    manipulatorState.manipulatorObject, 
+    getInitialTransformation(manipulatorState, selectedObjs.mainObj.value()).position, 
+    &projectCursorInfo,
+    tools.getSnapRotation()
+  );
   drawProjectionVisualization(tools.drawLine, projectCursorInfo);
   return projectedPosition;
 }
@@ -304,6 +313,7 @@ std::vector<ManipulatorState> manipulatorStates = {
       if (!manipulatorState.initialDragPosition.has_value()){
          manipulatorState.initialDragPosition = projectedPositionRaw;
       }
+      
       auto meanPosition = manipulatorState.meanPosition.has_value() ? manipulatorState.meanPosition.value() : calcMeanPosition(idToPositions(update.selectedObjs.selectedIds, tools.getPosition));
       manipulatorState.meanPosition = meanPosition;
 
@@ -314,6 +324,7 @@ std::vector<ManipulatorState> manipulatorStates = {
       auto manipulatorPos =  (update.options.manipulatorPositionMode == SNAP_ABSOLUTE) ? tools.snapPosition(oldManipulatorPos + positionDiff) : (oldManipulatorPos + positionDiff);
       auto actualPositionDiff = manipulatorPos - oldManipulatorPos;
       tools.setPosition(manipulatorState.manipulatorId, manipulatorPos, true);
+
 
       auto translateMirror = update.options.translateMirror && update.selectedObjs.selectedIds.size() > 1;
       if (translateMirror){
