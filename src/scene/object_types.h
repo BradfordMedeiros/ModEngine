@@ -195,6 +195,7 @@ int renderObject(
   bool showBoneWeight,
   bool useBoneTransform,
   unsigned int portalTexture,
+  unsigned int navmeshTexture,
   glm::mat4 model,
   bool drawPoints,
   std::function<int(GLint, objid, std::string, unsigned int, float, AlignType, TextWrap, TextVirtualization, UiTextCursor, std::string, bool)> drawWord,

@@ -162,6 +162,8 @@ struct engineState {
   
   bool disableInput;
   bool escapeQuits;
+
+  std::optional<unsigned int> navmeshTextureId;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

@@ -256,6 +256,7 @@ int renderObject(
   bool showBoneWeight,
   bool useBoneTransform,
   unsigned int portalTexture,
+  unsigned int navmeshTexture,
   glm::mat4 model,
   bool drawPoints,
   std::function<int(GLint, objid, std::string, unsigned int, float, AlignType, TextWrap, TextVirtualization, UiTextCursor, std::string, bool)> drawWord,
@@ -393,7 +394,7 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
 
 
-    drawMesh(navmeshObj -> mesh, shaderProgram, -1);    
+    drawMesh(navmeshObj -> mesh, shaderProgram, navmeshTexture);    
     return navmeshObj -> mesh.numTriangles;
   }
 

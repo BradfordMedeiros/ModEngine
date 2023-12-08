@@ -643,12 +643,15 @@ void previousTexture(){
   previousTexture(drawParams);
 }
 
+void setNavmeshTexture(unsigned int textureId){
+  state.navmeshTextureId = textureId;
+}
 void setTexture(objid index, std::string textureName){
-  setTexture(world, index, textureName);
+  setTexture(world, index, textureName, setNavmeshTexture);
 }
 void maybeChangeTexture(int index){
   auto textureName = worldTextures(world).at(drawParams.activeTextureIndex).textureName;
-  setTexture(world, index, textureName);
+  setTexture(world, index, textureName, setNavmeshTexture);
 }
 
 void setState(std::string stateName){

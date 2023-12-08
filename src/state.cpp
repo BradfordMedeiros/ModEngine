@@ -480,6 +480,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .muteSound = false,
     .disableInput = false,
     .escapeQuits = false,
+    .navmeshTextureId = std::nullopt,
 	};
 	return state;
 }

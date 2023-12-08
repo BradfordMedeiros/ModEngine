@@ -307,7 +307,7 @@ std::optional<std::string> lookupNormalTexture(World& world, std::string texture
   return fullNormalPath;
 }
 
-void setTexture(World& world, objid index, std::string textureName){
+void setTexture(World& world, objid index, std::string textureName, std::function<void(unsigned int)> setNavmeshTextureId){
   auto textureId = loadTextureWorld(world, textureName, index).textureId;
   auto normalTextureName = lookupNormalTexture(world, textureName);
   std::optional<Texture> normalTexture = std::nullopt;
@@ -331,6 +331,11 @@ void setTexture(World& world, objid index, std::string textureName){
     if (heightmapObj != NULL){
       heightmapObj -> texture.loadingInfo.textureString = textureName;
       heightmapObj -> texture.loadingInfo.textureId = textureId;       
+    }
+
+    GameObjectNavmesh* navmeshObj = std::get_if<GameObjectNavmesh>(&world.objectMapping.at(id));
+    if (navmeshObj != NULL){
+      setNavmeshTextureId(textureId);
     }
   }
 }

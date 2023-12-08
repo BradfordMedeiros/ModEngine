@@ -160,6 +160,8 @@ glm::vec3 moveRelative(glm::vec3 posFrom, glm::quat orientation, glm::vec3 vec);
 void nextTexture();
 void previousTexture();
 void maybeChangeTexture(int index);
+
+void setNavmeshTexture(unsigned int);
 void setTexture(objid index, std::string textureName);
 
 void setState(std::string stateName);
