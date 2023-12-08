@@ -5,7 +5,22 @@ platform:scale:100 1 100
 platform:position:0 -5 0
 platform:physics:enabled
 
+platform2:mesh:./res/models/box/box.obj
+platform2:scale:2 2 2
+platform2:position:0 0 0
+#platform2:physics:enabled
+#platform2:physics_type:dynamic
+
+platform3:mesh:./res/models/box/box.obj
+platform3:scale:2 2 2
+platform3:position:6 0 0
+platform3:physics:enabled
+platform3:physics_type:dynamic
+
+
+#
 ;navmesh1:position:0 -3 1
+;navmesh1:scale:5 5 5
 ;navmesh1:physics:enabled
 ;navmesh1:physics_shape:shape_exact
 

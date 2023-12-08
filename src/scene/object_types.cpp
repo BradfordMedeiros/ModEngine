@@ -382,12 +382,17 @@ int renderObject(
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&toRender);
   if (navmeshObj != NULL){
+
     glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);    
+
+    glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+
+
     drawMesh(navmeshObj -> mesh, shaderProgram, -1);    
     return navmeshObj -> mesh.numTriangles;
   }
@@ -493,19 +498,37 @@ std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){
   return indicies;
 }
 
+
+static std::string EMPTY_STR = "";
 NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id){  
+  static std::string NULL_STR = "";
+
   std::vector<std::reference_wrapper<std::string>> meshNames;
   std::vector<std::reference_wrapper<Mesh>> meshes;
 
   GameObjectObj& gameObj = mapping.at(id);
-  auto meshObject = std::get_if<GameObjectMesh>(&gameObj);
 
-  if (meshObject != NULL){
-    for (int i = 0; i < meshObject -> meshesToRender.size(); i++){
-      meshNames.push_back(meshObject -> meshNames.at(i));
-      meshes.push_back(meshObject -> meshesToRender.at(i));
+  {
+    auto meshObject = std::get_if<GameObjectMesh>(&gameObj);
+    if (meshObject != NULL){
+      for (int i = 0; i < meshObject -> meshesToRender.size(); i++){
+        meshNames.push_back(meshObject -> meshNames.at(i));
+        meshes.push_back(meshObject -> meshesToRender.at(i));
+      }
+      goto returndata;
     }
   }
+
+  {
+    auto navmeshObject = std::get_if<GameObjectNavmesh>(&gameObj);
+    if (navmeshObject != NULL){
+      meshNames.push_back(EMPTY_STR); // this should just be an optional array... need to clean up getmeshees in general
+      meshes.push_back(navmeshObject -> mesh);
+    }
+    goto returndata;
+  }
+
+returndata:
 
   NameAndMesh meshData {
     .meshNames = meshNames,

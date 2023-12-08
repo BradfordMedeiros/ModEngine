@@ -34,6 +34,8 @@ struct Mesh {
   int numTriangles;
   int numVertices;  // if this is < 0, invalid don't depend on
   int numIndices;   // if this is < 0, invalid don't depend on
+
+  //std::vector<Vertex> debugVertexs;
 };
 
 struct MeshRef {
@@ -78,5 +80,7 @@ unsigned int loadFullscreenQuadVAO();  // TODO - maybe make an unload...but in p
 unsigned int loadFullscreenQuadVAO3D();
 
 std::vector<Vertex> readVertsFromMeshVao(Mesh& mesh);
+
+std::string print(Mesh& mesh);
 
 #endif 

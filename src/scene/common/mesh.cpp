@@ -106,6 +106,7 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
     .numTriangles = numTriangles,
     .numVertices = meshData.vertices.size(),
     .numIndices = meshData.indices.size(),
+    //.debugVertexs = meshData.vertices,
   }; 
 
   return mesh; 
@@ -157,6 +158,7 @@ Mesh load2DMesh(std::string imagePath, float vertices[], unsigned int indices[],
     .numTriangles = numIndices / 3,
     .numVertices = -1,
     .numIndices = -1,
+    //.debugVertexs = {},
   };
 
   return mesh;
@@ -216,6 +218,7 @@ void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsi
   glBindTexture(GL_TEXTURE_2D, normalTextureId);
 
   glActiveTexture(GL_TEXTURE0); 
+
   glDrawElements(GL_TRIANGLES, mesh.numElements, GL_UNSIGNED_INT, 0);
 
   if (drawPoints){
@@ -348,24 +351,28 @@ unsigned int loadFullscreenQuadVAO3D(){
 }
 
 std::vector<Vertex> readVertsFromMeshVao(Mesh& mesh){
+  modlog("read verts", std::string("num verts = ") + std::to_string(mesh.numVertices) + ", num indicies = " + std::to_string(mesh.numIndices));
   if (mesh.numVertices <= 0 || mesh.numIndices <= 0){
     modassert(false, "no vertices in mesh vao");
     return {};
   }
-  glBindBuffer(GL_ARRAY_BUFFER, mesh.VBOPointer);
+
+  glBindVertexArray(mesh.VAOPointer); 
 
   std::vector<Vertex> vertices;
   vertices.resize(mesh.numVertices);
 
   //std::cout << "num vertices read: " << mesh.numVertices << std::endl;
-  glGetBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * mesh.numVertices, &(vertices[0]));
+
+  glBindBuffer(GL_ARRAY_BUFFER, mesh.VBOPointer);
+  glGetBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * mesh.numVertices, &(vertices.at(0)));
 
   std::vector<unsigned int> indices;
   indices.resize(mesh.numIndices);
 
-  unsigned int EBO;
+  std::cout << "read verts debug: " << print(mesh) << std::endl;
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.EBOPointer);
-  glGetBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(unsigned int) * mesh.numIndices, &(indices[0]));
+  glGetBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(unsigned int) * mesh.numIndices, &(indices.at(0)));
 
   std::vector<Vertex> vertexs;
   for (auto index : indices){
@@ -377,9 +384,24 @@ std::vector<Vertex> readVertsFromMeshVao(Mesh& mesh){
   //  std::cout << "index: " << index << " -- " << print(vertices.at(index)) << std::endl;
   //}
   //std::cout << "]" << std::endl;
-//
-  //std::cout << "num vertices out: " << vertexs.size() << ", num indicies was: " << mesh.numIndices << std::endl;
   modassert(vertexs.size() % 3 == 0, "vertices must be a multiple of 3");
-
   return vertexs;
+}
+
+std::string print(Mesh& mesh){
+  std::string value = "";
+  value += "vbo = " + std::to_string(mesh.VBOPointer) + "\n";
+  value += "ebo = " + std::to_string(mesh.EBOPointer) + "\n";
+  value += "numVertices = " + std::to_string(mesh.numVertices) + "\n";
+  value += "numIndices = " + std::to_string(mesh.numIndices) + "\n";
+  value += "numElements = " + std::to_string(mesh.numElements) + "\n";
+  value += "bones.size = " + std::to_string(mesh.bones.size()) + "\n";
+  value += "hasDiffuseTexture = " + print(mesh.hasDiffuseTexture) + "\n";
+  value += "hasEmissionTexture = " + print(mesh.hasEmissionTexture) + "\n";
+  value += "hasOpacityTexture = " + print(mesh.hasOpacityTexture) + "\n";
+  value += "hasCubemapTexture = " + print(mesh.hasCubemapTexture) + "\n";
+  value += "hasRoughnessTexture = " + print(mesh.hasRoughnessTexture) + "\n";
+  value += "hasNormalTexture = " + print(mesh.hasNormalTexture) + "\n";
+
+  return value;
 }
