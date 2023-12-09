@@ -12,7 +12,6 @@
 #include "../translations.h"
 #include "../common/util.h"
 #include "./sysinterface.h"
-#include "./types/ainav.h"
 #include "./sprites/sprites.h"
 #include "./common/util/meshgen.h"
 #include "./scene_sandbox.h"

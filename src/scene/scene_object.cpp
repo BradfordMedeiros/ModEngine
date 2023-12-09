@@ -187,21 +187,6 @@ std::string print(std::optional<objid> id){
 }
 
 std::optional<glm::vec3> aiNavigate(World& world, objid id, glm::vec3 target){
-  NavGraph  navgraph { };
-
-  bool found = false;
-  for (auto &[_, obj] : world.objectMapping){
-    //auto navConn = std::get_if<GameObjectNavConns>(&obj);
-    //if (navConn != NULL){
-    //  navgraph = navConn -> navgraph;
-    //  found = true;
-    //}
-  }
-  //assert(found);
-
-  auto getName = [&world](objid id) -> std::string {
-    return getGameObject(world, id).name;
-  };
   auto raycastWorld = [&world] (glm::vec3 posFrom, glm::quat direction, float maxDistance) -> std::vector<HitObject> {
     return raycast(world, posFrom, direction, maxDistance);
   };

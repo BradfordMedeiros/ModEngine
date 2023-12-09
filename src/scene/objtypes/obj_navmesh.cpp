@@ -3,6 +3,27 @@
 std::vector<AutoSerialize> navmeshAutoserializer {
 };
 
+
+
+std::optional<objid> targetNavmeshId(glm::vec3 target, raycastFn raycast, std::function<bool(objid)> isNavmesh){
+  auto abitAbove = glm::vec3(target.x, target.y + 1, target.z);
+  auto direction = orientationFromPos(abitAbove, target);
+  auto hitObjects = raycast(abitAbove, direction, 5);
+  for (auto targetObject : hitObjects){
+    if (isNavmesh(targetObject.id)){
+      return targetObject.id;
+    }
+  }
+  return std::nullopt;
+}
+
+glm::vec3 aiNavPosition(objid id, glm::vec3 target, std::function<glm::vec3(objid)> position, raycastFn raycast, std::function<bool(objid)> isNavmesh){
+  auto objectPosition = position(id);
+  auto directionTowardPoint = orientationFromPos(objectPosition, target);
+  return moveRelative(objectPosition, directionTowardPoint, glm::vec3(0.f, 0.f, -0.5f), false);
+
+
+
 Mesh createNavmeshFromPointList(std::vector<glm::vec3> points, ObjectTypeUtil& util){
   std::vector<Vertex> vertices;
   for (int i = 0; i < points.size(); i++){

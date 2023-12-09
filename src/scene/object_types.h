@@ -7,7 +7,6 @@
 #include <vector>
 #include <variant>
 #include "./common/mesh.h"
-#include "./types/ainav.h"
 #include "./serialization.h"
 #include "./objtypes/obj_geo.h"
 #include "./objtypes/obj_camera.h"
