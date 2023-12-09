@@ -178,7 +178,15 @@ GameObjectCamera& getCamera(World& world, objid id){
   return *cameraObj;
 }
 
-glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target){
+
+std::string print(std::optional<objid> id){
+  if (!id.has_value()){
+    return "[no value]";
+  }
+  return std::to_string(id.value());
+}
+
+std::optional<glm::vec3> aiNavigate(World& world, objid id, glm::vec3 target){
   NavGraph  navgraph { };
 
   bool found = false;
@@ -189,7 +197,7 @@ glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target){
     //  found = true;
     //}
   }
-  assert(found);
+  //assert(found);
 
   auto getName = [&world](objid id) -> std::string {
     return getGameObject(world, id).name;
@@ -204,9 +212,26 @@ glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target){
     return fullTransformation(world.sandbox, id).position;
   };
 
-  auto currentMesh = targetNavmesh(position(id), raycastWorld, isNavmeshWorld, getName);
-  auto destinationMesh = targetNavmesh(target, raycastWorld, isNavmeshWorld, getName);
-  if (currentMesh != destinationMesh){
+  auto currentMeshId = targetNavmeshId(position(id), raycastWorld, isNavmeshWorld);
+  auto destinationMeshId = targetNavmeshId(target, raycastWorld, isNavmeshWorld);
+  bool onDestinationNavmesh = currentMeshId == destinationMeshId;
+
+  modlog("ai navigate : currrentMesh id", print(currentMeshId));
+  modlog("ai navigate : destinationMesh id", print(destinationMeshId));
+
+  if (!currentMeshId.has_value()){
+    //modassert(false, "current has no navmesh");
+    goto simpleMoveTo;
+  }
+  if (!destinationMeshId.has_value()){
+    //modassert(false, "destination has no navmesh");
+    goto simpleMoveTo;
+  }
+  if (currentMeshId.value() != destinationMeshId.value()){
+    //modassert(false, "not yet supported");
+
+
+/*
     auto searchResult = aiNavSearchPath(navgraph, currentMesh, destinationMesh);
     if (!searchResult.found || searchResult.path.size() < 2){
       return position(id);
@@ -214,7 +239,13 @@ glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target){
     auto targetNav = searchResult.path.at(1);
     auto targetLink = aiTargetLink(navgraph, currentMesh, targetNav);
     return aiNavPosition(id, targetLink, position, raycastWorld, isNavmeshWorld);
+    */
+    goto simpleMoveTo;
   }
+
+
+simpleMoveTo:
+
   return aiNavPosition(id, target, position, raycastWorld, isNavmeshWorld);
 }
 

@@ -955,7 +955,7 @@ void createGeneratedMesh(std::vector<glm::vec3> face, std::vector<glm::vec3> poi
 }
 
 glm::vec3 navPosition(objid id, glm::vec3 target){
-  return aiNavigate(world, id, target);
+  return aiNavigate(world, id, target).value();
 }
 
 std::vector<VoxelQueryData> getSelectedVoxels(){
