@@ -16,4 +16,6 @@ struct GameObjectNavmesh {
 
 GameObjectNavmesh createNavmesh(GameobjAttributes& attr, ObjectTypeUtil& util);
 
+void printNavmeshDebug();
+
 #endif
