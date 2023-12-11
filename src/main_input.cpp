@@ -1356,6 +1356,9 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       //offlineNewScene("./build/testscene.rawscene");
 
+      printNavmeshDebug();
+
+      return;
       std::cout << "move element with parent" << std::endl;
       /*offlineMoveElementAndChildren(
         "./res/scenes/world/elementwithparent.rawscene", 

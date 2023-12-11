@@ -14,6 +14,7 @@ struct Edge {
 struct NavPlaneConnection {
   objid from;
   objid to;
+  glm::vec3 connectionPoint;
 };
 
 struct NavWorld {
@@ -107,6 +108,20 @@ void removeNavplane(objid navplaneId){
 
 std::vector<Edge> allEdgesForNavplane(NavPlane& navplane){
   std::vector<Edge> edges;
+  for (int i = 0; i < navplane.vertices.size(); i+=3){
+    edges.push_back(Edge {
+      .from = navplane.vertices.at(i),
+      .to = navplane.vertices.at(i + 1),
+    });
+    edges.push_back(Edge {
+      .from = navplane.vertices.at(i),
+      .to = navplane.vertices.at(i + 2),
+    });
+    edges.push_back(Edge {
+      .from = navplane.vertices.at(i + 1),
+      .to = navplane.vertices.at(i + 2),
+    });
+  }
   return edges;
 }
 
@@ -117,23 +132,28 @@ bool edgesAreEqual(Edge& edge1, Edge& edge2){  // would be nice if vertexs don't
   );
 }
 bool hasCommonEdge(std::vector<Edge>& edge1, std::vector<Edge>& edge2){
+  for (int i = 0; i < edge1.size(); i++){
+    for (int j = 0; j < edge2.size(); j++){
+      if (edgesAreEqual(edge1.at(i), edge2.at(j))){
+        return true;
+      }
+    }
+  }
   return false;
 }
 
 void calculateConnections(){
   navWorld.navplaneConnections = {};
   for (int i = 0; i < navWorld.navPlanes.size(); i++){
-    for (int j = 0; j < navWorld.navPlanes.size(); j++){
-      if (i == j){
-        continue;
-      }
+    for (int j = i + 1; j < navWorld.navPlanes.size(); j++){
       auto edges1 = allEdgesForNavplane(navWorld.navPlanes.at(i));
-      auto edges2 = allEdgesForNavplane(navWorld.navPlanes.at(i));
+      auto edges2 = allEdgesForNavplane(navWorld.navPlanes.at(j));
       auto connects = hasCommonEdge(edges1, edges2);
       if (connects){
         navWorld.navplaneConnections.push_back(NavPlaneConnection {
           .from = navWorld.navPlanes.at(i).id,
           .to = navWorld.navPlanes.at(j).id,
+          .connectionPoint = glm::vec3(0.f, 0.f, 0.f), // obviously incorrect
         });
         continue;
       }
@@ -194,7 +214,15 @@ std::string print(NavWorld& navWorld){
     for (auto &vertex : navplane.vertices){
       str += "      " + print(vertex) + "\n";
     }
-    str += "   ]";
+    str += "   ]\n";
+
+    auto edges = allEdgesForNavplane(navplane);
+    str += std::string("   ") + "edges =  [\n";
+    for (auto &edge : edges){
+      str += "      " + print(edge.from) + " | " + print(edge.to) + "\n";
+    }
+
+    str += "   ]\n\n";
   }
   str += "\n]";
 
@@ -241,9 +269,11 @@ GameObjectNavmesh createNavmesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   navmeshId++;
 
   addNavplane(util.id);
-  for (int i = 0; i < mesh1Points.size(); i+= 3){
-    addTriangleToNavPlane(util.id, points.at(0), points.at(1), points.at(2));
+  for (int i = 0; i < points.size(); i+= 3){
+    addTriangleToNavPlane(util.id, points.at(i), points.at(i + 1), points.at(i + 2));
   }
+  calculateConnections();
+  
   GameObjectNavmesh obj {
     .mesh = createNavmeshFromPointList(points, util),
   };
