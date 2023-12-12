@@ -131,15 +131,15 @@ bool edgesAreEqual(Edge& edge1, Edge& edge2){  // would be nice if vertexs don't
     aboutEqual(edge1.from, edge2.to) && aboutEqual(edge1.to, edge2.from)
   );
 }
-bool hasCommonEdge(std::vector<Edge>& edge1, std::vector<Edge>& edge2){
+std::optional<Edge> getCommonEdge(std::vector<Edge>& edge1, std::vector<Edge>& edge2){
   for (int i = 0; i < edge1.size(); i++){
     for (int j = 0; j < edge2.size(); j++){
       if (edgesAreEqual(edge1.at(i), edge2.at(j))){
-        return true;
+        return edge1.at(i);
       }
     }
   }
-  return false;
+  return std::nullopt;
 }
 
 void calculateConnections(){
@@ -148,23 +148,40 @@ void calculateConnections(){
     for (int j = i + 1; j < navWorld.navPlanes.size(); j++){
       auto edges1 = allEdgesForNavplane(navWorld.navPlanes.at(i));
       auto edges2 = allEdgesForNavplane(navWorld.navPlanes.at(j));
-      auto connects = hasCommonEdge(edges1, edges2);
+      auto commonEdge = getCommonEdge(edges1, edges2);
+      auto connects = commonEdge.has_value();
       if (connects){
+        Edge& edge = commonEdge.value();
         navWorld.navplaneConnections.push_back(NavPlaneConnection {
           .from = navWorld.navPlanes.at(i).id,
           .to = navWorld.navPlanes.at(j).id,
-          .connectionPoint = glm::vec3(0.f, 0.f, 0.f), // obviously incorrect
+          .connectionPoint = glm::vec3(0.5f * (edge.from.x + edge.to.x), 0.5f * (edge.from.y + edge.to.y), 0.5f * (edge.from.z + edge.to.z)), // obviously incorrect
         });
         continue;
       }
     }
-
   }
-  // guess go through all the vertices in a navplane, and 
+}
 
-  // check if the edge is shared
-  // or the edge is a subset of the other edge i guess? 
-      // if they're parralel than it is, then just do discrete logic to determine the partition
+struct NavPathElement {
+  objid navplaneId;
+  glm::vec3 point;
+};
+std::optional<std::vector<objid>> findNavplanePath(objid navplaneFrom, objid navplaneTo){
+
+  std::set<objid> visitedNavpaths;
+
+  objid currentNavId = navplaneFrom;
+  for (auto &navconnection : navWorld.navplaneConnections){
+    
+  }
+
+
+  return std::vector<objid>({ 5, 3, 2 });
+}
+
+void drawNavplanePath(std::function<void(glm::vec3, glm::vec3)> drawLine){
+
 }
 
 
@@ -226,9 +243,9 @@ std::string print(NavWorld& navWorld){
   }
   str += "\n]";
 
-  str += "\nconnections = [";
+  str += "\nconnections = [\n";
   for (auto &connection : navWorld.navplaneConnections){
-    str += std::string("(") + std::to_string(connection.from) + " - " + std::to_string(connection.to) + ")";
+    str += std::string("    (") + std::to_string(connection.from) + " - " + std::to_string(connection.to) + ") - " + print(connection.connectionPoint) + "\n";
   }
   str += "\n]";
 
@@ -255,6 +272,17 @@ std::vector<glm::vec3> mesh2Points = {
   glm::vec3(4.f, 0.f, 0.f),
   glm::vec3(2.f, 0.f, -2.f),
 };
+
+std::vector<glm::vec3> mesh3Points = {
+  glm::vec3(0.f, 2.f, 0.f),
+  glm::vec3(2.f, 2.f, 0.f),
+  glm::vec3(0.f, 2.f, -2.f),
+
+  glm::vec3(0.f, 2.f, -2.f),
+  glm::vec3(2.f, 2.f, 0.f),
+  glm::vec3(2.f, 2.f, -2.f),
+};
+
 
 
 std::vector<AutoSerialize> navmeshAutoserializer {

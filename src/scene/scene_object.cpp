@@ -201,8 +201,8 @@ std::optional<glm::vec3> aiNavigate(World& world, objid id, glm::vec3 target){
   auto destinationMeshId = targetNavmeshId(target, raycastWorld, isNavmeshWorld);
   bool onDestinationNavmesh = currentMeshId == destinationMeshId;
 
-  //modlog("ai navigate : currrentMesh id", print(currentMeshId));
-  //modlog("ai navigate : destinationMesh id", print(destinationMeshId));
+  modlog("ai navigate : currrentMesh id", print(currentMeshId));
+  modlog("ai navigate : destinationMesh id", print(destinationMeshId));
 
   if (!currentMeshId.has_value()){
     //modassert(false, "current has no navmesh");
@@ -213,6 +213,12 @@ std::optional<glm::vec3> aiNavigate(World& world, objid id, glm::vec3 target){
     goto simpleMoveTo;
   }
   if (currentMeshId.value() != destinationMeshId.value()){
+    auto navpath = findNavplanePath(currentMeshId.value(), destinationMeshId.value());
+    if (navpath.has_value()){
+      modlog("ai navpath: ", print(navpath.value()));
+    }else{
+      modlog("ai navpath: ", "no path");
+    }
     //modassert(false, "not yet supported");
 
 
