@@ -157,6 +157,11 @@ void calculateConnections(){
           .to = navWorld.navPlanes.at(j).id,
           .connectionPoint = glm::vec3(0.5f * (edge.from.x + edge.to.x), 0.5f * (edge.from.y + edge.to.y), 0.5f * (edge.from.z + edge.to.z)), // obviously incorrect
         });
+        navWorld.navplaneConnections.push_back(NavPlaneConnection {
+          .from = navWorld.navPlanes.at(j).id,
+          .to = navWorld.navPlanes.at(i).id,
+          .connectionPoint = glm::vec3(0.5f * (edge.from.x + edge.to.x), 0.5f * (edge.from.y + edge.to.y), 0.5f * (edge.from.z + edge.to.z)), // obviously incorrect
+        });
         continue;
       }
     }
@@ -167,17 +172,40 @@ struct NavPathElement {
   objid navplaneId;
   glm::vec3 point;
 };
-std::optional<std::vector<objid>> findNavplanePath(objid navplaneFrom, objid navplaneTo){
 
-  std::set<objid> visitedNavpaths;
 
-  objid currentNavId = navplaneFrom;
+std::set<objid> findConnectedNavpaths(objid navplaneId){
+  std::set<objid> connections;
   for (auto &navconnection : navWorld.navplaneConnections){
-    
+    if (navconnection.from == navplaneId){
+      connections.insert(navconnection.to);
+    }
   }
+  return connections;
+}
+std::optional<std::vector<objid>> findPath(std::vector<objid> currentPath, objid currentId, objid targetId, std::set<objid>& visitedNavpaths){
+  currentPath.push_back(currentId);
+  visitedNavpaths.insert(currentId);
+  auto neighbors = findConnectedNavpaths(currentId);
+  for (auto neighborId : neighbors){
+    if (neighborId == targetId){
+      return currentPath;
+    }else{
+      if (visitedNavpaths.count(neighborId) == 0){
+        auto searchPath = findPath(currentPath, neighborId, targetId, visitedNavpaths);
+        if (searchPath.has_value()){
+          return searchPath;
+        }
+      }
+    }
+  }
+  return std::nullopt;
+}
 
-
-  return std::vector<objid>({ 5, 3, 2 });
+std::optional<std::vector<objid>> findNavplanePath(objid navplaneFrom, objid navplaneTo){
+  std::set<objid> visitedNavpaths;
+  auto path = findPath({}, navplaneFrom, navplaneTo, visitedNavpaths);
+  return path;
 }
 
 void drawNavplanePath(std::function<void(glm::vec3, glm::vec3)> drawLine){
@@ -274,15 +302,21 @@ std::vector<glm::vec3> mesh2Points = {
 };
 
 std::vector<glm::vec3> mesh3Points = {
-  glm::vec3(0.f, 2.f, 0.f),
-  glm::vec3(2.f, 2.f, 0.f),
-  glm::vec3(0.f, 2.f, -2.f),
+  glm::vec3(0.f, 0.f, -2.f),
+  glm::vec3(2.f, 0.f, -2.f),
+  glm::vec3(0.f, 0.f, -4.f),
 
-  glm::vec3(0.f, 2.f, -2.f),
-  glm::vec3(2.f, 2.f, 0.f),
-  glm::vec3(2.f, 2.f, -2.f),
+  glm::vec3(0.f, 0.f, -4.f),
+  glm::vec3(2.f, 0.f, -2.f),
+  glm::vec3(2.f, 0.f, -4.f),
 };
 
+
+std::vector<std::vector<glm::vec3>> meshPointsVec {
+  mesh1Points,
+  mesh2Points,
+  mesh3Points,
+};
 
 
 std::vector<AutoSerialize> navmeshAutoserializer {
@@ -290,10 +324,7 @@ std::vector<AutoSerialize> navmeshAutoserializer {
 
 int navmeshId = 0;
 GameObjectNavmesh createNavmesh(GameobjAttributes& attr, ObjectTypeUtil& util){
-  auto points = navmeshId == 0 ? mesh1Points : mesh2Points;
-  if (navmeshId > 1){
-    assert(false);
-  }
+  auto points = meshPointsVec.at(navmeshId);
   navmeshId++;
 
   addNavplane(util.id);
