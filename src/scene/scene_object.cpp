@@ -186,7 +186,7 @@ std::string print(std::optional<objid> id){
   return std::to_string(id.value());
 }
 
-std::optional<glm::vec3> aiNavigate(World& world, objid id, glm::vec3 target){
+std::optional<glm::vec3> aiNavigate(World& world, objid id, glm::vec3 target, std::function<void(glm::vec3, glm::vec3)> drawLine){
   auto raycastWorld = [&world] (glm::vec3 posFrom, glm::quat direction, float maxDistance) -> std::vector<HitObject> {
     return raycast(world, posFrom, direction, maxDistance);
   };
@@ -215,11 +215,10 @@ std::optional<glm::vec3> aiNavigate(World& world, objid id, glm::vec3 target){
   if (currentMeshId.value() != destinationMeshId.value()){
     auto navpath = findNavplanePath(currentMeshId.value(), destinationMeshId.value());
     if (navpath.has_value()){
-      modlog("ai navpath: ", print(navpath.value()));
+      drawNavplanePath(navpath.value(), drawLine);
     }else{
       modlog("ai navpath: ", "no path");
     }
-    //modassert(false, "not yet supported");
 
 
 /*

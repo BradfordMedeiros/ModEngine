@@ -198,7 +198,11 @@ void makeParent(objid child, objid parent);
 
 void createGeneratedMesh(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string destMesh);
 
+objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth);
+objid addLineNextCyclePhysicsDebug(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner);
+
 glm::vec3 navPosition(objid id, glm::vec3 target);
+
 bool lock(std::string key, objid owner);
 bool unlock(std::string key, objid owner);
 void removeLocks(objid owner);

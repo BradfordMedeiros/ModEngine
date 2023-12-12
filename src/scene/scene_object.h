@@ -35,7 +35,7 @@ bool isHeightmap(World& world, objid id);
 
 GameObjectCamera& getCamera(World& world, objid id);
 
-std::optional<glm::vec3> aiNavigate(World& world, objid id, glm::vec3 target);
+std::optional<glm::vec3> aiNavigate(World& world, objid id, glm::vec3 target, std::function<void(glm::vec3, glm::vec3)> drawLine);
 
 std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance);
 std::vector<HitObject> contactTest(World& world, objid id);

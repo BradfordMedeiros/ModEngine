@@ -954,8 +954,19 @@ void createGeneratedMesh(std::vector<glm::vec3> face, std::vector<glm::vec3> poi
   createGeneratedMesh(world, face, points, destMesh);
 }
 
+objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth){
+  return addLineToNextCycleTint(lineData, fromPos, toPos, permaline, owner, color, textureId, linewidth);
+}
+
+objid addLineNextCyclePhysicsDebug(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner){
+  return addLineToNextCycle(lineData, fromPos, toPos, permaline, owner, GREEN, std::nullopt);
+}
+void drawLine(glm::vec3 point1, glm::vec3 point2){
+  glm::vec3 offset(-20.f, -27.f, 70.f);
+  addLineNextCyclePhysicsDebug(point1 + offset, point2 + offset,  false, 0);
+}
 glm::vec3 navPosition(objid id, glm::vec3 target){
-  return aiNavigate(world, id, target).value();
+  return aiNavigate(world, id, target, drawLine).value();
 }
 
 std::vector<VoxelQueryData> getSelectedVoxels(){
