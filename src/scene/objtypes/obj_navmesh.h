@@ -23,8 +23,8 @@ struct GameObjectNavmesh {
 };
 
 GameObjectNavmesh createNavmesh(GameobjAttributes& attr, ObjectTypeUtil& util);
-
 void removeNavmesh(GameObjectNavmesh& navmeshObj, ObjectRemoveUtil& util);
+void drawControlPoints(objid navmeshId, std::function<void(glm::vec3)> drawPoint);
 
 
 void printNavmeshDebug();

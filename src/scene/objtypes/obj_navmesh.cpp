@@ -308,6 +308,10 @@ std::vector<glm::vec3> mesh1Points = {
   glm::vec3(0.f, 0.f, -2.f),
   glm::vec3(2.f, 0.f, 0.f),
   glm::vec3(2.f, 0.f, -2.f),
+
+  glm::vec3(0.f, 0.f, -4.f),
+  glm::vec3(2.f, 0.f, -2.f),
+  glm::vec3(2.f, 0.f, -4.f),
 };
 
 std::vector<glm::vec3> mesh2Points = {
@@ -352,6 +356,20 @@ GameObjectNavmesh createNavmesh(GameobjAttributes& attr, ObjectTypeUtil& util){
     .mesh = createNavmeshFromPointList(points, util),
   };
   return obj;
+}
+
+// draw point with an id, lookup this map later when clicked (invalidate when navmap change, readonly calc)
+void drawControlPoints(objid navmeshId, std::function<void(glm::vec3)> drawPoint){
+  auto points = meshPointsVec.at(0);
+  for (auto &point : points){
+    drawPoint(point);
+  }
+}
+void onControlPointDown(){
+
+}
+void onControlPointRelease(){
+  
 }
 
 void removeNavmesh(GameObjectNavmesh& navmeshObj, ObjectRemoveUtil& util){

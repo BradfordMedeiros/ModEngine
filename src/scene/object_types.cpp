@@ -392,9 +392,13 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-
-
     drawMesh(navmeshObj -> mesh, shaderProgram, navmeshTexture);    
+
+    drawControlPoints(id, [shaderProgram, &model, &defaultMeshes](glm::vec3 point) -> void {
+      //modassert(false, "drawControlPoints not yet implemented");
+      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, point)));
+      renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
+    });
     return navmeshObj -> mesh.numTriangles;
   }
 
