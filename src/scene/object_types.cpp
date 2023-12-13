@@ -143,7 +143,7 @@ std::vector<ObjectType> objTypes = {
     .objectAttributes = nothingObjAttr, 
     .setAttributes = nothingSetObjAttr,
     .serialize = serializeNotImplemented,
-    .removeObject = removeDoNothing,
+    .removeObject = convertRemove<GameObjectNavmesh>(removeNavmesh),
   },
   ObjectType {
     .name = "emitter",

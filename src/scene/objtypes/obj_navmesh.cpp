@@ -353,3 +353,8 @@ GameObjectNavmesh createNavmesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   };
   return obj;
 }
+
+void removeNavmesh(GameObjectNavmesh& navmeshObj, ObjectRemoveUtil& util){
+  removeNavplane(util.id);
+  calculateConnections();
+}
