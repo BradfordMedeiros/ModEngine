@@ -488,6 +488,13 @@ int maxvalue(int x, int y, int z){
   return z;
 }
 
+
+const int NUM_BITS_RESERVED = 13;  // 8192
+const int32_t MAX_ID_RESERVED = 1 << NUM_BITS_RESERVED;
+
+bool isReservedObjId(objid id){
+  return id < MAX_ID_RESERVED && id >= 0;
+}
 // Chance of collision for id is 
 // (n^2) / (2^k) 
 // n = number of objects
@@ -518,11 +525,23 @@ objid getUniqueObjId(){
     randId =  randId | (bitHigh << i);
   }
 
-  if (randId == -1){              // TODO - hack, -1 used as sentinel, need to eliminate those and then can get rid of this (scenegraph mostly)
+  if (randId == -1 || isReservedObjId(randId)){              // TODO - hack, -1 used as sentinel, need to eliminate those and then can get rid of this (scenegraph mostly)
     return getUniqueObjId();
   }
   return randId;
 }
+
+
+int32_t currentReservedId = 0;
+objid getUniqueObjIdReserved(int claimAmount){
+  currentReservedId += claimAmount;
+  modassert(currentReservedId <= MAX_ID_RESERVED, "reserved id too big");
+  return currentReservedId;
+}
+void resetReservedId(){
+  currentReservedId = 0;
+}
+
 
 std::string getUniqueObjectName(std::string& prefix){
   return prefix + std::to_string(getUniqueObjId()) + ")";

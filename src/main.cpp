@@ -1664,8 +1664,11 @@ int main(int argc, char* argv[]){
         if (!(layerSelectNegOne || layerSelectThreeCond) && !state.selectionDisabled){
           shouldCallBindingOnObjectSelected = selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId), showCursor);
         }
+      }else if (isReservedObjId(selectTargetId)){
+        onObjectSelected(selectTargetId);
       }else{
         std::cout << "INFO: select item called -> id not in scene! - " << selectTargetId<< std::endl;
+        onObjectUnselected();
         cBindings.onObjectUnselected();
       }
     }
@@ -1906,7 +1909,7 @@ int main(int argc, char* argv[]){
       state.takeScreenshot = false;
       saveScreenshot(state.screenshotPath);
     }
-
+    resetReservedId();
     glfwSwapBuffers(window);
   )})
 

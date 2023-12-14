@@ -22,6 +22,7 @@
 #include "./objtypes/obj_nil.h"
 #include "./objtypes/obj_prefab.h"
 #include "./objtypes/obj_util.h"
+#include "../colorselection.h"
 
 #include <unistd.h>
 #include <glm/glm.hpp>
@@ -231,5 +232,8 @@ void updatePosition(std::map<objid, GameObjectObj>& mapping, objid, glm::vec3 po
 void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position);
 void stopSoundState(std::map<objid, GameObjectObj>& mapping, objid id);
 void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData, float timestamp);
+
+void onObjectSelected(objid id);
+void onObjectUnselected();
 
 #endif 

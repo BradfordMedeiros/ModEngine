@@ -305,13 +305,13 @@ std::vector<glm::vec3> mesh1Points = {
   glm::vec3(2.f, 0.f, 0.f),
   glm::vec3(0.f, 0.f, -2.f),
 
-  glm::vec3(0.f, 0.f, -2.f),
-  glm::vec3(2.f, 0.f, 0.f),
-  glm::vec3(2.f, 0.f, -2.f),
-
-  glm::vec3(0.f, 0.f, -4.f),
-  glm::vec3(2.f, 0.f, -2.f),
-  glm::vec3(2.f, 0.f, -4.f),
+  //glm::vec3(0.f, 0.f, -2.f),
+  //glm::vec3(2.f, 0.f, 0.f),
+  //glm::vec3(2.f, 0.f, -2.f),
+//
+//  //glm::vec3(0.f, 0.f, -4.f),
+//  //glm::vec3(2.f, 0.f, -2.f),
+  //glm::vec3(2.f, 0.f, -4.f),
 };
 
 std::vector<glm::vec3> mesh2Points = {
@@ -365,7 +365,7 @@ void drawControlPoints(objid navmeshId, std::function<void(glm::vec3)> drawPoint
     drawPoint(point);
   }
 }
-void onControlPointDown(){
+void onControlPointDown(objid navmeshId, int index){
 
 }
 void onControlPointRelease(){

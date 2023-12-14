@@ -248,6 +248,7 @@ int renderDefaultNode(GLint shaderProgram, Mesh& mesh){
   return mesh.numTriangles;
 }
 
+objid selectedId = 0;
 int renderObject(
   GLint shaderProgram, 
   objid id, 
@@ -394,11 +395,45 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     drawMesh(navmeshObj -> mesh, shaderProgram, navmeshTexture);    
 
-    drawControlPoints(id, [shaderProgram, &model, &defaultMeshes](glm::vec3 point) -> void {
+
+    // this base id point index stuff is pretty hackey bullshit
+    // maybe i should pull out a function to render the object only in selection mode. 
+    // should refactor all this shit
+    int pointIndex = 0;
+    static objid baseId = 0;
+
+    drawControlPoints(id, [selectionMode, shaderProgram, &model, &defaultMeshes, &pointIndex](glm::vec3 point) -> void {
       //modassert(false, "drawControlPoints not yet implemented");
+
+      objid objectId = 0;
+      if (selectionMode){
+        if (baseId == 0){
+          baseId = getUniqueObjIdReserved();
+          objectId = baseId;
+        }else{
+          objectId = getUniqueObjIdReserved();
+        }
+      }else{
+        objectId = baseId + pointIndex;
+      }
+      pointIndex++;
+
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, point)));
+
+      static glm::vec4 selectedColor  = glm::vec4(0.f, 0.f, 1.f, 0.5f);
+      static glm::vec4 notSelectedColor  = glm::vec4(1.f, 0.f, 0.f, 0.5f);
+
+      auto isSelected = selectedId == objectId;
+      glm::vec4 color = isSelected ? glm::vec4(0.f, 0.f, 1.f, 0.5f) : glm::vec4(1.f, 0.f, 0.f, 0.5f);
+      std::cout << "selected: " << selectedId << ", object id: " << objectId << ", isSelected = " << isSelected << ", color = " << print(color) << std::endl;
+      glUniform4fv(glGetUniformLocation(shaderProgram, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(objectId)));
+      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(isSelected ? selectedColor : notSelectedColor));
       renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     });
+    if (!selectionMode){
+      baseId = 0;
+    }
+
     return navmeshObj -> mesh.numTriangles;
   }
 
@@ -633,6 +668,17 @@ void stopSoundState(std::map<objid, GameObjectObj>& mapping, objid id){
 
 void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData, float timestamp){
   // placeholder unused for now
+}
+
+void onObjectSelected(objid id){
+  modlog("on object selected: ", std::to_string(id));
+  selectedId = id;
+}
+
+void onObjectUnselected(){
+  modlog("on object unselected: ", "");
+
+  selectedId = 0;
 }
 
 std::string getType(std::string name){
