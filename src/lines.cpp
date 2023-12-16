@@ -165,7 +165,7 @@ float convertTextNdiFontsize(float height, float width, float fontsize, bool isn
   return fontsize;
 }
 
-void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::string)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram){
+void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::optional<std::string>)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram){
   //std::cout << "text number: " << lineData.text.size() << std::endl;
   for (auto &shape : lineData.shapes){
     if (selectionProgram && !shape.selectionId.has_value()){
@@ -201,7 +201,7 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::functi
         modassert(textShapeData, "shape data is not text");
         auto coords = convertTextNDICoords(textShapeData -> left, textShapeData ->  top, height, width, shape.ndi);
         auto adjustedFontSize = convertTextNdiFontsize(height, width, textShapeData -> fontSize, shape.ndi);
-        FontFamily& fontFamily = fontFamilyByName(textShapeData -> fontFamily.has_value() ? textShapeData -> fontFamily.value() : "");
+        FontFamily& fontFamily = fontFamilyByName(textShapeData -> fontFamily);
 
         drawWords(uiShaderProgram, fontFamily, textShapeData -> word, coords.x, coords.y, adjustedFontSize);          
       }else if (rectShapeData != NULL){

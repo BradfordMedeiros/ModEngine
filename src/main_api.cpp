@@ -399,6 +399,7 @@ void drawText(std::string word, float left, float top, unsigned int fontSize, bo
     .selectionId = selectionId,
   });
 }
+
 void drawText(std::string word, float left, float top, unsigned int fontSize){
   drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, false, std::nullopt, std::nullopt);  
 }
@@ -406,10 +407,20 @@ void drawTextNdi(std::string word, float left, float top, unsigned int fontSize)
   drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);  
 }
 
-FontFamily& fontFamilyByName(std::string name){
+void getTextDimensionsNdi(std::string word, float fontSizeNdi, bool ndi, std::optional<std::string> fontFamily, float* _width, float* _height){
+  modassert(ndi, "only works with ndi for now");
+  *_width = word.size() * fontSizeNdi;
+  *_height = fontSizeNdi;
+
+  //BoundInfo boundInfoForCenteredText(FontFamily& fontFamily, std::string word, 0.f, 0.f, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength, glm::vec3* _offset){
+
+}
+
+FontFamily& fontFamilyByName(std::optional<std::string> name){
+  auto actualName = name.has_value() ? name.value() : "";
   for (auto &family : defaultResources.fontFamily){
     //std::cout << "Comparing " << name << " to " << family.name << std::endl;
-    if (family.name == name){
+    if (family.name == actualName){
       return family;
     }
   }

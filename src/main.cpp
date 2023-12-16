@@ -1206,6 +1206,7 @@ int main(int argc, char* argv[]){
     .setActiveCamera = setActiveCamera,
     .getView = getView,
     .drawText = drawText,
+    .getTextDimensionsNdi = getTextDimensionsNdi,
     .drawRect = drawRect,
     .drawLine2D = drawLine2D,
     .drawLine = addLineNextCycle,
