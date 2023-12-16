@@ -407,13 +407,15 @@ void drawTextNdi(std::string word, float left, float top, unsigned int fontSize)
   drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);  
 }
 
+
+// This whole function is coupled horribly to other parts of code
 void getTextDimensionsNdi(std::string word, float fontSizeNdi, bool ndi, std::optional<std::string> fontFamily, float* _width, float* _height){
   modassert(ndi, "only works with ndi for now");
-  *_width = word.size() * fontSizeNdi;
-  *_height = fontSizeNdi;
-
-  //BoundInfo boundInfoForCenteredText(FontFamily& fontFamily, std::string word, 0.f, 0.f, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength, glm::vec3* _offset){
-
+  unsigned int convertedFontSize = fontSizeNdi * 1000.f * 0.5f;
+  glm::vec3 offset(0.f, 0.f, 0.f);
+  auto boundInfo = boundInfoForCenteredText(fontFamilyByName(fontFamily), word, 0.f, 0.f, convertedFontSize, POSITIVE_ALIGN, TextWrap { .type = WRAP_NONE, .wrapamount = 0.f }, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 }, -1, false, 0, &offset);
+  *_width = boundInfo.xMax - boundInfo.xMin;
+  *_height = boundInfo.yMax - boundInfo.yMin;
 }
 
 FontFamily& fontFamilyByName(std::optional<std::string> name){
