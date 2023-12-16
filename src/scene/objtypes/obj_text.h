@@ -12,7 +12,6 @@ struct UiTextCursor {
 
 struct GameObjectUIText {
   std::string value;
-  float deltaOffset;
   glm::vec4 tint;
   AlignType align;
   TextWrap wrap;

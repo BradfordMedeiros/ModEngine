@@ -90,7 +90,6 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
       0,
       0,
       1000,
-      0, 
       textObj -> align, 
       textObj -> wrap, 
       textObj -> virtualization, 

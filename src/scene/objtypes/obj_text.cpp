@@ -73,12 +73,6 @@ std::vector<AutoSerialize> textAutoserializer {
     .field = "value",
     .defaultValue = "",
   },
-  AutoSerializeFloat {
-    .structOffset = offsetof(GameObjectUIText, deltaOffset),
-    .structOffsetFiller = std::nullopt,
-    .field = "spacing",
-    .defaultValue = 2,
-  },
   AutoSerializeVec4 {
     .structOffset = offsetof(GameObjectUIText, tint),
     .structOffsetFiller = std::nullopt,

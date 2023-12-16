@@ -235,7 +235,7 @@ struct DrawingInfoValues {
 };
 
 
-DrawingInfoValues computeDrawingInfo(FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
+DrawingInfoValues computeDrawingInfo(FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
   std::map<unsigned int, FontParams>& fontMeshes = fontFamily.asciToMesh;
   float fontSizeNdi = convertFontSizeToNdi(fontSize);
   float offsetDelta = 2.f * fontSizeNdi;
@@ -348,8 +348,8 @@ DrawingInfoValues computeDrawingInfo(FontFamily& fontFamily, std::string word, f
 }
 
 //
-BoundInfo boundInfoForCenteredText(FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength, glm::vec3* _offset){
-  auto drawingData = computeDrawingInfo(fontFamily, word, left, top, fontSize, spacing, align, wrap, virtualization, cursorIndex, cursorIndexLeft, highlightLength);
+BoundInfo boundInfoForCenteredText(FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength, glm::vec3* _offset){
+  auto drawingData = computeDrawingInfo(fontFamily, word, left, top, fontSize, align, wrap, virtualization, cursorIndex, cursorIndexLeft, highlightLength);
   auto drawingDimensions = calcDrawSizing(drawingData.drawingInfo);
   auto offsetToCenter = calcAlignOffset(drawingDimensions, align, left, top);
   //std::cout << "offset to center: " << print(offsetToCenter) << std::endl;
@@ -370,11 +370,11 @@ BoundInfo boundInfoForCenteredText(FontFamily& fontFamily, std::string word, flo
   return info;
 }
 
-int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength, bool drawBoundingOnly){
+int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength, bool drawBoundingOnly){
   int numTriangles = 0;
   if (drawBoundingOnly){
     glm::vec3 offset(0.f, 0.f, 0.f);
-    auto boundInfo = boundInfoForCenteredText(fontFamily, word, left, top, fontSize, spacing, align, wrap, virtualization,  cursorIndex, cursorIndexLeft, highlightLength, &offset);
+    auto boundInfo = boundInfoForCenteredText(fontFamily, word, left, top, fontSize, align, wrap, virtualization,  cursorIndex, cursorIndexLeft, highlightLength, &offset);
     auto boundingMesh = fontFamily.asciToMesh.at('H').mesh; // should swap out for unitxy mesh, but this is OK since in practice used in selection program, which does not discard
     numTriangles += boundingMesh.numTriangles;
     auto width = boundInfo.xMax - boundInfo.xMin;
@@ -383,7 +383,7 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
     return numTriangles;
   }
 
-  auto drawingData = computeDrawingInfo(fontFamily, word, left, top, fontSize, spacing, align, wrap, virtualization, cursorIndex, cursorIndexLeft, highlightLength);
+  auto drawingData = computeDrawingInfo(fontFamily, word, left, top, fontSize, align, wrap, virtualization, cursorIndex, cursorIndexLeft, highlightLength);
   auto drawingDimensions = calcDrawSizing(drawingData.drawingInfo);
   auto offsetToCenter = drawingDimensions.centerOffset + calcAlignOffset(drawingDimensions, align, left, top);
   //auto offsetToCenter = drawingDimensions.centerOffset;
@@ -401,5 +401,5 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
 }
 
 void drawWords(GLint shaderProgram, FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize){
-  drawWordsRelative(shaderProgram, fontFamily, glm::mat4(1.f), word, left, top, fontSize, 14, POSITIVE_ALIGN, TextWrap { .type = WRAP_NONE, .wrapamount = 0.f }, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 }, -1);
+  drawWordsRelative(shaderProgram, fontFamily, glm::mat4(1.f), word, left, top, fontSize, POSITIVE_ALIGN, TextWrap { .type = WRAP_NONE, .wrapamount = 0.f }, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 }, -1);
 }
