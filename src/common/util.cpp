@@ -957,16 +957,32 @@ const char* levelToString(MODLOG_LEVEL level){
 static std::vector<std::string> modlogLevels;
 static bool shouldFilterLogs = false;
 static MODLOG_LEVEL filterLevel;
+std::function<void(std::string&)> loggingFn = [](std::string& message) -> void {
+  std::cout << message << std::endl;
+};
+
 void modlog(const char* identifier, const char* value, MODLOG_LEVEL level){
   if (level < filterLevel){
     return;
   }
   if (!shouldFilterLogs){
-    std::cout << "modlog: " << levelToString(level) << " : " << identifier << " : " << value << std::endl;
+    std::string message("modlog: ");
+    message += levelToString(level);
+    message += " : ";
+    message += identifier;
+    message += " : ";
+    message += value;
+    loggingFn(message);
   }else{
     for (auto &modlogLevel : modlogLevels){
       if (identifier == modlogLevel){
-        std::cout << "modlog: " << levelToString(level) << " : " << identifier << " : " << value << std::endl;
+        std::string message("modlog: ");
+        message += levelToString(level);
+        message += " : ";
+        message += identifier;
+        message += " : ";
+        message += value;
+        loggingFn(message);
         return;
       }
     }
@@ -979,6 +995,10 @@ void modlogSetEnabled(bool filterLogs, MODLOG_LEVEL level, std::vector<std::stri
   modlogLevels = levels;
   shouldFilterLogs = filterLogs;
   filterLevel = level;
+}
+
+void modlogSetLogEndpoint(std::function<void(std::string&)> fn){
+  loggingFn = fn;
 }
 
 std::string mainTargetElement(std::string target){

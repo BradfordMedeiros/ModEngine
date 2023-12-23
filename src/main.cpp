@@ -1297,7 +1297,7 @@ int main(int argc, char* argv[]){
     .idAtCoord = idAtCoord,
     .gameobjExists = gameobjExists,
     .prefabId = prefabId,
-
+    .setLogEndpoint = setLogEndpoint,
   };
 
 

@@ -235,7 +235,7 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::functi
           .toPos = lineShapeData -> toPos,
         });
         //glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(lineByColor.tint));
-        drawLines(lines, 2); 
+        drawLines(lines, 1); 
       }
       else {
         modassert(false, "draw shape data type not yet implemented");

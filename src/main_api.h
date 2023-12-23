@@ -238,5 +238,6 @@ RotationDirection getCursorInfoWorld();
 
 
 void handleChangedResourceFiles(std::set<std::string> changedFiles);
+void setLogEndpoint(std::function<void(std::string&)> fn);
 
 #endif

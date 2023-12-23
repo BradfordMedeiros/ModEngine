@@ -128,6 +128,8 @@ struct CustomApiBindings {
   std::optional<objid> (*idAtCoord)(float ndix, float ndiy, bool onlyGameObjId);
   bool (*gameobjExists)(objid id);
   std::optional<objid> (*prefabId)(objid id);
+
+  void(*setLogEndpoint)(std::function<void(std::string&)>);
   //std::vector<func_t> registerGuileFns
 };
 
