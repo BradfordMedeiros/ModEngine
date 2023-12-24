@@ -957,9 +957,11 @@ const char* levelToString(MODLOG_LEVEL level){
 static std::vector<std::string> modlogLevels;
 static bool shouldFilterLogs = false;
 static MODLOG_LEVEL filterLevel;
-std::function<void(std::string&)> loggingFn = [](std::string& message) -> void {
+
+std::function<void(std::string&)> defaultLoggingFn = [](std::string& message) -> void {
   std::cout << message << std::endl;
 };
+std::function<void(std::string&)> loggingFn = defaultLoggingFn;
 
 void modlog(const char* identifier, const char* value, MODLOG_LEVEL level){
   if (level < filterLevel){
@@ -997,8 +999,12 @@ void modlogSetEnabled(bool filterLogs, MODLOG_LEVEL level, std::vector<std::stri
   filterLevel = level;
 }
 
-void modlogSetLogEndpoint(std::function<void(std::string&)> fn){
-  loggingFn = fn;
+void modlogSetLogEndpoint(std::optional<std::function<void(std::string&)>> fn){
+  if (!fn.has_value()){
+    loggingFn = defaultLoggingFn;
+    return;
+  }
+  loggingFn = fn.value();
 }
 
 std::string mainTargetElement(std::string target){

@@ -1216,8 +1216,7 @@ void handleChangedResourceFiles(std::set<std::string> changedFiles){
   }
 }
 
-void setLogEndpoint(std::function<void(std::string&)> fn){
-  std::string testMessage = "this is a test message";
+void setLogEndpoint(std::optional<std::function<void(std::string&)>> fn){
   modlogSetLogEndpoint(fn);
-  fn(testMessage);
+  modlog("logging", std::string("custom logEndpoint set: ") + std::string(fn.has_value() ? "true" : "false"));
 }

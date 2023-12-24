@@ -307,7 +307,7 @@ enum MODLOG_LEVEL { MODLOG_INFO = 0, MODLOG_WARNING = 1, MODLOG_ERROR = 2 };
 void modlog(const char* identifier, const char* value, MODLOG_LEVEL level = MODLOG_INFO);
 void modlog(const char* identifier, std::string value, MODLOG_LEVEL level = MODLOG_INFO);
 void modlogSetEnabled(bool filterLogs, MODLOG_LEVEL level, std::vector<std::string> levels);
-void modlogSetLogEndpoint(std::function<void(std::string&)> fn);
+void modlogSetLogEndpoint(std::optional<std::function<void(std::string&)>> fn);
 
 std::string mainTargetElement(std::string target);
 std::string suffixTargetElement(std::string target);
