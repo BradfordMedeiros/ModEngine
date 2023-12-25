@@ -6,11 +6,12 @@
 # emitter =  0b  100000
 # nav     =  0b 1000000
 # soe more options in object_types.cpp renderObject
-editor:debug:true
+editor:debug:false
 #editor:debugmask:126  # this & the above number determines if the debug object should show
 
 editor:debugmask:8
 
+physics:enabled:false
 world:paused:true  # true / false
 
 diffuse:enabled:true
@@ -61,7 +62,7 @@ rendering:fontsize:6
 mouse:cursor:normal   # normal, hidden, capture
 
 #window:name:ModEngine Editor
-window:icon:./res/textures/wood.jpg
+#window:icon:./res/textures/wood.jpg
 
 #skybox:color:0.1 0.1 0.1
 
@@ -69,7 +70,7 @@ rendering:cull:disabled
 
 editor:showgrid:true
 editor:gridsize:40
-editor:grid:1 0 -1 0
+#editor:grid:1 0 -1 0
 
 
 tools:manipulator-mode:translate
@@ -91,7 +92,6 @@ tools:terrainpaint-brush:./res/brush/ramp_5x5.png
 editor:snapscale:1
 editor:snapangle:10
 editor:snaptranslate:1.7
-
 
 
 debug:textoffset:0 -1.2

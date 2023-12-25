@@ -280,10 +280,14 @@ void handleSnapEasy(objid id, bool left){
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
+  cBindings.onKeyCallback(getKeyRemapping(keyMapper, key), scancode, action, mods);
+
+  if (state.disableInput){
+    return;
+  }
   if (state.printKeyStrokes){
     std::cout << "key: " << key << " action: " << action << std::endl;
   }
-  cBindings.onKeyCallback(getKeyRemapping(keyMapper, key), scancode, action, mods);
 
   // below stuff is editor/misc stuff
   if (key == 259){  // backspace

@@ -23,6 +23,7 @@ enum ANTIALIASING_TYPE { ANTIALIASING_NONE, ANTIALIASING_MSAA };
 enum CURSOR_TYPE { CURSOR_NORMAL, CURSOR_CAPTURE, CURSOR_HIDDEN };
 
 struct engineState {
+  bool enablePhysics;
   bool visualizeNormals;
   bool showDebug;
   int showDebugMask;

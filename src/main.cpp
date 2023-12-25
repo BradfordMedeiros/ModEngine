@@ -930,13 +930,12 @@ int main(int argc, char* argv[]){
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
    ("d,dumpphysics", "Dump physics info to file for external processing", cxxopts::value<bool>()->default_value("false"))
    ("b,bootstrapper", "Run the server in bootstrapper only", cxxopts::value<bool>()->default_value("false"))
-   ("p,physics", "Enable physics", cxxopts::value<bool>()->default_value("false"))
    ("y,debugphysics", "Enable physics debug drawing", cxxopts::value<bool>()->default_value("false"))
    ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))
    ("g,grid", "Size of grid chunking grid used for open world streaming, default to zero (no grid)", cxxopts::value<int>()->default_value("0"))
    ("w,world", "Use streaming chunk system", cxxopts::value<std::string>()->default_value(""))
    ("r,rawscene", "Rawscene file to use.  Set tags by adding =tag1,tag2,tag3 (optionally) and then :name to name", cxxopts::value<std::vector<std::string>>() -> default_value(""))
-   ("a,args", "Args to provide to scheme", cxxopts::value<std::vector<std::string>>() -> default_value(""))
+   ("a,args", "Args to provide to cscript", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("m,mapping", "Key mapping file to use", cxxopts::value<std::string>()->default_value(""))
    ("l,benchmark", "Benchmark file to write results", cxxopts::value<std::string>()->default_value(""))
    ("e,timetoexit", "Time to run the engine before exiting in ms", cxxopts::value<int>()->default_value("0"))
@@ -1026,7 +1025,6 @@ int main(int argc, char* argv[]){
     std::cout << cxxoption.help() << std::endl;
     return 0;
   }
-  bool enablePhysics = result["physics"].as<bool>();
   bootStrapperMode = result["bootstrapper"].as<bool>();
 
   shaderFolderPath = result["shader"].as<std::string>();
@@ -1551,7 +1549,7 @@ int main(int argc, char* argv[]){
     }
 
 
-    onWorldFrame(world, deltaTime, timePlayback.currentTime, enablePhysics, dumpPhysics, state.worldpaused, viewTransform);
+    onWorldFrame(world, deltaTime, timePlayback.currentTime, state.enablePhysics, dumpPhysics, state.worldpaused, viewTransform);
 
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
 
