@@ -4,7 +4,6 @@ extern World world;
 extern RenderStages renderStages;
 extern engineState state;
 extern CScriptBindingCallbacks cBindings;
-extern bool disableInput;
 extern KeyRemapper keyMapper;
 extern DrawingParams drawParams;
 extern glm::mat4 view;
@@ -45,7 +44,7 @@ void debugInfo(std::string infoType, std::string filepath){
   saveFile(filepath, dumpDebugInfo(false));
 }
 
-void onMouse(bool disableInput,  engineState& state, double xpos, double ypos, void(*rotateCamera)(float, float)){
+void onMouse(engineState& state, double xpos, double ypos, void(*rotateCamera)(float, float)){
     if(state.firstMouse){
         state.lastX = xpos;
         state.lastY = ypos;
@@ -63,13 +62,11 @@ void onMouse(bool disableInput,  engineState& state, double xpos, double ypos, v
     auto coords = ndiCoord();
     cBindings.onMouseMoveCallback(state.offsetX, state.offsetY, coords.x, coords.y);
     
-    if (disableInput){
-      return;
-    }
-
-    float rotateSensitivity = 0.05;
     if (state.isRotateSelection){
-      rotateCamera(xoffset * rotateSensitivity, -yoffset * rotateSensitivity);   // -y offset because mouse move forward is negative, which is ok, but inverted
+      if (!state.disableInput){
+        float rotateSensitivity = 0.05;
+        rotateCamera(xoffset * rotateSensitivity, -yoffset * rotateSensitivity);   // -y offset because mouse move forward is negative, which is ok, but inverted        
+      }
     }else{
       state.cursorLeft = xpos;
       state.cursorTop = ypos;
@@ -86,7 +83,7 @@ glm::vec2 ndiCoord(){
 
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
   //std::cout << "mouse events: " << xpos << ", " << ypos << std::endl;
-  onMouse(state.disableInput,  state, xpos, ypos, rotateCamera); 
+  onMouse(state, xpos, ypos, rotateCamera); 
 }
 
 void onMouse(int button, int action, int mods){
@@ -96,7 +93,7 @@ void onMouse(int button, int action, int mods){
     state.mouseIsDown = false;
   }
 
-  mouse_button_callback(state.disableInput, state, button, action, mods, onMouseButton);
+  mouse_button_callback(state, button, action, mods, onMouseButton);
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
     selectItemCalled = true;
     onManipulatorMouseDown(state.manipulatorState);
@@ -142,8 +139,8 @@ void moveMouse(glm::vec2 ndi){
   moveCursor(pixelCoords.x, pixelCoords.y);
 }
 
-void mouse_button_callback(bool disableInput, engineState& state, int button, int action, int mods, void (*handleSerialization) (void)){
-  if (disableInput){
+void mouse_button_callback(engineState& state, int button, int action, int mods, void (*handleSerialization) (void)){
+  if (!state.disableInput){
     return;
   }
   if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
@@ -411,12 +408,10 @@ void handleInput(GLFWwindow* window){
   }
   processControllerInput(keyMapper, moveCamera, deltaTime, keyCharCallback, onJoystick);
 
-  if (!state.disableInput){    // we return after escape, so escape still quits
-    bool lockSuccess = lock("input", 0);
-    if (lockSuccess){
-      processKeyBindings(window, keyMapper);
-      unlock("input", 0);
-    }
+  bool lockSuccess = lock("input", 0);
+  if (lockSuccess){
+    processKeyBindings(window, keyMapper);
+    unlock("input", 0);
   }
 }
 
@@ -492,6 +487,9 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
 void processKeyBindings(GLFWwindow *window, KeyRemapper& remapper){
   std::map<int, bool> lastFrameDown = {};
   for (auto inputFn : remapper.inputFns){
+    if (state.disableInput && !inputFn.alwaysEnable){
+      continue;
+    }
     auto mainKeyPressed = glfwGetKey(window, inputFn.sourceKey);
     lastFrameDown[inputFn.sourceKey] = mainKeyPressed;
     auto prereqOk = true; 
@@ -532,6 +530,7 @@ void toggleCursor(CURSOR_TYPE cursorBehavior){
 float cameraSpeed = 1.f;
 std::vector<InputDispatch> inputFns = {
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'B',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0,
@@ -548,6 +547,7 @@ std::vector<InputDispatch> inputFns = {
     }
   }, 
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'N',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0,
@@ -559,6 +559,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'G',  // G 
     .sourceType = BUTTON_PRESS,
     //.prereqKey = 341,  // ctrl,
@@ -570,6 +571,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'R',  // R
     .sourceType = BUTTON_PRESS,
     //.prereqKey = 341,  // ctrl,
@@ -581,6 +583,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'T',  // T
     .sourceType = BUTTON_PRESS,
     //.prereqKey = 341,  // ctrl,
@@ -592,6 +595,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = '1', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
@@ -602,6 +606,7 @@ std::vector<InputDispatch> inputFns = {
     }
   }, 
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = '2',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
@@ -612,6 +617,7 @@ std::vector<InputDispatch> inputFns = {
     }
   }, 
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = '3',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
@@ -622,6 +628,7 @@ std::vector<InputDispatch> inputFns = {
     }
   }, 
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = '4', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
@@ -632,6 +639,7 @@ std::vector<InputDispatch> inputFns = {
     }
   }, 
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = '5', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
@@ -642,6 +650,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = '6', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
@@ -652,6 +661,7 @@ std::vector<InputDispatch> inputFns = {
     }
   }, 
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = '7', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
@@ -662,6 +672,7 @@ std::vector<InputDispatch> inputFns = {
     }
   }, 
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 67,  // 4
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,
@@ -671,6 +682,7 @@ std::vector<InputDispatch> inputFns = {
     }
   }, 
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 86,  // 4
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,
@@ -680,6 +692,7 @@ std::vector<InputDispatch> inputFns = {
     }
   }, 
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 340,  // 4
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -689,6 +702,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 340,  // 4
     .sourceType = BUTTON_RELEASE,
     .prereqKey = 0, 
@@ -698,6 +712,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },  
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'W',  // w
     .sourceType = BUTTON_HOLD,
     .prereqKey = 0, 
@@ -709,6 +724,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },  
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'A',  // a
     .sourceType = BUTTON_HOLD,
     .prereqKey = 0, 
@@ -718,6 +734,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },  
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'S',  // s
     .sourceType = BUTTON_HOLD,
     .prereqKey = 0, 
@@ -729,6 +746,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },  
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'D',  // d
     .sourceType = BUTTON_HOLD,
     .prereqKey = 0, 
@@ -738,6 +756,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },  
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'S',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,
@@ -751,6 +770,7 @@ std::vector<InputDispatch> inputFns = {
     }
   }, 
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'J',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 'R',  
@@ -800,6 +820,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'S',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 'R',  
@@ -840,6 +861,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'A',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
@@ -850,6 +872,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },   
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'C',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
@@ -860,6 +883,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },   
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'R',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
@@ -870,6 +894,7 @@ std::vector<InputDispatch> inputFns = {
     }
   }, 
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 263,  // left arrow
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -881,6 +906,7 @@ std::vector<InputDispatch> inputFns = {
     }
   }, 
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 262,  // right arrow
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -892,6 +918,7 @@ std::vector<InputDispatch> inputFns = {
     }
   }, 
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 341,  // ctrl
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -903,6 +930,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = GLFW_KEY_LEFT_ALT,  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -915,6 +943,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },  
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 341,  // ctrl
     .sourceType = BUTTON_RELEASE,
     .prereqKey = 0, 
@@ -926,6 +955,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 261,  // delete
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -939,6 +969,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'O',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -960,6 +991,7 @@ std::vector<InputDispatch> inputFns = {
   },*/
 
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 322,  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,, 
@@ -970,6 +1002,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 322,  
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT, 
@@ -980,6 +1013,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 324,  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,, 
@@ -990,6 +1024,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 324,  
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT, 
@@ -1000,6 +1035,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 326, 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,, 
@@ -1010,6 +1046,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 326, 
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT,  // ctrl,, 
@@ -1020,6 +1057,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 327, 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,, 
@@ -1030,6 +1068,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 327, 
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT,  // ctrl,, 
@@ -1040,6 +1079,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 328,  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,, 
@@ -1050,6 +1090,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 328, 
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT,  // ctrl,, 
@@ -1060,6 +1101,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 329,  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,, 
@@ -1070,6 +1112,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 329, 
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT,
@@ -1080,6 +1123,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = '0', // zero 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1091,6 +1135,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 348, // to the right of fn key, looks like notepad
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1101,6 +1146,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = '\\', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1111,6 +1157,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'U', // u
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1145,6 +1192,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = '[',
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1159,6 +1207,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = ']',
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1178,6 +1227,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'I', // i
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1189,6 +1239,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'H', // h
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1200,6 +1251,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'J', // j
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1211,6 +1263,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'F', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1221,6 +1274,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'G', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1231,6 +1285,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'X', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1241,6 +1296,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'Y', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1251,6 +1307,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'Z', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1261,6 +1318,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = GLFW_KEY_RIGHT, 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1270,6 +1328,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = GLFW_KEY_LEFT, 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1279,6 +1338,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = GLFW_KEY_UP, 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1288,6 +1348,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = GLFW_KEY_DOWN, 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1297,6 +1358,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'R', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1307,6 +1369,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'L', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1321,6 +1384,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'Q', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1337,6 +1401,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'P', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1349,6 +1414,7 @@ std::vector<InputDispatch> inputFns = {
 
   // Testing offline scene functions
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'N', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 'L', 
@@ -1389,6 +1455,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'D', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 'L', 
@@ -1398,6 +1465,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'C', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 'L', 
@@ -1407,6 +1475,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'R', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 'L', 
@@ -1416,6 +1485,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'A', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 'L', 
@@ -1425,6 +1495,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = true,
     .sourceKey = GLFW_KEY_ENTER, 
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT,
@@ -1435,6 +1506,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'C',
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT,
@@ -1459,6 +1531,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'R',
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT,
@@ -1468,6 +1541,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'S',
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT,
@@ -1481,6 +1555,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 258,
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0,
@@ -1490,6 +1565,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 258,
     .sourceType = BUTTON_RELEASE,
     .prereqKey = 0,

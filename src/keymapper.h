@@ -26,6 +26,7 @@ struct KeyAxisConfiguration {
 
 enum DispatchType { BUTTON_PRESS, BUTTON_RELEASE, BUTTON_HOLD };
 struct InputDispatch {
+  bool alwaysEnable;
   int sourceKey;
   DispatchType sourceType;
   int prereqKey;

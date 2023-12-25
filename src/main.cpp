@@ -192,17 +192,21 @@ bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCu
   std::cout << "SELECT ITEM CALLED!" << std::endl;
   bool shouldCallBindingOnObjectSelected = false;
   modlog("selection", (std::string("select item called") + ", selectedId = " + std::to_string(selectedId) + ", layerSelectIndex = " + std::to_string(layerSelectIndex)).c_str());
-  if (!showCursor || state.disableInput){
+  if (!showCursor){
     return shouldCallBindingOnObjectSelected;
   }
   auto idToUse = state.groupSelection ? groupId : selectedId;
   auto selectedSubObj = getGameObject(world, selectedId);
   auto selectedObject =  getGameObject(world, idToUse);
 
-  if (layerSelectIndex >= 0){
+  if (layerSelectIndex >= 0 && !state.disableInput){
     onManipulatorSelectItem(state.manipulatorState, idToUse, selectedSubObj.name);
   }
   if (idToUse == getManipulatorId(state.manipulatorState)){
+    return shouldCallBindingOnObjectSelected;
+  }
+
+  if (state.disableInput){
     return shouldCallBindingOnObjectSelected;
   }
   textureToPaint = textureForId(world, selectedId);
