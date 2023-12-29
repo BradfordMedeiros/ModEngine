@@ -239,5 +239,7 @@ RotationDirection getCursorInfoWorld();
 
 void handleChangedResourceFiles(std::set<std::string> changedFiles);
 void setLogEndpoint(std::optional<std::function<void(std::string&)>> fn);
+const char* getClipboardString();
+void setClipboardString(const char* string);
 
 #endif

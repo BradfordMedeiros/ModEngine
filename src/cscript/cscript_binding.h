@@ -130,6 +130,8 @@ struct CustomApiBindings {
   std::optional<objid> (*prefabId)(objid id);
 
   void(*setLogEndpoint)(std::optional<std::function<void(std::string&)>>);
+  const char*(*getClipboardString)();
+  void (*setClipboardString)(const char*);
   //std::vector<func_t> registerGuileFns
 };
 

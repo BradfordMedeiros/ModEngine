@@ -1220,3 +1220,12 @@ void setLogEndpoint(std::optional<std::function<void(std::string&)>> fn){
   modlogSetLogEndpoint(fn);
   modlog("logging", std::string("custom logEndpoint set: ") + std::string(fn.has_value() ? "true" : "false"));
 }
+
+const char* getClipboardString(){
+  return glfwGetClipboardString(window); 
+  return NULL;
+}
+
+void setClipboardString(const char* string){
+  glfwSetClipboardString(window, string);
+}

@@ -1300,6 +1300,8 @@ int main(int argc, char* argv[]){
     .gameobjExists = gameobjExists,
     .prefabId = prefabId,
     .setLogEndpoint = setLogEndpoint,
+    .getClipboardString = getClipboardString,
+    .setClipboardString = setClipboardString,
   };
 
 
