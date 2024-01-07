@@ -1664,7 +1664,7 @@ int main(int argc, char* argv[]){
         auto layerSelectThreeCond = layerSelectIndex == -3 && mappingClickCalled;
         std::cout << "cond1 = " << (layerSelectNegOne ? "true" : "false") << ", condtwo = " << (layerSelectThreeCond ? "true" : "false") << ", selectindex " << layerSelectIndex << ", mapping = " << mappingClickCalled << std::endl;
         if (!(layerSelectNegOne || layerSelectThreeCond) && !state.selectionDisabled){
-          shouldCallBindingOnObjectSelected = selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId), state.showCursor);
+          shouldCallBindingOnObjectSelected = selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId), state.cursorBehavior != CURSOR_HIDDEN || state.showCursor );
         }
       }else if (isReservedObjId(selectTargetId)){
         onObjectSelected(selectTargetId);
