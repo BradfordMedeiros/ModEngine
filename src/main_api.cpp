@@ -1227,5 +1227,6 @@ const char* getClipboardString(){
 }
 
 void setClipboardString(const char* string){
+  // this is really slow for some reason 
   glfwSetClipboardString(window, string);
 }

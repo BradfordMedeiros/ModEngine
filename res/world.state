@@ -11,7 +11,7 @@ editor:debug:false
 
 editor:debugmask:8
 
-physics:enabled:false
+physics:enabled:true
 world:paused:true  # true / false
 
 diffuse:enabled:true
@@ -59,7 +59,8 @@ rendering:fontsize:6
 
 
 ### input stuff ###
-mouse:cursor:normal   # normal, hidden, capture
+mouse:cursor:capture   # normal, hidden, capture
+mouse:show-cursor:false
 
 #window:name:ModEngine Editor
 #window:icon:./res/textures/wood.jpg

@@ -287,7 +287,40 @@ std::vector<ObjectStateMapping> mapping = {
   simpleBoolSerializer("rendering", "fullscreen", offsetof(engineState, fullscreen)),
   simpleEnumSerializer("rendering", "antialiasing", { ANTIALIASING_NONE, ANTIALIASING_MSAA }, { "none", "msaa" }, offsetof(engineState, antialiasingMode)),
   simpleBoolSerializer("rendering", "cull", "enabled", "disabled", offsetof(engineState, cullEnabled)),
-  simpleEnumSerializer("mouse", "cursor", { CURSOR_NORMAL, CURSOR_HIDDEN, CURSOR_CAPTURE }, { "normal", "hidden", "capture" }, offsetof(engineState, cursorBehavior)),
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto strValue = std::get_if<std::string>(&value);
+      modassert(strValue, "mouse cursor invalid type");
+      if (*strValue == "normal"){
+        state.cursorBehavior = CURSOR_NORMAL;
+        state.shouldToggleCursor = true;
+        return;
+      }else if (*strValue == "hidden"){
+        state.cursorBehavior = CURSOR_HIDDEN;
+        state.shouldToggleCursor = true;
+        return;
+      }else if (*strValue == "capture"){
+        state.cursorBehavior = CURSOR_CAPTURE;
+        state.shouldToggleCursor = true;
+        return;
+      }
+      modassert(false, "invalid value to mouse cursor");
+    },
+    .getAttr = [](engineState& state) -> AttributeValue { 
+      if (state.cursorBehavior == CURSOR_NORMAL){
+        return "normal";
+      }else if (state.cursorBehavior == CURSOR_HIDDEN){
+        return "hidden";
+      }else if (state.cursorBehavior == CURSOR_CAPTURE){
+        return "capture";
+      }
+      modassert(false, "invalid value set state");
+      return 0;
+    },
+    .object = "mouse",
+    .attribute = "cursor",
+  },
+  simpleBoolSerializer("mouse", "show-cursor", offsetof(engineState, showCursor)),
   simpleStringSerializer("mouse", "crosshair", offsetof(engineState, crosshair)),
   simpleEnumSerializer("tools", "manipulator-mode", { TRANSLATE, SCALE, ROTATE }, { "translate", "scale", "rotate" }, offsetof(engineState, manipulatorMode)),
   simpleEnumSerializer("tools", "manipulator-axis", { XAXIS, YAXIS, ZAXIS, NOAXIS }, { "x", "y", "z", "none" }, offsetof(engineState, manipulatorAxis)),
@@ -407,6 +440,8 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.offsetY = 0,
     .mouseIsDown = false,
     .cursorBehavior = CURSOR_NORMAL,
+    .shouldToggleCursor = false,
+    .showCursor = true,
 		.enableDiffuse = true,
 		.enableSpecular = true,
     .enablePBR = false,

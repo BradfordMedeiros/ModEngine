@@ -543,19 +543,18 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
 
-void renderUI(Mesh* crosshairSprite, Color pixelColor, bool showCursor){
+void renderUI(Mesh* crosshairSprite, Color pixelColor){
   glUseProgram(uiShaderProgram);
   glEnable(GL_BLEND);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
 
-  if (showCursor && crosshairSprite != NULL){
-    if(!state.isRotateSelection && state.cursorBehavior != CURSOR_NORMAL){
-      glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
-      auto location = pixelCoordToNdi(glm::ivec2(state.cursorLeft, state.currentScreenHeight - state.cursorTop), glm::vec2(state.currentScreenWidth, state.currentScreenHeight));
-      drawSpriteAround(uiShaderProgram, *crosshairSprite, location.x, location.y, 0.05, 0.05);
-    }
+  if(crosshairSprite != NULL && !state.isRotateSelection && state.showCursor){
+    glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+    auto location = pixelCoordToNdi(glm::ivec2(state.cursorLeft, state.currentScreenHeight - state.cursorTop), glm::vec2(state.currentScreenWidth, state.currentScreenHeight));
+    drawSpriteAround(uiShaderProgram, *crosshairSprite, location.x, location.y, 0.05, 0.05);
   }
+  
   if (!state.showDebug){
     return;
   }
@@ -926,7 +925,6 @@ int main(int argc, char* argv[]){
    ("fps-speed", "Fps speed multiplier", cxxopts::value<int>()->default_value("1000"))
    ("f,fullscreen", "Enable fullscreen mode", cxxopts::value<bool>()->default_value("false"))
    ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
-   ("cursor", "Show cursor", cxxopts::value<bool>() -> default_value("true"))
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
    ("d,dumpphysics", "Dump physics info to file for external processing", cxxopts::value<bool>()->default_value("false"))
    ("b,bootstrapper", "Run the server in bootstrapper only", cxxopts::value<bool>()->default_value("false"))
@@ -1031,7 +1029,6 @@ int main(int argc, char* argv[]){
   auto textureFolderPath = result["texture"].as<std::string>();
   const std::string framebufferShaderPath = "./res/shaders/framebuffer";
   const std::string uiShaderPath = result["uishader"].as<std::string>();
-  bool showCursor = result["cursor"].as<bool>();
   
   auto benchmarkFile = result["benchmark"].as<std::string>();
   auto shouldBenchmark = benchmarkFile != "";
@@ -1667,7 +1664,7 @@ int main(int argc, char* argv[]){
         auto layerSelectThreeCond = layerSelectIndex == -3 && mappingClickCalled;
         std::cout << "cond1 = " << (layerSelectNegOne ? "true" : "false") << ", condtwo = " << (layerSelectThreeCond ? "true" : "false") << ", selectindex " << layerSelectIndex << ", mapping = " << mappingClickCalled << std::endl;
         if (!(layerSelectNegOne || layerSelectThreeCond) && !state.selectionDisabled){
-          shouldCallBindingOnObjectSelected = selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId), showCursor);
+          shouldCallBindingOnObjectSelected = selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId), state.showCursor);
         }
       }else if (isReservedObjId(selectTargetId)){
         onObjectSelected(selectTargetId);
@@ -1764,7 +1761,12 @@ int main(int argc, char* argv[]){
 
     handleInput(window);  // stateupdate
     glfwPollEvents();     // stateupdate
-    
+    if (state.shouldToggleCursor){
+      modlog("toggle cursor", std::to_string(state.cursorBehavior));
+      toggleCursor(state.cursorBehavior);
+      state.shouldToggleCursor = false;
+    }  
+
     cBindings.onFrame();
     afterFrameForScripts();
     
@@ -1905,7 +1907,7 @@ int main(int argc, char* argv[]){
     );
     
     if (state.renderMode == RENDER_FINAL){
-      renderUI(effectiveCrosshair, pixelColor, showCursor);
+      renderUI(effectiveCrosshair, pixelColor);
       drawShapeData(lineData, uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
     }
     glEnable(GL_DEPTH_TEST);
