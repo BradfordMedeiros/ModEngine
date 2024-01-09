@@ -462,20 +462,23 @@ std::vector<std::vector<std::string>> select(std::string tableName, std::vector<
 
 
   auto orderIndexs = getColumnIndexs(tableData.header.columns, qualifiedOrderBy);
-  std::sort (tableData.rows.begin(), tableData.rows.end(), [&orderIndexs, &orderBy](std::vector<std::string>& row1, std::vector<std::string>& row2) -> bool {
-    for (int i = 0; i < orderIndexs.size(); i++){
-      auto index = orderIndexs.at(i);
-      auto value = strcmp(row1.at(index).c_str(), row2.at(index).c_str()); // this is wrong because row is already the new one 
-      
-      auto isDesc = orderBy.isDesc.at(i);
-      if (value > 0){
-        return isDesc ? true : false;
-      }else if (value < 0){
-        return isDesc ? false : true;
+  if (orderIndexs.size() > 0){
+    std::sort (tableData.rows.begin(), tableData.rows.end(), [&orderIndexs, &orderBy](std::vector<std::string>& row1, std::vector<std::string>& row2) -> bool {
+      for (int i = 0; i < orderIndexs.size(); i++){
+        auto index = orderIndexs.at(i);
+        auto value = strcmp(row1.at(index).c_str(), row2.at(index).c_str()); // this is wrong because row is already the new one 
+        
+        auto isDesc = orderBy.isDesc.at(i);
+        if (value > 0){
+          return isDesc ? true : false;
+        }else if (value < 0){
+          return isDesc ? false : true;
+        }
       }
-    }
-    return false;
-  });
+      return false;
+    });    
+  }
+
 
   std::vector<std::vector<std::string>> finalRows;
   auto filterIndex = -1;
