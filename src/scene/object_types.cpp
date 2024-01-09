@@ -425,7 +425,7 @@ int renderObject(
 
       auto isSelected = selectedId == objectId;
       glm::vec4 color = isSelected ? glm::vec4(0.f, 0.f, 1.f, 0.5f) : glm::vec4(1.f, 0.f, 0.f, 0.5f);
-      std::cout << "selected: " << selectedId << ", object id: " << objectId << ", isSelected = " << isSelected << ", color = " << print(color) << std::endl;
+      //std::cout << "selected: " << selectedId << ", object id: " << objectId << ", isSelected = " << isSelected << ", color = " << print(color) << std::endl;
       glUniform4fv(glGetUniformLocation(shaderProgram, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(objectId)));
       glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(isSelected ? selectedColor : notSelectedColor));
       renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);

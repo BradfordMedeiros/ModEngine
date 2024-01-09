@@ -242,4 +242,6 @@ void setLogEndpoint(std::optional<std::function<void(std::string&)>> fn);
 const char* getClipboardString();
 void setClipboardString(const char* string);
 
+void sendManipulatorEvent(MANIPULATOR_EVENT event);
+
 #endif

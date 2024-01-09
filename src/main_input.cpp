@@ -140,7 +140,7 @@ void moveMouse(glm::vec2 ndi){
 }
 
 void mouse_button_callback(engineState& state, int button, int action, int mods, void (*handleSerialization) (void)){
-  if (!state.disableInput){
+  if (state.disableInput){
     return;
   }
   if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
@@ -722,6 +722,9 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = [&state]() -> void {
+      if (state.disableInput){
+        return;
+      }
       auto speed = cameraSpeed * -40.0f * deltaTime;
       glm::vec3 moveVec = state.moveUp ? glm::vec3(0.0, -1 * speed, 0.f) : glm::vec3(0.0, 0.0, speed);
       moveCamera(moveVec);
@@ -734,6 +737,9 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = [&state]() -> void {
+      if (state.disableInput){
+        return;
+      }
       moveCamera(glm::vec3(cameraSpeed * -40.0 * deltaTime, 0.0, 0.0));
     }
   },  
@@ -744,6 +750,9 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = [&state]() -> void {
+      if (state.disableInput){
+        return;
+      }
       auto speed = cameraSpeed * 40.0f * deltaTime;
       glm::vec3 moveVec = state.moveUp ? glm::vec3(0.0, -1 * speed, 0.f) : glm::vec3(0.0, 0.0, speed);
       moveCamera(moveVec);
@@ -756,6 +765,9 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = [&state]() -> void {
+      if (state.disableInput){
+        return;
+      }
       moveCamera(glm::vec3(cameraSpeed * 40.0f * deltaTime, 0.0, 0.0f));
     }
   },  

@@ -26,6 +26,7 @@ extern GLFWwindow* window;
 extern GLFWmonitor* monitor;
 extern const GLFWvidmode* mode;
 extern TimePlayback timePlayback;
+extern ManipulatorTools tools;
 
 extern std::string sqlDirectory;
 
@@ -875,7 +876,6 @@ void nextCamera(){
   setActiveCamera(activeCameraId, -1);
 }
 void moveCamera(glm::vec3 offset, std::optional<bool> relative){
-  //return;
   bool isRelative = !relative.has_value() || relative.value() == true;
   if (isRelative){
     if (state.activeCameraObj == NULL){
@@ -1229,4 +1229,8 @@ const char* getClipboardString(){
 void setClipboardString(const char* string){
   // this is really slow for some reason 
   glfwSetClipboardString(window, string);
+}
+
+void sendManipulatorEvent(MANIPULATOR_EVENT event){
+  onManipulatorEvent(state.manipulatorState, tools, event);
 }

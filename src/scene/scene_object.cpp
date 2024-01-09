@@ -201,8 +201,8 @@ std::optional<glm::vec3> aiNavigate(World& world, objid id, glm::vec3 target, st
   auto destinationMeshId = targetNavmeshId(target, raycastWorld, isNavmeshWorld);
   bool onDestinationNavmesh = currentMeshId == destinationMeshId;
 
-  modlog("ai navigate : currrentMesh id", print(currentMeshId));
-  modlog("ai navigate : destinationMesh id", print(destinationMeshId));
+  //modlog("ai navigate : currrentMesh id", print(currentMeshId));
+  //modlog("ai navigate : destinationMesh id", print(destinationMeshId));
 
   if (!currentMeshId.has_value()){
     //modassert(false, "current has no navmesh");
