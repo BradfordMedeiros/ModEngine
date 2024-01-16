@@ -1,0 +1,6 @@
+# Generated scene 
+*octree:position:0 0 0
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -10 0
