@@ -173,6 +173,15 @@ std::vector<ObjectType> objTypes = {
     .removeObject  = removeDoNothing,
   },
   ObjectType {
+    .name = "octree", 
+    .variantType = getVariantIndex(GameObjectOctree{}),
+    .createObj = createOctree, 
+    .objectAttributes = nothingObjAttr,
+    .setAttributes = nothingSetObjAttr,
+    .serialize = convertSerialize<GameObjectOctree>(serializeOctree),
+    .removeObject  = removeDoNothing,
+  },
+  ObjectType {
     .name = "custom", 
     .variantType = getVariantIndex(GameObjectNil{}),
     .createObj = createNil, 
@@ -349,6 +358,7 @@ int renderObject(
 
     int numTriangles = 0;
     // todo instance these
+    std::cout << "rendering voxel, size = " << voxelBodies.size() << std::endl;
     for (int i = 0; i < voxelBodies.size(); i++){
       auto voxelBody = voxelBodies.at(i);
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, voxelBody.position + glm::vec3(0.5f, 0.5f, 0.5f))));

@@ -39,7 +39,7 @@ void playSource(ALuint source, std::optional<float> volume, std::optional<glm::v
   alSourcePlay(source);
 
   if (volume.has_value()){
-    setSoundVolume(source, oldVolume);
+    //setSoundVolume(source, oldVolume);
   }
   if (position.has_value()){
     setSoundPosition(source, x, y, z);
