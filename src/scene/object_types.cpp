@@ -370,7 +370,14 @@ int renderObject(
 
   auto octreeObj = std::get_if<GameObjectOctree>(&toRender);
   if (octreeObj != NULL){
-    return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), defaultMeshes.voxelCubeMesh -> bones.size() > 0);
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+    Mesh* octreeMesh = getOctreeMesh(*octreeObj);
+    modassert(octreeMesh, "no octree mesh available");
+    drawMesh(*octreeMesh, shaderProgram);   
+    return octreeMesh -> numTriangles;
   }
 
   auto rootObj = std::get_if<GameObjectRoot>(&toRender);
