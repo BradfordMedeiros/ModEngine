@@ -5,7 +5,15 @@ std::vector<AutoSerialize> octreeAutoserializer {
 };
 
 struct OctreeDivision {
-  // topleft, topright, bottomleft, bottomright
+  // -x +y -z 
+  // +x +y -z
+  // -x +y +z
+  // +x +y +z
+  // -x -y -z 
+  // +x -y -z
+  // -x -y +z
+  // +x -y +z
+  bool filled;
   std::vector<OctreeDivision> divisions; 
 };
 
@@ -15,24 +23,48 @@ struct Octree {
 };
 
 
-Octree testOctree {
+Octree unsubdividedOctree {
   .size = 5.f,
   .rootNode = OctreeDivision {
+    .filled = false,
+    .divisions = {},
+  },
+};
+
+Octree subdividedOne {
+  .size = 5.f,
+  .rootNode = OctreeDivision {
+    .filled = true,
     .divisions = {
-      OctreeDivision {},
-      OctreeDivision {
+      OctreeDivision { .filled = true },
+      OctreeDivision { .filled = false },
+      OctreeDivision { 
+        .filled = true,
         .divisions = {
-          OctreeDivision {},
-          OctreeDivision {},
-          OctreeDivision {},
-          OctreeDivision {},
-        }
+          OctreeDivision { .filled = true },
+          OctreeDivision { .filled = true },
+          OctreeDivision { .filled = true },
+          OctreeDivision { .filled = true },
+          OctreeDivision { .filled = true },
+          OctreeDivision { .filled = true },
+          OctreeDivision { .filled = true },
+          OctreeDivision { .filled = true },
+        },
+
       },
-      OctreeDivision {},
-      OctreeDivision {},
+      OctreeDivision { .filled = false },
+
+      OctreeDivision { .filled = true },
+      OctreeDivision { .filled = false },
+      OctreeDivision { .filled = true },
+      OctreeDivision { .filled = true },
     },
   },
 };
+
+Octree testOctree = subdividedOne;
+
+
 
 /*Mesh createNavmeshFromPointList(std::vector<glm::vec3> points, ){
 
@@ -51,71 +83,117 @@ Vertex createVertex2(glm::vec3 position, glm::vec2 texCoords){
   return vertex;
 }
 
-void addCubePoints(std::vector<glm::vec3>& points){
+void addCubePoints(std::vector<glm::vec3>& points, float size, glm::vec3 offset){
   //bottom plane
-  points.push_back(glm::vec3(0.f, 0.f, -1.f));
-  points.push_back(glm::vec3(1.f, 0.f, 0.f));
-  points.push_back(glm::vec3(0.f, 0.f, 0.f));
+  points.push_back(glm::vec3(0.f, 0.f, -size) + offset);
+  points.push_back(glm::vec3(size, 0.f, 0.f) + offset);
+  points.push_back(glm::vec3(0.f, 0.f, 0.f) + offset);
 
-  points.push_back(glm::vec3(1.f, 0.f, -1.f));
-  points.push_back(glm::vec3(1.f, 0.f, 0.f));
-  points.push_back(glm::vec3(0.f, 0.f, -1.f));
+  points.push_back(glm::vec3(size, 0.f, -size) + offset);
+  points.push_back(glm::vec3(size, 0.f, 0.f) + offset);
+  points.push_back(glm::vec3(0.f, 0.f, -size) + offset);
 
   // top plane
-  points.push_back(glm::vec3(0.f, 1.f, 0.f));
-  points.push_back(glm::vec3(1.f, 1.f, 0.f));
-  points.push_back(glm::vec3(0.f, 1.f, -1.f));
+  points.push_back(glm::vec3(0.f, size, 0.f) + offset);
+  points.push_back(glm::vec3(size, size, 0.f) + offset);
+  points.push_back(glm::vec3(0.f, size, -size) + offset);
 
-  points.push_back(glm::vec3(0.f, 1.f, -1.f));
-  points.push_back(glm::vec3(1.f, 1.f, 0.f));
-  points.push_back(glm::vec3(1.f, 1.f, -1.f));
+  points.push_back(glm::vec3(0.f, size, -size) + offset);
+  points.push_back(glm::vec3(size, size, 0.f) + offset);
+  points.push_back(glm::vec3(size, size, -size) + offset);
 
   // left plane
-  points.push_back(glm::vec3(0.f, 1.f, -1.f));
-  points.push_back(glm::vec3(0.f, 0.f, -1.f));
-  points.push_back(glm::vec3(0.f, 0.f, 0.f));
+  points.push_back(glm::vec3(0.f, size, -size) + offset);
+  points.push_back(glm::vec3(0.f, 0.f, -size) + offset);
+  points.push_back(glm::vec3(0.f, 0.f, 0.f) + offset);
 
-  points.push_back(glm::vec3(0.f, 1.f, 0.f));
-  points.push_back(glm::vec3(0.f, 1.f, -1.f));
-  points.push_back(glm::vec3(0.f, 0.f, 0.f));
+  points.push_back(glm::vec3(0.f, size, 0.f) + offset);
+  points.push_back(glm::vec3(0.f, size, -size) + offset);
+  points.push_back(glm::vec3(0.f, 0.f, 0.f) + offset);
 
   // right plane
-  points.push_back(glm::vec3(1.f, 0.f, 0.f));
-  points.push_back(glm::vec3(1.f, 0.f, -1.f));
-  points.push_back(glm::vec3(1.f, 1.f, -1.f));
+  points.push_back(glm::vec3(size, 0.f, 0.f) + offset);
+  points.push_back(glm::vec3(size, 0.f, -size) + offset);
+  points.push_back(glm::vec3(size, size, -size) + offset);
 
-  points.push_back(glm::vec3(1.f, 0.f, 0.f));
-  points.push_back(glm::vec3(1.f, 1.f, -1.f));
-  points.push_back(glm::vec3(1.f, 1.f, 0.f));
+  points.push_back(glm::vec3(size, 0.f, 0.f) + offset);
+  points.push_back(glm::vec3(size, size, -size) + offset);
+  points.push_back(glm::vec3(size, size, 0.f) + offset);
 
 
   // front plane
-  points.push_back(glm::vec3(1.f, 0.f, 0.f));
-  points.push_back(glm::vec3(0.f, 1.f, 0.f));
-  points.push_back(glm::vec3(0.f, 0.f, 0.f));
+  points.push_back(glm::vec3(size, 0.f, 0.f) + offset);
+  points.push_back(glm::vec3(0.f, size, 0.f) + offset);
+  points.push_back(glm::vec3(0.f, 0.f, 0.f) + offset);
 
-  points.push_back(glm::vec3(1.f, 1.f, 0.f));
-  points.push_back(glm::vec3(0.f, 1.f, 0.f));
-  points.push_back(glm::vec3(1.f, 0.f, 0.f));
+  points.push_back(glm::vec3(size, size, 0.f) + offset);
+  points.push_back(glm::vec3(0.f, size, 0.f) + offset);
+  points.push_back(glm::vec3(size, 0.f, 0.f) + offset);
 
 
   // back plane
-  points.push_back(glm::vec3(0.f, 0.f, -1.f));
-  points.push_back(glm::vec3(0.f, 1.f, -1.f));
-  points.push_back(glm::vec3(1.f, 0.f, -1.f));
+  points.push_back(glm::vec3(0.f, 0.f, -size) + offset);
+  points.push_back(glm::vec3(0.f, size, -size) + offset);
+  points.push_back(glm::vec3(size, 0.f, -size) + offset);
 
-  points.push_back(glm::vec3(1.f, 0.f, -1.f));
-  points.push_back(glm::vec3(0.f, 1.f, -1.f));
-  points.push_back(glm::vec3(1.f, 1.f, -1.f));
+  points.push_back(glm::vec3(size, 0.f, -size) + offset);
+  points.push_back(glm::vec3(0.f, size, -size) + offset);
+  points.push_back(glm::vec3(size, size, -size) + offset);
 }
 
 Mesh createOctreeMesh(ObjectTypeUtil& util){
   std::vector<Vertex> vertices;
-
   std::vector<glm::vec3> points = {};
-  for (int i = 0; i < testOctree.rootNode.divisions.size(); i++){
-    addCubePoints(points);
-    break;
+
+  float rootWidth = testOctree.size;
+  if (testOctree.rootNode.divisions.size() == 0){
+    if (testOctree.rootNode.filled){
+      addCubePoints(points, rootWidth, glm::vec3(0.f, 0.f, 0.f));
+    }
+  }else{
+    modassert(testOctree.rootNode.divisions.size() == 8, "subdivisions should be 0 or 8");
+    float size = rootWidth * 0.5f;
+  
+    // -x +y -z 
+    // +x +y -z
+    // -x +y +z
+    // +x +y +z
+    // -x -y -z 
+    // +x -y -z
+    // -x -y +z
+    // +x -y +z
+
+    if (testOctree.rootNode.divisions.at(0).filled){
+      addCubePoints(points, size, glm::vec3(-0.5f * size, 0.5f * size, -0.5f * size));
+    }
+    if (testOctree.rootNode.divisions.at(1).filled){
+      addCubePoints(points, size, glm::vec3(0.5f * size, 0.5f * size, -0.5f * size));
+    }
+    if (testOctree.rootNode.divisions.at(2).filled){
+      addCubePoints(points, size, glm::vec3(-0.5f * size, 0.5f * size, 0.5f * size));
+    }
+    if (testOctree.rootNode.divisions.at(3).filled){
+      addCubePoints(points, size, glm::vec3(0.5f * size, 0.5f * size, 0.5f * size));
+    } 
+
+    if (testOctree.rootNode.divisions.at(4).filled){
+      addCubePoints(points, size, glm::vec3(-0.5f * size, -0.5f * size, -0.5f * size));
+    }
+    if (testOctree.rootNode.divisions.at(5).filled){
+      addCubePoints(points, size, glm::vec3(0.5f * size, -0.5f * size, -0.5f * size));
+    }
+    if (testOctree.rootNode.divisions.at(6).filled){
+      addCubePoints(points, size, glm::vec3(-0.5f * size, -0.5f * size, 0.5f * size));
+    }
+    if (testOctree.rootNode.divisions.at(7).filled){
+      addCubePoints(points, size, glm::vec3(0.5f * size, -0.5f * size, 0.5f * size));
+    } 
+
+  }
+
+
+  if (points.size() == 0){ // just hack for now 
+    addCubePoints(points, 0.0001f, glm::vec3(0.f, 0.f, 0.f));
   }
 
   for (int i = 0; i < points.size(); i++){
