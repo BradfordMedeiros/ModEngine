@@ -545,6 +545,7 @@ extern std::vector<AutoSerialize> portalAutoserializer;
 extern std::vector<AutoSerialize> soundAutoserializer;
 extern std::vector<AutoSerialize> lightAutoserializer;
 extern std::vector<AutoSerialize> voxelAutoserializer;
+extern std::vector<AutoSerialize> octreeAutoserializer;
 extern std::vector<AutoSerialize> emitterAutoserializer;
 extern std::vector<AutoSerialize> heightmapAutoserializer;
 extern std::vector<AutoSerialize> navmeshAutoserializer;
@@ -565,6 +566,8 @@ std::set<std::string> getObjautoserializerFields(std::string& name){
     return serializerFieldNames(lightAutoserializer);
   }else if (type == "voxel"){
     return serializerFieldNames(voxelAutoserializer);
+  }else if (type == "octree"){
+    return serializerFieldNames(octreeAutoserializer);
   }else if (type == "root"){
     return {};
   }else if (type == "emitter"){

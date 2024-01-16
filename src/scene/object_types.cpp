@@ -368,6 +368,11 @@ int renderObject(
     return numTriangles;
   }
 
+  auto octreeObj = std::get_if<GameObjectOctree>(&toRender);
+  if (octreeObj != NULL){
+    return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
+  }
+
   auto rootObj = std::get_if<GameObjectRoot>(&toRender);
   if (rootObj != NULL){
     if ((showDebugMask & 0b10000)){
@@ -495,6 +500,7 @@ int renderObject(
     return vertexCount;
   }
 
+  //modassert(false, "invalid object type found");
   return 0;
 }
 
