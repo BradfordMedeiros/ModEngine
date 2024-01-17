@@ -1,8 +1,6 @@
 #include "./obj_octree.h"
 
-std::vector<AutoSerialize> octreeAutoserializer {
- 
-};
+std::vector<AutoSerialize> octreeAutoserializer {};
 
 struct OctreeDivision {
   // -x +y -z 
@@ -22,7 +20,6 @@ struct Octree {
   OctreeDivision rootNode;
 };
 
-
 Octree unsubdividedOctree {
   .size = 5.f,
   .rootNode = OctreeDivision {
@@ -36,8 +33,6 @@ Octree subdividedOne {
   .rootNode = OctreeDivision {
     .filled = true,
     .divisions = {
-      OctreeDivision { .filled = true },
-      OctreeDivision { .filled = false },
       OctreeDivision { 
         .filled = true,
         .divisions = {
@@ -50,7 +45,20 @@ Octree subdividedOne {
           OctreeDivision { .filled = true },
           OctreeDivision { .filled = true },
         },
-
+      },
+      OctreeDivision { .filled = false },
+      OctreeDivision { 
+        .filled = true,
+        .divisions = {
+          OctreeDivision { .filled = true },
+          OctreeDivision { .filled = false },
+          OctreeDivision { .filled = true },
+          OctreeDivision { .filled = false },
+          OctreeDivision { .filled = true },
+          OctreeDivision { .filled = true },
+          OctreeDivision { .filled = true },
+          OctreeDivision { .filled = true },
+        },
       },
       OctreeDivision { .filled = false },
 
@@ -141,55 +149,47 @@ void addCubePoints(std::vector<glm::vec3>& points, float size, glm::vec3 offset)
   points.push_back(glm::vec3(size, size, -size) + offset);
 }
 
+void addOctreeLevel(std::vector<glm::vec3>& points, glm::vec3 rootPos, OctreeDivision& octreeDivision, float size, int subdivisionLevel){
+  std::cout << "addOctreeLevel: " << size << std::endl;
+  if (octreeDivision.divisions.size() > 0){
+    auto subdivisionRootPos = rootPos;
+    float subdivisionSize = size * 0.5f;
+
+    // -x +y -z 
+    addOctreeLevel(points, subdivisionRootPos + glm::vec3(0.f, subdivisionSize, -subdivisionSize), octreeDivision.divisions.at(0), subdivisionSize, subdivisionLevel + 1);
+
+    // +x +y -z
+    addOctreeLevel(points, subdivisionRootPos + glm::vec3(subdivisionSize, subdivisionSize, -subdivisionSize), octreeDivision.divisions.at(1), subdivisionSize, subdivisionLevel + 1);
+
+    // -x +y +z
+    addOctreeLevel(points, subdivisionRootPos + glm::vec3(0.f, subdivisionSize, 0.f), octreeDivision.divisions.at(2), subdivisionSize, subdivisionLevel + 1);
+
+    // +x +y +z
+    addOctreeLevel(points, subdivisionRootPos + glm::vec3(subdivisionSize, subdivisionSize, 0.f), octreeDivision.divisions.at(3), subdivisionSize, subdivisionLevel + 1);
+
+    // -x -y -z 
+    addOctreeLevel(points, subdivisionRootPos + glm::vec3(0.f, 0.f, -subdivisionSize), octreeDivision.divisions.at(4), subdivisionSize, subdivisionLevel + 1);
+
+    // +x -y -z
+    addOctreeLevel(points, subdivisionRootPos + glm::vec3(subdivisionSize, 0.f, -subdivisionSize), octreeDivision.divisions.at(5), subdivisionSize, subdivisionLevel + 1);
+
+    // -x -y +z
+    addOctreeLevel(points, subdivisionRootPos + glm::vec3(0.f, 0.f, 0.f), octreeDivision.divisions.at(6), subdivisionSize, subdivisionLevel + 1);
+
+    // +x -y +z
+    addOctreeLevel(points, subdivisionRootPos + glm::vec3(subdivisionSize, 0.f, 0.f), octreeDivision.divisions.at(7), subdivisionSize, subdivisionLevel + 1);
+  }else if (octreeDivision.filled){
+    addCubePoints(points, size, rootPos);
+  }
+}
+
 Mesh createOctreeMesh(ObjectTypeUtil& util){
   std::vector<Vertex> vertices;
   std::vector<glm::vec3> points = {};
 
-  float rootWidth = testOctree.size;
-  if (testOctree.rootNode.divisions.size() == 0){
-    if (testOctree.rootNode.filled){
-      addCubePoints(points, rootWidth, glm::vec3(0.f, 0.f, 0.f));
-    }
-  }else{
-    modassert(testOctree.rootNode.divisions.size() == 8, "subdivisions should be 0 or 8");
-    float size = rootWidth * 0.5f;
-  
-    // -x +y -z 
-    // +x +y -z
-    // -x +y +z
-    // +x +y +z
-    // -x -y -z 
-    // +x -y -z
-    // -x -y +z
-    // +x -y +z
-
-    if (testOctree.rootNode.divisions.at(0).filled){
-      addCubePoints(points, size, glm::vec3(-0.5f * size, 0.5f * size, -0.5f * size));
-    }
-    if (testOctree.rootNode.divisions.at(1).filled){
-      addCubePoints(points, size, glm::vec3(0.5f * size, 0.5f * size, -0.5f * size));
-    }
-    if (testOctree.rootNode.divisions.at(2).filled){
-      addCubePoints(points, size, glm::vec3(-0.5f * size, 0.5f * size, 0.5f * size));
-    }
-    if (testOctree.rootNode.divisions.at(3).filled){
-      addCubePoints(points, size, glm::vec3(0.5f * size, 0.5f * size, 0.5f * size));
-    } 
-
-    if (testOctree.rootNode.divisions.at(4).filled){
-      addCubePoints(points, size, glm::vec3(-0.5f * size, -0.5f * size, -0.5f * size));
-    }
-    if (testOctree.rootNode.divisions.at(5).filled){
-      addCubePoints(points, size, glm::vec3(0.5f * size, -0.5f * size, -0.5f * size));
-    }
-    if (testOctree.rootNode.divisions.at(6).filled){
-      addCubePoints(points, size, glm::vec3(-0.5f * size, -0.5f * size, 0.5f * size));
-    }
-    if (testOctree.rootNode.divisions.at(7).filled){
-      addCubePoints(points, size, glm::vec3(0.5f * size, -0.5f * size, 0.5f * size));
-    } 
-
-  }
+  std::cout << "adding octree start" << std::endl;
+  addOctreeLevel(points, glm::vec3(0.f, 0.f, 0.f), testOctree.rootNode, testOctree.size, 0);
+  std::cout << "adding octree end" << std::endl;
 
 
   if (points.size() == 0){ // just hack for now 
