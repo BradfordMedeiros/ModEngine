@@ -73,11 +73,6 @@ Octree subdividedOne {
 Octree testOctree = subdividedOne;
 
 
-OctreeDivision* getOctreeCell(Octree& octree, int x, int y, int z, int division){
-  return NULL;
-}
-
-
 glm::ivec3 indexForSubdivision(int x, int y, int z, int sourceSubdivision, int targetSubdivision){
   if (sourceSubdivision < targetSubdivision){ // same formula as other case, just being mindful of integer division
     int numCells = glm::pow(2, targetSubdivision - sourceSubdivision);
@@ -91,69 +86,89 @@ glm::ivec3 localIndexForSubdivision(int x, int y, int z, int sourceSubdivision, 
   auto indexs = indexForSubdivision(x, y, z, sourceSubdivision, targetSubdivision);
   return glm::ivec3(indexs.x % 2, indexs.y % 2, indexs.z % 2);
 }
-// This addresss the octree as if it's a voxel style grid
-// should be responsible for figuring out the proper octree representation
-void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool filled){
-  // turn x y z w/ subdivision into a 
-  // path through the current octree
 
-  // for a given subdivision, we can calculate the ratio of x y z
-  // eg (1, 0, 0) w/ subdivision 1 
-  // 0.5 0 0
-  // eg (1, 0, 0) w/ subdivision 2
-  // 0.25 0 0  
+int xyzIndexToFlatIndex(glm::ivec3 index){
+  modassert(index.x >= 0 && index.x < 2, std::string("xyzIndexToFlatIndex: invalid x index: ") + print(index));
+  modassert(index.y >= 0 && index.y < 2, std::string("xyzIndexToFlatIndex: invalid y index: ") + print(index));
+  modassert(index.z >= 0 && index.z < 2, std::string("xyzIndexToFlatIndex: invalid z index: ") + print(index));
 
-  OctreeDivision* octreeSubdivision = &octree.rootNode;
+  // -x +y -z 
+  if (index.x == 0 && index.y == 1 && index.z == 1){
+    return 0;
+  }
+
+  // +x +y -z
+  if (index.x == 1 && index.y == 1 && index.z == 1){
+    return 1;
+  }
+
+  // -x +y +z
+  if (index.x == 0 && index.y == 1 && index.z == 0){
+    return 2;
+  }
+
+  // +x +y +z
+  if (index.x == 1 && index.y == 1 && index.z == 0){
+    return 3;
+  }
+
+  // -x -y -z 
+  if (index.x == 0 && index.y == 0 && index.z == 1){
+    return 4;
+  }
+
+  // +x -y -z
+  if (index.x == 1 && index.y == 0 && index.z == 1){
+    return 5;
+  }
+
+  // -x -y +z
+  if (index.x == 0 && index.y == 0 && index.z == 0){
+    return 6;
+  }
+
+  // +x -y +z
+  if (index.x == 1 && index.y == 0 && index.z == 0){
+    return 7;
+  }
+
+  modassert(false, "xyzIndexToFlatIndex invalid");
+  return 0;
+}
+
+std::vector<glm::ivec3> octreePath(int x, int y, int z, int subdivision){
+  std::vector<glm::ivec3> path;
   for (int currentSubdivision = 1; currentSubdivision <= subdivision; currentSubdivision++){
     auto indexs = indexForSubdivision(x, y, z, subdivision, currentSubdivision);
     std::cout << "octree current subdivision index: " << print(indexs) << std::endl;
+    path.push_back(indexs);
   }
-
-  glm::ivec3 index(x, y, z);
-  std::cout << "octree trying to find: " << print(index) << ", subdivision = " << subdivision << std::endl;
-  std::cout << "octree division: target = 0, " << print(indexForSubdivision(index.x, index.y, index.z, 2, 0))  << std::endl;
-  std::cout << "octree division: target = 1, " << print(indexForSubdivision(index.x, index.y, index.z, 2, 1))  << std::endl;
-  std::cout << "octree division: target = 2, " << print(indexForSubdivision(index.x, index.y, index.z, 2, 2))  << std::endl;
-  std::cout << "octree division: target = 3, " << print(indexForSubdivision(index.x, index.y, index.z, 2, 3))  << std::endl;
-
-
-  std::cout << "octree trying to find: " << print(index) << std::endl;
-  std::cout << "octree division loc: target = 0, " << print(localIndexForSubdivision(index.x, index.y, index.z, 2, 0))  << std::endl;
-  std::cout << "octree division loc: target = 1, " << print(localIndexForSubdivision(index.x, index.y, index.z, 2, 1))  << std::endl;
-  std::cout << "octree division loc: target = 2, " << print(localIndexForSubdivision(index.x, index.y, index.z, 2, 2))  << std::endl;
-  std::cout << "octree division loc: target = 3, " << print(localIndexForSubdivision(index.x, index.y, index.z, 2, 3))  << std::endl;
-
-
-
-  // path => coord / 2 
-
-  // subdivision 2 => 8
-
-
-
-  int maxValue = glm::pow(2, subdivision);
-
-  // problem: convert this number to an index at each subdivision level
-  // sub 0
-  //  (0, 0) => [0]
-
-  // sub 1
-  // (0, 0) => [0, 0]
-  // (1, 0) => [0, 1]
-  // (0, 1) => [0, 2]
-  // (1, 1) => [0, 3]
-
-  // sub 2 
-  // (0, 0) => [0, 0]
-  // (1, 0) => []
-  // (2, 0) => 
-  // (3, 0) => 
+  return path;
 }
 
+void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool filled){
+  OctreeDivision* octreeSubdivision = &octree.rootNode;
+  auto path = octreePath(x, y, z, subdivision);
+  for (int i = 0; i < path.size(); i++){
+    // todo -> if the subdivision isn't made here, should make it here
+    if (octreeSubdivision -> divisions.size() == 0){
+      octreeSubdivision -> divisions = {
+        OctreeDivision { .filled = false },
+        OctreeDivision { .filled = false },
+        OctreeDivision { .filled = false },
+        OctreeDivision { .filled = false },
+        OctreeDivision { .filled = false },
+        OctreeDivision { .filled = false },
+        OctreeDivision { .filled = false },
+        OctreeDivision { .filled = false },
+      };
+    } 
+    octreeSubdivision = &octreeSubdivision -> divisions.at(xyzIndexToFlatIndex(path.at(i)));
+  }
+  octreeSubdivision -> filled = filled;
+  octreeSubdivision -> divisions = {};
+}
 
-/*Mesh createNavmeshFromPointList(std::vector<glm::vec3> points, ){
-
-}*/
 
 Vertex createVertex2(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal){
   Vertex vertex {
@@ -262,6 +277,8 @@ void addOctreeLevel(std::vector<glm::vec3>& points, glm::vec3 rootPos, OctreeDiv
 }
 
 Mesh createOctreeMesh(ObjectTypeUtil& util){
+  writeOctreeCell(testOctree, 2, 2, 2, 3, true);
+
   std::vector<Vertex> vertices;
   std::vector<glm::vec3> points = {};
 
@@ -270,7 +287,6 @@ Mesh createOctreeMesh(ObjectTypeUtil& util){
   std::cout << "adding octree end" << std::endl;
 
 
-  writeOctreeCell(testOctree, 2, 0, 2, 2, false);
 
 
   if (points.size() == 0){ // just hack for now 
