@@ -86,6 +86,11 @@ glm::ivec3 indexForSubdivision(int x, int y, int z, int sourceSubdivision, int t
   int numCells = glm::pow(2, sourceSubdivision - targetSubdivision);
   return glm::ivec3(x / numCells, y / numCells, z / numCells);
 }
+
+glm::ivec3 localIndexForSubdivision(int x, int y, int z, int sourceSubdivision, int targetSubdivision){
+  auto indexs = indexForSubdivision(x, y, z, sourceSubdivision, targetSubdivision);
+  return glm::ivec3(indexs.x % 2, indexs.y % 2, indexs.z % 2);
+}
 // This addresss the octree as if it's a voxel style grid
 // should be responsible for figuring out the proper octree representation
 void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool filled){
@@ -98,12 +103,27 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
   // eg (1, 0, 0) w/ subdivision 2
   // 0.25 0 0  
 
-  glm::ivec3 index(3, 1, 0);
-  std::cout << "octree trying to find: " << print(index) << std::endl;
+  OctreeDivision* octreeSubdivision = &octree.rootNode;
+  for (int currentSubdivision = 1; currentSubdivision <= subdivision; currentSubdivision++){
+    auto indexs = indexForSubdivision(x, y, z, subdivision, currentSubdivision);
+    std::cout << "octree current subdivision index: " << print(indexs) << std::endl;
+  }
+
+  glm::ivec3 index(x, y, z);
+  std::cout << "octree trying to find: " << print(index) << ", subdivision = " << subdivision << std::endl;
   std::cout << "octree division: target = 0, " << print(indexForSubdivision(index.x, index.y, index.z, 2, 0))  << std::endl;
   std::cout << "octree division: target = 1, " << print(indexForSubdivision(index.x, index.y, index.z, 2, 1))  << std::endl;
   std::cout << "octree division: target = 2, " << print(indexForSubdivision(index.x, index.y, index.z, 2, 2))  << std::endl;
   std::cout << "octree division: target = 3, " << print(indexForSubdivision(index.x, index.y, index.z, 2, 3))  << std::endl;
+
+
+  std::cout << "octree trying to find: " << print(index) << std::endl;
+  std::cout << "octree division loc: target = 0, " << print(localIndexForSubdivision(index.x, index.y, index.z, 2, 0))  << std::endl;
+  std::cout << "octree division loc: target = 1, " << print(localIndexForSubdivision(index.x, index.y, index.z, 2, 1))  << std::endl;
+  std::cout << "octree division loc: target = 2, " << print(localIndexForSubdivision(index.x, index.y, index.z, 2, 2))  << std::endl;
+  std::cout << "octree division loc: target = 3, " << print(localIndexForSubdivision(index.x, index.y, index.z, 2, 3))  << std::endl;
+
+
 
   // path => coord / 2 
 
@@ -250,7 +270,7 @@ Mesh createOctreeMesh(ObjectTypeUtil& util){
   std::cout << "adding octree end" << std::endl;
 
 
-  writeOctreeCell(testOctree, 1, 1, 0, 2, false);
+  writeOctreeCell(testOctree, 2, 0, 2, 2, false);
 
 
   if (points.size() == 0){ // just hack for now 
