@@ -77,15 +77,14 @@ OctreeDivision* getOctreeCell(Octree& octree, int x, int y, int z, int division)
   return NULL;
 }
 
-int indexForSubdivision(int x, int y, int z, int sourceSubdivision, int targetSubdivision){
-  modassert(targetSubdivision <= sourceSubdivision, "target subdivision needs to be same or less than source");
+
+glm::ivec3 indexForSubdivision(int x, int y, int z, int sourceSubdivision, int targetSubdivision){
+  if (sourceSubdivision < targetSubdivision){ // same formula as other case, just being mindful of integer division
+    int numCells = glm::pow(2, targetSubdivision - sourceSubdivision);
+    return glm::ivec3(x * numCells, y * numCells, z * numCells);
+  }
   int numCells = glm::pow(2, sourceSubdivision - targetSubdivision);
-  int offsetX = x / numCells;
-  int offsetY = y / numCells;
-  int offsetZ = z / numCells;
-  int index = 0;
-  modassert(index >= 0 && index < 8, "index must be between 0 and 8");
-  return index;
+  return glm::ivec3(x / numCells, y / numCells, z / numCells);
 }
 // This addresss the octree as if it's a voxel style grid
 // should be responsible for figuring out the proper octree representation
@@ -99,12 +98,12 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
   // eg (1, 0, 0) w/ subdivision 2
   // 0.25 0 0  
 
-  std::cout << "octree trying to find: " << x << ", " << y << ", " << z << std::endl;
-  int xIndex = x;
-  for (int i = subdivision; i >= 0; i--){
-    xIndex = xIndex / 2;
-    std::cout << "octree index: " << xIndex << std::endl;
-  }
+  glm::ivec3 index(3, 1, 0);
+  std::cout << "octree trying to find: " << print(index) << std::endl;
+  std::cout << "octree division: target = 0, " << print(indexForSubdivision(index.x, index.y, index.z, 2, 0))  << std::endl;
+  std::cout << "octree division: target = 1, " << print(indexForSubdivision(index.x, index.y, index.z, 2, 1))  << std::endl;
+  std::cout << "octree division: target = 2, " << print(indexForSubdivision(index.x, index.y, index.z, 2, 2))  << std::endl;
+  std::cout << "octree division: target = 3, " << print(indexForSubdivision(index.x, index.y, index.z, 2, 3))  << std::endl;
 
   // path => coord / 2 
 
@@ -261,7 +260,7 @@ Mesh createOctreeMesh(ObjectTypeUtil& util){
   for (int i = 0; i < points.size(); i+=3){
     glm::vec3 vec1 = points.at(i) - points.at(i + 1);
     glm::vec3 vec2 = points.at(i) - points.at(i + 2);
-    auto normal = glm::cross(vec1, vec2); // think about sign better
+    auto normal = glm::cross(vec1, vec2); // think about sign better, i think this is right 
     vertices.push_back(createVertex2(points.at(i), glm::vec2(0.f, 0.f), normal));  // maybe the tex coords should just be calculated as a ratio to a fix texture
     vertices.push_back(createVertex2(points.at(i + 1), glm::vec2(1.f, 0.f), normal));
     vertices.push_back(createVertex2(points.at(i + 2), glm::vec2(0.f, 1.f), normal));
