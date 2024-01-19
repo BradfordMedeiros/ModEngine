@@ -139,7 +139,7 @@ int xyzIndexToFlatIndex(glm::ivec3 index){
 std::vector<glm::ivec3> octreePath(int x, int y, int z, int subdivision){
   std::vector<glm::ivec3> path;
   for (int currentSubdivision = 1; currentSubdivision <= subdivision; currentSubdivision++){
-    auto indexs = indexForSubdivision(x, y, z, subdivision, currentSubdivision);
+    auto indexs = localIndexForSubdivision(x, y, z, subdivision, currentSubdivision);
     std::cout << "octree current subdivision index: " << print(indexs) << std::endl;
     path.push_back(indexs);
   }
@@ -277,7 +277,24 @@ void addOctreeLevel(std::vector<glm::vec3>& points, glm::vec3 rootPos, OctreeDiv
 }
 
 Mesh createOctreeMesh(ObjectTypeUtil& util){
-  writeOctreeCell(testOctree, 2, 2, 2, 3, true);
+  writeOctreeCell(testOctree, 4, 6, 6, 3, true);
+  writeOctreeCell(testOctree, 5, 6, 6, 3, true);
+  writeOctreeCell(testOctree, 6, 6, 6, 3, true);
+  writeOctreeCell(testOctree, 7, 6, 6, 3, true);
+
+  writeOctreeCell(testOctree, 4, 6, 7, 3, true);
+  writeOctreeCell(testOctree, 5, 6, 7, 3, true);
+  writeOctreeCell(testOctree, 6, 6, 7, 3, true);
+  writeOctreeCell(testOctree, 7, 6, 7, 3, true);
+
+  writeOctreeCell(testOctree, 8,  14, 15, 4, true);
+  writeOctreeCell(testOctree, 9,  14, 15, 4, true);
+  writeOctreeCell(testOctree, 10, 14, 15, 4, true);
+  writeOctreeCell(testOctree, 11, 14, 15, 4, true);
+  writeOctreeCell(testOctree, 12, 14, 15, 4, true);
+  writeOctreeCell(testOctree, 13, 14, 15, 4, true);
+  writeOctreeCell(testOctree, 14, 14, 15, 4, true);
+
 
   std::vector<Vertex> vertices;
   std::vector<glm::vec3> points = {};
