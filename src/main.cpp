@@ -1007,6 +1007,9 @@ int main(int argc, char* argv[]){
     .modlayerPath = modlayerPath,
     .modlayerFileExists = modlayerFileExists,
     .fontFamilyByName = fontFamilyByName,
+    .drawLine = [](glm::vec3 fromPos, glm::vec3 toPos, glm::vec4 color) -> void {
+      addLineToNextCycleTint(lineData, fromPos, toPos, false, -1, color, std::nullopt, std::nullopt);
+    },
   };
 
   auto mods = result["mods"].as<std::vector<std::string>>();
@@ -1768,6 +1771,7 @@ int main(int argc, char* argv[]){
     }  
 
     cBindings.onFrame();
+
     afterFrameForScripts();
     
     while (!channelMessages.empty()){

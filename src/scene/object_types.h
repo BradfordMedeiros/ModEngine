@@ -238,7 +238,7 @@ std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, obj
 void updatePosition(std::map<objid, GameObjectObj>& mapping, objid, glm::vec3 position, Transformation& viewTransform);
 void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position);
 void stopSoundState(std::map<objid, GameObjectObj>& mapping, objid id);
-void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData, float timestamp);
+void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine, float timestamp);
 
 void onObjectSelected(objid id);
 void onObjectUnselected();

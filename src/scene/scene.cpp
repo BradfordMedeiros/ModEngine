@@ -1450,9 +1450,13 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   updatePhysicsFromSandbox(world);
   callbackEntities(world);
 
-  onObjectFrame(world.objectMapping, [&world](std::string texturepath, unsigned char* data, int textureWidth, int textureHeight) -> void {
-    updateTextureDataWorld(world, texturepath, data, textureWidth, textureHeight);
-  }, timeElapsed);
+  onObjectFrame(world.objectMapping, 
+    [&world](std::string texturepath, unsigned char* data, int textureWidth, int textureHeight) -> void {
+      updateTextureDataWorld(world, texturepath, data, textureWidth, textureHeight);
+    },
+    world.interface.drawLine,
+    timeElapsed
+  );
 }
 
 

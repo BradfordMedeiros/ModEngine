@@ -3,6 +3,7 @@
 
 #include "../../common/util.h"
 #include "./obj_util.h"
+#include "../common/vectorgfx.h"
 
 struct GameObjectOctree {
 	Mesh mesh;
@@ -11,5 +12,8 @@ struct GameObjectOctree {
 GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util);
 std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctree& obj, ObjectSerializeUtil& util);
 Mesh* getOctreeMesh(GameObjectOctree& octree);
+
+void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine);
+
 
 #endif

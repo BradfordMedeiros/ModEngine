@@ -689,8 +689,9 @@ void stopSoundState(std::map<objid, GameObjectObj>& mapping, objid id){
   }
 }
 
-void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData, float timestamp){
+void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine,  float timestamp){
   // placeholder unused for now
+  drawOctreeSelectionGrid(drawLine);
 }
 
 void onObjectSelected(objid id){

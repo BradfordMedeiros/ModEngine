@@ -21,7 +21,7 @@ struct Octree {
 };
 
 Octree unsubdividedOctree {
-  .size = 5.f,
+  .size = 1.f,
   .rootNode = OctreeDivision {
     .filled = false,
     .divisions = {},
@@ -244,32 +244,31 @@ void addCubePoints(std::vector<glm::vec3>& points, float size, glm::vec3 offset)
 void addOctreeLevel(std::vector<glm::vec3>& points, glm::vec3 rootPos, OctreeDivision& octreeDivision, float size, int subdivisionLevel){
   std::cout << "addOctreeLevel: " << size << std::endl;
   if (octreeDivision.divisions.size() > 0){
-    auto subdivisionRootPos = rootPos;
     float subdivisionSize = size * 0.5f;
 
     // -x +y -z 
-    addOctreeLevel(points, subdivisionRootPos + glm::vec3(0.f, subdivisionSize, -subdivisionSize), octreeDivision.divisions.at(0), subdivisionSize, subdivisionLevel + 1);
+    addOctreeLevel(points, rootPos + glm::vec3(0.f, subdivisionSize, -subdivisionSize), octreeDivision.divisions.at(0), subdivisionSize, subdivisionLevel + 1);
 
     // +x +y -z
-    addOctreeLevel(points, subdivisionRootPos + glm::vec3(subdivisionSize, subdivisionSize, -subdivisionSize), octreeDivision.divisions.at(1), subdivisionSize, subdivisionLevel + 1);
+    addOctreeLevel(points, rootPos + glm::vec3(subdivisionSize, subdivisionSize, -subdivisionSize), octreeDivision.divisions.at(1), subdivisionSize, subdivisionLevel + 1);
 
     // -x +y +z
-    addOctreeLevel(points, subdivisionRootPos + glm::vec3(0.f, subdivisionSize, 0.f), octreeDivision.divisions.at(2), subdivisionSize, subdivisionLevel + 1);
+    addOctreeLevel(points, rootPos + glm::vec3(0.f, subdivisionSize, 0.f), octreeDivision.divisions.at(2), subdivisionSize, subdivisionLevel + 1);
 
     // +x +y +z
-    addOctreeLevel(points, subdivisionRootPos + glm::vec3(subdivisionSize, subdivisionSize, 0.f), octreeDivision.divisions.at(3), subdivisionSize, subdivisionLevel + 1);
+    addOctreeLevel(points, rootPos + glm::vec3(subdivisionSize, subdivisionSize, 0.f), octreeDivision.divisions.at(3), subdivisionSize, subdivisionLevel + 1);
 
     // -x -y -z 
-    addOctreeLevel(points, subdivisionRootPos + glm::vec3(0.f, 0.f, -subdivisionSize), octreeDivision.divisions.at(4), subdivisionSize, subdivisionLevel + 1);
+    addOctreeLevel(points, rootPos + glm::vec3(0.f, 0.f, -subdivisionSize), octreeDivision.divisions.at(4), subdivisionSize, subdivisionLevel + 1);
 
     // +x -y -z
-    addOctreeLevel(points, subdivisionRootPos + glm::vec3(subdivisionSize, 0.f, -subdivisionSize), octreeDivision.divisions.at(5), subdivisionSize, subdivisionLevel + 1);
+    addOctreeLevel(points, rootPos + glm::vec3(subdivisionSize, 0.f, -subdivisionSize), octreeDivision.divisions.at(5), subdivisionSize, subdivisionLevel + 1);
 
     // -x -y +z
-    addOctreeLevel(points, subdivisionRootPos + glm::vec3(0.f, 0.f, 0.f), octreeDivision.divisions.at(6), subdivisionSize, subdivisionLevel + 1);
+    addOctreeLevel(points, rootPos + glm::vec3(0.f, 0.f, 0.f), octreeDivision.divisions.at(6), subdivisionSize, subdivisionLevel + 1);
 
     // +x -y +z
-    addOctreeLevel(points, subdivisionRootPos + glm::vec3(subdivisionSize, 0.f, 0.f), octreeDivision.divisions.at(7), subdivisionSize, subdivisionLevel + 1);
+    addOctreeLevel(points, rootPos + glm::vec3(subdivisionSize, 0.f, 0.f), octreeDivision.divisions.at(7), subdivisionSize, subdivisionLevel + 1);
   }else if (octreeDivision.filled){
     addCubePoints(points, size, rootPos);
   }
@@ -346,6 +345,25 @@ GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util){
 
   obj.mesh = createOctreeMesh(util);
   return obj;
+}
+
+enum OctreeSelectionFace { FRONT, BACK, LEFT, RIGHT, UP, DOWN };
+
+void drawGridSelection(int x, int y, int numCellsWidth, int numCellsHeight, int subdivision, float size, OctreeSelectionFace face, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+  float cellSize = size * glm::pow(0.5f, subdivision);
+
+
+  glm::vec4 color(0.f, 0.f, 1.f, 1.f);
+  drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(numCellsWidth * cellSize, 0.f, 0.f), color);
+  drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, numCellsHeight * cellSize, 0.f), color);
+  drawLine(glm::vec3(0.f, numCellsHeight * cellSize, 0.f), glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
+  drawLine(glm::vec3(numCellsWidth * cellSize, 0.f, 0.f), glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
+}
+
+
+void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+  drawGridSelection(0, 0, 1, 1, 1, testOctree.size, FRONT, drawLine);
+  std::cout << "draw octree" << std::endl;
 }
 
 std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctree& obj, ObjectSerializeUtil& util){
