@@ -112,6 +112,11 @@ bool isVoxel(World& world, objid id){
   return std::get_if<GameObjectVoxel>(&obj) != NULL;
 }
 
+bool isOctree(World& world, objid id){
+  GameObjectObj& obj = world.objectMapping.at(id);
+  return std::get_if<GameObjectOctree>(&obj) != NULL;  
+}
+
 void handleVoxelRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPosDirection, int textureId){
   auto voxel = getVoxel(world, id);
   if (!voxel.has_value()){

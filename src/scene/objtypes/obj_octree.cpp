@@ -29,7 +29,7 @@ Octree unsubdividedOctree {
 };
 
 Octree subdividedOne {
-  .size = 5.f,
+  .size = 2.f,
   .rootNode = OctreeDivision {
     .filled = true,
     .divisions = {
@@ -352,18 +352,70 @@ enum OctreeSelectionFace { FRONT, BACK, LEFT, RIGHT, UP, DOWN };
 void drawGridSelection(int x, int y, int numCellsWidth, int numCellsHeight, int subdivision, float size, OctreeSelectionFace face, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
   float cellSize = size * glm::pow(0.5f, subdivision);
 
+  float offsetX = x * cellSize;
+  float offsetY = y * cellSize;
+  glm::vec3 offset(offsetX, offsetY, 0.f);
 
   glm::vec4 color(0.f, 0.f, 1.f, 1.f);
-  drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(numCellsWidth * cellSize, 0.f, 0.f), color);
-  drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, numCellsHeight * cellSize, 0.f), color);
-  drawLine(glm::vec3(0.f, numCellsHeight * cellSize, 0.f), glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
-  drawLine(glm::vec3(numCellsWidth * cellSize, 0.f, 0.f), glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
+  drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(numCellsWidth * cellSize, 0.f, 0.f), color);
+  drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), color);
+  drawLine(offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), offset + glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
+  drawLine(offset + glm::vec3(numCellsWidth * cellSize, 0.f, 0.f), offset + glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
 }
 
 
+std::optional<glm::ivec3> selectedIndex = glm::ivec3(0, 0, 0);
+std::optional<glm::ivec2> selectionDim = glm::ivec2(1, 1);;
+
+std::optional<Line> line = std::nullopt;
+
 void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
-  drawGridSelection(0, 0, 1, 1, 1, testOctree.size, FRONT, drawLine);
-  std::cout << "draw octree" << std::endl;
+  if (selectedIndex.has_value()){
+    drawGridSelection(selectedIndex.value().x, selectedIndex.value().y, selectionDim.value().x, selectionDim.value().y, 2, testOctree.size, FRONT, drawLine);
+    std::cout << "draw octree" << std::endl;
+    if (line.has_value()){
+      drawLine(line.value().fromPos, line.value().toPos, glm::vec4(1.f, 0.f, 0.f, 1.f));
+    }
+  }
+}
+
+void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
+  //if (selectedIndex.value().x > 5){
+  //  selectedIndex.value().x = selectedIndex.value().x - 1;
+  //}else{
+  //  selectedIndex.value().x = selectedIndex.value().x + 1;
+  //}
+
+  if (selectedIndex.value().y > 5){
+    selectedIndex.value().y = selectedIndex.value().y - 1;
+  }else{
+    selectedIndex.value().y = selectedIndex.value().y + 1;
+  }
+
+  glm::vec4 toPos =  glm::vec4(fromPos.x, fromPos.y, fromPos.z, 1.f) + glm::vec4(toPosDirection.x, toPosDirection.y, toPosDirection.z, 1.f);
+  line = Line {
+    .fromPos = fromPos,
+    .toPos = toPos,
+  };
+
+
+
+  /*
+
+  glm::vec4 toPosModelSpace = glm::inverse(voxelPtrModelMatrix) * toPos;
+  glm::vec3 rayDirectionModelSpace =  toPosModelSpace - fromPosModelSpace;
+  // This raycast happens in model space of voxel, so specify position + ray in voxel model space
+  auto collidedVoxels = raycastVoxels(voxelPtr -> voxel, fromPosModelSpace, rayDirectionModelSpace);
+  std::cout << "length is: " << collidedVoxels.size() << std::endl;
+  if (collidedVoxels.size() > 0){
+    auto collision = collidedVoxels.at(0);
+    voxelPtr -> voxel.selectedVoxels.push_back(collision);
+    applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, textureId);
+  }*/ 
+}
+
+void handleOctreeScroll(bool upDirection){
+  modassert(false, "handle octree scroll placeholder");
 }
 
 std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctree& obj, ObjectSerializeUtil& util){

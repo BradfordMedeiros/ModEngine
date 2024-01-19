@@ -248,6 +248,9 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
       }
     }
   } 
+
+  handleOctreeScroll(yoffset > 0);
+
 }
 
 
@@ -356,7 +359,7 @@ void onMouseButton(){
   std::cout << scenegraphAsDotFormat(world.sandbox, world.objectMapping) << std::endl;
   
   auto id = state.currentHoverIndex;
-  if (!idExists(world.sandbox, id) || !isVoxel(world, id)){
+  if (!idExists(world.sandbox, id) || (!isVoxel(world, id) && !isOctree(world, id))){
     return;
   }
   auto layer = layerByName(getGameObject(world, id).layer);
@@ -367,6 +370,8 @@ void onMouseButton(){
     .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
   };
   handleVoxelRaycast(world, id, line.fromPos, line.toPos, drawParams.activeTextureIndex);
+
+  handleOctreeRaycast(line.fromPos, line.toPos);
 }
 
 void drop_callback(GLFWwindow* window, int count, const char** paths){
