@@ -26,4 +26,6 @@ void handleChangeSubdivisionLevel(int subdivisionLevel);
 void increaseSelectionSize();
 void decreaseSelectionSize();
 
+void deleteSelectedOctreeNodes(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
+
 #endif

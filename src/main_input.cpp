@@ -1606,7 +1606,7 @@ std::vector<InputDispatch> inputFns = {
   },
 
 
-
+  //// octree input
   InputDispatch{
     .alwaysEnable = false,
     .sourceKey = '8',
@@ -1689,6 +1689,24 @@ std::vector<InputDispatch> inputFns = {
     }
   },
 
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = '7', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      for (auto &selectedIndex : selectedIds(state.editor)){
+        GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
+        GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
+        if (octreeObject != NULL){
+          deleteSelectedOctreeNodes(*octreeObject, createScopedLoadMesh(world, selectedIndex));
+        }
+      }
+      //();
+    }
+  },
+  /////////// end octree stuff
 };
 
     

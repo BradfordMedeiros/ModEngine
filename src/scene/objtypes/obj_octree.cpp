@@ -337,7 +337,7 @@ GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util){
 
 enum OctreeSelectionFace { FRONT, BACK, LEFT, RIGHT, UP, DOWN };
 
-void drawGridSelection(int x, int y, int z, int numCellsWidth, int numCellsHeight, int numCellsDepth, int subdivision, float size, OctreeSelectionFace face, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+void drawGridSelectionXY(int x, int y, int z, int numCellsWidth, int numCellsHeight, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
   float cellSize = size * glm::pow(0.5f, subdivision);
 
   float offsetX = x * cellSize;
@@ -352,9 +352,8 @@ void drawGridSelection(int x, int y, int z, int numCellsWidth, int numCellsHeigh
   drawLine(offset + glm::vec3(numCellsWidth * cellSize, 0.f, 0.f), offset + glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
 }
 
-
 std::optional<glm::ivec3> selectedIndex = glm::ivec3(1, 0, 0);
-std::optional<glm::ivec3> selectionDim = glm::ivec3(1, 1, 1);
+std::optional<glm::ivec3> selectionDim = glm::ivec3(1, 1, 0);
 OctreeSelectionFace editorOrientation = FRONT;
 
 std::optional<Line> line = std::nullopt;
@@ -362,7 +361,12 @@ int subdivisionLevel = 2;
 
 void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
   if (selectedIndex.has_value()){
-    drawGridSelection(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, testOctree.size, FRONT, drawLine);
+    std::cout << "draw grid, z: " << selectionDim.value().z << std::endl;
+
+    drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, testOctree.size,  drawLine);
+    if (selectionDim.value().z > 0){
+      drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z + selectionDim.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, testOctree.size,  drawLine);
+    }
     //std::cout << "draw octree" << std::endl;
     if (line.has_value()){
       drawLine(line.value().fromPos, line.value().toPos, glm::vec4(1.f, 0.f, 0.f, 1.f));
@@ -406,7 +410,6 @@ void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
 }
 
 int getNumOctreeNodes(OctreeDivision& octreeDivision){
-
   int numNodes = 1;
   for (auto &subdivision : octreeDivision.divisions){
     numNodes += getNumOctreeNodes(subdivision);
@@ -418,6 +421,14 @@ int getNumOctreeNodes(OctreeDivision& octreeDivision){
 void handleOctreeScroll(GameObjectOctree& octree, bool upDirection, std::function<Mesh(MeshData&)> loadMesh, bool holdingShift, bool holdingCtrl){
   if (holdingShift){
     std::cout << "num octree nodes: " << getNumOctreeNodes(testOctree.rootNode) << std::endl;
+    if (upDirection){
+      selectionDim.value().z++;
+    }else{
+      selectionDim.value().z--;
+      if (selectionDim.value().z < 0){
+        selectionDim.value().z = 0;
+      }
+    }
     return;
   }
   if (holdingCtrl){
@@ -502,6 +513,10 @@ void decreaseSelectionSize(){
   selectionDim.value().y--;
 }
 
+void deleteSelectedOctreeNodes(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh){
+  writeOctreeCellRange(testOctree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, false);
+  octree.mesh = createOctreeMesh(loadMesh);
+}
 
 std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctree& obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
