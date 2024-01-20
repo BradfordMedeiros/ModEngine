@@ -206,6 +206,7 @@ void onArrowKey(int key){
     std::cout << "next texture" << std::endl;
     nextTexture();
     expandVoxelRight();
+
   }
   if (key == 263){ // left
     std::cout << "previous texture" << std::endl;
@@ -223,16 +224,21 @@ void onArrowKey(int key){
   std::cout << "key: " << key << std::endl;
 }
 
-void scroll_callback(GLFWwindow *window, engineState& state, double xoffset, double yoffset){
-}
 
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
-  scroll_callback(window, state, xoffset, yoffset);
   cBindings.onScrollCallback(yoffset);
 
   for (auto &selectedIndex : selectedIds(state.editor)){
     if (idExists(world.sandbox, selectedIndex) && getLayerForId(selectedIndex).selectIndex != -2){
       maybeChangeTexture(selectedIndex);
+
+      GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
+      GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
+      if (octreeObject != NULL){
+        auto isShiftHeld = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
+        auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
+        handleOctreeScroll(*octreeObject, yoffset > 0, createScopedLoadMesh(world, selectedIndex), isShiftHeld, isCtrlHeld);
+      }
     }
   }
  
@@ -249,8 +255,9 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
     }
   } 
 
-  handleOctreeScroll(yoffset > 0);
 
+
+  // octreescroll
 }
 
 
@@ -370,6 +377,8 @@ void onMouseButton(){
     .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
   };
   handleVoxelRaycast(world, id, line.fromPos, line.toPos, drawParams.activeTextureIndex);
+
+
 
   handleOctreeRaycast(line.fromPos, line.toPos);
 }
@@ -1595,5 +1604,99 @@ std::vector<InputDispatch> inputFns = {
       state.selectionDisabled = false;
     }
   },
+
+
+
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = '8',
+    .sourceType = BUTTON_RELEASE,
+    .prereqKey = 0,
+    .hasPreq = false,
+    .fn = []() -> void {
+      decreaseSelectionSize();
+    }
+  },
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = '9',
+    .sourceType = BUTTON_RELEASE,
+    .prereqKey = 0,
+    .hasPreq = false,
+    .fn = []() -> void {
+      increaseSelectionSize();
+    }
+  },
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = '-',
+    .sourceType = BUTTON_RELEASE,
+    .prereqKey = 0,
+    .hasPreq = false,
+    .fn = []() -> void {
+      handleChangeSubdivisionLevel(getCurrentSubdivisionLevel() + 1);
+    }
+  },
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = '=',
+    .sourceType = BUTTON_RELEASE,
+    .prereqKey = 0,
+    .hasPreq = false,
+    .fn = []() -> void {
+      handleChangeSubdivisionLevel(getCurrentSubdivisionLevel() - 1);
+    }
+  },
+
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = GLFW_KEY_RIGHT, 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      handleMoveOctreeSelection(X_POS);
+    }
+  },
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = GLFW_KEY_LEFT, 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      handleMoveOctreeSelection(X_NEG);
+    }
+  },
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = GLFW_KEY_UP, 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      handleMoveOctreeSelection(Y_POS);
+    }
+  },
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = GLFW_KEY_DOWN, 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      handleMoveOctreeSelection(Y_NEG);
+    }
+  },
+
 };
 
+    
+    
+    
+    
+
+//int getCurrentSubdivisionLevel(){
+//  return subdivisionLevel;
+//}
+//void handleChangeSubdivisionLevel(int newSubdivisionLevel){

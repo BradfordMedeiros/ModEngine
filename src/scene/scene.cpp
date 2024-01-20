@@ -734,6 +734,15 @@ void updatePhysicsFromSandbox(World& world){
   }
 }
 
+std::function<Mesh(MeshData&)> createScopedLoadMesh(World& world, objid id){
+  auto loadMeshObject = [&world, id](MeshData& meshdata) -> Mesh {
+    return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {
+      return loadTextureWorld(world, texture, id);
+    });    
+  };
+  return loadMeshObject;
+}
+
 void addObjectToWorld(
   World& world, 
   objid sceneId, 
@@ -748,12 +757,7 @@ void addObjectToWorld(
   bool returnObjectOnly,
   std::vector<GameObjectObj>& returnobjs // only added to if returnObjOnly = true
 ){
-
-    auto loadMeshObject = [&world, id](MeshData& meshdata) -> Mesh {
-      return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {
-        return loadTextureWorld(world, texture, id);
-      });    
-    };
+    auto loadMeshObject = createScopedLoadMesh(world, id);
     auto addEmitterObject = [&world, name, id](std::string templateName, float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::map<std::string, GameobjAttributes> submodelAttributes, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {
       addEmitter(world.emitters, name, templateName, id, world.interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields, submodelAttributes, deltas, enabled, behavior);
     };

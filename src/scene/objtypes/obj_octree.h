@@ -15,6 +15,15 @@ Mesh* getOctreeMesh(GameObjectOctree& octree);
 
 void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine);
 void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection);
-void handleOctreeScroll(bool upDirection);
+
+void handleOctreeScroll(GameObjectOctree& octree, bool upDirection, std::function<Mesh(MeshData&)> loadMesh, bool holdingShift, bool holdingCtrl);
+
+enum OctreeEditorMove { X_NEG, X_POS, Y_NEG, Y_POS, Z_NEG, Z_POS };
+void handleMoveOctreeSelection(OctreeEditorMove direction);
+
+int getCurrentSubdivisionLevel();
+void handleChangeSubdivisionLevel(int subdivisionLevel);
+void increaseSelectionSize();
+void decreaseSelectionSize();
 
 #endif
