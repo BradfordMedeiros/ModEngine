@@ -1614,28 +1614,6 @@ std::vector<InputDispatch> inputFns = {
     }
   },
 
-
-  //// octree input
-  InputDispatch{
-    .alwaysEnable = false,
-    .sourceKey = '8',
-    .sourceType = BUTTON_RELEASE,
-    .prereqKey = 0,
-    .hasPreq = false,
-    .fn = []() -> void {
-      decreaseSelectionSize();
-    }
-  },
-  InputDispatch{
-    .alwaysEnable = false,
-    .sourceKey = '9',
-    .sourceType = BUTTON_RELEASE,
-    .prereqKey = 0,
-    .hasPreq = false,
-    .fn = []() -> void {
-      increaseSelectionSize();
-    }
-  },
   InputDispatch{
     .alwaysEnable = false,
     .sourceKey = '-',
@@ -1665,7 +1643,11 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
-      handleMoveOctreeSelection(X_POS);
+      if (isCtrlHeld){
+        increaseSelectionSize(1, 0, 0);
+      }else{
+        handleMoveOctreeSelection(X_POS);
+      }
     }
   },
   InputDispatch{
@@ -1677,7 +1659,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
       if (isCtrlHeld){
-
+        increaseSelectionSize(-1, 0, 0);
       }else{
         handleMoveOctreeSelection(X_NEG);
       }
@@ -1692,7 +1674,11 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
       if (isCtrlHeld){
-
+        if (state.manipulatorAxis == ZAXIS){
+          increaseSelectionSize(0, 0, 1);
+        }else{
+          increaseSelectionSize(0, 1, 0);
+        }
       }else{
         if (state.manipulatorAxis == ZAXIS){
           handleMoveOctreeSelection(Z_POS);
@@ -1711,7 +1697,11 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
       if (isCtrlHeld){
-
+        if (state.manipulatorAxis == ZAXIS){
+          increaseSelectionSize(0, 0, -1);
+        }else{
+          increaseSelectionSize(0, -1, 0);
+        }
       }else{
         if (state.manipulatorAxis == ZAXIS){
           handleMoveOctreeSelection(Z_NEG);

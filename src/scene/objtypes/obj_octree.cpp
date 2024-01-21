@@ -149,24 +149,34 @@ std::vector<glm::ivec3> octreePath(int x, int y, int z, int subdivision){
 void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool filled){
   OctreeDivision* octreeSubdivision = &octree.rootNode;
   auto path = octreePath(x, y, z, subdivision);
+
+  std::cout << "octree path: [";
+  for (auto &coord : path){
+    std::cout << print(coord) << ", ";
+  }
+  std::cout << "]" << std::endl;
+
   for (int i = 0; i < path.size(); i++){
     // todo -> if the subdivision isn't made here, should make it here
     if (octreeSubdivision -> divisions.size() == 0){
+      bool defaultFill = octreeSubdivision -> filled;
       octreeSubdivision -> divisions = {
-        OctreeDivision { .filled = false },
-        OctreeDivision { .filled = false },
-        OctreeDivision { .filled = false },
-        OctreeDivision { .filled = false },
-        OctreeDivision { .filled = false },
-        OctreeDivision { .filled = false },
-        OctreeDivision { .filled = false },
-        OctreeDivision { .filled = false },
+        OctreeDivision { .filled = defaultFill },
+        OctreeDivision { .filled = defaultFill },
+        OctreeDivision { .filled = defaultFill },
+        OctreeDivision { .filled = defaultFill },
+        OctreeDivision { .filled = defaultFill },
+        OctreeDivision { .filled = defaultFill },
+        OctreeDivision { .filled = defaultFill },
+        OctreeDivision { .filled = defaultFill },
       };
     } 
+    // check if all filled, then set the divsions = {}, and filled = true
     octreeSubdivision = &octreeSubdivision -> divisions.at(xyzIndexToFlatIndex(path.at(i)));
   }
   octreeSubdivision -> filled = filled;
   octreeSubdivision -> divisions = {};
+  
 }
 
 void writeOctreeCellRange(Octree& octree, int x, int y, int z, int width, int height, int depth, int subdivision, bool filled){
@@ -375,6 +385,7 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
 }
 
 void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
+  return;
   //if (selectedIndex.value().x > 5){
   //  selectedIndex.value().x = selectedIndex.value().x - 1;
   //}else{
@@ -556,15 +567,20 @@ void handleSetSelectionOrientation(OctreeSelectionFace face){
   editorOrientation = face;
 }
 
-void increaseSelectionSize(int width, int height){
+void increaseSelectionSize(int width, int height, int depth){
   selectionDim.value().x+= width;
   selectionDim.value().y+= height;
+  selectionDim.value().z+= depth;
+  if (selectionDim.value().x < 0){
+    selectionDim.value().x = 0;
+  }
+  if (selectionDim.value().y < 0){
+    selectionDim.value().y = 0;
+  }
+  if (selectionDim.value().z < 0){
+    selectionDim.value().z = 0;
+  }
 }
-void decreaseSelectionSize(int width, int height){
-  selectionDim.value().x-= width;
-  selectionDim.value().y-= height;
-}
-
 
 void insertSelectedOctreeNodes(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh){
   writeOctreeCellRange(testOctree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, true);

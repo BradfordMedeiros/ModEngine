@@ -24,8 +24,7 @@ void handleMoveOctreeSelection(OctreeEditorMove direction);
 
 int getCurrentSubdivisionLevel();
 void handleChangeSubdivisionLevel(int subdivisionLevel);
-void increaseSelectionSize(int width = 1, int height = 1);
-void decreaseSelectionSize(int width = 1, int height = 1);
+void increaseSelectionSize(int width, int height, int depth);
 
 void insertSelectedOctreeNodes(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
 void deleteSelectedOctreeNodes(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
