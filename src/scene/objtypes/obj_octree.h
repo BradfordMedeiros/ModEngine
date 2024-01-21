@@ -16,16 +16,19 @@ Mesh* getOctreeMesh(GameObjectOctree& octree);
 void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine);
 void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection);
 
-void handleOctreeScroll(GameObjectOctree& octree, bool upDirection, std::function<Mesh(MeshData&)> loadMesh, bool holdingShift, bool holdingCtrl);
+enum OctreeDimAxis { OCTREE_XAXIS, OCTREE_YAXIS, OCTREE_ZAXIS, OCTREE_NOAXIS };
+void handleOctreeScroll(GameObjectOctree& octree, bool upDirection, std::function<Mesh(MeshData&)> loadMesh, bool holdingShift, bool holdingCtrl, OctreeDimAxis axis);
 
 enum OctreeEditorMove { X_NEG, X_POS, Y_NEG, Y_POS, Z_NEG, Z_POS };
 void handleMoveOctreeSelection(OctreeEditorMove direction);
 
 int getCurrentSubdivisionLevel();
 void handleChangeSubdivisionLevel(int subdivisionLevel);
-void increaseSelectionSize();
-void decreaseSelectionSize();
+void increaseSelectionSize(int width = 1, int height = 1);
+void decreaseSelectionSize(int width = 1, int height = 1);
 
+void insertSelectedOctreeNodes(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
 void deleteSelectedOctreeNodes(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
+
 
 #endif

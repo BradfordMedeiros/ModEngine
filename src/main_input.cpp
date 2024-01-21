@@ -237,7 +237,16 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
       if (octreeObject != NULL){
         auto isShiftHeld = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
         auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
-        handleOctreeScroll(*octreeObject, yoffset > 0, createScopedLoadMesh(world, selectedIndex), isShiftHeld, isCtrlHeld);
+
+        OctreeDimAxis axis = OCTREE_NOAXIS;
+        if (state.manipulatorAxis == XAXIS){
+          axis = OCTREE_XAXIS;
+        }else if (state.manipulatorAxis == YAXIS){
+          axis = OCTREE_YAXIS;
+        }else if (state.manipulatorAxis == ZAXIS){
+          axis = OCTREE_ZAXIS;
+        }
+        handleOctreeScroll(*octreeObject, yoffset > 0, createScopedLoadMesh(world, selectedIndex), isShiftHeld, isCtrlHeld, axis);
       }
     }
   }
@@ -1655,6 +1664,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
+      auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
       handleMoveOctreeSelection(X_POS);
     }
   },
@@ -1665,7 +1675,12 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      handleMoveOctreeSelection(X_NEG);
+      auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
+      if (isCtrlHeld){
+
+      }else{
+        handleMoveOctreeSelection(X_NEG);
+      }
     }
   },
   InputDispatch{
@@ -1675,7 +1690,16 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      handleMoveOctreeSelection(Y_POS);
+      auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
+      if (isCtrlHeld){
+
+      }else{
+        if (state.manipulatorAxis == ZAXIS){
+          handleMoveOctreeSelection(Z_POS);
+        }else{
+          handleMoveOctreeSelection(Y_POS);
+        }         
+      }
     }
   },
   InputDispatch{
@@ -1685,7 +1709,16 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      handleMoveOctreeSelection(Y_NEG);
+      auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
+      if (isCtrlHeld){
+
+      }else{
+        if (state.manipulatorAxis == ZAXIS){
+          handleMoveOctreeSelection(Z_NEG);
+        }else{
+          handleMoveOctreeSelection(Y_NEG);
+        }         
+      }
     }
   },
 
@@ -1696,11 +1729,16 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
+      auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
       for (auto &selectedIndex : selectedIds(state.editor)){
         GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
         GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
         if (octreeObject != NULL){
-          deleteSelectedOctreeNodes(*octreeObject, createScopedLoadMesh(world, selectedIndex));
+          if (isCtrlHeld){
+            deleteSelectedOctreeNodes(*octreeObject, createScopedLoadMesh(world, selectedIndex));
+          }else{
+            insertSelectedOctreeNodes(*octreeObject, createScopedLoadMesh(world, selectedIndex));
+          }
         }
       }
       //();

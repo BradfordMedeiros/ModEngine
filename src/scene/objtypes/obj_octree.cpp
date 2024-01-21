@@ -418,37 +418,89 @@ int getNumOctreeNodes(OctreeDivision& octreeDivision){
   return numNodes;
 }
 
-void handleOctreeScroll(GameObjectOctree& octree, bool upDirection, std::function<Mesh(MeshData&)> loadMesh, bool holdingShift, bool holdingCtrl){
+void handleOctreeScroll(GameObjectOctree& octree, bool upDirection, std::function<Mesh(MeshData&)> loadMesh, bool holdingShift, bool holdingCtrl, OctreeDimAxis axis){
   if (holdingShift){
     std::cout << "num octree nodes: " << getNumOctreeNodes(testOctree.rootNode) << std::endl;
-    if (upDirection){
-      selectionDim.value().z++;
-    }else{
-      selectionDim.value().z--;
-      if (selectionDim.value().z < 0){
-        selectionDim.value().z = 0;
+    if (axis == OCTREE_NOAXIS){
+       if (upDirection){
+         selectedIndex.value().z++;
+       }else{
+         selectedIndex.value().z--;
+       }
+     }else if (axis == OCTREE_XAXIS){
+       if (upDirection){
+         selectedIndex.value().x++;
+       }else{
+         selectedIndex.value().x--;
+       }
+     }else if (axis == OCTREE_YAXIS){
+       if (upDirection){
+         selectedIndex.value().y++;
+       }else{
+         selectedIndex.value().y--;
+       }
+     }else if (axis == OCTREE_ZAXIS){
+       if (upDirection){
+         selectedIndex.value().z++;
+       }else{
+         selectedIndex.value().z--;
+       }
+     }
+     return;
+  }
+  std::cout << "octree selected index: " << print(selectedIndex.value()) << std::endl;
+
+  if (holdingCtrl){
+    if (axis == OCTREE_NOAXIS){
+      if (upDirection){
+        selectionDim.value().x++;
+        selectionDim.value().y++;
+      }else{
+        selectionDim.value().x--;
+        selectionDim.value().y--;
+      }
+    }else if (axis == OCTREE_XAXIS){
+      if (upDirection){
+        selectionDim.value().x++;
+      }else{
+        selectionDim.value().x--;
+      }
+    }else if (axis == OCTREE_YAXIS){
+      if (upDirection){
+        selectionDim.value().y++;
+      }else{
+        selectionDim.value().y--;
+      }
+    }else if (axis == OCTREE_ZAXIS){
+      if (upDirection){
+        selectionDim.value().z++;
+      }else{
+        selectionDim.value().z--;
       }
     }
     return;
   }
-  if (holdingCtrl){
-    if (upDirection){
-      selectionDim.value().x++;
-      selectionDim.value().y++;
-    }else{
-      selectionDim.value().x--;
-      selectionDim.value().y--;
-    }
-    
-    return;
-  }
 
   std::cout << "octree modifiers: " << holdingShift << ", " << holdingCtrl << std::endl;
-  writeOctreeCellRange(testOctree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, 1, subdivisionLevel, true);
-  selectedIndex.value().z = selectedIndex.value().z + (upDirection ? -1 : 1);
+  writeOctreeCellRange(testOctree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, true);
+  if (axis == OCTREE_NOAXIS || axis == OCTREE_ZAXIS){
+    selectedIndex.value().z = selectedIndex.value().z + (upDirection ? -1 : 1);
+  }else if (axis == OCTREE_XAXIS){
+    selectedIndex.value().x = selectedIndex.value().x + (upDirection ? 1 : -1);
+  }else if (axis == OCTREE_YAXIS){
+    selectedIndex.value().y = selectedIndex.value().y + (upDirection ? 1 : -1);
+  }
+  if (selectedIndex.value().x < 0){
+    selectedIndex.value().x = 0;
+  }
+  if (selectedIndex.value().y < 0){
+    selectedIndex.value().y = 0;
+  }
   if (selectedIndex.value().z < 0){
     selectedIndex.value().z = 0;
   }
+
+  writeOctreeCellRange(testOctree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, true);
 
   octree.mesh = createOctreeMesh(loadMesh);
 }
@@ -504,13 +556,19 @@ void handleSetSelectionOrientation(OctreeSelectionFace face){
   editorOrientation = face;
 }
 
-void increaseSelectionSize(){
-  selectionDim.value().x++;
-  selectionDim.value().y++;
+void increaseSelectionSize(int width, int height){
+  selectionDim.value().x+= width;
+  selectionDim.value().y+= height;
 }
-void decreaseSelectionSize(){
-  selectionDim.value().x--;
-  selectionDim.value().y--;
+void decreaseSelectionSize(int width, int height){
+  selectionDim.value().x-= width;
+  selectionDim.value().y-= height;
+}
+
+
+void insertSelectedOctreeNodes(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh){
+  writeOctreeCellRange(testOctree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, true);
+  octree.mesh = createOctreeMesh(loadMesh);
 }
 
 void deleteSelectedOctreeNodes(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh){
