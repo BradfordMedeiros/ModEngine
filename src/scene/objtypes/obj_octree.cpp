@@ -2,6 +2,8 @@
 
 std::vector<AutoSerialize> octreeAutoserializer {};
 
+
+
 struct OctreeDivision {
   // -x +y -z 
   // +x +y -z
@@ -20,6 +22,99 @@ struct Octree {
   OctreeDivision rootNode;
 };
 
+
+/*
+5
+1 [0 0 1 1 [0 0 0 1 0 0 0 0] 0 0 1] 1 1 1 1 1 1]
+*/
+
+// This could easily be optimized by saving this in binary form instead
+// human readable, at least for now, seems nice
+std::string serializeOctreeDivision(OctreeDivision& octreeDivision){
+  if (octreeDivision.divisions.size() != 0){
+    std::string str = "[ ";
+    modassert(octreeDivision.divisions.size() == 8, "serialization - unexpected # of octree divisions");
+    for (int i = 0; i < octreeDivision.divisions.size(); i++){
+      auto value = serializeOctreeDivision(octreeDivision.divisions.at(i));
+      str += value + " ";
+    }
+    str += "]";
+    return str;
+  }
+  return octreeDivision.filled ? "1" : "0";
+}
+std::string serializeOctree(Octree& octree){
+  std::string str = std::to_string(octree.size) + "\n";
+  str += serializeOctreeDivision(octree.rootNode);
+  return str;
+}
+
+std::vector<std::string> splitBrackets(std::string& value){
+  int numBrackets = 0;
+  std::vector<std::string> values;
+  std::string currString = "";
+  for (int i = 0; i < value.size(); i++){
+    if (value.at(i) == '['){
+      numBrackets++;
+    }else if (value.at(i) == ']'){
+      numBrackets--;
+    }
+ 
+    currString += value.at(i);
+    if (numBrackets == 0){
+      if (currString != " "){
+        values.push_back(currString);
+      }
+      currString = "";
+    }
+  }
+  if (currString.size() > 0){
+    if (currString != " "){
+      values.push_back(currString);
+    }
+  }
+  modassert(numBrackets == 0, std::string("invalid balancing to brackets: ") + value + ", " + std::to_string(numBrackets));
+  return values;
+}
+
+OctreeDivision deserializeOctreeDivision(std::string value){
+  value = trim(value);
+  bool inBrackets = value.size() >= 2 && value.at(0) == '[' && value.at(value.size() -1) == ']';
+
+  if (inBrackets){
+    auto withoutBrackets = value.substr(1, value.size() - 2);
+    auto splitValues = splitBrackets(withoutBrackets);
+    std::vector<OctreeDivision> octreeDivisions;
+    for (auto &splitValue : splitValues){
+      modassert(splitValue.size() > 0, "split value should not be 0 length");
+      octreeDivisions.push_back(deserializeOctreeDivision(splitValue));
+    }
+    modassert(octreeDivisions.size() == 8, std::string("invalid division size, got: " + std::to_string(octreeDivisions.size())));
+    return OctreeDivision {
+      .filled = false,
+      .divisions = octreeDivisions,
+    };
+  }
+  modassert(value.size() >= 1 && (value.at(0) == '0' || value.at(0) == '1'), std::string("invalid value type, got: ") + value + ", size=  " + std::to_string(value.size()));
+  auto filled = value.at(0) == '1';
+  return OctreeDivision {
+    .filled = filled,
+    .divisions = {},
+  };
+}
+
+Octree deserializeOctree(std::string& value){
+  auto lines = split(value, '\n');
+  modassert(lines.size() == 2, "invalid line size");
+  float size = std::atof(lines.at(0).c_str());
+  return Octree  {
+    .size = size,
+    .rootNode = deserializeOctreeDivision(lines.at(1)),
+  };
+
+}
+
+
 Octree unsubdividedOctree {
   .size = 1.f,
   .rootNode = OctreeDivision {
@@ -36,14 +131,7 @@ Octree subdividedOne {
       OctreeDivision { 
         .filled = true,
         .divisions = {
-          OctreeDivision { .filled = true },
-          OctreeDivision { .filled = true },
-          OctreeDivision { .filled = true },
-          OctreeDivision { .filled = true },
-          OctreeDivision { .filled = true },
-          OctreeDivision { .filled = true },
-          OctreeDivision { .filled = true },
-          OctreeDivision { .filled = true },
+         
         },
       },
       OctreeDivision { .filled = false },
@@ -371,8 +459,7 @@ int subdivisionLevel = 2;
 
 void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
   if (selectedIndex.has_value()){
-    std::cout << "draw grid, z: " << selectionDim.value().z << std::endl;
-
+    //std::cout << "draw grid, z: " << selectionDim.value().z << std::endl;
     drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, testOctree.size,  drawLine);
     if (selectionDim.value().z > 0){
       drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z + selectionDim.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, testOctree.size,  drawLine);
@@ -385,6 +472,14 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
 }
 
 void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
+  auto serializedData = serializeOctree(testOctree);
+  std::cout << "octree serialization: \n" << serializedData << std::endl;
+
+  Octree octree = deserializeOctree(serializedData);
+  std::cout << "octree serialization 2: \n" << serializeOctree(octree) << std::endl;
+
+
+
   return;
   //if (selectedIndex.value().x > 5){
   //  selectedIndex.value().x = selectedIndex.value().x - 1;
