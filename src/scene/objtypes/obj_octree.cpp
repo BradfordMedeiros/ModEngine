@@ -506,6 +506,7 @@ struct Faces {
   float XZRight;
   float XZTop;
   float XZBottom;
+  glm::vec3 center;
 };
 
 Faces getFaces(int x, int y, int z, float size /* todo add subdivision level */){
@@ -516,6 +517,7 @@ Faces getFaces(int x, int y, int z, float size /* todo add subdivision level */)
     .XZRight = 1.f,
     .XZTop = 1.f,
     .XZBottom = -1.f,
+    .center = glm::vec3(0.f, 0.f, 0.f),
   };
   return faces;
 }
@@ -549,7 +551,22 @@ glm::vec3 calculateTForZ(glm::vec3 pos, glm::vec3 dir, float z){
 }
 
 bool checkIfInCube(Faces& faces, bool checkX, bool checkY, bool checkZ, glm::vec3 point){
-  return false;
+  float minX = faces.center.x + faces.XZLeft;
+  float maxX = faces.center.x + faces.XZRight;
+  float minY = faces.center.y + faces.XZBottom;
+  float maxY = faces.center.y + faces.XZTop;
+  float minZ = faces.center.z + faces.XYFar;
+  float maxZ = faces.center.z + faces.XYClose;
+  if (checkX && (point.x > maxX || point.x < minX)){
+    return false;
+  }
+  if (checkY && (point.y > maxY || point.y < minY)){
+    return false;
+  }
+  if (checkZ && (point.z > maxZ || point.z < minZ)){
+    return false;
+  }
+  return true;
 }
 
 bool intersectsCube(glm::vec3 fromPos, glm::vec3 toPosDirection, int x, int y, int z, float size){
@@ -573,7 +590,6 @@ bool intersectsCube(glm::vec3 fromPos, glm::vec3 toPosDirection, int x, int y, i
 
   auto intersectionFar = calculateTForZ(fromPos, toPosDirection, faces.XYFar);
   bool intersectsFar  = checkIfInCube(faces, true, false, true, intersectionFar);
-
 
   bool intersectsCube = (intersectsRightFace || intersectsLeftFace || intersectsTop || intersectsBottom || intersectsClose || intersectsFar);
   return intersectsCube; 
