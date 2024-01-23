@@ -434,45 +434,6 @@ GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util){
 }
 
 enum OctreeSelectionFace { FRONT, BACK, LEFT, RIGHT, UP, DOWN };
-
-void drawGridSelectionXY(int x, int y, int z, int numCellsWidth, int numCellsHeight, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
-  float cellSize = size * glm::pow(0.5f, subdivision);
-
-  float offsetX = x * cellSize;
-  float offsetY = y * cellSize;
-  float offsetZ = -1 * z * cellSize;
-  glm::vec3 offset(offsetX, offsetY, offsetZ);
-
-  glm::vec4 color(0.f, 0.f, 1.f, 1.f);
-  drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(numCellsWidth * cellSize, 0.f, 0.f), color);
-  drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), color);
-  drawLine(offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), offset + glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
-  drawLine(offset + glm::vec3(numCellsWidth * cellSize, 0.f, 0.f), offset + glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
-}
-void drawGridSelectionYZ(int x, int y, int z, int numCellsHeight, int numCellsDepth, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
-  float cellSize = size * glm::pow(0.5f, subdivision);
-
-  float offsetX = x * cellSize;
-  float offsetY = y * cellSize;
-  float offsetZ = -1 * z * cellSize;
-  glm::vec3 offset(offsetX, offsetY, offsetZ);
-
-  glm::vec4 color(0.f, 0.f, 1.f, 1.f);
-  drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(0.f, 0.f, -1 * numCellsDepth * cellSize), color);
-  drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), color);
-  drawLine(offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), offset + glm::vec3(0.f, numCellsHeight * cellSize, -1 * numCellsDepth * cellSize), color);
-  drawLine(offset + glm::vec3(0.f, 0.f, -1 * numCellsDepth * cellSize), offset + glm::vec3(0.f, numCellsHeight * cellSize, -1 * numCellsDepth * cellSize), color);
-
-}
-
-void drawGridSelectionCube(int x, int y, int z, int numCellsWidth, int numCellsHeight, int numCellDepth, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
-  drawGridSelectionXY(x, y, z,     1, 1, subdivision, size, drawLine);
-  drawGridSelectionXY(x, y, z + 1, 1, 1, subdivision, size, drawLine);
-  drawGridSelectionYZ(x, y, z, 1, 1, subdivision, size, drawLine);
-  drawGridSelectionYZ(x + 1, y, z, 1, 1, subdivision, size, drawLine);
-}
-
-
 std::optional<glm::ivec3> selectedIndex = glm::ivec3(1, 0, 0);
 std::optional<glm::ivec3> selectionDim = glm::ivec3(1, 1, 0);
 OctreeSelectionFace editorOrientation = FRONT;
@@ -480,46 +441,41 @@ OctreeSelectionFace editorOrientation = FRONT;
 std::optional<Line> line = std::nullopt;
 int subdivisionLevel = 2;
 
-void drawOctreeSelectedCell(int x, int y, int z, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
-  drawGridSelectionCube(x, y, z, 1, 1, 1, subdivision, size, drawLine);
-}
-
-void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
-  if (selectedIndex.has_value()){
-    //std::cout << "draw grid, z: " << selectionDim.value().z << std::endl;
-    drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, testOctree.size,  drawLine);
-    if (selectionDim.value().z > 0){
-      drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z + selectionDim.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, testOctree.size,  drawLine);
-    }
-    //std::cout << "draw octree" << std::endl;
-    if (line.has_value()){
-      drawLine(line.value().fromPos, line.value().toPos, glm::vec4(1.f, 0.f, 0.f, 1.f));
-    }
-  }
-}
-
-
 struct Faces {
   float XYClose;
   float XYFar;
-  float XZLeft;
-  float XZRight;
+  float YZLeft;
+  float YZRight;
   float XZTop;
   float XZBottom;
   glm::vec3 center;
 };
 
-Faces getFaces(int x, int y, int z, float size /* todo add subdivision level */){
+Faces getFaces(int x, int y, int z, float size, int subdivisionLevel){
+  float adjustedSize = size * glm::pow(0.5f, 1);
   Faces faces {
-    .XYClose = 1.f,
-    .XYFar = -1.f,
-    .XZLeft = -1.f, 
-    .XZRight = 1.f,
-    .XZTop = 1.f,
-    .XZBottom = -1.f,
-    .center = glm::vec3(0.f, 0.f, 0.f),
+    .XYClose = adjustedSize * 1.f,
+    .XYFar = adjustedSize * -1.f,
+    .YZLeft = adjustedSize * -1.f, 
+    .YZRight = adjustedSize * 1.f,
+    .XZTop = adjustedSize * 1.f,
+    .XZBottom = adjustedSize * -1.f,
+    .center = glm::vec3(adjustedSize * x, adjustedSize * y, -1.f * adjustedSize * z),
   };
   return faces;
+}
+
+void visualizeFaces(Faces& faces, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+
+  drawLine(faces.center, faces.center + glm::vec3(faces.YZLeft, 0.f, 0.f), glm::vec4(1.f, 0.f, 0.f, 1.f));
+  drawLine(faces.center, faces.center + glm::vec3(faces.YZRight, 0.f, 0.f), glm::vec4(0.f, 1.f, 0.f, 1.f));
+
+  drawLine(faces.center, faces.center + glm::vec3(0.f, faces.XZTop, 0.f), glm::vec4(0.f, 1.f, 0.f, 1.f));
+  drawLine(faces.center, faces.center + glm::vec3(0.f, faces.XZBottom, 0.f), glm::vec4(0.f, 0.f, 1.f, 1.f));
+
+  drawLine(faces.center, faces.center + glm::vec3(0.f, 0.f, faces.XYClose), glm::vec4(1.f, 1.f, 0.f, 1.f));
+  drawLine(faces.center, faces.center + glm::vec3(0.f, 0.f, faces.XYFar), glm::vec4(0.f, 1.f, 1.f, 1.f));
+
 }
 
 /* parametric form to solve 
@@ -551,8 +507,8 @@ glm::vec3 calculateTForZ(glm::vec3 pos, glm::vec3 dir, float z){
 }
 
 bool checkIfInCube(Faces& faces, bool checkX, bool checkY, bool checkZ, glm::vec3 point){
-  float minX = faces.center.x + faces.XZLeft;
-  float maxX = faces.center.x + faces.XZRight;
+  float minX = faces.center.x + faces.YZLeft;
+  float maxX = faces.center.x + faces.YZRight;
   float minY = faces.center.y + faces.XZBottom;
   float maxY = faces.center.y + faces.XZTop;
   float minZ = faces.center.z + faces.XYFar;
@@ -569,13 +525,13 @@ bool checkIfInCube(Faces& faces, bool checkX, bool checkY, bool checkZ, glm::vec
   return true;
 }
 
-bool intersectsCube(glm::vec3 fromPos, glm::vec3 toPosDirection, int x, int y, int z, float size){
-  auto faces = getFaces(x, y, z, testOctree.size);
+bool intersectsCube(glm::vec3 fromPos, glm::vec3 toPosDirection, int x, int y, int z, float size, int subdivisionLevel){
+  auto faces = getFaces(x, y, z, size, subdivisionLevel);
 
-  auto intersectionLeft = calculateTForX(fromPos, toPosDirection, faces.XZLeft);
+  auto intersectionLeft = calculateTForX(fromPos, toPosDirection, faces.YZLeft);
   bool intersectsLeftFace = checkIfInCube(faces, false, true, true, intersectionLeft);
 
-  auto intersectionRight = calculateTForX(fromPos, toPosDirection, faces.XZRight);
+  auto intersectionRight = calculateTForX(fromPos, toPosDirection, faces.YZRight);
   bool intersectsRightFace = checkIfInCube(faces, false, true, true, intersectionRight);
 
   auto intersectionTop = calculateTForY(fromPos, toPosDirection, faces.XZTop);
@@ -595,13 +551,13 @@ bool intersectsCube(glm::vec3 fromPos, glm::vec3 toPosDirection, int x, int y, i
   return intersectsCube; 
 }
 
-std::vector<int> subdivisionIntersections(glm::vec3 fromPos, glm::vec3 toPosDirection, float size){
+std::vector<int> subdivisionIntersections(glm::vec3 fromPos, glm::vec3 toPosDirection, float size, int subdivisionLevel){
   std::vector<int> intersections;
   for (int x = 0; x < 2; x++){
     for (int y = 0; y < 2; y++){
       for (int z = 0; z < 2; z++){
         // notice that adjacent faces are duplicated here
-        if (intersectsCube(fromPos, toPosDirection, x, y, z, size)){
+        if (intersectsCube(fromPos, toPosDirection, x, y, z, size, subdivisionLevel)){
           intersections.push_back(xyzIndexToFlatIndex(glm::ivec3(x, y, z)));
         }
       }
@@ -674,6 +630,74 @@ void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
     applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, textureId);
   }*/ 
 }
+
+void drawGridSelectionXY(int x, int y, int z, int numCellsWidth, int numCellsHeight, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+  float cellSize = size * glm::pow(0.5f, subdivision);
+
+  float offsetX = x * cellSize;
+  float offsetY = y * cellSize;
+  float offsetZ = -1 * z * cellSize;
+  glm::vec3 offset(offsetX, offsetY, offsetZ);
+
+  glm::vec4 color(0.f, 0.f, 1.f, 1.f);
+  drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(numCellsWidth * cellSize, 0.f, 0.f), color);
+  drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), color);
+  drawLine(offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), offset + glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
+  drawLine(offset + glm::vec3(numCellsWidth * cellSize, 0.f, 0.f), offset + glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
+}
+void drawGridSelectionYZ(int x, int y, int z, int numCellsHeight, int numCellsDepth, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+  float cellSize = size * glm::pow(0.5f, subdivision);
+
+  float offsetX = x * cellSize;
+  float offsetY = y * cellSize;
+  float offsetZ = -1 * z * cellSize;
+  glm::vec3 offset(offsetX, offsetY, offsetZ);
+
+  glm::vec4 color(0.f, 0.f, 1.f, 1.f);
+  drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(0.f, 0.f, -1 * numCellsDepth * cellSize), color);
+  drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), color);
+  drawLine(offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), offset + glm::vec3(0.f, numCellsHeight * cellSize, -1 * numCellsDepth * cellSize), color);
+  drawLine(offset + glm::vec3(0.f, 0.f, -1 * numCellsDepth * cellSize), offset + glm::vec3(0.f, numCellsHeight * cellSize, -1 * numCellsDepth * cellSize), color);
+
+}
+
+void drawGridSelectionCube(int x, int y, int z, int numCellsWidth, int numCellsHeight, int numCellDepth, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+  drawGridSelectionXY(x, y, z,     1, 1, subdivision, size, drawLine);
+  drawGridSelectionXY(x, y, z + 1, 1, 1, subdivision, size, drawLine);
+  drawGridSelectionYZ(x, y, z, 1, 1, subdivision, size, drawLine);
+  drawGridSelectionYZ(x + 1, y, z, 1, 1, subdivision, size, drawLine);
+}
+
+
+void drawOctreeSelectedCell(int x, int y, int z, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+  drawGridSelectionCube(x, y, z, 1, 1, 1, subdivision, size, drawLine);
+}
+
+
+void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+  if (selectedIndex.has_value()){
+    //std::cout << "draw grid, z: " << selectionDim.value().z << std::endl;
+    drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, testOctree.size,  drawLine);
+    if (selectionDim.value().z > 0){
+      drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z + selectionDim.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, testOctree.size,  drawLine);
+    }
+    //std::cout << "draw octree" << std::endl;
+    if (line.has_value()){
+      drawLine(line.value().fromPos, line.value().toPos, glm::vec4(1.f, 0.f, 0.f, 1.f));
+    }
+  }
+
+
+  ////////
+
+  auto faces = getFaces(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, testOctree.size, subdivisionLevel);
+  visualizeFaces(faces, drawLine);
+}
+
+
+
+
+
 
 int getNumOctreeNodes(OctreeDivision& octreeDivision){
   int numNodes = 1;
