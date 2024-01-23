@@ -499,6 +499,101 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
 }
 
 
+struct Faces {
+  float XYClose;
+  float XYFar;
+  float XZLeft;
+  float XZRight;
+  float XZTop;
+  float XZBottom;
+};
+
+Faces getFaces(int x, int y, int z, float size /* todo add subdivision level */){
+  Faces faces {
+    .XYClose = 1.f,
+    .XYFar = -1.f,
+    .XZLeft = -1.f, 
+    .XZRight = 1.f,
+    .XZTop = 1.f,
+    .XZBottom = -1.f,
+  };
+  return faces;
+}
+
+/* parametric form to solve 
+  pos.x + dir.x * t = x
+  pos.y + dir.y * t = y
+  pos.z + dir.z * t = z
+  so if we provide x, y, or z, we can get the other values, 
+  since those values are dependent on the value
+  howerver, (x,y,z) as fn(t) doesn't necessarily lie on the face,
+  but it's the only possible solution at that face
+*/
+glm::vec3 calculateTForX(glm::vec3 pos, glm::vec3 dir, float x){
+  float t = (x - pos.x) / dir.x;
+  float y = pos.y + (dir.y * t);
+  float z = pos.z + (dir.z * t);
+  return glm::vec3(x, y, z);
+}
+glm::vec3 calculateTForY(glm::vec3 pos, glm::vec3 dir, float y){
+  float t = (y - pos.y) / dir.y;
+  float x = pos.x + (dir.x * t);
+  float z = pos.z + (dir.z * t);
+  return glm::vec3(x, y, z);
+}
+glm::vec3 calculateTForZ(glm::vec3 pos, glm::vec3 dir, float z){
+  float t = (z - pos.z) / dir.z;
+  float x = pos.x + (dir.x * t);
+  float y = pos.y + (dir.y * t);
+  return glm::vec3(x, y, z);
+}
+
+bool checkIfInCube(Faces& faces, bool checkX, bool checkY, bool checkZ, glm::vec3 point){
+  return false;
+}
+
+bool intersectsCube(glm::vec3 fromPos, glm::vec3 toPosDirection, int x, int y, int z, float size){
+  auto faces = getFaces(x, y, z, testOctree.size);
+
+  auto intersectionLeft = calculateTForX(fromPos, toPosDirection, faces.XZLeft);
+  bool intersectsLeftFace = checkIfInCube(faces, false, true, true, intersectionLeft);
+
+  auto intersectionRight = calculateTForX(fromPos, toPosDirection, faces.XZRight);
+  bool intersectsRightFace = checkIfInCube(faces, false, true, true, intersectionRight);
+
+  auto intersectionTop = calculateTForY(fromPos, toPosDirection, faces.XZTop);
+  bool intersectsTop = checkIfInCube(faces, true, false, true, intersectionTop);
+
+  auto intersectionBottom = calculateTForY(fromPos, toPosDirection, faces.XZBottom);
+  bool intersectsBottom = checkIfInCube(faces, true, false, true, intersectionBottom);
+
+  auto intersectionClose = calculateTForZ(fromPos, toPosDirection, faces.XYClose);
+  bool intersectsClose  = checkIfInCube(faces, true, false, true, intersectionClose);
+
+
+  auto intersectionFar = calculateTForZ(fromPos, toPosDirection, faces.XYFar);
+  bool intersectsFar  = checkIfInCube(faces, true, false, true, intersectionFar);
+
+
+  bool intersectsCube = (intersectsRightFace || intersectsLeftFace || intersectsTop || intersectsBottom || intersectsClose || intersectsFar);
+  return intersectsCube; 
+}
+
+std::vector<int> subdivisionIntersections(glm::vec3 fromPos, glm::vec3 toPosDirection, float size){
+  std::vector<int> intersections;
+  for (int x = 0; x < 2; x++){
+    for (int y = 0; y < 2; y++){
+      for (int z = 0; z < 2; z++){
+        // notice that adjacent faces are duplicated here
+        if (intersectsCube(fromPos, toPosDirection, x, y, z, size)){
+          intersections.push_back(xyzIndexToFlatIndex(glm::ivec3(x, y, z)));
+        }
+      }
+
+    }
+  }
+  return intersections;
+}
 
 void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
   auto serializedData = serializeOctree(testOctree);
@@ -508,6 +603,16 @@ void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
   std::cout << "octree serialization 2: \n" << serializeOctree(octree) << std::endl;
 
 
+
+
+  // for each voxel face, figure out what is held constnat,
+  // plug it into the parametric equations to solve for remaining values
+  // then check if the boundaries of those are in the face or not (boundaries check + dot ?)
+  // repeat for each face
+  
+
+
+  std::cout << "handle octree raycast -  from: " << print(fromPos) << ", to: " << print(glm::normalize(toPosDirection)) << std::endl;
 
   return;
   //if (selectedIndex.value().x > 5){
@@ -529,9 +634,16 @@ void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
   };
 
 
+
+
   // model parameterically 
   // 0 = (point_x + dir_x * t) 
   // y = (point_y + dir_y * t)
+  // should be able to solve for y
+  // then we have origin + dir
+
+  // iterate through the voxels, 
+  // determine if 
 
   /*
 
