@@ -449,6 +449,29 @@ void drawGridSelectionXY(int x, int y, int z, int numCellsWidth, int numCellsHei
   drawLine(offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), offset + glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
   drawLine(offset + glm::vec3(numCellsWidth * cellSize, 0.f, 0.f), offset + glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
 }
+void drawGridSelectionYZ(int x, int y, int z, int numCellsHeight, int numCellsDepth, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+  float cellSize = size * glm::pow(0.5f, subdivision);
+
+  float offsetX = x * cellSize;
+  float offsetY = y * cellSize;
+  float offsetZ = -1 * z * cellSize;
+  glm::vec3 offset(offsetX, offsetY, offsetZ);
+
+  glm::vec4 color(0.f, 0.f, 1.f, 1.f);
+  drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(0.f, 0.f, -1 * numCellsDepth * cellSize), color);
+  drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), color);
+  drawLine(offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), offset + glm::vec3(0.f, numCellsHeight * cellSize, -1 * numCellsDepth * cellSize), color);
+  drawLine(offset + glm::vec3(0.f, 0.f, -1 * numCellsDepth * cellSize), offset + glm::vec3(0.f, numCellsHeight * cellSize, -1 * numCellsDepth * cellSize), color);
+
+}
+
+void drawGridSelectionCube(int x, int y, int z, int numCellsWidth, int numCellsHeight, int numCellDepth, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+  drawGridSelectionXY(x, y, z,     1, 1, subdivision, size, drawLine);
+  drawGridSelectionXY(x, y, z + 1, 1, 1, subdivision, size, drawLine);
+  drawGridSelectionYZ(x, y, z, 1, 1, subdivision, size, drawLine);
+  drawGridSelectionYZ(x + 1, y, z, 1, 1, subdivision, size, drawLine);
+}
+
 
 std::optional<glm::ivec3> selectedIndex = glm::ivec3(1, 0, 0);
 std::optional<glm::ivec3> selectionDim = glm::ivec3(1, 1, 0);
@@ -456,6 +479,10 @@ OctreeSelectionFace editorOrientation = FRONT;
 
 std::optional<Line> line = std::nullopt;
 int subdivisionLevel = 2;
+
+void drawOctreeSelectedCell(int x, int y, int z, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+  drawGridSelectionCube(x, y, z, 1, 1, 1, subdivision, size, drawLine);
+}
 
 void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
   if (selectedIndex.has_value()){
@@ -470,6 +497,8 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
     }
   }
 }
+
+
 
 void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
   auto serializedData = serializeOctree(testOctree);
@@ -500,6 +529,9 @@ void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
   };
 
 
+  // model parameterically 
+  // 0 = (point_x + dir_x * t) 
+  // y = (point_y + dir_y * t)
 
   /*
 
