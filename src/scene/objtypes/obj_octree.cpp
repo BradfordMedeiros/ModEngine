@@ -2,8 +2,6 @@
 
 std::vector<AutoSerialize> octreeAutoserializer {};
 
-
-
 struct OctreeDivision {
   // -x +y -z 
   // +x +y -z
@@ -124,7 +122,7 @@ Octree unsubdividedOctree {
 };
 
 Octree subdividedOne {
-  .size = 2.f,
+  .size = 10.f,
   .rootNode = OctreeDivision {
     .filled = true,
     .divisions = {
@@ -222,6 +220,37 @@ int xyzIndexToFlatIndex(glm::ivec3 index){
 
   modassert(false, "xyzIndexToFlatIndex invalid");
   return 0;
+}
+
+glm::ivec3 flatIndexToXYZ(int index){
+  modassert(index >= 0 && index < 8, "invalid flatIndexToXYZ");
+
+  if (index == 0){
+    return glm::ivec3(0, 1, 1);
+  }
+  if (index == 1){
+    return glm::ivec3(1, 1, 1);
+  }
+  if (index == 2){
+    return glm::ivec3(0, 1, 0);
+  }
+  if (index == 3){
+    return glm::ivec3(1, 1, 0);
+  }
+  if (index == 4){
+    return glm::ivec3(0, 0, 1);
+  }
+  if (index == 5){
+    return glm::ivec3(1, 0, 1);
+  }
+  if (index == 6){
+    return glm::ivec3(0, 0, 0);
+  }
+  if (index == 7){
+    return glm::ivec3(1, 0, 0);
+  }
+  modassert(false, "invalid flatIndexToXYZ error");
+  return glm::ivec3(0, 0, 0);
 }
 
 std::vector<glm::ivec3> octreePath(int x, int y, int z, int subdivision){
@@ -440,42 +469,63 @@ OctreeSelectionFace editorOrientation = FRONT;
 
 std::optional<Line> line = std::nullopt;
 int subdivisionLevel = 2;
+std::vector<int> currentIntersections;
+
+std::optional<glm::vec3> intersectionFrom = std::nullopt;
+std::optional<glm::vec3> intersectionDirection = std::nullopt;
 
 struct Faces {
   float XYClose;
+  glm::vec3 XYClosePoint;
   float XYFar;
+  glm::vec3 XYFarPoint;
   float YZLeft;
+  glm::vec3 YZLeftPoint;
   float YZRight;
+  glm::vec3 YZRightPoint;
   float XZTop;
+  glm::vec3 XZTopPoint;
   float XZBottom;
+  glm::vec3 XZBottomPoint;
   glm::vec3 center;
 };
 
 Faces getFaces(int x, int y, int z, float size, int subdivisionLevel){
-  float adjustedSize = size * glm::pow(0.5f, 1);
+  float adjustedSize = size * glm::pow(0.5f, subdivisionLevel);
   Faces faces {
-    .XYClose = adjustedSize * 1.f,
-    .XYFar = adjustedSize * -1.f,
-    .YZLeft = adjustedSize * -1.f, 
-    .YZRight = adjustedSize * 1.f,
-    .XZTop = adjustedSize * 1.f,
-    .XZBottom = adjustedSize * -1.f,
-    .center = glm::vec3(adjustedSize * x, adjustedSize * y, -1.f * adjustedSize * z),
+    .XYClose = adjustedSize * 0.5f,
+    .XYFar = adjustedSize * -0.5f,
+    .YZLeft = adjustedSize * -0.5f, 
+    .YZRight = adjustedSize * 0.5f,
+    .XZTop = adjustedSize * 0.5f,
+    .XZBottom = adjustedSize * -0.5f,
   };
+
+  float width = faces.YZRight - faces.YZLeft;
+  float height = faces.XZTop - faces.XZBottom;
+  float depth = faces.XYClose - faces.XYFar;
+
+  faces.center = glm::vec3(adjustedSize * x + (0.5f * width), adjustedSize * y + (0.5f * height), -1.f * (adjustedSize * z + (0.5f * depth)));
+
+  faces.XYClosePoint = faces.center + glm::vec3(0.f, 0.f, faces.XYClose);
+  faces.XYFarPoint = faces.center + glm::vec3(0.f, 0.f, faces.XYClose);
+  faces.YZLeftPoint = faces.center + glm::vec3(faces.YZLeft, 0.f, 0.f);
+  faces.YZRightPoint = faces.center + glm::vec3(faces.YZRight, 0.f, 0.f);
+  faces.XZTopPoint = faces.center + glm::vec3(0.f, faces.XZTop, 0.f);
+  faces.XZBottomPoint = faces.center + glm::vec3(0.f, faces.XZBottom, 0.f);
+
   return faces;
 }
 
 void visualizeFaces(Faces& faces, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+  drawLine(faces.center, faces.YZLeftPoint, glm::vec4(1.f, 0.f, 0.f, 1.f));
+  drawLine(faces.center, faces.YZRightPoint, glm::vec4(0.f, 1.f, 0.f, 1.f));
 
-  drawLine(faces.center, faces.center + glm::vec3(faces.YZLeft, 0.f, 0.f), glm::vec4(1.f, 0.f, 0.f, 1.f));
-  drawLine(faces.center, faces.center + glm::vec3(faces.YZRight, 0.f, 0.f), glm::vec4(0.f, 1.f, 0.f, 1.f));
+  drawLine(faces.center, faces.XZTopPoint, glm::vec4(0.f, 1.f, 0.f, 1.f));
+  drawLine(faces.center, faces.XZBottomPoint, glm::vec4(0.f, 0.f, 1.f, 1.f));
 
-  drawLine(faces.center, faces.center + glm::vec3(0.f, faces.XZTop, 0.f), glm::vec4(0.f, 1.f, 0.f, 1.f));
-  drawLine(faces.center, faces.center + glm::vec3(0.f, faces.XZBottom, 0.f), glm::vec4(0.f, 0.f, 1.f, 1.f));
-
-  drawLine(faces.center, faces.center + glm::vec3(0.f, 0.f, faces.XYClose), glm::vec4(1.f, 1.f, 0.f, 1.f));
-  drawLine(faces.center, faces.center + glm::vec3(0.f, 0.f, faces.XYFar), glm::vec4(0.f, 1.f, 1.f, 1.f));
-
+  drawLine(faces.center, faces.XYClosePoint, glm::vec4(1.f, 1.f, 0.f, 1.f));
+  drawLine(faces.center, faces.XYFarPoint, glm::vec4(0.f, 1.f, 1.f, 1.f));
 }
 
 /* parametric form to solve 
@@ -528,24 +578,23 @@ bool checkIfInCube(Faces& faces, bool checkX, bool checkY, bool checkZ, glm::vec
 bool intersectsCube(glm::vec3 fromPos, glm::vec3 toPosDirection, int x, int y, int z, float size, int subdivisionLevel){
   auto faces = getFaces(x, y, z, size, subdivisionLevel);
 
-  auto intersectionLeft = calculateTForX(fromPos, toPosDirection, faces.YZLeft);
+  auto intersectionLeft = calculateTForX(fromPos, toPosDirection, faces.YZLeftPoint.x);
   bool intersectsLeftFace = checkIfInCube(faces, false, true, true, intersectionLeft);
 
-  auto intersectionRight = calculateTForX(fromPos, toPosDirection, faces.YZRight);
+  auto intersectionRight = calculateTForX(fromPos, toPosDirection, faces.YZRightPoint.x);
   bool intersectsRightFace = checkIfInCube(faces, false, true, true, intersectionRight);
 
-  auto intersectionTop = calculateTForY(fromPos, toPosDirection, faces.XZTop);
+  auto intersectionTop = calculateTForY(fromPos, toPosDirection, faces.XZTopPoint.y);
   bool intersectsTop = checkIfInCube(faces, true, false, true, intersectionTop);
 
-  auto intersectionBottom = calculateTForY(fromPos, toPosDirection, faces.XZBottom);
+  auto intersectionBottom = calculateTForY(fromPos, toPosDirection, faces.XZBottomPoint.y);
   bool intersectsBottom = checkIfInCube(faces, true, false, true, intersectionBottom);
 
-  auto intersectionClose = calculateTForZ(fromPos, toPosDirection, faces.XYClose);
-  bool intersectsClose  = checkIfInCube(faces, true, false, true, intersectionClose);
+  auto intersectionClose = calculateTForZ(fromPos, toPosDirection, faces.XYClosePoint.z);
+  bool intersectsClose  = checkIfInCube(faces, true, true, false, intersectionClose);
 
-
-  auto intersectionFar = calculateTForZ(fromPos, toPosDirection, faces.XYFar);
-  bool intersectsFar  = checkIfInCube(faces, true, false, true, intersectionFar);
+  auto intersectionFar = calculateTForZ(fromPos, toPosDirection, faces.XYFarPoint.z);
+  bool intersectsFar  = checkIfInCube(faces, true, true, false, intersectionFar);
 
   bool intersectsCube = (intersectsRightFace || intersectsLeftFace || intersectsTop || intersectsBottom || intersectsClose || intersectsFar);
   return intersectsCube; 
@@ -576,59 +625,21 @@ void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
 
 
 
-
+  auto intersections = subdivisionIntersections(fromPos, toPosDirection, testOctree.size, subdivisionLevel);
+  std::cout << "raycast num intersections: " << print(intersections) << std::endl;
   // for each voxel face, figure out what is held constnat,
   // plug it into the parametric equations to solve for remaining values
   // then check if the boundaries of those are in the face or not (boundaries check + dot ?)
   // repeat for each face
-  
 
+  currentIntersections = intersections;
+  intersectionFrom = fromPos;
+  intersectionDirection = toPosDirection;
 
   std::cout << "handle octree raycast -  from: " << print(fromPos) << ", to: " << print(glm::normalize(toPosDirection)) << std::endl;
 
   return;
-  //if (selectedIndex.value().x > 5){
-  //  selectedIndex.value().x = selectedIndex.value().x - 1;
-  //}else{
-  //  selectedIndex.value().x = selectedIndex.value().x + 1;
-  //}
 
-  if (selectedIndex.value().y > 5){
-    selectedIndex.value().y = selectedIndex.value().y - 1;
-  }else{
-    selectedIndex.value().y = selectedIndex.value().y + 1;
-  }
-
-  glm::vec4 toPos =  glm::vec4(fromPos.x, fromPos.y, fromPos.z, 1.f) + glm::vec4(toPosDirection.x, toPosDirection.y, toPosDirection.z, 1.f);
-  line = Line {
-    .fromPos = fromPos,
-    .toPos = toPos,
-  };
-
-
-
-
-  // model parameterically 
-  // 0 = (point_x + dir_x * t) 
-  // y = (point_y + dir_y * t)
-  // should be able to solve for y
-  // then we have origin + dir
-
-  // iterate through the voxels, 
-  // determine if 
-
-  /*
-
-  glm::vec4 toPosModelSpace = glm::inverse(voxelPtrModelMatrix) * toPos;
-  glm::vec3 rayDirectionModelSpace =  toPosModelSpace - fromPosModelSpace;
-  // This raycast happens in model space of voxel, so specify position + ray in voxel model space
-  auto collidedVoxels = raycastVoxels(voxelPtr -> voxel, fromPosModelSpace, rayDirectionModelSpace);
-  std::cout << "length is: " << collidedVoxels.size() << std::endl;
-  if (collidedVoxels.size() > 0){
-    auto collision = collidedVoxels.at(0);
-    voxelPtr -> voxel.selectedVoxels.push_back(collision);
-    applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, textureId);
-  }*/ 
 }
 
 void drawGridSelectionXY(int x, int y, int z, int numCellsWidth, int numCellsHeight, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
@@ -692,12 +703,21 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
 
   auto faces = getFaces(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, testOctree.size, subdivisionLevel);
   visualizeFaces(faces, drawLine);
+
+  ////
+
+  if (intersectionFrom.has_value()){
+    auto dirOffset = glm::normalize(intersectionDirection.value());
+    dirOffset.x *= 20;
+    dirOffset.y *= 20;
+    dirOffset.z *= 20;
+    drawLine(intersectionFrom.value(), intersectionFrom.value() + dirOffset, glm::vec4(1.f, 1.f, 1.f, 1.f));
+  }
+  for (auto intersection : currentIntersections){
+    auto xyzIndex = flatIndexToXYZ(intersection);
+    drawGridSelectionCube(xyzIndex.x, xyzIndex.y, xyzIndex.z, 1, 1, 1, subdivisionLevel, testOctree.size, drawLine);    
+  }
 }
-
-
-
-
-
 
 int getNumOctreeNodes(OctreeDivision& octreeDivision){
   int numNodes = 1;
