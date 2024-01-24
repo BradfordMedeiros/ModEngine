@@ -469,10 +469,17 @@ OctreeSelectionFace editorOrientation = FRONT;
 
 std::optional<Line> line = std::nullopt;
 int subdivisionLevel = 2;
-std::vector<int> currentIntersections;
 
-std::optional<glm::vec3> intersectionFrom = std::nullopt;
-std::optional<glm::vec3> intersectionDirection = std::nullopt;
+
+struct RaycastResult {
+  glm::vec3 fromPos;
+  glm::vec3 toPosDirection;
+  int subdivisionDepth;
+  std::vector<int> intersections;
+  glm::ivec3 blockOffset;
+};
+
+std::optional<RaycastResult> raycastResult = std::nullopt;
 
 struct Faces {
   float XYClose;
@@ -600,13 +607,13 @@ bool intersectsCube(glm::vec3 fromPos, glm::vec3 toPosDirection, int x, int y, i
   return intersectsCube; 
 }
 
-std::vector<int> subdivisionIntersections(glm::vec3 fromPos, glm::vec3 toPosDirection, float size, int subdivisionLevel){
+std::vector<int> subdivisionIntersections(glm::vec3 fromPos, glm::vec3 toPosDirection, float size, int subdivisionLevel, glm::ivec3 offset){
   std::vector<int> intersections;
   for (int x = 0; x < 2; x++){
     for (int y = 0; y < 2; y++){
       for (int z = 0; z < 2; z++){
         // notice that adjacent faces are duplicated here
-        if (intersectsCube(fromPos, toPosDirection, x, y, z, size, subdivisionLevel)){
+        if (intersectsCube(fromPos, toPosDirection, x + offset.x, y + offset.y, z + offset.z, size, subdivisionLevel)){
           intersections.push_back(xyzIndexToFlatIndex(glm::ivec3(x, y, z)));
         }
       }
@@ -614,6 +621,49 @@ std::vector<int> subdivisionIntersections(glm::vec3 fromPos, glm::vec3 toPosDire
     }
   }
   return intersections;
+}
+
+
+
+std::optional<RaycastResult> getRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, int subdivisionDepth){
+  //std::vector<int> path;
+  //std::vector<int> existingPath;
+
+  std::optional<std::vector<int>> finalIntersections;
+  std::optional<glm::ivec3> finalBlockOffset;
+
+
+  glm::ivec3 offset(0, 0, 0);
+  for (int i = 1; i <= subdivisionDepth; i++){
+    auto intersections = subdivisionIntersections(fromPos, toPosDirection, testOctree.size, i, offset);
+    std::cout << "raycast num intersections: " << print(intersections) << ", subdivision = " << i << ", offset = " << print(offset) << std::endl ;
+    
+    auto firstIntersection = intersections.at(0);
+    auto xyzIndex = flatIndexToXYZ(firstIntersection);
+
+    auto blocksPerOffset = glm::pow(2, subdivisionDepth - 1);
+    offset = xyzIndex;
+    offset.x *= blocksPerOffset;
+    offset.y *= blocksPerOffset;
+    offset.z *= blocksPerOffset;
+
+    finalBlockOffset = offset;
+    finalIntersections = intersections;
+
+  }
+  std::cout << std::endl;
+
+  if (!finalIntersections.has_value()){
+    return std::nullopt;
+  }
+  return RaycastResult {
+    .fromPos = fromPos,
+    .toPosDirection = toPosDirection,
+    .subdivisionDepth = subdivisionDepth,
+    .intersections = finalIntersections.value(),
+    .blockOffset = finalBlockOffset.value(),
+  };
+  
 }
 
 void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
@@ -624,17 +674,21 @@ void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
   std::cout << "octree serialization 2: \n" << serializeOctree(octree) << std::endl;
 
 
+  auto octreeRaycast = getRaycast(fromPos, toPosDirection, subdivisionLevel);
+  raycastResult = octreeRaycast;
+ 
 
-  auto intersections = subdivisionIntersections(fromPos, toPosDirection, testOctree.size, subdivisionLevel);
-  std::cout << "raycast num intersections: " << print(intersections) << std::endl;
+  //getRaycast(fromPos, toPosDirection, subdivisionLevel);
+  //auto intersections = subdivisionIntersections(fromPos, toPosDirection, testOctree.size, subdivisionLevel);
+  //std::cout << "raycast num intersections: " << print(intersections) << ", subdivision = " << subdivisionLevel << std::endl;
   // for each voxel face, figure out what is held constnat,
   // plug it into the parametric equations to solve for remaining values
   // then check if the boundaries of those are in the face or not (boundaries check + dot ?)
   // repeat for each face
 
-  currentIntersections = intersections;
-  intersectionFrom = fromPos;
-  intersectionDirection = toPosDirection;
+  //currentIntersections = intersections;
+  //intersectionFrom = fromPos;
+  //intersectionDirection = toPosDirection;
 
   std::cout << "handle octree raycast -  from: " << print(fromPos) << ", to: " << print(glm::normalize(toPosDirection)) << std::endl;
 
@@ -706,17 +760,19 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
 
   ////
 
-  if (intersectionFrom.has_value()){
-    auto dirOffset = glm::normalize(intersectionDirection.value());
+  if (raycastResult.has_value()){
+    auto dirOffset = glm::normalize(raycastResult.value().toPosDirection);
     dirOffset.x *= 20;
     dirOffset.y *= 20;
     dirOffset.z *= 20;
-    drawLine(intersectionFrom.value(), intersectionFrom.value() + dirOffset, glm::vec4(1.f, 1.f, 1.f, 1.f));
+    drawLine(raycastResult.value().fromPos, raycastResult.value().fromPos + dirOffset, glm::vec4(1.f, 1.f, 1.f, 1.f));
+
+    for (auto intersection : raycastResult.value().intersections){
+      auto xyzIndex = flatIndexToXYZ(intersection);
+      drawGridSelectionCube(xyzIndex.x, xyzIndex.y, xyzIndex.z, 1, 1, 1, subdivisionLevel, testOctree.size, drawLine);    
+    }
   }
-  for (auto intersection : currentIntersections){
-    auto xyzIndex = flatIndexToXYZ(intersection);
-    drawGridSelectionCube(xyzIndex.x, xyzIndex.y, xyzIndex.z, 1, 1, 1, subdivisionLevel, testOctree.size, drawLine);    
-  }
+  
 }
 
 int getNumOctreeNodes(OctreeDivision& octreeDivision){
