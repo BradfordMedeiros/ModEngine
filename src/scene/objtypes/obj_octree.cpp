@@ -623,8 +623,6 @@ std::vector<int> subdivisionIntersections(glm::vec3 fromPos, glm::vec3 toPosDire
   return intersections;
 }
 
-
-
 std::optional<RaycastResult> getRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, int subdivisionDepth){
   //std::vector<int> path;
   //std::vector<int> existingPath;
@@ -632,26 +630,27 @@ std::optional<RaycastResult> getRaycast(glm::vec3 fromPos, glm::vec3 toPosDirect
   std::optional<std::vector<int>> finalIntersections;
   std::optional<glm::ivec3> finalBlockOffset;
 
+  std::cout << "GET raycast START" << std::endl;
 
   glm::ivec3 offset(0, 0, 0);
   for (int i = 1; i <= subdivisionDepth; i++){
     auto intersections = subdivisionIntersections(fromPos, toPosDirection, testOctree.size, i, offset);
-    std::cout << "raycast num intersections: " << print(intersections) << ", subdivision = " << i << ", offset = " << print(offset) << std::endl ;
     
-    auto firstIntersection = intersections.at(0);
-    auto xyzIndex = flatIndexToXYZ(firstIntersection);
+    if (intersections.size() > 0){
+      auto firstIntersection = intersections.at(0);
+      auto xyzIndex = flatIndexToXYZ(firstIntersection);
+    
+      std::cout << "raycast num intersections: " << print(intersections) << ", subdivision = " << i << ", offset = " << print(offset) << ", xyz = " << print(xyzIndex) << std::endl ;
+      finalBlockOffset = offset;
 
-    auto blocksPerOffset = glm::pow(2, subdivisionDepth - 1);
-    offset = xyzIndex;
-    offset.x *= blocksPerOffset;
-    offset.y *= blocksPerOffset;
-    offset.z *= blocksPerOffset;
+      offset = (offset + xyzIndex) * 2;
 
-    finalBlockOffset = offset;
-    finalIntersections = intersections;
-
+      finalIntersections = intersections;      
+    }
   }
-  std::cout << std::endl;
+
+  std::cout << "GET raycast END" << std::endl;
+  std::cout << std::endl << std::endl;
 
   if (!finalIntersections.has_value()){
     return std::nullopt;
@@ -769,7 +768,9 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
 
     for (auto intersection : raycastResult.value().intersections){
       auto xyzIndex = flatIndexToXYZ(intersection);
-      drawGridSelectionCube(xyzIndex.x, xyzIndex.y, xyzIndex.z, 1, 1, 1, subdivisionLevel, testOctree.size, drawLine);    
+
+      auto blockOffset = raycastResult.value().blockOffset;
+      drawGridSelectionCube(xyzIndex.x + blockOffset.x, xyzIndex.y + blockOffset.y, xyzIndex.z + blockOffset.z, 1, 1, 1, raycastResult.value().subdivisionDepth, testOctree.size, drawLine);    
     }
   }
   
