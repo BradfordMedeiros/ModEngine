@@ -735,22 +735,26 @@ struct ClosestIntersection {
   glm::ivec3 blockOffset;
 };
 
-
 std::optional<ClosestIntersection> getClosestIntersection(RaycastResult& raycastResult){
   if (raycastResult.intersections.size() == 0){
     return std::nullopt;
   }
-  int closestIndex = 0;
-  for (int i = 1; i < raycastResult.intersections.size(); i++){
-    //auto position = raycastResult.intersections.at(i).position;
-    return ClosestIntersection {
-      .face = LEFT,
-      .position = glm::vec3(0.f, 0.f, 0.f),
-      .index = 0,
-      .blockOffset = glm::ivec3(0, 0, 0),
-    };
+  std::optional<ClosestIntersection> closestIntersection = std::nullopt;
+  for (int i = 0; i < raycastResult.intersections.size(); i++){
+    for (auto &faceIntersection : raycastResult.intersections.at(i).faceIntersections){
+      if (!closestIntersection.has_value() ||
+        glm::distance(faceIntersection.position, raycastResult.fromPos) < glm::distance(closestIntersection.value().position, raycastResult.fromPos) > 0){
+        closestIntersection = ClosestIntersection {
+          .face = faceIntersection.face,
+          .position = faceIntersection.position,
+          .index = raycastResult.intersections.at(i).index,
+          .blockOffset = raycastResult.intersections.at(i).blockOffset,
+        };
+      }
+
+    }
   }
-  return std::nullopt;
+  return closestIntersection;
 }
 
 void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
@@ -767,7 +771,7 @@ void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
 
 }
 
-void drawGridSelectionXY(int x, int y, int z, int numCellsWidth, int numCellsHeight, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+void drawGridSelectionXY(int x, int y, int z, int numCellsWidth, int numCellsHeight, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine, std::optional<OctreeSelectionFace> face){
   float cellSize = size * glm::pow(0.5f, subdivision);
 
   float offsetX = x * cellSize;
@@ -781,7 +785,7 @@ void drawGridSelectionXY(int x, int y, int z, int numCellsWidth, int numCellsHei
   drawLine(offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), offset + glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
   drawLine(offset + glm::vec3(numCellsWidth * cellSize, 0.f, 0.f), offset + glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
 }
-void drawGridSelectionYZ(int x, int y, int z, int numCellsHeight, int numCellsDepth, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+void drawGridSelectionYZ(int x, int y, int z, int numCellsHeight, int numCellsDepth, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine, std::optional<OctreeSelectionFace> face){
   float cellSize = size * glm::pow(0.5f, subdivision);
 
   float offsetX = x * cellSize;
@@ -797,25 +801,26 @@ void drawGridSelectionYZ(int x, int y, int z, int numCellsHeight, int numCellsDe
 
 }
 
-void drawGridSelectionCube(int x, int y, int z, int numCellsWidth, int numCellsHeight, int numCellDepth, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
-  drawGridSelectionXY(x, y, z,     1, 1, subdivision, size, drawLine);
-  drawGridSelectionXY(x, y, z + 1, 1, 1, subdivision, size, drawLine);
-  drawGridSelectionYZ(x, y, z, 1, 1, subdivision, size, drawLine);
-  drawGridSelectionYZ(x + 1, y, z, 1, 1, subdivision, size, drawLine);
+void drawGridSelectionCube(int x, int y, int z, int numCellsWidth, int numCellsHeight, int numCellDepth, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine, std::optional<OctreeSelectionFace> face){
+  drawGridSelectionXY(x, y, z,     1, 1, subdivision, size, drawLine, face);
+  drawGridSelectionXY(x, y, z + 1, 1, 1, subdivision, size, drawLine, face);
+  drawGridSelectionYZ(x, y, z, 1, 1, subdivision, size, drawLine, face);
+  drawGridSelectionYZ(x + 1, y, z, 1, 1, subdivision, size, drawLine, face);
 }
 
 
 void drawOctreeSelectedCell(int x, int y, int z, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
-  drawGridSelectionCube(x, y, z, 1, 1, 1, subdivision, size, drawLine);
+  drawGridSelectionCube(x, y, z, 1, 1, 1, subdivision, size, drawLine, std::nullopt);
 }
 
 
+bool drawAllSelectedBlocks = false;
 void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
   if (selectedIndex.has_value()){
     //std::cout << "draw grid, z: " << selectionDim.value().z << std::endl;
-    drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, testOctree.size,  drawLine);
+    drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, testOctree.size,  drawLine, std::nullopt);
     if (selectionDim.value().z > 0){
-      drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z + selectionDim.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, testOctree.size,  drawLine);
+      drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z + selectionDim.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, testOctree.size,  drawLine, std::nullopt);
     }
     //std::cout << "draw octree" << std::endl;
     if (line.has_value()){
@@ -823,13 +828,8 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
     }
   }
 
-
-  ////////
-
   auto faces = getFaces(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, testOctree.size, subdivisionLevel);
   visualizeFaces(faces, drawLine);
-
-  ////
 
   if (raycastResult.has_value()){
     auto dirOffset = glm::normalize(raycastResult.value().toPosDirection);
@@ -838,14 +838,22 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
     dirOffset.z *= 20;
     drawLine(raycastResult.value().fromPos, raycastResult.value().fromPos + dirOffset, glm::vec4(1.f, 1.f, 1.f, 1.f));
 
-    for (auto intersection : raycastResult.value().intersections){
-      auto xyzIndex = flatIndexToXYZ(intersection.index);
-      drawGridSelectionCube(xyzIndex.x + intersection.blockOffset.x, xyzIndex.y + intersection.blockOffset.y, xyzIndex.z + intersection.blockOffset.z, 1, 1, 1, raycastResult.value().subdivisionDepth, testOctree.size, drawLine);    
-   
-      // draw hit marker on the point
-      for (auto &face : intersection.faceIntersections){
-        drawLine(face.position, face.position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 1.f, 0.f, 1.f));
+    if (drawAllSelectedBlocks){
+      for (auto intersection : raycastResult.value().intersections){
+        auto xyzIndex = flatIndexToXYZ(intersection.index);
+        drawGridSelectionCube(xyzIndex.x + intersection.blockOffset.x, xyzIndex.y + intersection.blockOffset.y, xyzIndex.z + intersection.blockOffset.z, 1, 1, 1, raycastResult.value().subdivisionDepth, testOctree.size, drawLine, std::nullopt);    
+        // draw hit marker on the point
+        for (auto &face : intersection.faceIntersections){
+          drawLine(face.position, face.position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 1.f, 0.f, 1.f));
+        }
       }
+    }else{
+      auto closestBlock = getClosestIntersection(raycastResult.value());
+      if (closestBlock.has_value()){
+        auto xyzIndex = flatIndexToXYZ(closestBlock.value().index);
+        drawGridSelectionCube(xyzIndex.x + closestBlock.value().blockOffset.x, xyzIndex.y + closestBlock.value().blockOffset.y, xyzIndex.z + closestBlock.value().blockOffset.z, 1, 1, 1, raycastResult.value().subdivisionDepth, testOctree.size, drawLine, std::nullopt);    
+        drawLine(closestBlock.value().position, closestBlock.value().position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 0.f, 1.f, 1.f));
+      }      
     }
   }
   
