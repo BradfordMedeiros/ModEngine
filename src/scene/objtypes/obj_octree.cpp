@@ -100,7 +100,6 @@ OctreeDivision deserializeOctreeDivision(std::string value){
     .divisions = {},
   };
 }
-
 Octree deserializeOctree(std::string& value){
   auto lines = split(value, '\n');
   modassert(lines.size() == 2, "invalid line size");
@@ -120,7 +119,6 @@ Octree unsubdividedOctree {
     .divisions = {},
   },
 };
-
 Octree subdividedOne {
   .size = 10.f,
   .rootNode = OctreeDivision {
@@ -129,12 +127,11 @@ Octree subdividedOne {
       OctreeDivision { 
         .filled = true,
         .divisions = {
-         
         },
       },
       OctreeDivision { .filled = false },
       OctreeDivision { 
-        .filled = true,
+        .filled = false,
         .divisions = {
           OctreeDivision { .filled = true },
           OctreeDivision { .filled = false },
@@ -147,7 +144,6 @@ Octree subdividedOne {
         },
       },
       OctreeDivision { .filled = false },
-
       OctreeDivision { .filled = true },
       OctreeDivision { .filled = false },
       OctreeDivision { .filled = true },
@@ -158,7 +154,6 @@ Octree subdividedOne {
 
 Octree testOctree = subdividedOne;
 
-
 glm::ivec3 indexForSubdivision(int x, int y, int z, int sourceSubdivision, int targetSubdivision){
   if (sourceSubdivision < targetSubdivision){ // same formula as other case, just being mindful of integer division
     int numCells = glm::pow(2, targetSubdivision - sourceSubdivision);
@@ -167,12 +162,10 @@ glm::ivec3 indexForSubdivision(int x, int y, int z, int sourceSubdivision, int t
   int numCells = glm::pow(2, sourceSubdivision - targetSubdivision);
   return glm::ivec3(x / numCells, y / numCells, z / numCells);
 }
-
 glm::ivec3 localIndexForSubdivision(int x, int y, int z, int sourceSubdivision, int targetSubdivision){
   auto indexs = indexForSubdivision(x, y, z, sourceSubdivision, targetSubdivision);
   return glm::ivec3(indexs.x % 2, indexs.y % 2, indexs.z % 2);
 }
-
 int xyzIndexToFlatIndex(glm::ivec3 index){
   modassert(index.x >= 0 && index.x < 2, std::string("xyzIndexToFlatIndex: invalid x index: ") + print(index));
   modassert(index.y >= 0 && index.y < 2, std::string("xyzIndexToFlatIndex: invalid y index: ") + print(index));
@@ -221,7 +214,6 @@ int xyzIndexToFlatIndex(glm::ivec3 index){
   modassert(false, "xyzIndexToFlatIndex invalid");
   return 0;
 }
-
 glm::ivec3 flatIndexToXYZ(int index){
   modassert(index >= 0 && index < 8, "invalid flatIndexToXYZ");
 
@@ -293,7 +285,6 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
   }
   octreeSubdivision -> filled = filled;
   octreeSubdivision -> divisions = {};
-  
 }
 
 void writeOctreeCellRange(Octree& octree, int x, int y, int z, int width, int height, int depth, int subdivision, bool filled){
@@ -305,7 +296,6 @@ void writeOctreeCellRange(Octree& octree, int x, int y, int z, int width, int he
     }
   }
 }
-
 
 Vertex createVertex2(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal){
   Vertex vertex {
@@ -409,7 +399,6 @@ void addOctreeLevel(std::vector<glm::vec3>& points, glm::vec3 rootPos, OctreeDiv
   }else if (octreeDivision.filled){
     addCubePoints(points, size, rootPos);
   }
-
 }
 
 Mesh createOctreeMesh(std::function<Mesh(MeshData&)> loadMesh){
@@ -457,7 +446,6 @@ Mesh* getOctreeMesh(GameObjectOctree& octree){
 
 GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectOctree obj {};
-
   obj.mesh = createOctreeMesh(util.loadMesh);
   return obj;
 }
@@ -491,8 +479,15 @@ struct Intersection {
   std::vector<FaceIntersection> faceIntersections;
 };
 
+struct ClosestIntersection {
+  OctreeSelectionFace face;
+  glm::vec3 position;
+  glm::ivec3 xyzIndex;
+  int subdivisionDepth;
+};
 
 std::optional<RaycastResult> raycastResult = std::nullopt;
+std::optional<ClosestIntersection> closestRaycast = std::nullopt;
 
 struct Faces {
   float XYClose;
@@ -536,7 +531,6 @@ Faces getFaces(int x, int y, int z, float size, int subdivisionLevel){
 
   return faces;
 }
-
 void visualizeFaces(Faces& faces, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
   drawLine(faces.center, faces.YZLeftPoint, glm::vec4(1.f, 0.f, 0.f, 1.f));
   drawLine(faces.center, faces.YZRightPoint, glm::vec4(0.f, 1.f, 0.f, 1.f));
@@ -685,7 +679,6 @@ void raycastSubdivision(glm::vec3 fromPos, glm::vec3 toPosDirection, glm::ivec3 
     auto intersections = subdivisionIntersections(fromPos, toPosDirection, testOctree.size, currentSubdivision, offset);
     for (auto &intersection : intersections){
       auto xyzIndex = flatIndexToXYZ(intersection.index);
-      //std::cout << "raycast num intersections: " << print(intersections) << ", subdivision = " << i << ", offset = " << print(offset) << ", xyz = " << print(xyzIndex) << std::endl ;
       if (currentSubdivision == subdivisionDepth){
           finalIntersections.push_back(RaycastIntersection {
             .index = intersection.index,
@@ -694,19 +687,6 @@ void raycastSubdivision(glm::vec3 fromPos, glm::vec3 toPosDirection, glm::ivec3 
           });
           continue;
       }
-
-      /*
-        struct FaceIntersection {
-          OctreeSelectionFace face;
-          glm::vec3 position;
-        };
-        struct Intersection {
-          int index;
-          std::vector<FaceIntersection> faceIntersections;
-        };
-
-      */
-
       glm::ivec3 newOffset = (offset + xyzIndex) * 2;
       raycastSubdivision(fromPos, toPosDirection, newOffset, currentSubdivision + 1, subdivisionDepth, finalIntersections); 
     }
@@ -728,13 +708,6 @@ RaycastResult getRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, int subdiv
   };
 }
 
-struct ClosestIntersection {
-  OctreeSelectionFace face;
-  glm::vec3 position;
-  int index;
-  glm::ivec3 blockOffset;
-};
-
 std::optional<ClosestIntersection> getClosestIntersection(RaycastResult& raycastResult){
   if (raycastResult.intersections.size() == 0){
     return std::nullopt;
@@ -747,17 +720,56 @@ std::optional<ClosestIntersection> getClosestIntersection(RaycastResult& raycast
         closestIntersection = ClosestIntersection {
           .face = faceIntersection.face,
           .position = faceIntersection.position,
-          .index = raycastResult.intersections.at(i).index,
-          .blockOffset = raycastResult.intersections.at(i).blockOffset,
+          .xyzIndex = flatIndexToXYZ(raycastResult.intersections.at(i).index) + raycastResult.intersections.at(i).blockOffset,
+          .subdivisionDepth = raycastResult.subdivisionDepth,
         };
       }
-
     }
   }
   return closestIntersection;
 }
 
-void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
+bool cellFilledIn(Octree& octree, RaycastIntersection& intersection, int subdivision){
+  auto xyzIndex = flatIndexToXYZ(intersection.index) + intersection.blockOffset;;
+  auto path = octreePath(xyzIndex.x, xyzIndex.y, xyzIndex.z, subdivision);
+  std::cout << "octreepath: ";
+  for (auto index : path){
+    std::cout << "(" << index.x << ", " << index.y << ", " << index.z << "), ";
+  }
+  std::cout << std::endl;
+
+  OctreeDivision* currentSubdivision = &octree.rootNode;
+  for (auto xyzIndex : path){
+    if (currentSubdivision -> divisions.size() == 0){
+      return currentSubdivision -> filled;
+    }
+
+    auto index = xyzIndexToFlatIndex(xyzIndex);
+    currentSubdivision = &currentSubdivision -> divisions.at(index);
+    std::cout << "octreepath: " << serializeOctreeDivision(*currentSubdivision) << std::endl;
+  }
+  return currentSubdivision -> filled;
+}
+
+RaycastResult filterFilledInCells(Octree& octree, RaycastResult& raycastResult){
+  RaycastResult filteredRaycastResult {
+    .fromPos = raycastResult.fromPos,
+    .toPosDirection = raycastResult.toPosDirection,
+    .subdivisionDepth = raycastResult.subdivisionDepth,
+  };
+
+  std::vector<RaycastIntersection> intersections;
+  for (auto& intersection : raycastResult.intersections){
+    if (cellFilledIn(octree, intersection, raycastResult.subdivisionDepth)){
+      intersections.push_back(intersection);
+    }
+  }
+  filteredRaycastResult.intersections = intersections;
+
+  return filteredRaycastResult;
+}
+
+void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, bool secondarySelection){
   auto serializedData = serializeOctree(testOctree);
   std::cout << "octree serialization: \n" << serializedData << std::endl;
 
@@ -767,7 +779,14 @@ void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection){
   auto octreeRaycast = getRaycast(fromPos, toPosDirection, subdivisionLevel);
   raycastResult = octreeRaycast;
 
-  return;
+  RaycastResult filteredCells = filterFilledInCells(testOctree, raycastResult.value());
+  if (!secondarySelection){
+    closestRaycast = getClosestIntersection(filteredCells);
+    selectedIndex = closestRaycast.value().xyzIndex;
+  }else{
+    // should change selecteddim here
+  }
+ 
 
 }
 
@@ -798,21 +817,16 @@ void drawGridSelectionYZ(int x, int y, int z, int numCellsHeight, int numCellsDe
   drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), color);
   drawLine(offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), offset + glm::vec3(0.f, numCellsHeight * cellSize, -1 * numCellsDepth * cellSize), color);
   drawLine(offset + glm::vec3(0.f, 0.f, -1 * numCellsDepth * cellSize), offset + glm::vec3(0.f, numCellsHeight * cellSize, -1 * numCellsDepth * cellSize), color);
-
 }
-
 void drawGridSelectionCube(int x, int y, int z, int numCellsWidth, int numCellsHeight, int numCellDepth, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine, std::optional<OctreeSelectionFace> face){
   drawGridSelectionXY(x, y, z,     1, 1, subdivision, size, drawLine, face);
   drawGridSelectionXY(x, y, z + 1, 1, 1, subdivision, size, drawLine, face);
   drawGridSelectionYZ(x, y, z, 1, 1, subdivision, size, drawLine, face);
   drawGridSelectionYZ(x + 1, y, z, 1, 1, subdivision, size, drawLine, face);
 }
-
-
 void drawOctreeSelectedCell(int x, int y, int z, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
   drawGridSelectionCube(x, y, z, 1, 1, 1, subdivision, size, drawLine, std::nullopt);
 }
-
 
 bool drawAllSelectedBlocks = false;
 void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
@@ -847,16 +861,13 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
           drawLine(face.position, face.position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 1.f, 0.f, 1.f));
         }
       }
-    }else{
-      auto closestBlock = getClosestIntersection(raycastResult.value());
-      if (closestBlock.has_value()){
-        auto xyzIndex = flatIndexToXYZ(closestBlock.value().index);
-        drawGridSelectionCube(xyzIndex.x + closestBlock.value().blockOffset.x, xyzIndex.y + closestBlock.value().blockOffset.y, xyzIndex.z + closestBlock.value().blockOffset.z, 1, 1, 1, raycastResult.value().subdivisionDepth, testOctree.size, drawLine, std::nullopt);    
-        drawLine(closestBlock.value().position, closestBlock.value().position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 0.f, 1.f, 1.f));
-      }      
     }
   }
-  
+
+  if (closestRaycast.has_value()){
+    drawGridSelectionCube(closestRaycast.value().xyzIndex.x, closestRaycast.value().xyzIndex.y, closestRaycast.value().xyzIndex.z, 1, 1, 1, closestRaycast.value().subdivisionDepth, testOctree.size, drawLine, std::nullopt);    
+    drawLine(closestRaycast.value().position, closestRaycast.value().position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 0.f, 1.f, 1.f));
+  }
 }
 
 int getNumOctreeNodes(OctreeDivision& octreeDivision){
@@ -1025,7 +1036,6 @@ void insertSelectedOctreeNodes(GameObjectOctree& octree, std::function<Mesh(Mesh
   writeOctreeCellRange(testOctree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, true);
   octree.mesh = createOctreeMesh(loadMesh);
 }
-
 void deleteSelectedOctreeNodes(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh){
   writeOctreeCellRange(testOctree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, false);
   octree.mesh = createOctreeMesh(loadMesh);

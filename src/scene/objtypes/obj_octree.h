@@ -14,7 +14,7 @@ std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctre
 Mesh* getOctreeMesh(GameObjectOctree& octree);
 
 void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine);
-void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection);
+void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, bool secondarySelection);
 
 enum OctreeDimAxis { OCTREE_XAXIS, OCTREE_YAXIS, OCTREE_ZAXIS, OCTREE_NOAXIS };
 void handleOctreeScroll(GameObjectOctree& octree, bool upDirection, std::function<Mesh(MeshData&)> loadMesh, bool holdingShift, bool holdingCtrl, OctreeDimAxis axis);

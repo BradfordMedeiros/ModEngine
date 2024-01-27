@@ -388,8 +388,8 @@ void onMouseButton(){
   handleVoxelRaycast(world, id, line.fromPos, line.toPos, drawParams.activeTextureIndex);
 
 
-
-  handleOctreeRaycast(line.fromPos, line.toPos);
+  auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
+  handleOctreeRaycast(line.fromPos, line.toPos, isCtrlHeld);
 }
 
 void drop_callback(GLFWwindow* window, int count, const char** paths){
