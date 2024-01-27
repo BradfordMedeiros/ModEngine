@@ -769,6 +769,22 @@ RaycastResult filterFilledInCells(Octree& octree, RaycastResult& raycastResult){
   return filteredRaycastResult;
 }
 
+void setSelection(glm::ivec3 selection1, glm::ivec3 selection2){
+  //    auto diff = closestRaycast.value().xyzIndex - newRaycast.value().xyzIndex;
+  auto minXIndex = selection1.x < selection2.x ? selection1.x : selection2.x;
+  auto minYIndex = selection1.y < selection2.y ? selection1.y : selection2.y;
+  auto minZIndex = selection1.z < selection2.z ? selection1.z : selection2.z;
+
+  auto maxXIndex = selection1.x > selection2.x ? selection1.x : selection2.x;
+  auto maxYIndex = selection1.y > selection2.y ? selection1.y : selection2.y;
+  auto maxZIndex = selection1.z > selection2.z ? selection1.z : selection2.z;
+
+  selectedIndex = glm::ivec3(minXIndex, minYIndex, minZIndex);
+  selectionDim = glm::ivec3(maxXIndex - minXIndex, maxYIndex - minYIndex, maxZIndex - minZIndex);
+
+  std::cout << "octree raycast selection1: " << print(selection1) << ", 2 = " << print(selection2) << std::endl;
+}
+
 void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, bool secondarySelection){
   auto serializedData = serializeOctree(testOctree);
   std::cout << "octree serialization: \n" << serializedData << std::endl;
@@ -783,11 +799,12 @@ void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, bool secon
   if (!secondarySelection){
     closestRaycast = getClosestIntersection(filteredCells);
     selectedIndex = closestRaycast.value().xyzIndex;
-  }else{
+    setSelection(closestRaycast.value().xyzIndex, closestRaycast.value().xyzIndex);
+  }else if (closestRaycast.has_value()) {
     // should change selecteddim here
+    auto newRaycast = getClosestIntersection(filteredCells);
+    setSelection(closestRaycast.value().xyzIndex, newRaycast.value().xyzIndex);
   }
- 
-
 }
 
 void drawGridSelectionXY(int x, int y, int z, int numCellsWidth, int numCellsHeight, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine, std::optional<OctreeSelectionFace> face){
@@ -843,7 +860,7 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
   }
 
   auto faces = getFaces(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, testOctree.size, subdivisionLevel);
-  visualizeFaces(faces, drawLine);
+  //visualizeFaces(faces, drawLine);
 
   if (raycastResult.has_value()){
     auto dirOffset = glm::normalize(raycastResult.value().toPosDirection);
@@ -864,7 +881,7 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
     }
   }
 
-  if (closestRaycast.has_value()){
+  if (false && closestRaycast.has_value()){
     drawGridSelectionCube(closestRaycast.value().xyzIndex.x, closestRaycast.value().xyzIndex.y, closestRaycast.value().xyzIndex.z, 1, 1, 1, closestRaycast.value().subdivisionDepth, testOctree.size, drawLine, std::nullopt);    
     drawLine(closestRaycast.value().position, closestRaycast.value().position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 0.f, 1.f, 1.f));
   }
