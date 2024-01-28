@@ -769,7 +769,7 @@ RaycastResult filterFilledInCells(Octree& octree, RaycastResult& raycastResult){
   return filteredRaycastResult;
 }
 
-void setSelection(glm::ivec3 selection1, glm::ivec3 selection2){
+void setSelection(glm::ivec3 selection1, glm::ivec3 selection2, OctreeSelectionFace face){
   //    auto diff = closestRaycast.value().xyzIndex - newRaycast.value().xyzIndex;
   auto minXIndex = selection1.x < selection2.x ? selection1.x : selection2.x;
   auto minYIndex = selection1.y < selection2.y ? selection1.y : selection2.y;
@@ -780,7 +780,8 @@ void setSelection(glm::ivec3 selection1, glm::ivec3 selection2){
   auto maxZIndex = selection1.z > selection2.z ? selection1.z : selection2.z;
 
   selectedIndex = glm::ivec3(minXIndex, minYIndex, minZIndex);
-  selectionDim = glm::ivec3(maxXIndex - minXIndex, maxYIndex - minYIndex, maxZIndex - minZIndex);
+  selectionDim = glm::ivec3(maxXIndex - minXIndex + 1, maxYIndex - minYIndex + 1, maxZIndex - minZIndex + 1);
+  editorOrientation = face;
 
   std::cout << "octree raycast selection1: " << print(selection1) << ", 2 = " << print(selection2) << std::endl;
 }
@@ -799,11 +800,11 @@ void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, bool secon
   if (!secondarySelection){
     closestRaycast = getClosestIntersection(filteredCells);
     selectedIndex = closestRaycast.value().xyzIndex;
-    setSelection(closestRaycast.value().xyzIndex, closestRaycast.value().xyzIndex);
+    setSelection(closestRaycast.value().xyzIndex, closestRaycast.value().xyzIndex, closestRaycast.value().face);
   }else if (closestRaycast.has_value()) {
     // should change selecteddim here
     auto newRaycast = getClosestIntersection(filteredCells);
-    setSelection(closestRaycast.value().xyzIndex, newRaycast.value().xyzIndex);
+    setSelection(closestRaycast.value().xyzIndex, newRaycast.value().xyzIndex, closestRaycast.value().face);
   }
 }
 
@@ -897,7 +898,7 @@ int getNumOctreeNodes(OctreeDivision& octreeDivision){
 }
 
 void handleOctreeScroll(GameObjectOctree& octree, bool upDirection, std::function<Mesh(MeshData&)> loadMesh, bool holdingShift, bool holdingCtrl, OctreeDimAxis axis){
-  if (holdingShift){
+  if (holdingShift && !holdingCtrl){
     std::cout << "num octree nodes: " << getNumOctreeNodes(testOctree.rootNode) << std::endl;
     if (axis == OCTREE_NOAXIS){
        if (upDirection){
@@ -928,7 +929,7 @@ void handleOctreeScroll(GameObjectOctree& octree, bool upDirection, std::functio
   }
   std::cout << "octree selected index: " << print(selectedIndex.value()) << std::endl;
 
-  if (holdingCtrl){
+  if (holdingShift && holdingCtrl){
     if (axis == OCTREE_NOAXIS){
       if (upDirection){
         selectionDim.value().x++;
@@ -960,12 +961,13 @@ void handleOctreeScroll(GameObjectOctree& octree, bool upDirection, std::functio
   }
 
   std::cout << "octree modifiers: " << holdingShift << ", " << holdingCtrl << std::endl;
-  writeOctreeCellRange(testOctree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, true);
-  if (axis == OCTREE_NOAXIS || axis == OCTREE_ZAXIS){
+  
+  writeOctreeCellRange(testOctree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, !holdingCtrl);
+  if (editorOrientation == FRONT || editorOrientation == BACK){
     selectedIndex.value().z = selectedIndex.value().z + (upDirection ? -1 : 1);
-  }else if (axis == OCTREE_XAXIS){
+  }else if (editorOrientation == LEFT || editorOrientation == RIGHT){
     selectedIndex.value().x = selectedIndex.value().x + (upDirection ? 1 : -1);
-  }else if (axis == OCTREE_YAXIS){
+  }else if (editorOrientation == UP || editorOrientation == DOWN){
     selectedIndex.value().y = selectedIndex.value().y + (upDirection ? 1 : -1);
   }
   if (selectedIndex.value().x < 0){
@@ -978,7 +980,7 @@ void handleOctreeScroll(GameObjectOctree& octree, bool upDirection, std::functio
     selectedIndex.value().z = 0;
   }
 
-  writeOctreeCellRange(testOctree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, true);
+  //writeOctreeCellRange(testOctree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, true);
 
   octree.mesh = createOctreeMesh(loadMesh);
 }
@@ -1022,17 +1024,6 @@ void handleChangeSubdivisionLevel(int newSubdivisionLevel){
   subdivisionLevel = newSubdivisionLevel;
 }
 
-void handleSetSelectionOrientation(OctreeSelectionFace face){
-  //{ FRONT, BACK, LEFT, RIGHT, UP, DOWN }
-  if (face == RIGHT){
-    face = LEFT;
-  }else if (face == BACK){
-    face = FRONT;
-  }else if (face == DOWN){
-    face = UP;
-  }
-  editorOrientation = face;
-}
 
 void increaseSelectionSize(int width, int height, int depth){
   selectionDim.value().x+= width;
