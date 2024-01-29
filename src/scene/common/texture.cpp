@@ -199,3 +199,7 @@ TextureSizeInfo getTextureSizeInfo(Texture& texture){
     .height = height,
   };
 }
+
+Texture loadTextureAtlas(std::vector<std::string> textureFilePaths){
+  return loadTexture(textureFilePaths.at(0));
+}

@@ -220,6 +220,46 @@ Octree subdividedOne {
 
 Octree testOctree = unsubdividedOctree;
 
+std::vector<FaceTexture> defaultTextureCoords = {
+  FaceTexture {
+    .texCoordsTopLeft = glm::vec2(0, 1),
+    .texCoordsTopRight = glm::vec2(1, 1),
+    .texCoordsBottomLeft = glm::vec2(0, 0),
+    .texCoordsBottomRight = glm::vec2(1, 0),
+  },
+  FaceTexture {
+    .texCoordsTopLeft = glm::vec2(0, 1),
+    .texCoordsTopRight = glm::vec2(1, 1),
+    .texCoordsBottomLeft = glm::vec2(0, 0),
+    .texCoordsBottomRight = glm::vec2(1, 0),
+  },
+  FaceTexture {
+    .texCoordsTopLeft = glm::vec2(0, 1),
+    .texCoordsTopRight = glm::vec2(1, 1),
+    .texCoordsBottomLeft = glm::vec2(0, 0),
+    .texCoordsBottomRight = glm::vec2(1, 0),
+  },
+  FaceTexture {
+    .texCoordsTopLeft = glm::vec2(0, 1),
+    .texCoordsTopRight = glm::vec2(1, 1),
+    .texCoordsBottomLeft = glm::vec2(0, 0),
+    .texCoordsBottomRight = glm::vec2(1, 0),
+  },
+  FaceTexture {
+    .texCoordsTopLeft = glm::vec2(0, 1),
+    .texCoordsTopRight = glm::vec2(1, 1),
+    .texCoordsBottomLeft = glm::vec2(0, 0),
+    .texCoordsBottomRight = glm::vec2(1, 0),
+  },
+  FaceTexture {
+    .texCoordsTopLeft = glm::vec2(0, 1),
+    .texCoordsTopRight = glm::vec2(1, 1),
+    .texCoordsBottomLeft = glm::vec2(0, 0),
+    .texCoordsBottomRight = glm::vec2(1, 0),
+  },
+};
+
+
 glm::ivec3 indexForSubdivision(int x, int y, int z, int sourceSubdivision, int targetSubdivision){
   if (sourceSubdivision < targetSubdivision){ // same formula as other case, just being mindful of integer division
     int numCells = glm::pow(2, targetSubdivision - sourceSubdivision);
@@ -353,6 +393,19 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
   octreeSubdivision -> divisions = {};
 }
 
+OctreeDivision* getOctreeSubdivisionIfExists(Octree& octree, int x, int y, int z, int subdivision){
+  OctreeDivision* octreeSubdivision = &octree.rootNode;
+  auto path = octreePath(x, y, z, subdivision);
+  for (int i = 0; i < path.size(); i++){
+    int index = xyzIndexToFlatIndex(path.at(i));
+    if (octreeSubdivision -> divisions.size() == 0){
+      return NULL;
+    }
+    octreeSubdivision = &(octreeSubdivision -> divisions.at(index));
+  }
+  return octreeSubdivision;
+}
+
 void writeOctreeCellRange(Octree& octree, int x, int y, int z, int width, int height, int depth, int subdivision, bool filled){
   for (int i = 0; i < width; i++){
     for (int j = 0; j < height; j++){
@@ -363,8 +416,31 @@ void writeOctreeCellRange(Octree& octree, int x, int y, int z, int width, int he
   }
 }
 
-void writeOctreeTexture(Octree& octree, int x, int y, int z, glm::ivec2 size, OctreeSelectionFace faceOrientation){
-
+int textureIndex(OctreeSelectionFace faceOrientation){
+  int index = 0;
+  if (faceOrientation == FRONT){
+    index = 0;
+  }else if (faceOrientation == BACK){
+    index = 1;
+  }else if (faceOrientation == LEFT){
+    index = 2;
+  }else if (faceOrientation == RIGHT){
+    index = 3;
+  }else if (faceOrientation == UP){
+    index = 4;
+  }else if (faceOrientation == DOWN){
+    index = 5;
+  }else{
+    modassert(false, "writeOctreeTexture invalid face");
+  }
+  return index;  
+}
+void writeOctreeTexture(Octree& octree, int x, int y, int z, int subdivision, glm::ivec2 size, OctreeSelectionFace faceOrientation, FaceTexture faceTexture){
+  auto octreeDivision = getOctreeSubdivisionIfExists(octree, x, y, z, subdivision);
+  if (octreeDivision){
+    auto index = textureIndex(faceOrientation);
+    octreeDivision -> faces.at(index) = faceTexture;
+  }
 }
 
 Vertex createVertex2(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal){
@@ -382,44 +458,6 @@ Vertex createVertex2(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal){
 
 // enum OctreeSelectionFace { FRONT, BACK, LEFT, RIGHT, UP, DOWN };
 
-std::vector<FaceTexture> defaultTextureCoords = {
-  FaceTexture {
-    .texCoordsTopLeft = glm::vec2(0, 1),
-    .texCoordsTopRight = glm::vec2(1, 1),
-    .texCoordsBottomLeft = glm::vec2(0, 0),
-    .texCoordsBottomRight = glm::vec2(1, 0),
-  },
-  FaceTexture {
-    .texCoordsTopLeft = glm::vec2(0, 1),
-    .texCoordsTopRight = glm::vec2(1, 1),
-    .texCoordsBottomLeft = glm::vec2(0, 0),
-    .texCoordsBottomRight = glm::vec2(1, 0),
-  },
-  FaceTexture {
-    .texCoordsTopLeft = glm::vec2(0, 1),
-    .texCoordsTopRight = glm::vec2(1, 1),
-    .texCoordsBottomLeft = glm::vec2(0, 0),
-    .texCoordsBottomRight = glm::vec2(1, 0),
-  },
-  FaceTexture {
-    .texCoordsTopLeft = glm::vec2(0, 1),
-    .texCoordsTopRight = glm::vec2(1, 1),
-    .texCoordsBottomLeft = glm::vec2(0, 0),
-    .texCoordsBottomRight = glm::vec2(1, 0),
-  },
-  FaceTexture {
-    .texCoordsTopLeft = glm::vec2(0, 1),
-    .texCoordsTopRight = glm::vec2(1, 1),
-    .texCoordsBottomLeft = glm::vec2(0, 0),
-    .texCoordsBottomRight = glm::vec2(1, 0),
-  },
-  FaceTexture {
-    .texCoordsTopLeft = glm::vec2(0, 1),
-    .texCoordsTopRight = glm::vec2(1, 1),
-    .texCoordsBottomLeft = glm::vec2(0, 0),
-    .texCoordsBottomRight = glm::vec2(1, 0),
-  },
-};
 
 struct OctreeVertex {
   glm::vec3 position;
