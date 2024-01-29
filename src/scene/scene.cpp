@@ -317,7 +317,6 @@ void updatePhysicsBody(World& world, objid id){
 }
 
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
-  std::cout << "load texture world: " << texturepath << std::endl;
   if (world.textures.find(texturepath) != world.textures.end()){
     world.textures.at(texturepath).owners.insert(ownerId);
     return world.textures.at(texturepath).texture;
@@ -327,6 +326,24 @@ Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
     return loadTextureWorld(world, "./res/models/box/grid.png", ownerId);
   }
   Texture texture = loadTexture(texturePath);
+  world.textures[texturepath] = TextureRef {
+    .owners = { ownerId },
+    .texture = texture,
+    .mappingTexture = std::nullopt,
+  };
+  return texture;
+}
+
+Texture loadTextureAtlasWorld(World& world, std::string texturepath, std::vector<std::string> atlasTextures, objid ownerId){
+  if (world.textures.find(texturepath) != world.textures.end()){
+    world.textures.at(texturepath).owners.insert(ownerId);
+    return world.textures.at(texturepath).texture;
+  }
+  auto texturePath = world.interface.modlayerPath(texturepath);
+  if (!fileExists(texturePath) && ownerId != -1){ // root owner for default models etc, should never use default texs
+    return loadTextureWorld(world, "./res/models/box/grid.png", ownerId);
+  }
+  Texture texture = loadTextureAtlas({ texturePath });
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,

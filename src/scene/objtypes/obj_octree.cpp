@@ -584,15 +584,18 @@ Mesh createOctreeMesh(std::function<Mesh(MeshData&)> loadMesh){
   for (int i = 0; i < vertices.size(); i++){ // should be able to optimize this better...
     indices.push_back(i);
   }
+ 
   MeshData meshData {
     .vertices = vertices,
     .indices = indices,
-    .diffuseTexturePath = "./res/textures/grid.png",
+    .diffuseTexturePath = "../gameresources/build/textures/metal_vent_worn.jpg",
     .hasDiffuseTexture = true,
     .emissionTexturePath = "",
     .hasEmissionTexture = false,
     .opacityTexturePath = "",
     .hasOpacityTexture = false,
+    .normalTexturePath = "../gameresources/build/textures/metal_vent_worn.normal.jpg",
+    .hasNormalTexture = true,
     .boundInfo = getBounds(vertices),
     .bones = {},
   };
