@@ -29,6 +29,61 @@ struct Octree {
   OctreeDivision rootNode;
 };
 
+enum OctreeSelectionFace { FRONT, BACK, LEFT, RIGHT, UP, DOWN };
+std::optional<glm::ivec3> selectedIndex = glm::ivec3(1, 0, 0);
+std::optional<glm::ivec3> selectionDim = glm::ivec3(1, 1, 0);
+OctreeSelectionFace editorOrientation = FRONT;
+
+std::optional<Line> line = std::nullopt;
+int subdivisionLevel = 2;
+
+struct FaceIntersection {
+  OctreeSelectionFace face;
+  glm::vec3 position;
+};
+struct RaycastIntersection {
+  int index;
+  glm::ivec3 blockOffset;
+  std::vector<FaceIntersection> faceIntersections;
+};
+struct RaycastResult {
+  glm::vec3 fromPos;
+  glm::vec3 toPosDirection;
+  int subdivisionDepth;
+  std::vector<RaycastIntersection> intersections;
+};
+
+struct Intersection {
+  int index;
+  std::vector<FaceIntersection> faceIntersections;
+};
+
+struct ClosestIntersection {
+  OctreeSelectionFace face;
+  glm::vec3 position;
+  glm::ivec3 xyzIndex;
+  int subdivisionDepth;
+};
+
+std::optional<RaycastResult> raycastResult = std::nullopt;
+std::optional<ClosestIntersection> closestRaycast = std::nullopt;
+
+struct Faces {
+  float XYClose;
+  glm::vec3 XYClosePoint;
+  float XYFar;
+  glm::vec3 XYFarPoint;
+  float YZLeft;
+  glm::vec3 YZLeftPoint;
+  float YZRight;
+  glm::vec3 YZRightPoint;
+  float XZTop;
+  glm::vec3 XZTopPoint;
+  float XZBottom;
+  glm::vec3 XZBottomPoint;
+  glm::vec3 center;
+};
+
 
 /*
 5
@@ -308,6 +363,10 @@ void writeOctreeCellRange(Octree& octree, int x, int y, int z, int width, int he
   }
 }
 
+void writeOctreeTexture(Octree& octree, int x, int y, int z, glm::ivec2 size, OctreeSelectionFace faceOrientation){
+
+}
+
 Vertex createVertex2(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal){
   Vertex vertex {
     .position = position,
@@ -372,7 +431,6 @@ void addCubePoints(std::vector<OctreeVertex>& points, float size, glm::vec3 offs
   }
 
   // front plane
-
   FaceTexture& frontFace =  faces -> at(0);
   points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, 0.f) + offset, .coord = frontFace.texCoordsBottomRight });
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, 0.f) + offset, .coord = frontFace.texCoordsTopLeft });
@@ -513,60 +571,6 @@ GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util){
   return obj;
 }
 
-enum OctreeSelectionFace { FRONT, BACK, LEFT, RIGHT, UP, DOWN };
-std::optional<glm::ivec3> selectedIndex = glm::ivec3(1, 0, 0);
-std::optional<glm::ivec3> selectionDim = glm::ivec3(1, 1, 0);
-OctreeSelectionFace editorOrientation = FRONT;
-
-std::optional<Line> line = std::nullopt;
-int subdivisionLevel = 2;
-
-struct FaceIntersection {
-  OctreeSelectionFace face;
-  glm::vec3 position;
-};
-struct RaycastIntersection {
-  int index;
-  glm::ivec3 blockOffset;
-  std::vector<FaceIntersection> faceIntersections;
-};
-struct RaycastResult {
-  glm::vec3 fromPos;
-  glm::vec3 toPosDirection;
-  int subdivisionDepth;
-  std::vector<RaycastIntersection> intersections;
-};
-
-struct Intersection {
-  int index;
-  std::vector<FaceIntersection> faceIntersections;
-};
-
-struct ClosestIntersection {
-  OctreeSelectionFace face;
-  glm::vec3 position;
-  glm::ivec3 xyzIndex;
-  int subdivisionDepth;
-};
-
-std::optional<RaycastResult> raycastResult = std::nullopt;
-std::optional<ClosestIntersection> closestRaycast = std::nullopt;
-
-struct Faces {
-  float XYClose;
-  glm::vec3 XYClosePoint;
-  float XYFar;
-  glm::vec3 XYFarPoint;
-  float YZLeft;
-  glm::vec3 YZLeftPoint;
-  float YZRight;
-  glm::vec3 YZRightPoint;
-  float XZTop;
-  glm::vec3 XZTopPoint;
-  float XZBottom;
-  glm::vec3 XZBottomPoint;
-  glm::vec3 center;
-};
 
 Faces getFaces(int x, int y, int z, float size, int subdivisionLevel){
   float adjustedSize = size * glm::pow(0.5f, subdivisionLevel);
