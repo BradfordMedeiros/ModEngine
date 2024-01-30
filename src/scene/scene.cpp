@@ -339,11 +339,13 @@ Texture loadTextureAtlasWorld(World& world, std::string texturepath, std::vector
     world.textures.at(texturepath).owners.insert(ownerId);
     return world.textures.at(texturepath).texture;
   }
-  auto texturePath = world.interface.modlayerPath(texturepath);
-  if (!fileExists(texturePath) && ownerId != -1){ // root owner for default models etc, should never use default texs
-    return loadTextureWorld(world, "./res/models/box/grid.png", ownerId);
+
+  std::vector<std::string> textureValues;
+  for (auto &atlasTexture : atlasTextures){
+    auto newAtlasTexturePath = world.interface.modlayerPath(atlasTexture);
+    textureValues.push_back(newAtlasTexturePath);
   }
-  Texture texture = loadTextureAtlas({ texturePath });
+  Texture texture = loadTextureAtlas(textureValues);
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,

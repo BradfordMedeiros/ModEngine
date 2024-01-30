@@ -447,6 +447,8 @@ Vertex createVertex2(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal){
   Vertex vertex {
     .position = position,
     .normal = normal,
+    //.glm::vec3 tangent;
+
     .texCoords = texCoords,
   };
   for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
@@ -588,7 +590,7 @@ Mesh createOctreeMesh(std::function<Mesh(MeshData&)> loadMesh){
   MeshData meshData {
     .vertices = vertices,
     .indices = indices,
-    .diffuseTexturePath = "../gameresources/build/textures/metal_vent_worn.jpg",
+    .diffuseTexturePath = "octree-atlas:main",
     .hasDiffuseTexture = true,
     .emissionTexturePath = "",
     .hasEmissionTexture = false,

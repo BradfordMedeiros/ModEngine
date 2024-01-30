@@ -253,7 +253,7 @@ void loadAllTextures(std::string& textureFolderPath){
     loadTextureWorld(world, texturePath, -1);
   }*/
 
-  loadTextureAtlasWorld(world, "./res/textures/grid.png", { "./res/textures/wood.jpg", "./res/textures/water.jpg", "./res/textures/grass.jpg", "./res/textures/blacktop.jpg" }, -1);
+  loadTextureAtlasWorld(world, "octree-atlas:main", { "./res/textures/wood.jpg", "./res/textures/water.jpg", "./res/textures/grass.jpg", "./res/textures/blacktop.jpg" }, -1);
 }
 
 // Kind of crappy since the uniforms don't unset their values after rendering, but order should be deterministic so ... ok

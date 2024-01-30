@@ -25,6 +25,7 @@ Texture loadTextureEmpty(int textureWidth, int textureHeight, int numChannels){
   };
   return tex;
 }
+
 Texture loadTextureData(unsigned char* data, int textureWidth, int textureHeight, int numChannels){
   modassert(textureWidth > 0, "ERROR - loadTextureData - texture width must be > 0");
   modassert(textureHeight > 0, "ERROR - loadTextureData - height width must be > 0");
@@ -201,5 +202,35 @@ TextureSizeInfo getTextureSizeInfo(Texture& texture){
 }
 
 Texture loadTextureAtlas(std::vector<std::string> textureFilePaths){
+  for (int i = 0; i < textureFilePaths.size(); i++){
+    int textureWidth, textureHeight, numChannels;
+    int forcedChannels = 4;
+    unsigned char* data = stbi_load(textureFilePaths.at(i).c_str(), &textureWidth, &textureHeight, &numChannels, forcedChannels); 
+    if (!data){
+      throw std::runtime_error("failed loading texture " + textureFilePaths.at(i) + ", reason: " + stbi_failure_reason());
+    }
+
+    int newWidth = 100;
+    int newHeight = 100;
+    unsigned char* resizedData = (unsigned char *)malloc(newWidth * newHeight * 4);
+    stbir_resize_uint8_linear(data, textureWidth, textureHeight, 0, resizedData, newWidth, newHeight, 0, STBIR_RGBA);
+
+
+    if (i == textureFilePaths.size() - 1){
+      stbi_write_png("/home/brad/Desktop/test6.png", newWidth, newHeight, 4, resizedData, 0); 
+    }
+    
+    //unsigned char *atlasData = (unsigned char *)malloc(atlasWidth * atlasHeight * 4); // Assuming 3 channels (RGB)
+    free(resizedData);
+
+
+
+
+
+    stbi_image_free(data);
+  }
+
+
+  modassert(false, std::string("atlas loading textures: ") + print(textureFilePaths));
   return loadTexture(textureFilePaths.at(0));
 }
