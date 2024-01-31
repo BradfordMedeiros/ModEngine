@@ -2,6 +2,18 @@
 
 std::vector<AutoSerialize> octreeAutoserializer {};
 
+struct AtlasDimensions {
+  int numTexturesWide;
+  int numTexturesHeight;
+  int totalTextures;
+};
+
+AtlasDimensions AtlasDimensions {
+  .numTexturesWide = 3,
+  .numTexturesHeight = 3,
+  .totalTextures = 5,
+};
+
 struct FaceTexture {
   //const char* texture;
   glm::vec2 texCoordsTopLeft;

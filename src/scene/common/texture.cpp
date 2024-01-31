@@ -202,35 +202,44 @@ TextureSizeInfo getTextureSizeInfo(Texture& texture){
 }
 
 Texture loadTextureAtlas(std::vector<std::string> textureFilePaths){
+  float nextSquare = glm::sqrt(textureFilePaths.size());
+  int roundedUp = std::ceil(nextSquare);
+
+  int imageWidth = 500;
+  int imageHeight = 500;
+  int numImagesWide = roundedUp;
+  int numImagesHeight = roundedUp;
+
+  int newWidth = imageWidth * numImagesWide;
+  int newHeight = imageHeight * numImagesHeight;
+  unsigned char* textureAtlasData = (unsigned char *)malloc(newWidth * newHeight * 4);
+  std::memset(textureAtlasData, 0, newWidth * newHeight * 4);
+
+  auto atlasTexture = loadTextureData(textureAtlasData, newWidth, newHeight, 4);
+
   for (int i = 0; i < textureFilePaths.size(); i++){
+    int xIndex = (i % numImagesWide) * imageWidth;
+    int yIndex = (i / numImagesWide) * imageHeight;
+
     int textureWidth, textureHeight, numChannels;
     int forcedChannels = 4;
     unsigned char* data = stbi_load(textureFilePaths.at(i).c_str(), &textureWidth, &textureHeight, &numChannels, forcedChannels); 
     if (!data){
       throw std::runtime_error("failed loading texture " + textureFilePaths.at(i) + ", reason: " + stbi_failure_reason());
     }
-
-    int newWidth = 100;
-    int newHeight = 100;
-    unsigned char* resizedData = (unsigned char *)malloc(newWidth * newHeight * 4);
-    stbir_resize_uint8_linear(data, textureWidth, textureHeight, 0, resizedData, newWidth, newHeight, 0, STBIR_RGBA);
-
-
-    if (i == textureFilePaths.size() - 1){
-      stbi_write_png("/home/brad/Desktop/test6.png", newWidth, newHeight, 4, resizedData, 0); 
-    }
-    
-    //unsigned char *atlasData = (unsigned char *)malloc(atlasWidth * atlasHeight * 4); // Assuming 3 channels (RGB)
+    unsigned char* resizedData = (unsigned char *)malloc(imageWidth * imageHeight * 4);
+    stbir_resize_uint8_linear(data, textureWidth, textureHeight, 0, resizedData, imageWidth, imageHeight, 0, STBIR_RGBA);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, xIndex, yIndex, imageWidth, imageHeight, GL_RGBA, GL_UNSIGNED_BYTE, resizedData);
+   
     free(resizedData);
-
-
-
-
-
     stbi_image_free(data);
   }
 
+  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureAtlasData);
 
-  modassert(false, std::string("atlas loading textures: ") + print(textureFilePaths));
-  return loadTexture(textureFilePaths.at(0));
+  //stbi_flip_vertically_on_write(1);
+  //stbi_write_png("/home/brad/Desktop/test_atlas.png", newWidth, newHeight, 4, textureAtlasData, 0); 
+
+  free(textureAtlasData);
+  return atlasTexture;
 }
