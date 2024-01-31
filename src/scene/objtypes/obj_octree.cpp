@@ -2,17 +2,6 @@
 
 std::vector<AutoSerialize> octreeAutoserializer {};
 
-struct AtlasDimensions {
-  int numTexturesWide;
-  int numTexturesHeight;
-  int totalTextures;
-};
-
-AtlasDimensions AtlasDimensions {
-  .numTexturesWide = 3,
-  .numTexturesHeight = 3,
-  .totalTextures = 5,
-};
 
 struct FaceTexture {
   //const char* texture;
@@ -232,43 +221,45 @@ Octree subdividedOne {
 
 Octree testOctree = unsubdividedOctree;
 
+
+struct AtlasDimensions {
+  int numTexturesWide;
+  int numTexturesHeight;
+  int totalTextures;
+};
+AtlasDimensions atlasDimensions {
+  .numTexturesWide = 3,
+  .numTexturesHeight = 3,
+  .totalTextures = 5,
+};
+
+FaceTexture texCoords(int imageIndex){
+  float texWide = 1.f / atlasDimensions.numTexturesWide;
+  float texHeight = 1.f / atlasDimensions.numTexturesHeight;
+
+  int xIndex = imageIndex % atlasDimensions.numTexturesWide;
+  int yIndex = imageIndex / atlasDimensions.numTexturesWide;
+
+  float xMin = xIndex * texWide;
+  float xMax = xMin + texWide;
+  float yMin = yIndex * texHeight;
+  float yMax = yMin + texHeight;
+  FaceTexture faceTexture {
+    .texCoordsTopLeft = glm::vec2(xMin, yMax),
+    .texCoordsTopRight = glm::vec2(xMax, yMax),
+    .texCoordsBottomLeft = glm::vec2(xMin, yMin),
+    .texCoordsBottomRight = glm::vec2(xMax, yMin),
+  };
+  return faceTexture;
+}
+
 std::vector<FaceTexture> defaultTextureCoords = {
-  FaceTexture {
-    .texCoordsTopLeft = glm::vec2(0, 1),
-    .texCoordsTopRight = glm::vec2(1, 1),
-    .texCoordsBottomLeft = glm::vec2(0, 0),
-    .texCoordsBottomRight = glm::vec2(1, 0),
-  },
-  FaceTexture {
-    .texCoordsTopLeft = glm::vec2(0, 1),
-    .texCoordsTopRight = glm::vec2(1, 1),
-    .texCoordsBottomLeft = glm::vec2(0, 0),
-    .texCoordsBottomRight = glm::vec2(1, 0),
-  },
-  FaceTexture {
-    .texCoordsTopLeft = glm::vec2(0, 1),
-    .texCoordsTopRight = glm::vec2(1, 1),
-    .texCoordsBottomLeft = glm::vec2(0, 0),
-    .texCoordsBottomRight = glm::vec2(1, 0),
-  },
-  FaceTexture {
-    .texCoordsTopLeft = glm::vec2(0, 1),
-    .texCoordsTopRight = glm::vec2(1, 1),
-    .texCoordsBottomLeft = glm::vec2(0, 0),
-    .texCoordsBottomRight = glm::vec2(1, 0),
-  },
-  FaceTexture {
-    .texCoordsTopLeft = glm::vec2(0, 1),
-    .texCoordsTopRight = glm::vec2(1, 1),
-    .texCoordsBottomLeft = glm::vec2(0, 0),
-    .texCoordsBottomRight = glm::vec2(1, 0),
-  },
-  FaceTexture {
-    .texCoordsTopLeft = glm::vec2(0, 1),
-    .texCoordsTopRight = glm::vec2(1, 1),
-    .texCoordsBottomLeft = glm::vec2(0, 0),
-    .texCoordsBottomRight = glm::vec2(1, 0),
-  },
+  texCoords(4),
+  texCoords(4),
+  texCoords(4),
+  texCoords(4),
+  texCoords(4),
+  texCoords(4),
 };
 
 
@@ -496,11 +487,11 @@ void addCubePoints(std::vector<OctreeVertex>& points, float size, glm::vec3 offs
   FaceTexture& backFace =  faces -> at(1);
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, -size) + offset,  .coord = backFace.texCoordsBottomLeft   });
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset, .coord = backFace.texCoordsTopLeft });
-  points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset, .coord = glm::vec2(-1.f * backFace.texCoordsBottomRight.x, backFace.texCoordsBottomRight.y) });
+  points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset, .coord = glm::vec2(backFace.texCoordsBottomRight.x, backFace.texCoordsBottomRight.y) });
 
-  points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset,  .coord = glm::vec2(-1.f * backFace.texCoordsBottomRight.x, backFace.texCoordsBottomRight.y)  });
+  points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset,  .coord = glm::vec2(backFace.texCoordsBottomRight.x, backFace.texCoordsBottomRight.y)  });
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset,  .coord = backFace.texCoordsTopLeft   });
-  points.push_back(OctreeVertex { .position = glm::vec3(size, size, -size) + offset, .coord = glm::vec2(-1.f * backFace.texCoordsTopRight.x, backFace.texCoordsTopRight.y) });
+  points.push_back(OctreeVertex { .position = glm::vec3(size, size, -size) + offset, .coord = glm::vec2(backFace.texCoordsTopRight.x, backFace.texCoordsTopRight.y) });
 
   // left plane
   FaceTexture& leftFace =  faces -> at(2);

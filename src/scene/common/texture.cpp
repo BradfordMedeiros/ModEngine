@@ -227,7 +227,7 @@ Texture loadTextureAtlas(std::vector<std::string> textureFilePaths){
     if (!data){
       throw std::runtime_error("failed loading texture " + textureFilePaths.at(i) + ", reason: " + stbi_failure_reason());
     }
-    unsigned char* resizedData = (unsigned char *)malloc(imageWidth * imageHeight * 4);
+    unsigned char* resizedData = (unsigned char*)malloc(imageWidth * imageHeight * 4);
     stbir_resize_uint8_linear(data, textureWidth, textureHeight, 0, resizedData, imageWidth, imageHeight, 0, STBIR_RGBA);
     glTexSubImage2D(GL_TEXTURE_2D, 0, xIndex, yIndex, imageWidth, imageHeight, GL_RGBA, GL_UNSIGNED_BYTE, resizedData);
    
