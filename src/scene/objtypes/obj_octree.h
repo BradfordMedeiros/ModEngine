@@ -29,5 +29,8 @@ void increaseSelectionSize(int width, int height, int depth);
 void insertSelectedOctreeNodes(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
 void deleteSelectedOctreeNodes(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
 
+void writeOctreeTexture(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh, bool unitTexture);
+int getOctreeTextureId();
+void setOctreeTextureId(int textureId);
 
 #endif

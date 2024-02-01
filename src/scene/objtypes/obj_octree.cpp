@@ -34,6 +34,7 @@ enum OctreeSelectionFace { FRONT, BACK, LEFT, RIGHT, UP, DOWN };
 std::optional<glm::ivec3> selectedIndex = glm::ivec3(1, 0, 0);
 std::optional<glm::ivec3> selectionDim = glm::ivec3(1, 1, 0);
 OctreeSelectionFace editorOrientation = FRONT;
+int selectedTexture = 0;
 
 std::optional<Line> line = std::nullopt;
 int subdivisionLevel = 2;
@@ -233,7 +234,7 @@ AtlasDimensions atlasDimensions {
   .totalTextures = 5,
 };
 
-FaceTexture texCoords(int imageIndex){
+FaceTexture texCoords(int imageIndex, glm::vec2 multiplier = glm::vec2(1.f, 1.f), glm::vec2 offset = glm::vec2(0.f, 0.f)){
   float texWide = 1.f / atlasDimensions.numTexturesWide;
   float texHeight = 1.f / atlasDimensions.numTexturesHeight;
 
@@ -255,11 +256,11 @@ FaceTexture texCoords(int imageIndex){
 
 std::vector<FaceTexture> defaultTextureCoords = {
   texCoords(4),
+  texCoords(1),
   texCoords(4),
   texCoords(4),
   texCoords(4),
-  texCoords(4),
-  texCoords(4),
+  texCoords(2),
 };
 
 
@@ -379,14 +380,14 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
     if (octreeSubdivision -> divisions.size() == 0){
       bool defaultFill = octreeSubdivision -> filled;
       octreeSubdivision -> divisions = {
-        OctreeDivision { .filled = defaultFill },
-        OctreeDivision { .filled = defaultFill },
-        OctreeDivision { .filled = defaultFill },
-        OctreeDivision { .filled = defaultFill },
-        OctreeDivision { .filled = defaultFill },
-        OctreeDivision { .filled = defaultFill },
-        OctreeDivision { .filled = defaultFill },
-        OctreeDivision { .filled = defaultFill },
+        OctreeDivision { .filled = defaultFill, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .filled = defaultFill, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .filled = defaultFill, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .filled = defaultFill, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .filled = defaultFill, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .filled = defaultFill, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .filled = defaultFill, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .filled = defaultFill, .faces = octreeSubdivision -> faces },
       };
     } 
     // check if all filled, then set the divsions = {}, and filled = true
@@ -437,13 +438,6 @@ int textureIndex(OctreeSelectionFace faceOrientation){
     modassert(false, "writeOctreeTexture invalid face");
   }
   return index;  
-}
-void writeOctreeTexture(Octree& octree, int x, int y, int z, int subdivision, glm::ivec2 size, OctreeSelectionFace faceOrientation, FaceTexture faceTexture){
-  auto octreeDivision = getOctreeSubdivisionIfExists(octree, x, y, z, subdivision);
-  if (octreeDivision){
-    auto index = textureIndex(faceOrientation);
-    octreeDivision -> faces.at(index) = faceTexture;
-  }
 }
 
 Vertex createVertex2(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal){
@@ -1166,6 +1160,37 @@ void deleteSelectedOctreeNodes(GameObjectOctree& octree, std::function<Mesh(Mesh
   writeOctreeCellRange(testOctree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, false);
   octree.mesh = createOctreeMesh(loadMesh);
 }
+
+void writeOctreeTexture(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh, bool unitTexture){
+  for (int x = 0; x < selectionDim.value().x; x++){
+    for (int y = 0; y < selectionDim.value().y; y++){
+      for (int z = 0; z < selectionDim.value().z; z++){
+        auto octreeDivision = getOctreeSubdivisionIfExists(testOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel);
+        if (octreeDivision){
+          auto index = textureIndex(editorOrientation);
+          if (octreeDivision -> faces.size() == 0){
+            octreeDivision -> faces = defaultTextureCoords;
+          }
+          octreeDivision -> faces.at(index) = texCoords(selectedTexture, glm::vec2(1.f / selectionDim.value().x, 1.f / selectionDim.value().y));
+        }
+      }
+    }
+  }
+  octree.mesh = createOctreeMesh(loadMesh);
+}
+int getOctreeTextureId(){
+  return selectedTexture;
+}
+void setOctreeTextureId(int textureId){
+  if (textureId < 0){
+    textureId = 0;
+  }
+  if (textureId >= atlasDimensions.totalTextures){
+    textureId = atlasDimensions.totalTextures - 1;
+  }
+  selectedTexture = textureId;
+}
+
 
 std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctree& obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;

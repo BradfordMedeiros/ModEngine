@@ -1734,6 +1734,43 @@ std::vector<InputDispatch> inputFns = {
       //();
     }
   },
+
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = '6', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
+      for (auto &selectedIndex : selectedIds(state.editor)){
+        GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
+        GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
+        writeOctreeTexture(*octreeObject, createScopedLoadMesh(world, selectedIndex), isCtrlHeld);
+      }
+      //();
+    }
+  },
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = '4', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      setOctreeTextureId(getOctreeTextureId() - 1);
+    }
+  },
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = '5', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      setOctreeTextureId(getOctreeTextureId() + 1);
+    }
+  },
   /////////// end octree stuff
 };
 
