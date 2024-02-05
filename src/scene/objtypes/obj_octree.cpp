@@ -234,16 +234,18 @@ AtlasDimensions atlasDimensions {
   .totalTextures = 5,
 };
 
-FaceTexture texCoords(int imageIndex, glm::vec2 multiplier = glm::vec2(1.f, 1.f), glm::vec2 offset = glm::vec2(0.f, 0.f)){
-  float texWide = 1.f / atlasDimensions.numTexturesWide;
-  float texHeight = 1.f / atlasDimensions.numTexturesHeight;
+FaceTexture texCoords(int imageIndex, glm::vec2 multiplier = glm::vec2(1.f, 1.f), glm::ivec2 offset = glm::ivec2(0, 0)){
+  float atlasWide = 1.f / atlasDimensions.numTexturesWide;
+  float atlasHeight = 1.f / atlasDimensions.numTexturesHeight;
+  float texWide = multiplier.x * atlasWide;
+  float texHeight = multiplier.y * atlasHeight;
 
   int xIndex = imageIndex % atlasDimensions.numTexturesWide;
   int yIndex = imageIndex / atlasDimensions.numTexturesWide;
 
-  float xMin = xIndex * texWide;
+  float xMin = xIndex * atlasWide + (texWide * offset.x);
   float xMax = xMin + texWide;
-  float yMin = yIndex * texHeight;
+  float yMin = yIndex * atlasHeight + (texHeight * offset.y);
   float yMax = yMin + texHeight;
   FaceTexture faceTexture {
     .texCoordsTopLeft = glm::vec2(xMin, yMax),
@@ -911,6 +913,9 @@ void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, bool secon
   RaycastResult filteredCells = filterFilledInCells(testOctree, raycastResult.value());
   if (!secondarySelection){
     closestRaycast = getClosestIntersection(filteredCells);
+    if (!closestRaycast.has_value()){
+      return;
+    }
     selectedIndex = closestRaycast.value().xyzIndex;
     setSelection(closestRaycast.value().xyzIndex, closestRaycast.value().xyzIndex, closestRaycast.value().face);
   }else if (closestRaycast.has_value()) {
@@ -1162,20 +1167,50 @@ void deleteSelectedOctreeNodes(GameObjectOctree& octree, std::function<Mesh(Mesh
 }
 
 void writeOctreeTexture(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh, bool unitTexture){
-  for (int x = 0; x < selectionDim.value().x; x++){
+  if (editorOrientation == FRONT || editorOrientation == BACK){
+    for (int x = 0; x < selectionDim.value().x; x++){
+      for (int y = 0; y < selectionDim.value().y; y++){
+          auto octreeDivision = getOctreeSubdivisionIfExists(testOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z, subdivisionLevel);
+          if (octreeDivision){
+            auto index = textureIndex(editorOrientation);
+            if (octreeDivision -> faces.size() == 0){
+              octreeDivision -> faces = defaultTextureCoords;
+            }
+            octreeDivision -> faces.at(index) = texCoords(selectedTexture, glm::vec2(1.f / selectionDim.value().x, 1.f / selectionDim.value().y), glm::vec2(x, y));
+          
+        }
+      }
+    }
+  }else if (editorOrientation == LEFT || editorOrientation == RIGHT){
     for (int y = 0; y < selectionDim.value().y; y++){
       for (int z = 0; z < selectionDim.value().z; z++){
-        auto octreeDivision = getOctreeSubdivisionIfExists(testOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel);
-        if (octreeDivision){
-          auto index = textureIndex(editorOrientation);
-          if (octreeDivision -> faces.size() == 0){
-            octreeDivision -> faces = defaultTextureCoords;
-          }
-          octreeDivision -> faces.at(index) = texCoords(selectedTexture, glm::vec2(1.f / selectionDim.value().x, 1.f / selectionDim.value().y));
+          auto octreeDivision = getOctreeSubdivisionIfExists(testOctree, selectedIndex.value().x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel);
+          if (octreeDivision){
+            auto index = textureIndex(editorOrientation);
+            if (octreeDivision -> faces.size() == 0){
+              octreeDivision -> faces = defaultTextureCoords;
+            }
+            octreeDivision -> faces.at(index) = texCoords(selectedTexture, glm::vec2(-1.f / selectionDim.value().z, 1.f / selectionDim.value().y), glm::vec2(-1 * z, y));
+          
+        }
+      }
+    }
+  }else if (editorOrientation == UP || editorOrientation == DOWN){
+    for (int x = 0; x < selectionDim.value().x; x++){
+      for (int z = 0; z < selectionDim.value().z; z++){
+          auto octreeDivision = getOctreeSubdivisionIfExists(testOctree, selectedIndex.value().x + x, selectedIndex.value().y, selectedIndex.value().z + z, subdivisionLevel);
+          if (octreeDivision){
+            auto index = textureIndex(editorOrientation);
+            if (octreeDivision -> faces.size() == 0){
+              octreeDivision -> faces = defaultTextureCoords;
+            }
+            octreeDivision -> faces.at(index) = texCoords(selectedTexture, glm::vec2(selectionDim.value().x, 1.f / selectionDim.value().z), glm::vec2(x, -1 * z));
+          
         }
       }
     }
   }
+
   octree.mesh = createOctreeMesh(loadMesh);
 }
 int getOctreeTextureId(){

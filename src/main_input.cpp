@@ -388,8 +388,20 @@ void onMouseButton(){
   handleVoxelRaycast(world, id, line.fromPos, line.toPos, drawParams.activeTextureIndex);
 
 
+
+///////////////
+  auto octreeModelMatrix = fullModelTransform(world.sandbox, id);
+  //glm::vec4 fromPosModelSpace = glm::inverse(octreeModelMatrix) * glm::vec4(line.fromPos.x, line.fromPos.y, fromPos.z, 1.f);
+  //glm::vec4 toPos =  glm::vec4(fromPos.x, fromPos.y, fromPos.z, 1.f) + glm::vec4(toPosDirection.x, toPosDirection.y, toPosDirection.z, 1.f);
+  //glm::vec4 toPosModelSpace = glm::inverse(voxelPtrModelMatrix) * toPos;
+  //glm::vec3 rayDirectionModelSpace =  toPosModelSpace - fromPosModelSpace;
+
+  auto adjustedPosition = glm::inverse(octreeModelMatrix) * glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f);
+  auto adjustedDir = glm::inverse(octreeModelMatrix) * glm::vec4(line.toPos.x, line.toPos.y, line.toPos.z, 1.f);
+  std::cout << "adjusted raycast " << print(adjustedPosition) << ", dir " << print(glm::normalize(adjustedDir)) << std::endl;
+
   auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
-  handleOctreeRaycast(line.fromPos, line.toPos, isCtrlHeld);
+  handleOctreeRaycast(adjustedPosition, adjustedDir, isCtrlHeld);
 }
 
 void drop_callback(GLFWwindow* window, int count, const char** paths){
