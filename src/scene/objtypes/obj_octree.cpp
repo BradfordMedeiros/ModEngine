@@ -1178,10 +1178,7 @@ void writeOctreeTexture(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
 
   for (int x = 0; x < xTileDim; x++){
     for (int y = 0; y < yTileDim; y++){
-      int effectiveX = x;
-      if (editorOrientation == LEFT || editorOrientation == DOWN){
-        effectiveX = xTileDim - x - 1;
-      }
+      int effectiveX = (editorOrientation == LEFT || editorOrientation == DOWN) ? (xTileDim - x - 1) : x;
 
       glm::vec3 divisionOffset(0, 0, 0);
       if (editorOrientation == FRONT || editorOrientation == BACK){
