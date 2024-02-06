@@ -1760,7 +1760,6 @@ std::vector<InputDispatch> inputFns = {
         GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
         writeOctreeTexture(*octreeObject, createScopedLoadMesh(world, selectedIndex), isCtrlHeld);
       }
-      //();
     }
   },
   InputDispatch{
