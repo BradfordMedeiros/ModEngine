@@ -1178,18 +1178,19 @@ void writeOctreeTexture(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
 
   for (int x = 0; x < xTileDim; x++){
     for (int y = 0; y < yTileDim; y++){
-      int effectiveX = (editorOrientation == LEFT || editorOrientation == DOWN) ? (xTileDim - x - 1) : x;
+      int effectiveX = (editorOrientation == LEFT) ? (xTileDim - x - 1) : x;
+      int effectiveY = (editorOrientation == DOWN) ? (yTileDim - y - 1) : y;
 
       glm::vec3 divisionOffset(0, 0, 0);
       if (editorOrientation == FRONT || editorOrientation == BACK){
         divisionOffset.x = effectiveX;
-        divisionOffset.y = y;
+        divisionOffset.y = effectiveY;
       }else if (editorOrientation == LEFT || editorOrientation == RIGHT){
         divisionOffset.z = effectiveX;
-        divisionOffset.y = y;
+        divisionOffset.y = effectiveY;
       }else if (editorOrientation == UP || editorOrientation == DOWN){
         divisionOffset.x = effectiveX;
-        divisionOffset.z = y;
+        divisionOffset.z = effectiveY;
       }
 
       auto octreeDivision = getOctreeSubdivisionIfExists(testOctree, selectedIndex.value().x + divisionOffset.x, selectedIndex.value().y + divisionOffset.y, selectedIndex.value().z + divisionOffset.z, subdivisionLevel);
