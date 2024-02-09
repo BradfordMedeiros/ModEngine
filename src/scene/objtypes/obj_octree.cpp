@@ -1190,6 +1190,8 @@ void deleteSelectedOctreeNodes(GameObjectOctree& octree, std::function<Mesh(Mesh
 void writeOctreeTexture(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh, bool unitTexture, TextureOrientation texOrientation){
   int xTileDim = selectionDim.value().x;
   int yTileDim = selectionDim.value().y;
+
+
   if (editorOrientation == FRONT || editorOrientation == BACK){
     // do nothing
   }else if (editorOrientation == LEFT || editorOrientation == RIGHT){
@@ -1227,7 +1229,11 @@ void writeOctreeTexture(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
         if (unitTexture){
           octreeDivision -> faces.at(index) = texCoords(selectedTexture, texOrientation);
         }else{
-          octreeDivision -> faces.at(index) = texCoords(selectedTexture, texOrientation, glm::vec2(1.f / xTileDim, 1.f / yTileDim), glm::vec2(x, y));
+          if (texOrientation == TEXTURE_RIGHT){
+            octreeDivision -> faces.at(index) = texCoords(selectedTexture, texOrientation, glm::vec2(1.f / xTileDim, 1.f / yTileDim), glm::vec2(y, x));
+          }else{
+            octreeDivision -> faces.at(index) = texCoords(selectedTexture, texOrientation, glm::vec2(1.f / xTileDim, 1.f / yTileDim), glm::vec2(x, y));
+          }
         }
       }
     }
