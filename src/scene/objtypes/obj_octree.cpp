@@ -530,13 +530,13 @@ void addCubePoints(std::vector<OctreeVertex>& points, float size, glm::vec3 offs
 
   // back plane
   FaceTexture& backFace =  faces -> at(1);
-  points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, -size) + offset,  .coord = backFace.texCoordsBottomLeft   });
-  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset, .coord = backFace.texCoordsTopLeft });
-  points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset, .coord = backFace.texCoordsBottomRight });
+  points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, -size) + offset,  .coord = backFace.texCoordsBottomRight   });
+  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset, .coord = backFace.texCoordsTopRight });
+  points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset, .coord = backFace.texCoordsBottomLeft });
 
-  points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset,  .coord = backFace.texCoordsBottomRight  });
-  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset,  .coord = backFace.texCoordsTopLeft   });
-  points.push_back(OctreeVertex { .position = glm::vec3(size, size, -size) + offset, .coord = backFace.texCoordsTopRight });
+  points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset,  .coord = backFace.texCoordsBottomLeft  });
+  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset,  .coord = backFace.texCoordsTopRight   });
+  points.push_back(OctreeVertex { .position = glm::vec3(size, size, -size) + offset, .coord = backFace.texCoordsTopLeft });
 
   // left plane
   FaceTexture& leftFace =  faces -> at(2);
@@ -1220,7 +1220,7 @@ void writeOctreeTexture(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
   int yTileDim = selectionDim.value().y;
 
 
-  if (editorOrientation == FRONT || editorOrientation == BACK){
+  if (editorOrientation == FRONT){
     // do nothing
   }else if (editorOrientation == LEFT || editorOrientation == RIGHT){
     xTileDim = selectionDim.value().z;
@@ -1234,6 +1234,10 @@ void writeOctreeTexture(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
     for (int y = 0; y < yTileDim; y++){
       int effectiveX = (editorOrientation == LEFT) ? (xTileDim - x - 1) : x;
       int effectiveY = (editorOrientation == DOWN) ? (yTileDim - y - 1) : y;
+
+      if (editorOrientation == BACK){
+        effectiveX = xTileDim - x - 1;
+      }
 
       glm::vec3 divisionOffset(0, 0, 0);
       if (editorOrientation == FRONT || editorOrientation == BACK){

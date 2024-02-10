@@ -1758,7 +1758,7 @@ std::vector<InputDispatch> inputFns = {
       for (auto &selectedIndex : selectedIds(state.editor)){
         GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
         GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
-        writeOctreeTexture(*octreeObject, createScopedLoadMesh(world, selectedIndex), isCtrlHeld, TEXTURE_LEFT);
+        writeOctreeTexture(*octreeObject, createScopedLoadMesh(world, selectedIndex), isCtrlHeld, TEXTURE_UP);
       }
     }
   },
