@@ -164,15 +164,6 @@ std::vector<ObjectType> objTypes = {
     .removeObject = removeDoNothing,
   },
   ObjectType {
-    .name = "voxel", 
-    .variantType = getVariantIndex(GameObjectVoxel{}),
-    .createObj = createVoxel, 
-    .objectAttributes = nothingObjAttr,
-    .setAttributes = nothingSetObjAttr,
-    .serialize = convertSerialize<GameObjectVoxel>(serializeVoxel),
-    .removeObject  = removeDoNothing,
-  },
-  ObjectType {
     .name = "octree", 
     .variantType = getVariantIndex(GameObjectOctree{}),
     .createObj = createOctree, 
@@ -347,30 +338,9 @@ int renderObject(
     return renderDefaultNode(shaderProgram, *defaultMeshes.lightMesh);
   }
 
-  auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
-  if (voxelObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), defaultMeshes.voxelCubeMesh -> bones.size() > 0);
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-
-    auto voxelBodies = getVoxelBodies(voxelObj -> voxel);
-
-    int numTriangles = 0;
-    // todo instance these
-    std::cout << "rendering voxel, size = " << voxelBodies.size() << std::endl;
-    for (int i = 0; i < voxelBodies.size(); i++){
-      auto voxelBody = voxelBodies.at(i);
-      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, voxelBody.position + glm::vec3(0.5f, 0.5f, 0.5f))));
-      drawMesh(*defaultMeshes.voxelCubeMesh, shaderProgram, voxelBody.textureId);   
-      numTriangles = numTriangles + defaultMeshes.voxelCubeMesh -> numTriangles; 
-    }
-    return numTriangles;
-  }
-
   auto octreeObj = std::get_if<GameObjectOctree>(&toRender);
   if (octreeObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), defaultMeshes.voxelCubeMesh -> bones.size() > 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));

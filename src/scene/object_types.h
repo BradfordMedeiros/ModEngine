@@ -18,7 +18,6 @@
 #include "./objtypes/obj_heightmap.h"
 #include "./objtypes/obj_emitter.h"
 #include "./objtypes/obj_mesh.h"
-#include "./objtypes/obj_voxel.h"
 #include "./objtypes/obj_octree.h"
 #include "./objtypes/obj_nil.h"
 #include "./objtypes/obj_prefab.h"
@@ -42,7 +41,6 @@ typedef std::variant<
   GameObjectPortal, 
   GameObjectSound, 
   GameObjectLight, 
-  GameObjectVoxel,
   GameObjectOctree,
   GameObjectRoot, 
   GameObjectEmitter,
@@ -84,12 +82,6 @@ static Field sound = {
 static Field light = {
   .prefix = '!',
   .type = "light",
-};
-
-// attributes: from
-static Field voxelField = {
-  .prefix = ']',
-  .type = "voxel",
 };
 
 static Field octreeField {
@@ -143,7 +135,6 @@ static std::vector fields = {
   portal, 
   sound, 
   light, 
-  voxelField,
   octreeField,
   rootField, 
   emitterField, 

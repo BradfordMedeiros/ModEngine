@@ -96,49 +96,10 @@ void maybeTeleportObjects(World& world, objid obj1Id, objid obj2Id){
   } 
 }
 
-std::optional<GameObjectVoxel*> getVoxel(World& world, objid id){
-  if (world.objectMapping.find(id) == world.objectMapping.end()){
-    return std::nullopt;
-  }
-  GameObjectObj& objectVoxel = world.objectMapping.at(id);
-  GameObjectVoxel* voxelObject = std::get_if<GameObjectVoxel>(&objectVoxel);
-  if (voxelObject == NULL){
-    return std::nullopt;
-  }
-  return voxelObject;
-}
-bool isVoxel(World& world, objid id){
-  GameObjectObj& obj = world.objectMapping.at(id);
-  return std::get_if<GameObjectVoxel>(&obj) != NULL;
-}
-
 bool isOctree(World& world, objid id){
   GameObjectObj& obj = world.objectMapping.at(id);
   return std::get_if<GameObjectOctree>(&obj) != NULL;  
 }
-
-void handleVoxelRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPosDirection, int textureId){
-  auto voxel = getVoxel(world, id);
-  if (!voxel.has_value()){
-    return;
-  }
-  GameObjectVoxel* voxelPtr = voxel.value();
-
-  auto voxelPtrModelMatrix = fullModelTransform(world.sandbox, id);
-  glm::vec4 fromPosModelSpace = glm::inverse(voxelPtrModelMatrix) * glm::vec4(fromPos.x, fromPos.y, fromPos.z, 1.f);
-  glm::vec4 toPos =  glm::vec4(fromPos.x, fromPos.y, fromPos.z, 1.f) + glm::vec4(toPosDirection.x, toPosDirection.y, toPosDirection.z, 1.f);
-  glm::vec4 toPosModelSpace = glm::inverse(voxelPtrModelMatrix) * toPos;
-  glm::vec3 rayDirectionModelSpace =  toPosModelSpace - fromPosModelSpace;
-  // This raycast happens in model space of voxel, so specify position + ray in voxel model space
-  auto collidedVoxels = raycastVoxels(voxelPtr -> voxel, fromPosModelSpace, rayDirectionModelSpace);
-  std::cout << "length is: " << collidedVoxels.size() << std::endl;
-  if (collidedVoxels.size() > 0){
-    auto collision = collidedVoxels.at(0);
-    voxelPtr -> voxel.selectedVoxels.push_back(collision);
-    applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, textureId);
-  } 
-}
-
 
 void applyHeightmapMasking(World& world, objid id, HeightmapMask& mask, float amount, float uvx, float uvy, bool shouldAverage, float radius){
   auto heightmaps = getHeightmaps(world.objectMapping);

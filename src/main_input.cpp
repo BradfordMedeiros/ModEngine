@@ -105,12 +105,6 @@ void onMouse(int button, int action, int mods){
 
   modlog("input", "mouse callback: " + std::to_string(button) + ", action: " + std::to_string(action) + ", mods: " + std::to_string(mods));
   cBindings.onMouseCallback(button, action, mods);
-
-  if (button == 0){
-    for (auto voxelData : getSelectedVoxels()){
-      voxelData.voxelPtr -> voxel.selectedVoxels.clear();
-    }
-  }
 }
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   onMouse(button, action, mods);
@@ -175,50 +169,14 @@ void onJoystick(std::vector<JoyStickInfo> infos){
   //}
 }
 
-
-void expandVoxelUp(){
-  for (auto voxelData : getSelectedVoxels()){
-    std::cout << "voxels: expand voxel up" << std::endl;
-    expandVoxels(voxelData.voxelPtr -> voxel, 0, state.useYAxis ? -1 : 0, !state.useYAxis ? -1 : 0);
-  }
-}
-void expandVoxelDown(){
-  for (auto voxelData : getSelectedVoxels()){
-    std::cout << "voxels: expand voxel down" << std::endl;
-    expandVoxels(voxelData.voxelPtr -> voxel , 0, state.useYAxis ? 1 : 0, !state.useYAxis ? 1 : 0);
-  }  
-}
-void expandVoxelLeft(){
-  for (auto voxelData : getSelectedVoxels()){
-    std::cout << "voxels: expand voxel left" << std::endl;
-    expandVoxels(voxelData.voxelPtr -> voxel, -1, 0, 0); 
-  }  
-}
-void expandVoxelRight(){
-  for (auto voxelData : getSelectedVoxels()){
-    std::cout << "voxels: expand voxel right" << std::endl;
-    expandVoxels(voxelData.voxelPtr -> voxel, 1, 0, 0);
-  }  
-}
-
 void onArrowKey(int key){
   if (key == 262){ // right
     std::cout << "next texture" << std::endl;
     nextTexture();
-    expandVoxelRight();
-
   }
   if (key == 263){ // left
     std::cout << "previous texture" << std::endl;
     previousTexture();
-    expandVoxelLeft();
-  }
-
-  if (key == 265){ // up
-    expandVoxelUp();
-  }
-  if (key == 264){ // down
-    expandVoxelDown();
   }
 
   std::cout << "key: " << key << std::endl;
@@ -251,22 +209,6 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
     }
   }
  
-
-  for (auto voxelData : getSelectedVoxels()){ 
-    auto activeTexture = activeTextureId();
-    if (activeTexture != -1){
-      if (yoffset > 0){
-        applyTextureToCube(voxelData.voxelPtr -> voxel, voxelData.voxelPtr -> voxel.selectedVoxels, activeTexture);
-      }
-      if (yoffset < 0){
-        applyTextureToCube(voxelData.voxelPtr -> voxel, voxelData.voxelPtr -> voxel.selectedVoxels, activeTexture);
-      }
-    }
-  } 
-
-
-
-  // octreescroll
 }
 
 
@@ -307,14 +249,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   if (state.printKeyStrokes){
     std::cout << "key: " << key << " action: " << action << std::endl;
   }
-
-  // below stuff is editor/misc stuff
-  if (key == 259){  // backspace
-    for (auto voxelData : getSelectedVoxels()){
-      removeVoxel(voxelData.voxelPtr -> voxel, voxelData.voxelPtr -> voxel.selectedVoxels);
-      voxelData.voxelPtr -> voxel.selectedVoxels.clear();
-    }
-  } 
 
   auto selectedIndex = latestSelected(state.editor);
   if (key == GLFW_KEY_UP && action == 1 && selectedIndex.has_value()){
@@ -375,7 +309,7 @@ void onMouseButton(){
   std::cout << scenegraphAsDotFormat(world.sandbox, world.objectMapping) << std::endl;
   
   auto id = state.currentHoverIndex;
-  if (!idExists(world.sandbox, id) || (!isVoxel(world, id) && !isOctree(world, id))){
+  if (!idExists(world.sandbox, id) || (!isOctree(world, id))){
     return;
   }
   auto layer = layerByName(getGameObject(world, id).layer);
@@ -385,8 +319,6 @@ void onMouseButton(){
     .fromPos = defaultResources.defaultCamera.transformation.position,
     .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
   };
-  handleVoxelRaycast(world, id, line.fromPos, line.toPos, drawParams.activeTextureIndex);
-
 
 
 ///////////////
@@ -831,12 +763,9 @@ std::vector<InputDispatch> inputFns = {
       auto selectedObjects = selectedIds(state.editor);
 
       std::vector<objid> selectedHeightmaps;
-      std::vector<objid> selectedVoxels;
       for (auto id : selectedObjects){
         if (isHeightmap(world, id)){
           selectedHeightmaps.push_back(id);
-        }else if (isVoxel(world, id)){
-          selectedVoxels.push_back(id);
         }
       }
       std::cout << "want to join heightmaps (size = " << selectedHeightmaps.size() << ") = [ ";
@@ -847,27 +776,10 @@ std::vector<InputDispatch> inputFns = {
       }
       std::cout << "]" << std::endl;
 
-      std::vector<objid> voxels;
-      for (auto id : selectedVoxels){
-        voxels.push_back(id);
-      }
-
       if (heightmaps.size() > 0){
         auto heightmapData = joinHeightmaps(heightmaps);
         saveHeightmap(heightmapData, "./res/heightmaps/joinedmap.png");
       }
-      if (voxels.size() > 0){
-        std::cout << "joined voxel data! size = " << voxels.size() << std::endl;
-        std::vector<Voxels> voxelBodies;
-        std::vector<Transformation> transforms;
-        for (auto id : voxels){
-          voxelBodies.push_back(getVoxel(world, id).value() -> voxel);
-          transforms.push_back(gameobjectTransformation(world, id, false));
-        }
-        auto voxelData = joinVoxels(voxelBodies, transforms);
-        std::cout << "serialized voxel: \n" << serializeVoxelDefault(world, voxelData) << std::endl;
-      }
-
     }
   },
   InputDispatch{
@@ -892,21 +804,6 @@ std::vector<InputDispatch> inputFns = {
           auto newHm = newHeightmaps.at(i);
           auto newMapPath = heightmapBaseName + "splitmap_" + std::to_string(i) + ".png";
           saveHeightmap(newHm, newMapPath);
-        }
-      }else if (isVoxel(world, objectId.value())){
-        std::cout << "Splitting voxel:" << std::endl;
-        auto voxel = getVoxel(world, objectId.value());
-        if (voxel.has_value()){
-          auto voxels = voxel.value();
-          auto localTransform = gameobjectTransformation(world, objectId.value(), false);
-          auto voxelFragments = splitVoxel(voxels -> voxel, localTransform, 2);
-          auto newVoxels = groupVoxelChunks(voxelFragments);
-          std::cout << "Voxel fragments size: " << voxelFragments.size() << std::endl;
-          std::cout << "New Voxels size: " << newVoxels.size() << std::endl;
-
-          for (auto voxelFragment : newVoxels){
-            std::cout << "serialized voxel: \n" << serializeVoxelDefault(world, voxelFragment.voxel) << std::endl;
-          }
         }
       }
     }
@@ -1497,12 +1394,6 @@ std::vector<InputDispatch> inputFns = {
         std::cout << "(none)";
       }
       std::cout << std::endl;
-
-      //offlineMoveElement(
-      //  "./res/scenes/world/voxelchunksmall_000.rawscene", 
-      //  "./res/scenes/world/empty.rawscene", 
-      //  "]default_voxel"
-      //);
     }
   },
   InputDispatch{
@@ -1782,6 +1673,28 @@ std::vector<InputDispatch> inputFns = {
       setOctreeTextureId(getOctreeTextureId() + 1);
     }
   },
+
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = '2', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      setOctreeTextureId(getOctreeTextureId() + 1);
+    }
+  },
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = '3', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      setOctreeTextureId(getOctreeTextureId() + 1);
+    }
+  },
+
   /////////// end octree stuff
 };
 

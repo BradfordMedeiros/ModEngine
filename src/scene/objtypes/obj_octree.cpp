@@ -950,12 +950,6 @@ void setSelection(glm::ivec3 selection1, glm::ivec3 selection2, OctreeSelectionF
 }
 
 void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, bool secondarySelection){
-  auto serializedData = serializeOctree(testOctree);
-  std::cout << "octree serialization: \n" << serializedData << std::endl;
-
-  Octree octree = deserializeOctree(serializedData);
-  std::cout << "octree serialization 2: \n" << serializeOctree(octree) << std::endl;
-
   auto octreeRaycast = doRaycast(fromPos, toPosDirection, subdivisionLevel);
   raycastResult = octreeRaycast;
 

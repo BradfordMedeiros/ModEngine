@@ -982,20 +982,6 @@ glm::vec3 navPosition(objid id, glm::vec3 target){
   return aiNavigate(world, id, target, drawLine).value();
 }
 
-std::vector<VoxelQueryData> getSelectedVoxels(){
-  std::vector<VoxelQueryData> voxels;
-  for (auto id : selectedIds(state.editor)){
-    auto maybeVoxel = getVoxel(world, id);
-    if (maybeVoxel.has_value()){
-      voxels.push_back(VoxelQueryData{
-        .index = id,
-        .voxelPtr = maybeVoxel.value(),
-      });
-    }
-  }
-  return voxels;
-}
-
 bool lock(std::string key, objid owner){
   //std::cout << "lock: (" << key << ", " << owner << ")" << std::endl;
   auto canLock = activeLocks.find(key) == activeLocks.end();

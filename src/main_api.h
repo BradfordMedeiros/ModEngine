@@ -184,12 +184,6 @@ void playSoundState(objid id, std::optional<float> volume, std::optional<glm::ve
 
 unsigned int activeTextureId();
 
-struct VoxelQueryData {
-  int index;
-  GameObjectVoxel* voxelPtr;
-};
-std::vector<VoxelQueryData> getSelectedVoxels();
-
 void emit(objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity, std::optional<glm::vec3> initAvelocity, std::optional<objid> parentId);
 
 objid addLoadingAround(objid id);

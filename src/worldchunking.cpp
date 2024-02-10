@@ -1,26 +1,5 @@
 #include "./worldchunking.h"
 
-std::vector<std::string> voxelsInScene(std::string sceneFile, std::function<std::string(std::string)> readFile){
-  std::vector<std::string> voxelsInScene;
-  auto elementsInScene = offlineGetElements(sceneFile, readFile);
-  for (auto &element : elementsInScene){
-    auto objType = getType(element);
-    if (objType == "voxel"){
-      voxelsInScene.push_back(element);
-    }
-  }
-  return voxelsInScene;
-}
-
-std::vector<std::string> getVoxelsForChunkhash(DynamicLoading& loadingInfo, std::string& chunkHash, std::function<std::string(std::string)> readFile){
-  auto hasSceneFile = loadingInfo.mappingInfo.chunkHashToSceneFile.find(chunkHash) != loadingInfo.mappingInfo.chunkHashToSceneFile.end();
-  if (hasSceneFile){
-    auto sceneFile = loadingInfo.mappingInfo.chunkHashToSceneFile.at(chunkHash);
-    return voxelsInScene(sceneFile, readFile);
-  }
-  return {};
-}
-
 std::string originalSceneFileName(DynamicLoading& loadingInfo, std::string chunkhash){
   return loadingInfo.mappingInfo.chunkHashToSceneFile.at(chunkhash);
 }
@@ -46,31 +25,6 @@ std::string finalOutputfileForChunkHash(DynamicLoading& loadingInfo, std::string
   return name;
 }
 
-fragmentSceneFile scenefileForFragment(DynamicLoading& loadingInfo, std::string& chunkHash, VoxelChunkFragment& fragment){
-  bool isValid = false;
-  auto chunkAddress = decodeChunkHash(chunkHash, &isValid);
-  assert(isValid);
-  ChunkAddress addressWithFragment {
-    .x = chunkAddress.x + fragment.x,
-    .y = chunkAddress.y + fragment.y,
-    .z = chunkAddress.z + fragment.z,
-  };
-  auto encodedHash = encodeChunkHash(addressWithFragment);
-  auto name = finalOutputfileForChunkHash(loadingInfo, encodedHash, addressWithFragment);
-  return fragmentSceneFile {
-    .alreadyExists = offlineSceneExists(name),
-    .name = name,
-    .fragmenthash = encodedHash,
-  };
-}
-std::vector<fragmentSceneFile> getSceneFilesForFragments(DynamicLoading& loadingInfo, std::string& chunkHash, std::vector<VoxelChunkFragment>& fragments){
-  std::vector<fragmentSceneFile> scenefiles;
-  for (auto &fragment : fragments){
-    scenefiles.push_back(scenefileForFragment(loadingInfo, chunkHash, fragment));
-  }
-  return scenefiles;
-}
-
 void ensureAllTargetFilesExist(std::vector<fragmentSceneFile>& sceneFilesForFragments){
   for (auto &fragmentSceneFile : sceneFilesForFragments){
     if (!fragmentSceneFile.alreadyExists){
@@ -79,125 +33,6 @@ void ensureAllTargetFilesExist(std::vector<fragmentSceneFile>& sceneFilesForFrag
   }
 }
 
-std::string serializeVoxelDefault(World& world, Voxels& voxelData){
- GameObjectVoxel vox {
-    .voxel = voxelData,
-  };
-
-  std::string name = "]default_voxel";
-  auto gameobj = gameObjectFromFields(name, -1, {}, getObjautoserializerFields(name));
-  std::vector<std::string> children;
-  ObjectSerializeUtil util {
-    .textureName = [&world](int id) -> std::string {
-      return getTextureById(world, id).value(); // can be not loaded...
-    }
-  };
-  auto additionalFields = serializeVoxel(vox, util);
-  auto serializedObj = serializeObj(-1, -1, gameobj, children, false, additionalFields, "");
-  return serializedObj;
-}
-
-void writeVoxelToSceneFile(World& world, std::string scenefile, std::string name, Voxels& voxel, std::function<std::string(std::string)> readFile){
-  auto serializedObj = serializeVoxelDefault(world, voxel);
-  auto tokens = parseFormat(serializedObj);
-  std::vector<std::pair<std::string, std::string>> attrs;
-  for (auto &token : tokens){
-    attrs.push_back({ token.attribute, token.payload });
-  }
-  offlineSetElementAttributes(scenefile, name, attrs, readFile);
-}
-void addFragmentToScene(World& world, fragmentSceneFile& fragmentSceneFile, VoxelChunkFragment& voxelFragment, std::string& voxelname, std::string& chunkValue, std::function<std::string(std::string)> readFile){
-  auto elementName = std::string("]voxelfragment_") + voxelname + "_from_" + chunkValue;
-  auto elementAlreadyExists = offlineGetElement(fragmentSceneFile.name, elementName, readFile).size() > 0;
-  auto name = elementAlreadyExists ? (elementName + "_" + std::to_string(getUniqueObjId())) : elementName;
-  if (elementAlreadyExists){
-    std::cout << "warning: " <<  elementName << " already exists in " << fragmentSceneFile.name << std::endl;
-    //std::cout << "source: (hash, file, fragment address): (" <<  chunkHash << ", " << scenefile << ", " << fragmentSceneFile.fragmenthash << ")" << std::endl; 
-    assert(offlineGetElement(fragmentSceneFile.name, name, readFile).size() == 0);
-  }
-  writeVoxelToSceneFile(world, fragmentSceneFile.name, name, voxelFragment.voxel, readFile);
-}
-
-GameObjPair getVoxelFromFile(World& world, std::string& scenefile, std::string& voxelname){
-  auto elementTokens = offlineGetElement(scenefile, voxelname, world.interface.readFile);
-  auto sceneTokensSerialized = serializeSceneTokens(elementTokens);
-  auto gameobjPair = createObjectForScene(world, -1, voxelname, sceneTokensSerialized);
-  return gameobjPair;
-}
-std::vector<VoxelChunkFragment> fragmentsForVoxelname(World& world, std::string& scenefile, std::string& voxelname){
-  std::cout << "splitting: " << voxelname << std::endl;;
-  auto gameobjPair = getVoxelFromFile(world, scenefile, voxelname);
-  auto voxelObj = std::get_if<GameObjectVoxel>(&gameobjPair.gameobjObj);
-  if (voxelObj == NULL){
-    std::cout << "is not a voxel" << std::endl;
-    assert(false);
-  }
-  // todo -> probably should be full transformation right
-  // but that depends on it being hooked up to scenegraph which this isn't...
-  auto transformation = gameobjectTransformation(world, gameobjPair.gameobj.id, false);
-  return splitVoxel(voxelObj -> voxel, transformation, 2);
-}
-
-void joinFragmentsInScenefile(World& world, std::string& scenefile){
-  auto voxels = voxelsInScene(scenefile, world.interface.readFile);
-  std::cout << "joining frags in: " << scenefile << std::endl;
-
-  std::vector<std::string> fragmentNames;
-  std::vector<Voxels> voxelBodies;
-  std::vector<Transformation> transforms;
-  for (auto &voxel : voxels){
-    auto voxelPrefix = voxel.substr(0, 15);
-    auto isFragment = voxelPrefix == "]voxelfragment_";
-    std::cout << "voxel frag: " << voxelPrefix << " : " << isFragment << std::endl;
-    if (isFragment){
-      fragmentNames.push_back(voxel);
-    }
-    auto gameobjPair = getVoxelFromFile(world, scenefile, voxel);
-    auto voxelObj = std::get_if<GameObjectVoxel>(&gameobjPair.gameobjObj);
-    assert(voxelObj != NULL);
-    voxelBodies.push_back(voxelObj -> voxel);
-    transforms.push_back(gameobjPair.gameobj.transformation);
-  }
-
-  auto voxelData = joinVoxels(voxelBodies, transforms);
-  writeVoxelToSceneFile(world, scenefile, "]voxel_joined", voxelData, world.interface.readFile);
-
-  for (auto &fragmentname : fragmentNames){
-    offlineRemoveElement(scenefile, fragmentname, world.interface.readFile);
-  }
-}
-
-void rechunkAllVoxels(World& world, DynamicLoading& loadingInfo, int newchunksize){
-  std::cout << "Start: voxel rechunking" << std::endl;
-  std::cout << "num chunk hashes: " << loadingInfo.mappingInfo.chunkHashToSceneFile.size() << std::endl;
-  std::vector<ChunkAddress> chunks;
-
-  for (auto &[chunkhash, scenefile] : loadingInfo.mappingInfo.chunkHashToSceneFile){
-    offlineCopyScene(scenefile, newOutputFileForScene(originalSceneFileName(loadingInfo, chunkhash)), world.interface.readFile);
-  } 
-
-  std::set<std::string> filesWithFragments;  // includes elements that were split from the mapping only, maybe it should check bigger set of files
-  for (auto &[chunkHash, scenefile] : loadingInfo.mappingInfo.chunkHashToSceneFile){
-    std::string chunkValue = chunkHash;
-    std::cout << "processing chunk hash: " << chunkHash << std::endl;
-    auto voxelnamesInChunk = getVoxelsForChunkhash(loadingInfo, chunkValue, world.interface.readFile);
-    for (auto &voxelname : voxelnamesInChunk){
-      auto voxelFragments = fragmentsForVoxelname(world, scenefile, voxelname);
-      auto sceneFilesForFragments = getSceneFilesForFragments(loadingInfo, chunkValue, voxelFragments);
-      ensureAllTargetFilesExist(sceneFilesForFragments);
-      std::cout << "Voxel fragments size: " << voxelFragments.size() << std::endl;
-      for (int i = 0; i < voxelFragments.size(); i++){
-        filesWithFragments.insert(sceneFilesForFragments.at(i).name);
-        addFragmentToScene(world, sceneFilesForFragments.at(i), voxelFragments.at(i), voxelname, chunkValue, world.interface.readFile);
-      }
-      offlineRemoveElement(newOutputFileForScene(originalSceneFileName(loadingInfo, chunkHash)), voxelname, world.interface.readFile);
-    }
-  }
-
-  for (auto filesWithFragment : filesWithFragments){
-    joinFragmentsInScenefile(world, filesWithFragment);
-  }
-}
 
 std::vector<glm::vec3> getPositionForElements(std::string scenefile, std::vector<std::string>& elements, ChunkAddress& fromChunk, int oldchunksize, std::function<std::string(std::string)> readFile){
   std::vector<glm::vec3> positions;

@@ -69,11 +69,6 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
     }
   }
 
-  auto voxelObj = std::get_if<GameObjectVoxel>(&gameObjV);
-  if (voxelObj != NULL){
-    boundInfo = voxelObj -> voxel.boundInfo;
-  }
-
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&gameObjV);
   if (navmeshObj != NULL){
     boundInfo = navmeshObj -> mesh.boundInfo;
@@ -134,7 +129,6 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   btRigidBody* rigidBody = NULL;
 
   GameObjectObj& toRender = world.objectMapping.at(id);
-  bool isVoxelObj = std::get_if<GameObjectVoxel>(&toRender) != NULL;
   GameObjectHeightmap* heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
   bool isHeightmapObj = heightmapObj != NULL;
 
@@ -167,7 +161,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       heightmapObj -> heightmap.minHeight,
       heightmapObj -> heightmap.maxHeight
     );
-  }else if (physicsOptions.shape == BOX || (!isVoxelObj && physicsOptions.shape == AUTOSHAPE)){
+  }else if (physicsOptions.shape == BOX || physicsOptions.shape == AUTOSHAPE){
     std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ")" << std::endl;
     rigidBody = addRigidBodyRect(
       world.physicsEnvironment, 
@@ -238,7 +232,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
     if (verts.size() == 0){
        return PhysicsValue { .body = NULL, .offset = std::nullopt };
     }
-    // This is a hack, but it should be ok.  UpdatePhysicsBody really only need to apply for voxels and heightmaps as of writing this
+    // This is a hack, but it should be ok.  UpdatePhysicsBody really only need to apply for [voxels - octrees?] and heightmaps as of writing this
     // I don't have easy scope to the list of verts here, so I'd rather not reload the model (or really keep them in mem for no reason) just 
     // for this, which is unused.  Probably should just change the usage of the voxel/heightmap refresh code eventually.
     assert(initialLoad);  
@@ -270,20 +264,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       physicsInfo.transformation.scale,
       opts
     );
-  }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
-    std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
-    rigidBody = addRigidBodyVoxel(
-      world.physicsEnvironment, 
-      calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
-      physicsInfo.transformation.rotation,
-      getVoxelBodies(std::get_if<GameObjectVoxel>(&toRender) -> voxel),
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions,
-      physicsInfo.transformation.scale,
-        opts
-      );
-    }
-  
+  }
 
   PhysicsValue phys {
     .body = NULL,
@@ -563,7 +544,6 @@ extern std::vector<AutoSerialize> cameraAutoserializer;
 extern std::vector<AutoSerialize> portalAutoserializer;
 extern std::vector<AutoSerialize> soundAutoserializer;
 extern std::vector<AutoSerialize> lightAutoserializer;
-extern std::vector<AutoSerialize> voxelAutoserializer;
 extern std::vector<AutoSerialize> octreeAutoserializer;
 extern std::vector<AutoSerialize> emitterAutoserializer;
 extern std::vector<AutoSerialize> heightmapAutoserializer;
@@ -583,8 +563,6 @@ std::set<std::string> getObjautoserializerFields(std::string& name){
     return serializerFieldNames(soundAutoserializer);
   }else if (type == "light"){
     return serializerFieldNames(lightAutoserializer);
-  }else if (type == "voxel"){
-    return serializerFieldNames(voxelAutoserializer);
   }else if (type == "octree"){
     return serializerFieldNames(octreeAutoserializer);
   }else if (type == "root"){
