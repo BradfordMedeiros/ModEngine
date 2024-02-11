@@ -119,6 +119,9 @@ std::string serializeOctreeDivision(OctreeDivision& octreeDivision){
   return octreeDivision.filled ? "1" : "0";
 }
 std::string serializeOctree(Octree& octree){
+  // 2
+  // [ 1 1 1 1 [ 1 1 1 1 1 0 1 0 ] [ 1 1 1 1 0 1 0 1 ] [ 1 1 1 1 1 0 1 0 ] [ 1 1 1 1 0 1 0 1 ] ]
+  // 1,2,1,2,1,2;1,2,3,1,1,1;1,1,1,1,1,1
   std::string str = std::to_string(octree.size) + "\n";
   str += serializeOctreeDivision(octree.rootNode);
   return str;
@@ -906,10 +909,8 @@ bool cellFilledIn(Octree& octree, RaycastIntersection& intersection, int subdivi
     if (currentSubdivision -> divisions.size() == 0){
       return currentSubdivision -> filled;
     }
-
     auto index = xyzIndexToFlatIndex(xyzIndex);
     currentSubdivision = &currentSubdivision -> divisions.at(index);
-    std::cout << "octreepath: " << serializeOctreeDivision(*currentSubdivision) << std::endl;
   }
   return currentSubdivision -> filled;
 }
@@ -1296,3 +1297,16 @@ std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctre
 }  //
 
 
+std::string serializedOctreeStr = serializeOctree(testOctree);
+void loadOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh){
+  modlog("octree", "loading");
+  testOctree = deserializeOctree(serializedOctreeStr);
+  octree.mesh = createOctreeMesh(loadMesh);
+}
+
+void saveOctree(){
+  modlog("octree", "saving");
+  auto serializedData = serializeOctree(testOctree);
+  std::cout << "octree data: " << serializedData << std::endl;
+  serializedOctreeStr = serializedData;
+}

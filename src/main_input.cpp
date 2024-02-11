@@ -1681,7 +1681,12 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      setOctreeTextureId(getOctreeTextureId() + 1);
+      for (auto &selectedIndex : selectedIds(state.editor)){
+        GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
+        GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
+        loadOctree(*octreeObject, createScopedLoadMesh(world, selectedIndex));
+      }
+
     }
   },
   InputDispatch{
@@ -1691,7 +1696,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      setOctreeTextureId(getOctreeTextureId() + 1);
+      saveOctree();
     }
   },
 
