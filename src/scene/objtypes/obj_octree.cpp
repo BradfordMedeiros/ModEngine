@@ -105,25 +105,59 @@ AtlasDimensions atlasDimensions {
 
 // This could easily be optimized by saving this in binary form instead
 // human readable, at least for now, seems nice
-std::string serializeOctreeDivision(OctreeDivision& octreeDivision){
+std::string serializeOctreeDivision(OctreeDivision& octreeDivision, std::vector<FaceTexture>& textures){
   if (octreeDivision.divisions.size() != 0){
     std::string str = "[ ";
     modassert(octreeDivision.divisions.size() == 8, "serialization - unexpected # of octree divisions");
     for (int i = 0; i < octreeDivision.divisions.size(); i++){
-      auto value = serializeOctreeDivision(octreeDivision.divisions.at(i));
+      auto value = serializeOctreeDivision(octreeDivision.divisions.at(i), textures);
       str += value + " ";
     }
     str += "]";
     return str;
   }
+
+  modassert(octreeDivision.faces.size() == 6, "serializeOctreeDivision unexpected number of octree faces");
+  for (auto &face : octreeDivision.faces){
+    textures.push_back(face); 
+  }
+
   return octreeDivision.filled ? "1" : "0";
 }
+
+std::string serializeTexCoord(FaceTexture& faceTexture){
+  std::string value = "";
+  value += serializeVec(faceTexture.texCoordsTopLeft) + "|";
+  value += serializeVec(faceTexture.texCoordsTopRight) + "|";
+  value += serializeVec(faceTexture.texCoordsBottomLeft) + "|";
+  value += serializeVec(faceTexture.texCoordsBottomRight);
+  return value;
+}
+
 std::string serializeOctree(Octree& octree){
   // 2
   // [ 1 1 1 1 [ 1 1 1 1 1 0 1 0 ] [ 1 1 1 1 0 1 0 1 ] [ 1 1 1 1 1 0 1 0 ] [ 1 1 1 1 0 1 0 1 ] ]
-  // 1,2,1,2,1,2;1,2,3,1,1,1;1,1,1,1,1,1
+  // 0.3 0.3|0.4 0.2|0.3 0.4|0.1 0.1,2,1,2,1,2;1,2,3,1,1,1;1,1,1,1,1,1
+  std::vector<FaceTexture> textures;
+
   std::string str = std::to_string(octree.size) + "\n";
-  str += serializeOctreeDivision(octree.rootNode);
+  str += serializeOctreeDivision(octree.rootNode, textures) + "\n";
+
+  std::string textureString = "";
+  for (int i = 0; i < textures.size(); i+=6){
+    textureString += serializeTexCoord(textures.at(i)) + ",";  // front
+    textureString += serializeTexCoord(textures.at(i + 1)) + ",";  // back
+    textureString += serializeTexCoord(textures.at(i + 2)) + ",";  // left
+    textureString += serializeTexCoord(textures.at(i + 3)) + ",";  // right
+    textureString += serializeTexCoord(textures.at(i + 4)) + ",";  // top
+    textureString += serializeTexCoord(textures.at(i + 5));  // down
+
+    if ((i + 5) != textures.size() -1){
+      textureString += ";";
+    }
+  }
+  str += textureString;
+
   return str;
 }
 
@@ -154,43 +188,6 @@ std::vector<std::string> splitBrackets(std::string& value){
   modassert(numBrackets == 0, std::string("invalid balancing to brackets: ") + value + ", " + std::to_string(numBrackets));
   return values;
 }
-
-OctreeDivision deserializeOctreeDivision(std::string value){
-  value = trim(value);
-  bool inBrackets = value.size() >= 2 && value.at(0) == '[' && value.at(value.size() -1) == ']';
-
-  if (inBrackets){
-    auto withoutBrackets = value.substr(1, value.size() - 2);
-    auto splitValues = splitBrackets(withoutBrackets);
-    std::vector<OctreeDivision> octreeDivisions;
-    for (auto &splitValue : splitValues){
-      modassert(splitValue.size() > 0, "split value should not be 0 length");
-      octreeDivisions.push_back(deserializeOctreeDivision(splitValue));
-    }
-    modassert(octreeDivisions.size() == 8, std::string("invalid division size, got: " + std::to_string(octreeDivisions.size())));
-    return OctreeDivision {
-      .filled = false,
-      .divisions = octreeDivisions,
-    };
-  }
-  modassert(value.size() >= 1 && (value.at(0) == '0' || value.at(0) == '1'), std::string("invalid value type, got: ") + value + ", size=  " + std::to_string(value.size()));
-  auto filled = value.at(0) == '1';
-  return OctreeDivision {
-    .filled = filled,
-    .faces = {},
-    .divisions = {},
-  };
-}
-Octree deserializeOctree(std::string& value){
-  auto lines = split(value, '\n');
-  modassert(lines.size() == 2, "invalid line size");
-  float size = std::atof(lines.at(0).c_str());
-  return Octree  {
-    .size = size,
-    .rootNode = deserializeOctreeDivision(lines.at(1)),
-  };
-}
-
 
 FaceTexture texCoords(int imageIndex, TextureOrientation texOrientation = TEXTURE_UP, int xTileDim = 1, int yTileDim = 1,  int x = 0, int y = 0){
   glm::vec2 offset(x, y);
@@ -274,6 +271,74 @@ std::vector<FaceTexture> defaultTextureCoords = {
   texCoords(2),
 };
 
+OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::vector<FaceTexture>>& textures, int* currentTextureIndex){
+  value = trim(value);
+  bool inBrackets = value.size() >= 2 && value.at(0) == '[' && value.at(value.size() -1) == ']';
+
+  if (inBrackets){
+    auto withoutBrackets = value.substr(1, value.size() - 2);
+    auto splitValues = splitBrackets(withoutBrackets);
+    std::vector<OctreeDivision> octreeDivisions;
+    for (auto &splitValue : splitValues){
+      modassert(splitValue.size() > 0, "split value should not be 0 length");
+      octreeDivisions.push_back(deserializeOctreeDivision(splitValue, textures, currentTextureIndex));
+    }
+    modassert(octreeDivisions.size() == 8, std::string("invalid division size, got: " + std::to_string(octreeDivisions.size())));
+    return OctreeDivision {
+      .filled = false,
+      .divisions = octreeDivisions,
+    };
+  }
+  modassert(value.size() >= 1 && (value.at(0) == '0' || value.at(0) == '1'), std::string("invalid value type, got: ") + value + ", size=  " + std::to_string(value.size()));
+  auto filled = value.at(0) == '1';
+  *currentTextureIndex = *currentTextureIndex + 1;
+  return OctreeDivision {
+    .filled = filled,
+    .faces = textures.at(*currentTextureIndex),
+    .divisions = {},
+  };
+}
+
+std::vector<std::vector<FaceTexture>> deserializeTextures(std::string& values){
+  std::vector<std::vector<FaceTexture>> textures;
+  auto valuesStr = split(values, ';'); // denotes each octree division
+  for (auto &value : valuesStr){
+    auto faces = split(value, ',');
+    modassert(faces.size() == 6, "invalid face size for textures");
+    std::vector<FaceTexture> faceTextures;
+    for (auto &face : faces){
+      auto textureCoords = split(face, '|');
+
+      modassert(textureCoords.size() == 4, "invalid texture coords size");
+      faceTextures.push_back(FaceTexture {
+        .texCoordsTopLeft = parseVec2(textureCoords.at(0)),
+        .texCoordsTopRight = parseVec2(textureCoords.at(1)),
+        .texCoordsBottomLeft = parseVec2(textureCoords.at(2)),
+        .texCoordsBottomRight = parseVec2(textureCoords.at(3)),
+      });
+    }
+    textures.push_back(faceTextures);
+  }
+  // , denotes each face
+  // | denotes each texture 
+
+  return textures;
+}
+
+
+Octree deserializeOctree(std::string& value){
+  auto lines = split(value, '\n');
+  modassert(lines.size() == 3, "invalid line size");
+  float size = std::atof(lines.at(0).c_str());
+
+  auto textures = deserializeTextures(lines.at(2));
+  int currentTextureIndex = -1;
+  return Octree  {
+    .size = size,
+    .rootNode = deserializeOctreeDivision(lines.at(1), textures, &currentTextureIndex),
+  };
+}
+
 Octree unsubdividedOctree {
   .size = 1.f,
   .rootNode = OctreeDivision {
@@ -286,7 +351,7 @@ Octree subdividedOne {
   .size = 10.f,
   .rootNode = OctreeDivision {
     .filled = true,
-    .faces = {},
+    .faces = defaultTextureCoords,
     .divisions = {
       OctreeDivision { 
         .filled = true,
@@ -294,7 +359,7 @@ Octree subdividedOne {
       OctreeDivision { .filled = false },
       OctreeDivision { 
         .filled = false,
-        .faces = {},
+        .faces = defaultTextureCoords,
         .divisions = {
           OctreeDivision { .filled = true },
           OctreeDivision { .filled = false },
@@ -1307,6 +1372,6 @@ void loadOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMes
 void saveOctree(){
   modlog("octree", "saving");
   auto serializedData = serializeOctree(testOctree);
-  std::cout << "octree data: " << serializedData << std::endl;
+  std::cout << "octree data: \n" << serializedData << std::endl;
   serializedOctreeStr = serializedData;
 }
