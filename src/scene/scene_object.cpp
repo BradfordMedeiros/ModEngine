@@ -291,6 +291,9 @@ std::optional<std::string> lookupNormalTexture(World& world, std::string texture
   auto newFileName = textureFile.stem().string() + ".normal" + textureFile.extension().string();
   std::filesystem::path fullNormalPath = std::filesystem::weakly_canonical(folder / newFileName); //  / is append operator 
   modlog("editor", "normal fullfilepath is: " + fullNormalPath.string());
+  if (!world.interface.modlayerFileExists(fullNormalPath)){
+    return std::nullopt;
+  }
   return fullNormalPath;
 }
 

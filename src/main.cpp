@@ -253,11 +253,16 @@ void loadAllTextures(std::string& textureFolderPath){
     loadTextureWorld(world, texturePath, -1);
   }*/
 
-  std::vector<std::string> textures { "../gameresources/build/textures/clean/cherrybark.jpg", "../gameresources/build/textures/clean/darkwood.jpg", "../gameresources/build/textures/clean/hardwood.jpg", "../gameresources/build/textures/clean/pebbles2.png" };
+  std::string flatSurfaceNormalTexture = "../gameresources/build/textures/clean/cherrybark.normal.jpg";
+  std::vector<std::string> textures { "./res/textures/grid.png", "../gameresources/build/textures/clean/chainlink.png", "../gameresources/build/textures/clean/hardwood.jpg", "../gameresources/build/textures/clean/pebbles2.png" };
   std::vector<std::string> normalTextures;
   for (auto &texture : textures){
     auto normalTexture = lookupNormalTexture(world, texture);
-    normalTextures.push_back(normalTexture.value());
+    if (normalTexture.has_value()){
+      normalTextures.push_back(normalTexture.value());
+    }else{
+      normalTextures.push_back(flatSurfaceNormalTexture);
+    }
   }
   loadTextureAtlasWorld(world, "octree-atlas:main",   textures, -1);
   loadTextureAtlasWorld(world, "octree-atlas:normal", normalTextures, -1);
