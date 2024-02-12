@@ -53,6 +53,7 @@ struct TextureAndName {
 };
 std::vector<TextureAndName> worldTextures(World& world);
 void setTexture(World& world, objid index, std::string textureName, std::function<void(unsigned int)> setNavmeshTextureId);
+std::optional<std::string> lookupNormalTexture(World& world, std::string textureName);
 
 bool isPrefab(World& world, objid id);
 std::optional<objid> prefabId(World& world, objid id);

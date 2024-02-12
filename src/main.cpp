@@ -253,7 +253,14 @@ void loadAllTextures(std::string& textureFolderPath){
     loadTextureWorld(world, texturePath, -1);
   }*/
 
-  loadTextureAtlasWorld(world, "octree-atlas:main", { "./res/textures/metal_scifi.png", "./res/textures/hexglow.png","./res/textures/grid.png", "./res/textures/window.png", "./res/textures/grass.jpg", "./res/textures/blacktop.jpg", "./res/textures/brickwall.jpg" }, -1);
+  std::vector<std::string> textures { "../gameresources/build/textures/clean/cherrybark.jpg", "../gameresources/build/textures/clean/darkwood.jpg", "../gameresources/build/textures/clean/hardwood.jpg", "../gameresources/build/textures/clean/pebbles2.png" };
+  std::vector<std::string> normalTextures;
+  for (auto &texture : textures){
+    auto normalTexture = lookupNormalTexture(world, texture);
+    normalTextures.push_back(normalTexture.value());
+  }
+  loadTextureAtlasWorld(world, "octree-atlas:main",   textures, -1);
+  loadTextureAtlasWorld(world, "octree-atlas:normal", normalTextures, -1);
 }
 
 // Kind of crappy since the uniforms don't unset their values after rendering, but order should be deterministic so ... ok

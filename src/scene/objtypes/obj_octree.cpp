@@ -92,9 +92,9 @@ struct AtlasDimensions {
   int totalTextures;
 };
 AtlasDimensions atlasDimensions {
-  .numTexturesWide = 3,
-  .numTexturesHeight = 3,
-  .totalTextures = 5,
+  .numTexturesWide = 2,
+  .numTexturesHeight = 2,
+  .totalTextures = 4,
 };
 
 
@@ -712,7 +712,7 @@ Mesh createOctreeMesh(std::function<Mesh(MeshData&)> loadMesh){
     .hasEmissionTexture = false,
     .opacityTexturePath = "",
     .hasOpacityTexture = false,
-    .normalTexturePath = "../gameresources/build/textures/metal_vent_worn.normal.jpg",
+    .normalTexturePath = "octree-atlas:normal",
     .hasNormalTexture = true,
     .boundInfo = getBounds(vertices),
     .bones = {},
