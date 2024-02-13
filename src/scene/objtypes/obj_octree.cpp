@@ -11,7 +11,7 @@ struct FaceTexture {
   glm::vec2 texCoordsBottomRight;
 };
 
-enum FillType { FILL_FULL, FILL_EMPTY };
+enum FillType { FILL_FULL, FILL_EMPTY, FILL_MIXED };
 struct OctreeDivision {
   // -x +y -z 
   // +x +y -z
@@ -351,32 +351,30 @@ Octree unsubdividedOctree {
 Octree subdividedOne {
   .size = 10.f,
   .rootNode = OctreeDivision {
-    .fill = FILL_FULL,
+    .fill = FILL_MIXED,
     .faces = defaultTextureCoords,
     .divisions = {
+      OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+      OctreeDivision { .fill = FILL_EMPTY, .faces = defaultTextureCoords },
       OctreeDivision { 
-        .fill = FILL_FULL,
-      },
-      OctreeDivision { .fill = FILL_EMPTY },
-      OctreeDivision { 
-        .fill = FILL_EMPTY,
+        .fill = FILL_MIXED,
         .faces = defaultTextureCoords,
         .divisions = {
-          OctreeDivision { .fill = FILL_FULL },
-          OctreeDivision { .fill = FILL_EMPTY },
-          OctreeDivision { .fill = FILL_FULL },
-          OctreeDivision { .fill = FILL_EMPTY },
-          OctreeDivision { .fill = FILL_FULL },
-          OctreeDivision { .fill = FILL_FULL },
-          OctreeDivision { .fill = FILL_FULL },
-          OctreeDivision { .fill = FILL_FULL },
+          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_EMPTY, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_EMPTY, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
         },
       },
-      OctreeDivision { .fill = FILL_EMPTY },
-      OctreeDivision { .fill = FILL_FULL },
-      OctreeDivision { .fill = FILL_EMPTY },
-      OctreeDivision { .fill = FILL_FULL },
-      OctreeDivision { .fill = FILL_FULL },
+      OctreeDivision { .fill = FILL_EMPTY, .faces = defaultTextureCoords },
+      OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+      OctreeDivision { .fill = FILL_EMPTY, .faces = defaultTextureCoords},
+      OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+      OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
     },
   },
 };
@@ -485,9 +483,22 @@ std::vector<glm::ivec3> octreePath(int x, int y, int z, int subdivision){
   return path;
 }
 
+bool allFilledIn(OctreeDivision& octreeDivision, FillType fillType){
+  if (octreeDivision.divisions.size() != 8){
+    return false;
+  }
+  for (auto &division : octreeDivision.divisions){
+    if (division.fill != fillType){
+      return false;
+    }
+  }
+  return true;
+}
+
 void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool filled){
   OctreeDivision* octreeSubdivision = &octree.rootNode;
-  OctreeDivision* parentNode = NULL;
+
+  std::vector<OctreeDivision*> parentSubdivisions;
   auto path = octreePath(x, y, z, subdivision);
 
   std::cout << "octree path: [";
@@ -512,12 +523,25 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
       };
     } 
     // check if all filled, then set the divsions = {}, and filled = true
-    parentNode = octreeSubdivision;
+    parentSubdivisions.push_back(octreeSubdivision);
     octreeSubdivision = &octreeSubdivision -> divisions.at(xyzIndexToFlatIndex(path.at(i)));
   }
 
   octreeSubdivision -> fill = filled ? FILL_FULL : FILL_EMPTY;
   octreeSubdivision -> divisions = {};
+
+  for (int i = parentSubdivisions.size() - 1; i >= 0; i--){
+    auto parentNode = parentSubdivisions.at(i);
+    if (allFilledIn(*parentNode, FILL_FULL)){
+      parentNode -> divisions = {};
+      parentNode -> fill = FILL_FULL;
+    }else if (allFilledIn(*parentNode, FILL_EMPTY)){
+      parentNode -> divisions = {};
+      parentNode -> fill = FILL_EMPTY;
+    }else{
+      break;
+    }
+  }
 }
 
 OctreeDivision* getOctreeSubdivisionIfExists(Octree& octree, int x, int y, int z, int subdivision){
