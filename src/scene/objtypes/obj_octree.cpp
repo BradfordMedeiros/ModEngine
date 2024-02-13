@@ -486,6 +486,7 @@ std::vector<glm::ivec3> octreePath(int x, int y, int z, int subdivision){
 
 void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool filled){
   OctreeDivision* octreeSubdivision = &octree.rootNode;
+  OctreeDivision* parentNode = NULL;
   auto path = octreePath(x, y, z, subdivision);
 
   std::cout << "octree path: [";
@@ -510,8 +511,10 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
       };
     } 
     // check if all filled, then set the divsions = {}, and filled = true
+    parentNode = octreeSubdivision;
     octreeSubdivision = &octreeSubdivision -> divisions.at(xyzIndexToFlatIndex(path.at(i)));
   }
+
   octreeSubdivision -> filled = filled;
   octreeSubdivision -> divisions = {};
 }
@@ -559,12 +562,22 @@ int textureIndex(OctreeSelectionFace faceOrientation){
   return index;  
 }
 
+// http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-13-normal-mapping/#computing-the-tangents-and-bitangents
+glm::vec3 computeTangent(Vertex v0, Vertex v1, Vertex v2){
+  auto deltaPos1 = v1.position - v0.position;
+  auto deltaPos2 = v2.position - v0.position;
+  auto deltaUV1 = v1.texCoords - v0.texCoords;
+  auto deltaUV2 = v2.texCoords - v0.texCoords;
+  float r = 1.f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+  glm::vec3 tangent = (deltaPos1 * deltaUV2.y   - deltaPos2 * deltaUV1.y) * r;
+  return tangent;
+}
+
 Vertex createVertex2(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal){
   Vertex vertex {
     .position = position,
     .normal = normal,
-    //.glm::vec3 tangent;
-
+    .tangent = glm::vec3(0.f, 0.f, 0.f), //  invalid value needs to be computed in context of triangle
     .texCoords = texCoords,
   };
   for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
@@ -697,6 +710,15 @@ Mesh createOctreeMesh(std::function<Mesh(MeshData&)> loadMesh){
     vertices.push_back(createVertex2(points.at(i).position, points.at(i).coord, normal));  // maybe the tex coords should just be calculated as a ratio to a fix texture
     vertices.push_back(createVertex2(points.at(i + 1).position, points.at(i + 1).coord, normal));
     vertices.push_back(createVertex2(points.at(i + 2).position, points.at(i + 2).coord, normal));
+
+
+    Vertex& v1 = vertices.at(vertices.size() - 3);
+    Vertex& v2 = vertices.at(vertices.size() - 2);
+    Vertex& v3 = vertices.at(vertices.size() - 1);
+    auto tangent = computeTangent(v1, v2, v3);
+    v1.tangent = tangent;
+    v2.tangent = tangent;
+    v3.tangent = tangent;
   }
   std::vector<unsigned int> indices;
   for (int i = 0; i < vertices.size(); i++){ // should be able to optimize this better...
