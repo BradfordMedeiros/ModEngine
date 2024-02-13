@@ -11,6 +11,7 @@ struct FaceTexture {
   glm::vec2 texCoordsBottomRight;
 };
 
+enum FillType { FILL_FULL, FILL_EMPTY };
 struct OctreeDivision {
   // -x +y -z 
   // +x +y -z
@@ -20,7 +21,7 @@ struct OctreeDivision {
   // +x -y -z
   // -x -y +z
   // +x -y +z
-  bool filled;
+  FillType fill;
   std::vector<FaceTexture> faces;
   std::vector<OctreeDivision> divisions;
 };
@@ -122,7 +123,7 @@ std::string serializeOctreeDivision(OctreeDivision& octreeDivision, std::vector<
     textures.push_back(face); 
   }
 
-  return octreeDivision.filled ? "1" : "0";
+  return octreeDivision.fill == FILL_FULL ? "1" : "0";
 }
 
 std::string serializeTexCoord(FaceTexture& faceTexture){
@@ -285,7 +286,7 @@ OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::ve
     }
     modassert(octreeDivisions.size() == 8, std::string("invalid division size, got: " + std::to_string(octreeDivisions.size())));
     return OctreeDivision {
-      .filled = false,
+      .fill = FILL_EMPTY,
       .divisions = octreeDivisions,
     };
   }
@@ -293,7 +294,7 @@ OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::ve
   auto filled = value.at(0) == '1';
   *currentTextureIndex = *currentTextureIndex + 1;
   return OctreeDivision {
-    .filled = filled,
+    .fill = filled ? FILL_FULL : FILL_EMPTY,
     .faces = textures.at(*currentTextureIndex),
     .divisions = {},
   };
@@ -342,7 +343,7 @@ Octree deserializeOctree(std::string& value){
 Octree unsubdividedOctree {
   .size = 1.f,
   .rootNode = OctreeDivision {
-    .filled = true,
+    .fill = FILL_FULL,
     .faces = defaultTextureCoords,
     .divisions = {},
   },
@@ -350,32 +351,32 @@ Octree unsubdividedOctree {
 Octree subdividedOne {
   .size = 10.f,
   .rootNode = OctreeDivision {
-    .filled = true,
+    .fill = FILL_FULL,
     .faces = defaultTextureCoords,
     .divisions = {
       OctreeDivision { 
-        .filled = true,
+        .fill = FILL_FULL,
       },
-      OctreeDivision { .filled = false },
+      OctreeDivision { .fill = FILL_EMPTY },
       OctreeDivision { 
-        .filled = false,
+        .fill = FILL_EMPTY,
         .faces = defaultTextureCoords,
         .divisions = {
-          OctreeDivision { .filled = true },
-          OctreeDivision { .filled = false },
-          OctreeDivision { .filled = true },
-          OctreeDivision { .filled = false },
-          OctreeDivision { .filled = true },
-          OctreeDivision { .filled = true },
-          OctreeDivision { .filled = true },
-          OctreeDivision { .filled = true },
+          OctreeDivision { .fill = FILL_FULL },
+          OctreeDivision { .fill = FILL_EMPTY },
+          OctreeDivision { .fill = FILL_FULL },
+          OctreeDivision { .fill = FILL_EMPTY },
+          OctreeDivision { .fill = FILL_FULL },
+          OctreeDivision { .fill = FILL_FULL },
+          OctreeDivision { .fill = FILL_FULL },
+          OctreeDivision { .fill = FILL_FULL },
         },
       },
-      OctreeDivision { .filled = false },
-      OctreeDivision { .filled = true },
-      OctreeDivision { .filled = false },
-      OctreeDivision { .filled = true },
-      OctreeDivision { .filled = true },
+      OctreeDivision { .fill = FILL_EMPTY },
+      OctreeDivision { .fill = FILL_FULL },
+      OctreeDivision { .fill = FILL_EMPTY },
+      OctreeDivision { .fill = FILL_FULL },
+      OctreeDivision { .fill = FILL_FULL },
     },
   },
 };
@@ -498,16 +499,16 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
   for (int i = 0; i < path.size(); i++){
     // todo -> if the subdivision isn't made here, should make it here
     if (octreeSubdivision -> divisions.size() == 0){
-      bool defaultFill = octreeSubdivision -> filled;
+      auto defaultFill = octreeSubdivision -> fill;
       octreeSubdivision -> divisions = {
-        OctreeDivision { .filled = defaultFill, .faces = octreeSubdivision -> faces },
-        OctreeDivision { .filled = defaultFill, .faces = octreeSubdivision -> faces },
-        OctreeDivision { .filled = defaultFill, .faces = octreeSubdivision -> faces },
-        OctreeDivision { .filled = defaultFill, .faces = octreeSubdivision -> faces },
-        OctreeDivision { .filled = defaultFill, .faces = octreeSubdivision -> faces },
-        OctreeDivision { .filled = defaultFill, .faces = octreeSubdivision -> faces },
-        OctreeDivision { .filled = defaultFill, .faces = octreeSubdivision -> faces },
-        OctreeDivision { .filled = defaultFill, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .fill = defaultFill, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .fill = defaultFill, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .fill = defaultFill, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .fill = defaultFill, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .fill = defaultFill, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .fill = defaultFill, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .fill = defaultFill, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .fill = defaultFill, .faces = octreeSubdivision -> faces },
       };
     } 
     // check if all filled, then set the divsions = {}, and filled = true
@@ -515,7 +516,7 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
     octreeSubdivision = &octreeSubdivision -> divisions.at(xyzIndexToFlatIndex(path.at(i)));
   }
 
-  octreeSubdivision -> filled = filled;
+  octreeSubdivision -> fill = filled ? FILL_FULL : FILL_EMPTY;
   octreeSubdivision -> divisions = {};
 }
 
@@ -690,7 +691,7 @@ void addOctreeLevel(std::vector<OctreeVertex>& points, glm::vec3 rootPos, Octree
 
     // +x -y +z
     addOctreeLevel(points, rootPos + glm::vec3(subdivisionSize, 0.f, 0.f), octreeDivision.divisions.at(7), subdivisionSize, subdivisionLevel + 1);
-  }else if (octreeDivision.filled){
+  }else if (octreeDivision.fill == FILL_FULL){
     addCubePoints(points, size, rootPos, &octreeDivision.faces);
   }
 }
@@ -994,12 +995,12 @@ bool cellFilledIn(Octree& octree, RaycastIntersection& intersection, int subdivi
   OctreeDivision* currentSubdivision = &octree.rootNode;
   for (auto xyzIndex : path){
     if (currentSubdivision -> divisions.size() == 0){
-      return currentSubdivision -> filled;
+      return currentSubdivision -> fill == FILL_FULL;
     }
     auto index = xyzIndexToFlatIndex(xyzIndex);
     currentSubdivision = &currentSubdivision -> divisions.at(index);
   }
-  return currentSubdivision -> filled;
+  return currentSubdivision -> fill == FILL_FULL;
 }
 
 RaycastResult filterFilledInCells(Octree& octree, RaycastResult& raycastResult){
