@@ -37,4 +37,11 @@ void setOctreeTextureId(int textureId);
 void loadOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
 void saveOctree();
 
+struct OctreeAABB {
+	glm::vec3 offset;
+	glm::vec3 size;
+};
+
+std::vector<OctreeAABB> getPhysicsShapes();
+
 #endif

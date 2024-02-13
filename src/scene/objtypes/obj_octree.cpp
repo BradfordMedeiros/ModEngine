@@ -530,6 +530,7 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
   octreeSubdivision -> fill = filled ? FILL_FULL : FILL_EMPTY;
   octreeSubdivision -> divisions = {};
 
+
   for (int i = parentSubdivisions.size() - 1; i >= 0; i--){
     auto parentNode = parentSubdivisions.at(i);
     if (allFilledIn(*parentNode, FILL_FULL)){
@@ -539,6 +540,7 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
       parentNode -> divisions = {};
       parentNode -> fill = FILL_EMPTY;
     }else{
+      parentNode -> fill = FILL_MIXED;
       break;
     }
   }
@@ -1421,4 +1423,8 @@ void saveOctree(){
   auto serializedData = serializeOctree(testOctree);
   std::cout << "octree data: \n" << serializedData << std::endl;
   serializedOctreeStr = serializedData;
+}
+
+std::vector<OctreeAABB> getPhysicsShapes(){
+  return {};
 }
