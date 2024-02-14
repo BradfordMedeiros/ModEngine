@@ -1161,6 +1161,29 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
     drawGridSelectionCube(closestRaycast.value().xyzIndex.x, closestRaycast.value().xyzIndex.y, closestRaycast.value().xyzIndex.z, 1, 1, 1, closestRaycast.value().subdivisionDepth, testOctree.size, drawLine, std::nullopt);    
     drawLine(closestRaycast.value().position, closestRaycast.value().position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 0.f, 1.f, 1.f));
   }
+
+  // visualize the physics objects
+  auto physicsShapes = getPhysicsShapes();
+  for (auto &physicShape : physicsShapes){
+    auto leftX = physicShape.position.x - (0.5f * physicShape.size.x);
+    auto rightX = physicShape.position.x + (0.5f * physicShape.size.x);
+    auto topY = physicShape.position.y + (0.5f * physicShape.size.y);
+    auto bottomY = physicShape.position.y - (0.5f * physicShape.size.y);
+    auto topZ = physicShape.position.z + (0.5f * physicShape.size.z);
+    auto bottomZ = physicShape.position.z - (0.5f * physicShape.size.z);
+
+    drawLine(glm::vec3(leftX, bottomY, bottomZ), glm::vec3(rightX, bottomY, bottomZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+    drawLine(glm::vec3(leftX, topY, bottomZ), glm::vec3(rightX, topY, bottomZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+
+    drawLine(glm::vec3(leftX, bottomY, topZ), glm::vec3(rightX, bottomY, topZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+    drawLine(glm::vec3(leftX, topY, topZ), glm::vec3(rightX, topY, topZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+
+    drawLine(glm::vec3(leftX, topY, topZ), glm::vec3(leftX, topY, bottomZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+    drawLine(glm::vec3(rightX, topY, topZ), glm::vec3(rightX, topY, bottomZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+
+    drawLine(glm::vec3(leftX, bottomY, topZ), glm::vec3(leftX, bottomY, bottomZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+    drawLine(glm::vec3(rightX, bottomY, topZ), glm::vec3(rightX, bottomY, bottomZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+  }
 }
 
 int getNumOctreeNodes(OctreeDivision& octreeDivision){
@@ -1426,5 +1449,10 @@ void saveOctree(){
 }
 
 std::vector<OctreeAABB> getPhysicsShapes(){
-  return {};
+  return {
+    OctreeAABB {
+      .position = glm::vec3(0.f, 0.f, 0.f),
+      .size = glm::vec3(5.f, 5.f, 5.f),
+    }
+  };
 }

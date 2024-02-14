@@ -38,7 +38,7 @@ void loadOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMes
 void saveOctree();
 
 struct OctreeAABB {
-	glm::vec3 offset;
+	glm::vec3 position;
 	glm::vec3 size;
 };
 
