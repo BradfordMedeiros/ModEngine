@@ -326,7 +326,6 @@ std::vector<std::vector<FaceTexture>> deserializeTextures(std::string& values){
   return textures;
 }
 
-
 Octree deserializeOctree(std::string& value){
   auto lines = split(value, '\n');
   modassert(lines.size() == 3, "invalid line size");
@@ -1448,11 +1447,55 @@ void saveOctree(){
   serializedOctreeStr = serializedData;
 }
 
+
+/*
+Octree subdividedOne {
+  .size = 10.f,
+  .rootNode = OctreeDivision {
+    .fill = FILL_MIXED,
+    .faces = defaultTextureCoords,
+    .divisions = {
+      OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+      OctreeDivision { .fill = FILL_EMPTY, .faces = defaultTextureCoords },
+      OctreeDivision { 
+        .fill = FILL_MIXED,
+        .faces = defaultTextureCoords,
+        .divisions = {
+          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_EMPTY, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_EMPTY, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+        },
+      },
+      OctreeDivision { .fill = FILL_EMPTY, .faces = defaultTextureCoords },
+      OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+      OctreeDivision { .fill = FILL_EMPTY, .faces = defaultTextureCoords},
+      OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+      OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
+    },
+  },
+};
+*/
+
+// https://dml.cz/bitstream/handle/10338.dmlcz/147950/Kybernetika_55-2019-5_1.pdf
+void marchingCubes(std::vector<std::vector<std::vector<int>>> cubes){
+
+}
+
+
 std::vector<OctreeAABB> getPhysicsShapes(){
   return {
     OctreeAABB {
       .position = glm::vec3(0.f, 0.f, 0.f),
       .size = glm::vec3(5.f, 5.f, 5.f),
-    }
+    },
+    OctreeAABB {
+      .position = glm::vec3(5.f, 0.f, 0.f),
+      .size = glm::vec3(5.f, 10.f, 5.f),
+    },
   };
 }
