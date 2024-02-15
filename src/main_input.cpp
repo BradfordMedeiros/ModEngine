@@ -1686,7 +1686,6 @@ std::vector<InputDispatch> inputFns = {
         GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
         loadOctree(*octreeObject, createScopedLoadMesh(world, selectedIndex));
       }
-
     }
   },
   InputDispatch{

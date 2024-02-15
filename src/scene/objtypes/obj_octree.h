@@ -36,6 +36,7 @@ void setOctreeTextureId(int textureId);
 
 void loadOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
 void saveOctree();
+void optimizeOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
 
 struct OctreeAABB {
 	glm::vec3 position;
