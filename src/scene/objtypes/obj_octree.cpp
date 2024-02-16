@@ -481,8 +481,28 @@ std::vector<glm::ivec3> octreePath(int x, int y, int z, int subdivision){
   }
   return path;
 }
-glm::ivec3 indexForOctreePath(std::vector<int> path){
-  return {};
+
+struct ValueAndSubdivision {
+  glm::ivec3 value;
+  int subdivisionLevel;
+};
+
+ValueAndSubdivision indexForOctreePath(std::vector<int> path){
+  std::cout << "index for octree: ";
+  glm::ivec3 sumIndex(0, 0, 0);
+  int subdivisionLevel = 0;
+  for (int index : path){
+    sumIndex = sumIndex * 2;
+    sumIndex += flatIndexToXYZ(index);;
+    subdivisionLevel++;
+
+    std::cout << index << " = " << print(sumIndex) << ", ";
+  }
+  std::cout << std::endl;
+  return ValueAndSubdivision {
+    .value = sumIndex,
+    .subdivisionLevel = subdivisionLevel,
+  };
 }
 
 bool allFilledIn(OctreeDivision& octreeDivision, FillType fillType){
@@ -730,50 +750,43 @@ void addOctreeLevel(std::vector<OctreeVertex>& points, glm::vec3 rootPos, Octree
   }
 }
 
-FillType octreeFillStatus(int subdivisionLevel, glm::ivec3 division){
-  return FILL_EMPTY;
+
+OctreeDivision* getOctreeSubdivisionIfExists2(Octree& octree, int x, int y, int z, int subdivision){
+  auto path = octreePath(x, y, z, subdivision);
+
+  OctreeDivision* octreeSubdivision = &octree.rootNode;
+  for (int i = 0; i < path.size(); i++){
+    int index = xyzIndexToFlatIndex(path.at(i));
+    if (octreeSubdivision -> fill == FILL_FULL || octreeSubdivision -> fill == FILL_EMPTY){
+      return NULL;
+    }
+    modassert(octreeSubdivision -> divisions.size() == 8, "expected 8 subdivisions");
+    octreeSubdivision = &(octreeSubdivision -> divisions.at(index));
+  }
+  return octreeSubdivision;
 }
 
-
-  // -x +y -z 
-  /*if (index.x == 0 && index.y == 1 && index.z == 1){
-    return 0;
+int calcBiggestSize(int subdivisionLevel){
+  return glm::pow(2, subdivisionLevel);
+}
+FillType octreeFillStatus(int subdivisionLevel, glm::ivec3 division){
+  if (division.x < 0 || division.y < 0 || division.z < 0){
+    return FILL_EMPTY;
+  }
+  auto biggestSubdivisionSize = calcBiggestSize(subdivisionLevel);
+  if (division.x >= biggestSubdivisionSize || division.y >= biggestSubdivisionSize || division.z >= biggestSubdivisionSize){
+    return FILL_EMPTY;
   }
 
-  // +x +y -z
-  if (index.x == 1 && index.y == 1 && index.z == 1){
-    return 1;
+  // this should be looking at the target subdivsiion level, and any level before it 
+
+  auto octreeDivision = getOctreeSubdivisionIfExists2(testOctree, division.x, division.y, division.z, subdivisionLevel);
+  if (!octreeDivision){
+    return FILL_EMPTY;
   }
 
-  // -x +y +z
-  if (index.x == 0 && index.y == 1 && index.z == 0){
-    return 2;
-  }
-
-  // +x +y +z
-  if (index.x == 1 && index.y == 1 && index.z == 0){
-    return 3;
-  }
-
-  // -x -y -z 
-  if (index.x == 0 && index.y == 0 && index.z == 1){
-    return 4;
-  }
-
-  // +x -y -z
-  if (index.x == 1 && index.y == 0 && index.z == 1){
-    return 5;
-  }
-
-  // -x -y +z
-  if (index.x == 0 && index.y == 0 && index.z == 0){
-    return 6;
-  }
-
-  // +x -y +z
-  if (index.x == 1 && index.y == 0 && index.z == 0){
-    return 7;
-  }*/
+  return octreeDivision -> fill;
+}
 
 void addOctreeLevelOptimized(std::vector<OctreeVertex>& points, glm::vec3 rootPos, OctreeDivision& octreeDivision, float size, int subdivisionLevel, std::vector<int> path){
   std::cout << "addOctreeLevel: " << size << std::endl;
@@ -787,7 +800,7 @@ void addOctreeLevelOptimized(std::vector<OctreeVertex>& points, glm::vec3 rootPo
 
     // +x +y -z
     auto topRightFrontPath = path;
-    topLeftFrontPath.push_back(1);
+    topRightFrontPath.push_back(1);
     addOctreeLevelOptimized(points, rootPos + glm::vec3(subdivisionSize, subdivisionSize, -subdivisionSize), octreeDivision.divisions.at(1), subdivisionSize, subdivisionLevel + 1, topRightFrontPath);
 
     // -x +y +z
@@ -820,9 +833,9 @@ void addOctreeLevelOptimized(std::vector<OctreeVertex>& points, glm::vec3 rootPo
     bottomRightBackPath.push_back(7);
     addOctreeLevelOptimized(points, rootPos + glm::vec3(subdivisionSize, 0.f, 0.f), octreeDivision.divisions.at(7), subdivisionSize, subdivisionLevel + 1, bottomRightBackPath);
   }else if (octreeDivision.fill == FILL_FULL){
-    // look at this point in the octree, then go left at this given resolution, and decide if it's covered
-    // covered means that the equiveltn subdivision level path is completely full
-    auto cellAddress = indexForOctreePath(path);
+    auto cellIndex = indexForOctreePath(path);
+    auto cellAddress = cellIndex.value;
+    modassert(cellIndex.subdivisionLevel == subdivisionLevel, "invalid result for octree path, probably provided incorrect path for subdivisionLevel");
 
     glm::ivec3 cellToTheFront(cellAddress.x, cellAddress.y, cellAddress.z - 1);
     if (octreeFillStatus(subdivisionLevel, cellToTheFront) != FILL_FULL){  
@@ -922,6 +935,7 @@ Mesh createOctreeMesh(std::function<Mesh(MeshData&)> loadMesh){
     indices.push_back(i);
   }
  
+  modassert(vertices.size() > 0, "no vertices create octree mesh");
   MeshData meshData {
     .vertices = vertices,
     .indices = indices,
