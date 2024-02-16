@@ -110,6 +110,7 @@ std::string serializeOctreeDivision(OctreeDivision& octreeDivision, std::vector<
   if (octreeDivision.divisions.size() != 0){
     std::string str = "[ ";
     modassert(octreeDivision.divisions.size() == 8, "serialization - unexpected # of octree divisions");
+    modassert(octreeDivision.fill == FILL_MIXED, "octree divisions, but not mixed filled");
     for (int i = 0; i < octreeDivision.divisions.size(); i++){
       auto value = serializeOctreeDivision(octreeDivision.divisions.at(i), textures);
       str += value + " ";
@@ -552,7 +553,6 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
   octreeSubdivision -> fill = filled ? FILL_FULL : FILL_EMPTY;
   octreeSubdivision -> divisions = {};
 
-
   for (int i = parentSubdivisions.size() - 1; i >= 0; i--){
     auto parentNode = parentSubdivisions.at(i);
     if (allFilledIn(*parentNode, FILL_FULL)){
@@ -563,9 +563,11 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
       parentNode -> fill = FILL_EMPTY;
     }else{
       parentNode -> fill = FILL_MIXED;
-      break;
     }
+    modassert(parentNode -> divisions.size() == 8 ? parentNode -> fill == FILL_MIXED : true,  "write octree - no divisions, but mixed fill");
   }
+  modassert(octreeSubdivision -> divisions.size() == 8 ? octreeSubdivision -> fill == FILL_MIXED : true, "write octree - no divisions, but mixed fill");
+
 }
 
 OctreeDivision* getOctreeSubdivisionIfExists(Octree& octree, int x, int y, int z, int subdivision){
@@ -750,15 +752,17 @@ void addOctreeLevel(std::vector<OctreeVertex>& points, glm::vec3 rootPos, Octree
   }
 }
 
-
+// does not account if a larger subdivision exists and is filled
 OctreeDivision* getOctreeSubdivisionIfExists2(Octree& octree, int x, int y, int z, int subdivision){
   auto path = octreePath(x, y, z, subdivision);
 
   OctreeDivision* octreeSubdivision = &octree.rootNode;
   for (int i = 0; i < path.size(); i++){
     int index = xyzIndexToFlatIndex(path.at(i));
-    if (octreeSubdivision -> fill == FILL_FULL || octreeSubdivision -> fill == FILL_EMPTY){
+    if (octreeSubdivision -> fill == FILL_EMPTY){
       return NULL;
+    }else if (octreeSubdivision -> fill == FILL_FULL){
+      return octreeSubdivision;
     }
     modassert(octreeSubdivision -> divisions.size() == 8, "expected 8 subdivisions");
     octreeSubdivision = &(octreeSubdivision -> divisions.at(index));
@@ -910,7 +914,9 @@ Mesh createOctreeMesh(std::function<Mesh(MeshData&)> loadMesh){
   std::vector<OctreeVertex> points = {};
 
   std::cout << "adding octree start" << std::endl;
+  //addOctreeLevel(points, glm::vec3(0.f, 0.f, 0.f), testOctree.rootNode, testOctree.size, 0);
   addOctreeLevelOptimized(points, glm::vec3(0.f, 0.f, 0.f), testOctree.rootNode, testOctree.size, 0, {});
+
   std::cout << "adding octree end" << std::endl;
 
   for (int i = 0; i < points.size(); i+=3){
