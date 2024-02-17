@@ -638,8 +638,6 @@ Vertex createVertex2(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal){
   return vertex;
 }
 
-// enum OctreeSelectionFace { FRONT, BACK, LEFT, RIGHT, UP, DOWN };
-
 
 struct OctreeVertex {
   glm::vec3 position;
@@ -773,23 +771,120 @@ OctreeDivision* getOctreeSubdivisionIfExists2(Octree& octree, int x, int y, int 
 int calcBiggestSize(int subdivisionLevel){
   return glm::pow(2, subdivisionLevel);
 }
-FillType octreeFillStatus(int subdivisionLevel, glm::ivec3 division){
+
+struct FillStatus {
+  FillType fill;
+  std::optional<OctreeDivision*> mixed;
+};
+FillStatus octreeFillStatus(int subdivisionLevel, glm::ivec3 division){
   if (division.x < 0 || division.y < 0 || division.z < 0){
-    return FILL_EMPTY;
+    return FillStatus { .fill = FILL_EMPTY, .mixed = std::nullopt };
   }
   auto biggestSubdivisionSize = calcBiggestSize(subdivisionLevel);
   if (division.x >= biggestSubdivisionSize || division.y >= biggestSubdivisionSize || division.z >= biggestSubdivisionSize){
-    return FILL_EMPTY;
+    return FillStatus { .fill = FILL_EMPTY, .mixed = std::nullopt };
   }
 
   // this should be looking at the target subdivsiion level, and any level before it 
 
   auto octreeDivision = getOctreeSubdivisionIfExists2(testOctree, division.x, division.y, division.z, subdivisionLevel);
   if (!octreeDivision){
-    return FILL_EMPTY;
+    return FillStatus { .fill = FILL_EMPTY, .mixed = std::nullopt };
   }
 
-  return octreeDivision -> fill;
+  // if this is mixed, then we need to check the corresponding side and see if it's filled 
+  if (octreeDivision -> fill == FILL_MIXED){
+    return FillStatus { .fill = FILL_MIXED, .mixed = octreeDivision };
+  }
+  return FillStatus { .fill = octreeDivision -> fill, .mixed = std::nullopt };
+}
+
+  // -x +y -z 
+  // +x +y -z
+  // -x +y +z
+  // +x +y +z
+  // -x -y -z 
+  // +x -y -z
+  // -x -y +z
+  // +x -y +z
+
+bool isSideFull(OctreeDivision& division, std::vector<int>& divisionIndexs){
+  if (division.fill == FILL_EMPTY){
+    return false;
+  }else if (division.fill == FILL_FULL){
+    return true;
+  }
+
+  std::vector<OctreeDivision*> divisions;
+  for (auto index : divisionIndexs){
+    divisions.push_back(&division.divisions.at(index));
+  }
+  for (auto division : divisions){
+    if (!isSideFull(*division, divisionIndexs)){
+      return false;
+    }
+  }
+  return true;
+}
+
+std::vector<int> topSideIndexs = { 4, 5, 6, 7 };
+bool isTopSideFull(OctreeDivision& division){
+  return isSideFull(division, topSideIndexs);
+}
+
+std::vector<int> downSideIndexs = { 0, 1, 2, 3 };
+bool isDownSideFull(OctreeDivision& division){
+  return isSideFull(division, downSideIndexs);
+}
+
+std::vector<int> leftSideIndexs = { 1, 3, 5, 7 };
+bool isLeftSideFull(OctreeDivision& division){
+  return isSideFull(division, leftSideIndexs);
+}
+
+std::vector<int> rightSideIndexs = { 0, 2, 4, 6 };
+bool isRightSideFull(OctreeDivision& division){
+  return isSideFull(division, rightSideIndexs);
+}
+
+std::vector<int> frontSideIndexs = { 0, 1, 4, 5 };
+bool isFrontSideFull(OctreeDivision& division){
+  return isSideFull(division, frontSideIndexs);
+}
+std::vector<int> backSideIndexs = { 2, 3, 6, 7 };
+bool isBackSideFull(OctreeDivision& division){
+  return isSideFull(division, backSideIndexs);
+}
+
+
+bool shouldShowCubeSide(FillStatus fillStatus, OctreeSelectionFace side /*  { FRONT, BACK, LEFT, RIGHT, UP, DOWN }*/){
+  // if it's mixed, can still check if some side of it is full 
+  // so need to look at the further divided sections
+  // should be able to be like fullSide(direction, octreeDivision)
+  if (fillStatus.fill == FILL_FULL){
+    return false;
+  }else if (fillStatus.fill == FILL_EMPTY){
+    return true;
+  }
+
+  OctreeDivision* octreeDivision = fillStatus.mixed.value();
+  modassert(octreeDivision != NULL, "mixed should have provided octree division");
+
+  if (side == UP){
+    return !isTopSideFull(*octreeDivision);
+  }else if (side == DOWN){
+    return !isDownSideFull(*octreeDivision);
+  }else if (side == LEFT){
+    return !isLeftSideFull(*octreeDivision);
+  }else if (side == RIGHT){
+    return !isRightSideFull(*octreeDivision);
+  }else if (side == FRONT){
+    return !isFrontSideFull(*octreeDivision);
+  }else if (side == BACK){
+    return !isBackSideFull(*octreeDivision);
+  }
+
+  return true;
 }
 
 void addOctreeLevelOptimized(std::vector<OctreeVertex>& points, glm::vec3 rootPos, OctreeDivision& octreeDivision, float size, int subdivisionLevel, std::vector<int> path){
@@ -842,71 +937,36 @@ void addOctreeLevelOptimized(std::vector<OctreeVertex>& points, glm::vec3 rootPo
     modassert(cellIndex.subdivisionLevel == subdivisionLevel, "invalid result for octree path, probably provided incorrect path for subdivisionLevel");
 
     glm::ivec3 cellToTheFront(cellAddress.x, cellAddress.y, cellAddress.z - 1);
-    if (octreeFillStatus(subdivisionLevel, cellToTheFront) != FILL_FULL){  
+    if (shouldShowCubeSide(octreeFillStatus(subdivisionLevel, cellToTheFront), FRONT)){  
       addCubePointsFront(points, size, rootPos,  &octreeDivision.faces);
     }
 
     glm::ivec3 cellToTheBack(cellAddress.x, cellAddress.y, cellAddress.z + 1);
-    if (octreeFillStatus(subdivisionLevel, cellToTheBack) != FILL_FULL){  
+    if (shouldShowCubeSide(octreeFillStatus(subdivisionLevel, cellToTheBack), BACK)){  
       addCubePointsBack(points, size, rootPos,  &octreeDivision.faces);
     }
     //
     glm::ivec3 cellToTheLeft(cellAddress.x - 1, cellAddress.y, cellAddress.z);
-    if (octreeFillStatus(subdivisionLevel, cellToTheLeft) != FILL_FULL){  
+    if (shouldShowCubeSide(octreeFillStatus(subdivisionLevel, cellToTheLeft), LEFT)){  
       addCubePointsLeft(points, size, rootPos,  &octreeDivision.faces);
     }
 
     glm::ivec3 cellToTheRight(cellAddress.x + 1, cellAddress.y, cellAddress.z);
-    if (octreeFillStatus(subdivisionLevel, cellToTheRight) != FILL_FULL){  
+    if (shouldShowCubeSide(octreeFillStatus(subdivisionLevel, cellToTheRight), RIGHT)){  
       addCubePointsRight(points, size, rootPos,  &octreeDivision.faces);
     }  
 
     glm::ivec3 cellToTheTop(cellAddress.x, cellAddress.y + 1, cellAddress.z);
-    if (octreeFillStatus(subdivisionLevel, cellToTheTop) != FILL_FULL){  
+    if (shouldShowCubeSide(octreeFillStatus(subdivisionLevel, cellToTheTop), UP)){  
       addCubePointsTop(points, size, rootPos,  &octreeDivision.faces);
     }  
 
     glm::ivec3 cellToTheBottom(cellAddress.x, cellAddress.y - 1, cellAddress.z);
-    if (octreeFillStatus(subdivisionLevel, cellToTheBottom) != FILL_FULL){  
+    if (shouldShowCubeSide(octreeFillStatus(subdivisionLevel, cellToTheBottom), DOWN)){  
       addCubePointsBottom(points, size, rootPos,  &octreeDivision.faces);
     }
   }
 }
-
-
-// https://dml.cz/bitstream/handle/10338.dmlcz/147950/Kybernetika_55-2019-5_1.pdf
-/*
-Octree subdividedOne {
-  .size = 10.f,
-  .rootNode = OctreeDivision {
-    .fill = FILL_MIXED,
-    .faces = defaultTextureCoords,
-    .divisions = {
-      OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
-      OctreeDivision { .fill = FILL_EMPTY, .faces = defaultTextureCoords },
-      OctreeDivision { 
-        .fill = FILL_MIXED,
-        .faces = defaultTextureCoords,
-        .divisions = {
-          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_EMPTY, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_EMPTY, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
-        },
-      },
-      OctreeDivision { .fill = FILL_EMPTY, .faces = defaultTextureCoords },
-      OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
-      OctreeDivision { .fill = FILL_EMPTY, .faces = defaultTextureCoords},
-      OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
-      OctreeDivision { .fill = FILL_FULL, .faces = defaultTextureCoords },
-    },
-  },
-};*/
-
 
 
 Mesh createOctreeMesh(std::function<Mesh(MeshData&)> loadMesh){
