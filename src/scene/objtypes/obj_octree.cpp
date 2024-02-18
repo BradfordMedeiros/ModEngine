@@ -730,8 +730,21 @@ void addCubePointsBottom(std::vector<OctreeVertex>& points, float size, glm::vec
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, -size) + offset,  .coord = bottomFace.texCoordsBottomLeft });
 }
 
+int calcBiggestSize(int subdivisionLevel){
+  return glm::pow(2, subdivisionLevel);
+}
+
 // does not account if a larger subdivision exists and is filled
 OctreeDivision* getOctreeSubdivisionIfExists2(Octree& octree, int x, int y, int z, int subdivision){
+  if (x < 0 || y < 0 || z < 0){
+    return NULL;
+  }
+  auto biggestSubdivisionSize = calcBiggestSize(subdivision);
+  if (x >= biggestSubdivisionSize || y >= biggestSubdivisionSize || z >= biggestSubdivisionSize){
+    return NULL;
+  }
+
+
   auto path = octreePath(x, y, z, subdivision);
 
   OctreeDivision* octreeSubdivision = &octree.rootNode;
@@ -748,27 +761,21 @@ OctreeDivision* getOctreeSubdivisionIfExists2(Octree& octree, int x, int y, int 
   return octreeSubdivision;
 }
 
-int calcBiggestSize(int subdivisionLevel){
-  return glm::pow(2, subdivisionLevel);
-}
 
 struct FillStatus {
   FillType fill;
   std::optional<OctreeDivision*> mixed;
 };
 FillStatus octreeFillStatus(int subdivisionLevel, glm::ivec3 division){
-  if (division.x < 0 || division.y < 0 || division.z < 0){
-    return FillStatus { .fill = FILL_EMPTY, .mixed = std::nullopt };
-  }
-  auto biggestSubdivisionSize = calcBiggestSize(subdivisionLevel);
-  if (division.x >= biggestSubdivisionSize || division.y >= biggestSubdivisionSize || division.z >= biggestSubdivisionSize){
-    return FillStatus { .fill = FILL_EMPTY, .mixed = std::nullopt };
-  }
-
   // this should be looking at the target subdivsiion level, and any level before it 
 
   auto octreeDivision = getOctreeSubdivisionIfExists2(testOctree, division.x, division.y, division.z, subdivisionLevel);
   if (!octreeDivision){
+    return FillStatus { .fill = FILL_EMPTY, .mixed = std::nullopt };
+  }
+
+  auto blockShape = std::get_if<ShapeBlock>(&octreeDivision -> shape);
+  if (blockShape == NULL){
     return FillStatus { .fill = FILL_EMPTY, .mixed = std::nullopt };
   }
 
@@ -868,9 +875,6 @@ bool shouldShowCubeSide(FillStatus fillStatus, OctreeSelectionFace side /*  { FR
 }
 
 void addRamp(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, ShapeRamp& shapeRamp){
-
-
-
   if (shapeRamp.direction == RAMP_RIGHT){
     addCubePointsLeft(points, size, offset, faces);
     addCubePointsBottom(points, size, offset, faces);
@@ -893,7 +897,6 @@ void addRamp(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, st
     points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset,  .coord = topFace.texCoordsTopLeft });
     points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, 0.f) + offset,   .coord = topFace.texCoordsBottomRight  });
     points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset, .coord = topFace.texCoordsTopRight });
-
   }else if (shapeRamp.direction == RAMP_LEFT){
     addCubePointsRight(points, size, offset, faces);
     addCubePointsBottom(points, size, offset, faces);
@@ -916,7 +919,6 @@ void addRamp(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, st
     points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, -size) + offset,  .coord = topFace.texCoordsTopLeft });
     points.push_back(OctreeVertex { .position = glm::vec3(size, size, 0.f) + offset,   .coord = topFace.texCoordsBottomRight  });
     points.push_back(OctreeVertex { .position = glm::vec3(size, size, -size) + offset, .coord = topFace.texCoordsTopRight });
-
   }else if (shapeRamp.direction == RAMP_FORWARD){
     addCubePointsBack(points, size * 0.5f, offset, faces);
     addCubePointsBottom(points, size, offset, faces);
@@ -939,7 +941,6 @@ void addRamp(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, st
     points.push_back(OctreeVertex { .position = glm::vec3(size, size,-size) + offset, .coord = frontFace.texCoordsTopRight });
     points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset,  .coord = frontFace.texCoordsTopLeft  });
     points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, 0.f) + offset,  .coord = frontFace.texCoordsBottomRight  });
-
   }else if (shapeRamp.direction == RAMP_BACKWARD){
     addCubePointsFront(points, size, offset, faces);
     addCubePointsBottom(points, size, offset, faces);
@@ -965,11 +966,6 @@ void addRamp(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, st
   }else{
     modassert(false, "invalid ramp direction");
   }
-
-
-  // { RAMP_RIGHT, RAMP_LEFT, RAMP_FORWARD, RAMP_BACKWARD };
-
-
 }
 
 void addOctreeLevel(std::vector<OctreeVertex>& points, glm::vec3 rootPos, OctreeDivision& octreeDivision, float size, int subdivisionLevel, std::vector<int> path){
@@ -1060,7 +1056,6 @@ void addOctreeLevel(std::vector<OctreeVertex>& points, glm::vec3 rootPos, Octree
 
   }
 }
-
 
 Mesh createOctreeMesh(std::function<Mesh(MeshData&)> loadMesh){
   std::vector<Vertex> vertices;
