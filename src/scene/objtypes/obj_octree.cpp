@@ -669,55 +669,55 @@ struct OctreeVertex {
   glm::vec2 coord;
 };
 
-void addCubePointsFront(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces){
+void addCubePointsFront(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, float height = 1.f){
   FaceTexture& frontFace =  faces -> at(0);
   points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, 0.f) + offset, .coord = frontFace.texCoordsBottomRight });
-  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, 0.f) + offset, .coord = frontFace.texCoordsTopLeft });
+  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, 0.f) + offset, .coord = frontFace.texCoordsTopLeft });
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, 0.f) + offset,  .coord = frontFace.texCoordsBottomLeft  });
 
-  points.push_back(OctreeVertex { .position = glm::vec3(size, size, 0.f) + offset, .coord = frontFace.texCoordsTopRight });
-  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, 0.f) + offset,  .coord = frontFace.texCoordsTopLeft  });
+  points.push_back(OctreeVertex { .position = glm::vec3(size, size * height, 0.f) + offset, .coord = frontFace.texCoordsTopRight });
+  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, 0.f) + offset,  .coord = frontFace.texCoordsTopLeft  });
   points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, 0.f) + offset,  .coord = frontFace.texCoordsBottomRight  });
 }
-void addCubePointsBack(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces){
+void addCubePointsBack(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, float height = 1.f){
   FaceTexture& backFace =  faces -> at(1);
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, -size) + offset,  .coord = backFace.texCoordsBottomRight   });
-  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset, .coord = backFace.texCoordsTopRight });
+  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, -size) + offset, .coord = backFace.texCoordsTopRight });
   points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset, .coord = backFace.texCoordsBottomLeft });
 
   points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset,  .coord = backFace.texCoordsBottomLeft  });
-  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset,  .coord = backFace.texCoordsTopRight   });
-  points.push_back(OctreeVertex { .position = glm::vec3(size, size, -size) + offset, .coord = backFace.texCoordsTopLeft });
+  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, -size) + offset,  .coord = backFace.texCoordsTopRight   });
+  points.push_back(OctreeVertex { .position = glm::vec3(size, size * height, -size) + offset, .coord = backFace.texCoordsTopLeft });
 }
-void addCubePointsLeft(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces){
+void addCubePointsLeft(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, float height = 1.f){
   FaceTexture& leftFace =  faces -> at(2);
-  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset, .coord = leftFace.texCoordsTopLeft });
+  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, -size) + offset, .coord = leftFace.texCoordsTopLeft });
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, -size) + offset,  .coord = leftFace.texCoordsBottomLeft });
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, 0.f) + offset,    .coord = leftFace.texCoordsBottomRight });
 
-  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, 0.f) + offset,   .coord = leftFace.texCoordsTopRight });
-  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset, .coord = leftFace.texCoordsTopLeft });
+  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, 0.f) + offset,   .coord = leftFace.texCoordsTopRight });
+  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, -size) + offset, .coord = leftFace.texCoordsTopLeft });
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, 0.f) + offset,    .coord = leftFace.texCoordsBottomRight });
 }
-void addCubePointsRight(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces){
+void addCubePointsRight(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, float height = 1.f){
   FaceTexture& rightFace =  faces -> at(3);
   points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, 0.f) + offset,    .coord = rightFace.texCoordsBottomLeft });
   points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset,  .coord = rightFace.texCoordsBottomRight  });
-  points.push_back(OctreeVertex { .position = glm::vec3(size, size, -size) + offset, .coord = rightFace.texCoordsTopRight });
+  points.push_back(OctreeVertex { .position = glm::vec3(size, size * height, -size) + offset, .coord = rightFace.texCoordsTopRight });
 
   points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, 0.f) + offset,    .coord = rightFace.texCoordsBottomLeft });
-  points.push_back(OctreeVertex { .position = glm::vec3(size, size, -size) + offset, .coord = rightFace.texCoordsTopRight });
-  points.push_back(OctreeVertex { .position = glm::vec3(size, size, 0.f) + offset,   .coord = rightFace.texCoordsTopLeft });
+  points.push_back(OctreeVertex { .position = glm::vec3(size, size * height, -size) + offset, .coord = rightFace.texCoordsTopRight });
+  points.push_back(OctreeVertex { .position = glm::vec3(size, size * height, 0.f) + offset,   .coord = rightFace.texCoordsTopLeft });
 }
-void addCubePointsTop(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces){
+void addCubePointsTop(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, float height = 1.f){
   FaceTexture& topFace =  faces -> at(4);
-  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, 0.f) + offset,   .coord = topFace.texCoordsBottomLeft });
-  points.push_back(OctreeVertex { .position = glm::vec3(size, size, 0.f) + offset,  .coord = topFace.texCoordsBottomRight  });
-  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset, .coord = topFace.texCoordsTopLeft });
+  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, 0.f) + offset,   .coord = topFace.texCoordsBottomLeft });
+  points.push_back(OctreeVertex { .position = glm::vec3(size, size * height, 0.f) + offset,  .coord = topFace.texCoordsBottomRight  });
+  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, -size) + offset, .coord = topFace.texCoordsTopLeft });
 
-  points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset,  .coord = topFace.texCoordsTopLeft });
-  points.push_back(OctreeVertex { .position = glm::vec3(size, size, 0.f) + offset,   .coord = topFace.texCoordsBottomRight  });
-  points.push_back(OctreeVertex { .position = glm::vec3(size, size, -size) + offset, .coord = topFace.texCoordsTopRight });
+  points.push_back(OctreeVertex { .position = glm::vec3(0.f,  size * height, -size) + offset,  .coord = topFace.texCoordsTopLeft });
+  points.push_back(OctreeVertex { .position = glm::vec3(size, size * height, 0.f) + offset,   .coord = topFace.texCoordsBottomRight  });
+  points.push_back(OctreeVertex { .position = glm::vec3(size, size * height, -size) + offset, .coord = topFace.texCoordsTopRight });
 }
 void addCubePointsBottom(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces){
   FaceTexture& bottomFace =  faces -> at(5);
@@ -774,7 +774,7 @@ FillStatus octreeFillStatus(int subdivisionLevel, glm::ivec3 division){
     return FillStatus { .fill = FILL_EMPTY, .mixed = std::nullopt };
   }
 
-  auto blockShape = std::get_if<ShapeBlock>(&octreeDivision -> shape);
+  auto blockShape = std::get_if<ShapeBlock>(&octreeDivision -> shape);  // depeneding on the side of this, we could hide more faces
   if (blockShape == NULL){
     return FillStatus { .fill = FILL_EMPTY, .mixed = std::nullopt };
   }
@@ -876,27 +876,31 @@ bool shouldShowCubeSide(FillStatus fillStatus, OctreeSelectionFace side /*  { FR
 
 void addRamp(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, ShapeRamp& shapeRamp){
   if (shapeRamp.direction == RAMP_RIGHT){
-    addCubePointsLeft(points, size, offset, faces);
-    addCubePointsBottom(points, size, offset, faces);
+
+    float height = shapeRamp.endHeight - shapeRamp.startHeight;
+    glm::vec3 rampOffset(0.f, size * shapeRamp.startHeight, 0.f);
+
+    addCubePointsLeft(points, size, offset +  rampOffset, faces, height);
+    addCubePointsBottom(points, size, offset + rampOffset, faces);
 
     FaceTexture& backFace =  faces -> at(1);
-    points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset,  .coord = backFace.texCoordsBottomLeft  });
-    points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, -size) + offset,  .coord = backFace.texCoordsBottomRight   });
-    points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset, .coord = backFace.texCoordsTopRight });
+    points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset + rampOffset,  .coord = backFace.texCoordsBottomLeft  });
+    points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, -size) + offset + rampOffset,  .coord = backFace.texCoordsBottomRight   });
+    points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, -size) + offset + rampOffset, .coord = backFace.texCoordsTopRight });
 
     FaceTexture& frontFace =  faces -> at(0);
-    points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, 0.f) + offset, .coord = frontFace.texCoordsTopLeft });
-    points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, 0.f) + offset,  .coord = frontFace.texCoordsBottomLeft  });
-    points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, 0.f) + offset,  .coord = frontFace.texCoordsBottomRight  });
+    points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, 0.f) + offset + rampOffset, .coord = frontFace.texCoordsTopLeft });
+    points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, 0.f) + offset + rampOffset,  .coord = frontFace.texCoordsBottomLeft  });
+    points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, 0.f) + offset + rampOffset,  .coord = frontFace.texCoordsBottomRight  });
 
     FaceTexture& topFace =  faces -> at(4);
-    points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, 0.f) + offset,   .coord = topFace.texCoordsBottomLeft });
-    points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, 0.f) + offset,  .coord = topFace.texCoordsBottomRight  });
-    points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset, .coord = topFace.texCoordsTopLeft });
+    points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, 0.f) + offset + rampOffset,   .coord = topFace.texCoordsBottomLeft });
+    points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, 0.f) + offset + rampOffset,  .coord = topFace.texCoordsBottomRight  });
+    points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, -size) + offset + rampOffset, .coord = topFace.texCoordsTopLeft });
 
-    points.push_back(OctreeVertex { .position = glm::vec3(0.f, size, -size) + offset,  .coord = topFace.texCoordsTopLeft });
-    points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, 0.f) + offset,   .coord = topFace.texCoordsBottomRight  });
-    points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset, .coord = topFace.texCoordsTopRight });
+    points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, -size) + offset + rampOffset,  .coord = topFace.texCoordsTopLeft });
+    points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, 0.f) + offset + rampOffset,   .coord = topFace.texCoordsBottomRight  });
+    points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset + rampOffset, .coord = topFace.texCoordsTopRight });
   }else if (shapeRamp.direction == RAMP_LEFT){
     addCubePointsRight(points, size, offset, faces);
     addCubePointsBottom(points, size, offset, faces);
@@ -1555,8 +1559,9 @@ void makeOctreeCellRamp(Octree& octree, int x, int y, int z, int subdivision, Ra
     .startHeight = startHeight,
     .endHeight = endHeight,
   };
-  octreeDivision -> fill = FILL_FULL;
-  octreeDivision -> divisions = {};
+
+  writeOctreeCell(octree,  x, y, z, subdivision, true); // kind of hackey, but just to ensure parents are updated
+  // this needs to make sure the parents are 
 }
 
 void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh){
