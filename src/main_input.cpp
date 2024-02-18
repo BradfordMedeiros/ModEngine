@@ -1699,6 +1699,21 @@ std::vector<InputDispatch> inputFns = {
     }
   },
 
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = '1', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      for (auto &selectedIndex : selectedIds(state.editor)){
+        GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
+        GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
+        makeOctreeCellRamp(*octreeObject, createScopedLoadMesh(world, selectedIndex));
+      }
+    }
+  },
+
   /////////// end octree stuff
 };
 

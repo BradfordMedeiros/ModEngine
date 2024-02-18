@@ -593,6 +593,7 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
 
 }
 
+
 OctreeDivision* getOctreeSubdivisionIfExists(Octree& octree, int x, int y, int z, int subdivision){
   OctreeDivision* octreeSubdivision = &octree.rootNode;
   auto path = octreePath(x, y, z, subdivision);
@@ -605,6 +606,7 @@ OctreeDivision* getOctreeSubdivisionIfExists(Octree& octree, int x, int y, int z
   }
   return octreeSubdivision;
 }
+
 
 void writeOctreeCellRange(Octree& octree, int x, int y, int z, int width, int height, int depth, int subdivision, bool filled){
   for (int i = 0; i < width; i++){
@@ -1468,6 +1470,23 @@ int getNumOctreeNodes(OctreeDivision& octreeDivision){
   }
 
   return numNodes;
+}
+
+void makeOctreeCellRamp(Octree& octree, int x, int y, int z, int subdivision, float startHeight = 0.f, float endHeight = 1.f){
+  auto octreeDivision = getOctreeSubdivisionIfExists(octree, x, y, z, subdivision);
+  modassert(octreeDivision, "octreeDivision does not exist");
+  octreeDivision -> shape = ShapeRamp {
+    .direction = RAMP_FORWARD,
+    .startHeight = startHeight,
+    .endHeight = endHeight,
+  };
+  octreeDivision -> fill = FILL_FULL;
+  octreeDivision -> divisions = {};
+}
+
+void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh){
+  makeOctreeCellRamp(testOctree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, subdivisionLevel);
+  octree.mesh = createOctreeMesh(loadMesh);
 }
 
 void handleOctreeScroll(GameObjectOctree& octree, bool upDirection, std::function<Mesh(MeshData&)> loadMesh, bool holdingShift, bool holdingCtrl, OctreeDimAxis axis){

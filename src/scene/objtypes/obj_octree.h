@@ -41,6 +41,9 @@ void writeOctreeTexture(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
 int getOctreeTextureId();
 void setOctreeTextureId(int textureId);
 
+void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
+
+
 void loadOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
 void saveOctree();
 void optimizeOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
