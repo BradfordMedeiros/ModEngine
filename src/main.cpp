@@ -254,7 +254,7 @@ void loadAllTextures(std::string& textureFolderPath){
   }*/
 
   std::string flatSurfaceNormalTexture = "../gameresources/build/textures/clean/cherrybark.normal.jpg";
-  std::vector<std::string> textures { "./res/textures/grid.png", "../gameresources/build/textures/clean/chainlink.png", "../gameresources/build/textures/clean/hardwood.jpg", "../gameresources/build/textures/clean/pebbles2.png" };
+  std::vector<std::string> textures { "./res/textures/grid.png", "../gameresources/build/textures/clean/chainlink.png", "../gameresources/build/textures/clean/hardwood.jpg", "../gameresources/build/textures/clean/pebbles2.png", "../gameresources/build/textures/clean/stonewall.jpg", "../gameresources/build/textures/clean/metalgrid.jpg" , "../gameresources/build/textures/clean/dryforestground.jpg", "../gameresources/build/textures/clean/foliage2.png"};
   std::vector<std::string> normalTextures;
   for (auto &texture : textures){
     auto normalTexture = lookupNormalTexture(world, texture);
@@ -264,8 +264,16 @@ void loadAllTextures(std::string& textureFolderPath){
       normalTextures.push_back(flatSurfaceNormalTexture);
     }
   }
-  loadTextureAtlasWorld(world, "octree-atlas:main",   textures, -1);
-  loadTextureAtlasWorld(world, "octree-atlas:normal", normalTextures, -1);
+
+  int numTexturesWide = 0;
+  loadTextureAtlasWorld(world, "octree-atlas:normal", normalTextures, -1, &numTexturesWide);
+  loadTextureAtlasWorld(world, "octree-atlas:main",   textures, -1, &numTexturesWide);
+
+  setAtlasDimensions(AtlasDimensions {
+    .numTexturesWide = numTexturesWide,
+    .numTexturesHeight = numTexturesWide, 
+    .totalTextures = textures.size(),
+  });
 }
 
 // Kind of crappy since the uniforms don't unset their values after rendering, but order should be deterministic so ... ok

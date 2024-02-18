@@ -13,6 +13,13 @@ GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util);
 std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctree& obj, ObjectSerializeUtil& util);
 Mesh* getOctreeMesh(GameObjectOctree& octree);
 
+struct AtlasDimensions {
+  int numTexturesWide;
+  int numTexturesHeight;
+  int totalTextures;
+};
+void setAtlasDimensions(AtlasDimensions newAtlasDimensions);
+
 void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine);
 void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, bool secondarySelection);
 

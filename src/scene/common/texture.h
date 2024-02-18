@@ -33,7 +33,7 @@ void updateTextureData(Texture& texture, unsigned char* data, int textureWidth, 
 void saveTextureData(std::string filepath, char* data, int width, int height);
 void freeTexture(Texture& texture);
 
-Texture loadTextureAtlas(std::vector<std::string> textureFilePaths);
+Texture loadTextureAtlas(std::vector<std::string> textureFilePaths, int* numImagesWidePtr);
 
 struct TextureSizeInfo {
   int width;
