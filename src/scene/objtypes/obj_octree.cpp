@@ -359,17 +359,13 @@ Octree unsubdividedOctree {
   .size = 1.f,
   .rootNode = OctreeDivision {
     .fill = FILL_FULL,
-    .shape = ShapeRamp{
-      .direction = RAMP_BACKWARD,
-      .startHeight = 0.f,
-      .endHeight = 1.f,
-    },
+    .shape = ShapeBlock{},
     .faces = defaultTextureCoords,
     .divisions = {},
   },
 };
 Octree subdividedOne {
-  .size = 10.f,
+  .size = 1.f,
   .rootNode = OctreeDivision {
     .fill = FILL_MIXED,
     .shape = ShapeBlock{},
@@ -400,7 +396,7 @@ Octree subdividedOne {
   },
 };
 
-Octree testOctree = unsubdividedOctree;
+Octree testOctree = subdividedOne;
 
 
 glm::ivec3 indexForSubdivision(int x, int y, int z, int sourceSubdivision, int targetSubdivision){
@@ -984,50 +980,72 @@ void addRamp(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, st
   }
 }
 
+glm::vec3 offsetForFlatIndex(int index, float subdivisionSize, glm::vec3 rootPos){
+  if (index == 0){
+    return rootPos + glm::vec3(0.f, subdivisionSize, -subdivisionSize);
+  }else if (index == 1){
+    return rootPos + glm::vec3(subdivisionSize, subdivisionSize, -subdivisionSize);
+  }else if (index == 2){
+    return rootPos + glm::vec3(0.f, subdivisionSize, 0.f);
+  }else if (index == 3){
+    return rootPos + glm::vec3(subdivisionSize, subdivisionSize, 0.f);
+  }else if (index == 4){
+    return rootPos + glm::vec3(0.f, 0.f, -subdivisionSize);
+  }else if (index == 5){
+    return rootPos + glm::vec3(subdivisionSize, 0.f, -subdivisionSize);
+  }else if (index == 6){
+    return rootPos + glm::vec3(0.f, 0.f, 0.f);
+  }else if (index == 7){
+    return rootPos + glm::vec3(subdivisionSize, 0.f, 0.f);
+  }
+  modassert(false, "invalid flat index");
+  return glm::vec3(0.f, 0.f, 0.f);
+}
+
 void addOctreeLevel(std::vector<OctreeVertex>& points, glm::vec3 rootPos, OctreeDivision& octreeDivision, float size, int subdivisionLevel, std::vector<int> path){
   std::cout << "addOctreeLevel: " << size << std::endl;
   if (octreeDivision.divisions.size() > 0){
-    float subdivisionSize = size * 0.5f;
+    float subdivisionSize = size * 0.5f; 
 
     // -x +y -z
     auto topLeftFrontPath = path;
     topLeftFrontPath.push_back(0);
-    addOctreeLevel(points, rootPos + glm::vec3(0.f, subdivisionSize, -subdivisionSize), octreeDivision.divisions.at(0), subdivisionSize, subdivisionLevel + 1, topLeftFrontPath);
+    addOctreeLevel(points, offsetForFlatIndex(0, subdivisionSize, rootPos), octreeDivision.divisions.at(0), subdivisionSize, subdivisionLevel + 1, topLeftFrontPath);
 
     // +x +y -z
     auto topRightFrontPath = path;
     topRightFrontPath.push_back(1);
-    addOctreeLevel(points, rootPos + glm::vec3(subdivisionSize, subdivisionSize, -subdivisionSize), octreeDivision.divisions.at(1), subdivisionSize, subdivisionLevel + 1, topRightFrontPath);
+    addOctreeLevel(points, offsetForFlatIndex(1, subdivisionSize, rootPos), octreeDivision.divisions.at(1), subdivisionSize, subdivisionLevel + 1, topRightFrontPath);
 
     // -x +y +z
     auto topLeftBackPath = path;
     topLeftBackPath.push_back(2);
-    addOctreeLevel(points, rootPos + glm::vec3(0.f, subdivisionSize, 0.f), octreeDivision.divisions.at(2), subdivisionSize, subdivisionLevel + 1, topLeftBackPath);
+    addOctreeLevel(points, offsetForFlatIndex(2, subdivisionSize, rootPos), octreeDivision.divisions.at(2), subdivisionSize, subdivisionLevel + 1, topLeftBackPath);
 
     // +x +y +z
     auto topRightBackPath = path;
     topRightBackPath.push_back(3);
-    addOctreeLevel(points, rootPos + glm::vec3(subdivisionSize, subdivisionSize, 0.f), octreeDivision.divisions.at(3), subdivisionSize, subdivisionLevel + 1, topRightBackPath);
+    addOctreeLevel(points, offsetForFlatIndex(3, subdivisionSize, rootPos), octreeDivision.divisions.at(3), subdivisionSize, subdivisionLevel + 1, topRightBackPath);
 
     // -x -y -z
     auto bottomLeftFrontPath = path;
     bottomLeftFrontPath.push_back(4);
-    addOctreeLevel(points, rootPos + glm::vec3(0.f, 0.f, -subdivisionSize), octreeDivision.divisions.at(4), subdivisionSize, subdivisionLevel + 1, bottomLeftFrontPath);
+    addOctreeLevel(points, offsetForFlatIndex(4, subdivisionSize, rootPos), octreeDivision.divisions.at(4), subdivisionSize, subdivisionLevel + 1, bottomLeftFrontPath);
 
     // +x -y -z
     auto bottomRightFrontPath = path;
     bottomRightFrontPath.push_back(5);
-    addOctreeLevel(points, rootPos + glm::vec3(subdivisionSize, 0.f, -subdivisionSize), octreeDivision.divisions.at(5), subdivisionSize, subdivisionLevel + 1, bottomRightFrontPath);
+    addOctreeLevel(points, offsetForFlatIndex(5, subdivisionSize, rootPos), octreeDivision.divisions.at(5), subdivisionSize, subdivisionLevel + 1, bottomRightFrontPath);
 
     // -x -y +z
     auto bottomLeftBackPath = path;
     bottomLeftBackPath.push_back(6);
-    addOctreeLevel(points, rootPos + glm::vec3(0.f, 0.f, 0.f), octreeDivision.divisions.at(6), subdivisionSize, subdivisionLevel + 1, bottomLeftBackPath);
+    addOctreeLevel(points, offsetForFlatIndex(6, subdivisionSize, rootPos), octreeDivision.divisions.at(6), subdivisionSize, subdivisionLevel + 1, bottomLeftBackPath);
 
     // +x -y +z
     auto bottomRightBackPath = path;
     bottomRightBackPath.push_back(7);
-    addOctreeLevel(points, rootPos + glm::vec3(subdivisionSize, 0.f, 0.f), octreeDivision.divisions.at(7), subdivisionSize, subdivisionLevel + 1, bottomRightBackPath);
+    addOctreeLevel(points, offsetForFlatIndex(7, subdivisionSize, rootPos), octreeDivision.divisions.at(7), subdivisionSize, subdivisionLevel + 1, bottomRightBackPath);
   }else if (octreeDivision.fill == FILL_FULL){
     auto cellIndex = indexForOctreePath(path);
     auto cellAddress = cellIndex.value;
@@ -1819,6 +1837,7 @@ void writeOctreeTexture(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
 
   std::cout << std::endl << std::endl;
   octree.mesh = createOctreeMesh(loadMesh);
+
 }
 
 int getOctreeTextureId(){
@@ -1861,15 +1880,77 @@ void saveOctree(){
   serializedOctreeStr = serializedData;
 }
 
+
+
+void addAllDivisions(std::vector<PositionAndScale>& octreeCubes, OctreeDivision& octreeDivision, float size, int subdivisionLevel, glm::vec3 rootPos){
+  bool isBlockShape = std::get_if<ShapeBlock>(&octreeDivision.shape);
+  modassert(isBlockShape, "non-block shape not yet supported");
+  
+  //rootPos + glm::vec3(0.f, subdivisionSize, 0.f)
+  
+
+  if (octreeDivision.fill == FILL_FULL){
+    octreeCubes.push_back(PositionAndScale {
+      .position = rootPos, 
+      .size = glm::vec3(size, size, size),
+    });
+  }else if (octreeDivision.fill == FILL_MIXED){
+    modassert(octreeDivision.divisions.size() == 8, "expected 8 octree division addAllDivisions");
+    for (int i = 0; i < octreeDivision.divisions.size(); i++){
+      auto offset = offsetForFlatIndex(i, size * 0.5f, rootPos);
+      addAllDivisions(octreeCubes, octreeDivision.divisions.at(i), size * 0.5f, subdivisionLevel + 1, rootPos + offset);
+    }
+  }
+}
+
 std::vector<PositionAndScale> getPhysicsShapes(){
-  return {
-    PositionAndScale {
-      .position = glm::vec3(0.f, 0.f, 0.f),
-      .size = glm::vec3(5.f, 5.f, 5.f),
-    },
-    PositionAndScale {
-      .position = glm::vec3(5.f, 0.f, 0.f),
-      .size = glm::vec3(5.f, 10.f, 5.f),
-    },
+
+  // this should be optimized by joining common shapes 
+
+  //  Octree subdividedOne {
+  //  .size = 10.f,
+  //  .rootNode = OctreeDivision {
+  //    .fill = FILL_MIXED,
+  //    .shape = ShapeBlock{},
+  //    .faces = defaultTextureCoords,
+  //    .divisions = {
+  //      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+  //      OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+  //      OctreeDivision { 
+  //        .fill = FILL_MIXED,
+  //        .faces = defaultTextureCoords,
+  //        .divisions = {
+  //          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+  //          OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+  //          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+  //          OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+  //          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+  //          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+  //          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+  //          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+  //        },
+  //      },
+  //      OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+  //      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+  //      OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords},
+  //      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+  //      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+  //    },
+  //  },
+  //};
+
+  std::vector<PositionAndScale> octreeCubes = {
+    //PositionAndScale {
+    //  .position = glm::vec3(0.f, 0.f, 0.f),
+    //  .size = glm::vec3(5.f, 5.f, 5.f),
+    //},
+    //PositionAndScale {
+    //  .position = glm::vec3(5.f, 0.f, 0.f),
+    //  .size = glm::vec3(5.f, 10.f, 5.f),
+    //},
   };
+
+  addAllDivisions(octreeCubes, testOctree.rootNode, 1.f, 0, glm::vec3(0.f, 0.f, 0.f));
+
+  return octreeCubes;
 }
