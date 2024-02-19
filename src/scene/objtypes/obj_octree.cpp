@@ -1478,7 +1478,7 @@ void drawOctreeSelectedCell(int x, int y, int z, int subdivision, float size, st
 }
 
 
-void drawPhysicsShape(OctreeAABB& physicShape, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+void drawPhysicsShape(PositionAndScale& physicShape, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
   auto leftX = physicShape.position.x - (0.5f * physicShape.size.x);
   auto rightX = physicShape.position.x + (0.5f * physicShape.size.x);
   auto topY = physicShape.position.y + (0.5f * physicShape.size.y);
@@ -1861,13 +1861,13 @@ void saveOctree(){
   serializedOctreeStr = serializedData;
 }
 
-std::vector<OctreeAABB> getPhysicsShapes(){
+std::vector<PositionAndScale> getPhysicsShapes(){
   return {
-    OctreeAABB {
+    PositionAndScale {
       .position = glm::vec3(0.f, 0.f, 0.f),
       .size = glm::vec3(5.f, 5.f, 5.f),
     },
-    OctreeAABB {
+    PositionAndScale {
       .position = glm::vec3(5.f, 0.f, 0.f),
       .size = glm::vec3(5.f, 10.f, 5.f),
     },

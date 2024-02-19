@@ -132,6 +132,9 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   GameObjectHeightmap* heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
   bool isHeightmapObj = heightmapObj != NULL;
 
+  GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&toRender);
+  bool isOctree = octreeObj != NULL;
+
   auto physicsInfo =  getPhysicsInfoForGameObject(world, id);
 
   rigidBodyOpts opts = {
@@ -161,6 +164,9 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       heightmapObj -> heightmap.minHeight,
       heightmapObj -> heightmap.maxHeight
     );
+  }else if (isOctree){
+    std::vector<PositionAndScale> blocks = getPhysicsShapes();
+    rigidBody = addRigidBodyOctree(world.physicsEnvironment, physicsInfo.transformation.position, physicsInfo.transformation.rotation, physicsInfo.transformation.scale, opts, blocks);
   }else if (physicsOptions.shape == BOX || physicsOptions.shape == AUTOSHAPE){
     std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ")" << std::endl;
     rigidBody = addRigidBodyRect(

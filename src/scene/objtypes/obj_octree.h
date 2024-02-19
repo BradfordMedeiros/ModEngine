@@ -48,11 +48,6 @@ void loadOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMes
 void saveOctree();
 void optimizeOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
 
-struct OctreeAABB {
-	glm::vec3 position;
-	glm::vec3 size;
-};
-
-std::vector<OctreeAABB> getPhysicsShapes();
+std::vector<PositionAndScale> getPhysicsShapes();
 
 #endif

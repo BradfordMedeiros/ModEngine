@@ -217,6 +217,24 @@ btRigidBody* addRigidBodyHeightmap(physicsEnv& env, glm::vec3 pos, glm::quat rot
   return addBodyToWorld(env, rigidBodyPtr, opts);
 }
 
+
+btRigidBody* createRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks){
+  btCompoundShape* shape = new btCompoundShape();
+  for (auto &block : blocks){
+    btCollisionShape* cshape1 = new btBoxShape(btVector3(btScalar(block.size.x * 0.5f), btScalar(block.size.y * 0.5f), btScalar(block.size.z * 0.5f)));
+    btTransform position;
+    position.setIdentity();
+    position.setOrigin(glmToBt(block.position));
+    shape -> addChildShape(position, cshape1);
+  }
+  return createRigidBody(pos, shape, rotation, false /*isStatic */, true /*hasCollision*/, scaling, opts);
+}
+
+btRigidBody* addRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks){
+  auto rigidBodyPtr = createRigidBodyOctree(env, pos, rotation, scaling, opts, blocks);
+  return addBodyToWorld(env, rigidBodyPtr, opts);
+}
+
 void rmRigidBody(physicsEnv& env, btRigidBody* body){
   env.collisionCache.rmObject(body);
   env.dynamicsWorld -> removeRigidBody(body);

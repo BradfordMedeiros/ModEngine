@@ -374,5 +374,9 @@ struct Transformation {
 
 enum AnimationType { ONESHOT, LOOP, FORWARDS };
 
+struct PositionAndScale {
+  glm::vec3 position;
+  glm::vec3 size;
+};
 
 #endif
