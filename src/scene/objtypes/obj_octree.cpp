@@ -1095,8 +1095,6 @@ void addAllDivisions(std::vector<PositionAndScale>& octreeCubes, OctreeDivision&
   bool isBlockShape = std::get_if<ShapeBlock>(&octreeDivision.shape);
   modassert(isBlockShape, "non-block shape not yet supported");
   
-  //rootPos + glm::vec3(0.f, subdivisionSize, 0.f)
-
   if (octreeDivision.fill == FILL_FULL){
     std::cout << "size = " << size << ", root = " << print(rootPos) << std::endl;
     octreeCubes.push_back(PositionAndScale {
@@ -1105,13 +1103,17 @@ void addAllDivisions(std::vector<PositionAndScale>& octreeCubes, OctreeDivision&
     });
   }else if (octreeDivision.fill == FILL_MIXED){
     float subdivisionSize = size * 0.5f; 
-
     modassert(octreeDivision.divisions.size() == 8, "expected 8 octree division addAllDivisions");
     for (int i = 0; i < octreeDivision.divisions.size(); i++){ 
       glm::vec3 offset = offsetForFlatIndex(i, subdivisionSize, rootPos);
       addAllDivisions(octreeCubes, octreeDivision.divisions.at(i), subdivisionSize, offset);
     }
   }
+}
+std::vector<PositionAndScale> getPhysicsShapes(){
+  std::vector<PositionAndScale> octreeCubes;
+  addAllDivisions(octreeCubes, testOctree.rootNode, 1.f, glm::vec3(0.f, 0.f, 0.f));
+  return octreeCubes;
 }
 
 Mesh createOctreeMesh(std::function<Mesh(MeshData&)> loadMesh){
@@ -1903,60 +1905,4 @@ void saveOctree(){
   auto serializedData = serializeOctree(testOctree);
   std::cout << "octree data: \n" << serializedData << std::endl;
   serializedOctreeStr = serializedData;
-}
-
-
-
-
-
-std::vector<PositionAndScale> getPhysicsShapes(){
-
-  // this should be optimized by joining common shapes 
-
-  //  Octree subdividedOne {
-  //  .size = 10.f,
-  //  .rootNode = OctreeDivision {
-  //    .fill = FILL_MIXED,
-  //    .shape = ShapeBlock{},
-  //    .faces = defaultTextureCoords,
-  //    .divisions = {
-  //      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-  //      OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-  //      OctreeDivision { 
-  //        .fill = FILL_MIXED,
-  //        .faces = defaultTextureCoords,
-  //        .divisions = {
-  //          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-  //          OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-  //          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-  //          OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-  //          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-  //          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-  //          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-  //          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-  //        },
-  //      },
-  //      OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-  //      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-  //      OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords},
-  //      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-  //      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-  //    },
-  //  },
-  //};
-
-  std::vector<PositionAndScale> octreeCubes = {
-    //PositionAndScale {
-    //  .position = glm::vec3(0.f, 0.f, 0.f),
-    //  .size = glm::vec3(5.f, 5.f, 5.f),
-    //},
-    //PositionAndScale {
-    //  .position = glm::vec3(5.f, 0.f, 0.f),
-    //  .size = glm::vec3(5.f, 10.f, 5.f),
-    //},
-  };
-
-  addAllDivisions(octreeCubes, testOctree.rootNode, 1.f, glm::vec3(0.f, 0.f, 0.f));
-
-  return octreeCubes;
 }

@@ -218,7 +218,7 @@ btRigidBody* addRigidBodyHeightmap(physicsEnv& env, glm::vec3 pos, glm::quat rot
 }
 
 
-btRigidBody* createRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks){
+btRigidBody* createRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, bool isStatic, bool hasCollision, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks){
   btCompoundShape* shape = new btCompoundShape();
   for (auto &block : blocks){
     glm::vec3 halfSize = 0.5f * block.size;
@@ -229,11 +229,12 @@ btRigidBody* createRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rot
     position.setOrigin(glmToBt(positionVec));
     shape -> addChildShape(position, cshape1);
   }
-  return createRigidBody(pos, shape, rotation, false /*isStatic */, true /*hasCollision*/, scaling, opts);
+  return createRigidBody(pos, shape, rotation, isStatic, hasCollision, scaling, opts);
 }
 
-btRigidBody* addRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks){
-  auto rigidBodyPtr = createRigidBodyOctree(env, pos, rotation, scaling, opts, blocks);
+
+btRigidBody* addRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, bool isStatic, bool hasCollision, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks){
+  auto rigidBodyPtr = createRigidBodyOctree(env, pos, rotation, scaling, isStatic, hasCollision, opts, blocks);
   return addBodyToWorld(env, rigidBodyPtr, opts);
 }
 
