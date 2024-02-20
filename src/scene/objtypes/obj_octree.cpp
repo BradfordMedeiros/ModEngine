@@ -1091,6 +1091,29 @@ void addOctreeLevel(std::vector<OctreeVertex>& points, glm::vec3 rootPos, Octree
   }
 }
 
+void addAllDivisions(std::vector<PositionAndScale>& octreeCubes, OctreeDivision& octreeDivision, float size, glm::vec3 rootPos){
+  bool isBlockShape = std::get_if<ShapeBlock>(&octreeDivision.shape);
+  modassert(isBlockShape, "non-block shape not yet supported");
+  
+  //rootPos + glm::vec3(0.f, subdivisionSize, 0.f)
+
+  if (octreeDivision.fill == FILL_FULL){
+    std::cout << "size = " << size << ", root = " << print(rootPos) << std::endl;
+    octreeCubes.push_back(PositionAndScale {
+      .position = rootPos, 
+      .size = glm::vec3(size, size, -size),
+    });
+  }else if (octreeDivision.fill == FILL_MIXED){
+    float subdivisionSize = size * 0.5f; 
+
+    modassert(octreeDivision.divisions.size() == 8, "expected 8 octree division addAllDivisions");
+    for (int i = 0; i < octreeDivision.divisions.size(); i++){ 
+      glm::vec3 offset = offsetForFlatIndex(i, subdivisionSize, rootPos);
+      addAllDivisions(octreeCubes, octreeDivision.divisions.at(i), subdivisionSize, offset);
+    }
+  }
+}
+
 Mesh createOctreeMesh(std::function<Mesh(MeshData&)> loadMesh){
   std::vector<Vertex> vertices;
   std::vector<OctreeVertex> points = {};
@@ -1497,30 +1520,32 @@ void drawOctreeSelectedCell(int x, int y, int z, int subdivision, float size, st
 
 
 void drawPhysicsShape(PositionAndScale& physicShape, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
-  auto leftX = physicShape.position.x - (0.5f * physicShape.size.x);
-  auto rightX = physicShape.position.x + (0.5f * physicShape.size.x);
-  auto topY = physicShape.position.y + (0.5f * physicShape.size.y);
-  auto bottomY = physicShape.position.y - (0.5f * physicShape.size.y);
-  auto topZ = physicShape.position.z + (0.5f * physicShape.size.z);
-  auto bottomZ = physicShape.position.z - (0.5f * physicShape.size.z);
 
-  drawLine(glm::vec3(leftX, bottomY, bottomZ), glm::vec3(rightX, bottomY, bottomZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-  drawLine(glm::vec3(leftX, topY, bottomZ), glm::vec3(rightX, topY, bottomZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+  std::cout << "draw physics shape: " << print(physicShape.position) << ", size: " << print(physicShape.size) << std::endl;
+  auto leftX = physicShape.position.x;
+  auto rightX = physicShape.position.x + physicShape.size.x;
+  auto topY = physicShape.position.y + physicShape.size.y;
+  auto bottomY = physicShape.position.y;
+  auto farZ = physicShape.position.z + physicShape.size.z;
+  auto nearZ = physicShape.position.z;
 
-  drawLine(glm::vec3(leftX, bottomY, topZ), glm::vec3(rightX, bottomY, topZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-  drawLine(glm::vec3(leftX, topY, topZ), glm::vec3(rightX, topY, topZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+  drawLine(glm::vec3(leftX, bottomY, nearZ), glm::vec3(rightX, bottomY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+  drawLine(glm::vec3(leftX, topY, nearZ), glm::vec3(rightX, topY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
 
-  drawLine(glm::vec3(leftX, topY, topZ), glm::vec3(leftX, topY, bottomZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-  drawLine(glm::vec3(rightX, topY, topZ), glm::vec3(rightX, topY, bottomZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+  drawLine(glm::vec3(leftX, bottomY, farZ), glm::vec3(rightX, bottomY, farZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+  drawLine(glm::vec3(leftX, topY, farZ), glm::vec3(rightX, topY, farZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
 
-  drawLine(glm::vec3(leftX, bottomY, topZ), glm::vec3(leftX, bottomY, bottomZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-  drawLine(glm::vec3(rightX, bottomY, topZ), glm::vec3(rightX, bottomY, bottomZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+  drawLine(glm::vec3(leftX, topY, farZ), glm::vec3(leftX, topY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+  drawLine(glm::vec3(rightX, topY, farZ), glm::vec3(rightX, topY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
 
-  drawLine(glm::vec3(rightX, bottomY, topZ), glm::vec3(rightX, topY, topZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-  drawLine(glm::vec3(leftX, bottomY, topZ), glm::vec3(leftX, topY, topZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+  drawLine(glm::vec3(leftX, bottomY, farZ), glm::vec3(leftX, bottomY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+  drawLine(glm::vec3(rightX, bottomY, farZ), glm::vec3(rightX, bottomY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
 
-  drawLine(glm::vec3(rightX, bottomY, bottomZ), glm::vec3(rightX, topY, bottomZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-  drawLine(glm::vec3(leftX, bottomY, bottomZ), glm::vec3(leftX, topY, bottomZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+  drawLine(glm::vec3(rightX, bottomY, farZ), glm::vec3(rightX, topY, farZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+  drawLine(glm::vec3(leftX, bottomY, farZ), glm::vec3(leftX, topY, farZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+
+  drawLine(glm::vec3(rightX, bottomY, nearZ), glm::vec3(rightX, topY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+  drawLine(glm::vec3(leftX, bottomY, nearZ), glm::vec3(leftX, topY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
 }
 
 bool drawAllSelectedBlocks = false;
@@ -1882,26 +1907,7 @@ void saveOctree(){
 
 
 
-void addAllDivisions(std::vector<PositionAndScale>& octreeCubes, OctreeDivision& octreeDivision, float size, int subdivisionLevel, glm::vec3 rootPos){
-  bool isBlockShape = std::get_if<ShapeBlock>(&octreeDivision.shape);
-  modassert(isBlockShape, "non-block shape not yet supported");
-  
-  //rootPos + glm::vec3(0.f, subdivisionSize, 0.f)
-  
 
-  if (octreeDivision.fill == FILL_FULL){
-    octreeCubes.push_back(PositionAndScale {
-      .position = rootPos, 
-      .size = glm::vec3(size, size, size),
-    });
-  }else if (octreeDivision.fill == FILL_MIXED){
-    modassert(octreeDivision.divisions.size() == 8, "expected 8 octree division addAllDivisions");
-    for (int i = 0; i < octreeDivision.divisions.size(); i++){
-      auto offset = offsetForFlatIndex(i, size * 0.5f, rootPos);
-      addAllDivisions(octreeCubes, octreeDivision.divisions.at(i), size * 0.5f, subdivisionLevel + 1, rootPos + offset);
-    }
-  }
-}
 
 std::vector<PositionAndScale> getPhysicsShapes(){
 
@@ -1950,7 +1956,7 @@ std::vector<PositionAndScale> getPhysicsShapes(){
     //},
   };
 
-  addAllDivisions(octreeCubes, testOctree.rootNode, 1.f, 0, glm::vec3(0.f, 0.f, 0.f));
+  addAllDivisions(octreeCubes, testOctree.rootNode, 1.f, glm::vec3(0.f, 0.f, 0.f));
 
   return octreeCubes;
 }
