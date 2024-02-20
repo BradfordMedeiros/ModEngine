@@ -278,12 +278,12 @@ FaceTexture texCoords(int imageIndex, TextureOrientation texOrientation = TEXTUR
 }
 
 std::vector<FaceTexture> defaultTextureCoords = {
-  texCoords(2),
-  texCoords(2),
-  texCoords(2),
-  texCoords(2),
-  texCoords(2),
-  texCoords(2),
+  texCoords(4),
+  texCoords(4),
+  texCoords(4),
+  texCoords(4),
+  texCoords(4),
+  texCoords(4),
 };
 
 OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::vector<FaceTexture>>& textures, int* currentTextureIndex){
@@ -1099,7 +1099,7 @@ void addAllDivisions(std::vector<PositionAndScale>& octreeCubes, OctreeDivision&
     std::cout << "size = " << size << ", root = " << print(rootPos) << std::endl;
     octreeCubes.push_back(PositionAndScale {
       .position = rootPos, 
-      .size = glm::vec3(size, size, -size),
+      .size = glm::vec3(size, size, size),
     });
   }else if (octreeDivision.fill == FILL_MIXED){
     float subdivisionSize = size * 0.5f; 

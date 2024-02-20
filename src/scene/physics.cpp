@@ -221,8 +221,9 @@ btRigidBody* addRigidBodyHeightmap(physicsEnv& env, glm::vec3 pos, glm::quat rot
 btRigidBody* createRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, bool isStatic, bool hasCollision, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks){
   btCompoundShape* shape = new btCompoundShape();
   for (auto &block : blocks){
+    modassert(block.size.x >= 0 && block.size.y >= 0 && block.size.z >= 0, "negative block size createRigidBodyOctree");
     glm::vec3 halfSize = 0.5f * block.size;
-    glm::vec3 positionVec = block.position + halfSize;
+    glm::vec3 positionVec = block.position + glm::vec3(halfSize.x, halfSize.y, -1 * halfSize.z);
     btCollisionShape* cshape1 = new btBoxShape(glmToBt(halfSize));
     btTransform position;
     position.setIdentity();
