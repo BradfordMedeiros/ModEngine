@@ -205,6 +205,7 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
           axis = OCTREE_ZAXIS;
         }
         handleOctreeScroll(*octreeObject, yoffset > 0, createScopedLoadMesh(world, selectedIndex), isShiftHeld, isCtrlHeld, axis);
+        updatePhysicsBody(world, selectedIndex);
       }
     }
   }
@@ -1629,8 +1630,10 @@ std::vector<InputDispatch> inputFns = {
         if (octreeObject != NULL){
           if (isCtrlHeld){
             deleteSelectedOctreeNodes(*octreeObject, createScopedLoadMesh(world, selectedIndex));
+            updatePhysicsBody(world, selectedIndex);
           }else{
             insertSelectedOctreeNodes(*octreeObject, createScopedLoadMesh(world, selectedIndex));
+            updatePhysicsBody(world, selectedIndex);
           }
         }
       }
@@ -1685,6 +1688,7 @@ std::vector<InputDispatch> inputFns = {
         GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
         GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
         loadOctree(*octreeObject, createScopedLoadMesh(world, selectedIndex));
+        updatePhysicsBody(world, selectedIndex);
       }
     }
   },

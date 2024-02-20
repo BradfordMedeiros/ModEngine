@@ -1522,8 +1522,6 @@ void drawOctreeSelectedCell(int x, int y, int z, int subdivision, float size, st
 
 
 void drawPhysicsShape(PositionAndScale& physicShape, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
-
-  std::cout << "draw physics shape: " << print(physicShape.position) << ", size: " << print(physicShape.size) << std::endl;
   auto leftX = physicShape.position.x;
   auto rightX = physicShape.position.x + physicShape.size.x;
   auto topY = physicShape.position.y + physicShape.size.y;
