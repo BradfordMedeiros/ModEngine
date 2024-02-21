@@ -241,11 +241,17 @@ btRigidBody* createRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rot
     }
 
     for (auto &block : shapeType.specialBlocks){
+      std::cout << "adding special block shape: " << print(block.position) << std::endl;
+
       btTriangleMeshShape* triangleShape = new btBvhTriangleMeshShape(trimesh, true);
-      btTransform position;
-      position.setIdentity();
-      position.setOrigin(glmToBt(block.position));
-      shape -> addChildShape(position, triangleShape);      
+      btTransform transform;
+      transform.setIdentity();
+      transform.setOrigin(glmToBt(block.position));
+
+      glm::quat rotation = glm::identity<glm::quat>();
+      transform.setRotation(glmToBt(rotation));
+
+      shape -> addChildShape(transform, triangleShape);      
     }
 
   }

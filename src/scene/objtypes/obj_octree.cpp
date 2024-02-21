@@ -1091,53 +1091,57 @@ void addOctreeLevel(std::vector<OctreeVertex>& points, glm::vec3 rootPos, Octree
   }
 }
 
-void addAllDivisions(std::vector<PositionAndScale>& octreeCubes, OctreeDivision& octreeDivision, float size, glm::vec3 rootPos){
+void addAllDivisions(std::vector<PositionAndScale>& octreeCubes, std::vector<PositionAndScale>& rampBlocks, OctreeDivision& octreeDivision, float size, glm::vec3 rootPos){
   bool isBlockShape = std::get_if<ShapeBlock>(&octreeDivision.shape);
-  //modassert(isBlockShape, "non-block shape not yet supported");
-  if (isBlockShape){
-    //return;
-  }
+  bool isRampShape = std::get_if<ShapeRamp>(&octreeDivision.shape);
+  modassert(isBlockShape || isRampShape, "shape type not supported");
 
   if (octreeDivision.fill == FILL_FULL){
     std::cout << "size = " << size << ", root = " << print(rootPos) << std::endl;
-    octreeCubes.push_back(PositionAndScale {
-      .position = rootPos, 
-      .size = glm::vec3(size, size, size),
-    });
+    if (isBlockShape){
+      octreeCubes.push_back(PositionAndScale {
+        .position = rootPos, 
+        .size = glm::vec3(size, size, size),
+      });
+    }else if (isRampShape){
+      rampBlocks.push_back(PositionAndScale {
+        .position = rootPos,
+        .size = glm::vec3(size, size, size),
+      });
+    }
   }else if (octreeDivision.fill == FILL_MIXED){
     float subdivisionSize = size * 0.5f; 
     modassert(octreeDivision.divisions.size() == 8, "expected 8 octree division addAllDivisions");
     for (int i = 0; i < octreeDivision.divisions.size(); i++){ 
       glm::vec3 offset = offsetForFlatIndex(i, subdivisionSize, rootPos);
-      addAllDivisions(octreeCubes, octreeDivision.divisions.at(i), subdivisionSize, offset);
+      addAllDivisions(octreeCubes, rampBlocks, octreeDivision.divisions.at(i), subdivisionSize, offset);
     }
   }
 }
 PhysicsShapes getPhysicsShapes(){
   std::vector<PositionAndScale> octreeCubes;
-  addAllDivisions(octreeCubes, testOctree.rootNode, 1.f, glm::vec3(0.f, 0.f, 0.f));
-  PhysicsShapes physicsShapes {};
-  physicsShapes.blocks = octreeCubes;
 
+
+  // ENUMATE OUT THE REST OF THE VERTS FOR A RAMP
   std::vector<PositionAndScaleVerts> shapes = {
     PositionAndScaleVerts {
       .verts = {
+        glm::vec3(0.f, 0.5f, -0.5f),
+        glm::vec3(0.f, 0.f, -0.5f),
         glm::vec3(0.f, 0.f, 0.f),
-        glm::vec3(2.f, 0.f, 0.f),
-        glm::vec3(0.f, 2.f, 0.f),
+
+        glm::vec3(0.5f, 0.5f, -0.5f),
+        glm::vec3(0.5f, 0.f, -0.5f),
+        glm::vec3(0.5f, 0.f, 0.f),
+
       },
-      .specialBlocks = {
-        PositionAndScale {
-          .position = glm::vec3(0.f, 0.f, 0.f),
-          .size = glm::vec3(1.f, 1.f, 1.f),
-        },
-        PositionAndScale {
-          .position = glm::vec3(1.f, 0.f, 0.f),
-          .size = glm::vec3(1.f, 1.f, 1.f),
-        },
-      },
+      .specialBlocks = {},
     }
   };
+
+  addAllDivisions(octreeCubes, shapes.at(0).specialBlocks, testOctree.rootNode, 1.f, glm::vec3(0.f, 0.f, 0.f));
+  PhysicsShapes physicsShapes {};
+  physicsShapes.blocks = octreeCubes;
   physicsShapes.shapes = shapes;
   return physicsShapes;
 }
@@ -1648,7 +1652,7 @@ void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
   for (int x = 0; x < selectionDim.value().x; x++){
     for (int y = 0; y < selectionDim.value().y; y++){
       for (int z = 0; z < selectionDim.value().z; z++){
-        RampDirection direction = RAMP_BACKWARD;
+        RampDirection direction = RAMP_FORWARD;
         if (direction == RAMP_RIGHT){
           float unitHeight = 1.f / selectionDim.value().x;
           float startHeight = unitHeight * (selectionDim.value().x - x - 1);
