@@ -1351,7 +1351,9 @@ std::vector<Intersection> subdivisionIntersections(glm::vec3 fromPos, glm::vec3 
 }
 
 void raycastSubdivision(glm::vec3 fromPos, glm::vec3 toPosDirection, glm::ivec3 offset, int currentSubdivision, int subdivisionDepth, std::vector<RaycastIntersection>& finalIntersections){
+  modassert(currentSubdivision <= subdivisionDepth, "current subdivision should not be greater than the target subdivision depth");
   auto intersections = subdivisionIntersections(fromPos, toPosDirection, testOctree.size, currentSubdivision, offset);
+
   for (auto &intersection : intersections){
     auto xyzIndex = flatIndexToXYZ(intersection.index);
     if (currentSubdivision == subdivisionDepth){
@@ -1371,7 +1373,7 @@ RaycastResult doRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, int subdivi
   std::vector<RaycastIntersection> finalIntersections;
   std::cout << "GET raycast START" << std::endl;
 
-  raycastSubdivision(fromPos, toPosDirection, glm::ivec3(0, 0, 0), 1, subdivisionDepth, finalIntersections);
+  raycastSubdivision(fromPos, toPosDirection, glm::ivec3(0, 0, 0), 0, subdivisionDepth, finalIntersections);
 
   std::cout << "GET raycast END" << std::endl;
   std::cout << std::endl << std::endl;
@@ -1526,7 +1528,7 @@ void drawPhysicsShape(PositionAndScale& physicShape, std::function<void(glm::vec
   auto rightX = physicShape.position.x + physicShape.size.x;
   auto topY = physicShape.position.y + physicShape.size.y;
   auto bottomY = physicShape.position.y;
-  auto farZ = physicShape.position.z + physicShape.size.z;
+  auto farZ = physicShape.position.z - physicShape.size.z;
   auto nearZ = physicShape.position.z;
 
   drawLine(glm::vec3(leftX, bottomY, nearZ), glm::vec3(rightX, bottomY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
