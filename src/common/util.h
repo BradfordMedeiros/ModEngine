@@ -378,5 +378,9 @@ struct PositionAndScale {
   glm::vec3 position;
   glm::vec3 size;
 };
+struct PositionAndScaleVerts {
+  std::vector<glm::vec3> verts;
+  std::vector<PositionAndScale> specialBlocks;
+};
 
 #endif

@@ -165,8 +165,8 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       heightmapObj -> heightmap.maxHeight
     );
   }else if (isOctree){
-    std::vector<PositionAndScale> blocks = getPhysicsShapes();
-    rigidBody = addRigidBodyOctree(world.physicsEnvironment, physicsInfo.transformation.position, physicsInfo.transformation.rotation, physicsInfo.transformation.scale, physicsOptions.isStatic, physicsOptions.hasCollisions, opts, blocks);
+    auto physicsShapes = getPhysicsShapes();
+    rigidBody = addRigidBodyOctree(world.physicsEnvironment, physicsInfo.transformation.position, physicsInfo.transformation.rotation, physicsInfo.transformation.scale, physicsOptions.isStatic, physicsOptions.hasCollisions, opts, physicsShapes.blocks, physicsShapes.shapes);
   }else if (physicsOptions.shape == BOX || physicsOptions.shape == AUTOSHAPE){
     std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ")" << std::endl;
     rigidBody = addRigidBodyRect(

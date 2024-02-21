@@ -48,6 +48,11 @@ void loadOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMes
 void saveOctree();
 void optimizeOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
 
-std::vector<PositionAndScale> getPhysicsShapes();
+struct PhysicsShapes {
+  std::vector<PositionAndScale> blocks;
+  std::vector<PositionAndScaleVerts> shapes;
+};
+
+PhysicsShapes getPhysicsShapes();
 
 #endif

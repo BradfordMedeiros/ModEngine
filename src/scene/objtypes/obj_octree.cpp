@@ -1093,8 +1093,11 @@ void addOctreeLevel(std::vector<OctreeVertex>& points, glm::vec3 rootPos, Octree
 
 void addAllDivisions(std::vector<PositionAndScale>& octreeCubes, OctreeDivision& octreeDivision, float size, glm::vec3 rootPos){
   bool isBlockShape = std::get_if<ShapeBlock>(&octreeDivision.shape);
-  modassert(isBlockShape, "non-block shape not yet supported");
-  
+  //modassert(isBlockShape, "non-block shape not yet supported");
+  if (isBlockShape){
+    //return;
+  }
+
   if (octreeDivision.fill == FILL_FULL){
     std::cout << "size = " << size << ", root = " << print(rootPos) << std::endl;
     octreeCubes.push_back(PositionAndScale {
@@ -1110,10 +1113,33 @@ void addAllDivisions(std::vector<PositionAndScale>& octreeCubes, OctreeDivision&
     }
   }
 }
-std::vector<PositionAndScale> getPhysicsShapes(){
+PhysicsShapes getPhysicsShapes(){
   std::vector<PositionAndScale> octreeCubes;
   addAllDivisions(octreeCubes, testOctree.rootNode, 1.f, glm::vec3(0.f, 0.f, 0.f));
-  return octreeCubes;
+  PhysicsShapes physicsShapes {};
+  physicsShapes.blocks = octreeCubes;
+
+  std::vector<PositionAndScaleVerts> shapes = {
+    PositionAndScaleVerts {
+      .verts = {
+        glm::vec3(0.f, 0.f, 0.f),
+        glm::vec3(2.f, 0.f, 0.f),
+        glm::vec3(0.f, 2.f, 0.f),
+      },
+      .specialBlocks = {
+        PositionAndScale {
+          .position = glm::vec3(0.f, 0.f, 0.f),
+          .size = glm::vec3(1.f, 1.f, 1.f),
+        },
+        PositionAndScale {
+          .position = glm::vec3(1.f, 0.f, 0.f),
+          .size = glm::vec3(1.f, 1.f, 1.f),
+        },
+      },
+    }
+  };
+  physicsShapes.shapes = shapes;
+  return physicsShapes;
 }
 
 Mesh createOctreeMesh(std::function<Mesh(MeshData&)> loadMesh){
@@ -1593,7 +1619,7 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
 
   // visualize the physics objects
   auto physicsShapes = getPhysicsShapes();
-  for (auto &physicShape : physicsShapes){
+  for (auto &physicShape : physicsShapes.blocks){
     drawPhysicsShape(physicShape, drawLine);
   }
 }

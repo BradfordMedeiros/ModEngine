@@ -218,7 +218,7 @@ btRigidBody* addRigidBodyHeightmap(physicsEnv& env, glm::vec3 pos, glm::quat rot
 }
 
 
-btRigidBody* createRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, bool isStatic, bool hasCollision, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks){
+btRigidBody* createRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, bool isStatic, bool hasCollision, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks, std::vector<PositionAndScaleVerts>& shapes){
   btCompoundShape* shape = new btCompoundShape();
   for (auto &block : blocks){
     modassert(block.size.x >= 0 && block.size.y >= 0 && block.size.z >= 0, "negative block size createRigidBodyOctree");
@@ -230,12 +230,32 @@ btRigidBody* createRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rot
     position.setOrigin(glmToBt(positionVec));
     shape -> addChildShape(position, cshape1);
   }
+
+  for (auto &shapeType : shapes){
+    btTriangleMesh*  trimesh = new btTriangleMesh();
+
+    modassert(shapeType.verts.size() % 3 == 0, "verts shapetype must be multiple of 3");
+    for (int i = 0; i < shapeType.verts.size(); i+=3){
+      modlog("physics rigid body exact-  adding vert", print(shapeType.verts.at(i)) + " ");
+      trimesh -> addTriangle(glmToBt(shapeType.verts.at(i)), glmToBt(shapeType.verts.at(i + 1)), glmToBt(shapeType.verts.at(i + 2)));
+    }
+
+    for (auto &block : shapeType.specialBlocks){
+      btTriangleMeshShape* triangleShape = new btBvhTriangleMeshShape(trimesh, true);
+      btTransform position;
+      position.setIdentity();
+      position.setOrigin(glmToBt(block.position));
+      shape -> addChildShape(position, triangleShape);      
+    }
+
+  }
+
   return createRigidBody(pos, shape, rotation, isStatic, hasCollision, scaling, opts);
 }
 
 
-btRigidBody* addRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, bool isStatic, bool hasCollision, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks){
-  auto rigidBodyPtr = createRigidBodyOctree(env, pos, rotation, scaling, isStatic, hasCollision, opts, blocks);
+btRigidBody* addRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, bool isStatic, bool hasCollision, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks, std::vector<PositionAndScaleVerts>& shapes){
+  auto rigidBodyPtr = createRigidBodyOctree(env, pos, rotation, scaling, isStatic, hasCollision, opts, blocks, shapes);
   return addBodyToWorld(env, rigidBodyPtr, opts);
 }
 
