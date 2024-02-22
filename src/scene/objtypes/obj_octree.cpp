@@ -1091,23 +1091,46 @@ void addOctreeLevel(std::vector<OctreeVertex>& points, glm::vec3 rootPos, Octree
   }
 }
 
-void addAllDivisions(std::vector<PositionAndScale>& octreeCubes, std::vector<PositionAndScale>& rampBlocks, OctreeDivision& octreeDivision, float size, glm::vec3 rootPos){
-  bool isBlockShape = std::get_if<ShapeBlock>(&octreeDivision.shape);
-  bool isRampShape = std::get_if<ShapeRamp>(&octreeDivision.shape);
-  modassert(isBlockShape || isRampShape, "shape type not supported");
+void addAllDivisions(std::vector<PositionAndScale>& octreeCubes, std::vector<Transformation>& rampBlocks, OctreeDivision& octreeDivision, float size, glm::vec3 rootPos){
+  ShapeBlock* blockShape = std::get_if<ShapeBlock>(&octreeDivision.shape);
+  ShapeRamp* rampShape = std::get_if<ShapeRamp>(&octreeDivision.shape);
+  modassert(blockShape || rampShape, "shape type not supported");
 
   if (octreeDivision.fill == FILL_FULL){
     std::cout << "size = " << size << ", root = " << print(rootPos) << std::endl;
-    if (isBlockShape){
+    if (blockShape){
       octreeCubes.push_back(PositionAndScale {
         .position = rootPos, 
         .size = glm::vec3(size, size, size),
       });
-    }else if (isRampShape){
-      rampBlocks.push_back(PositionAndScale {
-        .position = rootPos,
-        .size = glm::vec3(size, size, size),
-      });
+    }else if (rampShape){
+      if (rampShape -> direction == RAMP_FORWARD || true){
+        rampBlocks.push_back(Transformation {
+          .position = rootPos,
+          .scale = glm::vec3(size, size, size),
+          .rotation = MOD_ORIENTATION_FORWARD,
+        });
+      }else if (rampShape -> direction == RAMP_BACKWARD){
+        rampBlocks.push_back(Transformation {
+          .position = rootPos,
+          .scale = glm::vec3(size, size, size),
+          .rotation = MOD_ORIENTATION_BACKWARD,
+        });
+      }else if (rampShape -> direction == RAMP_LEFT){
+        rampBlocks.push_back(Transformation {
+          .position = rootPos,
+          .scale = glm::vec3(size, size, size),
+          .rotation = MOD_ORIENTATION_RIGHT,
+        });
+      }else if (rampShape -> direction == RAMP_RIGHT){
+        rampBlocks.push_back(Transformation {
+          .position = rootPos,
+          .scale = glm::vec3(size, size, size),
+          .rotation = MOD_ORIENTATION_LEFT,
+        });
+      }else {
+        modassert(false, "invalid ramp shape");
+      }
     }
   }else if (octreeDivision.fill == FILL_MIXED){
     float subdivisionSize = size * 0.5f; 
@@ -1679,7 +1702,7 @@ void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
   for (int x = 0; x < selectionDim.value().x; x++){
     for (int y = 0; y < selectionDim.value().y; y++){
       for (int z = 0; z < selectionDim.value().z; z++){
-        RampDirection direction = RAMP_FORWARD;
+        RampDirection direction = RAMP_LEFT;
         if (direction == RAMP_RIGHT){
           float unitHeight = 1.f / selectionDim.value().x;
           float startHeight = unitHeight * (selectionDim.value().x - x - 1);

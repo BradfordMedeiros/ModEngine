@@ -380,7 +380,7 @@ struct PositionAndScale {
 };
 struct PositionAndScaleVerts {
   std::vector<glm::vec3> verts;
-  std::vector<PositionAndScale> specialBlocks;
+  std::vector<Transformation> specialBlocks;
 };
 
 #endif

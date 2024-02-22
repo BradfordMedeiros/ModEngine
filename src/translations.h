@@ -41,8 +41,11 @@ glm::quat quatFromDirection(glm::vec3 direction);
 glm::vec3 directionFromQuat(glm::quat direction);
 
 const glm::quat MOD_ORIENTATION_UP = quatFromDirection(glm::vec3(0.f, 1.f, 0.f));
+const glm::quat MOD_ORIENTATION_DOWN = quatFromDirection(glm::vec3(0.f, -1.f, 0.f));
+const glm::quat MOD_ORIENTATION_LEFT = quatFromDirection(glm::vec3(-1.f, 0.f, 0.f));
 const glm::quat MOD_ORIENTATION_RIGHT = quatFromDirection(glm::vec3(1.f, 0.f, 0.f));
 const glm::quat MOD_ORIENTATION_FORWARD = quatFromDirection(glm::vec3(0.f, 0.f, -1.f));
+const glm::quat MOD_ORIENTATION_BACKWARD = quatFromDirection(glm::vec3(0.f, 0.f, 1.f));
 
 const Transformation IDENTITY_TRANSFORMATION {
   .position = glm::vec3(0.f, 0.f, 0.f),

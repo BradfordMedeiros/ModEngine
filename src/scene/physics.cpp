@@ -246,12 +246,11 @@ btRigidBody* createRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rot
       btTriangleMeshShape* triangleShape = new btBvhTriangleMeshShape(trimesh, true);
       btTransform transform;
       transform.setIdentity();
+      transform.setRotation(glmToBt(block.rotation));
       transform.setOrigin(glmToBt(block.position));
 
-      glm::quat rotation = glm::identity<glm::quat>();
-      transform.setRotation(glmToBt(rotation));
-
-      shape -> addChildShape(transform, triangleShape);      
+      shape -> addChildShape(transform, triangleShape);
+      //shape -> setLocalScaling(btVector3(block.scale.x, block.scale.y, block.scale.z));
     }
 
   }
