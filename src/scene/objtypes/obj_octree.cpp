@@ -1126,14 +1126,41 @@ PhysicsShapes getPhysicsShapes(){
   std::vector<PositionAndScaleVerts> shapes = {
     PositionAndScaleVerts {
       .verts = {
+        // left 
         glm::vec3(0.f, 0.5f, -0.5f),
         glm::vec3(0.f, 0.f, -0.5f),
         glm::vec3(0.f, 0.f, 0.f),
 
+        // right 
         glm::vec3(0.5f, 0.5f, -0.5f),
         glm::vec3(0.5f, 0.f, -0.5f),
         glm::vec3(0.5f, 0.f, 0.f),
 
+        // bottom 
+        glm::vec3(0.f, 0.f, 0.f),
+        glm::vec3(0.f, 0.f, -0.5f),
+        glm::vec3(0.5f, 0.f, 0.f),
+        glm::vec3(0.5f, 0.f, 0.f),
+        glm::vec3(0.f, 0.f, -0.5f),
+        glm::vec3(0.5f, 0.f, -0.5f),
+
+        // back
+        glm::vec3(0.f, 0.f, -0.5f),
+        glm::vec3(0.f, 0.5f, -0.5f),
+        glm::vec3(0.5f, 0.5f, -0.5f),
+
+        glm::vec3(0.5f, 0.5f, -0.5f),
+        glm::vec3(0.f, 0.f, -0.5f),
+        glm::vec3(0.5f, 0.f, -0.5f),
+
+        // main ramp face
+        glm::vec3(0.f, 0.f, 0.f),
+        glm::vec3(0.f, 0.5f, -0.5f),
+        glm::vec3(0.5f, 0.f, 0.f),
+
+        glm::vec3(0.5f, 0.f, 0.f),
+        glm::vec3(0.f, 0.5f, -0.5f),
+        glm::vec3(0.5f, 0.5f, -0.5f),
       },
       .specialBlocks = {},
     }
