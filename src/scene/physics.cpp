@@ -233,24 +233,20 @@ btRigidBody* createRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rot
 
   for (auto &shapeType : shapes){
     btTriangleMesh*  trimesh = new btTriangleMesh();
-
     modassert(shapeType.verts.size() % 3 == 0, "verts shapetype must be multiple of 3");
     for (int i = 0; i < shapeType.verts.size(); i+=3){
-      modlog("physics rigid body exact-  adding vert", print(shapeType.verts.at(i)) + " ");
+      //modlog("physics rigid body exact-  adding vert", print(shapeType.verts.at(i)) + " ");
       trimesh -> addTriangle(glmToBt(shapeType.verts.at(i)), glmToBt(shapeType.verts.at(i + 1)), glmToBt(shapeType.verts.at(i + 2)));
     }
 
     for (auto &block : shapeType.specialBlocks){
-      std::cout << "adding special block shape: " << print(block.position) << std::endl;
-
+      //std::cout << "adding special block shape: " << print(block.position) << std::endl;
       btTriangleMeshShape* triangleShape = new btBvhTriangleMeshShape(trimesh, true);
       btTransform transform;
       transform.setIdentity();
       transform.setRotation(glmToBt(block.rotation));
       transform.setOrigin(glmToBt(block.position));
-
       shape -> addChildShape(transform, triangleShape);
-      //shape -> setLocalScaling(btVector3(block.scale.x, block.scale.y, block.scale.z));
     }
 
   }

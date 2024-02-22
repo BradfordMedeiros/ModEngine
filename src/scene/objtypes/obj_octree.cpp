@@ -1104,7 +1104,7 @@ void addAllDivisions(std::vector<PositionAndScale>& octreeCubes, std::vector<Tra
         .size = glm::vec3(size, size, size),
       });
     }else if (rampShape){
-      if (rampShape -> direction == RAMP_FORWARD || true){
+      if (rampShape -> direction == RAMP_FORWARD){
         rampBlocks.push_back(Transformation {
           .position = rootPos,
           .scale = glm::vec3(size, size, size),
@@ -1603,8 +1603,7 @@ void drawOctreeSelectedCell(int x, int y, int z, int subdivision, float size, st
   drawGridSelectionCube(x, y, z, 1, 1, 1, subdivision, size, drawLine, std::nullopt);
 }
 
-
-void drawPhysicsShape(PositionAndScale& physicShape, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+void drawPhysicsBlock(PositionAndScale& physicShape, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
   auto leftX = physicShape.position.x;
   auto rightX = physicShape.position.x + physicShape.size.x;
   auto topY = physicShape.position.y + physicShape.size.y;
@@ -1629,6 +1628,44 @@ void drawPhysicsShape(PositionAndScale& physicShape, std::function<void(glm::vec
 
   drawLine(glm::vec3(rightX, bottomY, nearZ), glm::vec3(rightX, topY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
   drawLine(glm::vec3(leftX, bottomY, nearZ), glm::vec3(leftX, topY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
+}
+void drawPhysicsShape(std::vector<glm::vec3>& verts, Transformation& transform, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+  modassert(verts.size() % 3 == 0, "expected verts to be a multiple of 3");
+  for (int i = 0; i < verts.size() - 1; i+=3){
+    auto pos1 = verts.at(i);
+    auto pos2 = verts.at(i + 1);
+    auto pos3 = verts.at(i + 2);
+
+    pos1 *= transform.scale * 2.f;  // * 2 since communicated to physics in half extents
+    pos2 *= transform.scale * 2.f;  // * 2 since communicated to physics in half extents
+    pos3 *= transform.scale * 2.f;  // * 2 since communicated to physics in half extents
+
+    pos1 = transform.rotation * pos1;
+    pos2 = transform.rotation * pos2;
+    pos3 = transform.rotation * pos3;
+
+    pos1 += transform.position;
+    pos2 += transform.position;
+    pos3 += transform.position;
+
+    drawLine(pos1, pos2, glm::vec4(1.f, 0.f, 0.f, 1.f));
+    drawLine(pos1, pos3, glm::vec4(1.f, 0.f, 0.f, 1.f));
+    drawLine(pos2, pos3, glm::vec4(1.f, 0.f, 0.f, 1.f));
+
+  }
+}
+
+
+void drawPhysicsShapes(PhysicsShapes& physicsShapes, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+  for (auto &block : physicsShapes.blocks){
+    drawPhysicsBlock(block, drawLine);
+  }
+
+  for (auto &shape : physicsShapes.shapes){
+    for (auto &transform : shape.specialBlocks){
+      drawPhysicsShape(shape.verts, transform, drawLine);
+    }
+  }
 }
 
 bool drawAllSelectedBlocks = false;
@@ -1674,9 +1711,7 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
 
   // visualize the physics objects
   auto physicsShapes = getPhysicsShapes();
-  for (auto &physicShape : physicsShapes.blocks){
-    drawPhysicsShape(physicShape, drawLine);
-  }
+  drawPhysicsShapes(physicsShapes, drawLine);
 }
 
 int getNumOctreeNodes(OctreeDivision& octreeDivision){
@@ -1703,7 +1738,7 @@ void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
   for (int x = 0; x < selectionDim.value().x; x++){
     for (int y = 0; y < selectionDim.value().y; y++){
       for (int z = 0; z < selectionDim.value().z; z++){
-        RampDirection direction = RAMP_LEFT;
+        RampDirection direction = RAMP_RIGHT;
         if (direction == RAMP_RIGHT){
           float unitHeight = 1.f / selectionDim.value().x;
           float startHeight = unitHeight * (selectionDim.value().x - x - 1);
