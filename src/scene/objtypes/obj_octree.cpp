@@ -50,7 +50,7 @@ OctreeSelectionFace editorOrientation = FRONT;
 int selectedTexture = 0;
 
 std::optional<Line> line = std::nullopt;
-int subdivisionLevel = 2;
+int subdivisionLevel = 1;
 
 struct FaceIntersection {
   OctreeSelectionFace face;
@@ -1450,10 +1450,11 @@ void raycastSubdivision(glm::vec3 fromPos, glm::vec3 toPosDirection, glm::ivec3 
 }
 
 RaycastResult doRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, int subdivisionDepth){
+  modassert(subdivisionDepth >= 1, "subdivisionDepth must be >= 1");
   std::vector<RaycastIntersection> finalIntersections;
   std::cout << "GET raycast START" << std::endl;
 
-  raycastSubdivision(fromPos, toPosDirection, glm::ivec3(0, 0, 0), 0, subdivisionDepth, finalIntersections);
+  raycastSubdivision(fromPos, toPosDirection, glm::ivec3(0, 0, 0), 1, subdivisionDepth, finalIntersections);
 
   std::cout << "GET raycast END" << std::endl;
   std::cout << std::endl << std::endl;
@@ -1841,8 +1842,8 @@ int getCurrentSubdivisionLevel(){
   return subdivisionLevel;
 }
 void handleChangeSubdivisionLevel(int newSubdivisionLevel){
-  if (newSubdivisionLevel < 0){
-    newSubdivisionLevel = 0;
+  if (newSubdivisionLevel < 1){
+    newSubdivisionLevel = 1;
   }
   int subdivisionLevelDifference = newSubdivisionLevel - subdivisionLevel;
   if (subdivisionLevelDifference >= 0){
