@@ -1714,6 +1714,7 @@ std::vector<InputDispatch> inputFns = {
         GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
         GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
         makeOctreeCellRamp(*octreeObject, createScopedLoadMesh(world, selectedIndex));
+        updatePhysicsBody(world, selectedIndex);
       }
     }
   },

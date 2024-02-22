@@ -1185,6 +1185,7 @@ PhysicsShapes getPhysicsShapes(){
         glm::vec3(0.f, 0.5f, -0.5f),
         glm::vec3(0.5f, 0.5f, -0.5f),
       },
+      .centeringOffset = glm::vec3(-0.25, -0.25f, 0.25f),
       .specialBlocks = {},
     }
   };
@@ -1629,24 +1630,29 @@ void drawPhysicsBlock(PositionAndScale& physicShape, std::function<void(glm::vec
   drawLine(glm::vec3(rightX, bottomY, nearZ), glm::vec3(rightX, topY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
   drawLine(glm::vec3(leftX, bottomY, nearZ), glm::vec3(leftX, topY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
 }
-void drawPhysicsShape(std::vector<glm::vec3>& verts, Transformation& transform, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+void drawPhysicsShape(std::vector<glm::vec3>& verts, glm::vec3& centeringOffset, Transformation& transform, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
   modassert(verts.size() % 3 == 0, "expected verts to be a multiple of 3");
+  auto scale = transform.scale * 2.f;
   for (int i = 0; i < verts.size() - 1; i+=3){
     auto pos1 = verts.at(i);
     auto pos2 = verts.at(i + 1);
     auto pos3 = verts.at(i + 2);
 
-    pos1 *= transform.scale * 2.f;  // * 2 since communicated to physics in half extents
-    pos2 *= transform.scale * 2.f;  // * 2 since communicated to physics in half extents
-    pos3 *= transform.scale * 2.f;  // * 2 since communicated to physics in half extents
+    pos1 += centeringOffset;
+    pos2 += centeringOffset;
+    pos3 += centeringOffset;
+
+    pos1 *= scale;  // * 2 since communicated to physics in half extents
+    pos2 *= scale;  // * 2 since communicated to physics in half extents
+    pos3 *= scale;  // * 2 since communicated to physics in half extents
 
     pos1 = transform.rotation * pos1;
     pos2 = transform.rotation * pos2;
     pos3 = transform.rotation * pos3;
 
-    pos1 += transform.position;
-    pos2 += transform.position;
-    pos3 += transform.position;
+    pos1 += transform.position - (centeringOffset * scale);  // why doesn't this need the rotation added back in ? 
+    pos2 += transform.position - (centeringOffset * scale);
+    pos3 += transform.position - (centeringOffset * scale);
 
     drawLine(pos1, pos2, glm::vec4(1.f, 0.f, 0.f, 1.f));
     drawLine(pos1, pos3, glm::vec4(1.f, 0.f, 0.f, 1.f));
@@ -1663,7 +1669,7 @@ void drawPhysicsShapes(PhysicsShapes& physicsShapes, std::function<void(glm::vec
 
   for (auto &shape : physicsShapes.shapes){
     for (auto &transform : shape.specialBlocks){
-      drawPhysicsShape(shape.verts, transform, drawLine);
+      drawPhysicsShape(shape.verts, shape.centeringOffset, transform, drawLine);
     }
   }
 }
