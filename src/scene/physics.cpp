@@ -145,7 +145,13 @@ void cleanupRigidBody(btRigidBody* body){
   if (cshape != NULL){
     int numChildren = cshape -> getNumChildShapes();
     for (int i = 0; i < numChildren; i++){
-      btCollisionShape * childShape = cshape -> getChildShape(i);
+      btCollisionShape* childShape = cshape -> getChildShape(i);
+      btBvhTriangleMeshShape* childShapeMesh = dynamic_cast<btBvhTriangleMeshShape*>(childShape);
+      //std::cout << "addr: child shape: " << childShape << std::endl;
+      //std::cout << "addr: childShapeMesh: " << childShapeMesh << std::endl;
+      if (childShapeMesh != NULL){
+        delete childShapeMesh -> getMeshInterface();
+      }
       delete childShape;
     }
   }else if (tshape != NULL){
@@ -154,6 +160,7 @@ void cleanupRigidBody(btRigidBody* body){
   }
   delete shape;
   delete body;
+
 }
 
 // Due to bullet weirdness, this seems like it has to be called after adding rigid body to world (for the gravity part)
@@ -232,20 +239,25 @@ btRigidBody* createRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rot
   }
 
   for (auto &shapeType : shapes){
-    btTriangleMesh*  trimesh = new btTriangleMesh();
-    modassert(shapeType.verts.size() % 3 == 0, "verts shapetype must be multiple of 3");
-    for (int i = 0; i < shapeType.verts.size(); i+=3){
-      //modlog("physics rigid body exact-  adding vert", print(shapeType.verts.at(i)) + " ");
-      trimesh -> addTriangle(glmToBt(shapeType.verts.at(i)), glmToBt(shapeType.verts.at(i + 1)), glmToBt(shapeType.verts.at(i + 2)));
-    }
-
     for (auto &block : shapeType.specialBlocks){
-      //std::cout << "adding special block shape: " << print(block.position) << std::endl;
-      btTriangleMeshShape* triangleShape = new btBvhTriangleMeshShape(trimesh, true);
+      btTriangleMesh*  trimesh = new btTriangleMesh();
+      modassert(shapeType.verts.size() % 3 == 0, "verts shapetype must be multiple of 3");
+      for (int i = 0; i < shapeType.verts.size(); i+=3){
+        trimesh -> addTriangle(glmToBt(shapeType.verts.at(i)), glmToBt(shapeType.verts.at(i + 1)), glmToBt(shapeType.verts.at(i + 2)));
+      }
+      btBvhTriangleMeshShape* triangleShape = new btBvhTriangleMeshShape(trimesh, true);
+      //std::cout << "addr: btBvhTriangleMeshShape: " << triangleShape << std::endl;
       btTransform transform;
       transform.setIdentity();
+
+      // first term brings it into the center relative to the new rotation, second term puts it back to the offset
+      //auto extraOffset = (block.rotation * shapeType.centeringOffset) - shapeType.centeringOffset + block.position;
+      auto scale = block.scale * 2.f;
+      auto extraOffset = (block.rotation * (scale * shapeType.centeringOffset)) - (scale * shapeType.centeringOffset) + block.position;
+
       transform.setRotation(glmToBt(block.rotation));
-      transform.setOrigin(glmToBt(block.position));
+      transform.setOrigin(glmToBt(extraOffset));
+      triangleShape -> setLocalScaling(glmToBt(scale));
       shape -> addChildShape(transform, triangleShape);
     }
 
