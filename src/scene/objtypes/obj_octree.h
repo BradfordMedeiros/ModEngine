@@ -41,7 +41,8 @@ void writeOctreeTexture(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
 int getOctreeTextureId();
 void setOctreeTextureId(int textureId);
 
-void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
+enum RampDirection { RAMP_RIGHT, RAMP_LEFT, RAMP_FORWARD, RAMP_BACKWARD };
+void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh, RampDirection direction);
 
 
 void loadOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);

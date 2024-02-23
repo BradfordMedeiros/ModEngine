@@ -1713,12 +1713,32 @@ std::vector<InputDispatch> inputFns = {
       for (auto &selectedIndex : selectedIds(state.editor)){
         GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
         GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
-        makeOctreeCellRamp(*octreeObject, createScopedLoadMesh(world, selectedIndex));
+        makeOctreeCellRamp(*octreeObject, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
         updatePhysicsBody(world, selectedIndex);
       }
     }
   },
 
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = '[', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.rampDirection = (state.rampDirection ==  RAMP_FORWARD) ? RAMP_BACKWARD : RAMP_FORWARD;
+    }
+  },
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = ']', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.rampDirection = (state.rampDirection ==  RAMP_LEFT) ? RAMP_RIGHT : RAMP_LEFT;
+    }
+  },
   /////////// end octree stuff
 };
 

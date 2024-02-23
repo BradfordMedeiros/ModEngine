@@ -167,6 +167,9 @@ struct engineState {
   bool escapeQuits;
 
   std::optional<unsigned int> navmeshTextureId;
+
+  RampDirection rampDirection;
+
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

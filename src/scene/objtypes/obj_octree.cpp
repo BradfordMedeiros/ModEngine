@@ -15,7 +15,6 @@ enum FillType { FILL_FULL, FILL_EMPTY, FILL_MIXED };
 
 struct ShapeBlock { };
 
-enum RampDirection { RAMP_RIGHT, RAMP_LEFT, RAMP_FORWARD, RAMP_BACKWARD };
 struct ShapeRamp { 
   RampDirection direction;
   float startHeight;
@@ -1104,28 +1103,31 @@ void addAllDivisions(std::vector<PositionAndScale>& octreeCubes, std::vector<Tra
         .size = glm::vec3(size, size, size),
       });
     }else if (rampShape){
+      auto heightMultiplier = rampShape -> endHeight - rampShape -> startHeight;
+      float ySize = size * heightMultiplier;
+      auto rampPosition = rootPos + glm::vec3(0.f, size * rampShape -> startHeight, 0.f);
       if (rampShape -> direction == RAMP_FORWARD){
         rampBlocks.push_back(Transformation {
-          .position = rootPos,
-          .scale = glm::vec3(size, size, size),
+          .position = rampPosition,
+          .scale = glm::vec3(size, ySize, size),
           .rotation = MOD_ORIENTATION_FORWARD,
         });
       }else if (rampShape -> direction == RAMP_BACKWARD){
         rampBlocks.push_back(Transformation {
-          .position = rootPos,
-          .scale = glm::vec3(size, size, size),
+          .position = rampPosition,
+          .scale = glm::vec3(size, ySize, size),
           .rotation = MOD_ORIENTATION_BACKWARD,
         });
       }else if (rampShape -> direction == RAMP_LEFT){
         rampBlocks.push_back(Transformation {
-          .position = rootPos,
-          .scale = glm::vec3(size, size, size),
+          .position = rampPosition,
+          .scale = glm::vec3(size, ySize, size),
           .rotation = MOD_ORIENTATION_RIGHT,
         });
       }else if (rampShape -> direction == RAMP_RIGHT){
         rampBlocks.push_back(Transformation {
-          .position = rootPos,
-          .scale = glm::vec3(size, size, size),
+          .position = rampPosition,
+          .scale = glm::vec3(size, ySize, size),
           .rotation = MOD_ORIENTATION_LEFT,
         });
       }else {
@@ -1145,7 +1147,7 @@ PhysicsShapes getPhysicsShapes(){
   std::vector<PositionAndScale> octreeCubes;
 
 
-  // ENUMATE OUT THE REST OF THE VERTS FOR A RAMP
+  // ENUMERATE OUT THE REST OF THE VERTS FOR A RAMP
   std::vector<PositionAndScaleVerts> shapes = {
     PositionAndScaleVerts {
       .verts = {
@@ -1740,11 +1742,10 @@ void makeOctreeCellRamp(Octree& octree, int x, int y, int z, int subdivision, Ra
   writeOctreeCell(octree,  x, y, z, subdivision, true); // kind of hackey, but just to ensure parents are updated
 }
 
-void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh){
+void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh, RampDirection direction){
   for (int x = 0; x < selectionDim.value().x; x++){
     for (int y = 0; y < selectionDim.value().y; y++){
       for (int z = 0; z < selectionDim.value().z; z++){
-        RampDirection direction = RAMP_RIGHT;
         if (direction == RAMP_RIGHT){
           float unitHeight = 1.f / selectionDim.value().x;
           float startHeight = unitHeight * (selectionDim.value().x - x - 1);
@@ -1766,7 +1767,8 @@ void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
           float startHeight = unitHeight * (selectionDim.value().z - z - 1);
           float endHeight = unitHeight * (selectionDim.value().z - z);
           makeOctreeCellRamp(testOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel, direction, startHeight, endHeight);
-
+        }else {
+          modassert(false, "invalid ramp direction");
         }
       }
     }
