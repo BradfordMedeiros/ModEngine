@@ -68,6 +68,7 @@ const glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);
 
 auto fpsStat = 0;
 auto numObjectsStat = 0;
+auto rigidBodiesStat = 0;
 auto scenesLoadedStat = 0;
 
 std::map<std::string, std::string> args;
@@ -636,10 +637,11 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
 
   drawTextNdi(std::string("triangles: ") + std::to_string(numTriangles), uiXOffset, uiYOffset + offsetPerLine * 14, state.fontsize);
   drawTextNdi(std::string("num gameobjects: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(numObjectsStat)))), uiXOffset, uiYOffset + offsetPerLine * 15, state.fontsize);
-  drawTextNdi(std::string("num scenes loaded: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(scenesLoadedStat)))), uiXOffset, uiYOffset + offsetPerLine * 16, state.fontsize);
-  drawTextNdi(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + offsetPerLine * 17, state.fontsize);
-  drawTextNdi(std::string("time: ") + std::to_string(timeSeconds(false)), uiXOffset, uiYOffset + offsetPerLine * 18, state.fontsize);
-  drawTextNdi(std::string("realtime: ") + std::to_string(timeSeconds(true)), uiXOffset, uiYOffset + offsetPerLine * 19, state.fontsize);
+  drawTextNdi(std::string("num rigidbodys: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(rigidBodiesStat)))), uiXOffset, uiYOffset + offsetPerLine * 16, state.fontsize);
+  drawTextNdi(std::string("num scenes loaded: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(scenesLoadedStat)))), uiXOffset, uiYOffset + offsetPerLine * 17, state.fontsize);
+  drawTextNdi(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + offsetPerLine * 18, state.fontsize);
+  drawTextNdi(std::string("time: ") + std::to_string(timeSeconds(false)), uiXOffset, uiYOffset + offsetPerLine * 19, state.fontsize);
+  drawTextNdi(std::string("realtime: ") + std::to_string(timeSeconds(true)), uiXOffset, uiYOffset + offsetPerLine * 20, state.fontsize);
 
 }
 
@@ -1526,6 +1528,7 @@ int main(int argc, char* argv[]){
   setShouldProfile(shouldBenchmark);
   fpsStat = statName("fps");
   numObjectsStat = statName("object-count");
+  rigidBodiesStat = statName("rigidbody-count");
   scenesLoadedStat = statName("scenes-loaded");
 
   PROFILE("MAINLOOP",
@@ -1556,7 +1559,9 @@ int main(int argc, char* argv[]){
     previous = now;
 
     int numObjects = getNumberOfObjects(world.sandbox);
+    int numRigidBodies = getNumberOfRigidBodies(world);
     registerStat(numObjectsStat, numObjects);
+    registerStat(rigidBodiesStat, numRigidBodies);
     registerStat(scenesLoadedStat, getNumberScenesLoaded(world.sandbox));
     logBenchmarkTick(benchmark, deltaTime, numObjects, numTriangles);
 

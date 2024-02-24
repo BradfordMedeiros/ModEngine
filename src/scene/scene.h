@@ -109,7 +109,7 @@ std::optional<objid> getGameObjectByNamePrefix(World& world, std::string name, o
 GameObject& getGameObject(World& world, objid id);
 GameObject& getGameObject(World& world, std::string name, objid sceneId);
 
-int getNumberOfObjects(World& world);
+int getNumberOfRigidBodies(World& world);
 
 PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index);
 void loadMeshData(World& world, std::string meshPath, MeshData& meshData, objid ownerId);

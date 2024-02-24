@@ -1525,3 +1525,7 @@ Transformation gameobjectTransformation(World& world, objid id, bool isWorld){
   }
   return calcRelativeTransform(world.sandbox, id);
 }
+
+int getNumberOfRigidBodies(World& world){
+  return world.rigidbodys.size();
+}
