@@ -20,8 +20,8 @@ struct AtlasDimensions {
 };
 void setAtlasDimensions(AtlasDimensions newAtlasDimensions);
 
-void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine);
-void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, bool secondarySelection);
+void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine, glm::mat4 modelMatrix);
+void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, bool secondarySelection, objid id);
 
 enum OctreeDimAxis { OCTREE_XAXIS, OCTREE_YAXIS, OCTREE_ZAXIS, OCTREE_NOAXIS };
 void handleOctreeScroll(GameObjectOctree& octree, bool upDirection, std::function<Mesh(MeshData&)> loadMesh, bool holdingShift, bool holdingCtrl, OctreeDimAxis axis);
@@ -55,5 +55,6 @@ struct PhysicsShapes {
 };
 
 PhysicsShapes getPhysicsShapes();
+std::optional<objid> getSelectedOctreeId();
 
 #endif

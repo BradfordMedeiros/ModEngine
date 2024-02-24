@@ -334,7 +334,7 @@ void onMouseButton(){
   std::cout << "adjusted raycast " << print(adjustedPosition) << ", dir " << print(glm::normalize(adjustedDir)) << std::endl;
 
   auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
-  handleOctreeRaycast(adjustedPosition, adjustedDir, isCtrlHeld);
+  handleOctreeRaycast(adjustedPosition, adjustedDir, isCtrlHeld, id);
 }
 
 void drop_callback(GLFWwindow* window, int count, const char** paths){

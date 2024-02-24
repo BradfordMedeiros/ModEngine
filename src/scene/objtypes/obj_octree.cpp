@@ -50,6 +50,7 @@ int selectedTexture = 0;
 
 std::optional<Line> line = std::nullopt;
 int subdivisionLevel = 1;
+std::optional<objid> selectedOctreeId = std::nullopt;
 
 struct FaceIntersection {
   OctreeSelectionFace face;
@@ -1546,9 +1547,10 @@ void setSelection(glm::ivec3 selection1, glm::ivec3 selection2, OctreeSelectionF
   std::cout << "octree raycast selection1: " << print(selection1) << ", 2 = " << print(selection2) << std::endl;
 }
 
-void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, bool secondarySelection){
+void handleOctreeRaycast(glm::vec3 fromPos, glm::vec3 toPosDirection, bool secondarySelection, objid id){
   auto octreeRaycast = doRaycast(fromPos, toPosDirection, subdivisionLevel);
   raycastResult = octreeRaycast;
+  selectedOctreeId = id;
 
   RaycastResult filteredCells = filterFilledInCells(testOctree, raycastResult.value());
   if (!secondarySelection){
@@ -1676,21 +1678,35 @@ void drawPhysicsShapes(PhysicsShapes& physicsShapes, std::function<void(glm::vec
   }
 }
 
-bool drawAllSelectedBlocks = false;
-void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
+bool drawAllSelectedBlocks = true;
+void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine2, glm::mat4 modelMatrix){
+  std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLineModel = [drawLine2, &modelMatrix](glm::vec3 fromPos, glm::vec3 toPos, glm::vec4 color) -> void {
+    glm::vec4 fromPosVec4(fromPos.x, fromPos.y, fromPos.z, 1.f);
+    glm::vec4 toPosVec4(toPos.x, toPos.y, toPos.z, 1.f);
+    auto transformedFrom = modelMatrix * fromPosVec4;
+    auto transformedTo = modelMatrix * toPosVec4;
+
+    std::cout << "drawLine2:        " << print(transformedFrom) << ", " << print(transformedTo) << std::endl;
+
+    drawLine2(
+      glm::vec3(transformedFrom.x, transformedFrom.y, transformedFrom.z), 
+      glm::vec3(transformedTo.x, transformedTo.y, transformedTo.z), 
+      color
+    );
+  };
+
   if (selectedIndex.has_value()){
-    //std::cout << "draw grid, z: " << selectionDim.value().z << std::endl;
-    drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, testOctree.size,  drawLine, std::nullopt);
+    drawLineModel(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 5.f, 0.f), glm::vec4(1.f, 0.f, 0.f, 1.f));
+    drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, testOctree.size,  drawLineModel, std::nullopt);
     if (selectionDim.value().z > 0){
-      drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z + selectionDim.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, testOctree.size,  drawLine, std::nullopt);
+      drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z + selectionDim.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, testOctree.size,  drawLineModel, std::nullopt);
     }
-    //std::cout << "draw octree" << std::endl;
     if (line.has_value()){
-      drawLine(line.value().fromPos, line.value().toPos, glm::vec4(1.f, 0.f, 0.f, 1.f));
+      drawLineModel(line.value().fromPos, line.value().toPos, glm::vec4(1.f, 0.f, 0.f, 1.f));
     }
   }
 
-  auto faces = getFaces(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, testOctree.size, subdivisionLevel);
+  //auto faces = getFaces(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, testOctree.size, subdivisionLevel);
   //visualizeFaces(faces, drawLine);
 
   if (raycastResult.has_value()){
@@ -1698,28 +1714,28 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
     dirOffset.x *= 20;
     dirOffset.y *= 20;
     dirOffset.z *= 20;
-    drawLine(raycastResult.value().fromPos, raycastResult.value().fromPos + dirOffset, glm::vec4(1.f, 1.f, 1.f, 1.f));
+    drawLineModel(raycastResult.value().fromPos, raycastResult.value().fromPos + dirOffset, glm::vec4(1.f, 1.f, 1.f, 1.f));
 
     if (drawAllSelectedBlocks){
       for (auto intersection : raycastResult.value().intersections){
         auto xyzIndex = flatIndexToXYZ(intersection.index);
-        drawGridSelectionCube(xyzIndex.x + intersection.blockOffset.x, xyzIndex.y + intersection.blockOffset.y, xyzIndex.z + intersection.blockOffset.z, 1, 1, 1, raycastResult.value().subdivisionDepth, testOctree.size, drawLine, std::nullopt);    
+        drawGridSelectionCube(xyzIndex.x + intersection.blockOffset.x, xyzIndex.y + intersection.blockOffset.y, xyzIndex.z + intersection.blockOffset.z, 1, 1, 1, raycastResult.value().subdivisionDepth, testOctree.size, drawLineModel, std::nullopt);    
         // draw hit marker on the point
         for (auto &face : intersection.faceIntersections){
-          drawLine(face.position, face.position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 1.f, 0.f, 1.f));
+          drawLineModel(face.position, face.position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 1.f, 0.f, 1.f));
         }
       }
     }
   }
 
   if (false && closestRaycast.has_value()){
-    drawGridSelectionCube(closestRaycast.value().xyzIndex.x, closestRaycast.value().xyzIndex.y, closestRaycast.value().xyzIndex.z, 1, 1, 1, closestRaycast.value().subdivisionDepth, testOctree.size, drawLine, std::nullopt);    
-    drawLine(closestRaycast.value().position, closestRaycast.value().position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 0.f, 1.f, 1.f));
+    drawGridSelectionCube(closestRaycast.value().xyzIndex.x, closestRaycast.value().xyzIndex.y, closestRaycast.value().xyzIndex.z, 1, 1, 1, closestRaycast.value().subdivisionDepth, testOctree.size, drawLineModel, std::nullopt);    
+    drawLineModel(closestRaycast.value().position, closestRaycast.value().position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 0.f, 1.f, 1.f));
   }
 
-  // visualize the physics objects
-  auto physicsShapes = getPhysicsShapes();
-  drawPhysicsShapes(physicsShapes, drawLine);
+  //// visualize the physics objects
+  //auto physicsShapes = getPhysicsShapes();
+  //drawPhysicsShapes(physicsShapes, drawLine);
 }
 
 int getNumOctreeNodes(OctreeDivision& octreeDivision){
@@ -2029,4 +2045,9 @@ void saveOctree(){
   auto serializedData = serializeOctree(testOctree);
   std::cout << "octree data: \n" << serializedData << std::endl;
   serializedOctreeStr = serializedData;
+}
+
+
+std::optional<objid> getSelectedOctreeId(){
+  return selectedOctreeId;
 }

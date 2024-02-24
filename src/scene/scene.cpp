@@ -1464,6 +1464,15 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     world.interface.drawLine,
     timeElapsed
   );
+
+  // move this into on object frame
+  auto selectedOctree = getSelectedOctreeId();
+  if (selectedOctree.has_value()){
+    //auto transformation = fullTransformation(world.sandbox, selectedOctree.value());
+    //std::cout << "octree transformation: " << print(transformation) << std::endl;
+    auto transform = fullModelTransform(world.sandbox, selectedOctree.value());
+    drawOctreeSelectionGrid(world.interface.drawLine, transform);
+  }
 }
 
 
