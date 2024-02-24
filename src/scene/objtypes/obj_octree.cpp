@@ -1200,6 +1200,16 @@ PhysicsShapes getPhysicsShapes(){
   return physicsShapes;
 }
 
+std::string debugInfo(PhysicsShapes& physicsShapes){
+  std::string value = "debug physics\n";
+  value += std::string("blocks, size = ") + std::to_string(physicsShapes.blocks.size()) + "\n";
+  value += std::string("special shapes num types = ") + std::to_string(physicsShapes.shapes.size()) + "\n";
+  for (auto &shape : physicsShapes.shapes){
+    value += std::string("shape type, size = ") + std::to_string(shape.specialBlocks.size()) + "\n";
+  }
+  return value;
+}
+
 Mesh createOctreeMesh(std::function<Mesh(MeshData&)> loadMesh){
   std::vector<Vertex> vertices;
   std::vector<OctreeVertex> points = {};
@@ -1685,8 +1695,6 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
     glm::vec4 toPosVec4(toPos.x, toPos.y, toPos.z, 1.f);
     auto transformedFrom = modelMatrix * fromPosVec4;
     auto transformedTo = modelMatrix * toPosVec4;
-
-    std::cout << "drawLine2:        " << print(transformedFrom) << ", " << print(transformedTo) << std::endl;
 
     drawLine2(
       glm::vec3(transformedFrom.x, transformedFrom.y, transformedFrom.z), 

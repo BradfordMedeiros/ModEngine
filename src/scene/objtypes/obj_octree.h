@@ -55,6 +55,7 @@ struct PhysicsShapes {
 };
 
 PhysicsShapes getPhysicsShapes();
+std::string debugInfo(PhysicsShapes& physicsShapes);
 std::optional<objid> getSelectedOctreeId();
 
 #endif

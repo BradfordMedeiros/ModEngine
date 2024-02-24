@@ -166,6 +166,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
     );
   }else if (isOctree){
     auto physicsShapes = getPhysicsShapes();
+    std::cout << debugInfo(physicsShapes) << std::endl;
     rigidBody = addRigidBodyOctree(world.physicsEnvironment, physicsInfo.transformation.position, physicsInfo.transformation.rotation, physicsInfo.transformation.scale, physicsOptions.isStatic, physicsOptions.hasCollisions, opts, physicsShapes.blocks, physicsShapes.shapes);
   }else if (physicsOptions.shape == BOX || physicsOptions.shape == AUTOSHAPE){
     std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ")" << std::endl;
