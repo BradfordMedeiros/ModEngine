@@ -580,15 +580,12 @@ struct ValueAndSubdivision {
 };
 
 ValueAndSubdivision indexForOctreePath(std::vector<int> path){
-  std::cout << "index for octree: ";
   glm::ivec3 sumIndex(0, 0, 0);
   int subdivisionLevel = 0;
   for (int index : path){
     sumIndex = sumIndex * 2;
     sumIndex += flatIndexToXYZ(index);;
     subdivisionLevel++;
-
-    std::cout << index << " = " << print(sumIndex) << ", ";
   }
   std::cout << std::endl;
   return ValueAndSubdivision {
@@ -660,9 +657,7 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
     modassert(parentNode -> divisions.size() == 8 ? parentNode -> fill == FILL_MIXED : true,  "write octree - no divisions, but mixed fill");
   }
   modassert(octreeSubdivision -> divisions.size() == 8 ? octreeSubdivision -> fill == FILL_MIXED : true, "write octree - no divisions, but mixed fill");
-
 }
-
 
 OctreeDivision* getOctreeSubdivisionIfExists(Octree& octree, int x, int y, int z, int subdivision){
   OctreeDivision* octreeSubdivision = &octree.rootNode;
@@ -1177,6 +1172,9 @@ void addOctreeLevel(std::vector<OctreeVertex>& points, glm::vec3 rootPos, Octree
 1. decompose down to max subdivision levels, but make it sparse
 2*/
 
+float sizeForSubdivision(std::vector<int>& path){
+  return glm::pow(0.5f, path.size());
+}
 
 struct PhysicsShapeData {
   OctreeShape* shape;
@@ -1184,41 +1182,151 @@ struct PhysicsShapeData {
 };
 
 struct SparseShape {
+  OctreeShape* shape;
+  std::vector<int> path;
   bool deleted;
   int minX;
   int maxX;
   int minY;
   int maxY;
+  int minZ;
+  int maxZ;
 };
 
-SparseShape pathToSparseSubdivision(std::vector<int>& path){
-  return SparseShape {
+std::string print(SparseShape& sparseShape){
+  glm::vec3 minValues(sparseShape.minX, sparseShape.minY, sparseShape.minZ);
+  glm::vec3 maxValues(sparseShape.maxX, sparseShape.maxY, sparseShape.maxZ);
+  std::string value = print(minValues) + " | " + print(maxValues);
+  return value;
+}
+
+SparseShape blockToSparseSubdivision(OctreeShape* shape, std::vector<int>& path, int subdivisionSize){
+  modassert(path.size() <= subdivisionSize, "expected path.size() <= subdivisionSize");
+  auto offsetValue = indexForOctreePath(path);
+  modassert(offsetValue.subdivisionLevel == path.size(), "should be equal size");
+  auto newOffset = indexForSubdivision(offsetValue.value.x, offsetValue.value.y, offsetValue.value.z, offsetValue.subdivisionLevel, subdivisionSize);
+  auto size = glm::pow(2, subdivisionSize - path.size());  
+  
+  std::cout << "block to sparse subdivision: size = " << size << ", path = " << print(path) << ", max = " << subdivisionSize << ", maxvalue: " << glm::pow(2, subdivisionSize) << std::endl;
+  SparseShape sparseShape {
+    .shape = shape,
+    .path = path,
     .deleted = false,
-    .minX = 0,
-    .maxX = 0,
-    .minY = 0,
-    .maxY = 0,
+    .minX = newOffset.x,
+    .maxX = newOffset.x + size,
+    .minY = newOffset.y,
+    .maxY = newOffset.y + size,
+    .minZ = newOffset.z,
+    .maxZ = newOffset.z + size,
   };
+  std::cout << "sparse shape: " << print(sparseShape) << std::endl;
+
+  return sparseShape;
 }
 
 std::vector<SparseShape> joinSparseShapes(std::vector<SparseShape>& shapes){
-  return shapes;
+
+  // join along x
+
+  std::vector<SparseShape> joinedShapes;
+  for (int i = 0; i < shapes.size(); i++){
+    for (int j = i + 1; j < shapes.size(); j++){
+      SparseShape& shape1 = shapes.at(i);
+      SparseShape& shape2 = shapes.at(j);
+      if (shape1.deleted || shape2.deleted){
+        continue;
+      }
+
+      // if shape2 can fit into shape1 in other y and z dimensions, and is right next ot it on the x
+      // or vice versa
+      if (
+        (shape2.minY == shape1.minY && shape2.maxY == shape1.maxY &&  shape2.minZ == shape1.minZ && shape2.maxZ == shape1.maxZ) || 
+        (shape1.minY == shape2.minY && shape1.maxY == shape2.maxY &&  shape1.minZ == shape2.minZ && shape1.maxZ == shape2.maxZ)
+      ){
+        std::cout << "found a candidate for joining: " << print(shape1) << ", " << print(shape2) << std::endl;
+        // if the shape is just in the other...shouldn't ever happen
+        if (shape2.minX >= shape1.minX && shape2.maxX <= shape1.maxX){
+          shape2.deleted = true;
+          modassert(false, "expected blocks being joined not to be completely within the other");
+        }
+
+        if (shape2.minX == shape1.maxX){
+          shape2.deleted = true;
+          shape1.maxX = shape2.maxX;
+        }
+        if (shape1.minX == shape2.maxX){
+          shape1.deleted = true;
+          shape2.maxX = shape1.maxX;
+        }
+
+      
+
+        // shapes overlap 
+
+      }
+
+    }
+  }
+
+  for (auto &shape : shapes){
+    if (!shape.deleted){
+      joinedShapes.push_back(shape);
+    }
+  }
+
+
+  return joinedShapes;
 }
+
 
 int maxSubdivision(std::vector<PhysicsShapeData>& shapeData){
-  return 0;
+  int maxSize = 0;
+  for (auto &shape : shapeData){
+    if (shape.path.size() > maxSize){
+      maxSize = shape.path.size();
+    }
+  }
+  return maxSize;
 }
 
 
+struct OptimizeShape {
+  PhysicsShapeData physicsShapeData;
+  glm::ivec3 size;
+};
 
 std::vector<PhysicsShapeData> optimizePhysicsShapeData(std::vector<PhysicsShapeData>& shapeData){
-  return shapeData;
+  std::vector<PhysicsShapeData> optimizedShapes;
+
+  auto subdivisionSize = maxSubdivision(shapeData);
+  std::vector<SparseShape> sparseShapes;
+  for (auto &shape : shapeData){
+    ShapeBlock* blockShape = std::get_if<ShapeBlock>(shape.shape);
+    ShapeRamp* rampShape = std::get_if<ShapeRamp>(shape.shape);
+    modassert(blockShape || rampShape, "invalid shape type");
+    if (blockShape){
+      auto sparseShape = blockToSparseSubdivision(shape.shape, shape.path, subdivisionSize);
+      sparseShapes.push_back(sparseShape);
+    }else if (rampShape){
+      optimizedShapes.push_back(shape);
+    }
+  }
+
+//       .size = glm::ivec3(sparseShape.maxX - sparseShape.minX, sparseShape.maxY - sparseShape.minY, sparseShape.maxZ - sparseShape.minZ),
+
+  auto combinedSparseShapes = joinSparseShapes(sparseShapes);
+  for (auto &sparseShape : combinedSparseShapes){
+    optimizedShapes.push_back(PhysicsShapeData {
+      .shape = sparseShape.shape,
+      .path = sparseShape.path,
+    });
+  }
+
+  return optimizedShapes;
 }
 
 
-float sizeForSubdivision(std::vector<int>& path){
-  return glm::pow(0.5f, path.size());
-}
+
 
 glm::vec3 calculatePosition(std::vector<int>& path){
   glm::vec3 offset(0.f, 0.f, 0.f);
@@ -1276,7 +1384,7 @@ void createShapeData(std::vector<PhysicsShapeData>& shapeData, std::vector<Posit
  }
 }
 
-void addAllDivisions(std::vector<PositionAndScale>& octreeCubes, std::vector<Transformation>& rampBlocks, std::vector<PhysicsShapeData>& shapeBlocks, OctreeDivision& octreeDivision, std::vector<int> path){
+void addAllDivisions(std::vector<PhysicsShapeData>& shapeBlocks, OctreeDivision& octreeDivision, std::vector<int> path){
   if (octreeDivision.fill == FILL_FULL){
     shapeBlocks.push_back(PhysicsShapeData {
       .shape = &octreeDivision.shape,
@@ -1287,7 +1395,7 @@ void addAllDivisions(std::vector<PositionAndScale>& octreeCubes, std::vector<Tra
     for (int i = 0; i < octreeDivision.divisions.size(); i++){ 
       std::vector<int> newPath = path;
       newPath.push_back(i);
-      addAllDivisions(octreeCubes, rampBlocks, shapeBlocks, octreeDivision.divisions.at(i), newPath);
+      addAllDivisions(shapeBlocks, octreeDivision.divisions.at(i), newPath);
     }
   }
 }
@@ -1341,11 +1449,11 @@ PhysicsShapes getPhysicsShapes(){
   };
 
   std::vector<PhysicsShapeData> shapeDatas;
-  addAllDivisions(octreeCubes, shapes.at(0).specialBlocks, shapeDatas, testOctree.rootNode, {});
+  addAllDivisions(shapeDatas, testOctree.rootNode, {});
   PhysicsShapes physicsShapes {};
 
   auto optimizedShapeData = optimizePhysicsShapeData(shapeDatas);
-  createShapeData(optimizedShapeData, octreeCubes, shapes.at(0).specialBlocks);
+  createShapeData(optimizedShapeData, octreeCubes, shapes.at(0).specialBlocks /* ramps */);
 
   physicsShapes.blocks = octreeCubes;
   physicsShapes.shapes = shapes;
@@ -1354,7 +1462,7 @@ PhysicsShapes getPhysicsShapes(){
   for (auto &shape : shapes){
     numShapes += shape.specialBlocks.size();
   }
-  modassert((physicsShapes.blocks.size() + numShapes) == shapeDatas.size(), "shape datas should be equal to blocks and numShapes");
+  //modassert((physicsShapes.blocks.size() + numShapes) == shapeDatas.size(), "shape datas should be equal to blocks and numShapes");
 
   return physicsShapes;
 }
