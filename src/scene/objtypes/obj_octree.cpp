@@ -1289,14 +1289,22 @@ int maxSubdivision(std::vector<PhysicsShapeData>& shapeData){
   return maxSize;
 }
 
-
-struct OptimizeShape {
-  PhysicsShapeData physicsShapeData;
-  glm::ivec3 size;
+struct FinalShapeData {
+  OctreeShape* shape;
+  glm::vec3 position;
+  float subdivisionSize;
 };
 
-std::vector<PhysicsShapeData> optimizePhysicsShapeData(std::vector<PhysicsShapeData>& shapeData){
-  std::vector<PhysicsShapeData> optimizedShapes;
+glm::vec3 calculatePosition(std::vector<int>& path){
+  glm::vec3 offset(0.f, 0.f, 0.f);
+  for (int i = 0; i < path.size(); i++){
+    offset = offsetForFlatIndex(path.at(i), glm::pow(0.5f, i + 1), offset);
+  }
+  return offset;
+}
+
+std::vector<FinalShapeData> optimizePhysicsShapeData(std::vector<PhysicsShapeData>& shapeData){
+  std::vector<FinalShapeData> optimizedShapes;
 
   auto subdivisionSize = maxSubdivision(shapeData);
   std::vector<SparseShape> sparseShapes;
@@ -1308,7 +1316,11 @@ std::vector<PhysicsShapeData> optimizePhysicsShapeData(std::vector<PhysicsShapeD
       auto sparseShape = blockToSparseSubdivision(shape.shape, shape.path, subdivisionSize);
       sparseShapes.push_back(sparseShape);
     }else if (rampShape){
-      optimizedShapes.push_back(shape);
+      optimizedShapes.push_back(FinalShapeData {
+        .shape = shape.shape,
+        .position = calculatePosition(shape.path),
+        .subdivisionSize = sizeForSubdivision(shape.path),
+      });
     }
   }
 
@@ -1316,9 +1328,10 @@ std::vector<PhysicsShapeData> optimizePhysicsShapeData(std::vector<PhysicsShapeD
 
   auto combinedSparseShapes = joinSparseShapes(sparseShapes);
   for (auto &sparseShape : combinedSparseShapes){
-    optimizedShapes.push_back(PhysicsShapeData {
+    optimizedShapes.push_back(FinalShapeData {
       .shape = sparseShape.shape,
-      .path = sparseShape.path,
+      .position = calculatePosition(sparseShape.path),
+      .subdivisionSize = sizeForSubdivision(sparseShape.path),
     });
   }
 
@@ -1326,34 +1339,21 @@ std::vector<PhysicsShapeData> optimizePhysicsShapeData(std::vector<PhysicsShapeD
 }
 
 
-
-
-glm::vec3 calculatePosition(std::vector<int>& path){
-  glm::vec3 offset(0.f, 0.f, 0.f);
-  for (int i = 0; i < path.size(); i++){
-    offset = offsetForFlatIndex(path.at(i), glm::pow(0.5f, i + 1), offset);
-  }
-  return offset;
-}
-
-void createShapeData(std::vector<PhysicsShapeData>& shapeData, std::vector<PositionAndScale>& _octreeCubes, std::vector<Transformation>& _rampBlocks){
- for (auto &shape : shapeData){
-    float subdivisionSize = sizeForSubdivision(shape.path);
-    auto position = calculatePosition(shape.path);
+void createShapeData(std::vector<FinalShapeData>& shapeData, std::vector<PositionAndScale>& _octreeCubes, std::vector<Transformation>& _rampBlocks){
+  for (auto &shape : shapeData){
+    float subdivisionSize = shape.subdivisionSize;
     ShapeBlock* blockShape = std::get_if<ShapeBlock>(shape.shape);
     ShapeRamp* rampShape = std::get_if<ShapeRamp>(shape.shape);
     modassert(blockShape || rampShape, "shape type not supported");
     if (blockShape){
       _octreeCubes.push_back(PositionAndScale {
-        .position = position, 
+        .position = shape.position, 
         .size = glm::vec3(subdivisionSize, subdivisionSize, subdivisionSize),
       });
     }else if (rampShape){
-      float subdivisionSize = sizeForSubdivision(shape.path);
       auto heightMultiplier = rampShape -> endHeight - rampShape -> startHeight;
       float ySize = subdivisionSize * heightMultiplier;
-      auto position = calculatePosition(shape.path);
-      auto rampPosition = position + glm::vec3(0.f, subdivisionSize * rampShape -> startHeight, 0.f);
+      auto rampPosition = shape.position + glm::vec3(0.f, subdivisionSize * rampShape -> startHeight, 0.f);
 
       if (rampShape -> direction == RAMP_FORWARD){
         _rampBlocks.push_back(Transformation {
