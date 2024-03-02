@@ -1288,8 +1288,9 @@ int maxSubdivision(std::vector<PhysicsShapeData>& shapeData){
 struct FinalShapeData {
   OctreeShape* shape;
   glm::vec3 position;
-  glm::ivec3 subdivisionLevels;
+  glm::vec3 shapeSize;
 };
+
 
 glm::vec3 calculatePosition(std::vector<int>& path){
   glm::vec3 offset(0.f, 0.f, 0.f);
@@ -1312,20 +1313,32 @@ std::vector<FinalShapeData> optimizePhysicsShapeData(std::vector<PhysicsShapeDat
       auto sparseShape = blockToSparseSubdivision(shape.shape, shape.path, subdivisionSize);
       sparseShapes.push_back(sparseShape);
     }else if (rampShape){
+      auto subdivisionLevels = glm::ivec3(shape.path.size());
+      float subdivisionSizeX = glm::pow(0.5f, subdivisionLevels.x);
+      float subdivisionSizeY = glm::pow(0.5f, subdivisionLevels.y);
+      float subdivisionSizeZ = glm::pow(0.5f, subdivisionLevels.z);
+      glm::vec3 shapeSize(subdivisionSizeX, subdivisionSizeY, subdivisionSizeZ);
+
       optimizedShapes.push_back(FinalShapeData {
         .shape = shape.shape,
         .position = calculatePosition(shape.path),
-        .subdivisionLevels = glm::ivec3(shape.path.size()),
+        .shapeSize = shapeSize,
       });
     }
   }
 
   auto combinedSparseShapes = joinSparseShapes(sparseShapes);
   for (auto &sparseShape : combinedSparseShapes){
+    auto subdivisionLevels = glm::ivec3(sparseShape.path.size(), sparseShape.path.size(), sparseShape.path.size());
+    float subdivisionSizeX = glm::pow(0.5f, subdivisionLevels.x);
+    float subdivisionSizeY = glm::pow(0.5f, subdivisionLevels.y);
+    float subdivisionSizeZ = glm::pow(0.5f, subdivisionLevels.z);
+    glm::vec3 shapeSize(subdivisionSizeX, subdivisionSizeY, subdivisionSizeZ);
+
     optimizedShapes.push_back(FinalShapeData {
       .shape = sparseShape.shape,
       .position = calculatePosition(sparseShape.path),
-      .subdivisionLevels = glm::ivec3(sparseShape.path.size(), sparseShape.path.size(), sparseShape.path.size()),
+      .shapeSize = shapeSize,
     });
   }
 
@@ -1335,50 +1348,46 @@ std::vector<FinalShapeData> optimizePhysicsShapeData(std::vector<PhysicsShapeDat
 
 void createShapeData(std::vector<FinalShapeData>& shapeData, std::vector<PositionAndScale>& _octreeCubes, std::vector<Transformation>& _rampBlocks){
   for (auto &shape : shapeData){
-    float subdivisionSizeX = glm::pow(0.5f, shape.subdivisionLevels.x);
-    float subdivisionSizeY = glm::pow(0.5f, shape.subdivisionLevels.y);
-    float subdivisionSizeZ = glm::pow(0.5f, shape.subdivisionLevels.z);
-
     ShapeBlock* blockShape = std::get_if<ShapeBlock>(shape.shape);
     ShapeRamp* rampShape = std::get_if<ShapeRamp>(shape.shape);
     modassert(blockShape || rampShape, "shape type not supported");
     if (blockShape){
       _octreeCubes.push_back(PositionAndScale {
         .position = shape.position, 
-        .size = glm::vec3(subdivisionSizeX, subdivisionSizeY, subdivisionSizeZ),
+        .size = glm::vec3(shape.shapeSize.x, shape.shapeSize.y, shape.shapeSize.z),
       });
     }else if (rampShape){
       auto heightMultiplier = rampShape -> endHeight - rampShape -> startHeight;
-      float ySize = subdivisionSizeY * heightMultiplier;
-      auto rampPosition = shape.position + glm::vec3(0.f, subdivisionSizeY * rampShape -> startHeight, 0.f);
+      float ySize = shape.shapeSize.y * heightMultiplier;
+      auto rampPosition = shape.position + glm::vec3(0.f, shape.shapeSize.y * rampShape -> startHeight, 0.f);
 
       if (rampShape -> direction == RAMP_FORWARD){
         _rampBlocks.push_back(Transformation {
           .position = rampPosition,
-          .scale = glm::vec3(subdivisionSizeX, ySize, subdivisionSizeZ),
+          .scale = glm::vec3(shape.shapeSize.x, ySize, shape.shapeSize.z),
           .rotation = MOD_ORIENTATION_FORWARD,
         });
       }else if (rampShape -> direction == RAMP_BACKWARD){
         _rampBlocks.push_back(Transformation {
           .position = rampPosition,
-          .scale = glm::vec3(subdivisionSizeX, ySize, subdivisionSizeZ),
+          .scale = glm::vec3(shape.shapeSize.x, ySize, shape.shapeSize.z),
           .rotation = MOD_ORIENTATION_BACKWARD,
         });
       }else if (rampShape -> direction == RAMP_LEFT){
         _rampBlocks.push_back(Transformation {
           .position = rampPosition,
-          .scale = glm::vec3(subdivisionSizeX, ySize, subdivisionSizeZ),
+          .scale = glm::vec3(shape.shapeSize.x, ySize, shape.shapeSize.z),
           .rotation = MOD_ORIENTATION_RIGHT,
         });
       }else if (rampShape -> direction == RAMP_RIGHT){
         _rampBlocks.push_back(Transformation {
           .position = rampPosition,
-          .scale = glm::vec3(subdivisionSizeX, ySize, subdivisionSizeZ),
+          .scale = glm::vec3(shape.shapeSize.x, ySize, shape.shapeSize.z),
           .rotation = MOD_ORIENTATION_LEFT,
         });
       }
     }
- }
+  }
 }
 
 void addAllDivisions(std::vector<PhysicsShapeData>& shapeBlocks, OctreeDivision& octreeDivision, std::vector<int> path){
