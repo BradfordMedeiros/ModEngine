@@ -253,7 +253,21 @@ btRigidBody* createRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rot
       // first term brings it into the center relative to the new rotation, second term puts it back to the offset
       //auto extraOffset = (block.rotation * shapeType.centeringOffset) - shapeType.centeringOffset + block.position;
       auto scale = block.scale * 2.f;
-      auto extraOffset = (block.rotation * (scale * shapeType.centeringOffset)) - (scale * shapeType.centeringOffset) + block.position;
+
+      auto rotatedScaledCentering = block.rotation * (shapeType.centeringOffset * scale);
+      if (rotatedScaledCentering.x < 0){
+        rotatedScaledCentering.x *= -1;
+      }
+      if (rotatedScaledCentering.y < 0){
+        rotatedScaledCentering.y *= -1;
+      }
+      if (rotatedScaledCentering.z < 0){
+        rotatedScaledCentering.z *= -1;
+      }
+      rotatedScaledCentering.z *= -1;
+
+      auto extraOffset = (block.rotation * (scale * shapeType.centeringOffset))  + block.position + rotatedScaledCentering;
+
 
       transform.setRotation(glmToBt(block.rotation));
       transform.setOrigin(glmToBt(extraOffset));

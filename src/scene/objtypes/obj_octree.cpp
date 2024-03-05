@@ -1433,31 +1433,36 @@ void createShapeData(std::vector<FinalShapeData>& shapeData, std::vector<Positio
       });
     }else if (rampShape){
       auto heightMultiplier = rampShape -> endHeight - rampShape -> startHeight;
+      float depth = rampShape -> endDepth - rampShape -> startDepth;
       float ySize = shape.shapeSize.y * heightMultiplier;
       auto rampPosition = shape.position + glm::vec3(0.f, shape.shapeSize.y * rampShape -> startHeight, 0.f);
 
       if (rampShape -> direction == RAMP_FORWARD){
+        auto extraOffset = glm::vec3(0.f, 0.f, -1 * rampShape -> startDepth * shape.shapeSize.z);
         _rampBlocks.push_back(Transformation {
-          .position = rampPosition,
-          .scale = glm::vec3(shape.shapeSize.x, ySize, shape.shapeSize.z),
+          .position = rampPosition + extraOffset,
+          .scale = glm::vec3(shape.shapeSize.x, ySize, shape.shapeSize.z * depth),
           .rotation = MOD_ORIENTATION_FORWARD,
         });
       }else if (rampShape -> direction == RAMP_BACKWARD){
+        auto extraOffset = glm::vec3(0.f, 0.f, -1 * (1.f - rampShape -> endDepth) * shape.shapeSize.z);
         _rampBlocks.push_back(Transformation {
-          .position = rampPosition,
-          .scale = glm::vec3(shape.shapeSize.x, ySize, shape.shapeSize.z),
+          .position = rampPosition + extraOffset,
+          .scale = glm::vec3(shape.shapeSize.x, ySize, shape.shapeSize.z * depth),
           .rotation = MOD_ORIENTATION_BACKWARD,
         });
       }else if (rampShape -> direction == RAMP_LEFT){
+        auto extraOffset = glm::vec3(rampShape -> startDepth * shape.shapeSize.z, 0.f, 0.f);
         _rampBlocks.push_back(Transformation {
-          .position = rampPosition,
-          .scale = glm::vec3(shape.shapeSize.x, ySize, shape.shapeSize.z),
+          .position = rampPosition + extraOffset,
+          .scale = glm::vec3(shape.shapeSize.x, ySize, shape.shapeSize.z * depth),
           .rotation = MOD_ORIENTATION_RIGHT,
         });
       }else if (rampShape -> direction == RAMP_RIGHT){
+        auto extraOffset = glm::vec3((1.f - rampShape -> endDepth) * shape.shapeSize.z, 0.f, 0.f);
         _rampBlocks.push_back(Transformation {
-          .position = rampPosition,
-          .scale = glm::vec3(shape.shapeSize.x, ySize, shape.shapeSize.z),
+          .position = rampPosition + extraOffset,
+          .scale = glm::vec3(shape.shapeSize.x, ySize, shape.shapeSize.z * depth),
           .rotation = MOD_ORIENTATION_LEFT,
         });
       }
@@ -2000,21 +2005,36 @@ void drawPhysicsShape(std::vector<glm::vec3>& verts, glm::vec3& centeringOffset,
     auto pos2 = verts.at(i + 1);
     auto pos3 = verts.at(i + 2);
 
-    pos1 += centeringOffset;
-    pos2 += centeringOffset;
-    pos3 += centeringOffset;
+    pos1 = pos1 + centeringOffset;
+    pos2 = pos2 + centeringOffset;
+    pos3 = pos3 + centeringOffset;
 
     pos1 *= scale;  // * 2 since communicated to physics in half extents
     pos2 *= scale;  // * 2 since communicated to physics in half extents
     pos3 *= scale;  // * 2 since communicated to physics in half extents
 
-    pos1 = transform.rotation * pos1;
-    pos2 = transform.rotation * pos2;
-    pos3 = transform.rotation * pos3;
+    pos1 = transform.rotation * pos1 + transform.position;
+    pos2 = transform.rotation * pos2 + transform.position;
+    pos3 = transform.rotation * pos3 + transform.position;
 
-    pos1 += transform.position - (centeringOffset * scale);  // why doesn't this need the rotation added back in ? 
-    pos2 += transform.position - (centeringOffset * scale);
-    pos3 += transform.position - (centeringOffset * scale);
+    auto rotatedScaledCentering = transform.rotation * (centeringOffset * scale);
+
+    if (rotatedScaledCentering.x < 0){
+      rotatedScaledCentering.x *= -1;
+    }
+    if (rotatedScaledCentering.y < 0){
+      rotatedScaledCentering.y *= -1;
+    }
+    if (rotatedScaledCentering.z < 0){
+      rotatedScaledCentering.z *= -1;
+    }
+    rotatedScaledCentering.z *= -1; 
+
+    //std::cout << "values: c = " << print(centeringOffset) << ", s = " << print(scale) << ", r  = " << print(rotatedScale) << ", rc = " << print(rotatedCentering) << ", rsc = " << print(rotatedScaledCentering) << std::endl;
+
+    pos1 += rotatedScaledCentering;  // why doesn't this need the rotation added back in ? 
+    pos2 += rotatedScaledCentering;
+    pos3 += rotatedScaledCentering;
 
     drawLine(pos1, pos2, glm::vec4(1.f, 0.f, 0.f, 1.f));
     drawLine(pos1, pos3, glm::vec4(1.f, 0.f, 0.f, 1.f));
@@ -2089,9 +2109,9 @@ void drawOctreeSelectionGrid(std::function<void(glm::vec3, glm::vec3, glm::vec4)
     drawLineModel(closestRaycast.value().position, closestRaycast.value().position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 0.f, 1.f, 1.f));
   }
 
-  //// visualize the physics objects
+  ////// visualize the physics objects
   //auto physicsShapes = getPhysicsShapes();
-  //drawPhysicsShapes(physicsShapes, drawLine);
+  //drawPhysicsShapes(physicsShapes, drawLine2);
 }
 
 int getNumOctreeNodes(OctreeDivision& octreeDivision){

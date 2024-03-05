@@ -255,7 +255,7 @@ void loadAllTextures(std::string& textureFolderPath){
   }*/
 
   std::string flatSurfaceNormalTexture = "../gameresources/build/textures/clean/cherrybark.normal.jpg";
-  std::vector<std::string> textures { "./res/textures/grid.png", "../gameresources/build/textures/clean/chainlink.png", "../gameresources/build/textures/clean/hardwood.jpg", "../gameresources/build/textures/clean/pebbles2.png", "../gameresources/build/textures/clean/stonewall.jpg", "../gameresources/build/textures/clean/metalgrid.jpg" , "../gameresources/build/textures/clean/dryforestground.jpg", "../gameresources/build/textures/clean/foliage2.png"};
+  std::vector<std::string> textures { "./res/textures/grid.png", "../gameresources/build/textures/clean/tunnel_road.jpg", "../gameresources/build/textures/clean/grass.jpg", "../gameresources/build/textures/clean/pebbles2.png", "../gameresources/build/textures/clean/stonewall.jpg", "../gameresources/build/textures/clean/metalgrid.jpg" , "../gameresources/build/textures/clean/dryforestground.jpg", "../gameresources/build/textures/clean/foliage2.png"};
   std::vector<std::string> normalTextures;
   for (auto &texture : textures){
     auto normalTexture = lookupNormalTexture(world, texture);
