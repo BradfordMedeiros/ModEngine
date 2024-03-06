@@ -2136,10 +2136,52 @@ void makeOctreeCellRamp(Octree& octree, int x, int y, int z, int subdivision, Ra
   writeOctreeCell(octree,  x, y, z, subdivision, true); // kind of hackey, but just to ensure parents are updated
 }
 
-void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh, RampDirection direction){
-  float startDepth = 0.25f;
-  float endDepth = 0.9f;
 
+struct RampParams {
+  float startHeight;
+  float endHeight;
+  float startDepth;
+  float endDepth;
+};
+
+std::optional<RampParams> calculateRampParams(glm::vec2 slope, int x, int y){
+  // just solve parametric representation of the line
+
+  // x = slope.x * t
+  // y = slope.y * t
+
+  // t = x / slope.x
+  // y = y / slope.y
+
+  float tAtXLeft = slope.x / x;
+  float tAtXRight = slope.x / (x + 1);
+  float yAtXLeft = tAtXLeft * slope.y;
+  float yAtXRight = tAtXRight * slope.y;
+
+
+  float tAtYLow = slope.y / y;
+  float tAtYHigh = slope.y / (y + 1);
+  float xAtYLow = tAtYLow * slope.x;
+  float xAtYHigh = tAtYHigh * slope.x;
+
+  bool yLeftInCell =  (yAtXLeft >= y) && (yAtXLeft < (y + 1));
+  bool yRightInCell = (yAtXRight >= y) && (yAtXRight < (y + 1));
+
+  if (yLeftInCell && yRightInCell){
+    return RampParams {
+      .startHeight = yAtXLeft,
+      .endHeight = yAtXRight,
+      .startDepth = 0.f,
+      .endDepth = 1.f,
+    };
+  }
+
+  return std::nullopt;
+}
+
+
+
+void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh, RampDirection direction){
   for (int x = 0; x < selectionDim.value().x; x++){
     for (int y = 0; y < selectionDim.value().y; y++){
       for (int z = 0; z < selectionDim.value().z; z++){
@@ -2147,22 +2189,32 @@ void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
           float unitHeight = 1.f / selectionDim.value().x;
           float startHeight = unitHeight * (selectionDim.value().x - x - 1);
           float endHeight = unitHeight * (selectionDim.value().x - x);
+          float startDepth = 0.f;
+          float endDepth = 1.f;
           makeOctreeCellRamp(testOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel, direction, startHeight, endHeight, startDepth, endDepth);
         }else if (direction == RAMP_LEFT){
           float unitHeight = 1.f / selectionDim.value().x;
           float startHeight = unitHeight * x;
           float endHeight = unitHeight * (x + 1);
+          float startDepth = 0.f;
+          float endDepth = 1.f;
           std::cout << "make ramp left: " << startHeight << ", " << endHeight << std::endl;
           makeOctreeCellRamp(testOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel, direction, startHeight, endHeight, startDepth, endDepth);
         }else if (direction == RAMP_FORWARD){
           float unitHeight = 1.f / selectionDim.value().z;
           float startHeight = unitHeight * z;
           float endHeight = unitHeight * (z + 1);
+          float startDepth = 0.f;
+          float endDepth = 1.f;
+
+
           makeOctreeCellRamp(testOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel, direction, startHeight, endHeight, startDepth, endDepth);
         }else if (direction == RAMP_BACKWARD){
           float unitHeight = 1.f / selectionDim.value().z;
           float startHeight = unitHeight * (selectionDim.value().z - z - 1);
           float endHeight = unitHeight * (selectionDim.value().z - z);
+          float startDepth = 0.f;
+          float endDepth = 1.f;
           makeOctreeCellRamp(testOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel, direction, startHeight, endHeight, startDepth, endDepth);
         }else {
           modassert(false, "invalid ramp direction");
