@@ -2145,38 +2145,35 @@ struct RampParams {
 };
 
 std::optional<RampParams> calculateRampParams(glm::vec2 slope, int x, int y){
-  // just solve parametric representation of the line
+  float startDepth = y * (slope.x / slope.y);
+  float endDepth = (y + 1) * (slope.x / slope.y);
 
-  // x = slope.x * t
-  // y = slope.y * t
-
-  // t = x / slope.x
-  // y = y / slope.y
-
-  float tAtXLeft = slope.x / x;
-  float tAtXRight = slope.x / (x + 1);
-  float yAtXLeft = tAtXLeft * slope.y;
-  float yAtXRight = tAtXRight * slope.y;
-
-
-  float tAtYLow = slope.y / y;
-  float tAtYHigh = slope.y / (y + 1);
-  float xAtYLow = tAtYLow * slope.x;
-  float xAtYHigh = tAtYHigh * slope.x;
-
-  bool yLeftInCell =  (yAtXLeft >= y) && (yAtXLeft < (y + 1));
-  bool yRightInCell = (yAtXRight >= y) && (yAtXRight < (y + 1));
-
-  if (yLeftInCell && yRightInCell){
-    return RampParams {
-      .startHeight = yAtXLeft,
-      .endHeight = yAtXRight,
-      .startDepth = 0.f,
-      .endDepth = 1.f,
-    };
+  if ((endDepth - x) > 1){
+    endDepth = x + 1;
   }
 
-  return std::nullopt;
+  if ((startDepth - x) < 0){
+    startDepth = x;
+  }
+
+  float startHeight = startDepth * (slope.y / slope.x);
+  float endHeight = endDepth * (slope.y / slope.x); 
+
+  if (aboutEqual(startHeight, endHeight) || aboutEqual(startDepth, endDepth)){
+    return std::nullopt;
+  }
+
+  RampParams rampParams {
+    .startHeight = startHeight - y,
+    .endHeight = endHeight - y,
+    .startDepth = startDepth - x,
+    .endDepth = endDepth - x,
+  };
+
+  //std::cout << "calculate ramp: (X,Y): " << x << ", " << y << ", slope = " << print(slope) << " -  startDepth " << startDepthX << ", endDepth " << endDepth << ", startHeight = " << startHeight << ", endHeight = " << endHeight << std::endl;
+  //std::cout << std::endl;
+  return rampParams;
+
 }
 
 
@@ -2201,14 +2198,15 @@ void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
           std::cout << "make ramp left: " << startHeight << ", " << endHeight << std::endl;
           makeOctreeCellRamp(testOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel, direction, startHeight, endHeight, startDepth, endDepth);
         }else if (direction == RAMP_FORWARD){
-          float unitHeight = 1.f / selectionDim.value().z;
-          float startHeight = unitHeight * z;
-          float endHeight = unitHeight * (z + 1);
-          float startDepth = 0.f;
-          float endDepth = 1.f;
+          auto rampParams = calculateRampParams(glm::vec2(selectionDim.value().z, selectionDim.value().y), z, y);
+          if (rampParams.has_value()){
+            float startHeight = rampParams.value().startHeight;
+            float endHeight = rampParams.value().endHeight;
+            float startDepth = rampParams.value().startDepth;
+            float endDepth = rampParams.value().endDepth;
+            makeOctreeCellRamp(testOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel, direction, startHeight, endHeight, startDepth, endDepth);
+          }
 
-
-          makeOctreeCellRamp(testOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel, direction, startHeight, endHeight, startDepth, endDepth);
         }else if (direction == RAMP_BACKWARD){
           float unitHeight = 1.f / selectionDim.value().z;
           float startHeight = unitHeight * (selectionDim.value().z - z - 1);
