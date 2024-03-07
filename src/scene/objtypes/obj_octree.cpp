@@ -2205,6 +2205,8 @@ void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
             float startDepth = rampParams.value().startDepth;
             float endDepth = rampParams.value().endDepth;
             makeOctreeCellRamp(testOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel, direction, startHeight, endHeight, startDepth, endDepth);
+          }else{
+            writeOctreeCell(testOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel, false);
           }
 
         }else if (direction == RAMP_BACKWARD){
