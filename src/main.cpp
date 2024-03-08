@@ -36,6 +36,7 @@ RenderStages renderStages;
 SysInterface interface;
 KeyRemapper keyMapper;
 CScriptBindingCallbacks cBindings;
+btIDebugDraw* debuggerDrawer = NULL;
 
 unsigned int framebufferTexture;
 unsigned int framebufferTexture2;
@@ -952,7 +953,6 @@ int main(int argc, char* argv[]){
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
    ("d,dumpphysics", "Dump physics info to file for external processing", cxxopts::value<bool>()->default_value("false"))
    ("b,bootstrapper", "Run the server in bootstrapper only", cxxopts::value<bool>()->default_value("false"))
-   ("y,debugphysics", "Enable physics debug drawing", cxxopts::value<bool>()->default_value("false"))
    ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))
    ("g,grid", "Size of grid chunking grid used for open world streaming, default to zero (no grid)", cxxopts::value<int>()->default_value("0"))
    ("w,world", "Use streaming chunk system", cxxopts::value<std::string>()->default_value(""))
@@ -1066,6 +1066,12 @@ int main(int argc, char* argv[]){
   std::cout << "LIFECYCLE: program starting" << std::endl;
 
   state.fullscreen = result["fullscreen"].as<bool>(); // merge flags and world.state concept
+
+  // have this before createing the state since depends on debuggerDrawer
+  BulletDebugDrawer drawer(addLineNextCyclePhysicsDebug);
+  debuggerDrawer = &drawer;
+  debuggerDrawer -> setDebugMode(0);
+
   setInitialState(state, "./res/world.state", now, interface.readFile, result["noinput"].as<bool>()); 
 
   glfwInit();
@@ -1345,8 +1351,6 @@ int main(int argc, char* argv[]){
   registerAllBindings(pluginBindings);
   cBindings = getCScriptBindingCallbacks();
 
-  BulletDebugDrawer drawer(addLineNextCyclePhysicsDebug);
-  btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
 
   if(bootStrapperMode){
     netcode = initNetCode(cBindings.onPlayerJoined, cBindings.onPlayerLeave, interface.readFile);

@@ -24,6 +24,7 @@ enum CURSOR_TYPE { CURSOR_NORMAL, CURSOR_CAPTURE, CURSOR_HIDDEN, CURSOR_DEFAULT 
 
 struct engineState {
   bool enablePhysics;
+  bool enablePhysicsDebug;
   bool visualizeNormals;
   bool showDebug;
   int showDebugMask;

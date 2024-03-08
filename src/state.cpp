@@ -1,6 +1,6 @@
 #include "./state.h"
 
-extern World world;
+extern btIDebugDraw* debuggerDrawer;
 
 std::string renderModeAsStr(RENDER_MODE mode){
   if (mode == RENDER_FINAL){
@@ -231,6 +231,29 @@ ObjectStateMapping simpleEnumSerializer(std::string object, std::string attribut
 
 std::vector<ObjectStateMapping> mapping = {
   simpleBoolSerializer("physics", "enabled", offsetof(engineState, enablePhysics)),
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value, float now) -> void {
+      auto debugEnabled = std::get_if<std::string>(&value);
+      if (debugEnabled != NULL){
+        if (*debugEnabled == "true"){
+          debuggerDrawer -> setDebugMode(1);
+          state.enablePhysicsDebug = true;
+        }else if (*debugEnabled == "false") {
+          debuggerDrawer -> setDebugMode(0);
+          state.enablePhysicsDebug = false;
+        }
+      }
+    },
+    .getAttr = [](engineState& state) -> AttributeValue {
+      if (state.enablePhysicsDebug){
+        return "enabled";
+      }
+      return "disabled";
+    },
+    .object = "physics",
+    .attribute = "debug",
+  },
+
   simpleBoolSerializer("editor", "debug", offsetof(engineState, showDebug)),
   simpleIntSerializer("editor", "debugmask", offsetof(engineState, showDebugMask)),
   simpleBoolSerializer("diffuse", "enabled", offsetof(engineState, enableDiffuse)),
@@ -402,6 +425,7 @@ void setState(engineState& state, std::vector<ObjectValue>& values, float now){
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight){
 	engineState state = {
     .enablePhysics = true,
+    .enablePhysicsDebug = false,
 		.visualizeNormals = false,
     .showDebug = false,
     .showDebugMask = 0,

@@ -12,6 +12,8 @@ editor:debug:false
 editor:debugmask:8
 
 physics:enabled:true
+physics:debug:false
+
 world:paused:true  # true / false
 
 diffuse:enabled:true
@@ -22,18 +24,18 @@ bloom:threshold:3
 bloomblur:amount:1
 #exposure:amount:0.8
 pbr:enabled:false
-shadows:enabled:false
+shadows:enabled:true
 shadows:intensity:0.7
 attenuation:enabled:false
 
 exposure:enabled:false
 gamma:enabled:false
 
-light:amount:0.6 0.6 0.6
+light:amount:1 1 1
 ###############################
 
 ### Post Process ###
-fog:color:0.2 0.1 0
+fog:color:0 0 1 1
 fog:enabled:true
 fog:mincutoff:0.5
 fog:maxcutoff:0.9999
@@ -42,8 +44,8 @@ fog:maxcutoff:0.9999
 
 ### Effects ###
 #dof:state:enabled
-skybox:texture:./res/textures/skyboxs/desert/
-skybox:color:0.2 0.2 0.2
+skybox:texture:./res/textures/skyboxs/sky/
+skybox:color:1 1 1
 skybox:enable:true
 ###############################
 
@@ -59,8 +61,9 @@ rendering:fontsize:6
 
 
 ### input stuff ###
-mouse:cursor:capture   # normal, hidden, capture
+mouse:cursor:normal   # normal, hidden, capture
 mouse:show-cursor:false
+
 
 #window:name:ModEngine Editor
 #window:icon:./res/textures/wood.jpg

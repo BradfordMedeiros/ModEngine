@@ -1739,7 +1739,38 @@ std::vector<InputDispatch> inputFns = {
       state.rampDirection = (state.rampDirection ==  RAMP_LEFT) ? RAMP_RIGHT : RAMP_LEFT;
     }
   },
+
+
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = ']', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.rampDirection = (state.rampDirection ==  RAMP_LEFT) ? RAMP_RIGHT : RAMP_LEFT;
+    }
+  },
+
   /////////// end octree stuff
+
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = '\'', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      setWorldState({
+        ObjectValue {
+          .object = "physics",
+          .attribute = "debug",
+          .value = state.enablePhysicsDebug ? "false" : "true",
+        }
+      });
+    }
+  },
+
 };
 
     
