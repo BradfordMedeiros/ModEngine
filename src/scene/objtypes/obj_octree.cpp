@@ -2172,7 +2172,7 @@ std::optional<RampParams> calculateRampParams(glm::vec2 slope, int x, int y){
 
 
   std::cout << "calculate ramp: (X,Y): " << x << ", " << y << ", slope = " << print(slope) << " -  startDepth " << startDepth << ", endDepth " << endDepth << ", startHeight = " << startHeight << ", endHeight = " << endHeight << std::endl;
-  if (aboutEqual(startHeight, endHeight) || aboutEqual(startDepth, endDepth)){
+  if (aboutEqual(startHeight, endHeight) || aboutEqual(startDepth, endDepth) || startDepth > endDepth){
     return std::nullopt;
   }
 
@@ -2182,13 +2182,14 @@ std::optional<RampParams> calculateRampParams(glm::vec2 slope, int x, int y){
 }
 
 
-
 void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh, RampDirection direction){
+  auto slope = (direction == RAMP_FORWARD || direction == RAMP_BACKWARD) ? glm::vec2(selectionDim.value().z, selectionDim.value().y) : glm::vec2(selectionDim.value().x, selectionDim.value().y);
+
   for (int x = 0; x < selectionDim.value().x; x++){
     for (int y = 0; y < selectionDim.value().y; y++){
       for (int z = 0; z < selectionDim.value().z; z++){
         if (direction == RAMP_RIGHT){
-          auto rampParams = calculateRampParams(glm::vec2(selectionDim.value().x, selectionDim.value().y), selectionDim.value().x - x - 1, y);
+          auto rampParams = calculateRampParams(slope, selectionDim.value().x - x - 1, y);
           if (rampParams.has_value()){
             float startHeight = rampParams.value().startHeight;
             float endHeight = rampParams.value().endHeight;
@@ -2199,7 +2200,7 @@ void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
             writeOctreeCell(testOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel, false);
           }
         }else if (direction == RAMP_LEFT){
-          auto rampParams = calculateRampParams(glm::vec2(selectionDim.value().x, selectionDim.value().y), x, y);
+          auto rampParams = calculateRampParams(slope, x, y);
           if (rampParams.has_value()){
             float startHeight = rampParams.value().startHeight;
             float endHeight = rampParams.value().endHeight;
@@ -2210,7 +2211,7 @@ void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
             writeOctreeCell(testOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel, false);
           }
         }else if (direction == RAMP_FORWARD){
-          auto rampParams = calculateRampParams(glm::vec2(selectionDim.value().z, selectionDim.value().y), z, y);
+          auto rampParams = calculateRampParams(slope, z, y);
           if (rampParams.has_value()){
             float startHeight = rampParams.value().startHeight;
             float endHeight = rampParams.value().endHeight;
@@ -2221,7 +2222,7 @@ void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)>
             writeOctreeCell(testOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel, false);
           }
         }else if (direction == RAMP_BACKWARD){
-          auto rampParams = calculateRampParams(glm::vec2(selectionDim.value().z, selectionDim.value().y), selectionDim.value().z - z - 1, y);
+          auto rampParams = calculateRampParams(slope, selectionDim.value().z - z - 1, y);
           if (rampParams.has_value()){
             float startHeight = rampParams.value().startHeight;
             float endHeight = rampParams.value().endHeight;

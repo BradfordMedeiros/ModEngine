@@ -1741,16 +1741,6 @@ std::vector<InputDispatch> inputFns = {
   },
 
 
-  InputDispatch{
-    .alwaysEnable = false,
-    .sourceKey = ']', 
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = []() -> void {
-      state.rampDirection = (state.rampDirection ==  RAMP_LEFT) ? RAMP_RIGHT : RAMP_LEFT;
-    }
-  },
 
   /////////// end octree stuff
 
