@@ -165,7 +165,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       heightmapObj -> heightmap.maxHeight
     );
   }else if (isOctree){
-    auto physicsShapes = getPhysicsShapes();
+    auto physicsShapes = getPhysicsShapes(getTestOctree());
     std::cout << debugInfo(physicsShapes) << std::endl;
     rigidBody = addRigidBodyOctree(world.physicsEnvironment, physicsInfo.transformation.position, physicsInfo.transformation.rotation, physicsInfo.transformation.scale, physicsOptions.isStatic, physicsOptions.hasCollisions, opts, physicsShapes.blocks, physicsShapes.shapes);
   }else if (physicsOptions.shape == BOX || physicsOptions.shape == AUTOSHAPE){
@@ -1472,7 +1472,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     //auto transformation = fullTransformation(world.sandbox, selectedOctree.value());
     //std::cout << "octree transformation: " << print(transformation) << std::endl;
     auto transform = fullModelTransform(world.sandbox, selectedOctree.value());
-    drawOctreeSelectionGrid(world.interface.drawLine, transform);
+    drawOctreeSelectionGrid(getTestOctree(), world.interface.drawLine, transform);
   }
 }
 
