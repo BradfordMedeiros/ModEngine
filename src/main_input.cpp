@@ -204,7 +204,7 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
         }else if (state.manipulatorAxis == ZAXIS){
           axis = OCTREE_ZAXIS;
         }
-        handleOctreeScroll(*octreeObject, getTestOctree(), yoffset > 0, createScopedLoadMesh(world, selectedIndex), isShiftHeld, isCtrlHeld, axis);
+        handleOctreeScroll(*octreeObject, octreeObject -> octree, yoffset > 0, createScopedLoadMesh(world, selectedIndex), isShiftHeld, isCtrlHeld, axis);
         updatePhysicsBody(world, selectedIndex);
       }
     }
@@ -334,7 +334,13 @@ void onMouseButton(){
   std::cout << "adjusted raycast " << print(adjustedPosition) << ", dir " << print(glm::normalize(adjustedDir)) << std::endl;
 
   auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
-  handleOctreeRaycast(getTestOctree(), adjustedPosition, adjustedDir, isCtrlHeld, id);
+
+  for (auto &selectedIndex : selectedIds(state.editor)){
+    GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
+    GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&objectOctree);
+    modassert(octreeObj, "draw selection grid onFrame not octree type");
+    handleOctreeRaycast(octreeObj -> octree, adjustedPosition, adjustedDir, isCtrlHeld, id);
+  }
 }
 
 void drop_callback(GLFWwindow* window, int count, const char** paths){
@@ -1629,10 +1635,10 @@ std::vector<InputDispatch> inputFns = {
         GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
         if (octreeObject != NULL){
           if (isCtrlHeld){
-            deleteSelectedOctreeNodes(*octreeObject, getTestOctree(), createScopedLoadMesh(world, selectedIndex));
+            deleteSelectedOctreeNodes(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex));
             updatePhysicsBody(world, selectedIndex);
           }else{
-            insertSelectedOctreeNodes(*octreeObject, getTestOctree(), createScopedLoadMesh(world, selectedIndex));
+            insertSelectedOctreeNodes(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex));
             updatePhysicsBody(world, selectedIndex);
           }
         }
@@ -1652,7 +1658,7 @@ std::vector<InputDispatch> inputFns = {
       for (auto &selectedIndex : selectedIds(state.editor)){
         GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
         GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
-        writeOctreeTexture(*octreeObject, getTestOctree(), createScopedLoadMesh(world, selectedIndex), isCtrlHeld, TEXTURE_UP);
+        writeOctreeTexture(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), isCtrlHeld, TEXTURE_UP);
       }
     }
   },
@@ -1713,7 +1719,7 @@ std::vector<InputDispatch> inputFns = {
       for (auto &selectedIndex : selectedIds(state.editor)){
         GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
         GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
-        makeOctreeCellRamp(*octreeObject, getTestOctree(), createScopedLoadMesh(world, selectedIndex), state.rampDirection);
+        makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
         updatePhysicsBody(world, selectedIndex);
       }
     }

@@ -5,10 +5,6 @@
 #include "./obj_util.h"
 #include "../common/vectorgfx.h"
 
-struct GameObjectOctree {
-	Mesh mesh;
-};
-
 struct FaceTexture {
   //const char* texture;
   glm::vec2 texCoordsTopLeft;
@@ -49,6 +45,11 @@ struct OctreeDivision {
 struct Octree {
   double size;
   OctreeDivision rootNode;
+};
+
+struct GameObjectOctree {
+  Mesh mesh;
+  Octree octree;
 };
 
 GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util);
@@ -97,7 +98,5 @@ struct PhysicsShapes {
 PhysicsShapes getPhysicsShapes(Octree& octree);
 std::string debugInfo(PhysicsShapes& physicsShapes);
 std::optional<objid> getSelectedOctreeId();
-
-Octree& getTestOctree();
 
 #endif

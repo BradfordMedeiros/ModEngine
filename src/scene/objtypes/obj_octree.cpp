@@ -2,7 +2,6 @@
 
 std::vector<AutoSerialize> octreeAutoserializer {};
 
-
 enum OctreeSelectionFace { FRONT, BACK, LEFT, RIGHT, UP, DOWN };
 std::optional<glm::ivec3> selectedIndex = glm::ivec3(1, 0, 0);
 std::optional<glm::ivec3> selectionDim = glm::ivec3(1, 1, 0);
@@ -393,53 +392,6 @@ Octree deserializeOctree(std::string& value){
     .rootNode = deserializeOctreeDivision(lines.at(1), textures, &currentTextureIndex, shapes, &currentShapeIndex),
   };
 }
-
-Octree unsubdividedOctree {
-  .size = 1.f,
-  .rootNode = OctreeDivision {
-    .fill = FILL_FULL,
-    .shape = ShapeBlock{},
-    .faces = defaultTextureCoords,
-    .divisions = {},
-  },
-};
-Octree subdividedOne {
-  .size = 1.f,
-  .rootNode = OctreeDivision {
-    .fill = FILL_MIXED,
-    .shape = ShapeBlock{},
-    .faces = defaultTextureCoords,
-    .divisions = {
-      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-      OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-      OctreeDivision { 
-        .fill = FILL_MIXED,
-        .faces = defaultTextureCoords,
-        .divisions = {
-          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-        },
-      },
-      OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-      OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords},
-      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-    },
-  },
-};
-
-Octree testOctree = subdividedOne;
-Octree& getTestOctree(){
-  return testOctree;
-}
-
 
 glm::ivec3 indexForSubdivision(int x, int y, int z, int sourceSubdivision, int targetSubdivision){
   if (sourceSubdivision < targetSubdivision){ // same formula as other case, just being mindful of integer division
@@ -1578,9 +1530,51 @@ Mesh* getOctreeMesh(GameObjectOctree& octree){
   return &octree.mesh;
 }
 
+Octree unsubdividedOctree {
+  .size = 1.f,
+  .rootNode = OctreeDivision {
+    .fill = FILL_FULL,
+    .shape = ShapeBlock{},
+    .faces = defaultTextureCoords,
+    .divisions = {},
+  },
+};
+Octree subdividedOne {
+  .size = 1.f,
+  .rootNode = OctreeDivision {
+    .fill = FILL_MIXED,
+    .shape = ShapeBlock{},
+    .faces = defaultTextureCoords,
+    .divisions = {
+      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+      OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+      OctreeDivision { 
+        .fill = FILL_MIXED,
+        .faces = defaultTextureCoords,
+        .divisions = {
+          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+        },
+      },
+      OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+      OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords},
+      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
+    },
+  },
+};
+
 GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectOctree obj {};
-  obj.mesh = createOctreeMesh(testOctree, util.loadMesh);
+  obj.octree = subdividedOne;
+  obj.mesh = createOctreeMesh(obj.octree, util.loadMesh);
   return obj;
 }
 
@@ -2442,18 +2436,18 @@ std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctre
 }  //
 
 
-std::string serializedOctreeStr = serializeOctree(testOctree);
+std::string serializedOctreeStr = serializeOctree(subdividedOne);
 void loadOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh){
-  modlog("octree", "loading");
-  testOctree = deserializeOctree(serializedOctreeStr);
-  octree.mesh = createOctreeMesh(testOctree, loadMesh);
+  //modlog("octree", "loading");
+  //testOctree = deserializeOctree(serializedOctreeStr);
+  //octree.mesh = createOctreeMesh(testOctree, loadMesh);
 }
 
 void saveOctree(){
-  modlog("octree", "saving");
-  auto serializedData = serializeOctree(testOctree);
-  std::cout << "octree data: \n" << serializedData << std::endl;
-  serializedOctreeStr = serializedData;
+  //modlog("octree", "saving");
+  //auto serializedData = serializeOctree(testOctree);
+  //std::cout << "octree data: \n" << serializedData << std::endl;
+  //serializedOctreeStr = serializedData;
 }
 
 
