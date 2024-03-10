@@ -2183,8 +2183,8 @@ std::optional<RampParams> calculateRampParams(glm::vec2 slope, int x, int y){
 
 
 void makeOctreeCellRamp(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh, RampDirection direction){
-  auto slope = (direction == RAMP_FORWARD || direction == RAMP_BACKWARD) ? glm::vec2(selectionDim.value().z, selectionDim.value().y) : glm::vec2(selectionDim.value().x, selectionDim.value().y);
-
+  float heightNudge = 0.f;
+  auto slope = glm::vec2((direction == RAMP_FORWARD || direction == RAMP_BACKWARD) ? selectionDim.value().z : selectionDim.value().x, selectionDim.value().y - heightNudge);
   for (int x = 0; x < selectionDim.value().x; x++){
     for (int y = 0; y < selectionDim.value().y; y++){
       for (int z = 0; z < selectionDim.value().z; z++){
