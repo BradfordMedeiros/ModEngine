@@ -48,6 +48,7 @@ struct Octree {
 };
 
 struct GameObjectOctree {
+  std::string map;
   Mesh mesh;
   Octree octree;
 };
@@ -86,8 +87,8 @@ void setOctreeTextureId(int textureId);
 
 void makeOctreeCellRamp(GameObjectOctree& gameobjOctree, Octree& octree, std::function<Mesh(MeshData&)> loadMesh, RampDirection direction);
 
-void loadOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
-void saveOctree();
+void loadOctree(GameObjectOctree& octree, std::function<std::string(std::string)> loadFile, std::function<Mesh(MeshData&)> loadMesh);
+void saveOctree(GameObjectOctree& octree, std::function<void(std::string, std::string&)> saveFile);
 void optimizeOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
 
 struct PhysicsShapes {
@@ -98,5 +99,6 @@ struct PhysicsShapes {
 PhysicsShapes getPhysicsShapes(Octree& octree);
 std::string debugInfo(PhysicsShapes& physicsShapes);
 std::optional<objid> getSelectedOctreeId();
+Octree deserializeOctree(std::string& value);
 
 #endif

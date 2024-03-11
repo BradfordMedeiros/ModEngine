@@ -1,7 +1,5 @@
 #include "./obj_octree.h"
 
-std::vector<AutoSerialize> octreeAutoserializer {};
-
 enum OctreeSelectionFace { FRONT, BACK, LEFT, RIGHT, UP, DOWN };
 std::optional<glm::ivec3> selectedIndex = glm::ivec3(1, 0, 0);
 std::optional<glm::ivec3> selectionDim = glm::ivec3(1, 1, 0);
@@ -92,7 +90,7 @@ std::string serializeOctreeDivision(OctreeDivision& octreeDivision, std::vector<
     return str;
   }
 
-  modassert(octreeDivision.faces.size() == 6, "serializeOctreeDivision unexpected number of octree faces");
+  //modassert(octreeDivision.faces.size() == 6, "serializeOctreeDivision unexpected number of octree faces");
   for (auto &face : octreeDivision.faces){
     textures.push_back(face); 
   }
@@ -1571,9 +1569,31 @@ Octree subdividedOne {
   },
 };
 
+std::vector<AutoSerialize> octreeAutoserializer {
+  AutoSerializeString {
+    .structOffset = offsetof(GameObjectOctree, map),
+    .field = "map",
+    .defaultValue = "",
+  }
+};
+
+
 GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectOctree obj {};
-  obj.octree = subdividedOne;
+  createAutoSerializeWithTextureLoading((char*)&obj, octreeAutoserializer, attr, util);
+  if (obj.map != ""){
+    auto mapFilePath = util.pathForModLayer(obj.map);
+    auto serializedFileData = loadFile(mapFilePath);
+    std::cout << "serialized data: " << serializedFileData << std::endl;    
+    if (serializedFileData == ""){
+      obj.octree = subdividedOne;
+    }else{
+      obj.octree = deserializeOctree(serializedFileData);
+    }
+  }else{
+    obj.octree = unsubdividedOctree;
+  }
+
   obj.mesh = createOctreeMesh(obj.octree, util.loadMesh);
   return obj;
 }
@@ -1999,7 +2019,6 @@ void drawPhysicsShape(std::vector<glm::vec3>& verts, glm::vec3& centeringOffset,
   }
 }
 
-
 void drawPhysicsShapes(PhysicsShapes& physicsShapes, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
   for (auto &block : physicsShapes.blocks){
     drawPhysicsBlock(block, drawLine);
@@ -2134,9 +2153,7 @@ std::optional<RampParams> calculateRampParams(glm::vec2 slope, int x, int y){
 
   //std::cout << std::endl;
   return rampParams;
-
 }
-
 
 void makeOctreeCellRamp(GameObjectOctree& gameobjOctree, Octree& octree, std::function<Mesh(MeshData&)> loadMesh, RampDirection direction){
   float heightNudge = 0.f;
@@ -2323,7 +2340,6 @@ void handleChangeSubdivisionLevel(int newSubdivisionLevel){
   subdivisionLevel = newSubdivisionLevel;
 }
 
-
 void increaseSelectionSize(int width, int height, int depth){
   selectionDim.value().x+= width;
   selectionDim.value().y+= height;
@@ -2351,7 +2367,6 @@ void deleteSelectedOctreeNodes(GameObjectOctree& gameobjOctree, Octree& octree, 
 void writeOctreeTexture(GameObjectOctree& gameobjOctree, Octree& octree, std::function<Mesh(MeshData&)> loadMesh, bool unitTexture, TextureOrientation texOrientation){
   int xTileDim = selectionDim.value().x;
   int yTileDim = selectionDim.value().y;
-
 
   if (editorOrientation == FRONT){
     // do nothing
@@ -2423,7 +2438,6 @@ void setOctreeTextureId(int textureId){
   selectedTexture = textureId;
 }
 
-
 std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctree& obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
 //  auto serializedData = serializeVoxelState(obj.voxel, util.textureName);
@@ -2436,18 +2450,17 @@ std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctre
 }  //
 
 
-std::string serializedOctreeStr = serializeOctree(subdividedOne);
-void loadOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh){
-  //modlog("octree", "loading");
-  //testOctree = deserializeOctree(serializedOctreeStr);
-  //octree.mesh = createOctreeMesh(testOctree, loadMesh);
+void loadOctree(GameObjectOctree& octree, std::function<std::string(std::string)> loadFile, std::function<Mesh(MeshData&)> loadMesh){
+  modlog("octree", "loading");
+  auto serializedData = loadFile(octree.map);
+  octree.octree = deserializeOctree(serializedData);
+  octree.mesh = createOctreeMesh(octree.octree, loadMesh);
 }
 
-void saveOctree(){
-  //modlog("octree", "saving");
-  //auto serializedData = serializeOctree(testOctree);
-  //std::cout << "octree data: \n" << serializedData << std::endl;
-  //serializedOctreeStr = serializedData;
+void saveOctree(GameObjectOctree& octree, std::function<void(std::string, std::string&)> saveFile){
+  modlog("octree", "saving");
+  auto serializedData = serializeOctree(octree.octree);
+  saveFile(octree.map, serializedData);
 }
 
 

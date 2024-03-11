@@ -1693,7 +1693,14 @@ std::vector<InputDispatch> inputFns = {
       for (auto &selectedIndex : selectedIds(state.editor)){
         GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
         GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
-        loadOctree(*octreeObject, createScopedLoadMesh(world, selectedIndex));
+        loadOctree(
+          *octreeObject, 
+          [](std::string filepath) -> std::string {
+            auto modpath = modlayerPath(filepath);
+            return loadFile(modpath);
+          }, 
+          createScopedLoadMesh(world, selectedIndex)
+        );
         updatePhysicsBody(world, selectedIndex);
       }
     }
@@ -1705,7 +1712,15 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      saveOctree();
+      for (auto &selectedIndex : selectedIds(state.editor)){
+        GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
+        GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
+        modassert(octreeObject, "octree object null");
+        saveOctree(*octreeObject, [](std::string filepath, std::string& data) -> void {
+          auto modpath = modlayerPath(filepath);
+          saveFile(modpath, data);
+        });
+      }
     }
   },
 
