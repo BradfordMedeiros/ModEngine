@@ -62,6 +62,7 @@ std::optional<AtlasDimensions> atlasDimensions = AtlasDimensions {
   .numTexturesWide = 3,
   .numTexturesHeight = 3,
   .totalTextures = 9,
+  .textureNames = { "one", "two", "three" },
 };
 
 
@@ -164,7 +165,14 @@ std::string serializeOctree(Octree& octree){
       shapeString += ";";
     }
   }
-  str += shapeString;
+  str += shapeString + "\n";
+
+  std::string textureNames = "";
+  for (int i = 0; i < atlasDimensions.value().textureNames.size(); i++){
+    textureNames += atlasDimensions.value().textureNames.at(i) + (i == (atlasDimensions.value().textureNames.size() - 1) ? "" : ",");
+  }
+  str += textureNames;
+
 
   return str;
 }
@@ -374,14 +382,37 @@ std::vector<OctreeShape> deserializeShapes(std::string& values){
   return octreeShapes;
 }
 
+// this allows us to assert that we can load the octree textures successfully, and makes it 
+// so that we don't have to always have the same texture list between these files
+void updateTextureUvs(std::vector<std::vector<FaceTexture>>& faces, std::vector<std::string> texNames){
+
+}
+
+bool equalOrdered(std::vector<std::string>& values1, std::vector<std::string>& values2){
+  if (values1.size() != values2.size()){
+    return false;
+  }
+  for (int i = 0; i < values1.size(); i++){
+    if (values1.at(i) != values2.at(i)){
+      return false;
+    }
+  }
+  return true;
+}
+
 Octree deserializeOctree(std::string& value){
   auto lines = split(value, '\n');
-  modassert(lines.size() == 4, "invalid line size");
+  //modassert(lines.size() == 5, std::string("invalid line size, got: ") + std::to_string(lines.size()));
   float size = std::atof(lines.at(0).c_str());
 
   auto textures = deserializeTextures(lines.at(2));
   auto shapes = deserializeShapes(lines.at(3));
   modassert(shapes.size() == textures.size(), std::string("texture size and shapes sizes disagree: t, s") + std::to_string(textures.size()) + ", " + std::to_string(shapes.size()));
+
+  auto textureAtlas = split(lines.at(4), ',');
+  //updateTextureUvs(textures, textureAtlas);
+  modassert(equalOrdered(textureAtlas, atlasDimensions.value().textureNames), "textures are not equal");
+
 
   int currentTextureIndex = -1;
   int currentShapeIndex = -1;
@@ -2093,8 +2124,8 @@ void drawOctreeSelectionGrid(Octree& octree, std::function<void(glm::vec3, glm::
   }
 
   ////// visualize the physics objects
-  auto physicsShapes = getPhysicsShapes(octree);
-  drawPhysicsShapes(physicsShapes, drawLine2);
+  //auto physicsShapes = getPhysicsShapes(octree);
+  //drawPhysicsShapes(physicsShapes, drawLine2);
 }
 
 int getNumOctreeNodes(OctreeDivision& octreeDivision){
@@ -2108,7 +2139,10 @@ int getNumOctreeNodes(OctreeDivision& octreeDivision){
 
 void makeOctreeCellRamp(Octree& octree, int x, int y, int z, int subdivision, RampDirection rampDirection, float startHeight = 0.f, float endHeight = 1.f, float startDepth = 0.f, float endDepth = 1.f){
   auto octreeDivision = getOctreeSubdivisionIfExists(octree, x, y, z, subdivision);
-  modassert(octreeDivision, "octreeDivision does not exist");
+  if (octreeDivision == NULL){
+    return;
+  }
+  //modassert(octreeDivision, "octreeDivision does not exist");
   octreeDivision -> shape = ShapeRamp {
     .direction = rampDirection,
     .startHeight = startHeight,

@@ -275,6 +275,7 @@ void loadAllTextures(std::string& textureFolderPath){
     .numTexturesWide = numTexturesWide,
     .numTexturesHeight = numTexturesWide, 
     .totalTextures = textures.size(),
+    .textureNames = textures,
   });
 }
 

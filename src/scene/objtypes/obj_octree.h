@@ -61,6 +61,7 @@ struct AtlasDimensions {
   int numTexturesWide;
   int numTexturesHeight;
   int totalTextures;
+  std::vector<std::string> textureNames;
 };
 void setAtlasDimensions(AtlasDimensions newAtlasDimensions);
 
