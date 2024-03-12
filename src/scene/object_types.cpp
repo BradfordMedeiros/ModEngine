@@ -74,15 +74,6 @@ std::vector<ObjectType> objTypes = {
     .removeObject = removeDoNothing,
   },
   ObjectType {
-    .name = "geo",
-    .variantType = getVariantIndex(GameObjectGeo{}),
-    .createObj = createGeo,
-    .objectAttributes = convertElementValue<GameObjectGeo>(geoObjAttr),
-    .setAttributes = convertElementSetValue<GameObjectGeo>(setGeoObjAttributes),
-    .serialize = convertSerialize<GameObjectGeo>(serializeGeo),
-    .removeObject = removeDoNothing,
-  },
-  ObjectType {
     .name = "camera",
     .variantType = getVariantIndex(GameObjectCamera{}),
     .createObj = createCamera,
@@ -439,23 +430,6 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(textObj -> tint));
     return drawWord(shaderProgram, id, textObj -> value, 1000.f /* 1000.f => -1,1 range for each quad */, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor, textObj -> fontFamily, selectionMode);
-  }
-
-  auto geoObj = std::get_if<GameObjectGeo>(&toRender);
-  if (geoObj != NULL){
-    auto vertexCount = 0;
-    for (auto point : geoObj -> points){
-      if (geoObj -> type == GEOSPHERE){
-        vertexCount += drawSphere(point);
-      }else{
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, point)));
-        vertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
-      }
-    }
-    if (showDebugMask & 0b10000000){
-      vertexCount += (geoObj -> type == GEOSPHERE && geoObj -> points.size() == 0) ? drawSphere(glm::vec3(0.f, 0.f, 0.f)) : renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);      
-    }
-    return vertexCount;
   }
 
   auto customObj = std::get_if<GameObjectNil>(&toRender);

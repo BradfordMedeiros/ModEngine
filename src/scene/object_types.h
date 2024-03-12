@@ -8,7 +8,6 @@
 #include <variant>
 #include "./common/mesh.h"
 #include "./serialization.h"
-#include "./objtypes/obj_geo.h"
 #include "./objtypes/obj_camera.h"
 #include "./objtypes/obj_portal.h"
 #include "./objtypes/obj_light.h"
@@ -47,7 +46,6 @@ typedef std::variant<
   GameObjectHeightmap,
   GameObjectNavmesh,
   GameObjectUIText,
-  GameObjectGeo,
   GameObjectNil,
   GameObjectPrefab
 > GameObjectObj;
@@ -114,11 +112,6 @@ static Field uiTextField {
   .type = "text",
 };
 
-static Field geoField {
-  .prefix = '<',
-  .type = "geo",
-};
-
 static Field customField {
   .prefix = '|',
   .type = "custom",
@@ -141,7 +134,6 @@ static std::vector fields = {
   heightmap, 
   navmeshField, 
   uiTextField,
-  geoField,
   customField,
   prefabField,
 };

@@ -293,7 +293,7 @@ OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::ve
     }
     modassert(octreeDivisions.size() == 8, std::string("invalid division size, got: " + std::to_string(octreeDivisions.size())));
     return OctreeDivision {
-      .fill = FILL_EMPTY,
+      .fill = FILL_MIXED,
       .shape = ShapeBlock{},
       .divisions = octreeDivisions,
     };
@@ -381,7 +381,7 @@ Octree deserializeOctree(std::string& value){
 
   auto textures = deserializeTextures(lines.at(2));
   auto shapes = deserializeShapes(lines.at(3));
-  modassert(shapes.size() == textures.size(), std::string("texture size and shapes sizes disagree: ") + std::to_string(textures.size()) + ", " + std::to_string(shapes.size()));
+  modassert(shapes.size() == textures.size(), std::string("texture size and shapes sizes disagree: t, s") + std::to_string(textures.size()) + ", " + std::to_string(shapes.size()));
 
   int currentTextureIndex = -1;
   int currentShapeIndex = -1;
@@ -653,6 +653,7 @@ struct OctreeVertex {
 };
 
 void addCubePointsFront(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, float height = 1.f){
+  modassert(faces -> size() == 6, std::string("faces size unexpected, got: " + std::to_string(faces -> size())));
   FaceTexture& frontFace =  faces -> at(0);
   points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, 0.f) + offset, .coord = frontFace.texCoordsBottomRight });
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, 0.f) + offset, .coord = frontFace.texCoordsTopLeft });
@@ -663,6 +664,7 @@ void addCubePointsFront(std::vector<OctreeVertex>& points, float size, glm::vec3
   points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, 0.f) + offset,  .coord = frontFace.texCoordsBottomRight  });
 }
 void addCubePointsBack(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, float height = 1.f, float depth = 1.f){
+  modassert(faces -> size() == 6, std::string("faces size unexpected, got: " + std::to_string(faces -> size())));
   FaceTexture& backFace =  faces -> at(1);
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, -size * depth) + offset,  .coord = backFace.texCoordsBottomRight   });
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, -size * depth) + offset, .coord = backFace.texCoordsTopRight });
@@ -673,6 +675,7 @@ void addCubePointsBack(std::vector<OctreeVertex>& points, float size, glm::vec3 
   points.push_back(OctreeVertex { .position = glm::vec3(size, size * height, -size * depth) + offset, .coord = backFace.texCoordsTopLeft });
 }
 void addCubePointsLeft(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, float height = 1.f){
+  modassert(faces -> size() == 6, std::string("faces size unexpected, got: " + std::to_string(faces -> size())));
   FaceTexture& leftFace =  faces -> at(2);
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, -size) + offset, .coord = leftFace.texCoordsTopLeft });
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, -size) + offset,  .coord = leftFace.texCoordsBottomLeft });
@@ -683,6 +686,7 @@ void addCubePointsLeft(std::vector<OctreeVertex>& points, float size, glm::vec3 
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, 0.f) + offset,    .coord = leftFace.texCoordsBottomRight });
 }
 void addCubePointsRight(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, float height = 1.f){
+  modassert(faces -> size() == 6, std::string("faces size unexpected, got: " + std::to_string(faces -> size())));
   FaceTexture& rightFace =  faces -> at(3);
   points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, 0.f) + offset,    .coord = rightFace.texCoordsBottomLeft });
   points.push_back(OctreeVertex { .position = glm::vec3(size, 0.f, -size) + offset,  .coord = rightFace.texCoordsBottomRight  });
@@ -693,6 +697,7 @@ void addCubePointsRight(std::vector<OctreeVertex>& points, float size, glm::vec3
   points.push_back(OctreeVertex { .position = glm::vec3(size, size * height, 0.f) + offset,   .coord = rightFace.texCoordsTopLeft });
 }
 void addCubePointsTop(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, float height = 1.f){
+  modassert(faces -> size() == 6, std::string("faces size unexpected, got: " + std::to_string(faces -> size())));
   FaceTexture& topFace =  faces -> at(4);
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, size * height, 0.f) + offset,   .coord = topFace.texCoordsBottomLeft });
   points.push_back(OctreeVertex { .position = glm::vec3(size, size * height, 0.f) + offset,  .coord = topFace.texCoordsBottomRight  });
@@ -703,6 +708,7 @@ void addCubePointsTop(std::vector<OctreeVertex>& points, float size, glm::vec3 o
   points.push_back(OctreeVertex { .position = glm::vec3(size, size * height, -size) + offset, .coord = topFace.texCoordsTopRight });
 }
 void addCubePointsBottom(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, float depth = 1.f, float width = 1.f){
+  modassert(faces -> size() == 6, std::string("faces size unexpected, got: " + std::to_string(faces -> size())));
   FaceTexture& bottomFace =  faces -> at(5);
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, -size * depth) + offset, .coord = bottomFace.texCoordsBottomLeft });
   points.push_back(OctreeVertex { .position = glm::vec3(width * size, 0.f, 0.f) + offset,  .coord = bottomFace.texCoordsTopRight });
@@ -1460,6 +1466,9 @@ PhysicsShapes getPhysicsShapes(Octree& octree){
   for (auto &shape : shapes){
     numShapes += shape.specialBlocks.size();
   }
+
+  std::cout << "getPhysicsShapes, shape datas size = " << shapeDatas.size() << std::endl;
+  std::cout << "getPhysicsShapes  num shapes: " << numShapes << ", num blocks " << physicsShapes.blocks.size() << std::endl;
   //modassert((physicsShapes.blocks.size() + numShapes) == shapeDatas.size(), "shape datas should be equal to blocks and numShapes");
 
   return physicsShapes;
@@ -1889,7 +1898,6 @@ void setSelection(glm::ivec3 selection1, glm::ivec3 selection2, OctreeSelectionF
 void handleOctreeRaycast(Octree& octree, glm::vec3 fromPos, glm::vec3 toPosDirection, bool secondarySelection, objid id){
   auto octreeRaycast = doRaycast(octree, fromPos, toPosDirection, subdivisionLevel);
   raycastResult = octreeRaycast;
-  selectedOctreeId = id;
 
   RaycastResult filteredCells = filterFilledInCells(octree, raycastResult.value());
   if (!secondarySelection){
@@ -2085,8 +2093,8 @@ void drawOctreeSelectionGrid(Octree& octree, std::function<void(glm::vec3, glm::
   }
 
   ////// visualize the physics objects
-  //auto physicsShapes = getPhysicsShapes();
-  //drawPhysicsShapes(physicsShapes, drawLine2);
+  auto physicsShapes = getPhysicsShapes(octree);
+  drawPhysicsShapes(physicsShapes, drawLine2);
 }
 
 int getNumOctreeNodes(OctreeDivision& octreeDivision){
@@ -2463,7 +2471,9 @@ void saveOctree(GameObjectOctree& octree, std::function<void(std::string, std::s
   saveFile(octree.map, serializedData);
 }
 
-
+void setSelectedOctreeId(objid id){
+  selectedOctreeId = id;
+}
 std::optional<objid> getSelectedOctreeId(){
   return selectedOctreeId;
 }

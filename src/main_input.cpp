@@ -189,27 +189,28 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   for (auto &selectedIndex : selectedIds(state.editor)){
     if (idExists(world.sandbox, selectedIndex) && getLayerForId(selectedIndex).selectIndex != -2){
       maybeChangeTexture(selectedIndex);
-
-      GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
-      GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
-      if (octreeObject != NULL){
-        auto isShiftHeld = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
-        auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
-
-        OctreeDimAxis axis = OCTREE_NOAXIS;
-        if (state.manipulatorAxis == XAXIS){
-          axis = OCTREE_XAXIS;
-        }else if (state.manipulatorAxis == YAXIS){
-          axis = OCTREE_YAXIS;
-        }else if (state.manipulatorAxis == ZAXIS){
-          axis = OCTREE_ZAXIS;
-        }
-        handleOctreeScroll(*octreeObject, octreeObject -> octree, yoffset > 0, createScopedLoadMesh(world, selectedIndex), isShiftHeld, isCtrlHeld, axis);
-        updatePhysicsBody(world, selectedIndex);
-      }
     }
   }
  
+  auto octreeId = getSelectedOctreeId();
+  if (octreeId.has_value()){
+    GameObjectObj& objectOctree = world.objectMapping.at(octreeId.value());
+    GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
+    if (octreeObject != NULL){
+      auto isShiftHeld = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
+      auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
+      OctreeDimAxis axis = OCTREE_NOAXIS;
+      if (state.manipulatorAxis == XAXIS){
+        axis = OCTREE_XAXIS;
+      }else if (state.manipulatorAxis == YAXIS){
+        axis = OCTREE_YAXIS;
+      }else if (state.manipulatorAxis == ZAXIS){
+        axis = OCTREE_ZAXIS;
+      }
+      handleOctreeScroll(*octreeObject, octreeObject -> octree, yoffset > 0, createScopedLoadMesh(world, octreeId.value()), isShiftHeld, isCtrlHeld, axis);
+      updatePhysicsBody(world, octreeId.value());
+    }
+  }
 }
 
 
@@ -335,11 +336,12 @@ void onMouseButton(){
 
   auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
 
-  for (auto &selectedIndex : selectedIds(state.editor)){
-    GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
-    GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&objectOctree);
+  GameObjectObj& objectOctree = world.objectMapping.at(id);
+  GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&objectOctree);
+  if (octreeObj){
     modassert(octreeObj, "draw selection grid onFrame not octree type");
     handleOctreeRaycast(octreeObj -> octree, adjustedPosition, adjustedDir, isCtrlHeld, id);
+    setSelectedOctreeId(id);       
   }
 }
 

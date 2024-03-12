@@ -556,7 +556,6 @@ extern std::vector<AutoSerialize> emitterAutoserializer;
 extern std::vector<AutoSerialize> heightmapAutoserializer;
 extern std::vector<AutoSerialize> navmeshAutoserializer;
 extern std::vector<AutoSerialize> textAutoserializer;
-extern std::vector<AutoSerialize> geoAutoserializer;
 extern std::vector<AutoSerialize> prefabAutoserializer;
 std::set<std::string> getObjautoserializerFields(std::string& name){
   auto type = getType(name);
@@ -582,8 +581,6 @@ std::set<std::string> getObjautoserializerFields(std::string& name){
     return serializerFieldNames(navmeshAutoserializer);
   }else if (type == "text"){
     return serializerFieldNames(textAutoserializer);
-  }else if (type == "geo"){
-    return serializerFieldNames(geoAutoserializer);
   }else if (type == "custom"){
     return {};
   }else if (type == "prefab"){
