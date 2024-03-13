@@ -201,17 +201,17 @@ TextureSizeInfo getTextureSizeInfo(Texture& texture){
   };
 }
 
-Texture loadTextureAtlas(std::vector<std::string> textureFilePaths, int* numImagesWidePtr){
-  float nextSquare = glm::sqrt(textureFilePaths.size());
+int calculateAtlasImageDimension(int numTextures){
+  float nextSquare = glm::sqrt(numTextures);
   int roundedUp = std::ceil(nextSquare);
+  return roundedUp;
+}
 
+Texture loadTextureAtlas(std::vector<std::string> textureFilePaths){
   int imageWidth = 500;
   int imageHeight = 500;
-  int numImagesWide = roundedUp;
-  int numImagesHeight = roundedUp;
-  if (numImagesWidePtr){
-    *numImagesWidePtr = numImagesWide;
-  }
+  int numImagesWide = calculateAtlasImageDimension(textureFilePaths.size());
+  int numImagesHeight = numImagesWide;
 
   int newWidth = imageWidth * numImagesWide;
   int newHeight = imageHeight * numImagesHeight;

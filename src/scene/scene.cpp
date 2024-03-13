@@ -322,7 +322,7 @@ Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
   return texture;
 }
 
-Texture loadTextureAtlasWorld(World& world, std::string texturepath, std::vector<std::string> atlasTextures, objid ownerId, int* numImagesWidePtr){
+Texture loadTextureAtlasWorld(World& world, std::string texturepath, std::vector<std::string> atlasTextures, objid ownerId){
   if (world.textures.find(texturepath) != world.textures.end()){
     world.textures.at(texturepath).owners.insert(ownerId);
     return world.textures.at(texturepath).texture;
@@ -333,7 +333,7 @@ Texture loadTextureAtlasWorld(World& world, std::string texturepath, std::vector
     auto newAtlasTexturePath = world.interface.modlayerPath(atlasTexture);
     textureValues.push_back(newAtlasTexturePath);
   }
-  Texture texture = loadTextureAtlas(textureValues, numImagesWidePtr);
+  Texture texture = loadTextureAtlas(textureValues);
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,

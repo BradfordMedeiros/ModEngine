@@ -59,16 +59,14 @@ struct Faces {
 
 
 std::optional<AtlasDimensions> atlasDimensions = AtlasDimensions {
-  .numTexturesWide = 3,
-  .numTexturesHeight = 3,
-  .totalTextures = 9,
-  .textureNames = { "one", "two", "three" },
+  .textureNames = { "" },
 };
 
 
 void setAtlasDimensions(AtlasDimensions newAtlasDimensions){
   atlasDimensions = newAtlasDimensions;
-  modlog("set atlas", std::string("wide = ") + std::to_string(newAtlasDimensions.numTexturesWide) + ", height = " + std::to_string(newAtlasDimensions.numTexturesHeight) + ", total = " + std::to_string(newAtlasDimensions.totalTextures));
+  auto textureDim = calculateAtlasImageDimension(atlasDimensions.value().textureNames.size());
+  modlog("set atlas", std::string("textureDim = ") + std::to_string(textureDim) + ", total = " + std::to_string(newAtlasDimensions.textureNames.size()));
 }
 
 /*
@@ -233,13 +231,14 @@ FaceTexture texCoords(int imageIndex, TextureOrientation texOrientation = TEXTUR
 
   std::cout << "write octree texture inner offset = " <<  print(offset) << ", multiplier = " << print(multiplier) << std::endl;
 
-  float atlasWide = 1.f / atlasDimensions.value().numTexturesWide;
-  float atlasHeight = 1.f / atlasDimensions.value().numTexturesHeight;
+  auto textureDim = calculateAtlasImageDimension(atlasDimensions.value().textureNames.size());
+  float atlasWide = 1.f / textureDim;
+  float atlasHeight = 1.f / textureDim;
   float texWide = multiplier.x * atlasWide;
   float texHeight = multiplier.y * atlasHeight;
 
-  int xIndex = imageIndex % atlasDimensions.value().numTexturesWide;
-  int yIndex = imageIndex / atlasDimensions.value().numTexturesWide;
+  int xIndex = imageIndex % textureDim;
+  int yIndex = imageIndex / textureDim;
 
   float xMin = xIndex * atlasWide + (texWide * offset.x);
   float xMax = xMin + texWide;
@@ -384,9 +383,19 @@ std::vector<OctreeShape> deserializeShapes(std::string& values){
 
 // this allows us to assert that we can load the octree textures successfully, and makes it 
 // so that we don't have to always have the same texture list between these files
-void updateTextureUvs(std::vector<std::vector<FaceTexture>>& faces, std::vector<std::string> texNames){
 
-}
+struct TextureAtlasDiff {
+  int oldTextureIndex;
+  int newTextureIndex;
+};
+
+/*
+struct AtlasDimensions {
+  int numTexturesWide;
+  int numTexturesHeight;
+  int totalTextures;
+  std::vector<std::string> textureNames;
+*/
 
 bool equalOrdered(std::vector<std::string>& values1, std::vector<std::string>& values2){
   if (values1.size() != values2.size()){
@@ -400,6 +409,16 @@ bool equalOrdered(std::vector<std::string>& values1, std::vector<std::string>& v
   return true;
 }
 
+
+// implement this when the equalOrdered assertion fails
+void updateTextureUvs(std::vector<std::vector<FaceTexture>>& faces, std::vector<std::string>& oldTexNames, AtlasDimensions& atlasDimensions){
+  if(equalOrdered(oldTexNames, atlasDimensions.textureNames)){
+    return;
+  }
+
+}
+
+
 Octree deserializeOctree(std::string& value){
   auto lines = split(value, '\n');
   //modassert(lines.size() == 5, std::string("invalid line size, got: ") + std::to_string(lines.size()));
@@ -410,9 +429,7 @@ Octree deserializeOctree(std::string& value){
   modassert(shapes.size() == textures.size(), std::string("texture size and shapes sizes disagree: t, s") + std::to_string(textures.size()) + ", " + std::to_string(shapes.size()));
 
   auto textureAtlas = split(lines.at(4), ',');
-  //updateTextureUvs(textures, textureAtlas);
-  modassert(equalOrdered(textureAtlas, atlasDimensions.value().textureNames), "textures are not equal");
-
+  updateTextureUvs(textures, textureAtlas, atlasDimensions.value());
 
   int currentTextureIndex = -1;
   int currentShapeIndex = -1;
@@ -2474,8 +2491,8 @@ void setOctreeTextureId(int textureId){
   if (textureId < 0){
     textureId = 0;
   }
-  if (textureId >= atlasDimensions.value().totalTextures){
-    textureId = atlasDimensions.value().totalTextures - 1;
+  if (textureId >= atlasDimensions.value().textureNames.size()){
+    textureId = atlasDimensions.value().textureNames.size() - 1;
   }
   selectedTexture = textureId;
 }

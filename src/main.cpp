@@ -256,7 +256,7 @@ void loadAllTextures(std::string& textureFolderPath){
   }*/
 
   std::string flatSurfaceNormalTexture = "../gameresources/build/textures/clean/cherrybark.normal.jpg";
-  std::vector<std::string> textures { "./res/textures/grid.png", "../gameresources/build/textures/clean/tunnel_road.jpg", "../gameresources/build/textures/clean/grass.jpg", "../gameresources/build/textures/clean/pebbles2.png", "../gameresources/build/textures/clean/stonewall.jpg", "../gameresources/build/textures/clean/metalgrid.jpg" , "../gameresources/build/textures/clean/dryforestground.jpg", "../gameresources/build/textures/clean/foliage2.png"};
+  std::vector<std::string> textures { "./res/textures/grid.png", "../gameresources/build/textures/clean/tunnel_road.jpg", "../gameresources/build/textures/clean/grass.jpg", "../gameresources/build/textures/clean/pebbles2.png", "../gameresources/build/textures/clean/stonewall.jpg", "../gameresources/build/textures/clean/metalgrid.jpg" , "../gameresources/build/textures/clean/dryforestground.jpg", "../gameresources/build/textures/clean/foliage2.png", "../gameresources/build/textures/clean/metal_scifi.png",};
   std::vector<std::string> normalTextures;
   for (auto &texture : textures){
     auto normalTexture = lookupNormalTexture(world, texture);
@@ -267,14 +267,10 @@ void loadAllTextures(std::string& textureFolderPath){
     }
   }
 
-  int numTexturesWide = 0;
-  loadTextureAtlasWorld(world, "octree-atlas:normal", normalTextures, -1, &numTexturesWide);
-  loadTextureAtlasWorld(world, "octree-atlas:main",   textures, -1, &numTexturesWide);
-
+  int numTexturesWide = calculateAtlasImageDimension(textures.size());
+  loadTextureAtlasWorld(world, "octree-atlas:normal", normalTextures, -1);
+  loadTextureAtlasWorld(world, "octree-atlas:main",   textures, -1);
   setAtlasDimensions(AtlasDimensions {
-    .numTexturesWide = numTexturesWide,
-    .numTexturesHeight = numTexturesWide, 
-    .totalTextures = textures.size(),
     .textureNames = textures,
   });
 }

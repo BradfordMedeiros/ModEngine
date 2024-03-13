@@ -58,9 +58,6 @@ std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctre
 Mesh* getOctreeMesh(GameObjectOctree& octree);
 
 struct AtlasDimensions {
-  int numTexturesWide;
-  int numTexturesHeight;
-  int totalTextures;
   std::vector<std::string> textureNames;
 };
 void setAtlasDimensions(AtlasDimensions newAtlasDimensions);
