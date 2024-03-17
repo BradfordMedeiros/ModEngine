@@ -6,7 +6,6 @@
 #include "../common/vectorgfx.h"
 
 struct FaceTexture {
-  //const char* texture;
   glm::vec2 texCoordsTopLeft;
   glm::vec2 texCoordsTopRight;
   glm::vec2 texCoordsBottomLeft;

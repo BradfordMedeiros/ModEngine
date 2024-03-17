@@ -59,7 +59,27 @@ struct Faces {
 
 
 std::optional<AtlasDimensions> atlasDimensions = AtlasDimensions {
-  .textureNames = { "" },
+  .textureNames = {
+    "./res/textures/grid.png", 
+    "../gameresources/build/textures/clean/tunnel_road.jpg", 
+    "../gameresources/build/textures/clean/grass.jpg", 
+    "../gameresources/build/textures/clean/pebbles2.png", 
+
+    "../gameresources/build/textures/clean/metalgrid.jpg" , 
+    "../gameresources/build/textures/clean/dryforestground.jpg", 
+    "../gameresources/build/textures/clean/foliage2.png", 
+    "../gameresources/build/textures/clean/metal_scifi.png",
+
+    "../gameresources/build/textures/clean/tex_Ice.jpg", 
+    "../gameresources/build/textures/clean/tex_Ice.jpg", 
+    "../gameresources/build/textures/clean/tex_Ice.jpg", 
+    "../gameresources/build/textures/clean/tex_Ice.jpg", 
+
+    "../gameresources/build/textures/clean/tex_Ice.jpg", 
+    "../gameresources/build/textures/clean/tex_Ice.jpg", 
+    "../gameresources/build/textures/clean/tex_Ice.jpg", 
+    "../gameresources/build/textures/clean/tex_Ice.jpg", 
+  },
 };
 
 
@@ -203,6 +223,7 @@ std::vector<std::string> splitBrackets(std::string& value){
   return values;
 }
 
+
 FaceTexture texCoords(int imageIndex, TextureOrientation texOrientation = TEXTURE_UP, int xTileDim = 1, int yTileDim = 1,  int x = 0, int y = 0){
   glm::vec2 offset(x, y);
 
@@ -240,6 +261,7 @@ FaceTexture texCoords(int imageIndex, TextureOrientation texOrientation = TEXTUR
   int xIndex = imageIndex % textureDim;
   int yIndex = imageIndex / textureDim;
 
+  // just adding the atlas buffe rhere is wrong b/c of tiles textures, only should apply to edges 
   float xMin = xIndex * atlasWide + (texWide * offset.x);
   float xMax = xMin + texWide;
   float yMin = yIndex * atlasHeight + (texHeight * offset.y);
@@ -278,12 +300,12 @@ FaceTexture texCoords(int imageIndex, TextureOrientation texOrientation = TEXTUR
 }
 
 std::vector<FaceTexture> defaultTextureCoords = {
-  texCoords(4),
-  texCoords(4),
-  texCoords(4),
-  texCoords(4),
-  texCoords(4),
-  texCoords(4),
+  texCoords(0),
+  texCoords(0),
+  texCoords(0),
+  texCoords(0),
+  texCoords(0),
+  texCoords(0),
 };
 
 OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::vector<FaceTexture>>& textures, int* currentTextureIndex, std::vector<OctreeShape>& octreeShapes, int* currentShapeIndex){
@@ -381,21 +403,6 @@ std::vector<OctreeShape> deserializeShapes(std::string& values){
   return octreeShapes;
 }
 
-// this allows us to assert that we can load the octree textures successfully, and makes it 
-// so that we don't have to always have the same texture list between these files
-
-struct TextureAtlasDiff {
-  int oldTextureIndex;
-  int newTextureIndex;
-};
-
-/*
-struct AtlasDimensions {
-  int numTexturesWide;
-  int numTexturesHeight;
-  int totalTextures;
-  std::vector<std::string> textureNames;
-*/
 
 bool equalOrdered(std::vector<std::string>& values1, std::vector<std::string>& values2){
   if (values1.size() != values2.size()){
@@ -409,13 +416,12 @@ bool equalOrdered(std::vector<std::string>& values1, std::vector<std::string>& v
   return true;
 }
 
-
 // implement this when the equalOrdered assertion fails
 void updateTextureUvs(std::vector<std::vector<FaceTexture>>& faces, std::vector<std::string>& oldTexNames, AtlasDimensions& atlasDimensions){
   if(equalOrdered(oldTexNames, atlasDimensions.textureNames)){
     return;
   }
-
+  modassert(false, "unequal textures uvs");
 }
 
 
@@ -1643,7 +1649,7 @@ GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util){
     auto serializedFileData = loadFile(mapFilePath);
     std::cout << "serialized data: " << serializedFileData << std::endl;    
     if (serializedFileData == ""){
-      obj.octree = subdividedOne;
+      obj.octree = unsubdividedOctree;
     }else{
       obj.octree = deserializeOctree(serializedFileData);
     }

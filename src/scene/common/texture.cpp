@@ -240,8 +240,8 @@ Texture loadTextureAtlas(std::vector<std::string> textureFilePaths){
 
   glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureAtlasData);
 
-  //stbi_flip_vertically_on_write(1);
-  //stbi_write_png("/home/brad/Desktop/test_atlas.png", newWidth, newHeight, 4, textureAtlasData, 0); 
+  stbi_flip_vertically_on_write(1);
+  stbi_write_png("/home/brad/Desktop/test_atlas.png", newWidth, newHeight, 4, textureAtlasData, 0); 
 
   free(textureAtlasData);
   return atlasTexture;
