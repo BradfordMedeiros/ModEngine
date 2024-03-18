@@ -120,6 +120,7 @@ std::string serializeOctreeDivision(OctreeDivision& octreeDivision, std::vector<
 
 std::string serializeTexCoord(FaceTexture& faceTexture){
   std::string value = "";
+  value += std::to_string(faceTexture.textureIndex) + "|";
   value += serializeVec(faceTexture.texCoordsTopLeft) + "|";
   value += serializeVec(faceTexture.texCoordsTopRight) + "|";
   value += serializeVec(faceTexture.texCoordsBottomLeft) + "|";
@@ -307,11 +308,6 @@ FaceTexture texCoords(int imageIndex, TextureOrientation texOrientation = TEXTUR
     };
   }
 
-  faceTexture.texCoordsTopLeft = calcNdiCoordAtlasCoord(faceTexture.texCoordsTopLeft, faceTexture.textureIndex);
-  faceTexture.texCoordsTopRight = calcNdiCoordAtlasCoord(faceTexture.texCoordsTopRight, faceTexture.textureIndex);
-  faceTexture.texCoordsBottomLeft = calcNdiCoordAtlasCoord(faceTexture.texCoordsBottomLeft, faceTexture.textureIndex);
-  faceTexture.texCoordsBottomRight = calcNdiCoordAtlasCoord(faceTexture.texCoordsBottomRight, faceTexture.textureIndex);
-
   return faceTexture;
 }
 
@@ -357,8 +353,6 @@ OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::ve
 }
 
 std::vector<std::vector<FaceTexture>> deserializeTextures(std::string& values){
-  int imageIndex = 0; // should get the proper image index
-
   std::vector<std::vector<FaceTexture>> textures;
   auto valuesStr = split(values, ';'); // denotes each octree division
   for (auto &value : valuesStr){
@@ -368,13 +362,13 @@ std::vector<std::vector<FaceTexture>> deserializeTextures(std::string& values){
     for (auto &face : faces){
       auto textureCoords = split(face, '|');
 
-      modassert(textureCoords.size() == 4, "invalid texture coords size");
+      modassert(textureCoords.size() == 5, "invalid texture coords size");
       faceTextures.push_back(FaceTexture {
-        .textureIndex = imageIndex,
-        .texCoordsTopLeft = parseVec2(textureCoords.at(0)),
-        .texCoordsTopRight = parseVec2(textureCoords.at(1)),
-        .texCoordsBottomLeft = parseVec2(textureCoords.at(2)),
-        .texCoordsBottomRight = parseVec2(textureCoords.at(3)),
+        .textureIndex = std::atoi(textureCoords.at(0).c_str()),
+        .texCoordsTopLeft = parseVec2(textureCoords.at(1)),
+        .texCoordsTopRight = parseVec2(textureCoords.at(2)),
+        .texCoordsBottomLeft = parseVec2(textureCoords.at(3)),
+        .texCoordsBottomRight = parseVec2(textureCoords.at(4)),
       });
     }
     textures.push_back(faceTextures);
@@ -727,16 +721,16 @@ struct OctreeVertex {
 
 
 glm::vec2 meshTexBottomRight(FaceTexture& faceTexture){
-  return faceTexture.texCoordsBottomRight;
+  return calcNdiCoordAtlasCoord(faceTexture.texCoordsBottomRight, faceTexture.textureIndex);
 }
 glm::vec2 meshTexBottomLeft(FaceTexture& faceTexture){
-  return faceTexture.texCoordsBottomLeft;
+  return calcNdiCoordAtlasCoord(faceTexture.texCoordsBottomLeft, faceTexture.textureIndex);
 }
 glm::vec2 meshTexTopLeft(FaceTexture& faceTexture){
-  return faceTexture.texCoordsTopLeft;
+  return calcNdiCoordAtlasCoord(faceTexture.texCoordsTopLeft, faceTexture.textureIndex);
 }
 glm::vec2 meshTexTopRight(FaceTexture& faceTexture){
-  return faceTexture.texCoordsTopRight;
+  return calcNdiCoordAtlasCoord(faceTexture.texCoordsTopRight, faceTexture.textureIndex);
 }
 
 void addCubePointsFront(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, float height = 1.f){
