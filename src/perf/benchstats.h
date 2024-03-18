@@ -13,11 +13,12 @@ AttributeValue statValue(std::string& name);
 struct Stats {
   unsigned int frameCount;
   long long totalFrames;
+	int numTriangles;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
+
   unsigned int numObjectsStat;
   unsigned int rigidBodiesStat;
   unsigned int scenesLoadedStat;
   unsigned int fpsStat;
-	int numTriangles;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
 };
 
 #endif

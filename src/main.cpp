@@ -94,11 +94,11 @@ TimePlayback timePlayback(
 Stats statistics {
   .frameCount = 0,
   .totalFrames = 0,
+  .numTriangles = 0,
   .numObjectsStat = 0,
   .rigidBodiesStat = 0,
   .scenesLoadedStat = 0,
   .fpsStat = 0,
-  .numTriangles = 0,
 };
 
 void initializeStatistics(){
