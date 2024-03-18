@@ -1638,17 +1638,18 @@ int main(int argc, char* argv[]){
 
     onNetCode(world, netcode, onClientMessage, bootStrapperMode);
 
-    auto forward = calculateRelativeOffset(viewTransform.rotation, {0, 0, -1 }, false);
-    auto up  = calculateRelativeOffset(viewTransform.rotation, {0, 1, 0 }, false);
-    setListenerPosition(
-      viewTransform.position.x, viewTransform.position.y, viewTransform.position.z,
-      { forward.x, forward.y, forward.z},
-      { up.x, up.y, up.z }
-    );
-    viewTransform = getCameraTransform();
+    { // set volume
+      auto forward = calculateRelativeOffset(viewTransform.rotation, {0, 0, -1 }, false);
+      auto up  = calculateRelativeOffset(viewTransform.rotation, {0, 1, 0 }, false);
+      setListenerPosition(
+        viewTransform.position.x, viewTransform.position.y, viewTransform.position.z,
+        { forward.x, forward.y, forward.z},
+        { up.x, up.y, up.z }
+      );
+      setVolume(state.muteSound ? 0.f : state.volume);
+    }
 
-    setVolume(state.muteSound ? 0.f : state.volume);
-    
+    viewTransform = getCameraTransform();
     view = renderView(viewTransform.position, viewTransform.rotation);
     glViewport(0, 0, state.resolution.x, state.resolution.y);
 
@@ -1849,7 +1850,6 @@ int main(int argc, char* argv[]){
     doRemoveQueuedRemovals();
     doUnloadScenes();
 
-
     portalIdCache.clear();
  
 
@@ -1878,7 +1878,6 @@ int main(int argc, char* argv[]){
       renderScreenspaceLines(tex, tex2, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor, userTexture.clearTextureId, false);
     }
     markUserTexturesCleared();
-
 
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
