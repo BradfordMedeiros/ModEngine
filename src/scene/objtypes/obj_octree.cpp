@@ -224,6 +224,20 @@ std::vector<std::string> splitBrackets(std::string& value){
 }
 
 
+glm::vec2 calcNdiCoordAtlasCoord(glm::vec2 ndiCoord, int imageIndex){
+  auto textureDim = calculateAtlasImageDimension(atlasDimensions.value().textureNames.size());
+
+  float atlasWide = 1.f / textureDim;         // width  per texture
+  float atlasHeight = 1.f / textureDim;       // height per texture
+
+  int xIndex = imageIndex % textureDim;
+  int yIndex = imageIndex / textureDim;
+
+  float xValue = atlasWide * xIndex + (ndiCoord.x * atlasWide);
+  float yValue = atlasHeight * yIndex + (ndiCoord.y * atlasHeight);
+  return glm::vec2(xValue, yValue);
+}
+
 FaceTexture texCoords(int imageIndex, TextureOrientation texOrientation = TEXTURE_UP, int xTileDim = 1, int yTileDim = 1,  int x = 0, int y = 0){
   glm::vec2 offset(x, y);
 
@@ -249,26 +263,25 @@ FaceTexture texCoords(int imageIndex, TextureOrientation texOrientation = TEXTUR
   }
 
   glm::vec2 multiplier(1.f / xTileDim, 1.f / yTileDim);
+  float xMin = multiplier.x * offset.x;
+  float xMax = (multiplier.x * offset.x) + multiplier.x;
+  float yMin = multiplier.y * offset.y;
+  float yMax = (multiplier.y * offset.y) + multiplier.y;
 
-  std::cout << "write octree texture inner offset = " <<  print(offset) << ", multiplier = " << print(multiplier) << std::endl;
-
-  auto textureDim = calculateAtlasImageDimension(atlasDimensions.value().textureNames.size());
-  float atlasWide = 1.f / textureDim;
-  float atlasHeight = 1.f / textureDim;
-  float texWide = multiplier.x * atlasWide;
-  float texHeight = multiplier.y * atlasHeight;
-
-  int xIndex = imageIndex % textureDim;
-  int yIndex = imageIndex / textureDim;
-
-  // just adding the atlas buffe rhere is wrong b/c of tiles textures, only should apply to edges 
-  float xMin = xIndex * atlasWide + (texWide * offset.x);
-  float xMax = xMin + texWide;
-  float yMin = yIndex * atlasHeight + (texHeight * offset.y);
-  float yMax = yMin + texHeight;
-
+  std::cout << "update texcoord ndi x: " << multiplier.x << ", " << offset.x << ", * = " << (multiplier.x * offset.x) << std::endl;
+  std::cout << "update texcoord ndi y: " << multiplier.y << ", " << offset.y << ", * = " << (multiplier.y * offset.y) << std::endl;
+  std::cout << "update texcoords: " << print(glm::vec2(xMin, xMax)) << std::endl;
+  std::cout << "update --------------------------" << std::endl;
+  FaceTexture faceTexture {
+    .textureIndex = imageIndex,
+    .texCoordsTopLeft = glm::vec2(xMin, yMax),
+    .texCoordsTopRight = glm::vec2(xMax, yMax),
+    .texCoordsBottomLeft = glm::vec2(xMin, yMin),
+    .texCoordsBottomRight = glm::vec2(xMax, yMin),
+  };
   if (texOrientation == TEXTURE_DOWN){
-    return FaceTexture {
+    faceTexture = FaceTexture {
+      .textureIndex = imageIndex,
       .texCoordsTopLeft = glm::vec2(xMax, yMin),
       .texCoordsTopRight = glm::vec2(xMin, yMin),
       .texCoordsBottomLeft = glm::vec2(xMax, yMax),
@@ -276,7 +289,8 @@ FaceTexture texCoords(int imageIndex, TextureOrientation texOrientation = TEXTUR
     };
   }
   if (texOrientation == TEXTURE_RIGHT){
-    return FaceTexture {
+    faceTexture = FaceTexture {
+      .textureIndex = imageIndex,
       .texCoordsTopLeft = glm::vec2(xMin, yMin),
       .texCoordsTopRight = glm::vec2(xMin, yMax),
       .texCoordsBottomLeft = glm::vec2(xMax, yMin),
@@ -284,19 +298,21 @@ FaceTexture texCoords(int imageIndex, TextureOrientation texOrientation = TEXTUR
     };
   }
   if (texOrientation == TEXTURE_LEFT){
-    return FaceTexture {
+    faceTexture = FaceTexture {
+      .textureIndex = imageIndex,
       .texCoordsTopLeft = glm::vec2(xMax, yMax),
       .texCoordsTopRight = glm::vec2(xMax, yMin),
       .texCoordsBottomLeft = glm::vec2(xMin, yMax),
       .texCoordsBottomRight = glm::vec2(xMin, yMin),
     };
   }
-  return FaceTexture {
-    .texCoordsTopLeft = glm::vec2(xMin, yMax),
-    .texCoordsTopRight = glm::vec2(xMax, yMax),
-    .texCoordsBottomLeft = glm::vec2(xMin, yMin),
-    .texCoordsBottomRight = glm::vec2(xMax, yMin),
-  };
+
+  faceTexture.texCoordsTopLeft = calcNdiCoordAtlasCoord(faceTexture.texCoordsTopLeft, faceTexture.textureIndex);
+  faceTexture.texCoordsTopRight = calcNdiCoordAtlasCoord(faceTexture.texCoordsTopRight, faceTexture.textureIndex);
+  faceTexture.texCoordsBottomLeft = calcNdiCoordAtlasCoord(faceTexture.texCoordsBottomLeft, faceTexture.textureIndex);
+  faceTexture.texCoordsBottomRight = calcNdiCoordAtlasCoord(faceTexture.texCoordsBottomRight, faceTexture.textureIndex);
+
+  return faceTexture;
 }
 
 std::vector<FaceTexture> defaultTextureCoords = {
@@ -341,6 +357,8 @@ OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::ve
 }
 
 std::vector<std::vector<FaceTexture>> deserializeTextures(std::string& values){
+  int imageIndex = 0; // should get the proper image index
+
   std::vector<std::vector<FaceTexture>> textures;
   auto valuesStr = split(values, ';'); // denotes each octree division
   for (auto &value : valuesStr){
@@ -352,6 +370,7 @@ std::vector<std::vector<FaceTexture>> deserializeTextures(std::string& values){
 
       modassert(textureCoords.size() == 4, "invalid texture coords size");
       faceTextures.push_back(FaceTexture {
+        .textureIndex = imageIndex,
         .texCoordsTopLeft = parseVec2(textureCoords.at(0)),
         .texCoordsTopRight = parseVec2(textureCoords.at(1)),
         .texCoordsBottomLeft = parseVec2(textureCoords.at(2)),
