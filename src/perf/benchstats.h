@@ -10,4 +10,11 @@ void registerStat(unsigned int stat, AttributeValue amount);
 AttributeValue statValue(unsigned int);
 AttributeValue statValue(std::string& name);
 
+struct Stats {
+  unsigned int numObjectsStat;
+  unsigned int rigidBodiesStat;
+  unsigned int scenesLoadedStat;
+  unsigned int fpsStat;
+};
+
 #endif
