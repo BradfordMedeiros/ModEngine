@@ -52,7 +52,9 @@ unsigned int textureDepthTextures[1];
 float initialTime = 0;
 float now = 0;
 float deltaTime = 0.0f; // Time between current frame and last frame
-int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
+float previous = now;
+float last60 = previous;
+
 bool selectItemCalled = false;
 
 std::map<objid, unsigned int> portalIdCache;
@@ -90,10 +92,13 @@ TimePlayback timePlayback(
 
 
 Stats statistics {
+  .frameCount = 0,
+  .totalFrames = 0,
   .numObjectsStat = 0,
   .rigidBodiesStat = 0,
   .scenesLoadedStat = 0,
   .fpsStat = 0,
+  .numTriangles = 0,
 };
 
 void initializeStatistics(){
@@ -103,7 +108,7 @@ void initializeStatistics(){
   statistics.scenesLoadedStat = statName("scenes-loaded");
 }
 
-void registerStatistics(){
+void registerStatistics(float currentFps){
   int numObjects = getNumberOfObjects(world.sandbox);
   registerStat(statistics.numObjectsStat, numObjects);
 
@@ -111,8 +116,9 @@ void registerStatistics(){
   registerStat(statistics.rigidBodiesStat, numRigidBodies);
 
   registerStat(statistics.scenesLoadedStat, getNumberScenesLoaded(world.sandbox));
-  
-  logBenchmarkTick(benchmark, deltaTime, numObjects, numTriangles);
+  logBenchmarkTick(benchmark, deltaTime, numObjects, statistics.numTriangles);
+
+  registerStat(statistics.fpsStat, currentFps);
 }
 
 
@@ -674,7 +680,7 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
   drawTextNdi("using animation: " + std::to_string(-1) + " / " + std::to_string(-1) , uiXOffset, uiYOffset + offsetPerLine * 12, state.fontsize);
   drawTextNdi("using object id: -1" , uiXOffset, uiYOffset + offsetPerLine * 13, state.fontsize);
 
-  drawTextNdi(std::string("triangles: ") + std::to_string(numTriangles), uiXOffset, uiYOffset + offsetPerLine * 14, state.fontsize);
+  drawTextNdi(std::string("triangles: ") + std::to_string(statistics.numTriangles), uiXOffset, uiYOffset + offsetPerLine * 14, state.fontsize);
   drawTextNdi(std::string("num gameobjects: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(statistics.numObjectsStat)))), uiXOffset, uiYOffset + offsetPerLine * 15, state.fontsize);
   drawTextNdi(std::string("num rigidbodys: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(statistics.rigidBodiesStat)))), uiXOffset, uiYOffset + offsetPerLine * 16, state.fontsize);
   drawTextNdi(std::string("num scenes loaded: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(statistics.scenesLoadedStat)))), uiXOffset, uiYOffset + offsetPerLine * 17, state.fontsize);
@@ -1534,9 +1540,6 @@ int main(int argc, char* argv[]){
   toggleFullScreen(state.fullscreen);
   toggleCursor(state.cursorBehavior); 
 
-  unsigned int frameCount = 0;
-  float previous = now;
-  float last60 = previous;
 
   std::cout << "INFO: render loop starting" << std::endl;
 
@@ -1550,7 +1553,6 @@ int main(int argc, char* argv[]){
   float fixedFps = 60.f;
   float fixedDelta = 1.f / fixedFps;
   float fpsLag = (result["fps-lag"].as<int>()) / 1000.f;
-  long long totalFrames = 0;
   float speedMultiplier = result["fps-speed"].as<int>() / 1000.f;
   std::cout << "speed multiplier: "  << speedMultiplier << std::endl;
 
@@ -1574,11 +1576,11 @@ int main(int argc, char* argv[]){
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
   PROFILE("FRAME",
-    frameCount++;
-    totalFrames++;
+    statistics.frameCount++;
+    statistics.totalFrames++;
 
     fpscountstart:
-    now = fpsFixed ? (fixedDelta * (totalFrames - 1)) :  (speedMultiplier * glfwGetTime());
+    now = fpsFixed ? (fixedDelta * (statistics.totalFrames - 1)) :  (speedMultiplier * glfwGetTime());
     deltaTime = now - previous;   
 
     if (timetoexit != 0){
@@ -1598,14 +1600,15 @@ int main(int argc, char* argv[]){
 
     previous = now;
 
-    registerStatistics();
-
-    if (frameCount == 60){
-      frameCount = 0;
+    static float currentFps = 0.f;
+    if (statistics.frameCount == 60){
+      statistics.frameCount = 0;
       float timedelta = now - last60;
       last60 = now;
-      registerStat(statistics.fpsStat, floor((60.f/(timedelta) + 0.5f)));
+      currentFps = floor((60.f/(timedelta) + 0.5f));
     }
+    registerStatistics(currentFps);
+
 
     if (!state.worldpaused){
       //std::cout << "Current time: " << timePlayback.currentTime << std::endl;
@@ -1798,7 +1801,7 @@ int main(int argc, char* argv[]){
 
     ////////////////////////////
 
-    numTriangles = renderWithProgram(renderContext, renderStages.main);
+    statistics.numTriangles = renderWithProgram(renderContext, renderStages.main);
     Color colorFromSelection = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     renderVector(shaderProgram, view, glm::mat4(1.0f), numChunkingGridCells);
 
