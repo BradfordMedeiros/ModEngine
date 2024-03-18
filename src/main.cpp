@@ -1607,6 +1607,7 @@ int main(int argc, char* argv[]){
       last60 = now;
       currentFps = floor((60.f/(timedelta) + 0.5f));
     }
+
     registerStatistics(currentFps);
 
 
@@ -1619,6 +1620,17 @@ int main(int argc, char* argv[]){
     onWorldFrame(world, deltaTime, timePlayback.currentTime, state.enablePhysics, dumpPhysics, state.worldpaused, viewTransform);
 
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
+    if (useChunkingSystem){
+      handleChunkLoading(
+        dynamicLoading, 
+        [](objid id) -> glm::vec3 { 
+          return getGameObjectPosition(id, true);
+        }, 
+        loadSceneParentOffset, 
+        removeObjectById,
+        state.useDefaultCamera ? &viewTransform.position : NULL
+      );
+    }
 
     auto time = getTotalTime();
     tickRecordings(time);
@@ -1780,24 +1792,12 @@ int main(int argc, char* argv[]){
     glViewport(0, 0, state.resolution.x, state.resolution.y);
     handleTerrainPainting(uvCoord, hoveredId);
      
-    if (useChunkingSystem){
-      handleChunkLoading(
-        dynamicLoading, 
-        [](objid id) -> glm::vec3 { 
-          return getGameObjectPosition(id, true);
-        }, 
-        loadSceneParentOffset, 
-        removeObjectById,
-        state.useDefaultCamera ? &viewTransform.position : NULL
-      );
-    }
 
     assert(portals.size() <= numPortalTextures);
 
     PROFILE("PORTAL_RENDERING", 
       portalIdCache = renderPortals(renderContext);
     )
-
 
     ////////////////////////////
 
