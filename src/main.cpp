@@ -108,6 +108,19 @@ void initializeStatistics(){
   statistics.scenesLoadedStat = statName("scenes-loaded");
 }
 
+float updateTimings(){
+  previous = now;
+
+  static float currentFps = 0.f;
+  if (statistics.frameCount == 60){
+    statistics.frameCount = 0;
+    float timedelta = now - last60;
+    last60 = now;
+    currentFps = floor((60.f/(timedelta) + 0.5f));
+  }
+  return currentFps;
+}
+
 void registerStatistics(float currentFps){
   int numObjects = getNumberOfObjects(world.sandbox);
   registerStat(statistics.numObjectsStat, numObjects);
@@ -1598,16 +1611,7 @@ int main(int argc, char* argv[]){
       goto fpscountstart; 
     }
 
-    previous = now;
-
-    static float currentFps = 0.f;
-    if (statistics.frameCount == 60){
-      statistics.frameCount = 0;
-      float timedelta = now - last60;
-      last60 = now;
-      currentFps = floor((60.f/(timedelta) + 0.5f));
-    }
-
+    float currentFps = updateTimings();
     registerStatistics(currentFps);
 
 
