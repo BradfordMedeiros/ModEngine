@@ -265,24 +265,13 @@ void loadAllTextures(std::string& textureFolderPath){
 
   std::vector<std::string> textures { 
     "./res/textures/grid.png", 
-    "../gameresources/build/textures/clean/tunnel_road.jpg", 
+    "../gameresources/build/textures/clean/pebbles2.png",
+
     "../gameresources/build/textures/clean/grass.jpg", 
-    "../gameresources/build/textures/clean/pebbles2.png", 
-
-    "../gameresources/build/textures/clean/metalgrid.jpg" , 
-    "../gameresources/build/textures/clean/dryforestground.jpg", 
-    "../gameresources/build/textures/clean/foliage2.png", 
-    "../gameresources/build/textures/clean/metal_scifi.png",
 
     "../gameresources/build/textures/clean/tex_Ice.jpg", 
-    "../gameresources/build/textures/clean/tex_Ice.jpg", 
-    "../gameresources/build/textures/clean/tex_Ice.jpg", 
-    "../gameresources/build/textures/clean/tex_Ice.jpg", 
-
-    "../gameresources/build/textures/clean/tex_Ice.jpg", 
-    "../gameresources/build/textures/clean/tex_Ice.jpg", 
-    "../gameresources/build/textures/clean/tex_Ice.jpg", 
-    "../gameresources/build/textures/clean/tex_Ice.jpg", 
+    "../gameresources/build/textures/clean/tunnel_road.jpg", 
+   
   };
 
   std::vector<std::string> normalTextures;

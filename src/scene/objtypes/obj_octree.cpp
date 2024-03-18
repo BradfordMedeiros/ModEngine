@@ -417,25 +417,32 @@ std::vector<OctreeShape> deserializeShapes(std::string& values){
 }
 
 
-bool equalOrdered(std::vector<std::string>& values1, std::vector<std::string>& values2){
-  if (values1.size() != values2.size()){
+bool equalOrdered(std::vector<std::string>& mapTextures, std::vector<std::string>& atlasTextures){
+  if (mapTextures.size() != atlasTextures.size()){
     return false;
   }
-  for (int i = 0; i < values1.size(); i++){
-    if (values1.at(i) != values2.at(i)){
+  for (int i = 0; i < mapTextures.size(); i++){
+    if (mapTextures.at(i) != atlasTextures.at(i)){
       return false;
     }
   }
   return true;
 }
 
-// implement this when the equalOrdered assertion fails
-void updateTextureUvs(std::vector<std::vector<FaceTexture>>& faces, std::vector<std::string>& oldTexNames, AtlasDimensions& atlasDimensions){
-  if(equalOrdered(oldTexNames, atlasDimensions.textureNames)){
-    return;
+
+std::map<int, int> getTextureMapping(std::vector<std::string>& mapTextures, std::vector<std::string>& atlasTextures, std::vector<std::vector<FaceTexture>>& faceTextures){
+  std::map<int, int> mapToAtlas;
+  for (int x = 0; x < mapTextures.size(); x++){
+    for (int y = 0; y < atlasTextures.size(); y++){
+      if (mapTextures.at(x) == atlasTextures.at(y)){
+        mapToAtlas[x] = y;
+        break;
+      }
+    }
   }
-  modassert(false, "unequal textures uvs");
+  return mapToAtlas;
 }
+
 
 
 Octree deserializeOctree(std::string& value){
@@ -448,7 +455,14 @@ Octree deserializeOctree(std::string& value){
   modassert(shapes.size() == textures.size(), std::string("texture size and shapes sizes disagree: t, s") + std::to_string(textures.size()) + ", " + std::to_string(shapes.size()));
 
   auto textureAtlas = split(lines.at(4), ',');
-  updateTextureUvs(textures, textureAtlas, atlasDimensions.value());
+  //modassert(equalOrdered(textureAtlas, atlasDimensions.value().textureNames), "textures changed");
+  auto textureMapping = getTextureMapping(textureAtlas, atlasDimensions.value().textureNames, textures);
+  modassert(textureMapping.size() == textureAtlas.size(), std::string("does not have a mapping for all textures, textureMapping.size = ") + std::to_string(textureMapping.size()) + ", textureAtlas.size = " + std::to_string(textureAtlas.size()));
+  for (auto &texture : textures){
+    for (auto &textureFace : texture){
+      textureFace.textureIndex = textureMapping.at(textureFace.textureIndex);
+    }
+  }
 
   int currentTextureIndex = -1;
   int currentShapeIndex = -1;
