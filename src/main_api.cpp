@@ -7,11 +7,8 @@ extern WorldTiming timings;
 extern engineState state;
 extern DefaultResources defaultResources;
 extern unsigned int uiShaderProgram;
-extern float initialTime;
+extern Stats statistics;
 extern std::queue<StringAttribute> channelMessages;
-
-extern float now;
-extern float deltaTime;
 
 extern bool bootStrapperMode;
 extern NetCode netcode;
@@ -31,7 +28,7 @@ extern ManipulatorTools tools;
 extern std::string sqlDirectory;
 
 float getTotalTime(){
-  return now - initialTime;
+  return statistics.now - statistics.initialTime;
 }
 
 std::vector<objid> objectsQueuedForRemoval = {};
@@ -557,13 +554,13 @@ void sendAlert(std::string message){
 
 double timeSeconds(bool realtime){
   if (realtime){
-    return now;
+    return statistics.now;
   }
   return timePlayback.currentTime;
 }
 
 double timeElapsed(){
-  return deltaTime;
+  return statistics.deltaTime;
 }
 
 struct ActiveRecording {
@@ -747,7 +744,7 @@ void setWorldState(std::vector<ObjectValue> values){
   
   auto oldFullScreen = state.fullscreen;
   auto oldCullEnabled = state.cullEnabled;
-  setState(state, otherValues, now);
+  setState(state, otherValues, statistics.now);
   if (oldFullScreen != state.fullscreen){
     toggleFullScreen(state.fullscreen);
   }
@@ -800,7 +797,7 @@ Transformation getCameraTransform(){
     return defaultResources.defaultCamera.transformation;
   }
   if (state.cameraInterp.shouldInterpolate){
-    auto lerpAmount = (now - state.cameraInterp.startingTime) / state.cameraInterp.length;
+    auto lerpAmount = (statistics.now - state.cameraInterp.startingTime) / state.cameraInterp.length;
     if (lerpAmount >= 1){
       state.cameraInterp.shouldInterpolate = false;
       state.activeCameraObj = &getGameObject(world, state.cameraInterp.targetCam);
@@ -835,7 +832,7 @@ void setActiveCamera(int32_t cameraId, float interpolationTime){
   if (interpolationTime > 0){
     state.cameraInterp = CamInterpolation {
       .shouldInterpolate = true,
-      .startingTime = now,
+      .startingTime = statistics.now,
       .length = interpolationTime,
       .targetCam = cameraId,
     };
@@ -1146,7 +1143,7 @@ void schedule(objid id, float delayTimeMs, void* data, std::function<void(void*)
   tasksToSchedule.push_back(ScheduledTask { 
     .ownerId = id,
     .fn = fn,
-    .time = now * 1000 + delayTimeMs,
+    .time = statistics.now * 1000 + delayTimeMs,
     .data = data,
   });
 }
@@ -1177,7 +1174,7 @@ void tickScheduledTasks(){
   tasksToSchedule = {};
 
   std::set<objid> idsToRemove;
-  float currTime = now * 1000;
+  float currTime = statistics.now * 1000;
   //std::cout << "num tasks: " << scheduledTasks.size() << std::endl;
   for (int i = 0; i < scheduledTasks.size(); i++){
     ScheduledTask& task = scheduledTasks.at(i);

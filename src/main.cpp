@@ -17,26 +17,11 @@
 #endif
 CustomApiBindings* mainApi;
 
+
+// application rendering stuff
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
 unsigned int uiShaderProgram;
-
-DefaultResources defaultResources {};
-
-std::string shaderFolderPath;
-std::string sqlDirectory = "./res/data/sql/";
-
-bool bootStrapperMode = false;
-NetCode netcode { };
-
-engineState state = getDefaultState(1920, 1080);
-
-World world;
-RenderStages renderStages;
-SysInterface interface;
-KeyRemapper keyMapper;
-CScriptBindingCallbacks cBindings;
-btIDebugDraw* debuggerDrawer = NULL;
 
 unsigned int framebufferTexture;
 unsigned int framebufferTexture2;
@@ -49,13 +34,23 @@ const int numDepthTextures = 32;
 unsigned int depthTextures[32];
 unsigned int textureDepthTextures[1];
 
-float initialTime = 0;
-float now = 0;
-float deltaTime = 0.0f; // Time between current frame and last frame
-float previous = now;
-float last60 = previous;
 
+// long lived app resources
+DefaultResources defaultResources {};
+std::string shaderFolderPath;
+std::string sqlDirectory = "./res/data/sql/";
+bool bootStrapperMode = false;
+std::map<std::string, std::string> args;
+DrawingParams drawParams = getDefaultDrawingParams();
+extern std::vector<InputDispatch> inputFns;     
+std::map<std::string, GLint> shaderstringToId;
+
+// per frame variable data 
 bool selectItemCalled = false;
+extern Stats statistics;
+LineData lineData = createLines();
+std::queue<StringAttribute> channelMessages;
+std::map<std::string, objid> activeLocks;
 
 std::map<objid, unsigned int> portalIdCache;
 std::optional<Texture> textureToPaint = std::optional<Texture>(std::nullopt);
@@ -70,55 +65,75 @@ glm::mat4 orthoProj;
 const glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);  
 
 
-std::map<std::string, std::string> args;
-DrawingParams drawParams = getDefaultDrawingParams();
+// core system 
+NetCode netcode { };
+engineState state = getDefaultState(1920, 1080);
+World world;
+RenderStages renderStages;
+SysInterface interface;
+KeyRemapper keyMapper;
+CScriptBindingCallbacks cBindings;
+btIDebugDraw* debuggerDrawer = NULL;
 Benchmark benchmark;
 DynamicLoading dynamicLoading;
 WorldTiming timings;
 
-std::queue<StringAttribute> channelMessages;
-extern std::vector<InputDispatch> inputFns;     
-std::map<std::string, objid> activeLocks;
-LineData lineData = createLines();
-std::map<std::string, GLint> shaderstringToId;
-
 TimePlayback timePlayback(
-  initialTime, 
+  statistics.initialTime, 
   [](float currentTime, float _, float elapsedTime) -> void {
     tickAnimations(world, timings, currentTime);
   }, 
   []() -> void {}
 ); 
 
+////////////////////////
 
-Stats statistics {
-  .frameCount = 0,
-  .totalFrames = 0,
-  .numTriangles = 0,
-  .numObjectsStat = 0,
-  .rigidBodiesStat = 0,
-  .scenesLoadedStat = 0,
-  .fpsStat = 0,
+struct TimingUpdate {
+  bool goToCleanup;
+  float currentFps;
 };
 
-void initializeStatistics(){
-  statistics.fpsStat = statName("fps");
-  statistics.numObjectsStat = statName("object-count");
-  statistics.rigidBodiesStat = statName("rigidbody-count");
-  statistics.scenesLoadedStat = statName("scenes-loaded");
-}
-
-float updateTimings(){
-  previous = now;
-
+TimingUpdate updateTimings(bool fpsFixed, float fixedDelta, float speedMultiplier, int timetoexit, bool hasFramelimit, float minDeltaTime, float fpsLag){
   static float currentFps = 0.f;
+
+  statistics.frameCount++;
+  statistics.totalFrames++;
+
+  fpscountstart:
+  statistics.now = fpsFixed ? (fixedDelta * (statistics.totalFrames - 1)) :  (speedMultiplier * glfwGetTime());
+  statistics.deltaTime = statistics.now - statistics.previous;   
+
+  if (timetoexit != 0){
+    float timeInSeconds = timetoexit / 1000.f;
+    if (statistics.now > timeInSeconds){
+      std::cout << "INFO: TIME TO EXIST EXPIRED" << std::endl;
+      return TimingUpdate {
+        .goToCleanup = true,
+        .currentFps = currentFps,
+      };
+    }
+  }
+
+  if (hasFramelimit &&  (statistics.deltaTime < minDeltaTime)){
+    goto fpscountstart;
+  }
+  if (statistics.deltaTime < fpsLag){
+    goto fpscountstart; 
+  }
+
+
+  statistics.previous = statistics.now;
+
   if (statistics.frameCount == 60){
     statistics.frameCount = 0;
-    float timedelta = now - last60;
-    last60 = now;
+    float timedelta = statistics.now - statistics.last60;
+    statistics.last60 = statistics.now;
     currentFps = floor((60.f/(timedelta) + 0.5f));
   }
-  return currentFps;
+  return TimingUpdate {
+    .goToCleanup = false,
+    .currentFps = currentFps,
+  };
 }
 
 void registerStatistics(float currentFps){
@@ -129,12 +144,10 @@ void registerStatistics(float currentFps){
   registerStat(statistics.rigidBodiesStat, numRigidBodies);
 
   registerStat(statistics.scenesLoadedStat, getNumberScenesLoaded(world.sandbox));
-  logBenchmarkTick(benchmark, deltaTime, numObjects, statistics.numTriangles);
+  logBenchmarkTick(benchmark, statistics.deltaTime, numObjects, statistics.numTriangles);
 
   registerStat(statistics.fpsStat, currentFps);
 }
-
-
 
 void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId, bool blend){
   auto texSize = getTextureSizeInfo(texture);
@@ -720,7 +733,7 @@ void signalHandler(int signum) {
 }
 
 float exposureAmount(){
-  float elapsed = now - state.exposureStart;
+  float elapsed = statistics.now - state.exposureStart;
   float amount = elapsed / 1.f;   
   float exposureA = glm::clamp(amount, 0.f, 1.f);
   float effectiveExposure = glm::mix(state.oldExposure, state.targetExposure, exposureA);
@@ -1068,10 +1081,7 @@ int main(int argc, char* argv[]){
   }
 
   auto filewatch = watchFiles(result["watch"].as<std::string>(), 1.f);
-
-
   bool mappingClickCalled = false;
-
 
   interface = SysInterface {
     .loadCScript = [](std::string script, objid id, objid sceneId) -> void {
@@ -1129,7 +1139,7 @@ int main(int argc, char* argv[]){
   debuggerDrawer = &drawer;
   debuggerDrawer -> setDebugMode(0);
 
-  setInitialState(state, "./res/world.state", now, interface.readFile, result["noinput"].as<bool>()); 
+  setInitialState(state, "./res/world.state", statistics.now, interface.readFile, result["noinput"].as<bool>()); 
 
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -1478,9 +1488,9 @@ int main(int argc, char* argv[]){
 
 
   bool fpsFixed = result["fps-fixed"].as<bool>();
-  initialTime = fpsFixed  ? 0 : glfwGetTime();
+  statistics.initialTime = fpsFixed  ? 0 : glfwGetTime();
 
-  timings = createWorldTiming(initialTime);
+  timings = createWorldTiming(statistics.initialTime);
 
 
   auto fontPaths = result["font"].as<std::vector<std::string>>();
@@ -1512,8 +1522,6 @@ int main(int argc, char* argv[]){
       .crosshairSprite = NULL,
     }
   };
-
-
 
   setCrosshairSprite();  // needs to be after create world since depends on these meshes being loaded
 
@@ -1589,39 +1597,20 @@ int main(int argc, char* argv[]){
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
   PROFILE("FRAME",
-    statistics.frameCount++;
-    statistics.totalFrames++;
-
-    fpscountstart:
-    now = fpsFixed ? (fixedDelta * (statistics.totalFrames - 1)) :  (speedMultiplier * glfwGetTime());
-    deltaTime = now - previous;   
-
-    if (timetoexit != 0){
-      float timeInSeconds = timetoexit / 1000.f;
-      if (now > timeInSeconds){
-        std::cout << "INFO: TIME TO EXIST EXPIRED" << std::endl;
-        goto cleanup;
-      }
+    auto timingUpdate = updateTimings(fpsFixed, fixedDelta, speedMultiplier, timetoexit, hasFramelimit, minDeltaTime, fpsLag);
+    if (timingUpdate.goToCleanup){
+      goto cleanup;
     }
-
-    if (hasFramelimit &&  (deltaTime < minDeltaTime)){
-      goto fpscountstart;
-    }
-    if (deltaTime < fpsLag){
-      goto fpscountstart; 
-    }
-
-    float currentFps = updateTimings();
-    registerStatistics(currentFps);
+    registerStatistics(timingUpdate.currentFps);
 
 
     if (!state.worldpaused){
       //std::cout << "Current time: " << timePlayback.currentTime << std::endl;
-      timePlayback.setElapsedTime(deltaTime);
+      timePlayback.setElapsedTime(statistics.deltaTime);
     }
 
 
-    onWorldFrame(world, deltaTime, timePlayback.currentTime, state.enablePhysics, dumpPhysics, state.worldpaused, viewTransform);
+    onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, state.enablePhysics, dumpPhysics, state.worldpaused, viewTransform);
 
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
     if (useChunkingSystem){

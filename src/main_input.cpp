@@ -8,7 +8,7 @@ extern KeyRemapper keyMapper;
 extern DrawingParams drawParams;
 extern glm::mat4 view;
 extern DefaultResources defaultResources;
-extern float deltaTime;
+extern Stats statistics;
 extern Benchmark benchmark;
 extern bool selectItemCalled;
 extern DynamicLoading dynamicLoading;
@@ -386,7 +386,7 @@ void handleInput(GLFWwindow* window){
   if (state.escapeQuits && glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
     glfwSetWindowShouldClose(window, true);
   }
-  processControllerInput(keyMapper, moveCamera, deltaTime, keyCharCallback, onJoystick);
+  processControllerInput(keyMapper, moveCamera, statistics.deltaTime, keyCharCallback, onJoystick);
 
   bool lockSuccess = lock("input", 0);
   if (lockSuccess){
@@ -701,7 +701,7 @@ std::vector<InputDispatch> inputFns = {
       if (state.disableInput){
         return;
       }
-      auto speed = cameraSpeed * -40.0f * deltaTime;
+      auto speed = cameraSpeed * -40.0f * statistics.deltaTime;
       glm::vec3 moveVec = state.moveUp ? glm::vec3(0.0, -1 * speed, 0.f) : glm::vec3(0.0, 0.0, speed);
       moveCamera(moveVec);
     }
@@ -716,7 +716,7 @@ std::vector<InputDispatch> inputFns = {
       if (state.disableInput){
         return;
       }
-      moveCamera(glm::vec3(cameraSpeed * -40.0 * deltaTime, 0.0, 0.0));
+      moveCamera(glm::vec3(cameraSpeed * -40.0 * statistics.deltaTime, 0.0, 0.0));
     }
   },  
   InputDispatch{
@@ -729,7 +729,7 @@ std::vector<InputDispatch> inputFns = {
       if (state.disableInput){
         return;
       }
-      auto speed = cameraSpeed * 40.0f * deltaTime;
+      auto speed = cameraSpeed * 40.0f * statistics.deltaTime;
       glm::vec3 moveVec = state.moveUp ? glm::vec3(0.0, -1 * speed, 0.f) : glm::vec3(0.0, 0.0, speed);
       moveCamera(moveVec);
     }
@@ -744,7 +744,7 @@ std::vector<InputDispatch> inputFns = {
       if (state.disableInput){
         return;
       }
-      moveCamera(glm::vec3(cameraSpeed * 40.0f * deltaTime, 0.0, 0.0f));
+      moveCamera(glm::vec3(cameraSpeed * 40.0f * statistics.deltaTime, 0.0, 0.0f));
     }
   },  
   InputDispatch{

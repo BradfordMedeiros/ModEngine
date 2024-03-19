@@ -11,6 +11,12 @@ AttributeValue statValue(unsigned int);
 AttributeValue statValue(std::string& name);
 
 struct Stats {
+  float initialTime;
+  float now;
+  float deltaTime; // Time between current frame and last frame
+  float previous;
+  float last60;
+
   unsigned int frameCount;
   long long totalFrames;
 	int numTriangles;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
@@ -20,5 +26,7 @@ struct Stats {
   unsigned int scenesLoadedStat;
   unsigned int fpsStat;
 };
+
+void initializeStatistics();
 
 #endif
