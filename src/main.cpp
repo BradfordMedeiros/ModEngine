@@ -1593,11 +1593,17 @@ int main(int argc, char* argv[]){
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
   PROFILE("FRAME",
+    /* trying to get this into the form of 
+      getInput
+      updateState
+      render
+    */
     auto timingUpdate = updateTime(fpsFixed, fixedDelta, speedMultiplier, timetoexit, hasFramelimit, minDeltaTime, fpsLag);
     if (timingUpdate.goToCleanup){
       goto cleanup;
     }
     registerStatistics(timingUpdate.currentFps);
+
 
 
     if (!state.worldpaused){
@@ -1816,6 +1822,28 @@ int main(int argc, char* argv[]){
 
     handleInput(window);  // stateupdate
     glfwPollEvents();     // stateupdate
+    onManipulatorUpdate(
+      state.manipulatorState, 
+      projectionFromLayer(layers.at(0)),
+      view, 
+      state.manipulatorMode, 
+      state.manipulatorAxis,
+      state.offsetX, 
+      state.offsetY,
+      glm::vec2(adjustedCoords.x, adjustedCoords.y),
+      glm::vec2(state.resolution.x, state.resolution.y),
+      ManipulatorOptions {
+         .manipulatorPositionMode = state.manipulatorPositionMode,
+         .relativePositionMode = state.relativePositionMode,
+         .translateMirror = state.translateMirror,
+         .rotateMode = state.rotateMode,
+         .scalingGroup = state.scalingGroup,
+         .snapManipulatorScales = state.snapManipulatorScales,
+         .preserveRelativeScale = state.preserveRelativeScale,
+      },
+      tools
+    );
+
     if (state.shouldToggleCursor){
       modlog("toggle cursor", std::to_string(state.cursorBehavior));
       toggleCursor(state.cursorBehavior);
@@ -1840,6 +1868,7 @@ int main(int argc, char* argv[]){
 
     portalIdCache.clear();
  
+    // EVERYTHING BELOW HERE IS RENDERING
 
     PROFILE("BLOOM-RENDERING",
       renderWithProgram(renderContext, renderStages.bloom1);
@@ -1865,7 +1894,7 @@ int main(int argc, char* argv[]){
       };
       renderScreenspaceLines(tex, tex2, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor, userTexture.clearTextureId, false);
     }
-    markUserTexturesCleared();
+    markUserTexturesCleared();  // not really rendering, should pull this out
 
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -1938,27 +1967,6 @@ int main(int argc, char* argv[]){
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
-    onManipulatorUpdate(
-      state.manipulatorState, 
-      projectionFromLayer(layers.at(0)),
-      view, 
-      state.manipulatorMode, 
-      state.manipulatorAxis,
-      state.offsetX, 
-      state.offsetY,
-      glm::vec2(adjustedCoords.x, adjustedCoords.y),
-      glm::vec2(state.resolution.x, state.resolution.y),
-      ManipulatorOptions {
-         .manipulatorPositionMode = state.manipulatorPositionMode,
-         .relativePositionMode = state.relativePositionMode,
-         .translateMirror = state.translateMirror,
-         .rotateMode = state.rotateMode,
-         .scalingGroup = state.scalingGroup,
-         .snapManipulatorScales = state.snapManipulatorScales,
-         .preserveRelativeScale = state.preserveRelativeScale,
-      },
-      tools
-    );
     
     if (state.renderMode == RENDER_FINAL){
       renderUI(effectiveCrosshair, pixelColor);
