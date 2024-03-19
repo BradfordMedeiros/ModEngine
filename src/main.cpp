@@ -1694,7 +1694,6 @@ int main(int argc, char* argv[]){
     Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     auto hoveredId = getIdFromColor(hoveredItemColor);
 
-    state.lastHoveredIdInScene = state.hoveredIdInScene;  // stateupdate
     state.hoveredIdInScene = idExists(world.sandbox, hoveredId);   // stateupdate
     state.lastHoverIndex = state.currentHoverIndex; // stateupdate
     state.currentHoverIndex = hoveredId; // stateupdate
