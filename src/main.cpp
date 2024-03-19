@@ -999,6 +999,28 @@ void setSelected(std::optional<std::set<objid>> ids){
   }
 }
 
+Mesh* updateAndGetCursor(objid hoveredId){
+  bool hoveredIdInScene = idExists(world.sandbox, hoveredId);   // stateupdate
+
+  std::string cursorForLayer("./res/textures/crosshairs/crosshair008.png");
+  if (hoveredIdInScene){
+    auto hoveredLayer = getLayerForId(hoveredId);
+    if (hoveredLayer.cursor != ""){
+      cursorForLayer = hoveredLayer.cursor;
+    }
+  }
+  if (cursorForLayer == "none"){
+    defaultResources.defaultMeshes.defaultCrosshairSprite = NULL;
+  }else{
+    defaultResources.defaultMeshes.defaultCrosshairSprite = &world.meshes.at(cursorForLayer).mesh;
+  }
+  Mesh* effectiveCrosshair = defaultResources.defaultMeshes.defaultCrosshairSprite;
+  if (defaultResources.defaultMeshes.crosshairSprite != NULL){
+    effectiveCrosshair = defaultResources.defaultMeshes.crosshairSprite;
+  }
+  return effectiveCrosshair;
+}
+
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
 const GLFWvidmode* mode = NULL;
@@ -1692,30 +1714,14 @@ int main(int argc, char* argv[]){
     auto uvCoordWithTex = getUVCoordAndTextureId(adjustedCoords.x, adjustedCoords.y);
     auto uvCoord = toUvCoord(uvCoordWithTex);
     Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
-    auto hoveredId = getIdFromColor(hoveredItemColor);
 
-    state.hoveredIdInScene = idExists(world.sandbox, hoveredId);   // stateupdate
+    objid hoveredId = getIdFromColor(hoveredItemColor);
+
     state.lastHoverIndex = state.currentHoverIndex; // stateupdate
     state.currentHoverIndex = hoveredId; // stateupdate
     state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate
 
-    std::string cursorForLayer("./res/textures/crosshairs/crosshair008.png");
-    if (state.hoveredIdInScene){
-      auto hoveredLayer = getLayerForId(hoveredId);
-      if (hoveredLayer.cursor != ""){
-        cursorForLayer = hoveredLayer.cursor;
-      }
-    }
-    if (cursorForLayer == "none"){
-      defaultResources.defaultMeshes.defaultCrosshairSprite = NULL;
-    }else{
-      defaultResources.defaultMeshes.defaultCrosshairSprite = &world.meshes.at(cursorForLayer).mesh;
-    }
-        // stateupdate
-    Mesh* effectiveCrosshair = defaultResources.defaultMeshes.defaultCrosshairSprite;
-    if (defaultResources.defaultMeshes.crosshairSprite != NULL){
-      effectiveCrosshair = defaultResources.defaultMeshes.crosshairSprite;
-    }
+    Mesh* effectiveCrosshair = updateAndGetCursor(hoveredId);
 
 
     bool selectItemCalledThisFrame = selectItemCalled;
