@@ -1633,9 +1633,7 @@ int main(int argc, char* argv[]){
       timePlayback.setElapsedTime(statistics.deltaTime);
     }
 
- 
     onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, state.enablePhysics, dumpPhysics, state.worldpaused, viewTransform);
-
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
     if (useChunkingSystem){
       handleChunkLoading(
@@ -1667,11 +1665,13 @@ int main(int argc, char* argv[]){
 
     viewTransform = getCameraTransform();
     view = renderView(viewTransform.position, viewTransform.rotation);
-    glViewport(0, 0, state.resolution.x, state.resolution.y);
-
     std::vector<LightInfo> lights = getLightInfo(world);
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= numPortalTextures);
+
+    /////////// everything above is state update ////////////////////
+
+    glViewport(0, 0, state.resolution.x, state.resolution.y);
 
     // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
 
@@ -1708,6 +1708,7 @@ int main(int argc, char* argv[]){
     glEnable(GL_DEPTH_TEST);
 
 
+    /* this part can be isolated out of rendering, just need to save some information out of this for the next frame */
     //std::cout << "cursor pos: " << state.cursorLeft << " " << state.cursorTop << std::endl;
     auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
     //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
@@ -1722,7 +1723,6 @@ int main(int argc, char* argv[]){
     state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate
 
     Mesh* effectiveCrosshair = updateAndGetCursor(hoveredId);
-
 
     bool selectItemCalledThisFrame = selectItemCalled;
     selectItemCalled = false;  // reset the state
@@ -1754,6 +1754,7 @@ int main(int argc, char* argv[]){
         cBindings.onObjectUnselected();
       }
     }
+
 
     ///////////////////
     auto textureId = uvCoordWithTex.z;
@@ -1799,6 +1800,7 @@ int main(int argc, char* argv[]){
       portalIdCache = renderPortals(renderContext);
     )
 
+    std::cout << "cache size: " << portalIdCache.size() << std::endl;
     ////////////////////////////
 
     statistics.numTriangles = renderWithProgram(renderContext, renderStages.main);
@@ -1871,8 +1873,6 @@ int main(int argc, char* argv[]){
     doRemoveQueuedRemovals();
     doUnloadScenes();
 
-    portalIdCache.clear();
- 
     // EVERYTHING BELOW HERE IS RENDERING
 
     PROFILE("BLOOM-RENDERING",
