@@ -1418,7 +1418,6 @@ int main(int argc, char* argv[]){
   registerAllBindings(pluginBindings);
   cBindings = getCScriptBindingCallbacks();
 
-
   if(bootStrapperMode){
     netcode = initNetCode(cBindings.onPlayerJoined, cBindings.onPlayerLeave, interface.readFile);
   }
@@ -1478,20 +1477,13 @@ int main(int argc, char* argv[]){
     allTexturesToLoad
   );
   loadAllTextures(textureFolderPath);
-
-
-   // this texture used for default textures, could make font mesh texture optional or something
   if (state.skybox != ""){
     loadSkybox(world, state.skybox); 
   }
 
-
-
   bool fpsFixed = result["fps-fixed"].as<bool>();
   statistics.initialTime = fpsFixed  ? 0 : glfwGetTime();
-
   timings = createWorldTiming(statistics.initialTime);
-
 
   auto fontPaths = result["font"].as<std::vector<std::string>>();
   std::cout << "INFO: FONT: loading font paths (" << fontPaths.size() <<") - " << print(fontPaths) << std::endl;
@@ -1525,11 +1517,6 @@ int main(int argc, char* argv[]){
 
   setCrosshairSprite();  // needs to be after create world since depends on these meshes being loaded
 
-  GLFWimage images[1]; 
-  images[0].pixels = stbi_load(state.iconpath.c_str(), &images[0].width, &images[0].height, 0, 4); //rgba channels 
-  glfwSetWindowIcon(window, 1, images);
-  stbi_image_free(images[0].pixels); 
-
   dynamicLoading = createDynamicLoading(worldfile, interface.readFile);
   if (result["rechunk"].as<int>()){
     rechunkAllObjects(world, dynamicLoading, result["rechunk"].as<int>());
@@ -1549,6 +1536,11 @@ int main(int argc, char* argv[]){
   if (defaultCameraName != ""){
     setActiveCamera(defaultCameraName, sceneId(world.sandbox, getByName(world.sandbox, defaultCameraName).at(0)));
   }
+
+  GLFWimage images[1]; 
+  images[0].pixels = stbi_load(state.iconpath.c_str(), &images[0].width, &images[0].height, 0, 4); //rgba channels 
+  glfwSetWindowIcon(window, 1, images);
+  stbi_image_free(images[0].pixels); 
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
@@ -1591,7 +1583,6 @@ int main(int argc, char* argv[]){
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   setShouldProfile(shouldBenchmark);
-
   initializeStatistics();
 
   PROFILE("MAINLOOP",
@@ -1609,7 +1600,7 @@ int main(int argc, char* argv[]){
       timePlayback.setElapsedTime(statistics.deltaTime);
     }
 
-
+ 
     onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, state.enablePhysics, dumpPhysics, state.worldpaused, viewTransform);
 
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
@@ -1625,8 +1616,7 @@ int main(int argc, char* argv[]){
       );
     }
 
-    auto time = getTotalTime();
-    tickRecordings(time);
+    tickRecordings(getTotalTime());
     tickScheduledTasks();
 
     onNetCode(world, netcode, onClientMessage, bootStrapperMode);
