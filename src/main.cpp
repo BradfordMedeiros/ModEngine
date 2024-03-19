@@ -19,14 +19,19 @@ CustomApiBindings* mainApi;
 
 
 // application rendering stuff
-unsigned int framebufferProgram;
-unsigned int drawingProgram;
-unsigned int uiShaderProgram;
+struct RenderingResources { 
+  unsigned int framebufferProgram;
+  unsigned int drawingProgram;
+  unsigned int uiShaderProgram;
 
-unsigned int framebufferTexture;
-unsigned int framebufferTexture2;
-unsigned int framebufferTexture3;
-unsigned int framebufferTexture4;
+  unsigned int framebufferTexture;
+  unsigned int framebufferTexture2;
+  unsigned int framebufferTexture3;
+  unsigned int framebufferTexture4;
+};
+
+RenderingResources renderingResources { };
+
 unsigned int fbo;
 const int numPortalTextures = 16;
 unsigned int portalTextures[16];
@@ -93,7 +98,7 @@ struct TimingUpdate {
   float currentFps;
 };
 
-TimingUpdate updateTimings(bool fpsFixed, float fixedDelta, float speedMultiplier, int timetoexit, bool hasFramelimit, float minDeltaTime, float fpsLag){
+TimingUpdate updateTime(bool fpsFixed, float fixedDelta, float speedMultiplier, int timetoexit, bool hasFramelimit, float minDeltaTime, float fpsLag){
   static float currentFps = 0.f;
 
   statistics.frameCount++;
@@ -162,7 +167,7 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,  texture2.textureId, 0);
   
-  glUseProgram(uiShaderProgram);
+  glUseProgram(renderingResources.uiShaderProgram);
 
   if (shouldClear){ 
     glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
@@ -174,38 +179,38 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
     glDisable(GL_BLEND);
   }
 
-  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
-  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
-  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
+  glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
+  glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+  glUniform1i(glGetUniformLocation(renderingResources.uiShaderProgram, "forceTint"), false);
   if (shouldClear && clearTextureId.has_value()){
-    glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(clearColor));
+    glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(clearColor));
     glDisable(GL_DEPTH_TEST);
-    glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(
+    glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(
       glm::mat4(1.0f), 
       glm::vec3(2.f, 2.f, 2.f)
     )));
-    drawMesh(*defaultResources.defaultMeshes.unitXYRect, uiShaderProgram, clearTextureId.value());
+    drawMesh(*defaultResources.defaultMeshes.unitXYRect, renderingResources.uiShaderProgram, clearTextureId.value());
     glEnable(GL_DEPTH_TEST);
   }
-  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
-  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
-  glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
-  glUniform4fv(glGetUniformLocation(uiShaderProgram, "selectionId"), 1, glm::value_ptr(getColorFromGameobject(0)));
-  glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0)));
+  glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+  glUniform1i(glGetUniformLocation(renderingResources.uiShaderProgram, "forceTint"), true);
+  glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+  glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "selectionId"), 1, glm::value_ptr(getColorFromGameobject(0)));
+  glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0)));
 
   //glEnable(GL_BLEND);
   glDisable(GL_DEPTH_TEST);
 
   //std::cout << "screenspace: lines" << std::endl;
-  drawAllLines(lineData, uiShaderProgram, texture.textureId);
+  drawAllLines(lineData, renderingResources.uiShaderProgram, texture.textureId);
 
   //std::cout << "screenspace: textdata" << std::endl;
-  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
-  glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
+  glUniform1i(glGetUniformLocation(renderingResources.uiShaderProgram, "forceTint"), false);
+  glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
 
   //auto ortho = glm::ortho(0.0f, (float)texSize.width, 0.0f, (float)texSize.height, -1.0f, 1.0f);  
-  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
-  drawShapeData(lineData, uiShaderProgram, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
+  glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
+  drawShapeData(lineData, renderingResources.uiShaderProgram, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
 }
 
 void handlePaintingModifiesViewport(UVCoord uvsToPaint){
@@ -213,7 +218,7 @@ void handlePaintingModifiesViewport(UVCoord uvsToPaint){
     return;
   }
 
-  glUseProgram(drawingProgram); 
+  glUseProgram(renderingResources.drawingProgram); 
 
   glBindTexture(GL_TEXTURE_2D, textureToPaint.value().textureId);
   int w, h;
@@ -226,14 +231,14 @@ void handlePaintingModifiesViewport(UVCoord uvsToPaint){
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToPaint.value().textureId, 0);
 
-  glUniformMatrix4fv(glGetUniformLocation(drawingProgram, "model"), 1, GL_FALSE, glm::value_ptr(
+  glUniformMatrix4fv(glGetUniformLocation(renderingResources.drawingProgram, "model"), 1, GL_FALSE, glm::value_ptr(
     glm::scale(
       glm::translate(glm::mat4(1.0f), uvToNDC(uvsToPaint)), 
       glm::vec3(0.01f, 0.01f, 0.01f) * drawParams.scale)
     )
   );
-  glUniform1f(glGetUniformLocation(drawingProgram, "opacity"), drawParams.opacity);
-  glUniform4fv(glGetUniformLocation(drawingProgram, "tint"), 1, glm::value_ptr(drawParams.tint));
+  glUniform1f(glGetUniformLocation(renderingResources.drawingProgram, "opacity"), drawParams.opacity);
+  glUniform4fv(glGetUniformLocation(renderingResources.drawingProgram, "tint"), 1, glm::value_ptr(drawParams.tint));
 
   glBindTexture(GL_TEXTURE_2D, activeTextureId());
   glBindVertexArray(defaultResources.quadVAO);
@@ -540,7 +545,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   
     glStencilFunc(GL_EQUAL, 1, 0xFF);
     if (isPortal && portalTextureInCache && isPerspectivePortal){
-      glUseProgram(framebufferProgram); 
+      glUseProgram(renderingResources.framebufferProgram); 
       glDisable(GL_DEPTH_TEST);
       glBindVertexArray(defaultResources.quadVAO);
       glBindTexture(GL_TEXTURE_2D,  portalIdCache.at(id));
@@ -638,15 +643,15 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
 }
 
 void renderUI(Mesh* crosshairSprite, Color pixelColor){
-  glUseProgram(uiShaderProgram);
+  glUseProgram(renderingResources.uiShaderProgram);
   glEnable(GL_BLEND);
-  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
-  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
+  glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
+  glUniform1i(glGetUniformLocation(renderingResources.uiShaderProgram, "forceTint"), false);
 
   if(crosshairSprite != NULL && !state.isRotateSelection && state.showCursor){
-    glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+    glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
     auto location = pixelCoordToNdi(glm::ivec2(state.cursorLeft, state.currentScreenHeight - state.cursorTop), glm::vec2(state.currentScreenWidth, state.currentScreenHeight));
-    drawSpriteAround(uiShaderProgram, *crosshairSprite, location.x, location.y, 0.05, 0.05);
+    drawSpriteAround(renderingResources.uiShaderProgram, *crosshairSprite, location.x, location.y, 0.05, 0.05);
   }
   
   if (!state.showDebug){
@@ -1176,16 +1181,16 @@ int main(int argc, char* argv[]){
   glGenFramebuffers(1, &fbo);
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);  
 
-  genFramebufferTexture(&framebufferTexture, state.resolution.x, state.resolution.y);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
+  genFramebufferTexture(&renderingResources.framebufferTexture, state.resolution.x, state.resolution.y);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderingResources.framebufferTexture, 0);
 
-  genFramebufferTexture(&framebufferTexture2, state.resolution.x, state.resolution.y);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
+  genFramebufferTexture(&renderingResources.framebufferTexture2, state.resolution.x, state.resolution.y);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, renderingResources.framebufferTexture2, 0);
 
-  genFramebufferTexture(&framebufferTexture3, state.resolution.x, state.resolution.y);
-  //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, framebufferTexture3, 0);
+  genFramebufferTexture(&renderingResources.framebufferTexture3, state.resolution.x, state.resolution.y);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, renderingResources.framebufferTexture3, 0);
 
-  genFramebufferTexture(&framebufferTexture4, state.resolution.x, state.resolution.y);
+  genFramebufferTexture(&renderingResources.framebufferTexture4, state.resolution.x, state.resolution.y);
 
   generateDepthTextures(depthTextures, numDepthTextures, state.resolution.x, state.resolution.y);
   generateDepthTextures(textureDepthTextures, 1, state.resolution.x, state.resolution.y);
@@ -1211,16 +1216,16 @@ int main(int argc, char* argv[]){
        state.resolution = glm::ivec2(width, height);
      }
 
-     glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+     glBindTexture(GL_TEXTURE_2D, renderingResources.framebufferTexture);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
-     glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
+     glBindTexture(GL_TEXTURE_2D, renderingResources.framebufferTexture2);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
-     glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
+     glBindTexture(GL_TEXTURE_2D, renderingResources.framebufferTexture3);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
-     glBindTexture(GL_TEXTURE_2D, framebufferTexture4);
+     glBindTexture(GL_TEXTURE_2D, renderingResources.framebufferTexture4);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
      updateDepthTexturesSize(depthTextures, numDepthTextures, state.resolution.x, state.resolution.y);
@@ -1240,14 +1245,14 @@ int main(int argc, char* argv[]){
   unsigned int shaderProgram = loadShader(shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl", interface.readFile);
   
   modlog("shaders", std::string("framebuffer file path is ") + framebufferShaderPath);
-  framebufferProgram = loadShader(framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl", interface.readFile);
+  renderingResources.framebufferProgram = loadShader(framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string depthShaderPath = "./res/shaders/depth";
   modlog("shaders", std::string("depth file path is ") + depthShaderPath);
   unsigned int depthProgram = loadShader(depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl", interface.readFile);
 
   modlog("shaders", std::string("ui shader file path is ") + uiShaderPath);
-  uiShaderProgram = loadShader(uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile);
+  renderingResources.uiShaderProgram = loadShader(uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string selectionShaderPath = "./res/shaders/selection";
   modlog("shaders", std::string("selection shader path is ") + selectionShaderPath);
@@ -1255,7 +1260,7 @@ int main(int argc, char* argv[]){
 
   std::string drawingShaderPath = "./res/shaders/drawing";
   modlog("shaders", std::string("drawing shader path is: ") + drawingShaderPath);
-  drawingProgram = loadShader(drawingShaderPath + "/vertex.glsl", drawingShaderPath + "/fragment.glsl", interface.readFile);
+  renderingResources.drawingProgram = loadShader(drawingShaderPath + "/vertex.glsl", drawingShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string blurShaderPath = "./res/shaders/blur";
   modlog("shaders", std::string("blur shader path is: ") + blurShaderPath);
@@ -1266,13 +1271,13 @@ int main(int argc, char* argv[]){
   unsigned int basicProgram = loadShader(basicShaderPath + "/vertex.glsl", basicShaderPath+ "/fragment.glsl", interface.readFile);
 
   renderStages = loadRenderStages(fbo, 
-    framebufferTexture, framebufferTexture2, framebufferTexture3, framebufferTexture4,
+    renderingResources.framebufferTexture, renderingResources.framebufferTexture2, renderingResources.framebufferTexture3, renderingResources.framebufferTexture4,
     depthTextures, numDepthTextures,
     portalTextures, numPortalTextures,
     RenderShaders {
       .blurProgram = blurProgram,
       .selectionProgram = selectionProgram,
-      .uiShaderProgram = uiShaderProgram,
+      .uiShaderProgram = renderingResources.uiShaderProgram,
       .shaderProgram = shaderProgram,
       .basicProgram = basicProgram,
     },
@@ -1588,7 +1593,7 @@ int main(int argc, char* argv[]){
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
   PROFILE("FRAME",
-    auto timingUpdate = updateTimings(fpsFixed, fixedDelta, speedMultiplier, timetoexit, hasFramelimit, minDeltaTime, fpsLag);
+    auto timingUpdate = updateTime(fpsFixed, fixedDelta, speedMultiplier, timetoexit, hasFramelimit, minDeltaTime, fpsLag);
     if (timingUpdate.goToCleanup){
       goto cleanup;
     }
@@ -1864,7 +1869,7 @@ int main(int argc, char* argv[]){
 
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    auto finalProgram = (state.renderMode == RENDER_DEPTH) ? depthProgram : framebufferProgram;
+    auto finalProgram = (state.renderMode == RENDER_DEPTH) ? depthProgram : renderingResources.framebufferProgram;
     glUseProgram(finalProgram); 
     glClearColor(0.f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1890,7 +1895,7 @@ int main(int argc, char* argv[]){
     glBindTexture(GL_TEXTURE_2D, depthTextures[0]);
 
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
+    glBindTexture(GL_TEXTURE_2D, renderingResources.framebufferTexture2);
 
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(finalProgram, "framebufferTexture"), 0);
@@ -1910,7 +1915,7 @@ int main(int argc, char* argv[]){
       assert(state.textureIndex <= numPortalTextures && state.textureIndex >= 0);
       glBindTexture(GL_TEXTURE_2D, portalTextures[state.textureIndex]);  
     }else if (state.renderMode == RENDER_SELECTION){
-      glBindTexture(GL_TEXTURE_2D, framebufferTexture4);  
+      glBindTexture(GL_TEXTURE_2D, renderingResources.framebufferTexture4);  
     }else if (state.renderMode == RENDER_PAINT){
       //glBindTexture(GL_TEXTURE_2D, textureToPaint);
       glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-scenegraph_selection_texture").texture.textureId);
@@ -1918,7 +1923,7 @@ int main(int argc, char* argv[]){
       assert(state.textureIndex <=  numDepthTextures && state.textureIndex >= 0);
       glBindTexture(GL_TEXTURE_2D, depthTextures[state.textureIndex]);
     }else if (state.renderMode == RENDER_BLOOM){
-      glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
+      glBindTexture(GL_TEXTURE_2D, renderingResources.framebufferTexture2);
     }else if (state.renderMode == RENDER_GRAPHS){
       if (screenspaceTextureIds.size() > state.textureIndex && state.textureIndex >= 0){
         glBindTexture(GL_TEXTURE_2D, screenspaceTextureIds.at(state.textureIndex).id);
@@ -1957,7 +1962,7 @@ int main(int argc, char* argv[]){
     
     if (state.renderMode == RENDER_FINAL){
       renderUI(effectiveCrosshair, pixelColor);
-      drawShapeData(lineData, uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
+      drawShapeData(lineData, renderingResources.uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
     }
     glEnable(GL_DEPTH_TEST);
 
