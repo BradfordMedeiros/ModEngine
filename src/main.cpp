@@ -1706,6 +1706,21 @@ int main(int argc, char* argv[]){
     }
 
 
+    if (shouldCallBindingOnObjectSelected){
+      auto id = state.groupSelection ? getGroupId(world.sandbox, selectTargetId) : selectTargetId;
+      modassert(idExists(world.sandbox, id), "id does not exist for objectSelected");
+      cBindings.onObjectSelected(id, state.hoveredColor.value());
+    }
+
+    if (state.lastHoverIndex != state.currentHoverIndex){  
+      if (idExists(world.sandbox, state.lastHoverIndex)){
+        cBindings.onObjectHover(state.lastHoverIndex, false);
+      }
+      if (idExists(world.sandbox, state.currentHoverIndex)){
+        cBindings.onObjectHover(state.currentHoverIndex, true);
+      }
+    }
+    
     /////////// everything above is state update ////////////////////
 
 
@@ -1790,20 +1805,7 @@ int main(int argc, char* argv[]){
     // mostly state updated here should be moved upward
     Color pixelColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     state.hoveredColor = glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b);
-    if (shouldCallBindingOnObjectSelected){
-      auto id = state.groupSelection ? getGroupId(world.sandbox, selectTargetId) : selectTargetId;
-      modassert(idExists(world.sandbox, id), "id does not exist for objectSelected");
-      cBindings.onObjectSelected(id, state.hoveredColor.value());
-    }
 
-    if (state.lastHoverIndex != state.currentHoverIndex){  
-      if (idExists(world.sandbox, state.lastHoverIndex)){
-        cBindings.onObjectHover(state.lastHoverIndex, false);
-      }
-      if (idExists(world.sandbox, state.currentHoverIndex)){
-        cBindings.onObjectHover(state.currentHoverIndex, true);
-      }
-    }
 
     disposeTempBufferedData(lineData);
 
