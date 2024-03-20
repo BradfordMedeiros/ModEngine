@@ -922,6 +922,9 @@ objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& a
 
 // todo finish removing data like eg clearing meshes, animations,etc
 void removeObjectById(World& world, objid objectId, std::string name, std::string scriptName, bool netsynchronized){
+  if (!idExists(world.sandbox, objectId)){
+    return;
+  }
   if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
     auto rigidBody = world.rigidbodys.at(objectId).body;
     assert(rigidBody != NULL);
