@@ -103,6 +103,9 @@ std::vector<ParsedLoadScene> parseSceneArgs(std::vector<std::string>& rawScenes)
 }
 
 std::optional<unsigned int> getTextureId(std::string& texture){
+  if (world.textures.find(texture) == world.textures.end()){
+    return std::nullopt;
+  }
   return world.textures.at(texture).texture.textureId;
 }
 
