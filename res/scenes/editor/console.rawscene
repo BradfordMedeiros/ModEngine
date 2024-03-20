@@ -1,6 +1,0 @@
-(console:layer:basicui
-(console:backpanel:true
-(console:minwidth:2
-(console:minheight:2
-(console:script:./res/scenes/editor/console.scm
-(console:position:0 0 -0.1
