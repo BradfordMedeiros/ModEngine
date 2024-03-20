@@ -1108,7 +1108,6 @@ int main(int argc, char* argv[]){
   }
 
   auto filewatch = watchFiles(result["watch"].as<std::string>(), 1.f);
-  bool mappingClickCalled = false;
 
   interface = SysInterface {
     .loadCScript = [](std::string script, objid id, objid sceneId) -> void {
@@ -1693,9 +1692,8 @@ int main(int argc, char* argv[]){
         auto layerSelectIndex = getLayerForId(selectTargetId).selectIndex;
 
         auto layerSelectNegOne = layerSelectIndex == -1;
-        auto layerSelectThreeCond = layerSelectIndex == -3 && mappingClickCalled;
-        std::cout << "cond1 = " << (layerSelectNegOne ? "true" : "false") << ", condtwo = " << (layerSelectThreeCond ? "true" : "false") << ", selectindex " << layerSelectIndex << ", mapping = " << mappingClickCalled << std::endl;
-        if (!(layerSelectNegOne || layerSelectThreeCond) && !state.selectionDisabled){
+        std::cout << "cond1 = " << (layerSelectNegOne ? "true" : "false") << ", condtwo = " << ", selectindex " << layerSelectIndex <<  std::endl;
+        if (!(layerSelectNegOne) && !state.selectionDisabled){
           shouldCallBindingOnObjectSelected = selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId), state.cursorBehavior != CURSOR_HIDDEN || state.showCursor );
         }
       }else if (isReservedObjId(selectTargetId)){
@@ -1706,7 +1704,6 @@ int main(int argc, char* argv[]){
         cBindings.onObjectUnselected();
       }
     }
-
 
 
     /////////// everything above is state update ////////////////////
@@ -1748,31 +1745,6 @@ int main(int argc, char* argv[]){
 
 
 
-    ///////////////////
-    // callbacks here should eb moved into state update
-    auto textureId = uvCoordWithTex.z;
-    std::optional<std::string> textureName = textureId > 0 ? getTextureById(world, textureId) : std::nullopt;
-
-    bool selectedMappingTexture = false;
-    if (textureName.has_value()){
-      //std::cout << "texturename: " << textureName << std::endl;
-      auto mappingTexture = getMappingTexture(world, textureName.value());
-      if (mappingTexture.has_value()){
-        auto mappingTextureName = getTextureById(world, mappingTexture.value()).value();
-        renderStages.basicTexture.quadTexture = mappingTexture.value();
-        renderWithProgram(renderContext, renderStages.basicTexture);
-        auto pixelCoord = uvToPixelCoord(uvCoord, state.resolution);
-        Color colorFromSelection2 = getPixelColor(pixelCoord.x, pixelCoord.y);
-        auto hoveredColorItemId = getIdFromColor(colorFromSelection2);
-        if (hoveredColorItemId > 0){
-          if (selectItemCalledThisFrame){
-            cBindings.onMapping(hoveredColorItemId);
-            selectedMappingTexture = true;
-          }
-        }
-      }    
-    }
-    mappingClickCalled = selectedMappingTexture;
     ///////////////////////
 
     // Each portal requires a render pass  -- // look misplaced and unneccessary 

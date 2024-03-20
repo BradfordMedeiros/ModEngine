@@ -25,7 +25,6 @@ struct CScriptBindingCallbacks {
   onobjectSelectedFunc onObjectSelected;
   func onObjectUnselected;
   onobjectHoverFunc onObjectHover;
-  funcMappingFunc onMapping;
   keycallback onKeyCallback;
   keycharcallback onKeyCharCallback;
   stringboolFunc onCameraSystemChange;

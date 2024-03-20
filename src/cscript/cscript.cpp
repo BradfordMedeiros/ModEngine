@@ -254,16 +254,6 @@ void onCObjectHoverAllScripts(int32_t index, bool isHover){
     binding -> onObjectHover(objInstance.instanceId, objInstance.data, index, isHover);
   }
 }
-void onCMappingAllScripts(int32_t index){
-  for (auto &objInstance : customObjInstances){
-    if (objInstance.shouldRemove){
-      continue;
-    }
-    auto binding = objInstance.cScriptBinding;
-    assert(binding != NULL);
-    binding -> onMapping(objInstance.instanceId, objInstance.data, index);
-  }
-}
 
 void onCKeyCallbackAllScripts(int key, int scancode, int action, int mods){
   for (auto &objInstance : customObjInstances){
@@ -380,7 +370,6 @@ CScriptBindingCallbacks getCScriptBindingCallbacks(){
     .onObjectSelected = onCObjectSelectedAllScripts,
     .onObjectUnselected = onCObjectUnselectedAllScripts,
     .onObjectHover = onCObjectHoverAllScripts,
-    .onMapping = onCMappingAllScripts,
     .onKeyCallback = onCKeyCallbackAllScripts,
     .onKeyCharCallback = onCKeyCharCallbackAllScripts,
     .onCameraSystemChange = onCCameraSystemChangeAllScripts,
