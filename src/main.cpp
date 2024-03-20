@@ -1669,55 +1669,17 @@ int main(int argc, char* argv[]){
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= numPortalTextures);
 
-    /////////// everything above is state update ////////////////////
-
-    glViewport(0, 0, state.resolution.x, state.resolution.y);
-
-    // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
-
-    RenderContext renderContext {
-      .world = world,
-      .view = view,
-      .lights = lights,
-      .portals = portals,
-      .lightProjview = {},
-      .cameraTransform = viewTransform,
-      .projection = std::nullopt,
-    };
-
-
-    bool depthEnabled = false;
-    auto dofInfo = getDofInfo(&depthEnabled);
-    updateRenderStages(renderStages, dofInfo);
-    // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
-    renderWithProgram(renderContext, renderStages.selection);
-
-    glUniformMatrix4fv(glGetUniformLocation(renderStages.selection.shader, "projview"), 1, GL_FALSE, glm::value_ptr(ndiOrtho));
-    glDisable(GL_DEPTH_TEST);
-    drawShapeData(lineData, renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
-    glEnable(GL_DEPTH_TEST);
 
 
     /* this part can be isolated out of rendering, just need to save some information out of this for the next frame */
     //std::cout << "cursor pos: " << state.cursorLeft << " " << state.cursorTop << std::endl;
     auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
-    //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
-    auto uvCoordWithTex = getUVCoordAndTextureId(adjustedCoords.x, adjustedCoords.y);
-    auto uvCoord = toUvCoord(uvCoordWithTex);
-    Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
 
-    objid hoveredId = getIdFromColor(hoveredItemColor);
 
-    state.lastHoverIndex = state.currentHoverIndex; // stateupdate
-    state.currentHoverIndex = hoveredId; // stateupdate
-    state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate
-
-    Mesh* effectiveCrosshair = updateAndGetCursor(hoveredId);
-
+    Mesh* effectiveCrosshair = updateAndGetCursor(state.currentHoverIndex);
     bool selectItemCalledThisFrame = selectItemCalled;
     selectItemCalled = false;  // reset the state
-
-    auto selectTargetId = state.forceSelectIndex == 0 ? hoveredId : state.forceSelectIndex;
+    auto selectTargetId = state.forceSelectIndex == 0 ? state.currentHoverIndex : state.forceSelectIndex;
     auto shouldSelectItem = selectItemCalledThisFrame || (state.forceSelectIndex != 0);
     state.forceSelectIndex = 0; // stateupdate
 
@@ -1746,7 +1708,48 @@ int main(int argc, char* argv[]){
     }
 
 
+
+    /////////// everything above is state update ////////////////////
+
+
+    RenderContext renderContext {
+      .world = world,
+      .view = view,
+      .lights = lights,
+      .portals = portals,
+      .lightProjview = {},
+      .cameraTransform = viewTransform,
+      .projection = std::nullopt,
+    };
+
+    bool depthEnabled = false;
+    auto dofInfo = getDofInfo(&depthEnabled);
+    updateRenderStages(renderStages, dofInfo);
+    glViewport(0, 0, state.resolution.x, state.resolution.y);
+
+    // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
+    renderWithProgram(renderContext, renderStages.selection);
+
+    glUniformMatrix4fv(glGetUniformLocation(renderStages.selection.shader, "projview"), 1, GL_FALSE, glm::value_ptr(ndiOrtho));
+    glDisable(GL_DEPTH_TEST);
+    drawShapeData(lineData, renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
+    glEnable(GL_DEPTH_TEST);
+
+
+    //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
+    auto uvCoordWithTex = getUVCoordAndTextureId(adjustedCoords.x, adjustedCoords.y);
+    auto uvCoord = toUvCoord(uvCoordWithTex);
+    Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+    objid hoveredId = getIdFromColor(hoveredItemColor);
+
+    state.lastHoverIndex = state.currentHoverIndex; // stateupdate
+    state.currentHoverIndex = hoveredId; // stateupdate
+    state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate
+
+
+
     ///////////////////
+    // callbacks here should eb moved into state update
     auto textureId = uvCoordWithTex.z;
     std::optional<std::string> textureName = textureId > 0 ? getTextureById(world, textureId) : std::nullopt;
 
@@ -1773,6 +1776,9 @@ int main(int argc, char* argv[]){
     ///////////////////////
 
     // Each portal requires a render pass  -- // look misplaced and unneccessary 
+    //     // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
+    ////////////////////////////////////////////////
+
     std::vector<glm::mat4> lightMatrixs;
     if (state.enableShadows){
       PROFILE(
@@ -1782,7 +1788,7 @@ int main(int argc, char* argv[]){
     }
 
     renderContext.lightProjview = lightMatrixs;
-    
+
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_BLEND);
@@ -1809,12 +1815,13 @@ int main(int argc, char* argv[]){
     renderVector(shaderProgram, view, glm::mat4(1.0f), numChunkingGridCells);
 
       /////////////////
-
+    // mostly state updated here should be moved upward
     Color pixelColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+    state.hoveredColor = glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b);
     if (shouldCallBindingOnObjectSelected){
       auto id = state.groupSelection ? getGroupId(world.sandbox, selectTargetId) : selectTargetId;
       modassert(idExists(world.sandbox, id), "id does not exist for objectSelected");
-      cBindings.onObjectSelected(id, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
+      cBindings.onObjectSelected(id, state.hoveredColor.value());
     }
 
     if (state.lastHoverIndex != state.currentHoverIndex){  
@@ -1873,6 +1880,10 @@ int main(int argc, char* argv[]){
     }
     doRemoveQueuedRemovals();
     doUnloadScenes();
+    //////////////////////////////////////////////////////////
+
+
+
 
     // EVERYTHING BELOW HERE IS RENDERING
 
