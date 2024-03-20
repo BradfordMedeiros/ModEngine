@@ -1685,16 +1685,6 @@ int main(int argc, char* argv[]){
       .projection = std::nullopt,
     };
 
-    std::vector<glm::mat4> lightMatrixs;
-    if (state.enableShadows){
-      PROFILE(
-        "RENDERING-SHADOWMAPS",
-        lightMatrixs = renderShadowMaps(renderContext);
-      )
-    }
-
-    renderContext.lightProjview = lightMatrixs;
-
 
     bool depthEnabled = false;
     auto dofInfo = getDofInfo(&depthEnabled);
@@ -1783,6 +1773,17 @@ int main(int argc, char* argv[]){
     ///////////////////////
 
     // Each portal requires a render pass  -- // look misplaced and unneccessary 
+    std::vector<glm::mat4> lightMatrixs;
+    if (state.enableShadows){
+      PROFILE(
+        "RENDERING-SHADOWMAPS",
+        lightMatrixs = renderShadowMaps(renderContext);
+      )
+    }
+
+    renderContext.lightProjview = lightMatrixs;
+    
+
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_BLEND);
     /////////////////////
