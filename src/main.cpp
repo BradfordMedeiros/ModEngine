@@ -1581,9 +1581,7 @@ int main(int argc, char* argv[]){
   toggleFullScreen(state.fullscreen);
   toggleCursor(state.cursorBehavior); 
 
-
   std::cout << "INFO: render loop starting" << std::endl;
-
   GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
   glDrawBuffers(2, buffers_to_render);
 
@@ -1616,11 +1614,6 @@ int main(int argc, char* argv[]){
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
   PROFILE("FRAME",
-    /* trying to get this into the form of 
-      getInput
-      updateState
-      render
-    */
     auto timingUpdate = updateTime(fpsFixed, fixedDelta, speedMultiplier, timetoexit, hasFramelimit, minDeltaTime, fpsLag);
     if (timingUpdate.goToCleanup){
       goto cleanup;
@@ -1636,9 +1629,7 @@ int main(int argc, char* argv[]){
     }
     idCoordsToGet = {};
 
-
     if (!state.worldpaused){
-      //std::cout << "Current time: " << timePlayback.currentTime << std::endl;
       timePlayback.setElapsedTime(statistics.deltaTime);
     }
 
@@ -1661,7 +1652,7 @@ int main(int argc, char* argv[]){
 
     onNetCode(world, netcode, onClientMessage, bootStrapperMode);
 
-    { // set volume
+    { 
       auto forward = calculateRelativeOffset(viewTransform.rotation, {0, 0, -1 }, false);
       auto up  = calculateRelativeOffset(viewTransform.rotation, {0, 1, 0 }, false);
       setListenerPosition(
@@ -1672,12 +1663,10 @@ int main(int argc, char* argv[]){
       setVolume(state.muteSound ? 0.f : state.volume);
     }
 
-    handleInput(window);  // stateupdate
-    glfwPollEvents();     // stateupdate
+    handleInput(window);
+    glfwPollEvents();
     cBindings.onFrame();
 
-    /* this part can be isolated out of rendering, just need to save some information out of this for the next frame */
-    //std::cout << "cursor pos: " << state.cursorLeft << " " << state.cursorTop << std::endl;
     auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
 
 
@@ -1727,9 +1716,6 @@ int main(int argc, char* argv[]){
       }
     }
     
-
-    //handle input was here
-
     onManipulatorUpdate(
       state.manipulatorState, 
       projectionFromLayer(layers.at(0)),
@@ -1770,8 +1756,6 @@ int main(int argc, char* argv[]){
       cBindings.onMessage(message.strTopic, message.strValue);
     }
 
-
-
     viewTransform = getCameraTransform();
     view = renderView(viewTransform.position, viewTransform.rotation);
     std::vector<LightInfo> lights = getLightInfo(world);
@@ -1804,7 +1788,6 @@ int main(int argc, char* argv[]){
     drawShapeData(lineData, renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
     glEnable(GL_DEPTH_TEST);
 
-
     //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
     auto uvCoordWithTex = getUVCoordAndTextureId(adjustedCoords.x, adjustedCoords.y);
     auto uvCoord = toUvCoord(uvCoordWithTex);
@@ -1814,8 +1797,6 @@ int main(int argc, char* argv[]){
     state.lastHoverIndex = state.currentHoverIndex; // stateupdate
     state.currentHoverIndex = hoveredId; // stateupdate
     state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate
-
-
 
     for (auto &idCoordToGet : idCoordsToGet){
       auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.ndix, idCoordToGet.ndiy), state.resolution);
@@ -1828,14 +1809,7 @@ int main(int argc, char* argv[]){
       }
     }
 
-    std::cout << "hovered id: " << hoveredId << std::endl;
-
-    ///////////////////////
-
-    // Each portal requires a render pass  -- // look misplaced and unneccessary 
-    //     // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
-    ////////////////////////////////////////////////
-
+    // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
     std::vector<glm::mat4> lightMatrixs;
     if (state.enableShadows){
       PROFILE(
@@ -1843,50 +1817,27 @@ int main(int argc, char* argv[]){
         lightMatrixs = renderShadowMaps(renderContext);
       )
     }
-
     renderContext.lightProjview = lightMatrixs;
-
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_BLEND);
-    /////////////////////
-
     handlePaintingModifiesViewport(uvCoord);
-
 
     glViewport(0, 0, state.resolution.x, state.resolution.y);
     handleTerrainPainting(uvCoord, hoveredId);
      
-
     assert(portals.size() <= numPortalTextures);
-
     PROFILE("PORTAL_RENDERING", 
       portalIdCache = renderPortals(renderContext);
     )
-
-    std::cout << "cache size: " << portalIdCache.size() << std::endl;
-    ////////////////////////////
+    //std::cout << "cache size: " << portalIdCache.size() << std::endl;
 
     statistics.numTriangles = renderWithProgram(renderContext, renderStages.main);
     Color colorFromSelection = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     renderVector(shaderProgram, view, glm::mat4(1.0f), numChunkingGridCells);
 
-      /////////////////
-    // mostly state updated here should be moved upward
     Color pixelColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     state.hoveredColor = glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b);
-
-
-  
-
-    
-
-    //////////////////////////////////////////////////////////
-
-
-
-
-    // EVERYTHING BELOW HERE IS RENDERING
 
     PROFILE("BLOOM-RENDERING",
       renderWithProgram(renderContext, renderStages.bloom1);
@@ -1947,14 +1898,12 @@ int main(int argc, char* argv[]){
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(finalProgram, "framebufferTexture"), 0);
 
-    //  Border rendering
     if (state.borderTexture != ""){
       glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
       glBindTexture(GL_TEXTURE_2D, world.textures.at(state.borderTexture).texture.textureId);
       glDrawArrays(GL_TRIANGLES, 0, 6);
       glClear(GL_DEPTH_BUFFER_BIT);
     }
-    //////////////////////////////////////////////////////////
 
     if (state.renderMode == RENDER_FINAL){
       glBindTexture(GL_TEXTURE_2D, finalRenderingTexture(renderStages));
