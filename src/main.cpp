@@ -971,23 +971,25 @@ ManipulatorTools tools {
 };
 
 
-// Might be nice to have batched version of this so I can do it, say, by reading the texture object directly
-// basically find a way to bypass a draw call per idAtCoord query
-// Maybe look at READ_BUFFER
-std::optional<objid> idAtCoord(float ndix, float ndiy, bool onlyGameObjId){ // don't like binding framebuffer for this.  Need to isolate rendering from code so don't have to unbind / rebind framebuffer
-  glBindFramebuffer(GL_FRAMEBUFFER, renderStages.selection.fbo);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderStages.selection.colorAttachment0, 0);
-  auto pixelCoord = ndiToPixelCoord(glm::vec2(ndix, ndiy), state.resolution);
-  auto id = getIdFromPixelCoord(pixelCoord.x, pixelCoord.y);
-  if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
-    return std::nullopt;
-  }
-  if (onlyGameObjId && !idExists(world.sandbox, id)){
-    //modassert(false, std::string("id does not exist: ") + std::to_string(id));
-    return std::nullopt;
-  }
-  return id;
+struct IdAtCoords {
+  float ndix;
+  float ndiy;
+  bool onlyGameObjId;
+  std::optional<objid> result;
+  std::function<void(std::optional<objid>)> afterFrame;
+};
+
+std::vector<IdAtCoords> idCoordsToGet;
+void idAtCoordAsync(float ndix, float ndiy, bool onlyGameObjId, std::function<void(std::optional<objid>)> afterFrame){
+  idCoordsToGet.push_back(IdAtCoords {
+    .ndix = ndix,
+    .ndiy = ndiy,
+    .onlyGameObjId = onlyGameObjId,
+    .result = std::nullopt,
+    .afterFrame = afterFrame,
+  });
 }
+
 
 void setSelected(std::optional<std::set<objid>> ids){
   clearSelectedIndexs(state.editor);
@@ -1419,7 +1421,7 @@ int main(int argc, char* argv[]){
     .schedule = schedule,
     .getFrameInfo = getFrameInfo,
     .getCursorInfoWorld = getCursorInfoWorld,
-    .idAtCoord = idAtCoord,
+    .idAtCoordAsync = idAtCoordAsync,
     .gameobjExists = gameobjExists,
     .prefabId = prefabId,
     .setLogEndpoint = setLogEndpoint,
@@ -1626,8 +1628,14 @@ int main(int argc, char* argv[]){
     registerStatistics(timingUpdate.currentFps);
 
     resetReservedId();
+    disposeTempBufferedData(lineData);
     doRemoveQueuedRemovals();
     doUnloadScenes();
+    for (auto &idCoordToGet : idCoordsToGet){
+      idCoordToGet.afterFrame(idCoordToGet.result);
+    }
+    idCoordsToGet = {};
+
 
     if (!state.worldpaused){
       //std::cout << "Current time: " << timePlayback.currentTime << std::endl;
@@ -1664,13 +1672,9 @@ int main(int argc, char* argv[]){
       setVolume(state.muteSound ? 0.f : state.volume);
     }
 
-    viewTransform = getCameraTransform();
-    view = renderView(viewTransform.position, viewTransform.rotation);
-    std::vector<LightInfo> lights = getLightInfo(world);
-    std::vector<PortalInfo> portals = getPortalInfo(world);
-    assert(portals.size() <= numPortalTextures);
-
-
+    handleInput(window);  // stateupdate
+    glfwPollEvents();     // stateupdate
+    cBindings.onFrame();
 
     /* this part can be isolated out of rendering, just need to save some information out of this for the next frame */
     //std::cout << "cursor pos: " << state.cursorLeft << " " << state.cursorTop << std::endl;
@@ -1766,6 +1770,14 @@ int main(int argc, char* argv[]){
       cBindings.onMessage(message.strTopic, message.strValue);
     }
 
+
+
+    viewTransform = getCameraTransform();
+    view = renderView(viewTransform.position, viewTransform.rotation);
+    std::vector<LightInfo> lights = getLightInfo(world);
+    std::vector<PortalInfo> portals = getPortalInfo(world);
+    assert(portals.size() <= numPortalTextures);
+
     /////////// everything above is state update ////////////////////
 
 
@@ -1782,7 +1794,7 @@ int main(int argc, char* argv[]){
     bool depthEnabled = false;
     auto dofInfo = getDofInfo(&depthEnabled);
     updateRenderStages(renderStages, dofInfo);
-    glViewport(0, 0, state.resolution.x, state.resolution.y);
+    glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
     // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
     renderWithProgram(renderContext, renderStages.selection);
@@ -1804,6 +1816,19 @@ int main(int argc, char* argv[]){
     state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate
 
 
+
+    for (auto &idCoordToGet : idCoordsToGet){
+      auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.ndix, idCoordToGet.ndiy), state.resolution);
+      auto id = getIdFromPixelCoord(pixelCoord.x, pixelCoord.y);
+      if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
+      }else if (idCoordToGet.onlyGameObjId && !idExists(world.sandbox, id)){
+        //modassert(false, std::string("id does not exist: ") + std::to_string(id));
+      }else{
+        idCoordToGet.result = id;
+      }
+    }
+
+    std::cout << "hovered id: " << hoveredId << std::endl;
 
     ///////////////////////
 
@@ -1852,11 +1877,7 @@ int main(int argc, char* argv[]){
     state.hoveredColor = glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b);
 
 
-    disposeTempBufferedData(lineData);
-
-    handleInput(window);  // stateupdate
-    glfwPollEvents();     // stateupdate
-    cBindings.onFrame();
+  
 
     
 
