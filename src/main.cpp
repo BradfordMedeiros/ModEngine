@@ -17,56 +17,16 @@
 #endif
 CustomApiBindings* mainApi;
 
-struct Framebuffers {
-  unsigned int fbo;
-  unsigned int framebufferTexture;
-  unsigned int framebufferTexture2;
-  unsigned int framebufferTexture3;
-  unsigned int framebufferTexture4;
-};
-
-
 // application rendering stuff
 struct RenderingResources { 
   unsigned int framebufferProgram;
   unsigned int drawingProgram;
   unsigned int uiShaderProgram;
-
   Framebuffers framebuffers;
 };
 
 RenderingResources renderingResources { };
 
-const int numPortalTextures = 16;
-unsigned int portalTextures[16];
-const int numDepthTextures = 32;
-unsigned int depthTextures[32];
-unsigned int textureDepthTextures[1];
-
-
-Framebuffers generateFramebuffers(glm::ivec2 resolution){
-  Framebuffers framebuffers { };
-
-  glGenFramebuffers(1, &framebuffers.fbo);
-
-  genFramebufferTexture(&framebuffers.framebufferTexture, resolution.x, resolution.y);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebuffers.framebufferTexture, 0);
-
-  genFramebufferTexture(&framebuffers.framebufferTexture2, resolution.x, resolution.y);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebuffers.framebufferTexture2, 0);
-
-  genFramebufferTexture(&framebuffers.framebufferTexture3, resolution.x, resolution.y);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, framebuffers.framebufferTexture3, 0);
-
-  genFramebufferTexture(&framebuffers.framebufferTexture4, resolution.x, resolution.y);
-
-  generateDepthTextures(depthTextures, numDepthTextures, resolution.x, resolution.y);
-  generateDepthTextures(textureDepthTextures, 1, resolution.x, resolution.y);
-
-  generatePortalTextures(portalTextures, numPortalTextures, resolution.x, resolution.y);
-
-  return framebuffers;
-}
 
 // long lived app resources
 DefaultResources defaultResources {};
@@ -188,8 +148,8 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   modassert(texSize.width == texSize2.width && texSize.height == texSize2.height, "screenspace - invalid tex sizes, texsize = " + print(glm::vec2(texSize.width, texSize.height)) + ", texsize2 = " + print(glm::vec2(texSize2.width, texSize2.height)));
 
   glViewport(0, 0, texSize.width, texSize.height);
-  updateDepthTexturesSize(textureDepthTextures, 1, texSize.width, texSize.height); // wonder if this would be better off preallocated per gend texture?
-  setActiveDepthTexture(renderingResources.framebuffers.fbo, textureDepthTextures, 0);
+  updateDepthTexturesSize(&renderingResources.framebuffers.textureDepthTextures.at(0), renderingResources.framebuffers.textureDepthTextures.size(), texSize.width, texSize.height); // wonder if this would be better off preallocated per gend texture?
+  setActiveDepthTexture(renderingResources.framebuffers.fbo, &renderingResources.framebuffers.textureDepthTextures.at(0), 0);
 
   glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0);
@@ -357,8 +317,6 @@ void loadAllTextures(std::string& textureFolderPath){
     "../gameresources/build/textures/clean/pebbles2.png",
 
     "../gameresources/build/textures/clean/grass.jpg", 
-
-    "../gameresources/build/textures/clean/tex_Ice.jpg", 
     "../gameresources/build/textures/clean/tunnel_road.jpg", 
    
   };
@@ -449,7 +407,7 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
 
     if (lightProjview.size() > i){
       glActiveTexture(GL_TEXTURE3);
-      glBindTexture(GL_TEXTURE_2D, depthTextures[1]);
+      glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(1));
       glUniformMatrix4fv(glGetUniformLocation(shader, "lightsprojview"), 1, GL_FALSE, glm::value_ptr(lightProjview.at(i)));
       glActiveTexture(GL_TEXTURE0);
     }
@@ -806,7 +764,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     }
     glActiveTexture(GL_TEXTURE0);
 
-    setActiveDepthTexture(renderingResources.framebuffers.fbo, depthTextures, renderStep.depthTextureIndex);
+    setActiveDepthTexture(renderingResources.framebuffers.fbo, &renderingResources.framebuffers.depthTextures.at(0), renderStep.depthTextureIndex);
     glBindFramebuffer(GL_FRAMEBUFFER, renderStep.fbo);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderStep.colorAttachment0, 0);
     if (renderStep.hasColorAttachment1){
@@ -1229,10 +1187,9 @@ int main(int argc, char* argv[]){
 
   startSoundSystem();
 
-  renderingResources.framebuffers = generateFramebuffers(state.resolution);
-  
+  renderingResources.framebuffers = generateFramebuffers(state.resolution.x, state.resolution.y);
   glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
-  setActiveDepthTexture(renderingResources.framebuffers.fbo, depthTextures, 0);
+  setActiveDepthTexture(renderingResources.framebuffers.fbo, &renderingResources.framebuffers.depthTextures.at(0), 0);
 
   if (!glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE){
     std::cerr << "ERROR: framebuffer incomplete" << std::endl;
@@ -1264,8 +1221,8 @@ int main(int argc, char* argv[]){
      glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture4);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
-     updateDepthTexturesSize(depthTextures, numDepthTextures, state.resolution.x, state.resolution.y);
-     updatePortalTexturesSize(portalTextures, numPortalTextures, state.resolution.x, state.resolution.y);
+     updateDepthTexturesSize(&renderingResources.framebuffers.depthTextures.at(0), renderingResources.framebuffers.depthTextures.size(), state.resolution.x, state.resolution.y);
+     updatePortalTexturesSize(&renderingResources.framebuffers.portalTextures.at(0), renderingResources.framebuffers.portalTextures.size(), state.resolution.x, state.resolution.y);
 
      orthoProj = glm::ortho(0.0f, (float)state.currentScreenWidth, 0.0f, (float)state.currentScreenHeight, -1.0f, 1.0f);  
   }; 
@@ -1309,8 +1266,8 @@ int main(int argc, char* argv[]){
   renderStages = loadRenderStages(
     renderingResources.framebuffers.fbo, 
     renderingResources.framebuffers.framebufferTexture, renderingResources.framebuffers.framebufferTexture2, renderingResources.framebuffers.framebufferTexture3, renderingResources.framebuffers.framebufferTexture4,
-    depthTextures, numDepthTextures,
-    portalTextures, numPortalTextures,
+    &renderingResources.framebuffers.depthTextures.at(0), renderingResources.framebuffers.depthTextures.size(),
+    &renderingResources.framebuffers.portalTextures.at(0), renderingResources.framebuffers.portalTextures.size(),
     RenderShaders {
       .blurProgram = blurProgram,
       .selectionProgram = selectionProgram,
@@ -1774,7 +1731,7 @@ int main(int argc, char* argv[]){
     view = renderView(viewTransform.position, viewTransform.rotation);
     std::vector<LightInfo> lights = getLightInfo(world);
     std::vector<PortalInfo> portals = getPortalInfo(world);
-    assert(portals.size() <= numPortalTextures);
+    assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
 
     /////////// everything above is state update ////////////////////
 
@@ -1840,7 +1797,7 @@ int main(int argc, char* argv[]){
     glViewport(0, 0, state.resolution.x, state.resolution.y);
     handleTerrainPainting(uvCoord, hoveredId);
      
-    assert(portals.size() <= numPortalTextures);
+    assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
     PROFILE("PORTAL_RENDERING", 
       portalIdCache = renderPortals(renderContext);
     )
@@ -1904,7 +1861,7 @@ int main(int argc, char* argv[]){
     glUniform1i(glGetUniformLocation(finalProgram, "depthTexture"), 2);
 
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, depthTextures[0]);
+    glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(0));
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture2);
@@ -1922,16 +1879,16 @@ int main(int argc, char* argv[]){
     if (state.renderMode == RENDER_FINAL){
       glBindTexture(GL_TEXTURE_2D, finalRenderingTexture(renderStages));
     }else if (state.renderMode == RENDER_PORTAL){
-      assert(state.textureIndex <= numPortalTextures && state.textureIndex >= 0);
-      glBindTexture(GL_TEXTURE_2D, portalTextures[state.textureIndex]);  
+      assert(state.textureIndex <= renderingResources.framebuffers.portalTextures.size() && state.textureIndex >= 0);
+      glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.portalTextures.at(state.textureIndex));  
     }else if (state.renderMode == RENDER_SELECTION){
       glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture4);  
     }else if (state.renderMode == RENDER_PAINT){
       //glBindTexture(GL_TEXTURE_2D, textureToPaint);
       glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-scenegraph_selection_texture").texture.textureId);
     }else if (state.renderMode == RENDER_DEPTH){
-      assert(state.textureIndex <=  numDepthTextures && state.textureIndex >= 0);
-      glBindTexture(GL_TEXTURE_2D, depthTextures[state.textureIndex]);
+      assert(state.textureIndex <=  renderingResources.framebuffers.depthTextures.size() && state.textureIndex >= 0);
+      glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(state.textureIndex));
     }else if (state.renderMode == RENDER_BLOOM){
       glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture2);
     }else if (state.renderMode == RENDER_GRAPHS){
