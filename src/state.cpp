@@ -265,13 +265,13 @@ std::vector<ObjectStateMapping> mapping = {
   simpleVec3Serializer("light", "amount", offsetof(engineState, ambient)),
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto color = std::get_if<glm::vec3>(&value);
+      auto color = std::get_if<glm::vec4>(&value);
       if (color != NULL){
         auto fogColor = *color;
-        state.fogColor = glm::vec4(fogColor.x, fogColor.y, fogColor.z, 1.0f); 
+        state.fogColor = glm::vec4(fogColor.x, fogColor.y, fogColor.z, fogColor.w); 
       }
     },
-    .getAttr = [](engineState& state) -> AttributeValue { return glm::vec3(state.fogColor.x, state.fogColor.y, state.fogColor.z); },
+    .getAttr = [](engineState& state) -> AttributeValue { return glm::vec4(state.fogColor.x, state.fogColor.y, state.fogColor.z, state.fogColor.w); },
     .object = "fog",
     .attribute = "color",
   },
