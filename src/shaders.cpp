@@ -111,3 +111,81 @@ GLint getShaderByShaderString(std::map<std::string, GLint>& shaderstringToId, st
   }
   return shaderstringToId.at(shaderString);
 }
+
+
+
+
+std::vector<UniformData> queryUniforms(unsigned int program){
+  GLint size;
+  GLenum type;
+  GLchar name[128];
+  GLsizei length;
+  GLint count;
+  glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &count);
+  std::vector<UniformData> uniformValues;
+  for (int i = 0; i < count; i++){
+      glGetActiveUniform(program, (GLuint)i, 128, &length, &size, &type, name);
+      //printf("Uniform #%d Type: %u Name: %s\n", i, type, name);
+
+      if (type == GL_FLOAT_VEC4){
+        glm::vec4 uniformValue;
+        glGetUniformfv(program, glGetUniformLocation(program, name), glm::value_ptr(uniformValue));
+        uniformValues.push_back(UniformData {
+          .name = name,
+          .value = uniformValue,
+        });
+      }else if (type == GL_FLOAT_VEC3){
+        glm::vec3 uniformValue;
+        glGetUniformfv(program, glGetUniformLocation(program, name), glm::value_ptr(uniformValue));
+        uniformValues.push_back(UniformData {
+          .name = name,
+          .value = uniformValue,
+        });     
+      }else if (type == GL_BOOL){
+        GLint boolValue;
+        glGetUniformiv(program,  glGetUniformLocation(program, name), &boolValue);
+        uniformValues.push_back(UniformData {
+          .name = name,
+          .value = boolValue != 0,
+        });            
+      }else if (type == GL_FLOAT){
+        GLfloat floatValue;
+        glGetUniformfv(program, glGetUniformLocation(program, name), &floatValue);
+        uniformValues.push_back(UniformData {
+          .name = name,
+          .value = floatValue,
+        });    
+      }else if (type == GL_SAMPLER_2D){
+        //modassert(false, "sampler 2d not supported");
+      }else {
+        modassert(false, std::string("uniform type retrieval not yet supported for this type: ") + name);
+      }
+  }
+
+  return uniformValues;
+}
+
+std::string print(std::vector<UniformData>& uniforms){
+  std::string value = "";
+  for (auto &uniform : uniforms){
+    value += "[" + uniform.name + " ";
+    auto boolPtr = std::get_if<bool>(&uniform.value);
+    if (boolPtr){
+      value += (*boolPtr ? "true" : "false");
+    }
+    auto vec3Ptr = std::get_if<glm::vec3>(&uniform.value);
+    if (vec3Ptr){
+      value += print(*vec3Ptr);
+    }
+    auto vec4Ptr = std::get_if<glm::vec4>(&uniform.value);
+    if (vec4Ptr){
+      value += print(*vec4Ptr);
+    }
+    auto floatPtr = std::get_if<float>(&uniform.value);
+    if (floatPtr){
+      value += std::to_string(*floatPtr);
+    }
+    value += "] ";
+  }
+  return value;
+}
