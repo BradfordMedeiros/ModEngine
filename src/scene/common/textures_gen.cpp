@@ -76,3 +76,20 @@ Framebuffers generateFramebuffers(int resolutionX, int resolutionY){
 
   return framebuffers;
 }
+
+void updateFramebufferWindowSizeChange(Framebuffers& framebuffers, int resolutionX, int resolutionY){
+  glBindTexture(GL_TEXTURE_2D, framebuffers.framebufferTexture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, resolutionX, resolutionY, 0, GL_RGBA, GL_FLOAT, NULL);
+
+  glBindTexture(GL_TEXTURE_2D, framebuffers.framebufferTexture2);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, resolutionX, resolutionY, 0, GL_RGBA, GL_FLOAT, NULL);
+
+  glBindTexture(GL_TEXTURE_2D, framebuffers.framebufferTexture3);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, resolutionX, resolutionY, 0, GL_RGBA, GL_FLOAT, NULL);
+
+  glBindTexture(GL_TEXTURE_2D, framebuffers.framebufferTexture4);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, resolutionX, resolutionY, 0, GL_RGBA, GL_FLOAT, NULL);
+
+  updateDepthTexturesSize(&framebuffers.depthTextures.at(0), framebuffers.depthTextures.size(), resolutionX, resolutionY);
+  updatePortalTexturesSize(&framebuffers.portalTextures.at(0), framebuffers.portalTextures.size(), resolutionX, resolutionY);
+}

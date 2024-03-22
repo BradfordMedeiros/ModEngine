@@ -1196,8 +1196,6 @@ int main(int argc, char* argv[]){
     return -1;
   }
 
-  //////////////////////////////
-
   auto onFramebufferSizeChange = [](GLFWwindow* window, int width, int height) -> void {
      std::cout << "EVENT: framebuffer resized:  new size-  " << "width("<< width << ")" << " height(" << height << ")" << std::endl;
      state.currentScreenWidth = width;
@@ -1208,22 +1206,7 @@ int main(int argc, char* argv[]){
      if (state.nativeResolution){
        state.resolution = glm::ivec2(width, height);
      }
-
-     glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-     glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture2);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-     glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture3);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-     glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture4);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-     updateDepthTexturesSize(&renderingResources.framebuffers.depthTextures.at(0), renderingResources.framebuffers.depthTextures.size(), state.resolution.x, state.resolution.y);
-     updatePortalTexturesSize(&renderingResources.framebuffers.portalTextures.at(0), renderingResources.framebuffers.portalTextures.size(), state.resolution.x, state.resolution.y);
-
+     updateFramebufferWindowSizeChange(renderingResources.framebuffers, state.resolution.x, state.resolution.y);
      orthoProj = glm::ortho(0.0f, (float)state.currentScreenWidth, 0.0f, (float)state.currentScreenHeight, -1.0f, 1.0f);  
   }; 
 

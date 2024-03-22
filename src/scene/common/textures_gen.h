@@ -27,5 +27,6 @@ struct Framebuffers {
 };
 
 Framebuffers generateFramebuffers(int resolutionX, int resolutionY);
+void updateFramebufferWindowSizeChange(Framebuffers& framebuffers, int resolutionX, int resolutionY);
 
 #endif
