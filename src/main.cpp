@@ -17,6 +17,14 @@
 #endif
 CustomApiBindings* mainApi;
 
+struct Framebuffers {
+  unsigned int fbo;
+  unsigned int framebufferTexture;
+  unsigned int framebufferTexture2;
+  unsigned int framebufferTexture3;
+  unsigned int framebufferTexture4;
+};
+
 
 // application rendering stuff
 struct RenderingResources { 
@@ -24,21 +32,41 @@ struct RenderingResources {
   unsigned int drawingProgram;
   unsigned int uiShaderProgram;
 
-  unsigned int framebufferTexture;
-  unsigned int framebufferTexture2;
-  unsigned int framebufferTexture3;
-  unsigned int framebufferTexture4;
+  Framebuffers framebuffers;
 };
 
 RenderingResources renderingResources { };
 
-unsigned int fbo;
 const int numPortalTextures = 16;
 unsigned int portalTextures[16];
 const int numDepthTextures = 32;
 unsigned int depthTextures[32];
 unsigned int textureDepthTextures[1];
 
+
+Framebuffers generateFramebuffers(glm::ivec2 resolution){
+  Framebuffers framebuffers { };
+
+  glGenFramebuffers(1, &framebuffers.fbo);
+
+  genFramebufferTexture(&framebuffers.framebufferTexture, resolution.x, resolution.y);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebuffers.framebufferTexture, 0);
+
+  genFramebufferTexture(&framebuffers.framebufferTexture2, resolution.x, resolution.y);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebuffers.framebufferTexture2, 0);
+
+  genFramebufferTexture(&framebuffers.framebufferTexture3, resolution.x, resolution.y);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, framebuffers.framebufferTexture3, 0);
+
+  genFramebufferTexture(&framebuffers.framebufferTexture4, resolution.x, resolution.y);
+
+  generateDepthTextures(depthTextures, numDepthTextures, resolution.x, resolution.y);
+  generateDepthTextures(textureDepthTextures, 1, resolution.x, resolution.y);
+
+  generatePortalTextures(portalTextures, numPortalTextures, resolution.x, resolution.y);
+
+  return framebuffers;
+}
 
 // long lived app resources
 DefaultResources defaultResources {};
@@ -161,9 +189,9 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
 
   glViewport(0, 0, texSize.width, texSize.height);
   updateDepthTexturesSize(textureDepthTextures, 1, texSize.width, texSize.height); // wonder if this would be better off preallocated per gend texture?
-  setActiveDepthTexture(fbo, textureDepthTextures, 0);
+  setActiveDepthTexture(renderingResources.framebuffers.fbo, textureDepthTextures, 0);
 
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+  glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,  texture2.textureId, 0);
   
@@ -228,7 +256,7 @@ void handlePaintingModifiesViewport(UVCoord uvsToPaint){
 
   glViewport(0, 0, w, h);
 
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+  glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToPaint.value().textureId, 0);
 
   glUniformMatrix4fv(glGetUniformLocation(renderingResources.drawingProgram, "model"), 1, GL_FALSE, glm::value_ptr(
@@ -778,7 +806,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     }
     glActiveTexture(GL_TEXTURE0);
 
-    setActiveDepthTexture(fbo, depthTextures, renderStep.depthTextureIndex);
+    setActiveDepthTexture(renderingResources.framebuffers.fbo, depthTextures, renderStep.depthTextureIndex);
     glBindFramebuffer(GL_FRAMEBUFFER, renderStep.fbo);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderStep.colorAttachment0, 0);
     if (renderStep.hasColorAttachment1){
@@ -1201,25 +1229,10 @@ int main(int argc, char* argv[]){
 
   startSoundSystem();
 
-  glGenFramebuffers(1, &fbo);
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo);  
-
-  genFramebufferTexture(&renderingResources.framebufferTexture, state.resolution.x, state.resolution.y);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderingResources.framebufferTexture, 0);
-
-  genFramebufferTexture(&renderingResources.framebufferTexture2, state.resolution.x, state.resolution.y);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, renderingResources.framebufferTexture2, 0);
-
-  genFramebufferTexture(&renderingResources.framebufferTexture3, state.resolution.x, state.resolution.y);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, renderingResources.framebufferTexture3, 0);
-
-  genFramebufferTexture(&renderingResources.framebufferTexture4, state.resolution.x, state.resolution.y);
-
-  generateDepthTextures(depthTextures, numDepthTextures, state.resolution.x, state.resolution.y);
-  generateDepthTextures(textureDepthTextures, 1, state.resolution.x, state.resolution.y);
-
-  generatePortalTextures(portalTextures, numPortalTextures, state.resolution.x, state.resolution.y);
-  setActiveDepthTexture(fbo, depthTextures, 0);
+  renderingResources.framebuffers = generateFramebuffers(state.resolution);
+  
+  glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
+  setActiveDepthTexture(renderingResources.framebuffers.fbo, depthTextures, 0);
 
   if (!glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE){
     std::cerr << "ERROR: framebuffer incomplete" << std::endl;
@@ -1239,16 +1252,16 @@ int main(int argc, char* argv[]){
        state.resolution = glm::ivec2(width, height);
      }
 
-     glBindTexture(GL_TEXTURE_2D, renderingResources.framebufferTexture);
+     glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
-     glBindTexture(GL_TEXTURE_2D, renderingResources.framebufferTexture2);
+     glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture2);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
-     glBindTexture(GL_TEXTURE_2D, renderingResources.framebufferTexture3);
+     glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture3);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
-     glBindTexture(GL_TEXTURE_2D, renderingResources.framebufferTexture4);
+     glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture4);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
      updateDepthTexturesSize(depthTextures, numDepthTextures, state.resolution.x, state.resolution.y);
@@ -1293,8 +1306,9 @@ int main(int argc, char* argv[]){
   modlog("shaders", std::string("basic shader path is: ") + basicShaderPath);
   unsigned int basicProgram = loadShader(basicShaderPath + "/vertex.glsl", basicShaderPath+ "/fragment.glsl", interface.readFile);
 
-  renderStages = loadRenderStages(fbo, 
-    renderingResources.framebufferTexture, renderingResources.framebufferTexture2, renderingResources.framebufferTexture3, renderingResources.framebufferTexture4,
+  renderStages = loadRenderStages(
+    renderingResources.framebuffers.fbo, 
+    renderingResources.framebuffers.framebufferTexture, renderingResources.framebuffers.framebufferTexture2, renderingResources.framebuffers.framebufferTexture3, renderingResources.framebuffers.framebufferTexture4,
     depthTextures, numDepthTextures,
     portalTextures, numPortalTextures,
     RenderShaders {
@@ -1819,7 +1833,7 @@ int main(int argc, char* argv[]){
     }
     renderContext.lightProjview = lightMatrixs;
 
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
     glEnable(GL_BLEND);
     handlePaintingModifiesViewport(uvCoord);
 
@@ -1893,7 +1907,7 @@ int main(int argc, char* argv[]){
     glBindTexture(GL_TEXTURE_2D, depthTextures[0]);
 
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, renderingResources.framebufferTexture2);
+    glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture2);
 
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(finalProgram, "framebufferTexture"), 0);
@@ -1911,7 +1925,7 @@ int main(int argc, char* argv[]){
       assert(state.textureIndex <= numPortalTextures && state.textureIndex >= 0);
       glBindTexture(GL_TEXTURE_2D, portalTextures[state.textureIndex]);  
     }else if (state.renderMode == RENDER_SELECTION){
-      glBindTexture(GL_TEXTURE_2D, renderingResources.framebufferTexture4);  
+      glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture4);  
     }else if (state.renderMode == RENDER_PAINT){
       //glBindTexture(GL_TEXTURE_2D, textureToPaint);
       glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-scenegraph_selection_texture").texture.textureId);
@@ -1919,7 +1933,7 @@ int main(int argc, char* argv[]){
       assert(state.textureIndex <=  numDepthTextures && state.textureIndex >= 0);
       glBindTexture(GL_TEXTURE_2D, depthTextures[state.textureIndex]);
     }else if (state.renderMode == RENDER_BLOOM){
-      glBindTexture(GL_TEXTURE_2D, renderingResources.framebufferTexture2);
+      glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture2);
     }else if (state.renderMode == RENDER_GRAPHS){
       if (screenspaceTextureIds.size() > state.textureIndex && state.textureIndex >= 0){
         glBindTexture(GL_TEXTURE_2D, screenspaceTextureIds.at(state.textureIndex).id);

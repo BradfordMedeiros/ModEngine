@@ -13,4 +13,5 @@ void setActiveDepthTexture(unsigned int fbo, unsigned int* textures, int index);
 void generatePortalTextures(unsigned int* portalTextures, int numPortalTextures, unsigned int resolutionX, unsigned int resolutionY);
 void updatePortalTexturesSize(unsigned int* portalTextures, int numPortalTextures, unsigned int resolutionX, unsigned int resolutionY);
 
+
 #endif
