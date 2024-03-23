@@ -630,6 +630,14 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
 
 void renderUI(Mesh* crosshairSprite, Color pixelColor){
   glUseProgram(renderingResources.uiShaderProgram);
+
+  std::vector<UniformData> uniformData;
+  //uniformData.push_back(UniformData {
+  //  .name = "bloomAmount",
+  //  .value = state.bloomAmount,
+  //});
+  setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "forceTint", "projection", "textureData", "tint" });
+
   glEnable(GL_BLEND);
   glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
   glUniform1i(glGetUniformLocation(renderingResources.uiShaderProgram, "forceTint"), false);
@@ -1008,6 +1016,8 @@ Mesh* updateAndGetCursor(objid hoveredId){
   }
   return effectiveCrosshair;
 }
+
+
 
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
@@ -1826,22 +1836,75 @@ int main(int argc, char* argv[]){
     glClearColor(0.f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glUniform1i(glGetUniformLocation(finalProgram, "enableBloom"), state.enableBloom);
-    glUniform1i(glGetUniformLocation(finalProgram, "enableFog"), state.enableFog);
-    glUniform4fv(glGetUniformLocation(finalProgram, "fogColor"), 1, glm::value_ptr(state.fogColor));
-    glUniform1f(glGetUniformLocation(finalProgram, "near"), 0.1);
-    glUniform1f(glGetUniformLocation(finalProgram, "far"), 100);
-    glUniform1f(glGetUniformLocation(finalProgram, "mincutoff"), state.fogMinCutoff);  // 0.5
-    glUniform1f(glGetUniformLocation(finalProgram, "maxcuttoff"), state.fogMaxCutoff);  // 0.9999f) skybox is at 1, so under that excludes skybox, over includes
+    auto allUniforms = queryUniforms(finalProgram);
+    std::cout << print(allUniforms) << std::endl;
 
+    std::vector<UniformData> uniformData;
+    uniformData.push_back(UniformData {
+      .name = "bloomAmount",
+      .value = state.bloomAmount,
+    });
+    uniformData.push_back(UniformData {
+      .name = "enableBloom",
+      .value = state.enableBloom,
+    });
     state.exposure = exposureAmount();
-    glUniform1f(glGetUniformLocation(finalProgram, "exposure"), state.exposure);
-    glUniform1i(glGetUniformLocation(finalProgram, "enableGammaCorrection"), state.enableGammaCorrection);
-    glUniform1i(glGetUniformLocation(finalProgram, "enableExposure"), state.enableExposure);
+    uniformData.push_back(UniformData {
+      .name = "enableExposure",
+      .value = state.enableExposure,
+    });
+    uniformData.push_back(UniformData {
+      .name = "enableFog",
+      .value = state.enableFog,
+    });
+    uniformData.push_back(UniformData {
+      .name = "enableGammaCorrection",
+      .value = state.enableGammaCorrection,
+    });
+    uniformData.push_back(UniformData {
+      .name = "exposure",
+      .value = state.exposure,
+    });
+    uniformData.push_back(UniformData {
+      .name = "near",
+      .value = 0.1f,
+    });
+    uniformData.push_back(UniformData {
+      .name = "far",
+      .value = 100.f,
+    });
+    uniformData.push_back(UniformData {
+      .name = "fogColor",
+      .value = state.fogColor,
+    });
+    uniformData.push_back(UniformData {
+      .name = "mincutoff",
+      .value = state.fogMinCutoff,
+    });
+    uniformData.push_back(UniformData {
+      .name = "maxcuttoff",
+      .value = state.fogMaxCutoff,
+    });
+    uniformData.push_back(UniformData {
+      .name = "bloomTexture",
+      .value = Sampler2D {
+        .textureUnitId = 1,
+      }
+    });
+    uniformData.push_back(UniformData {
+      .name = "depthTexture",
+      .value = Sampler2D {
+        .textureUnitId = 2,
+      }
+    });
+    uniformData.push_back(UniformData {
+      .name = "framebufferTexture",
+      .value = Sampler2D {
+        .textureUnitId = 0,
+      }
+    });
 
-    glUniform1f(glGetUniformLocation(finalProgram, "bloomAmount"), state.bloomAmount);
-    glUniform1i(glGetUniformLocation(finalProgram, "bloomTexture"), 1);
-    glUniform1i(glGetUniformLocation(finalProgram, "depthTexture"), 2);
+    setUniformData(finalProgram, uniformData, {});
 
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(0));
@@ -1850,7 +1913,6 @@ int main(int argc, char* argv[]){
     glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture2);
 
     glActiveTexture(GL_TEXTURE0);
-    glUniform1i(glGetUniformLocation(finalProgram, "framebufferTexture"), 0);
 
     if (state.borderTexture != ""){
       glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);

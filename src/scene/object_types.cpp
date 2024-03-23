@@ -337,7 +337,7 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     Mesh* octreeMesh = getOctreeMesh(*octreeObj);
     modassert(octreeMesh, "no octree mesh available");
-    drawMesh(*octreeMesh, shaderProgram);   
+    drawMesh(*octreeMesh, shaderProgram);
     return octreeMesh -> numTriangles;
   }
 
