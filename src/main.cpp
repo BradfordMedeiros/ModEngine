@@ -632,15 +632,23 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
   glUseProgram(renderingResources.uiShaderProgram);
 
   std::vector<UniformData> uniformData;
-  //uniformData.push_back(UniformData {
-  //  .name = "bloomAmount",
-  //  .value = state.bloomAmount,
-  //});
-  setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "forceTint", "projection", "textureData", "tint" });
+  uniformData.push_back(UniformData {
+    .name = "projection",
+    .value = ndiOrtho,
+  });
+  uniformData.push_back(UniformData {
+    .name = "forceTint",
+    .value = false,
+  });
+  uniformData.push_back(UniformData {
+    .name = "textureData",
+    .value = Sampler2D {
+      .textureUnitId = 0,
+    },
+  });
+  setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "tint" });
 
   glEnable(GL_BLEND);
-  glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
-  glUniform1i(glGetUniformLocation(renderingResources.uiShaderProgram, "forceTint"), false);
 
   if(crosshairSprite != NULL && !state.isRotateSelection && state.showCursor){
     glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
