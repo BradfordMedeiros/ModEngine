@@ -131,6 +131,13 @@ std::vector<UniformData> queryUniforms(unsigned int program){
           .name = name,
           .value = uniformValue,
         });
+      }else if (type == GL_FLOAT_VEC2){
+        glm::vec2 uniformValue;
+        glGetUniformfv(program, glGetUniformLocation(program, name), glm::value_ptr(uniformValue));
+        uniformValues.push_back(UniformData {
+          .name = name,
+          .value = uniformValue,
+        });   
       }else if (type == GL_FLOAT_VEC3){
         glm::vec3 uniformValue;
         glGetUniformfv(program, glGetUniformLocation(program, name), glm::value_ptr(uniformValue));
@@ -153,7 +160,6 @@ std::vector<UniformData> queryUniforms(unsigned int program){
           .value = floatValue,
         });    
       }else if (type == GL_SAMPLER_2D){
-        //modassert(false, "sampler 2d not supported");
         GLint textureUnit;
         glGetUniformiv(program, glGetUniformLocation(program, name), &textureUnit);
         uniformValues.push_back(UniformData {
@@ -162,6 +168,22 @@ std::vector<UniformData> queryUniforms(unsigned int program){
             .textureUnitId = textureUnit,
           },
         });
+      }else if (type == GL_SAMPLER_CUBE){
+        GLint textureUnit;
+        glGetUniformiv(program, glGetUniformLocation(program, name), &textureUnit);
+        uniformValues.push_back(UniformData {
+          .name = name,
+          .value = SamplerCube {
+            .textureUnitId = textureUnit,
+          },
+        });
+      }else if (type == GL_INT){
+        int intValue;
+        glGetUniformiv(program, glGetUniformLocation(program, name), &intValue);
+        uniformValues.push_back(UniformData {
+          .name = name,
+          .value = intValue,
+        });    
       }else if (type == GL_FLOAT_MAT4){
         glm::mat4 value;
 
@@ -194,10 +216,13 @@ void assertAllUniformsSet(unsigned int program, std::vector<UniformData>& unifor
 
     auto requiredBoolType = std::get_if<bool>(&requiredUniform.value);
     auto requiredFloatType = std::get_if<float>(&requiredUniform.value);
+    auto requiredVec2Type = std::get_if<glm::vec2>(&requiredUniform.value);
     auto requiredVec3Type = std::get_if<glm::vec3>(&requiredUniform.value);
     auto requiredVec4Type = std::get_if<glm::vec4>(&requiredUniform.value);
     auto requiredSampler2DType = std::get_if<Sampler2D>(&requiredUniform.value);
+    auto requiredSamplerCubeType = std::get_if<SamplerCube>(&requiredUniform.value);
     auto requiredMat4Type = std::get_if<glm::mat4>(&requiredUniform.value);
+    auto requiredIntType = std::get_if<int>(&requiredUniform.value);
 
     bool foundUniform = false;
     bool correctType = false;
@@ -213,6 +238,12 @@ void assertAllUniformsSet(unsigned int program, std::vector<UniformData>& unifor
         }else if (requiredFloatType){
           auto floatType = std::get_if<float>(&uniform.value);
           if (floatType){
+            correctType = true;
+            break;
+          }
+        }else if (requiredVec2Type){
+          auto vec2Type = std::get_if<glm::vec2>(&uniform.value);
+          if (vec2Type){
             correctType = true;
             break;
           }
@@ -235,12 +266,24 @@ void assertAllUniformsSet(unsigned int program, std::vector<UniformData>& unifor
             correctType = true;
             break;
           }
+        }else if (requiredSamplerCubeType){
+          auto sampleCubeType = std::get_if<SamplerCube>(&uniform.value);
+          if (sampleCubeType){
+            correctType = true;
+            break;
+          }
         }else if (requiredMat4Type){
-          auto mat4Type = std::get_if<glm::mat4>(&requiredUniform.value);
+          auto mat4Type = std::get_if<glm::mat4>(&uniform.value);
           if (mat4Type){
             correctType = true;
             break;
           } 
+        }else if (requiredIntType){
+          auto intType = std::get_if<int>(&uniform.value);
+          if (intType){
+            correctType = true;
+            break;            
+          }
         }
         modassert(false, "assert types, invalid type");
       }
@@ -263,6 +306,11 @@ void setUniformData(unsigned int program, std::vector<UniformData>& uniformData,
       glUniform1f(glGetUniformLocation(program, uniform.name.c_str()), *floatType);
       continue;
     }
+    auto vec2Type = std::get_if<glm::vec2>(&uniform.value);
+    if (vec2Type){
+      glUniform2fv(glGetUniformLocation(program, uniform.name.c_str()), 1, glm::value_ptr(*vec2Type));
+      continue;
+    }    
     auto vec3Type = std::get_if<glm::vec3>(&uniform.value);
     if (vec3Type){
       glUniform3fv(glGetUniformLocation(program, uniform.name.c_str()), 1, glm::value_ptr(*vec3Type));
@@ -280,9 +328,22 @@ void setUniformData(unsigned int program, std::vector<UniformData>& uniformData,
       continue;
     }
 
+    auto sampleCubeType = std::get_if<SamplerCube>(&uniform.value);
+    if (sampleCubeType){
+      glUniform1i(glGetUniformLocation(program, uniform.name.c_str()), sampleCubeType -> textureUnitId);
+      continue;
+    }
+
+
     auto mat4Type = std::get_if<glm::mat4>(&uniform.value);
     if (mat4Type){
       glUniformMatrix4fv(glGetUniformLocation(program, uniform.name.c_str()), 1, GL_FALSE, glm::value_ptr(*mat4Type));
+      continue;
+    }
+
+    auto intType = std::get_if<int>(&uniform.value);
+    if (intType){
+      modassert(false, "set int uniform type not yet supported");
       continue;
     }
 
@@ -297,6 +358,10 @@ std::string print(std::vector<UniformData>& uniforms){
     auto boolPtr = std::get_if<bool>(&uniform.value);
     if (boolPtr){
       value += (*boolPtr ? "true" : "false");
+    }
+    auto vec2Ptr = std::get_if<glm::vec2>(&uniform.value);
+    if (vec2Ptr){
+      value += print(*vec2Ptr);
     }
     auto vec3Ptr = std::get_if<glm::vec3>(&uniform.value);
     if (vec3Ptr){
@@ -313,6 +378,16 @@ std::string print(std::vector<UniformData>& uniforms){
     auto sample2DPtr = std::get_if<Sampler2D>(&uniform.value);
     if (sample2DPtr){
       value += std::string("sample2D(") + std::to_string(sample2DPtr -> textureUnitId) + ")";
+    }
+
+    auto sampleCubePtr = std::get_if<SamplerCube>(&uniform.value);
+    if (sampleCubePtr){
+      value += std::string("sampleCube(") + std::to_string(sampleCubePtr -> textureUnitId) + ")";
+    }
+
+    auto intPtr = std::get_if<int>(&uniform.value);
+    if (intPtr){
+      value += std::to_string(*intPtr);
     }
     value += "] ";
   }

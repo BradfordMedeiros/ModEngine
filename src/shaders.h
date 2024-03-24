@@ -15,7 +15,10 @@ GLint getShaderByShaderString(std::map<std::string, GLint>& shaderstringToId, st
 struct Sampler2D { 
   int textureUnitId; 
 };
-typedef std::variant<bool, float, glm::vec3, glm::vec4, Sampler2D, glm::mat4> UniformValue;
+struct SamplerCube {
+  int textureUnitId;
+};
+typedef std::variant<bool, float, glm::vec2, glm::vec3, glm::vec4, Sampler2D, SamplerCube, glm::mat4, int> UniformValue;
 struct UniformData {
   std::string name;
   UniformValue value;
