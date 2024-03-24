@@ -157,6 +157,14 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   
   glUseProgram(renderingResources.uiShaderProgram);
 
+  //std::vector<UniformData> uniformData;
+  //uniformData.push_back(UniformData {
+  //  .name = "projection",
+  //  .value = ndiOrtho,
+  //});
+  //setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "tint" });
+  modassert(false, "todo - make this work with setUniformData");
+
   if (shouldClear){ 
     glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
@@ -369,24 +377,107 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   auto projview = (orthographic ? glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) : proj) * view;
 
   glUseProgram(shader);
+  std::vector<UniformData> uniformData;
+  uniformData.push_back(UniformData {
+    .name = "maintexture",
+    .value = Sampler2D {
+      .textureUnitId = 0,
+    },
+  });
+  uniformData.push_back(UniformData {
+    .name = "emissionTexture",
+    .value = Sampler2D {
+      .textureUnitId = 1,
+    },
+  });
+  uniformData.push_back(UniformData {
+    .name = "opacityTexture",
+    .value = Sampler2D {
+      .textureUnitId = 2,
+    },
+  });
+  uniformData.push_back(UniformData {
+    .name = "lightDepthTexture",
+    .value = Sampler2D {
+      .textureUnitId = 3,
+    },
+  });
 
-  glUniform1i(glGetUniformLocation(shader, "maintexture"), 0);        
-  glUniform1i(glGetUniformLocation(shader, "emissionTexture"), 1);
-  glUniform1i(glGetUniformLocation(shader, "opacityTexture"), 2);
-  glUniform1i(glGetUniformLocation(shader, "lightDepthTexture"), 3);
-  glUniform1i(glGetUniformLocation(shader, "cubemapTexture"), 4);
   glUniform1i(glGetUniformLocation(shader, "roughnessTexture"), 5);
+
+  uniformData.push_back(UniformData {
+    .name = "cubemapTexture",
+    .value = SamplerCube {
+      .textureUnitId = 4,
+    },
+  });
+
   glUniform1i(glGetUniformLocation(shader, "normalTexture"), 6);
+
+
+  uniformData.push_back(UniformData {
+    .name = "projview",
+    .value = projview,
+  });
+  uniformData.push_back(UniformData {
+    .name = "showBoneWeight",
+    .value = state.showBoneWeight,
+  });
+  uniformData.push_back(UniformData {
+    .name = "useBoneTransform",
+    .value = state.useBoneTransform,
+  });
+  uniformData.push_back(UniformData {
+    .name = "enableDiffuse",
+    .value = state.enableDiffuse,
+  });
+  uniformData.push_back(UniformData {
+    .name = "enableLighting",
+    .value = true,
+  });
+  uniformData.push_back(UniformData {
+    .name = "enablePBR",
+    .value = state.enablePBR,
+  });
+  uniformData.push_back(UniformData {
+    .name = "enableSpecular",
+    .value = state.enableSpecular,
+  });
+  uniformData.push_back(UniformData {
+    .name = "ambientAmount",
+    .value = glm::vec3(state.ambient),
+  });
+  uniformData.push_back(UniformData {
+    .name = "bloomThreshold",
+    .value = state.bloomThreshold,
+  });
+  uniformData.push_back(UniformData {
+    .name = "enableAttenutation",
+    .value = state.enableAttenuation,
+  });
+
+  uniformData.push_back(UniformData {
+    .name = "cameraPosition",
+    .value = cameraPosition,
+  });
+
+
+  // notice this is kind of wrong, since it sets it for multiple shader types here
+  setUniformData(shader, uniformData, { 
+    "textureid", "bones[0]", "encodedid", "hasBones", "model", "discardTexAmount", 
+    "emissionAmount", 
+    "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture",
+    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]",
+  
+    "lightsprojview", "normalTexture", "numlights", "textureOffset", "textureSize", "textureTiling", "tint",
+  });
+
+
 
   glActiveTexture(GL_TEXTURE0); 
 
-  glUniformMatrix4fv(glGetUniformLocation(shader, "projview"), 1, GL_FALSE, glm::value_ptr(projview));
-  glUniform3fv(glGetUniformLocation(shader, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
   glUniform1i(glGetUniformLocation(shader, "enableDiffuse"), state.enableDiffuse);
-  glUniform1i(glGetUniformLocation(shader, "enableSpecular"), state.enableSpecular);
-  glUniform1i(glGetUniformLocation(shader, "enablePBR"), state.enablePBR);
   glUniform1i(glGetUniformLocation(shader, "enableLighting"), true);
-  glUniform1i(glGetUniformLocation(shader, "enableAttenutation"), state.enableAttenuation);
 
   glUniform1i(glGetUniformLocation(shader, "enableShadows"), state.enableShadows);
   glUniform1f(glGetUniformLocation(shader, "shadowIntensity"),  state.shadowIntensity);
@@ -415,8 +506,6 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   /////////////////////////////
   glUniform4fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(glm::vec4(color.x, color.y, color.z, 1.f)));
   glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
-  glUniform3fv(glGetUniformLocation(shader, "ambientAmount"), 1, glm::value_ptr(glm::vec3(state.ambient)));
-  glUniform1f(glGetUniformLocation(shader, "bloomThreshold"),  state.bloomThreshold);
 
   setRenderUniformData(shader, uniforms);
 }
@@ -720,7 +809,6 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
   drawTextNdi(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + offsetPerLine * 18, state.fontsize);
   drawTextNdi(std::string("time: ") + std::to_string(timeSeconds(false)), uiXOffset, uiYOffset + offsetPerLine * 19, state.fontsize);
   drawTextNdi(std::string("realtime: ") + std::to_string(timeSeconds(true)), uiXOffset, uiYOffset + offsetPerLine * 20, state.fontsize);
-
 }
 
 void onClientMessage(std::string message){
