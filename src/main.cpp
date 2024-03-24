@@ -384,6 +384,13 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
       .textureUnitId = 0,
     },
   });
+  uniformData.push_back(UniformData { /* obviously texture id an maintexture shouldn't be same here */
+    .name = "textureid",
+    .value = Sampler2D {
+      .textureUnitId = 0,
+    },
+  });
+
   uniformData.push_back(UniformData {
     .name = "emissionTexture",
     .value = Sampler2D {
@@ -402,19 +409,24 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
       .textureUnitId = 3,
     },
   });
-
-  glUniform1i(glGetUniformLocation(shader, "roughnessTexture"), 5);
-
   uniformData.push_back(UniformData {
     .name = "cubemapTexture",
     .value = SamplerCube {
       .textureUnitId = 4,
     },
   });
-
-  glUniform1i(glGetUniformLocation(shader, "normalTexture"), 6);
-
-
+  uniformData.push_back(UniformData {
+    .name = "roughnessTexture",
+    .value = Sampler2D {
+      .textureUnitId = 5,
+    },
+  });
+  uniformData.push_back(UniformData {
+    .name = "normalTexture",
+    .value = Sampler2D {
+      .textureUnitId = 6,
+    },
+  });
   uniformData.push_back(UniformData {
     .name = "projview",
     .value = projview,
@@ -455,7 +467,6 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
     .name = "enableAttenutation",
     .value = state.enableAttenuation,
   });
-
   uniformData.push_back(UniformData {
     .name = "cameraPosition",
     .value = cameraPosition,
@@ -468,6 +479,11 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
     .name = "enableShadows",
     .value = state.enableShadows,
   });
+  uniformData.push_back(UniformData {
+    .name = "numlights",
+    .value = static_cast<int>(lights.size()),
+  });
+
 
   // notice this is kind of wrong, since it sets it for multiple shader types here
   setUniformData(shader, uniformData, { 
@@ -476,14 +492,12 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture",
     "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]",
   
-    "lightsprojview", "normalTexture", "numlights", "textureOffset", "textureSize", "textureTiling", "tint",
+    "lightsprojview", "normalTexture",  "textureOffset", "textureSize", "textureTiling", "tint",
   });
 
 
   glActiveTexture(GL_TEXTURE0); 
   
-  glUniform1i(glGetUniformLocation(shader, "numlights"), lights.size());
-  glUniform1i(glGetUniformLocation(shader, "textureid"), 0);
 
   for (int i = 0; i < lights.size(); i++){
     glm::vec3 position = lights.at(i).transform.position;
@@ -1931,9 +1945,6 @@ int main(int argc, char* argv[]){
     glUseProgram(finalProgram); 
     glClearColor(0.f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    auto allUniforms = queryUniforms(finalProgram);
-    std::cout << print(allUniforms) << std::endl;
 
     std::vector<UniformData> uniformData;
     uniformData.push_back(UniformData {

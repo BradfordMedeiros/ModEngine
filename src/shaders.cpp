@@ -343,7 +343,7 @@ void setUniformData(unsigned int program, std::vector<UniformData>& uniformData,
 
     auto intType = std::get_if<int>(&uniform.value);
     if (intType){
-      modassert(false, "set int uniform type not yet supported");
+      glUniform1i(glGetUniformLocation(program, uniform.name.c_str()), *intType);
       continue;
     }
 

@@ -23,7 +23,6 @@ struct UniformData {
   std::string name;
   UniformValue value;
 };
-std::vector<UniformData> queryUniforms(unsigned int program);
 void setUniformData(unsigned int program, std::vector<UniformData>& uniformData, std::vector<const char*>&& excludedNames);
 std::string print(std::vector<UniformData>& uniforms);
 
