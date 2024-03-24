@@ -460,7 +460,14 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
     .name = "cameraPosition",
     .value = cameraPosition,
   });
-
+  uniformData.push_back(UniformData {
+    .name = "shadowIntensity",
+    .value = state.shadowIntensity,
+  });
+  uniformData.push_back(UniformData {
+    .name = "enableShadows",
+    .value = state.enableShadows,
+  });
 
   // notice this is kind of wrong, since it sets it for multiple shader types here
   setUniformData(shader, uniformData, { 
@@ -473,14 +480,7 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   });
 
 
-
   glActiveTexture(GL_TEXTURE0); 
-
-  glUniform1i(glGetUniformLocation(shader, "enableDiffuse"), state.enableDiffuse);
-  glUniform1i(glGetUniformLocation(shader, "enableLighting"), true);
-
-  glUniform1i(glGetUniformLocation(shader, "enableShadows"), state.enableShadows);
-  glUniform1f(glGetUniformLocation(shader, "shadowIntensity"),  state.shadowIntensity);
   
   glUniform1i(glGetUniformLocation(shader, "numlights"), lights.size());
   glUniform1i(glGetUniformLocation(shader, "textureid"), 0);
