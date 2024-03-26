@@ -259,7 +259,6 @@ bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCu
   return shouldCallBindingOnObjectSelected;
 }
 
-
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::vec3 normal){
   auto obj1Id = getIdForCollisionObject(world, obj1);
   auto obj2Id = getIdForCollisionObject(world, obj2);
@@ -319,7 +318,6 @@ void loadAllTextures(std::string& textureFolderPath){
     }
   }
 
-  int numTexturesWide = calculateAtlasImageDimension(textures.size());
   loadTextureAtlasWorld(world, "octree-atlas:normal", normalTextures, -1);
   loadTextureAtlasWorld(world, "octree-atlas:main",   textures, -1);
   setAtlasDimensions(AtlasDimensions {
@@ -523,7 +521,6 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       numDepthClears++;
     }
 
-    bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
 
     bool loadedNewShader = false;
     auto newShader = getShaderByShaderString(shaderstringToId, shader, shaderProgram, allowShaderOverride, shaderFolderPath, interface.readFile,  &loadedNewShader);
@@ -531,6 +528,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       sendAlert(std::string("loaded shader: ") + shader);
     }
 
+    bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
     setShaderData(newShader, proj, layer.disableViewTransform ? glm::mat4(1.f) : view, lights, layer.orthographic, getTintIfSelected(objectSelected), id, lightProjview, cameraPosition, layer.uniforms);
   
     // bounding code //////////////////////
@@ -637,7 +635,6 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
   uniformData.push_back(UniformData { .name = "textureTiling",  .value = glm::vec2(1.f, 1.f) });
   setUniformData(shaderProgram, uniformData, { "bones[0]", "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]" });
 
-
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
   if (state.showDebug && numChunkingGridCells > 0){
     float offset = ((numChunkingGridCells % 2) == 0) ? (dynamicLoading.mappingInfo.chunkSize / 2) : 0;
@@ -652,7 +649,6 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
         float snapGridSize = snapCoord.size;
         if (snapGridSize > 0){
           auto position = getGameObjectPosition(selectedObj, false);
-
           if (state.manipulatorAxis == XAXIS){
             drawGridXY(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z, snapCoord.orientation);  
           }else if (state.manipulatorAxis == YAXIS){
@@ -695,7 +691,6 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
 
 void renderUI(Mesh* crosshairSprite, Color pixelColor){
   glUseProgram(renderingResources.uiShaderProgram);
-
   std::vector<UniformData> uniformData;
   uniformData.push_back(UniformData {
     .name = "projection",
@@ -712,8 +707,8 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
     },
   });
   setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "tint" });
-
   glEnable(GL_BLEND);
+
 
   if(crosshairSprite != NULL && !state.isRotateSelection && state.showCursor){
     glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));

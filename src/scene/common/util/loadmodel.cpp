@@ -261,7 +261,6 @@ void renameRootNode(ModelData& data, std::string rootname, std::string realrootn
       }
     }
   }
-  std::vector<Animation> animations;
 }
 
 
