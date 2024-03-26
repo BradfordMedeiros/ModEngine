@@ -78,7 +78,6 @@ TimePlayback timePlayback(
   []() -> void {}
 ); 
 
-////////////////////////
 
 bool updateTime(bool fpsFixed, float fixedDelta, float speedMultiplier, int timetoexit, bool hasFramelimit, float minDeltaTime, float fpsLag){
   static float currentFps = 0.f;
@@ -97,14 +96,12 @@ bool updateTime(bool fpsFixed, float fixedDelta, float speedMultiplier, int time
       return true;
     }
   }
-
   if (hasFramelimit &&  (statistics.deltaTime < minDeltaTime)){
     goto fpscountstart;
   }
   if (statistics.deltaTime < fpsLag){
     goto fpscountstart; 
   }
-
 
   statistics.previous = statistics.now;
 
@@ -146,13 +143,6 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,  texture2.textureId, 0);
   
   glUseProgram(renderingResources.uiShaderProgram);
-
-  //std::vector<UniformData> uniformData;
-  //uniformData.push_back(UniformData {
-  //  .name = "projection",
-  //  .value = ndiOrtho,
-  //});
-  //setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "tint" });
   modassert(false, "todo - make this work with setUniformData");
 
   if (shouldClear){ 
@@ -524,11 +514,10 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   int numDepthClears = 0;
 
   traverseSandboxByLayer(world.sandbox, [&world, &numDepthClears, shaderProgram, allowShaderOverride, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition, textBoundingOnly](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
-    assert(id >= 0);
+    modassert(id >= 0, "unexpected id render world");
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
      // This could easily be moved to reduce opengl context switches since the onObject sorts on layers (so just have to pass down).  
-    bool orthographic = layer.orthographic;
     if (state.depthBufferLayer != layer.depthBufferLayer){
       state.depthBufferLayer = layer.depthBufferLayer;
       glClear(GL_DEPTH_BUFFER_BIT);
@@ -543,12 +532,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       sendAlert(std::string("loaded shader: ") + shader);
     }
 
-    setShaderData(newShader, proj, layer.disableViewTransform ? glm::mat4(1.f) : view, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview, cameraPosition, layer.uniforms);
-
-    if (state.visualizeNormals){
-      glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-      drawMesh(world.meshes.at("./res/models/cone/cone.obj").mesh, newShader); 
-    }
+    setShaderData(newShader, proj, layer.disableViewTransform ? glm::mat4(1.f) : view, lights, layer.orthographic, getTintIfSelected(objectSelected), id, lightProjview, cameraPosition, layer.uniforms);
   
     // bounding code //////////////////////
     auto gameObjV = world.objectMapping.at(id);
@@ -1805,7 +1789,18 @@ int main(int argc, char* argv[]){
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
 
-    /////////// everything above is state update ////////////////////
+    if (state.visualizeNormals){
+      forEveryGameobj(world.sandbox, [&world, &interface](objid id, GameObject& gameobj) -> void {
+        auto transform = fullTransformation(world.sandbox, id);
+        auto toPosition = transform.position + (transform.rotation * glm::vec3(0.f, 0.f, -1.f));
+        auto leftArrow = transform.position + (transform.rotation * glm::vec3(-0.2f, 0.f, -0.8f));
+        auto rightArrow = transform.position + (transform.rotation * glm::vec3(0.2f, 0.f, -0.8f));
+
+        interface.drawLine(transform.position, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
+        interface.drawLine(leftArrow, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
+        interface.drawLine(rightArrow, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
+      });
+    }
 
 
     RenderContext renderContext {
