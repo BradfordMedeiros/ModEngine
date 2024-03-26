@@ -41,6 +41,7 @@ std::map<std::string, GLint> shaderstringToId;
 // per frame variable data 
 bool selectItemCalled = false;
 extern Stats statistics;
+extern ManipulatorTools tools;
 LineData lineData = createLines();
 std::queue<StringAttribute> channelMessages;
 std::map<std::string, objid> activeLocks;
@@ -477,8 +478,6 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   });
 
 
-  glActiveTexture(GL_TEXTURE0); 
-  
   for (int i = 0; i < lights.size(); i++){
     glm::vec3 position = lights.at(i).transform.position;
     auto& light = lights.at(i); 
@@ -494,9 +493,10 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
       glActiveTexture(GL_TEXTURE3);
       glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(1));
       glUniformMatrix4fv(glGetUniformLocation(shader, "lightsprojview"), 1, GL_FALSE, glm::value_ptr(lightProjview.at(i)));
-      glActiveTexture(GL_TEXTURE0);
     }
   }
+  glActiveTexture(GL_TEXTURE0); 
+
   /////////////////////////////
   glUniform4fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(glm::vec4(color.x, color.y, color.z, 1.f)));
   glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
@@ -988,41 +988,6 @@ RenderStagesDofInfo getDofInfo(bool* _shouldRender){
 void onGLFWEerror(int error, const char* description){
   std::cerr << "Error: " << description << std::endl;
 }
-
-ManipulatorTools tools {
-  .getPosition = [](objid id) -> glm::vec3 { return getGameObjectPosition(id, true); },
-  .setPosition = setGameObjectPosition,
-  .getScale = getGameObjectScale,
-  .setScale = [](int32_t index, glm::vec3 scale) -> void { setGameObjectScale(index, scale, true); },
-  .getRotation = [](objid id) -> glm::quat { return getGameObjectRotation(id, false); },
-  .setRotation = [](objid id, glm::quat rot) -> void { setGameObjectRotation(id, rot, true); },
-  .snapPosition = [](glm::vec3 pos) -> glm::vec3 {
-    return snapTranslate(state.easyUse, pos);
-  },
-  .snapScale = [](glm::vec3 scale) -> glm::vec3 {
-    return snapScale(state.easyUse, scale);
-  },
-  .snapRotate = [](glm::quat rot, Axis snapAxis, float extraRadians) -> glm::quat {
-    return snapRotate(state.easyUse, rot, snapAxis, extraRadians);
-  },
-  .drawLine = [](glm::vec3 frompos, glm::vec3 topos, LineColor color) -> void {
-    if (state.manipulatorLineId == 0){
-      state.manipulatorLineId = getUniqueObjId();
-    }
-    addLineToNextCycle(lineData, frompos, topos, true, state.manipulatorLineId, color, std::nullopt);
-  },
-  .getSnapRotation = []() -> std::optional<glm::quat> { 
-    return getSnapTranslateSize(state.easyUse).orientation; 
-  },
-  .clearLines = []() -> void {
-    if (state.manipulatorLineId != 0){
-      removeLinesByOwner(lineData, state.manipulatorLineId);
-    }
-  },
-  .removeObjectById = removeObjectById,
-  .makeManipulator = createManipulator,
-  .getSelectedIds = onManipulatorSelected,
-};
 
 
 struct IdAtCoords {

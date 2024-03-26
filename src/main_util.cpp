@@ -4,6 +4,7 @@ extern World world;
 extern engineState state;
 extern glm::mat4 view;
 extern Stats statistics;
+extern LineData lineData;
 
 objid createManipulator(){
   GameobjAttributes manipulatorAttr {
@@ -125,3 +126,38 @@ float exposureAmount(){
   float effectiveExposure = glm::mix(state.oldExposure, state.targetExposure, exposureA);
   return effectiveExposure;
 }
+
+ManipulatorTools tools {
+  .getPosition = [](objid id) -> glm::vec3 { return getGameObjectPosition(id, true); },
+  .setPosition = setGameObjectPosition,
+  .getScale = getGameObjectScale,
+  .setScale = [](int32_t index, glm::vec3 scale) -> void { setGameObjectScale(index, scale, true); },
+  .getRotation = [](objid id) -> glm::quat { return getGameObjectRotation(id, false); },
+  .setRotation = [](objid id, glm::quat rot) -> void { setGameObjectRotation(id, rot, true); },
+  .snapPosition = [](glm::vec3 pos) -> glm::vec3 {
+    return snapTranslate(state.easyUse, pos);
+  },
+  .snapScale = [](glm::vec3 scale) -> glm::vec3 {
+    return snapScale(state.easyUse, scale);
+  },
+  .snapRotate = [](glm::quat rot, Axis snapAxis, float extraRadians) -> glm::quat {
+    return snapRotate(state.easyUse, rot, snapAxis, extraRadians);
+  },
+  .drawLine = [](glm::vec3 frompos, glm::vec3 topos, LineColor color) -> void {
+    if (state.manipulatorLineId == 0){
+      state.manipulatorLineId = getUniqueObjId();
+    }
+    addLineToNextCycle(lineData, frompos, topos, true, state.manipulatorLineId, color, std::nullopt);
+  },
+  .getSnapRotation = []() -> std::optional<glm::quat> { 
+    return getSnapTranslateSize(state.easyUse).orientation; 
+  },
+  .clearLines = []() -> void {
+    if (state.manipulatorLineId != 0){
+      removeLinesByOwner(lineData, state.manipulatorLineId);
+    }
+  },
+  .removeObjectById = removeObjectById,
+  .makeManipulator = createManipulator,
+  .getSelectedIds = onManipulatorSelected,
+};
