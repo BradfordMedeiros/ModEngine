@@ -481,7 +481,6 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
 
   glActiveTexture(GL_TEXTURE0); 
   
-
   for (int i = 0; i < lights.size(); i++){
     glm::vec3 position = lights.at(i).transform.position;
     auto& light = lights.at(i); 
@@ -689,9 +688,8 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
     .vec3Uniforms = {},
     .builtInUniforms = {},
   };
-  setShaderData(shaderProgram, projection, value, lights, false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjView, cameraPosition, noUniforms);
+  setShaderData(shaderProgram, projection, value, lights, false, glm::vec3(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z), 0, lightProjView, cameraPosition, noUniforms);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
-  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z, 1.f)));
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
 
@@ -1802,7 +1800,8 @@ int main(int argc, char* argv[]){
       });
     }
 
-
+    //////////////////////// rendering code below ///////////////////////
+    
     RenderContext renderContext {
       .world = world,
       .view = view,
