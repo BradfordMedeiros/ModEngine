@@ -3,6 +3,7 @@
 extern World world;
 extern engineState state;
 extern glm::mat4 view;
+extern Stats statistics;
 
 objid createManipulator(){
   GameobjAttributes manipulatorAttr {
@@ -110,3 +111,17 @@ std::optional<unsigned int> getTextureId(std::string& texture){
 }
 
 
+glm::vec3 getTintIfSelected(bool isSelected){
+  if (isSelected){
+    return glm::vec3(1.0f, 0.0f, 0.0f);
+  }
+  return glm::vec3(0.f, 1.f, 1.f);
+}
+
+float exposureAmount(){
+  float elapsed = statistics.now - state.exposureStart;
+  float amount = elapsed / 1.f;   
+  float exposureA = glm::clamp(amount, 0.f, 1.f);
+  float effectiveExposure = glm::mix(state.oldExposure, state.targetExposure, exposureA);
+  return effectiveExposure;
+}

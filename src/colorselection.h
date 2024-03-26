@@ -43,6 +43,5 @@ std::string print(Color& color);
 
 void saveScreenshot(std::string& filepath);
 
-glm::vec3 getTintIfSelected(bool isSelected);
 
 #endif

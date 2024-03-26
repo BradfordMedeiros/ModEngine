@@ -16,6 +16,7 @@ struct Stats {
   float deltaTime; // Time between current frame and last frame
   float previous;
   float last60;
+  float currentFps;
 
   unsigned int frameCount;
   long long totalFrames;

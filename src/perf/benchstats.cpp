@@ -43,6 +43,7 @@ Stats statistics {
   .deltaTime = 0.f, // Time between current frame and last frame
   .previous = 0.f,
   .last60 = 0.f,
+  .currentFps = 0.f,
   .frameCount = 0,
   .totalFrames = 0,
   .numTriangles = 0,

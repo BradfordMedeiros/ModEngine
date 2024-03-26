@@ -54,7 +54,6 @@ Transformation viewTransform {
   .rotation = quatFromDirection(glm::vec3(0.f, 0.f, -1.f)),
 };
 glm::mat4 view;
-glm::mat4 orthoProj;
 const glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);  
 
 
@@ -81,12 +80,7 @@ TimePlayback timePlayback(
 
 ////////////////////////
 
-struct TimingUpdate {
-  bool goToCleanup;
-  float currentFps;
-};
-
-TimingUpdate updateTime(bool fpsFixed, float fixedDelta, float speedMultiplier, int timetoexit, bool hasFramelimit, float minDeltaTime, float fpsLag){
+bool updateTime(bool fpsFixed, float fixedDelta, float speedMultiplier, int timetoexit, bool hasFramelimit, float minDeltaTime, float fpsLag){
   static float currentFps = 0.f;
 
   statistics.frameCount++;
@@ -100,10 +94,7 @@ TimingUpdate updateTime(bool fpsFixed, float fixedDelta, float speedMultiplier, 
     float timeInSeconds = timetoexit / 1000.f;
     if (statistics.now > timeInSeconds){
       std::cout << "INFO: TIME TO EXIST EXPIRED" << std::endl;
-      return TimingUpdate {
-        .goToCleanup = true,
-        .currentFps = currentFps,
-      };
+      return true;
     }
   }
 
@@ -122,14 +113,13 @@ TimingUpdate updateTime(bool fpsFixed, float fixedDelta, float speedMultiplier, 
     float timedelta = statistics.now - statistics.last60;
     statistics.last60 = statistics.now;
     currentFps = floor((60.f/(timedelta) + 0.5f));
+    statistics.currentFps = currentFps;
   }
-  return TimingUpdate {
-    .goToCleanup = false,
-    .currentFps = currentFps,
-  };
+
+  return false;
 }
 
-void registerStatistics(float currentFps){
+void registerStatistics(){
   int numObjects = getNumberOfObjects(world.sandbox);
   registerStat(statistics.numObjectsStat, numObjects);
 
@@ -139,7 +129,7 @@ void registerStatistics(float currentFps){
   registerStat(statistics.scenesLoadedStat, getNumberScenesLoaded(world.sandbox));
   logBenchmarkTick(benchmark, statistics.deltaTime, numObjects, statistics.numTriangles);
 
-  registerStat(statistics.fpsStat, currentFps);
+  registerStat(statistics.fpsStat, statistics.currentFps);
 }
 
 void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId, bool blend){
@@ -831,13 +821,6 @@ void signalHandler(int signum) {
   exit(signum);  
 }
 
-float exposureAmount(){
-  float elapsed = statistics.now - state.exposureStart;
-  float amount = elapsed / 1.f;   
-  float exposureA = glm::clamp(amount, 0.f, 1.f);
-  float effectiveExposure = glm::mix(state.oldExposure, state.targetExposure, exposureA);
-  return effectiveExposure;
-}
 
 struct RenderContext {
   World& world;
@@ -1316,7 +1299,6 @@ int main(int argc, char* argv[]){
        state.resolution = glm::ivec2(width, height);
      }
      updateFramebufferWindowSizeChange(renderingResources.framebuffers, state.resolution.x, state.resolution.y);
-     orthoProj = glm::ortho(0.0f, (float)state.currentScreenWidth, 0.0f, (float)state.currentScreenHeight, -1.0f, 1.0f);  
   }; 
 
   onFramebufferSizeChange(window, state.currentScreenWidth, state.currentScreenHeight);
@@ -1677,11 +1659,11 @@ int main(int argc, char* argv[]){
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
   PROFILE("FRAME",
-    auto timingUpdate = updateTime(fpsFixed, fixedDelta, speedMultiplier, timetoexit, hasFramelimit, minDeltaTime, fpsLag);
-    if (timingUpdate.goToCleanup){
+    auto shouldExit = updateTime(fpsFixed, fixedDelta, speedMultiplier, timetoexit, hasFramelimit, minDeltaTime, fpsLag);
+    if (shouldExit){
       goto cleanup;
     }
-    registerStatistics(timingUpdate.currentFps);
+    registerStatistics();
 
     resetReservedId();
     disposeTempBufferedData(lineData);
@@ -1942,10 +1924,14 @@ int main(int argc, char* argv[]){
       .name = "enableBloom",
       .value = state.enableBloom,
     });
-    state.exposure = exposureAmount();
     uniformData.push_back(UniformData {
       .name = "enableExposure",
       .value = state.enableExposure,
+    });
+    state.exposure = exposureAmount();
+    uniformData.push_back(UniformData {
+      .name = "exposure",
+      .value = state.exposure,
     });
     uniformData.push_back(UniformData {
       .name = "enableFog",
@@ -1954,10 +1940,6 @@ int main(int argc, char* argv[]){
     uniformData.push_back(UniformData {
       .name = "enableGammaCorrection",
       .value = state.enableGammaCorrection,
-    });
-    uniformData.push_back(UniformData {
-      .name = "exposure",
-      .value = state.exposure,
     });
     uniformData.push_back(UniformData {
       .name = "near",
