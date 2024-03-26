@@ -670,10 +670,6 @@ void setState(std::string stateName){
     state.shouldPaint = true;
   }else if (stateName == "paint_off"){
     state.shouldPaint = false;
-  }else if (stateName == "highlight_on"){
-    state.highlight = true;
-  }else if (stateName == "highlight_off"){
-    state.highlight = false;
   }else if (stateName == "translate"){
     state.manipulatorMode = TRANSLATE;
   }else if (stateName == "scale"){

@@ -495,7 +495,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .enableGammaCorrection = false,
   	.takeScreenshot = false,
     .screenshotPath = "",
-    .highlight = true,
     .multiselect = false,
     .editor = EditorContent{ .activeObj = 0 },
     .isRecording = false,

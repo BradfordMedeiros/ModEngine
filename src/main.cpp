@@ -527,12 +527,6 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   setRenderUniformData(shader, uniforms);
 }
 
-glm::vec3 getTintIfSelected(bool isSelected){
-  if (isSelected && state.highlight){
-    return glm::vec3(1.0f, 0.0f, 0.0f);
-  }
-  return glm::vec3(1.f, 1.f, 1.f);
-}
 
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, bool textBoundingOnly){
   glUseProgram(shaderProgram);
@@ -559,9 +553,6 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       sendAlert(std::string("loaded shader: ") + shader);
     }
 
-    // todo -> need to just cache last shader value (or sort?) so don't abuse shader swapping (ok for now i guess)
-    MODTODO("improve shader state switches by looking into some sort of caching");
-
     setShaderData(newShader, proj, layer.disableViewTransform ? glm::mat4(1.f) : view, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview, cameraPosition, layer.uniforms);
 
     if (state.visualizeNormals){
@@ -576,12 +567,9 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       // @TODO i use first mesh to get sizing for bounding box, obviously that's questionable
       auto bounding = getBoundRatio(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh.boundInfo, meshObj -> meshesToRender.at(0).boundInfo);
       glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(getMatrixForBoundRatio(bounding, modelMatrix), glm::vec3(1.01f, 1.01f, 1.01f))));
-
       if (objectSelected){
         drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh, newShader);
       }
-      glUniform1f(glGetUniformLocation(newShader, "discardTexAmount"), meshObj -> discardAmount); 
-      glUniform1f(glGetUniformLocation(newShader, "emissionAmount"), meshObj -> emissionAmount); 
     }
 
     if (layer.scale){
@@ -594,7 +582,6 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
     }
 
-    glUniform1f(glGetUniformLocation(newShader, "time"), getTotalTime());
 
     bool isPortal = false;
     bool isPerspectivePortal = false;
