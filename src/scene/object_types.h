@@ -182,8 +182,6 @@ int renderObject(
   objid id, 
   std::map<objid, GameObjectObj>& mapping,
   int showDebugMask,
-  bool showBoneWeight,
-  bool useBoneTransform,
   unsigned int portalTexture,
   unsigned int navmeshTexture,
   glm::mat4 model,

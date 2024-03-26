@@ -603,8 +603,6 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
         id, 
         world.objectMapping, 
         state.showDebug ? state.showDebugMask : 0,
-        state.showBoneWeight,
-        state.useBoneTransform,
         (isPortal && portalTextureInCache &&  !isPerspectivePortal) ? portalIdCache.at(id) : -1,
         state.navmeshTextureId.has_value() ? state.navmeshTextureId.value() : -1,
         modelMatrix,

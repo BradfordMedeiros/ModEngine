@@ -245,8 +245,6 @@ int renderObject(
   objid id, 
   std::map<objid, GameObjectObj>& mapping, 
   int showDebugMask,
-  bool showBoneWeight,
-  bool useBoneTransform,
   unsigned int portalTexture,
   unsigned int navmeshTexture,
   glm::mat4 model,
@@ -277,8 +275,6 @@ int renderObject(
         hasBones = true;
       }
 
-      glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), showBoneWeight);
-      glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), useBoneTransform);
       glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);    
 
       glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(meshObj -> tint));
@@ -292,8 +288,6 @@ int renderObject(
   }
 
   if (meshObj != NULL && meshObj -> nodeOnly && (showDebugMask & 0b1)) {
-    glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
-    glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> texture.textureoffset));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshObj -> texture.texturetiling));
@@ -367,9 +361,6 @@ int renderObject(
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&toRender);
   if (navmeshObj != NULL){
-
-    glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
-    glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);    
 
     glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
@@ -422,8 +413,6 @@ int renderObject(
 
   auto textObj = std::get_if<GameObjectUIText>(&toRender);
   if (textObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
-    glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
