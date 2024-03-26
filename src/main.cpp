@@ -373,7 +373,7 @@ void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
   }
 }
 
-std::vector<UniformData> getDefaultShaderUniforms(glm::mat4 projview, glm::vec3 cameraPosition, std::vector<LightInfo>& lights){
+std::vector<UniformData> getDefaultShaderUniforms(glm::mat4 projview, glm::vec3 cameraPosition, std::vector<LightInfo>& lights, bool enableLighting){
   std::vector<UniformData> uniformData;
   uniformData.push_back(UniformData {
     .name = "maintexture",
@@ -443,7 +443,7 @@ std::vector<UniformData> getDefaultShaderUniforms(glm::mat4 projview, glm::vec3 
   });
   uniformData.push_back(UniformData {
     .name = "enableLighting",
-    .value = true,
+    .value = enableLighting,
   });
   uniformData.push_back(UniformData {
     .name = "enablePBR",
@@ -488,15 +488,14 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   auto projview = (orthographic ? glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) : proj) * view;
 
   glUseProgram(shader);
-  std::vector<UniformData> uniformData = getDefaultShaderUniforms(projview, cameraPosition, lights);
+  std::vector<UniformData> uniformData = getDefaultShaderUniforms(projview, cameraPosition, lights, true);
   // notice this is kind of wrong, since it sets it for multiple shader types here
   setUniformData(shader, uniformData, { 
     "textureid", "bones[0]", "encodedid", "hasBones", "model", "discardTexAmount", 
     "emissionAmount", 
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture",
     "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]",
-  
-    "lightsprojview", "normalTexture",  "textureOffset", "textureSize", "textureTiling", "tint",
+    "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint",
   });
 
 
@@ -657,151 +656,36 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 }
 
 void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells){
-  auto projection = projectionFromLayer(world.sandbox.layers.at(0));
   glUseProgram(shaderProgram);
+  glDisable(GL_DEPTH_TEST);
 
+  auto projection = projectionFromLayer(world.sandbox.layers.at(0));
   std::vector<LightInfo> lights;
-  std::vector<UniformData> uniformData = getDefaultShaderUniforms(projection * view, glm::vec3(0.f, 0.f, 0.f), lights);
-
-  //uniformData.push_back(UniformData {
-  //  .name = "maintexture",
-  //  .value = Sampler2D {
-  //    .textureUnitId = 0,
-  //  },
-  //});
-  //uniformData.push_back(UniformData { /* obviously texture id an maintexture shouldn't be same here */
-  //  .name = "textureid",
-  //  .value = Sampler2D {
-  //    .textureUnitId = 0,
-  //  },
-  //});
-//
-//  //uniformData.push_back(UniformData {
-//  //  .name = "emissionTexture",
-//  //  .value = Sampler2D {
-//  //    .textureUnitId = 1,
-//  //  },
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "opacityTexture",
-//  //  .value = Sampler2D {
-//  //    .textureUnitId = 2,
-//  //  },
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "lightDepthTexture",
-//  //  .value = Sampler2D {
-//  //    .textureUnitId = 3,
-//  //  },
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "cubemapTexture",
-//  //  .value = SamplerCube {
-//  //    .textureUnitId = 4,
-//  //  },
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "roughnessTexture",
-//  //  .value = Sampler2D {
-//  //    .textureUnitId = 5,
-//  //  },
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "normalTexture",
-//  //  .value = Sampler2D {
-//  //    .textureUnitId = 6,
-//  //  },
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "projview",
-//  //  .value = projview,
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "showBoneWeight",
-//  //  .value = state.showBoneWeight,
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "useBoneTransform",
-//  //  .value = state.useBoneTransform,
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "enableDiffuse",
-//  //  .value = state.enableDiffuse,
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "enableLighting",
-//  //  .value = true,
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "enablePBR",
-//  //  .value = state.enablePBR,
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "enableSpecular",
-//  //  .value = state.enableSpecular,
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "ambientAmount",
-//  //  .value = glm::vec3(state.ambient),
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "bloomThreshold",
-//  //  .value = state.bloomThreshold,
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "enableAttenutation",
-//  //  .value = state.enableAttenuation,
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "cameraPosition",
-//  //  .value = cameraPosition,
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "shadowIntensity",
-//  //  .value = state.shadowIntensity,
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "enableShadows",
-//  //  .value = state.enableShadows,
-//  //});
-//  //uniformData.push_back(UniformData {
-//  //  .name = "numlights",
-//  //  .value = static_cast<int>(lights.size()),
-  //});
-
-  uniformData.push_back(UniformData { .name = "tint",  .value = glm::vec4(0.05, 1.f, 0.f, 0.1f) });
+  std::vector<UniformData> uniformData = getDefaultShaderUniforms(projection * view, glm::vec3(0.f, 0.f, 0.f), lights, false);
+  uniformData.push_back(UniformData { .name = "tint",  .value = glm::vec4(0.05, 1.f, 0.f, 1.f) });
   uniformData.push_back(UniformData { .name = "hasBones",  .value = false });
-
   uniformData.push_back(UniformData { .name = "hasCubemapTexture",  .value = false });
   uniformData.push_back(UniformData { .name = "hasDiffuseTexture",  .value = false });
   uniformData.push_back(UniformData { .name = "hasEmissionTexture",  .value = false });
   uniformData.push_back(UniformData { .name = "hasNormalTexture",  .value = false });
   uniformData.push_back(UniformData { .name = "hasOpacityTexture",  .value = false });
   uniformData.push_back(UniformData { .name = "hasRoughnessTexture",  .value = false });
+  uniformData.push_back(UniformData { .name = "discardTexAmount",  .value = 0.f });
+  uniformData.push_back(UniformData { .name = "emissionAmount",  .value = 0.f });
+  uniformData.push_back(UniformData { .name = "model",  .value = glm::mat4(1.f) });
+  uniformData.push_back(UniformData { .name = "lightsprojview",  .value = glm::mat4(1.f) });
+  uniformData.push_back(UniformData { .name = "textureOffset",  .value = glm::vec2(1.f, 1.f) });
+  uniformData.push_back(UniformData { .name = "textureSize",  .value = glm::vec2(1.f, 1.f) });
+  uniformData.push_back(UniformData { .name = "textureTiling",  .value = glm::vec2(1.f, 1.f) });
+  setUniformData(shaderProgram, uniformData, { "bones[0]", "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]" });
 
-
-  // notice this is kind of wrong, since it sets it for multiple shader types here
-  setUniformData(shaderProgram, uniformData, { 
-    "textureid", "bones[0]", "encodedid", "model", "discardTexAmount", 
-    "emissionAmount", 
-    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]",
-    "lightsprojview", "normalTexture",  "textureOffset", "textureSize", "textureTiling",
-  });
-
-
-  glDisable(GL_DEPTH_TEST);
-  // this list is incomplete, it probably would be better to just use a separate shader maybe too
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
-  glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), 0);  
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
   if (state.showDebug && numChunkingGridCells > 0){
     float offset = ((numChunkingGridCells % 2) == 0) ? (dynamicLoading.mappingInfo.chunkSize / 2) : 0;
     drawGrid3D(numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
-    glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.05, 1.f, 0.f, 0.1f)));
   }
 
-  //////////////////
   if (state.manipulatorMode == TRANSLATE && state.showGrid){
     for (auto id : selectedIds(state.editor)){
       auto selectedObj = id;
@@ -820,7 +704,6 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
           }else{
             drawGrid3D(state.gridSize, snapGridSize, position.x, position.y, position.z);  
           }
-          glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.05, 1.f, 1.f, 1.f)));     
         }
       }
     }    
@@ -830,7 +713,6 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
   if (state.showDebug){
     drawCoordinateSystem(100.f);
   }
-  glDisable(GL_DEPTH_TEST);
   drawAllLines(lineData, shaderProgram, std::nullopt);
 
 }
