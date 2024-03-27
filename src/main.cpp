@@ -144,7 +144,7 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,  texture2.textureId, 0);
   
   glUseProgram(renderingResources.uiShaderProgram);
-  modassert(false, "todo - make this work with setUniformData");
+  //modassert(false, "todo - make this work with setUniformData");
 
   if (shouldClear){ 
     glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
@@ -474,7 +474,7 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
     "emissionAmount", 
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture",
     "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]",
-    "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint",
+    "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "time",
   });
 
 
@@ -500,6 +500,7 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   /////////////////////////////
   glUniform4fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(glm::vec4(color.x, color.y, color.z, 1.f)));
   glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
+  glUniform1f(glGetUniformLocation(shader, "time"), getTotalTime());
 
   setRenderUniformData(shader, uniforms);
 }

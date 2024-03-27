@@ -426,7 +426,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 	engineState state = {
     .enablePhysics = true,
     .enablePhysicsDebug = false,
-		.visualizeNormals = true,
+		.visualizeNormals = false,
     .showDebug = false,
     .showDebugMask = 0,
 		.isRotateSelection = false,
