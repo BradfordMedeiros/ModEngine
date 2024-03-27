@@ -180,10 +180,7 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
 
   //std::cout << "screenspace: lines" << std::endl;
   drawAllLines(lineData, renderingResources.uiShaderProgram, texture.textureId);
-
   //std::cout << "screenspace: textdata" << std::endl;
-  glUniform1i(glGetUniformLocation(renderingResources.uiShaderProgram, "forceTint"), false);
-  glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
 
   //auto ortho = glm::ortho(0.0f, (float)texSize.width, 0.0f, (float)texSize.height, -1.0f, 1.0f);  
   glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
