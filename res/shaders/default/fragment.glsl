@@ -53,7 +53,6 @@ uniform bool lightsisdir[MAX_LIGHTS];
 uniform vec3 ambientAmount;
 uniform float emissionAmount;
 uniform float discardTexAmount;
-uniform float time;
 uniform float bloomThreshold;
 
 
