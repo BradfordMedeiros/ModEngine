@@ -130,7 +130,7 @@ void registerStatistics(){
   registerStat(statistics.fpsStat, statistics.currentFps);
 }
 
-void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId, bool blend){
+void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId){
   auto texSize = getTextureSizeInfo(texture);
   auto texSize2 = getTextureSizeInfo(texture2);
   modassert(texSize.width == texSize2.width && texSize.height == texSize2.height, "screenspace - invalid tex sizes, texsize = " + print(glm::vec2(texSize.width, texSize.height)) + ", texsize2 = " + print(glm::vec2(texSize2.width, texSize2.height)));
@@ -144,16 +144,14 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,  texture2.textureId, 0);
   
   glUseProgram(renderingResources.uiShaderProgram);
+  glDisable(GL_BLEND);
+  glDisable(GL_DEPTH_TEST);
+
   //modassert(false, "todo - make this work with setUniformData");
 
   if (shouldClear){ 
     glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
-  }
-  if (blend){
-    glEnable(GL_BLEND);
-  }else{
-    glDisable(GL_BLEND);
   }
 
   glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
@@ -161,13 +159,11 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   glUniform1i(glGetUniformLocation(renderingResources.uiShaderProgram, "forceTint"), false);
   if (shouldClear && clearTextureId.has_value()){
     glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(clearColor));
-    glDisable(GL_DEPTH_TEST);
     glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(
       glm::mat4(1.0f), 
       glm::vec3(2.f, 2.f, 2.f)
     )));
     drawMesh(*defaultResources.defaultMeshes.unitXYRect, renderingResources.uiShaderProgram, clearTextureId.value());
-    glEnable(GL_DEPTH_TEST);
   }
   glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
   glUniform1i(glGetUniformLocation(renderingResources.uiShaderProgram, "forceTint"), true);
@@ -175,15 +171,7 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "selectionId"), 1, glm::value_ptr(getColorFromGameobject(0)));
   glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0)));
 
-  //glEnable(GL_BLEND);
-  glDisable(GL_DEPTH_TEST);
-
-  //std::cout << "screenspace: lines" << std::endl;
   drawAllLines(lineData, renderingResources.uiShaderProgram, texture.textureId);
-  //std::cout << "screenspace: textdata" << std::endl;
-
-  //auto ortho = glm::ortho(0.0f, (float)texSize.width, 0.0f, (float)texSize.height, -1.0f, 1.0f);  
-  glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
   drawShapeData(lineData, renderingResources.uiShaderProgram, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
 }
 
@@ -1854,7 +1842,7 @@ int main(int argc, char* argv[]){
       Texture tex2 {
         .textureId = userTexture.selectionTextureId,
       };
-      renderScreenspaceLines(tex, tex2, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor, userTexture.clearTextureId, false);
+      renderScreenspaceLines(tex, tex2, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor, userTexture.clearTextureId);
     }
     markUserTexturesCleared();  // not really rendering, should pull this out
 

@@ -293,8 +293,12 @@ void assertAllUniformsSet(unsigned int program, std::vector<UniformData>& unifor
   }
 }
 
+#define ASSERT_UNIFORMS_SET
+
 void setUniformData(unsigned int program, std::vector<UniformData>& uniformData, std::vector<const char*>&& excludedNames){
+  #ifdef ASSERT_UNIFORMS_SET
   assertAllUniformsSet(program, uniformData, excludedNames);
+  #endif
   for (auto &uniform : uniformData){
     auto boolType = std::get_if<bool>(&uniform.value);
     if (boolType){
