@@ -190,7 +190,6 @@ int renderObject(
   std::function<int(glm::vec3)> drawSphere,
   DefaultMeshes& defaultMeshes,
   std::function<void(int)> onRender,
-  std::function<glm::vec3(objid, bool)> getPosition,
   bool selectionMode
 );
 

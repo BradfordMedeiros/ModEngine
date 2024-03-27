@@ -228,16 +228,23 @@ void removeObject(
   assert(false);
 }
 
+void setShaderObjectData(GLint shaderProgram, bool hasBones, glm::vec4 tint, glm::vec2 textureOffset, glm::vec2 textureTiling, glm::vec2 textureSize){
+  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(tint));
+  glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);    
+  glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(textureOffset));
+  glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(textureTiling));
+  glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(textureSize));
+}
+
 int renderDefaultNode(GLint shaderProgram, Mesh& mesh){
   // Transformation getTransformationFromMatrix(glm::mat4 matrix){
   // unscale this model matrix
-  glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), mesh.bones.size() > 0);
-  glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
-  glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-  glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+  setShaderObjectData(shaderProgram, mesh.bones.size() > 0, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f));
   drawMesh(mesh, shaderProgram);
   return mesh.numTriangles;
 }
+
+
 
 objid selectedId = 0;
 int renderObject(
@@ -253,7 +260,6 @@ int renderObject(
   std::function<int(glm::vec3)> drawSphere,
   DefaultMeshes& defaultMeshes,
   std::function<void(int)> onRender,
-  std::function<glm::vec3(objid, bool)> getPosition,
   bool selectionMode
 ){
   GameObjectObj& toRender = mapping.at(id);
@@ -275,12 +281,7 @@ int renderObject(
         hasBones = true;
       }
 
-      glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);    
-
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(meshObj -> tint));
-      glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> texture.textureoffset));
-      glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshObj -> texture.texturetiling));
-      glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(meshObj -> texture.texturesize));
+      setShaderObjectData(shaderProgram, hasBones, meshObj -> tint, meshObj -> texture.textureoffset, meshObj -> texture.texturetiling, meshObj -> texture.texturesize);
       drawMesh(meshToRender, shaderProgram, meshObj -> texture.loadingInfo.textureId, -1, drawPoints, meshObj -> normalTexture.textureId);   
       numTriangles = numTriangles + meshToRender.numTriangles; 
     }
@@ -288,14 +289,10 @@ int renderObject(
   }
 
   if (meshObj != NULL && meshObj -> nodeOnly && (showDebugMask & 0b1)) {
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> texture.textureoffset));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshObj -> texture.texturetiling));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(meshObj -> texture.texturesize));
+    setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f), meshObj -> texture.textureoffset, meshObj -> texture.texturetiling, meshObj -> texture.texturesize);
     drawMesh(*defaultMeshes.nodeMesh, shaderProgram, meshObj -> texture.loadingInfo.textureId);    
     return defaultMeshes.nodeMesh -> numTriangles;
   }
-
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
   if (cameraObj != NULL && (showDebugMask & 0b10)){
@@ -310,10 +307,7 @@ int renderObject(
 
   auto portalObj = std::get_if<GameObjectPortal>(&toRender);
   if (portalObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), defaultMeshes.nodeMesh -> bones.size() > 0);
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+    setShaderObjectData(shaderProgram, defaultMeshes.nodeMesh -> bones.size() > 0, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f));
     drawMesh(*defaultMeshes.portalMesh, shaderProgram, portalTexture);
     return defaultMeshes.portalMesh -> numTriangles;
   }
@@ -325,10 +319,7 @@ int renderObject(
 
   auto octreeObj = std::get_if<GameObjectOctree>(&toRender);
   if (octreeObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+    setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f));
     Mesh* octreeMesh = getOctreeMesh(*octreeObj);
     modassert(octreeMesh, "no octree mesh available");
     drawMesh(*octreeMesh, shaderProgram);
@@ -351,22 +342,14 @@ int renderObject(
 
   auto heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
   if (heightmapObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(heightmapObj -> texture.textureoffset));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(heightmapObj -> texture.texturetiling));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(heightmapObj -> texture.texturesize));
+    setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f), heightmapObj -> texture.textureoffset, heightmapObj -> texture.texturetiling, heightmapObj -> texture.texturesize);
     drawMesh(heightmapObj -> mesh, shaderProgram, heightmapObj -> texture.loadingInfo.textureId);   
     return heightmapObj -> mesh.numTriangles;
   }
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&toRender);
   if (navmeshObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);    
-
-    glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+    setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f));
     drawMesh(navmeshObj -> mesh, shaderProgram, navmeshTexture);    
 
 
@@ -413,11 +396,7 @@ int renderObject(
 
   auto textObj = std::get_if<GameObjectUIText>(&toRender);
   if (textObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(textObj -> tint));
+    setShaderObjectData(shaderProgram, false, textObj -> tint, glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f));   
     return drawWord(shaderProgram, id, textObj -> value, 1000.f /* 1000.f => -1,1 range for each quad */, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor, textObj -> fontFamily, selectionMode);
   }
 

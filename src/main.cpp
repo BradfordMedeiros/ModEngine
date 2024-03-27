@@ -532,8 +532,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     setShaderData(newShader, proj, layer.disableViewTransform ? glm::mat4(1.f) : view, lights, layer.orthographic, getTintIfSelected(objectSelected), id, lightProjview, cameraPosition, layer.uniforms);
   
     // bounding code //////////////////////
-    auto gameObjV = world.objectMapping.at(id);
-    auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
+    auto meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id)); 
     if (meshObj != NULL && meshObj -> meshesToRender.size() > 0){
       // @TODO i use first mesh to get sizing for bounding box, obviously that's questionable
       auto bounding = getBoundRatio(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh.boundInfo, meshObj -> meshesToRender.at(0).boundInfo);
@@ -585,7 +584,6 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
         },
         defaultResources.defaultMeshes,
         renderCustomObj,
-        getGameObjectPosition,
         textBoundingOnly
       );
       numTriangles = numTriangles + trianglesDrawn;
