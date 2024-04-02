@@ -335,7 +335,7 @@ void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
   }
 }
 
-std::vector<UniformData> getDefaultShaderUniforms(glm::mat4 projview, glm::vec3 cameraPosition, std::vector<LightInfo>& lights, bool enableLighting){
+std::vector<UniformData> getDefaultShaderUniforms(std::optional<glm::mat4> projview, glm::vec3 cameraPosition, std::vector<LightInfo>& lights, bool enableLighting){
   std::vector<UniformData> uniformData;
   uniformData.push_back(UniformData {
     .name = "maintexture",
@@ -387,10 +387,12 @@ std::vector<UniformData> getDefaultShaderUniforms(glm::mat4 projview, glm::vec3 
       .textureUnitId = 6,
     },
   });
-  uniformData.push_back(UniformData {
-    .name = "projview",
-    .value = projview,
-  });
+  if (projview.has_value()){
+    uniformData.push_back(UniformData {
+      .name = "projview",
+      .value = projview.value(),
+    });
+  }
   uniformData.push_back(UniformData {
     .name = "showBoneWeight",
     .value = state.showBoneWeight,
@@ -443,23 +445,34 @@ std::vector<UniformData> getDefaultShaderUniforms(glm::mat4 projview, glm::vec3 
     .name = "numlights",
     .value = static_cast<int>(lights.size()),
   });
+  uniformData.push_back(UniformData {
+    .name = "time",
+    .value = getTotalTime(),
+  });
   return uniformData;  
 }
 
-void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
-  auto projview = (orthographic ? glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) : proj) * view;
+void setShaderDataObject(GLint shader, glm::vec3 color, objid id, glm::mat4 projview){
+  std::cout << "set shader data object" << std::endl; 
+  glUniform4fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(glm::vec4(color.x, color.y, color.z, 1.f)));
+  glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
+  glUniformMatrix4fv(glGetUniformLocation(shader, "projview"), 1, GL_FALSE, glm::value_ptr(projview));
+
+}
+void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
+  std::cout << "set shader data world" << std::endl; 
 
   glUseProgram(shader);
-  std::vector<UniformData> uniformData = getDefaultShaderUniforms(projview, cameraPosition, lights, true);
+  std::vector<UniformData> uniformData = getDefaultShaderUniforms(std::nullopt, cameraPosition, lights, true);
   // notice this is kind of wrong, since it sets it for multiple shader types here
   setUniformData(shader, uniformData, { 
     "textureid", "bones[0]", "encodedid", "hasBones", "model", "discardTexAmount", 
     "emissionAmount", 
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture",
     "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]",
-    "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "time",
+    "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview"
   });
-
+ 
 
   for (int i = 0; i < lights.size(); i++){
     glm::vec3 position = lights.at(i).transform.position;
@@ -479,22 +492,30 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
     }
   }
   glActiveTexture(GL_TEXTURE0); 
-
-  /////////////////////////////
-  glUniform4fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(glm::vec4(color.x, color.y, color.z, 1.f)));
-  glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
-  glUniform1f(glGetUniformLocation(shader, "time"), getTotalTime());
-
   setRenderUniformData(shader, uniforms);
 }
 
+void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
+  auto projview = (orthographic ? glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) : proj) * view;
+  setShaderWorld(shader, lights, lightProjview, cameraPosition, uniforms);
+  setShaderDataObject(shader, color, id, projview);
+}
+
+glm::mat4 calculateScaledMatrix(glm::mat4 modelMatrix, float fov){
+  auto transform = getTransformationFromMatrix(modelMatrix);
+  auto offset = distanceToSecondFromFirst(view, modelMatrix);
+  transform.scale *=  glm::tan(fov / 2.0) * offset.z; // glm::tan might not be correct
+  auto mat = matrixFromComponents(transform);
+  return mat;
+}
 
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, bool textBoundingOnly){
   glUseProgram(shaderProgram);
   int numTriangles = 0;
   int numDepthClears = 0;
 
-  traverseSandboxByLayer(world.sandbox, [&world, &numDepthClears, shaderProgram, allowShaderOverride, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition, textBoundingOnly](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
+  std::optional<GLint> lastShaderId = std::nullopt;
+  traverseSandboxByLayer(world.sandbox, [&world, &numDepthClears, shaderProgram, allowShaderOverride, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition, textBoundingOnly, &lastShaderId](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
     modassert(id >= 0, "unexpected id render world");
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
@@ -505,16 +526,16 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       numDepthClears++;
     }
 
-
-    bool loadedNewShader = false;
-    auto newShader = getShaderByShaderString(shaderstringToId, shader, shaderProgram, allowShaderOverride, shaderFolderPath, interface.readFile,  &loadedNewShader);
-    if (loadedNewShader){
+    auto newShader = getShaderByShaderString(shaderstringToId, shader, shaderProgram, allowShaderOverride, shaderFolderPath, interface.readFile);
+    if (!lastShaderId.has_value() || newShader != lastShaderId.value()){
+      lastShaderId = newShader;
       sendAlert(std::string("loaded shader: ") + shader);
+      setShaderWorld(newShader, lights, lightProjview, cameraPosition, layer.uniforms);
     }
-
+    
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
-    setShaderData(newShader, proj, layer.disableViewTransform ? glm::mat4(1.f) : view, lights, layer.orthographic, getTintIfSelected(objectSelected), id, lightProjview, cameraPosition, layer.uniforms);
-  
+    setShaderDataObject(newShader, getTintIfSelected(objectSelected), id, proj * (layer.disableViewTransform ? glm::mat4(1.f) : view));
+
     // bounding code //////////////////////
     auto meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id)); 
     if (meshObj != NULL && meshObj -> meshesToRender.size() > 0){
@@ -526,16 +547,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       }
     }
 
-    if (layer.scale){
-      auto transform = getTransformationFromMatrix(modelMatrix);
-      auto offset = distanceToSecondFromFirst(view, modelMatrix);
-      transform.scale *=  glm::tan(layer.fov / 2.0) * offset.z; // glm::tan might not be correct
-      auto mat = matrixFromComponents(transform);
-      glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(mat));
-    }else{
-      glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    }
-
+    glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(layer.scale ? calculateScaledMatrix(modelMatrix, layer.fov) : modelMatrix));
 
     bool isPortal = false;
     bool isPerspectivePortal = false;

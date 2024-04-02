@@ -95,8 +95,7 @@ ShaderStringVals parseShaderString(std::string& shaderString){
   };
 }
 
-GLint getShaderByShaderString(std::map<std::string, GLint>& shaderstringToId, std::string shaderString, GLint shaderProgram, bool allowShaderOverride, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile, bool* _loadedShader){
-  *_loadedShader = false;
+GLint getShaderByShaderString(std::map<std::string, GLint>& shaderstringToId, std::string shaderString, GLint shaderProgram, bool allowShaderOverride, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile){
   if (shaderString == "" || !allowShaderOverride){
     return shaderProgram;
   }
@@ -107,7 +106,6 @@ GLint getShaderByShaderString(std::map<std::string, GLint>& shaderstringToId, st
 
     auto shaderId = loadShader(vertexShaderPath, fragmentShaderPath, readFile);
     shaderstringToId[shaderString] = shaderId;
-    *_loadedShader = true;
   }
   return shaderstringToId.at(shaderString);
 }
