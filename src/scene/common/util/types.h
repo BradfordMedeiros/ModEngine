@@ -74,6 +74,7 @@ struct TextVirtualization {
 };
 
 glm::vec3 distanceToSecondFromFirst(glm::mat4 y, glm::mat4 x);
+glm::mat4 calculateScaledMatrix(glm::mat4 view, glm::mat4 modelMatrix, float fov);
 void printTransformInformation(Transformation transform);
 void printMatrixInformation(glm::mat4 transform, std::string label);
 BoundInfo getBounds(std::vector<Vertex>& vertices);

@@ -5,6 +5,14 @@ glm::vec3 distanceToSecondFromFirst(glm::mat4 y, glm::mat4 x){
   return getTransformationFromMatrix(toRelativeToFrom).position;
 }
 
+glm::mat4 calculateScaledMatrix(glm::mat4 view, glm::mat4 modelMatrix, float fov){
+  auto transform = getTransformationFromMatrix(modelMatrix);
+  auto offset = distanceToSecondFromFirst(view, modelMatrix);
+  transform.scale *=  glm::tan(fov / 2.0) * offset.z; // glm::tan might not be correct
+  auto mat = matrixFromComponents(transform);
+  return mat;
+}
+
 void printTransformInformation(Transformation transform){
   std::cout << "x.pos = [ " << print(transform.position)  << " ]; ";
   std::cout << "x.scale = [ " << print(transform.scale) << " ]; ";

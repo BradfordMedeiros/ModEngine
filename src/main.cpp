@@ -452,16 +452,8 @@ std::vector<UniformData> getDefaultShaderUniforms(std::optional<glm::mat4> projv
   return uniformData;  
 }
 
-void setShaderDataObject(GLint shader, glm::vec3 color, objid id, glm::mat4 projview){
-  std::cout << "set shader data object" << std::endl; 
-  glUniform4fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(glm::vec4(color.x, color.y, color.z, 1.f)));
-  glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
-  glUniformMatrix4fv(glGetUniformLocation(shader, "projview"), 1, GL_FALSE, glm::value_ptr(projview));
-
-}
 void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
-  std::cout << "set shader data world" << std::endl; 
-
+  //std::cout << "set shader data world" << std::endl; 
   glUseProgram(shader);
   std::vector<UniformData> uniformData = getDefaultShaderUniforms(std::nullopt, cameraPosition, lights, true);
   // notice this is kind of wrong, since it sets it for multiple shader types here
@@ -494,19 +486,16 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
   glActiveTexture(GL_TEXTURE0); 
   setRenderUniformData(shader, uniforms);
 }
-
+void setShaderDataObject(GLint shader, glm::vec3 color, objid id, glm::mat4 projview){
+  //std::cout << "set shader data object" << std::endl; 
+  glUniform4fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(glm::vec4(color.x, color.y, color.z, 1.f)));
+  glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
+  glUniformMatrix4fv(glGetUniformLocation(shader, "projview"), 1, GL_FALSE, glm::value_ptr(projview));
+}
 void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
   auto projview = (orthographic ? glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) : proj) * view;
   setShaderWorld(shader, lights, lightProjview, cameraPosition, uniforms);
   setShaderDataObject(shader, color, id, projview);
-}
-
-glm::mat4 calculateScaledMatrix(glm::mat4 modelMatrix, float fov){
-  auto transform = getTransformationFromMatrix(modelMatrix);
-  auto offset = distanceToSecondFromFirst(view, modelMatrix);
-  transform.scale *=  glm::tan(fov / 2.0) * offset.z; // glm::tan might not be correct
-  auto mat = matrixFromComponents(transform);
-  return mat;
 }
 
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, bool textBoundingOnly){
@@ -547,7 +536,10 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       }
     }
 
-    glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(layer.scale ? calculateScaledMatrix(modelMatrix, layer.fov) : modelMatrix));
+    glUniformMatrix4fv(
+      glGetUniformLocation(newShader, "model"), 1, GL_FALSE, 
+      glm::value_ptr(layer.scale ? calculateScaledMatrix(view, modelMatrix, layer.fov) : modelMatrix)
+    );
 
     bool isPortal = false;
     bool isPerspectivePortal = false;
