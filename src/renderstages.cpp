@@ -1,5 +1,7 @@
 #include "./renderstages.h"
 
+extern engineState state;  // should  remove 
+
 enum RenderStageUniformType { RENDER_UNSPECIFIED, RENDER_BOOL, RENDER_FLOAT, RENDER_ARR_FLOAT, RENDER_INT, RENDER_VEC3 };
 struct RenderStageUniformTypeValue {
   RenderStageUniformType type;
@@ -419,8 +421,7 @@ RenderStages loadRenderStages(
       .intUniforms = {
         RenderDataInt { .uniformName = "useDepthTexture", .value = false },
         RenderDataInt { .uniformName = "firstpass",       .value = true },
-        //RenderDataInt { .uniformName = "amount",          .value = static_cast<int>(state.bloomBlurAmount) }
-        RenderDataInt { .uniformName = "amount",          .value = 5 }
+        RenderDataInt { .uniformName = "amount",          .value = state.bloomBlurAmount },
       },
       .floatUniforms = {},
       .floatArrUniforms = {},
