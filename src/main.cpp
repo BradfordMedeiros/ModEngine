@@ -1958,6 +1958,8 @@ int main(int argc, char* argv[]){
       }else{
         modlog("rendering", (std::string("cannot display graph texture index: ") + std::to_string(state.textureIndex)).c_str());
       }
+    }else if (state.renderMode == RENDER_TEXTURE){
+       glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-ingame-ui-texture-test").texture.textureId);  
     }
     glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
     glBindVertexArray(defaultResources.quadVAO);

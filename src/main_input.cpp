@@ -653,6 +653,17 @@ std::vector<InputDispatch> inputFns = {
   }, 
   InputDispatch{
     .alwaysEnable = false,
+    .sourceKey = '8', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 340,  // shift,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      state.renderMode = RENDER_TEXTURE;
+      std::cout << "render mode: graph" << std::endl;
+    }
+  }, 
+  InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 67,  // 4
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,

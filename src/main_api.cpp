@@ -1089,6 +1089,7 @@ void clearTexture(unsigned int textureId, std::optional<bool> autoclear, std::op
   if (texture.has_value()){
     std::cout << "texture: " << texture.value() << std::endl;
     clearTextureId = world.textures.at(texture.value()).texture.textureId;
+    userTex.clearColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
   }
   userTex.clearTextureId = clearTextureId;
   
