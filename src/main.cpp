@@ -981,16 +981,18 @@ struct IdAtCoords {
   float ndiy;
   bool onlyGameObjId;
   std::optional<objid> result;
-  std::function<void(std::optional<objid>)> afterFrame;
+  glm::vec2 resultUv;
+  std::function<void(std::optional<objid>, glm::vec2)> afterFrame;
 };
 
 std::vector<IdAtCoords> idCoordsToGet;
-void idAtCoordAsync(float ndix, float ndiy, bool onlyGameObjId, std::function<void(std::optional<objid>)> afterFrame){
+void idAtCoordAsync(float ndix, float ndiy, bool onlyGameObjId, std::function<void(std::optional<objid>, glm::vec2)> afterFrame){
   idCoordsToGet.push_back(IdAtCoords {
     .ndix = ndix,
     .ndiy = ndiy,
     .onlyGameObjId = onlyGameObjId,
     .result = std::nullopt,
+    .resultUv = glm::vec2(0.f, 0.f),
     .afterFrame = afterFrame,
   });
 }
@@ -1598,7 +1600,7 @@ int main(int argc, char* argv[]){
     doRemoveQueuedRemovals();
     doUnloadScenes();
     for (auto &idCoordToGet : idCoordsToGet){
-      idCoordToGet.afterFrame(idCoordToGet.result);
+      idCoordToGet.afterFrame(idCoordToGet.result, idCoordToGet.resultUv);
     }
     idCoordsToGet = {};
 
@@ -1783,6 +1785,7 @@ int main(int argc, char* argv[]){
 
     for (auto &idCoordToGet : idCoordsToGet){
       auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.ndix, idCoordToGet.ndiy), state.resolution);
+
       auto id = getIdFromPixelCoord(pixelCoord.x, pixelCoord.y);
       if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
       }else if (idCoordToGet.onlyGameObjId && !idExists(world.sandbox, id)){
@@ -1790,6 +1793,10 @@ int main(int argc, char* argv[]){
       }else{
         idCoordToGet.result = id;
       }
+
+      auto uvCoordWithTex = getUVCoordAndTextureId(pixelCoord.x, pixelCoord.y);
+      auto uvCoord = toUvCoord(uvCoordWithTex);
+      idCoordToGet.resultUv = glm::vec2(uvCoord.x, uvCoord.y);
     }
 
     // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
