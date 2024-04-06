@@ -523,7 +523,8 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     }
     
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
-    setShaderDataObject(newShader, getTintIfSelected(objectSelected), id, proj * (layer.disableViewTransform ? glm::mat4(1.f) : view));
+
+    setShaderDataObject(newShader, getTintIfSelected(objectSelected), id, (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view));
 
     // bounding code //////////////////////
     auto meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id)); 
