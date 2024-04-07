@@ -305,7 +305,7 @@ void setTexture(World& world, objid index, std::string textureName, std::functio
     normalTexture = loadTextureWorld(world, normalTextureName.value(), index);
   }
 
-  for (auto id : getIdsInGroup(world.sandbox, index)){
+  for (auto id : getIdsInGroupByObjId(world.sandbox, index)){
     GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
     if (meshObj != NULL){
       meshObj -> texture.loadingInfo.textureString = textureName;

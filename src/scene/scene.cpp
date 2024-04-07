@@ -17,7 +17,7 @@ GameObject& getGameObject(World& world, std::string name, objid sceneId){
   return *obj.value();
 }
 
-NameAndMeshObjName getMeshesForGroupId(World& world, objid groupId){
+NameAndMeshObjName getMeshesForGameobj(World& world, objid gameobjId){
   std::vector<std::string> objnames;
   std::vector<std::reference_wrapper<std::string>> meshNames;
   std::vector<std::reference_wrapper<Mesh>> meshes;
@@ -25,7 +25,11 @@ NameAndMeshObjName getMeshesForGroupId(World& world, objid groupId){
     .objnames = objnames,
     .meshNames = meshNames,
   };
-  for (auto id : getIdsInGroup(world.sandbox, groupId)){
+
+  auto groupId = getGroupId(world.sandbox, gameobjId);
+  auto allIds = groupId == gameobjId ? getIdsInGroupByObjId(world.sandbox, groupId) : std::vector<objid>({ gameobjId });
+  std::cout << "1 physics : , groupId: " << groupId << ", ids " << print(allIds) << std::endl;
+  for (auto id : allIds){
     auto meshesForId = getMeshesForId(world.objectMapping, id);
     auto gameobjname = getGameObject(world, id).name;
     for (int i = 0; i < meshesForId.meshes.size(); i++){
@@ -41,20 +45,14 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
   GameObject obj = getGameObject(world.sandbox, index);
   auto gameObjV = world.objectMapping.at(index); 
 
-  BoundInfo boundInfo = {
-    .xMin = -1, 
-    .xMax = 1,
-    .yMin = -1, 
-    .yMax = 1,
-    .zMin = -1,
-    .zMax = 1,
-  };
+  BoundInfo boundInfo = { .xMin = -1,  .xMax = 1, .yMin = -1, .yMax = 1, .zMin = -1, .zMax = 1 };
 
   glm::vec3 offset(0.f, 0.f, 0.f);
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
   if (meshObj != NULL){
     std::vector<BoundInfo> boundInfos;
-    auto meshes = getMeshesForGroupId(world, index).meshes;
+    auto meshes = getMeshesForGameobj(world, index).meshes;
+    std::cout << "2 physics : " << obj.name << ", index = " << index << ", group = " <<  getGameObjectH(world.sandbox, index).groupId << ", size = " << meshes.size() << std::endl;
     for (Mesh& mesh : meshes){
       boundInfos.push_back(mesh.boundInfo);
     }
@@ -135,7 +133,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&toRender);
   bool isOctree = octreeObj != NULL;
 
-  auto physicsInfo =  getPhysicsInfoForGameObject(world, id);
+  auto physicsInfo = getPhysicsInfoForGameObject(world, id);
 
   rigidBodyOpts opts = {
     .linear = physicsOptions.linearFactor,
@@ -704,7 +702,7 @@ std::string serializeObjectById(World& world, objid id, std::string overridename
 std::string serializeObject(World& world, objid id, bool includeSubmodelAttr, std::string overridename){
   // std::vector<objid> getIdsInGroup(SceneSandbox& sandbox, objid index){
   std::vector<objid> singleId = { id };
-  auto idsToSerialize = includeSubmodelAttr ? getIdsInGroup(world.sandbox, getGroupId(world.sandbox, id)) : singleId;
+  auto idsToSerialize = includeSubmodelAttr ? getIdsInGroupByObjId(world.sandbox, getGroupId(world.sandbox, id)) : singleId;
 
   std::string serializedData = "";
   for (auto &gameobjid : idsToSerialize){
@@ -961,7 +959,7 @@ void removeObjectFromScene(World& world, objid objectId){
     return;
   }
   std::cout << "removing object: " << objectId << objectId << " " << getGameObject(world, objectId).name << std::endl;
-  for (auto gameobjId : getIdsInGroup(world.sandbox, objectId)){
+  for (auto gameobjId : getIdsInGroupByObjId(world.sandbox, objectId)){
     if (!idExists(world.sandbox, gameobjId)){
       //std::cout << "id does not exist: " << gameobjId << std::endl;
       //assert(false);

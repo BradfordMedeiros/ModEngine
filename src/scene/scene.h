@@ -103,7 +103,7 @@ void updatePhysicsBody(World& world, objid id);
 
 void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool dumpPhysics, bool paused, Transformation& viewTransform);
 
-NameAndMeshObjName getMeshesForGroupId(World& world, objid id);
+NameAndMeshObjName getMeshesForGameobj(World& world, objid id);
 
 std::optional<objid> getGameObjectByNamePrefix(World& world, std::string name, objid sceneId, bool sceneIdExplicit);
 GameObject& getGameObject(World& world, objid id);

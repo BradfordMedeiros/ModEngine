@@ -437,7 +437,7 @@ objid getGroupId(SceneSandbox& sandbox, objid id){
   return getGroupId(sandbox.mainScene, id); 
 }
 
-std::vector<objid> getIdsInGroup(SceneSandbox& sandbox, objid index){
+std::vector<objid> getIdsInGroupByObjId(SceneSandbox& sandbox, objid index){
   return getIdsInGroup(sandbox.mainScene, getGroupId(sandbox, index));
 }
 

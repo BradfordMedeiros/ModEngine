@@ -13,7 +13,7 @@ WorldTiming createWorldTiming(float initialTime){
 }
 
 void resetMeshBones(World& world, objid groupId){
-  auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
+  auto meshNameToMeshes = getMeshesForGameobj(world, groupId);  
   for (int i = 0; i <  meshNameToMeshes.meshes.size(); i++){
     Mesh& mesh = meshNameToMeshes.meshes.at(i);
     for (Bone& bone : mesh.bones){
@@ -85,7 +85,7 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
       return;
     }
     //modlog("animation", "ticking animation for groupid: " + std::to_string(playback.groupId));
-    auto meshNameToMeshes = getMeshesForGroupId(world, playback.groupId);
+    auto meshNameToMeshes = getMeshesForGameobj(world, playback.groupId);
 
     if (enableBlending && playback.blendData.has_value()){
       float timeElapsedBlendStart = currentTime - playback.blendData.value().blendStartTime;
@@ -169,7 +169,7 @@ void updateBonePose(World& world, objid id){
   auto groupId = getGroupId(world.sandbox, id);
   auto idScene = sceneId(world.sandbox, groupId);
   auto rootname = getGameObject(world, groupId).name;
-  auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
+  auto meshNameToMeshes = getMeshesForGameobj(world, groupId);  
   updateBonePoses(meshNameToMeshes, scopeGetModelMatrix(world, idScene), rootname); 
 }
 

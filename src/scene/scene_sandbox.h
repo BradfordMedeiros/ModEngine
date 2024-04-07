@@ -78,7 +78,7 @@ bool extractSceneIdFromName(std::string& name, objid* _id, std::string* _searchN
 std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string name, objid sceneId, bool enablePrefixMatch);
 objid getGroupId(SceneSandbox& sandbox, objid id);
 objid getIdForName(SceneSandbox& sandbox, std::string name, objid sceneId);
-std::vector<objid> getIdsInGroup(SceneSandbox& sandbox, objid index);
+std::vector<objid> getIdsInGroupByObjId(SceneSandbox& sandbox, objid index);
 bool idExists(SceneSandbox& sandbox, objid id);
 bool idExists(SceneSandbox& sandbox, std::string name, objid sceneId);
 GameObject& getGameObject(SceneSandbox& sandbox, objid id);
