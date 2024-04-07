@@ -41,13 +41,20 @@ NameAndMeshObjName getMeshesForGameobj(World& world, objid gameobjId){
   return nameAndMeshes;
 }
 
-PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){  
+glm::vec3 getOffsetForBoundInfo(BoundInfo& boundInfo){
+  float xoffset = 0.5f * (boundInfo.xMax + boundInfo.xMin);
+  float yoffset = 0.5f * (boundInfo.yMax + boundInfo.yMin);
+  float zoffset = 0.5f * (boundInfo.zMax + boundInfo.zMin);
+  return glm::vec3(xoffset, yoffset, zoffset);
+}
+
+std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index){  
   GameObject obj = getGameObject(world.sandbox, index);
   auto gameObjV = world.objectMapping.at(index); 
 
   BoundInfo boundInfo = { .xMin = -1,  .xMax = 1, .yMin = -1, .yMax = 1, .zMin = -1, .zMax = 1 };
+  std::optional<glm::vec3> finalOffset = std::nullopt;
 
-  glm::vec3 offset(0.f, 0.f, 0.f);
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
   if (meshObj != NULL){
     std::vector<BoundInfo> boundInfos;
@@ -56,15 +63,11 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
     for (Mesh& mesh : meshes){
       boundInfos.push_back(mesh.boundInfo);
     }
-    if (boundInfos.size() > 0){
-      boundInfo = getMaxUnionBoundingInfo(boundInfos);
-    }else{
-      boundInfo = BoundInfo {  // maybe this should be 0 size, or not have a bound info? hmm
-        .xMin = -0.5, .xMax = 0.5,
-        .yMin = -0.5, .yMax = 0.5,
-        .zMin = -0.5, .zMax = 0.5,
-      };
+    if (boundInfos.size() == 0){
+      return std::nullopt;
     }
+    boundInfo = getMaxUnionBoundingInfo(boundInfos);
+    finalOffset = getOffsetForBoundInfo(boundInfo);
   }
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&gameObjV);
@@ -72,11 +75,10 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
     boundInfo = navmeshObj -> mesh.boundInfo;
   }
 
-  bool hasOffset = false;
   auto textObj = std::get_if<GameObjectUIText>(&gameObjV);
   if (textObj != NULL){
     // textObj -> value, 1, textObj -> deltaOffset, textObj -> align, textObj -> wrap, textObj -> virtualization, &offset
-    hasOffset = true;
+    glm::vec3 offset(0.f, 0.f, 0.f);
     boundInfo = boundInfoForCenteredText(
       world.interface.fontFamilyByName(textObj -> fontFamily),
       textObj -> value,
@@ -91,12 +93,13 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
       textObj -> cursor.highlightLength,
       &offset
     ); 
+    finalOffset = offset; 
   }
 
   PhysicsInfo info = {
     .boundInfo = boundInfo,
     .transformation = obj.transformation,
-    .offset = hasOffset ? std::optional<glm::vec3>(offset) : std::nullopt,
+    .offset = finalOffset,
   };
 
   return info;
@@ -123,6 +126,15 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   if (!physicsOptions.enabled){
     return PhysicsValue { .body = NULL, .offset = std::nullopt };
   }
+  auto physicsInfoOpt = getPhysicsInfoForGameObject(world, id);
+  if (!physicsInfoOpt.has_value()){
+    return PhysicsValue { .body = NULL, .offset = std::nullopt };
+  }
+
+  PhysicsInfo& physicsInfo = physicsInfoOpt.value();
+  std::cout << "physics info for : " << getGameObject(world, id).name << print(physicsInfo.transformation) << std::endl;
+  std::cout << "physics info bound: " << print(physicsInfo.boundInfo) << std::endl;
+  std::cout << std::endl << std::endl;
 
   btRigidBody* rigidBody = NULL;
 
@@ -132,8 +144,6 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
 
   GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&toRender);
   bool isOctree = octreeObj != NULL;
-
-  auto physicsInfo = getPhysicsInfoForGameObject(world, id);
 
   rigidBodyOpts opts = {
     .linear = physicsOptions.linearFactor,

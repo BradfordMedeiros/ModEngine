@@ -111,7 +111,7 @@ GameObject& getGameObject(World& world, std::string name, objid sceneId);
 
 int getNumberOfRigidBodies(World& world);
 
-PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index);
+std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index);
 void loadMeshData(World& world, std::string meshPath, MeshData& meshData, objid ownerId);
 std::function<Mesh(MeshData&)> createScopedLoadMesh(World& world, objid id);
 

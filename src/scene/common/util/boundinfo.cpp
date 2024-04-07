@@ -28,6 +28,13 @@ boundRatio getBoundRatio(BoundInfo info1, BoundInfo info2){
   return boundingInfo;
 }
 
+std::string print(BoundInfo& info){
+  std::string str = "";
+  str += std::to_string(info.xMin) + " , " + std::to_string(info.xMax) + "[" + std::to_string(info.xMax - info.xMin) + "]" + " | ";
+  str += std::to_string(info.yMin) + " , " + std::to_string(info.yMax) + "[" + std::to_string(info.yMax - info.yMin) + "]" + " | ";
+  str += std::to_string(info.zMin) + " , " + std::to_string(info.zMax) + "[" + std::to_string(info.zMax - info.zMin) + "]";
+  return str;
+}
 void printBoundInfo(BoundInfo info){
   std::cout << "x: <" << info.xMin << " | " << info.xMax << ">" << std::endl;
   std::cout << "y: <" << info.yMin << " | " << info.yMax << ">" << std::endl;
