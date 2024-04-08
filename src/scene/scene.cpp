@@ -41,10 +41,10 @@ NameAndMeshObjName getMeshesForGameobj(World& world, objid gameobjId){
   return nameAndMeshes;
 }
 
-glm::vec3 getOffsetForBoundInfo(BoundInfo& boundInfo){
-  float xoffset = 0.5f * (boundInfo.xMax + boundInfo.xMin);
-  float yoffset = 0.5f * (boundInfo.yMax + boundInfo.yMin);
-  float zoffset = 0.5f * (boundInfo.zMax + boundInfo.zMin);
+glm::vec3 getOffsetForBoundInfo(BoundInfo& boundInfo, glm::vec3 scale){
+  float xoffset = 0.5f * (boundInfo.xMax + boundInfo.xMin) * scale.x;
+  float yoffset = 0.5f * (boundInfo.yMax + boundInfo.yMin) * scale.y;
+  float zoffset = 0.5f * (boundInfo.zMax + boundInfo.zMin) * scale.z;
   return glm::vec3(xoffset, yoffset, zoffset);
 }
 
@@ -59,15 +59,18 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
   if (meshObj != NULL){
     std::vector<BoundInfo> boundInfos;
     auto meshes = getMeshesForGameobj(world, index).meshes;
-    std::cout << "2 physics : " << obj.name << ", index = " << index << ", group = " <<  getGameObjectH(world.sandbox, index).groupId << ", size = " << meshes.size() << std::endl;
     for (Mesh& mesh : meshes){
       boundInfos.push_back(mesh.boundInfo);
     }
     if (boundInfos.size() == 0){
       return std::nullopt;
     }
+
+    auto fullTransform = fullTransformation(world.sandbox, index);
     boundInfo = getMaxUnionBoundingInfo(boundInfos);
-    finalOffset = getOffsetForBoundInfo(boundInfo);
+    finalOffset = getOffsetForBoundInfo(boundInfo, fullTransform.scale);
+    std::cout << "2 physics : " << obj.name << ", index = " << index << ", group = " <<  getGameObjectH(world.sandbox, index).groupId << ", size = " << meshes.size() << ", offset: " << print(finalOffset.value()) << std::endl;
+
   }
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&gameObjV);
