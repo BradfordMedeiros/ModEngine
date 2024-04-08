@@ -253,7 +253,8 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
     // This is a hack, but it should be ok.  UpdatePhysicsBody really only need to apply for [voxels - octrees?] and heightmaps as of writing this
     // I don't have easy scope to the list of verts here, so I'd rather not reload the model (or really keep them in mem for no reason) just 
     // for this, which is unused.  Probably should just change the usage of the voxel/heightmap refresh code eventually.
-    assert(initialLoad);  
+    assert(initialLoad);
+    physicsInfo.offset = glm::vec3(0.f, 0.f, 0.f);  
     std::cout << "INFO: PHYSICS: ADDING CONVEXHULL RIGID BODY" << std::endl;
     rigidBody = addRigidBodyHull(
       world.physicsEnvironment,

@@ -76,10 +76,7 @@ btRigidBody* createRigidBodyCylinder(physicsEnv& env, float radius, float height
 }
 
 btRigidBody* createRigidBodyHull(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
-  std::cout << "rigid body hull not yet implemented" << std::endl;
-  assert(false);
-  return NULL;
-  /*assert(verts.size() % 3 == 0);
+  modassert(verts.size() % 3 == 0, "verts must be % 3 = 0");
   btTriangleMesh trimesh;
   for (int i = 0; i < verts.size(); i+=3){
     trimesh.addTriangle(glmToBt(verts.at(i)), glmToBt(verts.at(i + 1)), glmToBt(verts.at(i + 2)));
@@ -96,7 +93,7 @@ btRigidBody* createRigidBodyHull(physicsEnv& env, std::vector<glm::vec3>& verts,
   btConvexTriangleMeshShape* shape2 = new btConvexTriangleMeshShape(hullmesh);
   shape2 -> setMargin(0);
 
-  return createRigidBody(pos, shape2, rot, isStatic, hasCollision, scaling, opts);*/
+  return createRigidBody(pos, shape2, rot, isStatic, hasCollision, scaling, opts);
 }
 
 btRigidBody* createRigidBodyExact(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
