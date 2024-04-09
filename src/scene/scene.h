@@ -68,6 +68,8 @@ objid addObjectToScene(World& world, objid sceneId, std::string name, AttrChildr
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId);
 
 void removeObjectFromScene(World& world, objid id);
+void removeGroupFromScene(World& world, objid idInGroup);
+
 bool copyObjectToScene(World& world, objid id);
 
 struct SingleObjDeserialization {

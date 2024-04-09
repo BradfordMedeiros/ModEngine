@@ -32,12 +32,19 @@ float getTotalTime(){
 }
 
 std::vector<objid> objectsQueuedForRemoval = {};
+std::vector<objid> groupsQueuedForRemoval = {};
 bool gameobjExists(objid id){
   if (!idExists(world.sandbox, id)){
     return false;
   }
+  auto groupId = getGroupId(world.sandbox, id); 
   for (auto idToRemove : objectsQueuedForRemoval){
     if (id == idToRemove){
+      return false;
+    }
+  }
+  for (auto idToRemove : groupsQueuedForRemoval){
+    if (groupId == idToRemove){
       return false;
     }
   }
@@ -490,14 +497,51 @@ void stopAnimation(int32_t id){
   removeAnimation(world, timings, id);
 }
 
+
+bool objIdInVector(std::vector<objid> ids, objid id){
+  for (auto compareId : ids){
+    if (compareId == id){
+      return true;
+    }
+  }
+  return false;
+}
+
+std::vector<objid> idsInGroupById(objid id){
+  modassert(gameobjExists(id), "gameobj does not exist");
+  // filter ids pending to be removed
+  auto allIds = getIdsInGroupByObjId(world.sandbox, id);
+  std::vector<objid> idsNotRemoved;
+  for (auto id : allIds){
+    if (!objIdInVector(objectsQueuedForRemoval, id) && !objIdInVector(groupsQueuedForRemoval, id)){
+      idsNotRemoved.push_back(id);
+    }
+  }
+  return idsNotRemoved;
+}
+
+objid groupId(objid id){
+  modassert(gameobjExists(id), "gameobj does not exist");
+  auto groupId = getGroupId(world.sandbox, id); 
+  return groupId;
+}
+
 void removeObjectById(objid id){
   objectsQueuedForRemoval.push_back(id);
+}
+void removeByGroupId(int32_t idInGroup){
+  groupsQueuedForRemoval.push_back(idInGroup);
 }
 void doRemoveQueuedRemovals(){
   for (auto id : objectsQueuedForRemoval){
     removeObjectFromScene(world, id);
   }
   objectsQueuedForRemoval = {};
+
+  for (auto groupId : groupsQueuedForRemoval){
+    removeGroupFromScene(world, groupId);
+  }
+  groupsQueuedForRemoval = {};
 }
 
 std::optional<objid> prefabId(objid id){

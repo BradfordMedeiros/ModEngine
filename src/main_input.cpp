@@ -931,7 +931,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       for (auto id : selectedIds(state.editor)){
         std::cout << "delete object id: " << id << std::endl;
-        removeObjectById(id);
+        removeByGroupId(id);
       }
       clearSelectedIndexs(state.editor);   
     }

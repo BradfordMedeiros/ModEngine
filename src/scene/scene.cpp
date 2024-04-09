@@ -968,31 +968,44 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
   }
 }
 
+
+void removeObjectByIdFromScene(World& world, objid gameobjId){
+  if (!idExists(world.sandbox, gameobjId)){
+    //std::cout << "id does not exist: " << gameobjId << std::endl;
+    //assert(false);
+    return;
+  }
+  auto idsToRemove = idsToRemoveFromScenegraph(world.sandbox, gameobjId);
+  for (auto id : idsToRemove){
+    if (!idExists(world.sandbox, id)){ // needed b/c removeobjectbyid could remove other entities in scene
+      continue;
+    }
+    auto gameobj = getGameObject(world, id);
+    auto name = gameobj.name;
+    auto scriptName = gameobj.script;
+    auto netsynchronized = gameobj.netsynchronize;
+    removeObjectById(world, id, name, scriptName, netsynchronized);
+  }
+  removeObjectsFromScenegraph(world.sandbox, idsToRemove);
+  maybePruneScenes(world.sandbox);
+}
+
 void removeObjectFromScene(World& world, objid objectId){  
   if (!idExists(world.sandbox, objectId)){
     return;
   }
   std::cout << "removing object: " << objectId << objectId << " " << getGameObject(world, objectId).name << std::endl;
-  for (auto gameobjId : getIdsInGroupByObjId(world.sandbox, objectId)){
-    if (!idExists(world.sandbox, gameobjId)){
-      //std::cout << "id does not exist: " << gameobjId << std::endl;
-      //assert(false);
-      continue;
-    }
-    auto idsToRemove = idsToRemoveFromScenegraph(world.sandbox, gameobjId);
-    for (auto id : idsToRemove){
-      if (!idExists(world.sandbox, id)){ // needed b/c removeobjectbyid could remove other entities in scene
-        continue;
-      }
-      auto gameobj = getGameObject(world, id);
-      auto name = gameobj.name;
-      auto scriptName = gameobj.script;
-      auto netsynchronized = gameobj.netsynchronize;
-      removeObjectById(world, id, name, scriptName, netsynchronized);
-    }
-    removeObjectsFromScenegraph(world.sandbox, idsToRemove);  
+  removeObjectByIdFromScene(world, objectId);
+}
+
+void removeGroupFromScene(World& world, objid idInGroup){  
+  if (!idExists(world.sandbox, idInGroup)){
+    return;
   }
-  maybePruneScenes(world.sandbox);
+  std::cout << "removing object: " << idInGroup << " " << getGameObject(world, idInGroup).name << std::endl;
+  for (auto gameobjId : getIdsInGroupByObjId(world.sandbox, idInGroup)){
+    removeObjectByIdFromScene(world, gameobjId);
+  }
 }
 
 bool copyObjectToScene(World& world, objid id){

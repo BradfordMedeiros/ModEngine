@@ -107,7 +107,11 @@ glm::quat getGameObjectRotation(int32_t index, bool isWorld);
 void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld);
 
 std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes);
+std::vector<objid> idsInGroupById(objid);
+objid groupId(objid);
+
 void removeObjectById(int32_t id);
+void removeByGroupId(int32_t idInGroup);
 void doRemoveQueuedRemovals();
 
 std::optional<objid> prefabId(objid id);
