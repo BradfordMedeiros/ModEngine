@@ -549,7 +549,7 @@ std::optional<objid> prefabId(objid id){
 }
 
 std::vector<std::string> listModels(){
-  return listFilesWithExtensions("./res/models", { "obj", "dae" });
+  return listFilesWithExtensions("./res/models", { "obj", "dae", "gltf" });
 }
 std::vector<std::string> listTextures(){
   return listFilesWithExtensions("./res/textures", { "png", "jpg" });
