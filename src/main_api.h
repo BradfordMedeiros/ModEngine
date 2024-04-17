@@ -106,6 +106,8 @@ std::optional<std::string> getStrAttr(ObjectAttrHandle& attrHandle, const char* 
 std::optional<float> getFloatAttr(ObjectAttrHandle& attrHandle, const char* key);
 std::optional<int> getIntFromAttr(ObjectAttrHandle& attrHandle, const char* key);
 std::optional<AttributeValue> getAttr(ObjectAttrHandle& attrHandle, const char* key);
+bool hasAttribute(ObjectAttrHandle& handle, const char* key);
+bool hasAttribute(objid id, const char* key);
 
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld);
 void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld);

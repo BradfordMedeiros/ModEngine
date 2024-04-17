@@ -838,14 +838,6 @@ std::optional<AttributeValue> getAttr(GameobjAttributes& objAttr, std::string ke
 }
 
 
-bool hasAttribute(GameobjAttributes& attributes, std::string attr){
-  bool hasStrAttr = attributes.stringAttributes.find(attr) != attributes.stringAttributes.end();
-  bool hasFloatAttr = attributes.numAttributes.find(attr) != attributes.numAttributes.end();
-  bool hasVec3Attr = attributes.vecAttr.vec3.find(attr) != attributes.vecAttr.vec3.end();
-  bool hasVec4Attr = attributes.vecAttr.vec4.find(attr) != attributes.vecAttr.vec4.end();
-  return hasStrAttr || hasFloatAttr || hasVec3Attr || hasVec4Attr;
-}
-
 bool hasAttribute(GameobjAttributes& attrs, std::string& type, std::optional<AttributeValue>& value){
   bool valueExists = value.has_value();
   if (attrs.stringAttributes.find(type) != attrs.stringAttributes.end()){
@@ -889,27 +881,6 @@ bool hasAttribute(GameobjAttributes& attrs, std::string& type, std::optional<Att
     return attrs.vecAttr.vec4.at(type) == *vecFloat;
   }  
   return false;
-}
-
-bool maybeSetVec3FromAttr(glm::vec3* _valueToUpdate, const char* field, GameobjAttributes& attributes){
-  if (attributes.vecAttr.vec3.find(field) != attributes.vecAttr.vec3.end()){
-    *_valueToUpdate = attributes.vecAttr.vec3.at(field);
-    return true;
-  }
-  return false;
-}
-bool maybeSetVec4FromAttr(glm::vec4* _valueToUpdate, const char* field, GameobjAttributes& attributes){
-  if (attributes.vecAttr.vec4.find(field) != attributes.vecAttr.vec4.end()){
-    *_valueToUpdate = attributes.vecAttr.vec4.at(field);
-    return true;
-  }
-  return false;
-}
-std::optional<int> optionalInt(std::optional<float> value){
-  if (!value.has_value()){
-    return std::nullopt;
-  }
-  return static_cast<int>(value.value());
 }
 
 void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAttributes){

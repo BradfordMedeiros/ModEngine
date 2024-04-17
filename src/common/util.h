@@ -218,12 +218,7 @@ std::optional<glm::vec4> getVec4Attr(GameobjAttributes& objAttr, std::string key
 
 // Below two are redundant, should eliminate one
 std::optional<AttributeValue> getAttr(GameobjAttributes& objAttr, std::string key);
-
-bool hasAttribute(GameobjAttributes& attributes, std::string attr);
 bool hasAttribute(GameobjAttributes& attrs, std::string& type, std::optional<AttributeValue>& value);
-bool maybeSetVec3FromAttr(glm::vec3* _valueToUpdate, const char* field, GameobjAttributes& attributes);
-bool maybeSetVec4FromAttr(glm::vec4* _valueToUpdate, const char* field, GameobjAttributes& attributes);
-std::optional<int> optionalInt(std::optional<float> value);
 
 void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAttributes);
 

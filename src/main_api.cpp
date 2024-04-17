@@ -319,6 +319,7 @@ void setGameObjectAttr(int32_t id, GameobjAttributes& attr){
   setAttributes(world, id, attr);
 }
 
+
 ObjectAttrHandle getAttrHandle(objid id){
   return ObjectAttrHandle {
     .attr = getGameObjectAttr(id),
@@ -348,6 +349,14 @@ std::optional<int> getIntFromAttr(ObjectAttrHandle& attrHandle, const char* key)
 std::optional<AttributeValue> getAttr(ObjectAttrHandle& attrHandle, const char* key){
   auto attrValue = getAttr(attrHandle.attr, key);
   return attrValue;
+}
+
+bool hasAttribute(ObjectAttrHandle& handle, const char* key){
+  return getAttr(handle, key).has_value();
+}
+bool hasAttribute(objid id, const char* key){
+  auto handle = getAttrHandle(id);
+  return hasAttribute(handle, key);
 }
 
 
