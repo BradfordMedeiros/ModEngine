@@ -1114,20 +1114,13 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   return addObjectToScene(world, sceneId, singleObj.name, singleObj.attrWithChildren, singleObj.submodelAttributes);
 }
 
-GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameobj){
+GameobjAttributes objectAttributes(World& world, objid id){
+  GameObjectObj& gameobjObj = world.objectMapping.at(id);
+  GameObject& gameobj = getGameObject(world, id);
   GameobjAttributes attr = gameobj.additionalAttr;
   objectAttributes(gameobjObj, attr);
   getAllAttributes(gameobj, attr);
   return attr;
-}
-
-GameobjAttributes objectAttributes(World& world, objid id){
-  return objectAttributes(world.objectMapping.at(id), getGameObject(world, id));
-}
-
-bool objectHasAttribute(World& world, objid id, std::string type, std::optional<AttributeValue> value){
-  auto attrs = objectAttributes(world, id);
-  return hasAttribute(attrs, type, value);
 }
 
 void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool velocitySet, bool physicsEnableChanged){

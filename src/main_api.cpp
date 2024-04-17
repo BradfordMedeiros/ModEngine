@@ -290,11 +290,13 @@ std::vector<int32_t> getObjectsByType(std::string type){
   }
   return getGameObjectsIndex(world.objectMapping);
 }
+
 std::vector<int32_t> getObjectsByAttr(std::string type, std::optional<AttributeValue> value, std::optional<int32_t> sceneId){
   auto objIds = listObjInScene(world.sandbox, sceneId);
   std::vector<objid> idsWithAttrs;
   for (auto id : objIds){
-    if (objectHasAttribute(world, id, type, value)){
+    auto attrs = objectAttributes(world, id);
+    if (hasAttribute(attrs, type, value)){
       idsWithAttrs.push_back(id);
     }
   }

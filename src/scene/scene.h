@@ -79,9 +79,7 @@ struct SingleObjDeserialization {
 };
 std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serializedObj, objid id, bool useObjId);
 
-GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameobj);
 GameobjAttributes objectAttributes(World& world, objid id);
-bool objectHasAttribute(World& world, objid id, std::string type, std::optional<AttributeValue> value);
 void setAttributes(World& world, objid id, GameobjAttributes& attr);
 void setProperty(World& world, objid id, std::vector<Property>& properties);
 AttributeValue interpolateAttribute(AttributeValue key1, AttributeValue key2, float percentage);
