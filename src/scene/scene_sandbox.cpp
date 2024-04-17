@@ -647,12 +647,11 @@ Transformation fullTransformation(SceneSandbox& sandbox, objid id){
   return getTransformationFromMatrix(fullModelTransform(sandbox, id));
 }
 
-SceneDeserialization deserializeScene(objid sceneId, std::string content, std::function<objid()> getNewObjectId, std::vector<Style>& styles, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields){
+SceneDeserialization deserializeScene(objid sceneId, std::string content, std::function<objid()> getNewObjectId, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields){
   auto tokens = parseFormat(content);
-  applyStyles(tokens, styles);
   return createSceneFromParsedContent(sceneId, tokens, getNewObjectId, getObjautoserializerFields);
 }
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::vector<Style>& styles, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields){
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData,  std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields){
   assert(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());
   for (auto &[_, metadata] : sandbox.sceneIdToSceneMetadata){ // all scene names should be unique
     if (metadata.name == name && name != std::nullopt){
@@ -661,7 +660,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
     }
   }
 
-  SceneDeserialization deserializedScene = deserializeScene(sceneId, sceneData, getUniqueObjId, styles, getObjautoserializerFields);
+  SceneDeserialization deserializedScene = deserializeScene(sceneId, sceneData, getUniqueObjId, getObjautoserializerFields);
 
   for (auto &[id, obj] : deserializedScene.scene.idToGameObjects){
     sandbox.mainScene.idToGameObjects[id] = obj;

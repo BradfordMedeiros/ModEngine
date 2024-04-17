@@ -1504,20 +1504,6 @@ std::vector<InputDispatch> inputFns = {
   },
   InputDispatch{
     .alwaysEnable = false,
-    .sourceKey = 'S',
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = GLFW_KEY_LEFT_ALT,
-    .hasPreq = true,
-    .fn = []() -> void {
-      auto styles = loadStyles("./res/test.style", interface.readFile);
-      auto tokens = parseFormat(interface.readFile("./res/scenes/example.p.rawscene"));
-      applyStyles(tokens, styles);
-      auto serializedContent = serializeSceneTokens(tokens);
-      std::cout << serializedContent << std::endl;
-    }
-  },
-  InputDispatch{
-    .alwaysEnable = false,
     .sourceKey = 258,
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0,

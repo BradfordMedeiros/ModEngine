@@ -15,7 +15,6 @@
 #include "./worldchunking.h"
 #include "./scene/scene_offline.h"
 #include "./renderstages.h"
-#include "./scene/styles.h"
 #include "./lines.h"
 #include "./main_util.h"
 #include "./scene/animation/timeplayback.h"

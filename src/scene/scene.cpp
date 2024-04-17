@@ -108,7 +108,6 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
   return info;
 }
 
-
 std::vector<glm::vec3> vertsForId(World& world, objid id){
   auto meshes = getMeshesForId(world.objectMapping, id).meshes;
   if (meshes.size() == 0){
@@ -918,8 +917,7 @@ void addSerialObjectsToWorld(
 }
 
 objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags){
-  auto styles = loadStyles("./res/default.style", world.interface.readFile);
-  auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData, styles, name, tags, getObjautoserializerFields);
+  auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData, name, tags, getObjautoserializerFields);
   std::vector<GameObjectObj> addedGameobjObjs = {};
 
   auto getId = createGetUniqueObjId(data.idsAdded);
