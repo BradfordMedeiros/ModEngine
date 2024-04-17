@@ -1216,11 +1216,6 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative
   world.entitiesToUpdate.insert(index);
 }
 
-void applyPhysicsTranslation(World& world, objid index, float offsetX, float offsetY, Axis manipulatorAxis){
-  auto position = fullTransformation(world.sandbox, index).position;
-  physicsTranslateSet(world, index, applyTranslation(position, offsetX, offsetY, manipulatorAxis), false);
-}
-
 void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relative){
   //std::cout << "physics rotate set: " << index << " relative: " << relative << std::endl;
   if (relative){
@@ -1250,11 +1245,6 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
   world.entitiesToUpdate.insert(index);
 }
 
-void applyPhysicsRotation(World& world, objid index, float offsetX, float offsetY, Axis manipulatorAxis){
-  auto currentOrientation = fullTransformation(world.sandbox, index).rotation;
-  physicsRotateSet(world, index, applyRotation(currentOrientation, offsetX, offsetY, manipulatorAxis), false);
-}
-
 void physicsScaleSet(World& world, objid index, glm::vec3 scale){
   updateAbsoluteScale(world.sandbox, index, scale);
 
@@ -1268,11 +1258,6 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
     std::cout << "physics scale set physics: " << index << " - " << print(scale) << std::endl;
   }
   world.entitiesToUpdate.insert(index);
-}
-
-void applyPhysicsScaling(World& world, objid index, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis){
-  auto transform = fullTransformation(world.sandbox, index);
-  physicsScaleSet(world, index, applyScaling(transform.position, transform.scale, lastX, lastY, offsetX, offsetY, manipulatorAxis));
 }
 
 void physicsLocalTransformSet(World& world, objid index, Transformation transform){
