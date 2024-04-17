@@ -1347,12 +1347,6 @@ void callbackEntities(World& world){
   world.entitiesToUpdate.clear();
 }
 
-// Should speed up attribute getting/setting, esp single attribute here  
-std::optional<AttributeValue> getSingleAttribute(World& world, objid id, std::string attribute){
-  auto allAttrs = objectAttributes(world, id);
-  return getAttr(allAttrs, attribute);
-}
-
 GameobjAttributes gameobjAttrFromValue(std::string& field, AttributeValue value){
   GameobjAttributes attr {
     .stringAttributes = {},
@@ -1380,7 +1374,8 @@ GameobjAttributes gameobjAttrFromValue(std::string& field, AttributeValue value)
 // TODO -> eliminate all the strings in the fields and use some sort of symbol system
 void applyAttributeDelta(World& world, objid id, std::string field, AttributeValue delta){
   GameObject& gameobj = getGameObject(world, id);
-  auto attribute = getSingleAttribute(world, id, field);
+  auto allAttrs = objectAttributes(world, id);
+  auto attribute = getAttr(allAttrs, field);
   modassert(attribute.has_value(), "attribute does not have a value: " + field);
   auto attributeSum = addAttributes(attribute.value(), delta);
   auto attrValue = gameobjAttrFromValue(field, attributeSum);
