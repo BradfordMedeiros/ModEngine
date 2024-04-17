@@ -837,21 +837,6 @@ std::optional<AttributeValue> getAttr(GameobjAttributes& objAttr, std::string ke
   return std::nullopt;
 }
 
-std::optional<AttributeValue> getAttribute(GameobjAttributes& allAttrs, std::string& attribute){
-  if (allAttrs.numAttributes.find(attribute) != allAttrs.numAttributes.end()){
-    return allAttrs.numAttributes.at(attribute);
-  }
-  if (allAttrs.stringAttributes.find(attribute) != allAttrs.stringAttributes.end()){
-    return allAttrs.stringAttributes.at(attribute);
-  }
-  if (allAttrs.vecAttr.vec3.find(attribute) != allAttrs.vecAttr.vec3.end()){
-    return allAttrs.vecAttr.vec3.at(attribute);
-  }
-  if (allAttrs.vecAttr.vec4.find(attribute) != allAttrs.vecAttr.vec4.end()){
-    return allAttrs.vecAttr.vec4.at(attribute);
-  }
-  return std::nullopt;
-}
 
 bool hasAttribute(GameobjAttributes& attributes, std::string attr){
   bool hasStrAttr = attributes.stringAttributes.find(attr) != attributes.stringAttributes.end();

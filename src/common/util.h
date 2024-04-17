@@ -218,7 +218,6 @@ std::optional<glm::vec4> getVec4Attr(GameobjAttributes& objAttr, std::string key
 
 // Below two are redundant, should eliminate one
 std::optional<AttributeValue> getAttr(GameobjAttributes& objAttr, std::string key);
-std::optional<AttributeValue> getAttribute(GameobjAttributes& allAttrs, std::string& attribute);
 
 bool hasAttribute(GameobjAttributes& attributes, std::string attr);
 bool hasAttribute(GameobjAttributes& attrs, std::string& type, std::optional<AttributeValue>& value);

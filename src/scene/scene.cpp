@@ -1357,7 +1357,7 @@ void callbackEntities(World& world){
 // Should speed up attribute getting/setting, esp single attribute here  
 std::optional<AttributeValue> getSingleAttribute(World& world, objid id, std::string attribute){
   auto allAttrs = objectAttributes(world, id);
-  return getAttribute(allAttrs, attribute);
+  return getAttr(allAttrs, attribute);
 }
 
 GameobjAttributes gameobjAttrFromValue(std::string& field, AttributeValue value){
@@ -1465,6 +1465,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       },
       [&world](objid id, std::string attribute, AttributeValue delta)  -> void {
         MODTODO("update particle attr -- WARNING ADD FPS INDEPNDENC HERE");
+        std::cout << "emitter: " << attribute << ", " << print(delta) << std::endl;
         applyAttributeDelta(world, id, attribute, delta);
       }
     );  
@@ -1504,7 +1505,6 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     drawOctreeSelectionGrid(octreeObj -> octree, world.interface.drawLine, transform);
   }
 }
-
 
 Properties getProperties(World& world, objid id){
   Properties properties {

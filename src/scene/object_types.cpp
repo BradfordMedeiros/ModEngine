@@ -336,7 +336,6 @@ int renderObject(
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
   if (emitterObj != NULL && (showDebugMask & 0b100000)){
-    std::cout << "rendering emitter" << std::endl;
     return renderDefaultNode(shaderProgram, *defaultMeshes.emitter);
   }
 
