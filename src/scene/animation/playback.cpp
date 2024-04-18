@@ -1,10 +1,10 @@
 #include "./playback.h"
 
 // https://gamedev.net/forums/topic/484984-skeletal-animation-non-uniform-scale/4172731/
-void updateBonePoses(NameAndMeshObjName meshNameToMeshes, std::function<glm::mat4(std::string, std::string)> getModelMatrix, std::string rootname){
-  for (int i = 0; i <  meshNameToMeshes.meshes.size(); i++){
-    Mesh* mesh = meshNameToMeshes.meshes.at(i);
-    std::string meshname = meshNameToMeshes.objnames.at(i);
+void updateBonePoses(std::vector<NameAndMeshObjName> meshNameToMeshes, std::function<glm::mat4(std::string, std::string)> getModelMatrix, std::string rootname){
+  for (int i = 0; i <  meshNameToMeshes.size(); i++){
+    Mesh* mesh = meshNameToMeshes.at(i).mesh;
+    std::string meshname = meshNameToMeshes.at(i).objname;
     for (Bone& bone : mesh -> bones){
       bone.offsetMatrix = getModelMatrix(bone.name, rootname) * glm::inverse(bone.initialBonePose);
     }
@@ -14,7 +14,7 @@ void updateBonePoses(NameAndMeshObjName meshNameToMeshes, std::function<glm::mat
 void playbackAnimation(
   Animation animation,  
   float currentTime, 
-  NameAndMeshObjName meshNameToMeshes,  
+  std::vector<NameAndMeshObjName> meshNameToMeshes,  
   std::function<glm::mat4(std::string, std::string)> getModelMatrix,
   std::function<void(std::string, Transformation)> setPose,
   std::string rootname
@@ -98,7 +98,7 @@ void playbackAnimationBlend(
   float currentTime,
   float currentTimeAnimation2,
   float blendFactor,
-  NameAndMeshObjName meshNameToMeshes,  
+  std::vector<NameAndMeshObjName> meshNameToMeshes,  
   std::function<glm::mat4(std::string, std::string)> getModelMatrix,
   std::function<void(std::string, Transformation)> setPose,
   std::string rootname

@@ -210,7 +210,13 @@ std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){
 }
 
 std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping);
+
+struct NameAndMesh {
+  std::vector<std::string*> meshNames;
+  std::vector<Mesh*> meshes;
+};
 NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id);
+
 std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, objid id);
 std::map<objid, GameObjectHeightmap*> getHeightmaps(std::map<objid, GameObjectObj>& mapping);
 bool isNavmesh(std::map<objid, GameObjectObj>& mapping, objid id);

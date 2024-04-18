@@ -95,7 +95,8 @@ void updatePhysicsBody(World& world, objid id);
 
 void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool dumpPhysics, bool paused, Transformation& viewTransform);
 
-NameAndMeshObjName getMeshesForGameobj(World& world, objid id);
+
+std::vector<NameAndMeshObjName> getMeshesForGameobj(World& world, objid gameobjId);
 
 std::optional<objid> getGameObjectByNamePrefix(World& world, std::string name, objid sceneId, bool sceneIdExplicit);
 GameObject& getGameObject(World& world, objid id);

@@ -17,15 +17,9 @@ GameObject& getGameObject(World& world, std::string name, objid sceneId){
   return *obj.value();
 }
 
-NameAndMeshObjName getMeshesForGameobj(World& world, objid gameobjId){
-  std::vector<std::string> objnames;
-  std::vector<std::string*> meshNames;
-  std::vector<Mesh*> meshes;
-  NameAndMeshObjName nameAndMeshes = {
-    .objnames = objnames,
-    .meshNames = meshNames,
-  };
 
+std::vector<NameAndMeshObjName> getMeshesForGameobj(World& world, objid gameobjId){
+  std::vector<NameAndMeshObjName> nameAndMeshObjNames;
   auto groupId = getGroupId(world.sandbox, gameobjId);
   auto allIds = groupId == gameobjId ? getIdsInGroupByObjId(world.sandbox, groupId) : std::vector<objid>({ gameobjId });
   std::cout << "1 physics : , groupId: " << groupId << ", ids " << print(allIds) << std::endl;
@@ -33,12 +27,14 @@ NameAndMeshObjName getMeshesForGameobj(World& world, objid gameobjId){
     auto meshesForId = getMeshesForId(world.objectMapping, id);
     auto gameobjname = getGameObject(world, id).name;
     for (int i = 0; i < meshesForId.meshes.size(); i++){
-      nameAndMeshes.objnames.push_back(gameobjname);
-      nameAndMeshes.meshNames.push_back(meshesForId.meshNames.at(i));
-      nameAndMeshes.meshes.push_back(meshesForId.meshes.at(i));
+      nameAndMeshObjNames.push_back(NameAndMeshObjName {
+        .objname = gameobjname,
+        .meshname = meshesForId.meshNames.at(i),
+        .mesh = meshesForId.meshes.at(i),
+      });
     }    
   }
-  return nameAndMeshes;
+  return nameAndMeshObjNames;
 }
 
 glm::vec3 getOffsetForBoundInfo(BoundInfo& boundInfo, glm::vec3 scale){
@@ -58,7 +54,13 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
   if (meshObj != NULL){
     std::vector<BoundInfo> boundInfos;
-    auto meshes = getMeshesForGameobj(world, index).meshes;
+    auto meshObjDatas = getMeshesForGameobj(world, index);
+
+    std::vector<Mesh*> meshes;
+    for (auto &meshObjData : meshObjDatas){
+      meshes.push_back(meshObjData.mesh);
+    }
+
     for (Mesh* mesh : meshes){
       boundInfos.push_back(mesh -> boundInfo);
     }

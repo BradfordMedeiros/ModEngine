@@ -14,8 +14,8 @@ WorldTiming createWorldTiming(float initialTime){
 
 void resetMeshBones(World& world, objid groupId){
   auto meshNameToMeshes = getMeshesForGameobj(world, groupId);  
-  for (int i = 0; i <  meshNameToMeshes.meshes.size(); i++){
-    Mesh* mesh = meshNameToMeshes.meshes.at(i);
+  for (int i = 0; i <  meshNameToMeshes.size(); i++){
+    Mesh* mesh = meshNameToMeshes.at(i).mesh;
     for (Bone& bone : mesh -> bones){
       bone.offsetMatrix = glm::mat4(1.f);
     }

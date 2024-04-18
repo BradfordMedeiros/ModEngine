@@ -44,15 +44,10 @@ struct MeshRef {
   Mesh mesh;
 };
 
-struct NameAndMesh {
-  std::vector<std::string*> meshNames;
-  std::vector<Mesh*> meshes;
-};
-
 struct NameAndMeshObjName {
-  std::vector<std::string> objnames;
-  std::vector<std::string*> meshNames;
-  std::vector<Mesh*> meshes;
+  std::string objname;
+  std::string* meshname;
+  Mesh* mesh;
 };
 
 void setVertexPosition(Mesh& mesh, unsigned int vertexIndex, glm::vec3 pos, glm::vec3 normal);
