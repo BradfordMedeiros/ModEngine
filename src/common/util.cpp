@@ -629,7 +629,6 @@ std::string print(AttributeValue& value){
   return "";
 }
 
-
 AttributeValue interpolateAttribute(AttributeValue key1, AttributeValue key2, float percentage){  
   assert(percentage <= 1.f && percentage >= 0.f);
   auto attr1 = std::get_if<glm::vec3>(&key1);
@@ -777,6 +776,30 @@ void assertWithBacktrace(bool isTrue, std::string message){
 
 void assertTodo(std::string message){
   assertWithBacktrace(false, "TODO hit: " + message);
+}
+
+GameobjAttributes gameobjAttrFromValue(std::string& field, AttributeValue value){
+  GameobjAttributes attr {
+    .stringAttributes = {},
+    .numAttributes = {},
+    .vecAttr = { .vec3 = {}, .vec4 = {} },
+  };
+  auto stringValue = std::get_if<std::string>(&value);
+  auto floatValue = std::get_if<float>(&value);
+  auto vec3Value = std::get_if<glm::vec3>(&value);
+  auto vec4Value = std::get_if<glm::vec4>(&value);
+  if (stringValue){
+    attr.stringAttributes[field] = *stringValue;
+  }else if (floatValue){
+    attr.numAttributes[field] = *floatValue;
+  }else if (vec3Value){
+    attr.vecAttr.vec3[field] = *vec3Value;
+  }else if (vec4Value){
+    attr.vecAttr.vec4[field] = *vec4Value;
+  }else{
+    modassert(false, "invalid attribute value type");
+  }
+  return attr;
 }
 
 std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key){
@@ -1022,35 +1045,4 @@ std::vector<AttributeKeyAndValue> allKeysAndAttributes(GameobjAttributes& attrib
     });
   }
   return values;
-}
-
-GameobjAttributes gameobjAttrFromAttributes(std::vector<KeyAndAttribute>& attrs){
-  GameobjAttributes attrAttrs {
-    .stringAttributes = {},
-    .numAttributes = {},
-    .vecAttr = { .vec3 = {}, .vec4 = {} },
-  };
-  for (auto &attr : attrs){
-    auto strValue = std::get_if<std::string>(&attr.value);
-    if (strValue){
-      attrAttrs.stringAttributes[attr.key] = *strValue;
-      continue;
-    }
-    auto floatValue = std::get_if<float>(&attr.value);
-    if (floatValue){
-      attrAttrs.numAttributes[attr.key] = *floatValue;
-      continue;
-    }
-    auto vec3Value = std::get_if<glm::vec3>(&attr.value);
-    if (vec3Value){
-      attrAttrs.vecAttr.vec3[attr.key] = *vec3Value;
-      continue;
-    }
-    auto vec4Value = std::get_if<glm::vec4>(&attr.value);
-    if (vec4Value){
-      attrAttrs.vecAttr.vec4[attr.key] = *vec4Value;
-      continue;
-    }
-  }
-  return attrAttrs;
 }

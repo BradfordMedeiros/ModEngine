@@ -1107,6 +1107,19 @@ GameobjAttributes objectAttributes(World& world, objid id){
   return attr;
 }
 
+// TODO -> eliminate all the strings in the fields and use some sort of symbol system
+void applyAttributeDelta(World& world, objid id, std::string field, AttributeValue delta){
+  GameObject& gameobj = getGameObject(world, id);
+  auto allAttrs = objectAttributes(world, id);
+  auto attribute = getAttr(allAttrs, field);
+  modassert(attribute.has_value(), "attribute does not have a value: " + field);
+  auto attributeSum = addAttributes(attribute.value(), delta);
+  auto attrValue = gameobjAttrFromValue(field, attributeSum);
+
+  std::cout << "apply attribute: " << field << " " << print(attributeSum) << std::endl;
+  setAttributes(world, id, attrValue);
+}
+
 void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool velocitySet, bool physicsEnableChanged){
   //std::cout << "rigid bodies old: " << world.rigidbodys.size() << std::endl;
   if (physicsEnableChanged){
@@ -1286,43 +1299,6 @@ void enforceLookAt(World& world){
       physicsRotateSet(world, id, orientationFromPos(fromPos, targetPosition), false);
     }
   });  
-}
-
-GameobjAttributes gameobjAttrFromValue(std::string& field, AttributeValue value){
-  GameobjAttributes attr {
-    .stringAttributes = {},
-    .numAttributes = {},
-    .vecAttr = { .vec3 = {}, .vec4 = {} },
-  };
-  auto stringValue = std::get_if<std::string>(&value);
-  auto floatValue = std::get_if<float>(&value);
-  auto vec3Value = std::get_if<glm::vec3>(&value);
-  auto vec4Value = std::get_if<glm::vec4>(&value);
-  if (stringValue){
-    attr.stringAttributes[field] = *stringValue;
-  }else if (floatValue){
-    attr.numAttributes[field] = *floatValue;
-  }else if (vec3Value){
-    attr.vecAttr.vec3[field] = *vec3Value;
-  }else if (vec4Value){
-    attr.vecAttr.vec4[field] = *vec4Value;
-  }else{
-    modassert(false, "invalid attribute value type");
-  }
-  return attr;
-}
-
-// TODO -> eliminate all the strings in the fields and use some sort of symbol system
-void applyAttributeDelta(World& world, objid id, std::string field, AttributeValue delta){
-  GameObject& gameobj = getGameObject(world, id);
-  auto allAttrs = objectAttributes(world, id);
-  auto attribute = getAttr(allAttrs, field);
-  modassert(attribute.has_value(), "attribute does not have a value: " + field);
-  auto attributeSum = addAttributes(attribute.value(), delta);
-  auto attrValue = gameobjAttrFromValue(field, attributeSum);
-
-  std::cout << "apply attribute: " << field << " " << print(attributeSum) << std::endl;
-  setAttributes(world, id, attrValue);
 }
 
 extern bool useTransform2;

@@ -209,6 +209,7 @@ struct GameobjAttributes {
   std::map<std::string, double> numAttributes;
   vectorAttributes vecAttr;
 };
+GameobjAttributes gameobjAttrFromValue(std::string& field, AttributeValue value);
 
 std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key);
 std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key);
@@ -315,12 +316,6 @@ struct AttributeKeyAndValue {
 };
 
 std::vector<AttributeKeyAndValue> allKeysAndAttributes(GameobjAttributes& attributes);
-
-struct KeyAndAttribute { 
-  std::string key;
-  AttributeValue value;
-};
-GameobjAttributes gameobjAttrFromAttributes(std::vector<KeyAndAttribute>& attrs);
 
 struct Token {
   std::string target;
