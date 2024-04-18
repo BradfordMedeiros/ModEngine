@@ -17,7 +17,6 @@ GameObject& getGameObject(World& world, std::string name, objid sceneId){
   return *obj.value();
 }
 
-
 std::vector<NameAndMeshObjName> getMeshesForGameobj(World& world, objid gameobjId){
   std::vector<NameAndMeshObjName> nameAndMeshObjNames;
   auto groupId = getGroupId(world.sandbox, gameobjId);
