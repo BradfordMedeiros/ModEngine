@@ -301,10 +301,6 @@ void rmRigidBody(World& world, objid id){
   world.rigidbodys.erase(id);
 }
 
-
-bool hasPhysicsBody(World& world, objid id){
-  return world.rigidbodys.find(id) != world.rigidbodys.end();
-}
 void updatePhysicsBody(World& world, objid id){
   bool hasRigidBody = world.rigidbodys.find(id) != world.rigidbodys.end();
   if (hasRigidBody){
@@ -430,15 +426,6 @@ void freeTextureRefsIdByOwner(World& world, int ownerId, std::optional<int> id){
 }
 void freeTextureRefsByOwner(World& world, int ownerId){
   freeTextureRefsIdByOwner(world, ownerId, std::nullopt);
-}
-
-std::optional<objid> getMappingTexture(World& world, std::string& texture){
-  for (auto &[name, textureRef] : world.textures){
-    if (name == texture){
-      return textureRef.mappingTexture;
-    }
-  }
-  return std::nullopt;
 }
 
 void freeAnimationsForOwner(World& world, objid id){
@@ -1179,18 +1166,6 @@ void setAttributes(World& world, objid id, GameobjAttributes& attr){
   mergeAttributes(obj.additionalAttr, additionalAttr);
   afterAttributesSet(world, id, obj, attr.vecAttr.vec3.find("physics_velocity") != attr.vecAttr.vec3.end(), oldPhysicsEnabled != newPhysicsEnabled || shouldRebuildPhysics);
 }
-void setProperty(World& world, objid id, std::vector<Property>& properties){
-  GameObject& gameobj = getGameObject(world, id);
-  GameobjAttributes attr { 
-    .stringAttributes = {},
-    .numAttributes = {},
-    .vecAttr = { .vec3 = {}, .vec4 = {}},
-  };
-  for (auto property : properties){
-    addAttributeFieldDynamic(attr, property.propertyName, property.value); 
-  }
-  setAttributes(world, id, attr);
-}
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative){
   //std::cout << "physics translate set: " << index << " relative: " << relative << std::endl;
@@ -1487,7 +1462,6 @@ std::vector<std::string> sceneTagsForSceneId(World& world, objid sceneId){
   return world.sandbox.sceneIdToSceneMetadata.at(sceneId).tags;
 }
 
-////////////
 glm::vec3 gameobjectPosition(World& world, objid id, bool isWorld){
   if (isWorld){
     return fullTransformation(world.sandbox, id).position;

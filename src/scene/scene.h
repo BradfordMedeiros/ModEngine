@@ -81,8 +81,6 @@ std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serial
 
 GameobjAttributes objectAttributes(World& world, objid id);
 void setAttributes(World& world, objid id, GameobjAttributes& attr);
-void setProperty(World& world, objid id, std::vector<Property>& properties);
-AttributeValue interpolateAttribute(AttributeValue key1, AttributeValue key2, float percentage);
 std::string serializePropertySuffix(std::string key, AttributeValue value);
 
 std::optional<std::string> getTextureById(World& world, int id);
@@ -94,7 +92,6 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
 void physicsScaleSet(World& world, objid index, glm::vec3 scale);
 void physicsLocalTransformSet(World& world, objid index, Transformation transform);
 
-bool hasPhysicsBody(World& world, objid id);
 void updatePhysicsBody(World& world, objid id);
 
 void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool dumpPhysics, bool paused, Transformation& viewTransform);
@@ -123,8 +120,6 @@ Transformation gameobjectTransformation(World& world, objid id, bool isWorld);
 void loadSkybox(World& world, std::string skyboxpath);
 
 std::string getType(std::string name);
-
-std::optional<objid> getMappingTexture(World& world, std::string& texture);
 void freeTextureRefsIdByOwner(World& world, int ownerId, std::optional<int> id);
 void freeTextureRefsByOwner(World& world, int ownerId);
 

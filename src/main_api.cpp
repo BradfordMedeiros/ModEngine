@@ -692,6 +692,17 @@ void stopRecording(objid id){
   }
 }
 
+void setProperty(World& world, objid id, std::vector<Property>& properties){
+  GameobjAttributes attr { 
+    .stringAttributes = {},
+    .numAttributes = {},
+    .vecAttr = { .vec3 = {}, .vec4 = {}},
+  };
+  for (auto property : properties){
+    addAttributeFieldDynamic(attr, property.propertyName, property.value); 
+  }
+  setAttributes(world, id, attr);
+}
 void tickRecordings(float time){
   for (auto &[id, activeRecording] : activeRecordings){
     auto localTransform = gameobjectTransformation(world, activeRecording.targetObj, false);
