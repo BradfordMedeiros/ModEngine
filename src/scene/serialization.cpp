@@ -26,7 +26,6 @@ std::optional<Token> parseToken(std::string content) {
   return std::nullopt;
 }
 
-
 std::vector<Token> parseFormat(std::string content) {
   std::vector<Token> dtokens;
   std::vector<std::string> lines = split(content, '\n');
@@ -329,7 +328,6 @@ std::map<std::string, AttrChildrenPair> deserializeSceneTokens(std::vector<Token
   return objectAttributes;
 }
 
-
 std::vector<std::pair<std::string, std::string>> coreFields(GameObject& gameobject){
   std::vector<std::pair<std::string, std::string>> pairs;
   autoserializerSerialize((char*)&gameobject, gameobjSerializer, pairs);
@@ -440,18 +438,6 @@ void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAttribUtil& util){
   autoserializerSetAttrWithTextureLoading((char*)&gameobj, gameobjSerializer, attr, util);
   modassert(attr.stringAttributes.find("script") == attr.stringAttributes.end(), "setting script attr not yet supported");
-}
-
-
-// property suffix looks like the parts of the tokens on the right hand side
-// eg position 10
-// eg tint 0.9 0.2 0.4
-AttributeValue parsePropertySuffix(std::string key, std::string value){
-  MODTODO("combine parse property suffix with getAttribute in serialization");
-  if (key == "position" || key == "scale"){
-    return parseVec(value);
-  }
-  return value;
 }
 
 bool isReservedAttribute(std::string field, std::set<std::string>& autoserializerFields){

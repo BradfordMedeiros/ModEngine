@@ -75,10 +75,7 @@ void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::
 void addAttributeFieldDynamic(GameobjAttributes& attributes, std::string attribute, AttributeValue& value);
 
 void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr);
-
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAttribUtil& util);
-
-AttributeValue parsePropertySuffix(std::string key, std::string value);
 
 GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes, std::set<std::string>& autoserializerFields);
 GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes, std::set<std::string> objautoserializerFields);
