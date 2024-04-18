@@ -1294,15 +1294,6 @@ void enforceLookAt(World& world){
   });  
 }
 
-void callbackEntities(World& world){
-  forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
-    if (id == getGroupId(world.sandbox, id) && world.entitiesToUpdate.find(id) != world.entitiesToUpdate.end()){
-      world.onObjectUpdate(gameobj);
-    }
-  });  
-  world.entitiesToUpdate.clear();
-}
-
 GameobjAttributes gameobjAttrFromValue(std::string& field, AttributeValue value){
   GameobjAttributes attr {
     .stringAttributes = {},
@@ -1426,7 +1417,12 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   updateSoundPositions(world, viewTransform);
   enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
   updatePhysicsFromSandbox(world);
-  callbackEntities(world);
+  forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
+    if (id == getGroupId(world.sandbox, id) && world.entitiesToUpdate.find(id) != world.entitiesToUpdate.end()){
+      world.onObjectUpdate(gameobj);
+    }
+  });  
+  world.entitiesToUpdate.clear();
 
   onObjectFrame(world.objectMapping, 
     [&world](std::string texturepath, unsigned char* data, int textureWidth, int textureHeight) -> void {
