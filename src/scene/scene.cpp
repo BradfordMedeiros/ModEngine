@@ -930,7 +930,7 @@ objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& a
   return addSceneToWorldFromData(world, sceneFile, sceneId.has_value() ? sceneId.value() : getUniqueObjId(), sceneData, name, tags);
 }
 
-// todo finish removing data like eg clearing meshes, animations,etc
+// todo verify removing data like eg clearing meshes, animations,etc
 void removeObjectById(World& world, objid objectId, std::string name, std::string scriptName, bool netsynchronized){
   if (!idExists(world.sandbox, objectId)){
     return;
@@ -965,7 +965,6 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
     world.interface.unloadCScript(scriptName, objectId);
   }
 }
-
 
 void removeObjectByIdFromScene(World& world, objid gameobjId){
   if (!idExists(world.sandbox, gameobjId)){
@@ -1016,7 +1015,6 @@ bool copyObjectToScene(World& world, objid id){
   addObjectToScene(world, getGameObjectH(world.sandbox, id).sceneId, serializedObject, -1, false);
   return true;
 }
-
 
 void removeSceneFromWorld(World& world, objid sceneId){
   if (!sceneExists(world.sandbox, sceneId)) {
@@ -1475,16 +1473,6 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     modassert(octreeObj, "draw selection grid onFrame not octree type");
     drawOctreeSelectionGrid(octreeObj -> octree, world.interface.drawLine, transform);
   }
-}
-
-Properties getProperties(World& world, objid id){
-  Properties properties {
-    .transformation =  gameobjectTransformation(world, id, false),
-  };
-  return properties;
-}
-void setProperties(World& world, objid id, Properties& properties){
-  physicsLocalTransformSet(world, id, properties.transformation);
 }
 
 std::string sceneFileForSceneId(World& world, objid sceneId){

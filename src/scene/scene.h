@@ -111,12 +111,6 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
 void loadMeshData(World& world, std::string meshPath, MeshData& meshData, objid ownerId);
 std::function<Mesh(MeshData&)> createScopedLoadMesh(World& world, objid id);
 
-struct Properties {
-  Transformation transformation;
-};
-Properties getProperties(World& world, objid id);
-void setProperties(World& world, objid id, Properties& properties);
-
 std::string sceneFileForSceneId(World& world, objid sceneId);
 std::optional<std::string> sceneNameForSceneId(World& world, objid sceneId);
 std::vector<std::string> sceneTagsForSceneId(World& world, objid sceneId);

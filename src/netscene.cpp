@@ -48,7 +48,9 @@ void netObjectUpdate(World& world, GameObject& obj, NetCode& netcode, bool boots
   UdpPacket packet { .type = UPDATE };
   packet.payload.updatepacket = UpdatePacket { 
     .id = obj.id,
-    .properties = getProperties(world, obj.id),
+    .properties = Properties {
+      .transformation = gameobjectTransformation(world, obj.id, false),
+    },
   };
   if (bootstrapperMode){
     sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
@@ -96,9 +98,8 @@ void handleCreate(World& world, UdpPacket& packet){
 
 void handleUpdate(World& world, UdpPacket& packet){
   auto update = packet.payload.updatepacket;
-
   if (idExists(world.sandbox, update.id)){
-    setProperties(world, update.id, update.properties);
+    physicsLocalTransformSet(world, update.id, update.properties.transformation);
   }else{
     std::cout << "WARNING: Udp client update: does not exist " << update.id << std::endl;
   }

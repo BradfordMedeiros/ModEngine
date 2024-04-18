@@ -17,6 +17,10 @@ struct CreatePacket {
 struct DeletePacket {
   int32_t id;
 };
+
+struct Properties {
+  Transformation transformation;  // this probably should be some generic way to address attributes, probably by some stable-symbol-id and variant
+};
 struct UpdatePacket {
   int32_t id;
   Properties properties;
