@@ -561,7 +561,7 @@ std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, obj
   return std::nullopt;
 }
 
-void updatePosition(std::map<objid, GameObjectObj>& mapping, objid id, glm::vec3 position, Transformation& viewTransform){
+void updateObjectPositions(std::map<objid, GameObjectObj>& mapping, objid id, glm::vec3 position, Transformation& viewTransform){
   auto object = mapping.at(id); 
   auto soundObj = std::get_if<GameObjectSound>(&object);
   if (soundObj != NULL){

@@ -1261,13 +1261,6 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, Physic
   }
 }
 
-void updateSoundPositions(World& world, Transformation& viewTransform){
-  forEveryGameobj(world.sandbox, [&world, &viewTransform](objid id, GameObject& gameobj) -> void {
-    auto absolutePosition = fullTransformation(world.sandbox, id).position;
-    updatePosition(world.objectMapping, id, absolutePosition, viewTransform);
-  });
-}
-
 void enforceLookAt(World& world){
   bool extractSceneIdFromName(std::string& name, objid* _id, std::string* _searchName);
 
@@ -1414,7 +1407,11 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   stepPhysicsSimulation(world.physicsEnvironment, timestep, paused, enablePhysics);
   updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);  
   
-  updateSoundPositions(world, viewTransform);
+  forEveryGameobj(world.sandbox, [&world, &viewTransform](objid id, GameObject& gameobj) -> void {
+    auto absolutePosition = fullTransformation(world.sandbox, id).position;
+    updateObjectPositions(world.objectMapping, id, absolutePosition, viewTransform);
+  });
+
   enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
   updatePhysicsFromSandbox(world);
   forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
