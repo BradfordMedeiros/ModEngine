@@ -3,9 +3,9 @@
 // https://gamedev.net/forums/topic/484984-skeletal-animation-non-uniform-scale/4172731/
 void updateBonePoses(NameAndMeshObjName meshNameToMeshes, std::function<glm::mat4(std::string, std::string)> getModelMatrix, std::string rootname){
   for (int i = 0; i <  meshNameToMeshes.meshes.size(); i++){
-    Mesh& mesh = meshNameToMeshes.meshes.at(i);
+    Mesh* mesh = meshNameToMeshes.meshes.at(i);
     std::string meshname = meshNameToMeshes.objnames.at(i);
-    for (Bone& bone : mesh.bones){
+    for (Bone& bone : mesh -> bones){
       bone.offsetMatrix = getModelMatrix(bone.name, rootname) * glm::inverse(bone.initialBonePose);
     }
   }

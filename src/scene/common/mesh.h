@@ -45,14 +45,14 @@ struct MeshRef {
 };
 
 struct NameAndMesh {
-  std::vector<std::reference_wrapper<std::string>> meshNames;
-  std::vector<std::reference_wrapper<Mesh>> meshes;
+  std::vector<std::string*> meshNames;
+  std::vector<Mesh*> meshes;
 };
 
 struct NameAndMeshObjName {
   std::vector<std::string> objnames;
-  std::vector<std::reference_wrapper<std::string>> meshNames;
-  std::vector<std::reference_wrapper<Mesh>> meshes;
+  std::vector<std::string*> meshNames;
+  std::vector<Mesh*> meshes;
 };
 
 void setVertexPosition(Mesh& mesh, unsigned int vertexIndex, glm::vec3 pos, glm::vec3 normal);

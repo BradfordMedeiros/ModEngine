@@ -81,7 +81,6 @@ std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serial
 
 GameobjAttributes objectAttributes(World& world, objid id);
 void setAttributes(World& world, objid id, GameobjAttributes& attr);
-std::string serializePropertySuffix(std::string key, AttributeValue value);
 
 std::optional<std::string> getTextureById(World& world, int id);
 std::string serializeScene(World& world, objid sceneId, bool includeIds);

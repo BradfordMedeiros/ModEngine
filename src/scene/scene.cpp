@@ -19,8 +19,8 @@ GameObject& getGameObject(World& world, std::string name, objid sceneId){
 
 NameAndMeshObjName getMeshesForGameobj(World& world, objid gameobjId){
   std::vector<std::string> objnames;
-  std::vector<std::reference_wrapper<std::string>> meshNames;
-  std::vector<std::reference_wrapper<Mesh>> meshes;
+  std::vector<std::string*> meshNames;
+  std::vector<Mesh*> meshes;
   NameAndMeshObjName nameAndMeshes = {
     .objnames = objnames,
     .meshNames = meshNames,
@@ -59,8 +59,8 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
   if (meshObj != NULL){
     std::vector<BoundInfo> boundInfos;
     auto meshes = getMeshesForGameobj(world, index).meshes;
-    for (Mesh& mesh : meshes){
-      boundInfos.push_back(mesh.boundInfo);
+    for (Mesh* mesh : meshes){
+      boundInfos.push_back(mesh -> boundInfo);
     }
     if (boundInfos.size() == 0){
       return std::nullopt;
@@ -115,7 +115,7 @@ std::vector<glm::vec3> vertsForId(World& world, objid id){
     return {};
   }
   std::vector<glm::vec3> vertPositions;
-  auto vertices = readVertsFromMeshVao(meshes.at(0));
+  auto vertices = readVertsFromMeshVao(*meshes.at(0));
   for (auto &vertex : vertices){
     vertPositions.push_back(vertex.position);
   }

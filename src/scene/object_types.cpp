@@ -477,8 +477,8 @@ static std::string EMPTY_STR = "";
 NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id){  
   static std::string NULL_STR = "";
 
-  std::vector<std::reference_wrapper<std::string>> meshNames;
-  std::vector<std::reference_wrapper<Mesh>> meshes;
+  std::vector<std::string*> meshNames;
+  std::vector<Mesh*> meshes;
 
   GameObjectObj& gameObj = mapping.at(id);
 
@@ -486,8 +486,8 @@ NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id){
     auto meshObject = std::get_if<GameObjectMesh>(&gameObj);
     if (meshObject != NULL){
       for (int i = 0; i < meshObject -> meshesToRender.size(); i++){
-        meshNames.push_back(meshObject -> meshNames.at(i));
-        meshes.push_back(meshObject -> meshesToRender.at(i));
+        meshNames.push_back(&meshObject -> meshNames.at(i));
+        meshes.push_back(&meshObject -> meshesToRender.at(i));
       }
       goto returndata;
     }
@@ -496,8 +496,8 @@ NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id){
   {
     auto navmeshObject = std::get_if<GameObjectNavmesh>(&gameObj);
     if (navmeshObject != NULL){
-      meshNames.push_back(EMPTY_STR); // this should just be an optional array... need to clean up getmeshees in general
-      meshes.push_back(navmeshObject -> mesh);
+      meshNames.push_back(&EMPTY_STR); // this should just be an optional array... need to clean up getmeshees in general
+      meshes.push_back(&navmeshObject -> mesh);
     }
     goto returndata;
   }
@@ -519,7 +519,7 @@ std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, o
     return names;
   }
   for (auto name : getMeshesForId(mapping, id).meshNames){
-    names.push_back(name);
+    names.push_back(*name);
   }
 
   return names;
