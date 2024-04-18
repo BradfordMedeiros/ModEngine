@@ -210,6 +210,7 @@ struct GameobjAttributes {
   vectorAttributes vecAttr;
 };
 GameobjAttributes gameobjAttrFromValue(std::string& field, AttributeValue value);
+void addAttributeFieldDynamic(GameobjAttributes& attributes, std::string attribute, AttributeValue& value);
 
 std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key);
 std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key);

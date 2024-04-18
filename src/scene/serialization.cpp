@@ -251,29 +251,6 @@ void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::
   assertCoreType(ATTRIBUTE_STRING, attribute, payload);
   attributes.stringAttributes[attribute] = payload;
 }
-void addAttributeFieldDynamic(GameobjAttributes& attributes, std::string attribute, AttributeValue& value){
-  auto vec3Field = std::get_if<glm::vec3>(&value);
-  if (vec3Field != NULL){
-    attributes.vecAttr.vec3[attribute] = *vec3Field;
-    return;
-  }
-  auto vec4Field = std::get_if<glm::vec4>(&value);
-  if (vec4Field != NULL){
-    attributes.vecAttr.vec4[attribute] = *vec4Field;
-    return;
-  }
-  auto numField = std::get_if<float>(&value);
-  if (numField != NULL){
-    attributes.numAttributes[attribute] = *numField;
-    return;
-  }
-  auto strField = std::get_if<std::string>(&value);
-  if (strField != NULL){
-    attributes.stringAttributes[attribute] = *strField;
-    return;
-  }
-  modassert(false, "add attribute dynamic invalid - " + attribute);
-}
 
 DividedTokens divideMainAndSubelementTokens(std::vector<Token> tokens){
   std::vector<Token> mainTokens;
@@ -298,7 +275,6 @@ std::map<std::string, AttrChildrenPair> deserializeSceneTokens(std::vector<Token
 
   for (Token token : tokens){
     assert(token.target != "" && token.attribute != "" && token.payload != "");
-
     if (objectAttributes.find(token.target) == objectAttributes.end()) {
       assert(token.target.find(',') == std::string::npos);
       objectAttributes[token.target] = AttrChildrenPair {
@@ -306,7 +282,6 @@ std::map<std::string, AttrChildrenPair> deserializeSceneTokens(std::vector<Token
         .children = {},
       };
     }
-
     if (token.attribute == "child"){
       auto children = parseChildren(token.payload);
       for (auto child : children){
@@ -320,11 +295,8 @@ std::map<std::string, AttrChildrenPair> deserializeSceneTokens(std::vector<Token
       objectAttributes.at(token.target).children = children;
       continue;
     }
-
-   
     addFieldDynamic(objectAttributes.at(token.target).attr, token.attribute, token.payload);
   }
-
   return objectAttributes;
 }
 
@@ -488,15 +460,6 @@ GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes at
   }
 
   object.additionalAttr = getAdditionalAttr(attributes, autoserializerFields);
-
-  //std::cout << "additional attr: " << name << std::endl;
-  //std::cout << print(object.additionalAttr) << std::endl << std::endl;
-  ////object.attr = attributes; // lots of redundant information here, should only set attrs that aren't consumed elsewhere
-//
-//  //std::cout << "gameobj from fields: " << name << std::endl;
-//  //std::cout << print(object.attr) << std::endl;
-  //std::cout << std::endl;
-
   return object;
 }
 

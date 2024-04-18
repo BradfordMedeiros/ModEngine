@@ -72,7 +72,6 @@ GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObj
 std::string serializeObj(objid id, objid groupId, GameObject& gameobject, std::vector<std::string> children, bool includeIds, std::vector<std::pair<std::string, std::string>> additionalFields, std::string name = "");
 
 void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::string payload);
-void addAttributeFieldDynamic(GameobjAttributes& attributes, std::string attribute, AttributeValue& value);
 
 void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr);
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAttribUtil& util);
