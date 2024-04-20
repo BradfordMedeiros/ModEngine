@@ -167,24 +167,6 @@ std::optional<AutoSerialize> serializerByName(std::vector<AutoSerialize>& serial
 std::set<std::string> serializerFieldNames(std::vector<AutoSerialize>& serializers);
 AttributeValueType typeForSerializer(AutoSerialize& serializer);
 
-template <typename T>
-int addCommonAutoserializer(std::vector<AutoSerialize>& autoserializer){
-  autoserializer.push_back(
-    AutoSerializeString {
-      .structOffset = offsetof(T, common.onFocus),
-      .field = "focus",
-      .defaultValue = "",
-    }
-  );
-  autoserializer.push_back(
-    AutoSerializeString {
-      .structOffset = offsetof(T, common.onBlur),
-      .field = "blur",
-      .defaultValue = "",
-    }
-  );
-  return 0;
-}
 
 template <typename T>
 int addTextureAutoserializer(std::vector<AutoSerialize>& autoserializer){
