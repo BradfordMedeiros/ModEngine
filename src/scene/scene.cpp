@@ -1117,14 +1117,6 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
     return valuePtr.value();
   }
 
-  if (std::string("lookat") == field){
-    std::string* strValue = &mainValueStr;
-    return strValue;
-  }else if (std::string("mass") == field){
-    double* massValue = &mainValueMass;
-    return massValue;
-  }
-
   // this can be an unstable ptr after vec3 is modified
   if (gameobj.additionalAttr.vecAttr.vec3.find(field) != gameobj.additionalAttr.vecAttr.vec3.end()){
       return &gameobj.additionalAttr.vecAttr.vec3.at(field);

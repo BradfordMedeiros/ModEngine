@@ -412,16 +412,11 @@ glm::vec4 mainValueVec4(1.f, 2.f, 3.f, 4.f);
 std::optional<AttributeValuePtr> getAttributePtr(GameObject& gameobj, const char* field){
   auto autoserializer = getAutoserializeByField(gameobjSerializer, field);
   if (autoserializer.has_value()){
-    
+    auto attrPtrValue = autoserializerGetAttrPtr((char*)&gameobj, *autoserializer.value());
+    if (attrPtrValue.has_value()){
+      return attrPtrValue;
+    }
   }
-
-  if (std::string("tint") == field){
-    glm::vec4* nullVec4 = &mainValueVec4;
-    return nullVec4;    
-  }else if (std::string("position") == field){
-    glm::vec3* nullVec3 = &mainValue;
-    return nullVec3;    
-  } 
 
   return std::nullopt;
 }
