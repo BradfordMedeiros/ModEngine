@@ -78,11 +78,6 @@ struct AutoSerializeForceString {
   std::string defaultValue;
 };
 
-struct AutoSerializeRequiredString {
-  size_t structOffset;
-  const char* field;
-};
-
 struct AutoSerializeFloat {
   size_t structOffset;
   std::optional<size_t> structOffsetFiller;
@@ -158,7 +153,7 @@ struct AutoserializeReservedField {
   AttributeValueType fieldType;
 };
 
-typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeForceString, AutoSerializeRequiredString, AutoSerializeFloat, AutoSerializeTextureLoaderManual, AutoSerializeInt, AutoSerializeUInt, AutoSerializeVec2, AutoSerializeVec3, AutoSerializeVec4, AutoSerializeRotation, AutoSerializeEnums, AutoSerializeCustom, AutoserializeReservedField> AutoSerialize;
+typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeForceString, AutoSerializeFloat, AutoSerializeTextureLoaderManual, AutoSerializeInt, AutoSerializeUInt, AutoSerializeVec2, AutoSerializeVec3, AutoSerializeVec4, AutoSerializeRotation, AutoSerializeEnums, AutoSerializeCustom, AutoserializeReservedField> AutoSerialize;
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr);
 void createAutoSerializeWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util);
 void autoserializerSerialize(char* structAddress, std::vector<AutoSerialize>& values, std::vector<std::pair<std::string, std::string>>& _pairs);
