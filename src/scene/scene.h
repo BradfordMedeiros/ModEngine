@@ -80,6 +80,10 @@ struct SingleObjDeserialization {
 std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serializedObj, objid id, bool useObjId);
 
 GameobjAttributes objectAttributes(World& world, objid id);
+
+std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, const char* field);
+
+
 void setAttributes(World& world, objid id, GameobjAttributes& attr);
 
 std::optional<std::string> getTextureById(World& world, int id);

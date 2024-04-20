@@ -100,6 +100,7 @@ int maxvalue(int x, int y, int z);
 
 enum AttributeValueType { ATTRIBUTE_VEC3, ATTRIBUTE_VEC4, ATTRIBUTE_STRING, ATTRIBUTE_FLOAT };
 typedef std::variant<glm::vec3, glm::vec4, std::string, float> AttributeValue;
+typedef std::variant<glm::vec3*, glm::vec4*, std::string*, double*> AttributeValuePtr;
 std::string attributeTypeStr(AttributeValueType type);
 
 template<typename T>

@@ -1107,6 +1107,42 @@ GameobjAttributes objectAttributes(World& world, objid id){
   return attr;
 }
 
+std::string mainValueStr = "the value for lookat";
+double mainValueMass = 21.3f;
+std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, const char* field){
+  GameObject& gameobj = getGameObject(world, id);
+
+  auto valuePtr = getAttributePtr(gameobj, field);
+  if (valuePtr.has_value()){
+    return valuePtr.value();
+  }
+
+  if (std::string("lookat") == field){
+    std::string* strValue = &mainValueStr;
+    return strValue;
+  }else if (std::string("mass") == field){
+    double* massValue = &mainValueMass;
+    return massValue;
+  }
+
+  // this can be an unstable ptr after vec3 is modified
+  if (gameobj.additionalAttr.vecAttr.vec3.find(field) != gameobj.additionalAttr.vecAttr.vec3.end()){
+      return &gameobj.additionalAttr.vecAttr.vec3.at(field);
+  }
+  if (gameobj.additionalAttr.vecAttr.vec4.find(field) != gameobj.additionalAttr.vecAttr.vec4.end()){
+      return &gameobj.additionalAttr.vecAttr.vec4.at(field);
+  }
+  if (gameobj.additionalAttr.stringAttributes.find(field) != gameobj.additionalAttr.stringAttributes.end()){
+      return &gameobj.additionalAttr.stringAttributes.at(field);
+  }
+  if (gameobj.additionalAttr.numAttributes.find(field) != gameobj.additionalAttr.numAttributes.end()){
+      return &gameobj.additionalAttr.numAttributes.at(field);
+  }
+  return std::nullopt;
+
+}
+
+
 // TODO -> eliminate all the strings in the fields and use some sort of symbol system
 void applyAttributeDelta(World& world, objid id, std::string field, AttributeValue delta){
   GameObject& gameobj = getGameObject(world, id);

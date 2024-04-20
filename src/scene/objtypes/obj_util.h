@@ -162,9 +162,11 @@ typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeForceS
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr);
 void createAutoSerializeWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util);
 void autoserializerSerialize(char* structAddress, std::vector<AutoSerialize>& values, std::vector<std::pair<std::string, std::string>>& _pairs);
+std::optional<AutoSerialize*> getAutoserializeByField(std::vector<AutoSerialize>& values, const char* field);
 void autoserializerGetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& _attributes);
 void autoserializerSetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes);
 void autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+std::string serializerName(AutoSerialize& serializer);
 std::vector<std::string> serializerNames(std::vector<AutoSerialize>& serializers);
 std::optional<AutoSerialize> serializerByName(std::vector<AutoSerialize>& serializer, std::string& name);
 std::set<std::string> serializerFieldNames(std::vector<AutoSerialize>& serializers);

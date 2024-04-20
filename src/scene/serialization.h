@@ -46,6 +46,7 @@ struct GameObject {
   GameobjAttributes additionalAttr;
 };
 
+
 struct Field {
   char prefix;
   std::string type;
@@ -74,6 +75,8 @@ std::string serializeObj(objid id, objid groupId, GameObject& gameobject, std::v
 void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::string payload);
 
 void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr);
+std::optional<AttributeValuePtr> getAttributePtr(GameObject& gameobj, const char* field);
+
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAttribUtil& util);
 
 GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes, std::set<std::string>& autoserializerFields);
