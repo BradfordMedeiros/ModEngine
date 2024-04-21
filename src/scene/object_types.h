@@ -195,6 +195,8 @@ int renderObject(
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);
 void objectAttributes(GameObjectObj& toRender, GameobjAttributes& _attributes);
+std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& toRender, const char* field);
+
 bool setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
 
 template<typename T>

@@ -1111,13 +1111,17 @@ std::string mainValueStr = "the value for lookat";
 double mainValueMass = 21.3f;
 std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, const char* field){
   GameObject& gameobj = getGameObject(world, id);
-
   auto valuePtr = getAttributePtr(gameobj, field);
   if (valuePtr.has_value()){
-    return valuePtr.value();
+    return valuePtr;
+  }
+  
+  GameObjectObj& gameobjObj = world.objectMapping.at(id);
+  auto objectValuePtr = getObjectAttributePtr(gameobjObj, field);
+  if (objectValuePtr.has_value()){
+    return objectValuePtr;
   }
 
-  // this can be an unstable ptr after vec3 is modified
   if (gameobj.additionalAttr.vecAttr.vec3.find(field) != gameobj.additionalAttr.vecAttr.vec3.end()){
       return &gameobj.additionalAttr.vecAttr.vec3.at(field);
   }
@@ -1131,7 +1135,6 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
       return &gameobj.additionalAttr.numAttributes.at(field);
   }
   return std::nullopt;
-
 }
 
 

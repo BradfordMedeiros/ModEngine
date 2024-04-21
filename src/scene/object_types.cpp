@@ -433,6 +433,17 @@ void objectAttributes(GameObjectObj& toRender, GameobjAttributes& _attributes){
   assert(false);
 }
 
+glm::vec4 testField(1.f, 0.f, 0.f, 0.5f);
+std::optional<AttributeValuePtr> getSampleAttributeValue(const char* field){
+  if (std::string(field) == "tint"){
+    return &testField;
+  }
+  return std::nullopt;
+}
+std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& toRender, const char* field){
+  return getSampleAttributeValue(field);
+}
+
 bool setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   GameObjectObj& toRender = mapping.at(id);
   auto variantIndex = toRender.index();
