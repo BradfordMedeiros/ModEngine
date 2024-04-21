@@ -723,24 +723,19 @@ std::optional<AttributeValuePtr> autoserializerGetAttrPtr(char* structAddress, A
 void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAttributes& _attributes){
   AutoSerializeBool* boolValue = std::get_if<AutoSerializeBool>(&value);
   if (boolValue != NULL){
-    bool valueAtPr = *(getTypeFromAttr<bool>(autoserializerGetAttrPtr(structAddress, value)).value());
-    _attributes.stringAttributes[boolValue -> field] = valueAtPr ? boolValue -> onString : boolValue -> offString;
+    bool valueAtPtr = *(getTypeFromAttr<bool>(autoserializerGetAttrPtr(structAddress, value)).value());
+    _attributes.stringAttributes[boolValue -> field] = valueAtPtr ? boolValue -> onString : boolValue -> offString;
     return;
   }
  
   AutoSerializeString* strValue = std::get_if<AutoSerializeString>(&value);
-  if (strValue != NULL){
+  AutoSerializeForceString* strForceValue = std::get_if<AutoSerializeForceString>(&value);
+  if (strValue != NULL || strForceValue != NULL){
     std::string* address = (getTypeFromAttr<std::string>(autoserializerGetAttrPtr(structAddress, value)).value());
     _attributes.stringAttributes[strValue -> field] = *address;
     return;
   }
-  AutoSerializeForceString* strForceValue = std::get_if<AutoSerializeForceString>(&value);
-  if (strForceValue != NULL){
-    std::string* address = (getTypeFromAttr<std::string>(autoserializerGetAttrPtr(structAddress, value)).value());
-    _attributes.stringAttributes[strForceValue -> field] = *address;
-    return;
-  }
-  
+
   AutoSerializeFloat* floatValue = std::get_if<AutoSerializeFloat>(&value);
   if (floatValue != NULL){
     float* address = (float*)(((char*)structAddress) + floatValue -> structOffset);
