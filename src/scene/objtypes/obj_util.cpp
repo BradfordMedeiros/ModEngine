@@ -631,12 +631,8 @@ std::optional<AutoSerialize*> getAutoserializeByField(std::vector<AutoSerialize>
 std::optional<AttributeValuePtr> autoserializerGetAttrPtr(char* structAddress, AutoSerialize& value){
   AutoSerializeBool* boolValue = std::get_if<AutoSerializeBool>(&value);
   if (boolValue != NULL){
-    //bool* address = (bool*)(((char*)structAddress) + boolValue -> structOffset);
-    //bool value = *address;
-    //_attributes.stringAttributes[boolValue -> field] = value ? boolValue -> onString : boolValue -> offString;
-    //return;
-    modassert(false, "objtypes cannot get a AutoSerializeBool field");
-    return std::nullopt;
+    bool* address = (bool*)(((char*)structAddress) + boolValue -> structOffset);
+    return address;
   }
 
   AutoSerializeString* strValue = std::get_if<AutoSerializeString>(&value);
@@ -647,10 +643,8 @@ std::optional<AttributeValuePtr> autoserializerGetAttrPtr(char* structAddress, A
   
   AutoSerializeForceString* strForceValue = std::get_if<AutoSerializeForceString>(&value);
   if (strForceValue != NULL){
-    //std::string* address = (std::string*)(((char*)structAddress) + strForceValue -> structOffset);
-    //return address;
-    modassert(false, "objtypes cannot get a AutoSerializeForceString field");
-    return std::nullopt;
+    std::string* address = (std::string*)(((char*)structAddress) + strForceValue -> structOffset);
+    return address;
   }
  
   AutoSerializeFloat* floatValue = std::get_if<AutoSerializeFloat>(&value);
@@ -671,18 +665,14 @@ std::optional<AttributeValuePtr> autoserializerGetAttrPtr(char* structAddress, A
 
   AutoSerializeInt* intValue = std::get_if<AutoSerializeInt>(&value);
   if (intValue != NULL){
-    modassert(false, "objtypes cannot get a AutoSerializeInt field");
-    //int* address = (int*)(((char*)structAddress) + intValue -> structOffset);
-    //return address;
-    return std::nullopt;
+    int* address = (int*)(((char*)structAddress) + intValue -> structOffset);
+    return address;
   }
 
   AutoSerializeUInt* uintValue = std::get_if<AutoSerializeUInt>(&value);
   if (uintValue != NULL){
-    modassert(false, "objtypes cannot get a AutoSerializeUInt field");
-    //uint* address = (uint*)(((char*)structAddress) + uintValue -> structOffset);
-    //return address;
-    return std::nullopt;
+    uint* address = (uint*)(((char*)structAddress) + uintValue -> structOffset);
+    return address;
   }
 
   AutoSerializeVec2* vec2Value = std::get_if<AutoSerializeVec2>(&value);
@@ -696,7 +686,6 @@ std::optional<AttributeValuePtr> autoserializerGetAttrPtr(char* structAddress, A
     glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);
     return address;
   }
-  
 
   AutoSerializeVec4* vec4Value = std::get_if<AutoSerializeVec4>(&value);
   if (vec4Value != NULL){
@@ -706,18 +695,14 @@ std::optional<AttributeValuePtr> autoserializerGetAttrPtr(char* structAddress, A
   
   AutoSerializeRotation* rotValue = std::get_if<AutoSerializeRotation>(&value);
   if (rotValue != NULL){
-    //glm::quat* address = (glm::quat*)(((char*)structAddress) + rotValue -> structOffset);
-    //return address;
-    modassert(false, "objtypes cannot get a AutoSerializeRotation field");
-    return std::nullopt;
+    glm::quat* address = (glm::quat*)(((char*)structAddress) + rotValue -> structOffset);
+    return address;
   }
 
   AutoSerializeEnums* enumsValue = std::get_if<AutoSerializeEnums>(&value);
   if (enumsValue != NULL){
-    //int* address = (int*)(((char*)structAddress) + enumsValue -> structOffset);
-    //return address;
-    modassert(false, "objtypes cannot get a AutoSerializeEnums field");
-    return std::nullopt;
+    int* address = (int*)(((char*)structAddress) + enumsValue -> structOffset);
+    return address;
   }
 
   AutoSerializeCustom* customValue = std::get_if<AutoSerializeCustom>(&value);
@@ -738,21 +723,20 @@ std::optional<AttributeValuePtr> autoserializerGetAttrPtr(char* structAddress, A
 void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAttributes& _attributes){
   AutoSerializeBool* boolValue = std::get_if<AutoSerializeBool>(&value);
   if (boolValue != NULL){
-    bool* address = (bool*)(((char*)structAddress) + boolValue -> structOffset);
-    bool value = *address;
-    _attributes.stringAttributes[boolValue -> field] = value ? boolValue -> onString : boolValue -> offString;
+    bool valueAtPr = *(getTypeFromAttr<bool>(autoserializerGetAttrPtr(structAddress, value)).value());
+    _attributes.stringAttributes[boolValue -> field] = valueAtPr ? boolValue -> onString : boolValue -> offString;
     return;
   }
  
   AutoSerializeString* strValue = std::get_if<AutoSerializeString>(&value);
   if (strValue != NULL){
-    std::string* address = (std::string*)(((char*)structAddress) + strValue -> structOffset);
+    std::string* address = (getTypeFromAttr<std::string>(autoserializerGetAttrPtr(structAddress, value)).value());
     _attributes.stringAttributes[strValue -> field] = *address;
     return;
   }
   AutoSerializeForceString* strForceValue = std::get_if<AutoSerializeForceString>(&value);
   if (strForceValue != NULL){
-    std::string* address = (std::string*)(((char*)structAddress) + strForceValue -> structOffset);
+    std::string* address = (getTypeFromAttr<std::string>(autoserializerGetAttrPtr(structAddress, value)).value());
     _attributes.stringAttributes[strForceValue -> field] = *address;
     return;
   }
@@ -773,49 +757,49 @@ void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
 
   AutoSerializeInt* intValue = std::get_if<AutoSerializeInt>(&value);
   if (intValue != NULL){
-    int* address = (int*)(((char*)structAddress) + intValue -> structOffset);
+    int* address = (getTypeFromAttr<int>(autoserializerGetAttrPtr(structAddress, value)).value());
     _attributes.numAttributes[intValue -> field] = *address;
     return;
   }
   
   AutoSerializeUInt* uintValue = std::get_if<AutoSerializeUInt>(&value);
   if (uintValue != NULL){
-    uint* address = (uint*)(((char*)structAddress) + uintValue -> structOffset);
+    uint* address = (getTypeFromAttr<uint>(autoserializerGetAttrPtr(structAddress, value)).value());
     _attributes.numAttributes[uintValue -> field] = *address;
     return;
   }
   
   AutoSerializeVec2* vec2Value = std::get_if<AutoSerializeVec2>(&value);
   if (vec2Value != NULL){
-    glm::vec2* address = (glm::vec2*)(((char*)structAddress) + vec2Value -> structOffset);
+    glm::vec2* address = (getTypeFromAttr<glm::vec2>(autoserializerGetAttrPtr(structAddress, value)).value());
     _attributes.stringAttributes[vec2Value -> field] = serializeVec(*address);
     return;
   }
 
   AutoSerializeVec3* vec3Value = std::get_if<AutoSerializeVec3>(&value);
   if (vec3Value != NULL){
-    glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);
+    glm::vec3* address = (getTypeFromAttr<glm::vec3>(autoserializerGetAttrPtr(structAddress, value)).value());
     _attributes.vecAttr.vec3[vec3Value -> field] = *address;
     return;
   }
   
   AutoSerializeVec4* vec4Value = std::get_if<AutoSerializeVec4>(&value);
   if (vec4Value != NULL){
-    glm::vec4* address = (glm::vec4*)(((char*)structAddress) + vec4Value -> structOffset);
+    glm::vec4* address = (getTypeFromAttr<glm::vec4>(autoserializerGetAttrPtr(structAddress, value)).value());
     _attributes.vecAttr.vec4[vec4Value -> field] = *address;
     return;
   }
 
   AutoSerializeRotation* rotValue = std::get_if<AutoSerializeRotation>(&value);
   if (rotValue != NULL){
-    glm::quat* address = (glm::quat*)(((char*)structAddress) + rotValue -> structOffset);
+    glm::quat* address = (getTypeFromAttr<glm::quat>(autoserializerGetAttrPtr(structAddress, value)).value());
     _attributes.vecAttr.vec4[rotValue -> field] = serializeQuatToVec4(*address);
     return;
   }
   
   AutoSerializeEnums* enumsValue = std::get_if<AutoSerializeEnums>(&value);
   if (enumsValue != NULL){
-    int* address = (int*)(((char*)structAddress) + enumsValue -> structOffset);
+    int* address = (getTypeFromAttr<int>(autoserializerGetAttrPtr(structAddress, value)).value());
     auto enumValue = *address;
     _attributes.stringAttributes[enumsValue -> field] = enumStringFromEnumValue(enumValue, enumsValue -> enums, enumsValue -> enumStrings);
     return;
