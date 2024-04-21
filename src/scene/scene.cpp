@@ -1107,8 +1107,6 @@ GameobjAttributes objectAttributes(World& world, objid id){
   return attr;
 }
 
-std::string mainValueStr = "the value for lookat";
-double mainValueMass = 21.3f;
 std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, const char* field){
   GameObject& gameobj = getGameObject(world, id);
   auto valuePtr = getAttributePtr(gameobj, field);
