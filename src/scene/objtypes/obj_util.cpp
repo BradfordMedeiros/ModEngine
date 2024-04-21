@@ -863,11 +863,6 @@ void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   modassert(false, "autoserialize type not found");
 }
 
-/*template <typename T>
-T* autoserializerGetAttrPtr(char* structAddress, AutoSerialize& autoserialize){
-  return NULL;
-}*/
-
 void autoserializerGetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& _attributes){
   for (auto &value : values){
     autoserializerGetAttr(structAddress, value, _attributes);
