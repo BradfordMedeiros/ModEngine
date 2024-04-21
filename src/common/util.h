@@ -100,7 +100,7 @@ int maxvalue(int x, int y, int z);
 
 enum AttributeValueType { ATTRIBUTE_VEC3, ATTRIBUTE_VEC4, ATTRIBUTE_STRING, ATTRIBUTE_FLOAT };
 typedef std::variant<glm::vec3, glm::vec4, std::string, float> AttributeValue;
-typedef std::variant<glm::vec2*, glm::vec3*, glm::vec4*, std::string*, double*, bool*, int*, uint*, glm::quat*> AttributeValuePtr;
+typedef std::variant<glm::vec2*, glm::vec3*, glm::vec4*, std::string*, float*, bool*, int*, uint*, glm::quat*> AttributeValuePtr;
 std::string attributeTypeStr(AttributeValueType type);
 
 template <typename T>
@@ -218,7 +218,7 @@ struct vectorAttributes {
 };
 struct GameobjAttributes {
   std::map<std::string, std::string> stringAttributes;
-  std::map<std::string, double> numAttributes;
+  std::map<std::string, float> numAttributes;
   vectorAttributes vecAttr;
 };
 GameobjAttributes gameobjAttrFromValue(std::string& field, AttributeValue value);

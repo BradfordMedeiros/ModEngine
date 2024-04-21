@@ -191,7 +191,7 @@ std::optional<EmitterSpecialAttribute> extractSpecialAttribute(std::string key){
 
 GameobjAttributes emitterExtractAttributes(GameobjAttributes& attributes, std::string name){
   std::map<std::string, std::string> stringAttributes;
-  std::map<std::string, double> numAttributes;
+  std::map<std::string, float> numAttributes;
   std::map<std::string, glm::vec3> vec3;
   std::map<std::string, glm::vec4> vec4;
 
