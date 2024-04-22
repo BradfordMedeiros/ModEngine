@@ -698,17 +698,6 @@ void stopRecording(objid id){
   }
 }
 
-void setProperty(World& world, objid id, std::vector<Property>& properties){
-  GameobjAttributes attr { 
-    .stringAttributes = {},
-    .numAttributes = {},
-    .vecAttr = { .vec3 = {}, .vec4 = {}},
-  };
-  for (auto property : properties){
-    addAttributeFieldDynamic(attr, property.propertyName, property.value); 
-  }
-  setAttributes(world, id, attr);
-}
 void tickRecordings(float time){
   for (auto &[id, activeRecording] : activeRecordings){
     auto localTransform = gameobjectTransformation(world, activeRecording.targetObj, false);
@@ -723,7 +712,9 @@ void tickRecordings(float time){
       modassert(recording.type != RECORDING_PLAY_LOOP, "recording playback - got complete loop type");
       recordingsToRemove.push_back(id);
     }
-    setProperty(world, id, interpolatedProperties);
+    for (auto &property: interpolatedProperties){
+      setObjectAttribute(world, id, property.propertyName.c_str(), property.value);
+    }
   }
   for (auto id : recordingsToRemove){
     stopRecording(id);

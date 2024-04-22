@@ -1136,9 +1136,28 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
 }
 
 
+void setObjectAttribute(World& world, objid id, const char* field, AttributeValue value){
+  modassert(false, "set object attribute not yet implemented");
+  // get if the attribute ptr exists
+  // then get if the object attribute exists
+  // then the remaining
+
+  // then check the types
+
+  // then set flags to determine if anything needs to be done after this
+
+}
+
 // TODO -> eliminate all the strings in the fields and use some sort of symbol system
 void applyAttributeDelta(World& world, objid id, std::string field, AttributeValue delta){
   GameObject& gameobj = getGameObject(world, id);
+
+  auto attrPtr = getObjectAttributePtr(world, id, field.c_str());
+  if (attrPtr.has_value()){
+    
+  }
+
+
   auto allAttrs = objectAttributes(world, id);
   auto attribute = getAttr(allAttrs, field);
   modassert(attribute.has_value(), "attribute does not have a value: " + field);

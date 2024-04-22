@@ -802,30 +802,6 @@ GameobjAttributes gameobjAttrFromValue(std::string& field, AttributeValue value)
   return attr;
 }
 
-void addAttributeFieldDynamic(GameobjAttributes& attributes, std::string attribute, AttributeValue& value){
-  auto vec3Field = std::get_if<glm::vec3>(&value);
-  if (vec3Field != NULL){
-    attributes.vecAttr.vec3[attribute] = *vec3Field;
-    return;
-  }
-  auto vec4Field = std::get_if<glm::vec4>(&value);
-  if (vec4Field != NULL){
-    attributes.vecAttr.vec4[attribute] = *vec4Field;
-    return;
-  }
-  auto numField = std::get_if<float>(&value);
-  if (numField != NULL){
-    attributes.numAttributes[attribute] = *numField;
-    return;
-  }
-  auto strField = std::get_if<std::string>(&value);
-  if (strField != NULL){
-    attributes.stringAttributes[attribute] = *strField;
-    return;
-  }
-  modassert(false, "add attribute dynamic invalid - " + attribute);
-}
-
 std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key){
   if (objAttr.stringAttributes.find(key) != objAttr.stringAttributes.end()){
     return objAttr.stringAttributes.at(key);
