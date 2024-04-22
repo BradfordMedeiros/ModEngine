@@ -48,3 +48,8 @@ void removePrefabObj(GameObjectPrefab& prefabObj, ObjectRemoveUtil& util){
 bool setPrefabAttributes(GameObjectPrefab& prefabObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
 	return false;
 }
+
+std::optional<AttributeValuePtr> getPrefabAttribute(GameObjectPrefab& obj, const char* field){
+  modassert(false, "getPrefabAttribute not yet implemented");
+  return std::nullopt;
+}

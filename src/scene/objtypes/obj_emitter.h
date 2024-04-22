@@ -17,6 +17,7 @@ struct GameObjectEmitter{
 GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& util);
 void removeEmitterObj(GameObjectEmitter& heightmapObj, ObjectRemoveUtil& util);
 bool setEmitterAttributes(GameObjectEmitter& emitterObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+std::optional<AttributeValuePtr> getEmitterAttribute(GameObjectEmitter& obj, const char* field);
 void emitterObjAttr(GameObjectEmitter& emitterObj, GameobjAttributes& _attributes);
 std::vector<std::pair<std::string, std::string>> serializeEmitter(GameObjectEmitter& emitterObj, ObjectSerializeUtil& util);
 

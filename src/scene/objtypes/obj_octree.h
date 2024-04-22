@@ -100,4 +100,6 @@ void setSelectedOctreeId(objid id);
 std::optional<objid> getSelectedOctreeId();
 Octree deserializeOctree(std::string& value);
 
+std::optional<AttributeValuePtr> getOctreeAttribute(GameObjectOctree& obj, const char* field);
+
 #endif

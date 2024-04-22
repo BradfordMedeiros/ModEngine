@@ -2575,3 +2575,8 @@ void setSelectedOctreeId(objid id){
 std::optional<objid> getSelectedOctreeId(){
   return selectedOctreeId;
 }
+
+std::optional<AttributeValuePtr> getOctreeAttribute(GameObjectOctree& obj, const char* field){
+  modassert(false, "getOctreeAttribute not yet implemented");
+  return std::nullopt;
+}

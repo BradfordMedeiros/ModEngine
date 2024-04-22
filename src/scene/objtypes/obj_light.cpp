@@ -63,6 +63,11 @@ GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){
   return obj;
 }
 
+std::optional<AttributeValuePtr> getLightAttribute(GameObjectLight& obj, const char* field){
+  modassert(false, "getLightAttribute not yet implemented");
+  return std::nullopt;
+}
+
 void lightObjAttr(GameObjectLight& lightObj, GameobjAttributes& _attributes){
   autoserializerGetAttr((char*)&lightObj, lightAutoserializer, _attributes);
 }

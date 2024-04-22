@@ -18,5 +18,6 @@ void soundObjAttr(GameObjectSound& soundObj, GameobjAttributes& _attributes);
 std::vector<std::pair<std::string, std::string>> serializeSound(GameObjectSound& obj, ObjectSerializeUtil& util);
 void removeSound(GameObjectSound& soundObj, ObjectRemoveUtil& util);
 bool setSoundAttributes(GameObjectSound& soundObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+std::optional<AttributeValuePtr> getSoundAttribute(GameObjectSound& obj, const char* field);
 
 #endif

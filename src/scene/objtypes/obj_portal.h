@@ -13,5 +13,6 @@ GameObjectPortal createPortal(GameobjAttributes& attr, ObjectTypeUtil& util);
 void portalObjAttr(GameObjectPortal& soundObj, GameobjAttributes& _attributes);
 std::vector<std::pair<std::string, std::string>> serializePortal(GameObjectPortal& obj, ObjectSerializeUtil& util);
 bool setPortalAttributes(GameObjectPortal& soundObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+std::optional<AttributeValuePtr> getPortalAttribute(GameObjectPortal& obj, const char* field);
 
 #endif

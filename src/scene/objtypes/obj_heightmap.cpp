@@ -29,6 +29,10 @@ void removeHeightmap(GameObjectHeightmap& heightmapObj, ObjectRemoveUtil& util){
   delete[] heightmapObj.heightmap.data;
 }
 
+std::optional<AttributeValuePtr> getHeightmapAttribute(GameObjectHeightmap& obj, const char* field){
+  modassert(false, "getHeightmapAttribute not yet implemented");
+  return std::nullopt;
+}
 void heightmapObjAttr(GameObjectHeightmap& heightmapObj, GameobjAttributes& _attributes){
   autoserializerGetAttr((char*)&heightmapObj, heightmapAutoserializer, _attributes);
 }

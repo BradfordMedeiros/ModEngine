@@ -79,3 +79,8 @@ bool setSoundAttributes(GameObjectSound& soundObj, GameobjAttributes& attributes
   setSoundLooping(soundObj.source, soundObj.loop);
   return false;
 }
+
+std::optional<AttributeValuePtr> getSoundAttribute(GameObjectSound& obj, const char* field){
+  modassert(false, "getSoundAttribute not yet implemented");
+  return std::nullopt;
+}

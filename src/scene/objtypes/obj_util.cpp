@@ -720,6 +720,18 @@ std::optional<AttributeValuePtr> autoserializerGetAttrPtr(char* structAddress, A
   return std::nullopt;
 }
 
+std::optional<AttributeValuePtr> getAttributePtr(char* structAddress, std::vector<AutoSerialize>& autoserializerConfig, const char* field){
+  auto autoserializer = getAutoserializeByField(autoserializerConfig, field);
+  if (autoserializer.has_value()){
+    auto attrPtrValue = autoserializerGetAttrPtr(structAddress, *autoserializer.value());
+    if (attrPtrValue.has_value()){
+      return attrPtrValue;
+    }
+  }
+  return std::nullopt;
+}
+
+
 void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAttributes& _attributes){
   AutoSerializeBool* boolValue = std::get_if<AutoSerializeBool>(&value);
   if (boolValue != NULL){

@@ -9,17 +9,11 @@ std::size_t getVariantIndex(GameObjectObj gameobj){
   return gameobj.index();
 }
 
-std::optional<AttributeValuePtr> nothingObjectAttribute(GameObjectObj& obj, const char* field){ 
+std::optional<AttributeValuePtr> nothingObjectAttribute(GameObjectObj& obj, const char* field){
+  modassert(false, "object attribute not yet implemented for this type");
   return std::nullopt; 
+}
 
-}
-glm::vec4 testField(1.f, 0.f, 0.f, 0.5f);
-std::optional<AttributeValuePtr> getSampleObjectAttribute(GameObjectMesh& obj, const char* field){
-  if (std::string(field) == "tint"){
-    return &testField;
-  }
-  return std::nullopt;
-}
 
 void nothingObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes){ }// do nothing 
 bool nothingSetObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes, ObjectSetAttribUtil& util){ return false; }// do nothing 
@@ -100,7 +94,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectCamera{}),
     .createObj = createCamera,
     .objectAttributes = convertElementValue<GameObjectCamera>(cameraObjAttr),
-    .objectAttribute = nothingObjectAttribute,
+    .objectAttribute = convertObjectAttribute<GameObjectCamera>(getCameraAttribute),
     .setAttributes = convertElementSetValue<GameObjectCamera>(setCameraAttributes),
     .serialize = convertSerialize<GameObjectCamera>(serializeCamera),
     .removeObject = removeDoNothing,
@@ -110,7 +104,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectPortal{}),
     .createObj = createPortal,
     .objectAttributes = convertElementValue<GameObjectPortal>(portalObjAttr),
-    .objectAttribute = nothingObjectAttribute,
+    .objectAttribute = convertObjectAttribute<GameObjectPortal>(getPortalAttribute),
     .setAttributes = convertElementSetValue<GameObjectPortal>(setPortalAttributes),
     .serialize = convertSerialize<GameObjectPortal>(serializePortal),
     .removeObject = removeDoNothing,
@@ -120,7 +114,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectLight{}),
     .createObj = createLight,
     .objectAttributes = convertElementValue<GameObjectLight>(lightObjAttr),
-    .objectAttribute = nothingObjectAttribute,
+    .objectAttribute = convertObjectAttribute<GameObjectLight>(getLightAttribute),
     .setAttributes = convertElementSetValue<GameObjectLight>(setLightAttributes),
     .serialize = convertSerialize<GameObjectLight>(serializeLight),
     .removeObject = removeDoNothing,
@@ -130,7 +124,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectSound{}),
     .createObj = createSound,
     .objectAttributes = convertElementValue<GameObjectSound>(soundObjAttr),
-    .objectAttribute = nothingObjectAttribute,
+    .objectAttribute = convertObjectAttribute<GameObjectSound>(getSoundAttribute),
     .setAttributes = convertElementSetValue<GameObjectSound>(setSoundAttributes),
     .serialize = convertSerialize<GameObjectSound>(serializeSound),
     .removeObject = convertRemove<GameObjectSound>(removeSound),
@@ -140,6 +134,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectUIText{}),
     .createObj = createUIText,
     .objectAttributes = convertElementValue<GameObjectUIText>(textObjAttributes),
+    .objectAttribute = convertObjectAttribute<GameObjectUIText>(getTextAttribute),
     .setAttributes = convertElementSetValue<GameObjectUIText>(setUITextAttributes),
     .serialize = convertSerialize<GameObjectUIText>(serializeText),
     .removeObject = removeDoNothing,
@@ -149,7 +144,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectHeightmap{}),
     .createObj = createHeightmap,
     .objectAttributes = convertElementValue<GameObjectHeightmap>(heightmapObjAttr),
-    .objectAttribute = nothingObjectAttribute,
+    .objectAttribute = convertObjectAttribute<GameObjectHeightmap>(getHeightmapAttribute),
     .setAttributes = convertElementSetValue<GameObjectHeightmap>(setHeightmapAttributes),
     .serialize = convertSerialize<GameObjectHeightmap>(serializeHeightmap),
     .removeObject = convertRemove<GameObjectHeightmap>(removeHeightmap),
@@ -159,7 +154,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectNavmesh{}),
     .createObj = createNavmesh,
     .objectAttributes = nothingObjAttr, 
-    .objectAttribute = nothingObjectAttribute,
+    .objectAttribute = convertObjectAttribute<GameObjectNavmesh>(getNavmeshAttribute),
     .setAttributes = nothingSetObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = convertRemove<GameObjectNavmesh>(removeNavmesh),
@@ -169,6 +164,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectEmitter{}),
     .createObj = createEmitter,
     .objectAttributes = convertElementValue<GameObjectEmitter>(emitterObjAttr),
+    .objectAttribute = convertObjectAttribute<GameObjectEmitter>(getEmitterAttribute),
     .setAttributes = convertElementSetValue<GameObjectEmitter>(setEmitterAttributes),
     .serialize = convertSerialize<GameObjectEmitter>(serializeEmitter),
     .removeObject = convertRemove<GameObjectEmitter>(removeEmitterObj),
@@ -178,7 +174,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectMesh{}),
     .createObj = createMesh,
     .objectAttributes = convertElementValue<GameObjectMesh>(meshObjAttr),
-    .objectAttribute = convertObjectAttribute<GameObjectMesh>(getSampleObjectAttribute),
+    .objectAttribute = convertObjectAttribute<GameObjectMesh>(getMeshAttribute),
     .setAttributes = convertElementSetValue<GameObjectMesh>(setMeshAttributes),
     .serialize = convertSerialize<GameObjectMesh>(serializeMesh),
     .removeObject = removeDoNothing,
@@ -188,19 +184,9 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectOctree{}),
     .createObj = createOctree, 
     .objectAttributes = nothingObjAttr,
-    .objectAttribute = nothingObjectAttribute,
+    .objectAttribute = convertObjectAttribute<GameObjectOctree>(getOctreeAttribute),
     .setAttributes = nothingSetObjAttr,
     .serialize = convertSerialize<GameObjectOctree>(serializeOctree),
-    .removeObject  = removeDoNothing,
-  },
-  ObjectType {
-    .name = "custom", 
-    .variantType = getVariantIndex(GameObjectNil{}),
-    .createObj = createNil, 
-    .objectAttributes = nothingObjAttr,
-    .objectAttribute = nothingObjectAttribute,
-    .setAttributes = nothingSetObjAttr,
-    .serialize = serializeNotImplemented,
     .removeObject  = removeDoNothing,
   },
   ObjectType {
@@ -208,7 +194,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectPrefab{}),
     .createObj = createPrefabObj, 
     .objectAttributes = convertElementValue<GameObjectPrefab>(prefabObjAttr),
-    .objectAttribute = nothingObjectAttribute,
+    .objectAttribute = convertObjectAttribute<GameObjectPrefab>(getPrefabAttribute),
     .setAttributes = convertElementSetValue<GameObjectPrefab>(setPrefabAttributes),
     .serialize = convertSerialize<GameObjectPrefab>(serializePrefabObj),
     .removeObject  = convertRemove<GameObjectPrefab>(removePrefabObj),
@@ -429,16 +415,6 @@ int renderObject(
   if (textObj != NULL){
     setShaderObjectData(shaderProgram, false, textObj -> tint, glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f));   
     return drawWord(shaderProgram, id, textObj -> value, 1000.f /* 1000.f => -1,1 range for each quad */, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor, textObj -> fontFamily, selectionMode);
-  }
-
-  auto customObj = std::get_if<GameObjectNil>(&toRender);
-  if (customObj != NULL){
-    auto vertexCount = 0;
-    if (showDebugMask & 0b10000000){
-      vertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
-    }
-    onRender(id);
-    return vertexCount;
   }
 
   auto prefabObj = std::get_if<GameObjectPrefab>(&toRender);

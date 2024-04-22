@@ -18,7 +18,6 @@
 #include "./objtypes/obj_emitter.h"
 #include "./objtypes/obj_mesh.h"
 #include "./objtypes/obj_octree.h"
-#include "./objtypes/obj_nil.h"
 #include "./objtypes/obj_prefab.h"
 #include "./objtypes/obj_util.h"
 #include "../colorselection.h"
@@ -46,7 +45,6 @@ typedef std::variant<
   GameObjectHeightmap,
   GameObjectNavmesh,
   GameObjectUIText,
-  GameObjectNil,
   GameObjectPrefab
 > GameObjectObj;
 
@@ -112,11 +110,6 @@ static Field uiTextField {
   .type = "text",
 };
 
-static Field customField {
-  .prefix = '|',
-  .type = "custom",
-};
-
 static Field prefabField {
   .prefix = '[',
   .type = "prefab",
@@ -134,7 +127,6 @@ static std::vector fields = {
   heightmap, 
   navmeshField, 
   uiTextField,
-  customField,
   prefabField,
 };
 

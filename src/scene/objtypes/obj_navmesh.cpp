@@ -376,3 +376,8 @@ void removeNavmesh(GameObjectNavmesh& navmeshObj, ObjectRemoveUtil& util){
   removeNavplane(util.id);
   calculateConnections();
 }
+
+std::optional<AttributeValuePtr> getNavmeshAttribute(GameObjectNavmesh& obj, const char* field){
+  modassert(false, "getNavmeshAttribute not yet implemented");
+  return std::nullopt;
+}

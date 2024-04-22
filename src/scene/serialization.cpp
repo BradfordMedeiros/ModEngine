@@ -407,18 +407,8 @@ void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
   autoserializerGetAttr((char*)&gameobj, gameobjSerializer, _attr);
 }
 
-glm::vec3 mainValue(1.f, 2.f, 3.f);
-glm::vec4 mainValueVec4(1.f, 2.f, 3.f, 4.f);
 std::optional<AttributeValuePtr> getAttributePtr(GameObject& gameobj, const char* field){
-  auto autoserializer = getAutoserializeByField(gameobjSerializer, field);
-  if (autoserializer.has_value()){
-    auto attrPtrValue = autoserializerGetAttrPtr((char*)&gameobj, *autoserializer.value());
-    if (attrPtrValue.has_value()){
-      return attrPtrValue;
-    }
-  }
-
-  return std::nullopt;
+  return getAttributePtr((char*)&gameobj, gameobjSerializer, field);
 }
 
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAttribUtil& util){

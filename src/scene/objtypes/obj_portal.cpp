@@ -34,3 +34,7 @@ bool setPortalAttributes(GameObjectPortal& portalObj, GameobjAttributes& attribu
   autoserializerSetAttrWithTextureLoading((char*)&portalObj, portalAutoserializer, attributes, util);
   return false;
 }
+std::optional<AttributeValuePtr> getPortalAttribute(GameObjectPortal& obj, const char* field){
+  modassert(false, "getPortalAttribute not yet implemented");
+  return std::nullopt;
+}
