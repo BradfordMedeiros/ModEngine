@@ -232,7 +232,7 @@ std::optional<glm::vec4> getVec4Attr(GameobjAttributes& objAttr, std::string key
 
 // Below two are redundant, should eliminate one
 std::optional<AttributeValue> getAttr(GameobjAttributes& objAttr, std::string key);
-bool hasAttribute(GameobjAttributes& attrs, std::string& type, std::optional<AttributeValue>& value);
+bool hasAttribute(GameobjAttributes& attrs, std::string& type);
 
 void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAttributes);
 

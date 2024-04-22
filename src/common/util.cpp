@@ -885,47 +885,18 @@ std::optional<AttributeValue> getAttr(GameobjAttributes& objAttr, std::string ke
 }
 
 
-bool hasAttribute(GameobjAttributes& attrs, std::string& type, std::optional<AttributeValue>& value){
-  bool valueExists = value.has_value();
+bool hasAttribute(GameobjAttributes& attrs, std::string& type){
   if (attrs.stringAttributes.find(type) != attrs.stringAttributes.end()){
-    if (!valueExists){
-      return true;
-    }
-    auto valueStr = std::get_if<std::string>(&value.value());
-    if (valueStr == NULL){
-      return false;
-    }
-    return attrs.stringAttributes.at(type) == *valueStr;
+    return true;
   }
   if (attrs.numAttributes.find(type) != attrs.numAttributes.end()){
-    if (!valueExists){
-      return true;
-    }
-    auto valueFloat = std::get_if<float>(&value.value());
-    if (valueFloat == NULL){
-      return false;
-    }
-    return attrs.numAttributes.at(type) == *valueFloat;
+    return true;
   }
   if (attrs.vecAttr.vec3.find(type) != attrs.vecAttr.vec3.end()){
-    if (!valueExists){
-      return true;
-    }
-    auto vecFloat = std::get_if<glm::vec3>(&value.value());
-    if (vecFloat == NULL){
-      return false;
-    }
-    return attrs.vecAttr.vec3.at(type) == *vecFloat;
+    return true;
   }  
   if (attrs.vecAttr.vec4.find(type) != attrs.vecAttr.vec4.end()){
-    if (!valueExists){
-      return true;
-    }
-    auto vecFloat = std::get_if<glm::vec4>(&value.value());
-    if (vecFloat == NULL){
-      return false;
-    }
-    return attrs.vecAttr.vec4.at(type) == *vecFloat;
+    return true;
   }  
   return false;
 }
