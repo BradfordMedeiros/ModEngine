@@ -99,6 +99,7 @@ void setGameObjectAttr(int32_t id, GameobjAttributes& attr);
 
 struct ObjectAttrHandle { 
   GameobjAttributes attr;
+  objid id;
 };
 ObjectAttrHandle getAttrHandle(objid id);
 std::optional<glm::vec3> getVec3Attr(ObjectAttrHandle& attrHandle, std::string key);

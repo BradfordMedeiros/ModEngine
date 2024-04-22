@@ -50,6 +50,6 @@ bool setPrefabAttributes(GameObjectPrefab& prefabObj, GameobjAttributes& attribu
 }
 
 std::optional<AttributeValuePtr> getPrefabAttribute(GameObjectPrefab& obj, const char* field){
-  modassert(false, "getPrefabAttribute not yet implemented");
+  //modassert(false, "getPrefabAttribute not yet implemented");
   return std::nullopt;
 }

@@ -295,10 +295,8 @@ std::vector<int32_t> getObjectsByAttr(std::string type, std::optional<AttributeV
   auto objIds = listObjInScene(world.sandbox, sceneId);
   std::vector<objid> idsWithAttrs;
   for (auto id : objIds){
-    //auto attrValue = getObjectAttributePtr(world, id, type.c_str());
-
-    auto attrs = objectAttributes(world, id);
-    if (hasAttribute(attrs, type)){
+    auto attrValue = getObjectAttributePtr(world, id, type.c_str());
+    if (attrValue.has_value()){
       idsWithAttrs.push_back(id);
     }
   }
@@ -330,6 +328,7 @@ void setGameObjectAttr(int32_t id, GameobjAttributes& attr){
 ObjectAttrHandle getAttrHandle(objid id){
   return ObjectAttrHandle {
     .attr = getGameObjectAttr(id),
+    .id = id,
   };
 }
 std::optional<glm::vec3> getVec3Attr(ObjectAttrHandle& attrHandle, std::string key){

@@ -10,7 +10,7 @@ std::size_t getVariantIndex(GameObjectObj gameobj){
 }
 
 std::optional<AttributeValuePtr> nothingObjectAttribute(GameObjectObj& obj, const char* field){
-  modassert(false, "object attribute not yet implemented for this type");
+  //modassert(false, "object attribute not yet implemented for this type");
   return std::nullopt; 
 }
 

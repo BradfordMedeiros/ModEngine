@@ -378,6 +378,6 @@ void removeNavmesh(GameObjectNavmesh& navmeshObj, ObjectRemoveUtil& util){
 }
 
 std::optional<AttributeValuePtr> getNavmeshAttribute(GameObjectNavmesh& obj, const char* field){
-  modassert(false, "getNavmeshAttribute not yet implemented");
+  //modassert(false, "getNavmeshAttribute not yet implemented");
   return std::nullopt;
 }

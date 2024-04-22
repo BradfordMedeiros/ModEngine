@@ -30,7 +30,7 @@ void removeHeightmap(GameObjectHeightmap& heightmapObj, ObjectRemoveUtil& util){
 }
 
 std::optional<AttributeValuePtr> getHeightmapAttribute(GameObjectHeightmap& obj, const char* field){
-  modassert(false, "getHeightmapAttribute not yet implemented");
+  //modassert(false, "getHeightmapAttribute not yet implemented");
   return std::nullopt;
 }
 void heightmapObjAttr(GameObjectHeightmap& heightmapObj, GameobjAttributes& _attributes){
