@@ -115,6 +115,5 @@ std::vector<std::pair<std::string, std::string>> serializeText(GameObjectUIText&
 }
 
 std::optional<AttributeValuePtr> getTextAttribute(GameObjectUIText& obj, const char* field){
-  modassert(false, "getTextAttribute not yet implemented");
-  return std::nullopt;
+  return getAttributePtr((char*)&obj, textAutoserializer, field);
 }

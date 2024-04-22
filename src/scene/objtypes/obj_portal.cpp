@@ -35,6 +35,5 @@ bool setPortalAttributes(GameObjectPortal& portalObj, GameobjAttributes& attribu
   return false;
 }
 std::optional<AttributeValuePtr> getPortalAttribute(GameObjectPortal& obj, const char* field){
-  modassert(false, "getPortalAttribute not yet implemented");
-  return std::nullopt;
+  return getAttributePtr((char*)&obj, portalAutoserializer, field);
 }

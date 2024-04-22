@@ -81,6 +81,5 @@ bool setSoundAttributes(GameObjectSound& soundObj, GameobjAttributes& attributes
 }
 
 std::optional<AttributeValuePtr> getSoundAttribute(GameObjectSound& obj, const char* field){
-  modassert(false, "getSoundAttribute not yet implemented");
-  return std::nullopt;
+  return getAttributePtr((char*)&obj, soundAutoserializer, field);
 }

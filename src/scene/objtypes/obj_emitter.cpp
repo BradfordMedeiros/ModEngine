@@ -254,8 +254,7 @@ bool setEmitterAttributes(GameObjectEmitter& emitterObj, GameobjAttributes& attr
 
 
 std::optional<AttributeValuePtr> getEmitterAttribute(GameObjectEmitter& obj, const char* field){
-  modassert(false, "getEmitterAttribute not yet implemented");
-  return std::nullopt;
+  return getAttributePtr((char*)&obj, emitterAutoserializer, field);
 }
 void emitterObjAttr(GameObjectEmitter& emitterObj, GameobjAttributes& _attributes){
   autoserializerGetAttr((char*)&emitterObj, emitterAutoserializer, _attributes);

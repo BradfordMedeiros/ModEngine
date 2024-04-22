@@ -48,8 +48,7 @@ void cameraObjAttr(GameObjectCamera& cameraObj, GameobjAttributes& _attributes){
 }
 
 std::optional<AttributeValuePtr> getCameraAttribute(GameObjectCamera& obj, const char* field){
-  modassert(false, "getCameraAttribute not yet implemented");
-  return std::nullopt;
+  return getAttributePtr((char*)&obj, cameraAutoserializer, field);
 }
 
 bool setCameraAttributes(GameObjectCamera& cameraObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
