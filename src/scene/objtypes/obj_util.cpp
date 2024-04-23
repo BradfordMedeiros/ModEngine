@@ -1,11 +1,5 @@
 #include "./obj_util.h"
 
-void attrSet(GameobjAttributes& attr, std::string* value, const char* field){
-  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
-    *value = attr.stringAttributes.at(field);
-  }
-}
-
 void attrSet(GameobjAttributes& attr, std::string* value, std::string defaultValue, const char* field){
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
     *value = attr.stringAttributes.at(field);
@@ -141,20 +135,6 @@ void attrSetLoadTextureManual(GameobjAttributes& attr, TextureLoadingData* _text
   //std::cout << "texture to load: " << textureToLoad << " isloaded: " << _textureLoading -> isLoaded << std::endl;
 }
 
-void attrSet(GameobjAttributes& attr, int* _value, std::vector<int> enums, std::vector<std::string> enumStrings, const char* field, bool strict){
-  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
-    auto value = attr.stringAttributes.at(field);
-    bool foundEnum = false;
-    for (int i = 0; i < enumStrings.size(); i++){
-      if (enumStrings.at(i) == value){
-        *_value = enums.at(i);
-        foundEnum = true;
-        break;
-      }
-    }
-    modassert(foundEnum || !strict, std::string("invalid enum type for ") + field + " - " + value);
-  }
-}
 
 void attrSet(GameobjAttributes& attr, int* _value, std::vector<int> enums, std::vector<std::string> enumStrings, int defaultValue, const char* field, bool strict){
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
@@ -773,7 +753,9 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   AutoSerializeString* strValue = std::get_if<AutoSerializeString>(&value);
   if (strValue != NULL){
     std::string* address = (std::string*)(((char*)structAddress) + strValue -> structOffset);
-    attrSet(attributes, address, strValue -> field);
+    if (attributes.stringAttributes.find(strValue -> field) != attributes.stringAttributes.end()){
+      *address = attributes.stringAttributes.at(strValue -> field);
+    }
     return;
   }
 
@@ -892,7 +874,18 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   AutoSerializeEnums* enumsValue = std::get_if<AutoSerializeEnums>(&value);
   if (enumsValue != NULL){
     int* address = (int*)(((char*)structAddress) + enumsValue -> structOffset);
-    attrSet(attributes, address, enumsValue -> enums, enumsValue -> enumStrings, enumsValue -> field, true);
+    if (attributes.stringAttributes.find(enumsValue -> field) != attributes.stringAttributes.end()){
+      auto value = attributes.stringAttributes.at(enumsValue -> field);
+      bool foundEnum = false;
+      for (int i = 0; i < enumsValue -> enumStrings.size(); i++){
+        if (enumsValue -> enumStrings.at(i) == value){
+          *address = enumsValue -> enums.at(i);
+          foundEnum = true;
+          break;
+        }
+      }
+      modassert(foundEnum, std::string("invalid enum type for ") + enumsValue -> field + " - " + value);
+    }
     return;
   }
 
