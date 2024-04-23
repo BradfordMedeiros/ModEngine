@@ -52,11 +52,6 @@ void attrForceSet(GameobjAttributes& attr, std::string* value, std::string defau
   } 
 }
 
-void attrSet(GameobjAttributes& attr, float* value, const char* field){
-  if (attr.numAttributes.find(field) != attr.numAttributes.end()){
-    *value = attr.numAttributes.at(field);
-  }
-}
 
 void attrSet(GameobjAttributes& attr, float* _value, bool* _hasValue, float defaultValue, const char* field){
   if (attr.numAttributes.find(field) != attr.numAttributes.end()){
@@ -83,12 +78,6 @@ void attrSet(GameobjAttributes& attr, unsigned int* value, unsigned int defaultV
     *value = static_cast<unsigned int>(attr.numAttributes.at(field));
   }else{
     *value = defaultValue;
-  }
-}
-
-void attrSet(GameobjAttributes& attr, int* _value, const char* field){
-  if (attr.numAttributes.find(field) != attr.numAttributes.end()){
-    *_value = static_cast<int>(attr.numAttributes.at(field));
   }
 }
 
@@ -882,11 +871,12 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     return;
   }
   
-
   AutoSerializeFloat* floatValue = std::get_if<AutoSerializeFloat>(&value);
   if (floatValue != NULL){
     float* address = (float*)(((char*)structAddress) + floatValue -> structOffset);
-    attrSet(attributes, address, floatValue -> field);
+    if (attributes.numAttributes.find(floatValue -> field) != attributes.numAttributes.end()){
+      *address = attributes.numAttributes.at(floatValue -> field);
+    }
     return;
   }
 
@@ -900,7 +890,11 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   AutoSerializeInt* intValue = std::get_if<AutoSerializeInt>(&value);
   if (intValue != NULL){
     int* address = (int*)(((char*)structAddress) + intValue -> structOffset);
-    attrSet(attributes, address, intValue -> field);    
+    if (attributes.numAttributes.find(intValue -> field) != attributes.numAttributes.end()){
+      *address = static_cast<int>(attributes.numAttributes.at(intValue -> field));
+    }
+
+
     return;
   }
   
