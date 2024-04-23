@@ -1017,3 +1017,14 @@ std::vector<AttributeKeyAndValue> allKeysAndAttributes(GameobjAttributes& attrib
   }
   return values;
 }
+
+
+std::optional<AttributeValue> getAttributeValue(GameobjAttributes& attributes, const char* field){
+  auto attrs = allKeysAndAttributes(attributes);
+  for (auto &attr : attrs){
+    if (attr.attribute == field){
+      return attr.payload;
+    }
+  }
+  return std::nullopt;
+}

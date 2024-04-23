@@ -411,14 +411,19 @@ std::optional<AttributeValuePtr> getAttributePtr(GameObject& gameobj, const char
   return getAttributePtr((char*)&gameobj, gameobjSerializer, field);
 }
 
-void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAttribUtil& util){
-  autoserializerSetAttrWithTextureLoading((char*)&gameobj, gameobjSerializer, attr, util);
-  modassert(attr.stringAttributes.find("script") == attr.stringAttributes.end(), "setting script attr not yet supported");
-}
+
 bool setAttribute(GameObject& gameobj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
   modassert(std::string(field) != "script", "setting script attr not yet supported");
   return autoserializerSetAttrWithTextureLoading((char*)&gameobj, gameobjSerializer, field, value, util);
 }
+
+void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAttribUtil& util){
+  auto allAttrs = allKeysAndAttributes(attr);
+  for (auto &attr : allAttrs){
+    setAttribute(gameobj, attr.attribute.c_str(), attr.payload, util);
+  }
+}
+
 
 bool isReservedAttribute(std::string field, std::set<std::string>& autoserializerFields){
   return autoserializerFields.count(field) > 0;

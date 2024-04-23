@@ -733,19 +733,23 @@ void autoserializerGetAttr(char* structAddress, std::vector<AutoSerialize>& valu
   }
 }
 
+
 void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAttributes& attributes){
+  auto fieldName = serializerName(value);
+  auto attributeValue = getAttributeValue(attributes, fieldName.c_str());
+
   AutoSerializeBool* boolValue = std::get_if<AutoSerializeBool>(&value);
   if (boolValue != NULL){
     bool* address = (bool*)(((char*)structAddress) + boolValue -> structOffset);
-    if (attributes.stringAttributes.find(boolValue -> field) != attributes.stringAttributes.end()){
-       auto value = attributes.stringAttributes.at(boolValue -> field);
-       if (value == boolValue -> onString){
-          *address = true;
-       }else if (value == boolValue -> offString){
-          *address = false;
-       }else {
-          modassert(false, "invalid on/off string");
-       }
+    if (attributeValue.has_value()){
+      auto value = unwrapAttr<std::string>(attributeValue.value());
+      if (value == boolValue -> onString){
+         *address = true;
+      }else if (value == boolValue -> offString){
+         *address = false;
+      }else {
+         modassert(false, "invalid on/off string");
+      }
     }
     return;
   }
@@ -753,8 +757,8 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   AutoSerializeString* strValue = std::get_if<AutoSerializeString>(&value);
   if (strValue != NULL){
     std::string* address = (std::string*)(((char*)structAddress) + strValue -> structOffset);
-    if (attributes.stringAttributes.find(strValue -> field) != attributes.stringAttributes.end()){
-      *address = attributes.stringAttributes.at(strValue -> field);
+    if (attributeValue.has_value()){
+      *address = unwrapAttr<std::string>(attributeValue.value());
     }
     return;
   }
@@ -840,8 +844,8 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   if (vec3Value != NULL){
     glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);
     bool* hasValueAddress = (!vec3Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec3Value -> structOffsetFiller.value());
-    if (attributes.vecAttr.vec3.find(vec3Value -> field) != attributes.vecAttr.vec3.end()){
-      *address = attributes.vecAttr.vec3.at(vec3Value -> field);
+    if (attributeValue.has_value()){
+      *address = unwrapAttr<glm::vec3>(attributeValue.value());;
       if (hasValueAddress != NULL){
         *hasValueAddress = true;
       }

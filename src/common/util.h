@@ -337,6 +337,7 @@ struct AttributeKeyAndValue {
 };
 
 std::vector<AttributeKeyAndValue> allKeysAndAttributes(GameobjAttributes& attributes);
+std::optional<AttributeValue> getAttributeValue(GameobjAttributes& attributes, const char* field);
 
 struct Token {
   std::string target;
