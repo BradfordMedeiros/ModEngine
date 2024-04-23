@@ -522,10 +522,8 @@ std::optional<AttributeValuePtr> autoserializerGetAttrPtr(char* structAddress, A
  
   AutoSerializeFloat* floatValue = std::get_if<AutoSerializeFloat>(&value);
   if (floatValue != NULL){
-    //float* address = (float*)(((char*)structAddress) + floatValue -> structOffset);
-    //return address;
-    modassert(false, "objtypes cannot get a AutoSerializeFloat field");
-    return std::nullopt;
+    float* address = (float*)(((char*)structAddress) + floatValue -> structOffset);
+    return address;
   }
  
   AutoSerializeTextureLoaderManual* textureLoaderManual = std::get_if<AutoSerializeTextureLoaderManual>(&value);
@@ -787,8 +785,8 @@ bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   AutoSerializeFloat* floatValue = std::get_if<AutoSerializeFloat>(&value);
   if (floatValue != NULL){
     float* address = (float*)(((char*)structAddress) + floatValue -> structOffset);
-    if (attributes.numAttributes.find(floatValue -> field) != attributes.numAttributes.end()){
-      *address = attributes.numAttributes.at(floatValue -> field);
+    if (attributeValue.has_value()){
+      *address = unwrapAttr<float>(attributeValue.value());
       return true;
     }
     return false;
@@ -815,8 +813,9 @@ bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   AutoSerializeInt* intValue = std::get_if<AutoSerializeInt>(&value);
   if (intValue != NULL){
     int* address = (int*)(((char*)structAddress) + intValue -> structOffset);
-    if (attributes.numAttributes.find(intValue -> field) != attributes.numAttributes.end()){
-      *address = static_cast<int>(attributes.numAttributes.at(intValue -> field));
+    if (attributeValue.has_value()){
+      float floatValue = unwrapAttr<float>(attributeValue.value());
+      *address = static_cast<int>(floatValue);
       return true;
     }
     return false;
@@ -825,8 +824,9 @@ bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   AutoSerializeUInt* uintValue = std::get_if<AutoSerializeUInt>(&value);
   if (uintValue != NULL){
     uint* address = (uint*)(((char*)structAddress) + uintValue -> structOffset);
-    if (attributes.numAttributes.find(uintValue -> field) != attributes.numAttributes.end()){
-      *address = static_cast<unsigned int>(attributes.numAttributes.at(uintValue -> field));
+    if (attributeValue.has_value()){
+      float floatValue = unwrapAttr<float>(attributeValue.value());
+      *address = static_cast<unsigned int>(floatValue);
       return true;
     }
     return false;
