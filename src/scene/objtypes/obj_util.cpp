@@ -134,19 +134,6 @@ void attrSet(GameobjAttributes& attr, glm::vec2* _value, bool* _hasValue, glm::v
   }  
 }
 
-void attrSet(GameobjAttributes& attr, glm::vec2* _value, bool* _hasValue, const char* field){
-  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
-    auto value = attr.stringAttributes.at(field);
-    *_value = parseVec2(value);
-    if (_hasValue != NULL){
-      *_hasValue = true;
-    }
-  }else{
-    if (_hasValue != NULL){
-      *_hasValue = false;
-    }
-  }  
-}
 
 void attrSet(GameobjAttributes& attr, glm::vec4* _value, bool* _hasValue, const char* field){
   if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
@@ -893,8 +880,6 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     if (attributes.numAttributes.find(intValue -> field) != attributes.numAttributes.end()){
       *address = static_cast<int>(attributes.numAttributes.at(intValue -> field));
     }
-
-
     return;
   }
   
@@ -909,7 +894,17 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   if (vec2Value != NULL){
     glm::vec2* address = (glm::vec2*)(((char*)structAddress) + vec2Value -> structOffset);
     bool* hasValueAddress = (!vec2Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec2Value -> structOffsetFiller.value());
-    attrSet(attributes, address, hasValueAddress, vec2Value -> field);
+    if (attributes.stringAttributes.find(vec2Value -> field) != attributes.stringAttributes.end()){
+      auto value = attributes.stringAttributes.at(vec2Value -> field);
+      *address = parseVec2(value);
+      if (hasValueAddress != NULL){
+        *hasValueAddress = true;
+      }
+    }else{
+      if (hasValueAddress != NULL){
+        *hasValueAddress = false;
+      }
+    }  
     return;
   }
 
