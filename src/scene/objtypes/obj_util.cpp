@@ -766,19 +766,30 @@ bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   AutoSerializeForceString* strForcedValue = std::get_if<AutoSerializeForceString>(&value);
   if (strForcedValue != NULL){
     std::string* address = (std::string*)(((char*)structAddress) + strForcedValue -> structOffset);
-    if (attributes.stringAttributes.find(strForcedValue -> field) != attributes.stringAttributes.end()){
-      *address = attributes.stringAttributes.at(strForcedValue -> field);
-      return true;
-    }else if (attributes.numAttributes.find(strForcedValue -> field) != attributes.numAttributes.end()){
-      *address = serializeFloat(attributes.numAttributes.at(strForcedValue -> field));
-      return true;
-    }else if (attributes.vecAttr.vec3.find(strForcedValue -> field) != attributes.vecAttr.vec3.end()){
-      *address = serializeVec(attributes.vecAttr.vec3.at(strForcedValue -> field));
-      return true;
-    }else if (attributes.vecAttr.vec4.find(strForcedValue -> field) != attributes.vecAttr.vec4.end()){
-      *address = serializeVec(attributes.vecAttr.vec4.at(strForcedValue -> field));
-      return true;
+
+    if (attributeValue.has_value()){
+      bool isStringAttr = std::get_if<std::string>(&attributeValue.value());
+      bool isFloatAttr = std::get_if<float>(&attributeValue.value());
+      bool isVec3Attr = std::get_if<glm::vec3>(&attributeValue.value());
+      bool isVec4Attr = std::get_if<glm::vec4>(&attributeValue.value());
+
+      if (isStringAttr){
+        *address = unwrapAttr<std::string>(attributeValue.value());
+        return true;
+      }else if (isFloatAttr){
+        *address = serializeFloat(unwrapAttr<float>(attributeValue.value()));
+        return true;
+      }else if (isVec3Attr){
+        *address = serializeVec(unwrapAttr<glm::vec3>(attributeValue.value()));
+        return true;
+      }else if (isVec4Attr){
+        *address = serializeVec(unwrapAttr<glm::vec4>(attributeValue.value()));
+        return true;
+      }else{
+        modassert(false, "invalid type strForcedValue");
+      }
     }
+
     return false;
   }
   
@@ -795,8 +806,9 @@ bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   AutoSerializeTextureLoaderManual* textureLoaderManual = std::get_if<AutoSerializeTextureLoaderManual>(&value);
   if (textureLoaderManual != NULL){
     TextureLoadingData* address = (TextureLoadingData*)(((char*)structAddress) + textureLoaderManual -> structOffset);
-    if (attributes.stringAttributes.find(textureLoaderManual -> field) != attributes.stringAttributes.end()){
-      std::string textureToLoad = attributes.stringAttributes.at(textureLoaderManual -> field);
+    if (attributeValue.has_value()){
+      std::string textureToLoad = unwrapAttr<std::string>(attributeValue.value());
+
       //std::cout << "attr set load texture manual: tex to load: " << textureToLoad << std::endl;
       //std::cout << "texture string: " << _textureLoading -> textureString << std::endl;
       //std::cout << "isloaded: " << _textureLoading -> isLoaded << std::endl;
@@ -836,9 +848,9 @@ bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   if (vec2Value != NULL){
     glm::vec2* address = (glm::vec2*)(((char*)structAddress) + vec2Value -> structOffset);
     bool* hasValueAddress = (!vec2Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec2Value -> structOffsetFiller.value());
-    if (attributes.stringAttributes.find(vec2Value -> field) != attributes.stringAttributes.end()){
-      auto value = attributes.stringAttributes.at(vec2Value -> field);
-      *address = parseVec2(value);
+    if (attributeValue.has_value()){
+      std::string stringValue = unwrapAttr<std::string>(attributeValue.value());
+      *address = parseVec2(stringValue);
       if (hasValueAddress != NULL){
         *hasValueAddress = true;
       }
@@ -893,8 +905,8 @@ bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   AutoSerializeEnums* enumsValue = std::get_if<AutoSerializeEnums>(&value);
   if (enumsValue != NULL){
     int* address = (int*)(((char*)structAddress) + enumsValue -> structOffset);
-    if (attributes.stringAttributes.find(enumsValue -> field) != attributes.stringAttributes.end()){
-      auto value = attributes.stringAttributes.at(enumsValue -> field);
+    if (attributeValue.has_value()){
+      std::string value = unwrapAttr<std::string>(attributeValue.value());
       bool foundEnum = false;
       for (int i = 0; i < enumsValue -> enumStrings.size(); i++){
         if (enumsValue -> enumStrings.at(i) == value){
