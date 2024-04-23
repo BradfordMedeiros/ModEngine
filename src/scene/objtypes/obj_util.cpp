@@ -882,8 +882,9 @@ bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   AutoSerializeRotation* rotValue = std::get_if<AutoSerializeRotation>(&value);
   if (rotValue != NULL){
     glm::quat* address = (glm::quat*)(((char*)structAddress) + rotValue -> structOffset);
-    if (attributes.vecAttr.vec4.find(rotValue -> field) != attributes.vecAttr.vec4.end()){
-      *address = parseQuat(attributes.vecAttr.vec4.at(rotValue -> field));
+    if (attributeValue.has_value()){
+      glm::vec4 vec4Value = unwrapAttr<glm::vec4>(rotValue -> field);
+      *address = parseQuat(vec4Value);
       return true;
     } 
     return false;
