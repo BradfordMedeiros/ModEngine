@@ -922,38 +922,33 @@ bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   }
 
   AutoSerializeCustom* customValue = std::get_if<AutoSerializeCustom>(&value);
-  if (customValue != NULL){
+  if (customValue != NULL && attributeValue.has_value()){
     int* address = (int*)(((char*)structAddress) + customValue -> structOffset);
     if (customValue -> fieldType == ATTRIBUTE_VEC3){
-      if (attributes.vecAttr.vec3.find(customValue -> field) == attributes.vecAttr.vec3.end()){
-        customValue -> setAttributes(address, NULL);
-      }else{
-        customValue -> setAttributes(address, &(attributes.vecAttr.vec3.at(customValue -> field)));
+      auto vec3Type = std::get_if<glm::vec3>(&attributeValue.value());
+      if (vec3Type){
+        customValue -> setAttributes(address, vec3Type);
+        return true;
       }
-      return true;
     }else if (customValue -> fieldType == ATTRIBUTE_VEC4){
-      if (attributes.vecAttr.vec4.find(customValue -> field) == attributes.vecAttr.vec4.end()){
-        customValue -> setAttributes(address, NULL);
-      }else{
-        customValue -> setAttributes(address, &(attributes.vecAttr.vec4.at(customValue -> field)));
+      auto vec4Type = std::get_if<glm::vec4>(&attributeValue.value());
+      if (vec4Type){
+        customValue -> setAttributes(address, vec4Type);
+        return true;
       }
-      return true;
     }else if (customValue -> fieldType == ATTRIBUTE_STRING){
-      if (attributes.stringAttributes.find(customValue -> field) == attributes.stringAttributes.end()){
-        customValue -> setAttributes(address, NULL);
-      }else{
-        customValue -> setAttributes(address, &(attributes.stringAttributes.at(customValue -> field)));
+      auto strType = std::get_if<std::string>(&attributeValue.value());
+      if (strType){
+        customValue -> setAttributes(address, strType);
+        return true;
       }
-      return true;
     }else if (customValue -> fieldType == ATTRIBUTE_FLOAT){
-      if (attributes.numAttributes.find(customValue -> field) == attributes.numAttributes.end()){
-        customValue -> setAttributes(address, NULL);
-      }else{
-        // why is num attributes a double?  Should unify
-        float value = static_cast<float>(attributes.numAttributes.at(customValue -> field));
+      auto floatType = std::get_if<float>(&attributeValue.value());
+      if (floatType){
+        float value = static_cast<float>(*floatType);
         customValue -> setAttributes(address, &value);
+        return true;
       }
-      return true;
     }else{
       modassert(false, "custom value -> invalid field type");
     }
