@@ -1136,17 +1136,6 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
 }
 
 
-void setObjectAttribute(World& world, objid id, const char* field, AttributeValue value){
-  modassert(false, "set object attribute not yet implemented");
-  // get if the attribute ptr exists
-  // then get if the object attribute exists
-  // then the remaining
-
-  // then check the types
-
-  // then set flags to determine if anything needs to be done after this
-
-}
 
 // TODO -> eliminate all the strings in the fields and use some sort of symbol system
 void applyAttributeDelta(World& world, objid id, std::string field, AttributeValue delta){
@@ -1193,6 +1182,53 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool veloci
     };
     updateRigidBodyOpts(world.physicsEnvironment, body, opts);
   }
+}
+
+
+void setSingleGameObjectAttr(World& world, objid id, const char* field, AttributeValue value){
+  auto loadMeshObject = [&world, id](MeshData& meshdata) -> Mesh {
+    return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {
+      return loadTextureWorld(world, texture, id);
+    });    
+  };
+
+  ObjectSetAttribUtil util {
+    .setEmitterEnabled = [&world, id](bool enabled) -> void {
+      setEmitterEnabled(world.emitters, id, enabled);
+    },
+    .ensureTextureLoaded = [&world, id](std::string texturepath) -> Texture {
+      return loadTextureWorld(world, texturepath, id);
+    },
+    .releaseTexture = [&world, id](int textureId){
+      freeTextureRefsIdByOwner(world, id, textureId);
+    },
+    .loadMesh = loadMeshObject,
+    .unloadMesh = freeMesh,
+    .pathForModLayer = world.interface.modlayerPath,
+  };
+
+  bool setCoreAttr = false;
+  bool setObjectAttr = false;
+
+  GameObject& gameobj = getGameObject(world, id);
+  setCoreAttr = setAttribute(gameobj, field, value, util);
+
+  if (!setCoreAttr){
+    modassert(false, "can only set for core attributes for now");
+    setObjectAttr = setObjectAttribute(world.objectMapping, id, field, value, util);
+  }
+
+  if (!setCoreAttr && !setObjectAttr){
+    modassert(false, "can only set for core or object attribute times for now");
+  }
+
+  // get if the attribute ptr exists
+  // then get if the object attribute exists
+  // then the remaining
+
+  // then check the types
+
+  // then set flags to determine if anything needs to be done after this
 }
 
 void setAttributes(World& world, objid id, GameobjAttributes& attr){

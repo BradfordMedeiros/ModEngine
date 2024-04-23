@@ -324,6 +324,10 @@ void setGameObjectAttr(int32_t id, GameobjAttributes& attr){
   setAttributes(world, id, attr);
 }
 
+void setSingleGameObjectAttr(int32_t id, const char* field, AttributeValue value){
+  setSingleGameObjectAttr(world, id, field, value);
+}
+
 
 ObjectAttrHandle getAttrHandle(objid id){
   return ObjectAttrHandle {
@@ -713,7 +717,7 @@ void tickRecordings(float time){
       recordingsToRemove.push_back(id);
     }
     for (auto &property: interpolatedProperties){
-      setObjectAttribute(world, id, property.propertyName.c_str(), property.value);
+      setSingleGameObjectAttr(world, id, property.propertyName.c_str(), property.value);
     }
   }
   for (auto id : recordingsToRemove){

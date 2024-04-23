@@ -415,6 +415,13 @@ void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAtt
   autoserializerSetAttrWithTextureLoading((char*)&gameobj, gameobjSerializer, attr, util);
   modassert(attr.stringAttributes.find("script") == attr.stringAttributes.end(), "setting script attr not yet supported");
 }
+bool setAttribute(GameObject& gameobj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+  auto attr = gameobjAttrFromValue(field, value);
+  autoserializerSetAttrWithTextureLoading((char*)&gameobj, gameobjSerializer, attr, util);
+  modassert(attr.stringAttributes.find("script") == attr.stringAttributes.end(), "setting script attr not yet supported");
+
+  return true; 
+}
 
 bool isReservedAttribute(std::string field, std::set<std::string>& autoserializerFields){
   return autoserializerFields.count(field) > 0;

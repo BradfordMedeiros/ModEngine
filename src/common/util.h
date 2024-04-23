@@ -216,12 +216,21 @@ struct vectorAttributes {
   std::map<std::string, glm::vec3> vec3;
   std::map<std::string, glm::vec4> vec4;
 };
+
+struct GameobjAttribute {
+  std::string field;
+  AttributeValue attributeValue;
+};
+struct GameobjAttributes2 {
+  std::vector<GameobjAttribute> attributes;
+};
+
 struct GameobjAttributes {
   std::map<std::string, std::string> stringAttributes;
   std::map<std::string, float> numAttributes;
   vectorAttributes vecAttr;
 };
-GameobjAttributes gameobjAttrFromValue(std::string& field, AttributeValue value);
+GameobjAttributes gameobjAttrFromValue(std::string field, AttributeValue value);
 
 std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key);
 std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key);

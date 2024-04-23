@@ -45,6 +45,7 @@ struct CustomApiBindings {
   std::optional<std::string> (*getGameObjNameForId)(int32_t id);
   GameobjAttributes (*getGameObjectAttr)(int32_t id);
   void (*setGameObjectAttr)(int32_t id, GameobjAttributes& attr);
+  void (*setSingleGameObjectAttr)(int32_t id, const char* field, AttributeValue value);
   glm::vec3 (*getGameObjectPos)(int32_t index, bool world);
   void (*setGameObjectPosition)(int32_t index, glm::vec3 pos, bool world);
   glm::quat (*getGameObjectRotation)(int32_t index, bool world);

@@ -82,7 +82,7 @@ std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serial
 GameobjAttributes objectAttributes(World& world, objid id);
 
 std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, const char* field);
-void setObjectAttribute(World& world, objid id, const char* field, AttributeValue value);
+void setSingleGameObjectAttr(World& world, objid id, const char* field, AttributeValue value);
 
 void setAttributes(World& world, objid id, GameobjAttributes& attr);
 

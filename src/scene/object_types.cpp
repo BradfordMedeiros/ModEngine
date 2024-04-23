@@ -464,6 +464,10 @@ bool setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
   assert(false);
   return false;
 }
+
+bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+  return false;
+}
   
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName){
   GameObjectObj objectToSerialize = mapping.at(id);

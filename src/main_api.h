@@ -96,6 +96,7 @@ std::optional<std::string> getGameObjectName(int32_t index);
 GameobjAttributes getGameObjectAttr(int32_t id);
 std::optional<AttributeValuePtr> getObjectAttributePtr(int32_t id, const char* field);
 void setGameObjectAttr(int32_t id, GameobjAttributes& attr);
+void setSingleGameObjectAttr(int32_t id, const char* field, AttributeValue value);
 
 struct ObjectAttrHandle { 
   GameobjAttributes attr;

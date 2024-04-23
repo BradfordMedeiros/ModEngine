@@ -191,6 +191,7 @@ void objectAttributes(GameObjectObj& toRender, GameobjAttributes& _attributes);
 std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& toRender, const char* field);
 
 bool setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util);
 
 template<typename T>
 std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){   // putting templates have to be in header?

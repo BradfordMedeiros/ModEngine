@@ -778,7 +778,7 @@ void assertTodo(std::string message){
   assertWithBacktrace(false, "TODO hit: " + message);
 }
 
-GameobjAttributes gameobjAttrFromValue(std::string& field, AttributeValue value){
+GameobjAttributes gameobjAttrFromValue(std::string field, AttributeValue value){
   GameobjAttributes attr {
     .stringAttributes = {},
     .numAttributes = {},
