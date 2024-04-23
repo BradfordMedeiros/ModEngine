@@ -1,18 +1,5 @@
 #include "./obj_util.h"
 
-void attrSet(GameobjAttributes& attr, bool* _value, const char* onString, const char* offString, const char* field, bool strict){
-  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
-     auto value = attr.stringAttributes.at(field);
-     if (value == onString){
-        *_value = true;
-     }else if (value == offString){
-        *_value = false;
-     }else if (strict){
-        modassert(false, "invalid on/off string");
-     }
-  }
-}
-
 void attrSet(GameobjAttributes& attr, std::string* value, const char* field){
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
     *value = attr.stringAttributes.at(field);
@@ -89,22 +76,6 @@ void attrSet(GameobjAttributes& attr, int* _value, int defaultValue, const char*
   }
 }
 
-void attrSet(GameobjAttributes& attr, glm::vec3* _value, bool* _hasValue, const char* field){
-  if (attr.vecAttr.vec3.find(field) != attr.vecAttr.vec3.end()){
-    *_value = attr.vecAttr.vec3.at(field);
-    if (_hasValue != NULL){
-      *_hasValue = true;
-    }
-  }
-}
-
-void attrSet(GameobjAttributes& attr, glm::vec3* _value, glm::vec3 defaultValue, const char* field){
-  if (attr.vecAttr.vec3.find(field) != attr.vecAttr.vec3.end()){
-    *_value = attr.vecAttr.vec3.at(field);
-  }else{
-    *_value = defaultValue;
-  }
-}
 void attrSet(GameobjAttributes& attr, glm::vec3* _value, bool* _hasValue, glm::vec3 defaultValue, const char* field){
   if (attr.vecAttr.vec3.find(field) != attr.vecAttr.vec3.end()){
     *_value = attr.vecAttr.vec3.at(field);
@@ -134,24 +105,6 @@ void attrSet(GameobjAttributes& attr, glm::vec2* _value, bool* _hasValue, glm::v
   }  
 }
 
-
-void attrSet(GameobjAttributes& attr, glm::vec4* _value, bool* _hasValue, const char* field){
-  if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
-    *_value = attr.vecAttr.vec4.at(field);
-    if (_hasValue != NULL){
-      *_hasValue = true;
-    }
-  }
-}
-
-void attrSet(GameobjAttributes& attr, glm::vec4* _value, glm::vec4 defaultValue, const char* field){
-  if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
-    *_value = attr.vecAttr.vec4.at(field);
-  }else{
-    *_value = defaultValue;
-  }
-}
-
 void attrSet(GameobjAttributes& attr, glm::vec4* _value, bool* _hasValue, glm::vec4 defaultValue, const char* field){
   if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
     *_value = attr.vecAttr.vec4.at(field);
@@ -172,11 +125,6 @@ void attrSet(GameobjAttributes& attr, glm::quat* _value, glm::quat defaultValue,
   }else{
     *_value = defaultValue;
   }  
-}
-void attrSet(GameobjAttributes& attr, glm::quat* _value, const char* field){
-  if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
-    *_value = parseQuat(attr.vecAttr.vec4.at(field));
-  } 
 }
 
 void attrSet(GameobjAttributes& attr, bool* _value, const char* onString, const char* offString, bool defaultValue, const char* field, bool strict){
@@ -840,7 +788,16 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   AutoSerializeBool* boolValue = std::get_if<AutoSerializeBool>(&value);
   if (boolValue != NULL){
     bool* address = (bool*)(((char*)structAddress) + boolValue -> structOffset);
-    attrSet(attributes, address, boolValue -> onString, boolValue -> offString, boolValue -> field, true);
+    if (attributes.stringAttributes.find(boolValue -> field) != attributes.stringAttributes.end()){
+       auto value = attributes.stringAttributes.at(boolValue -> field);
+       if (value == boolValue -> onString){
+          *address = true;
+       }else if (value == boolValue -> offString){
+          *address = false;
+       }else {
+          modassert(false, "invalid on/off string");
+       }
+    }
     return;
   }
 
@@ -912,7 +869,12 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   if (vec3Value != NULL){
     glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);
     bool* hasValueAddress = (!vec3Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec3Value -> structOffsetFiller.value());
-    attrSet(attributes, address, hasValueAddress, vec3Value -> field);
+    if (attributes.vecAttr.vec3.find(vec3Value -> field) != attributes.vecAttr.vec3.end()){
+      *address = attributes.vecAttr.vec3.at(vec3Value -> field);
+      if (hasValueAddress != NULL){
+        *hasValueAddress = true;
+      }
+    }
     return;
   }
 
@@ -920,14 +882,21 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   if (vec4Value != NULL){
     glm::vec4* address = (glm::vec4*)(((char*)structAddress) + vec4Value -> structOffset);
     bool* hasValueAddress = (!vec4Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec4Value -> structOffsetFiller.value());
-    attrSet(attributes, address, hasValueAddress, vec4Value -> field);
+    if (attributes.vecAttr.vec4.find(vec4Value -> field) != attributes.vecAttr.vec4.end()){
+      *address = attributes.vecAttr.vec4.at(vec4Value -> field);
+      if (hasValueAddress != NULL){
+        *hasValueAddress = true;
+      }
+    }
     return;
   }
 
   AutoSerializeRotation* rotValue = std::get_if<AutoSerializeRotation>(&value);
   if (rotValue != NULL){
     glm::quat* address = (glm::quat*)(((char*)structAddress) + rotValue -> structOffset);
-    attrSet(attributes, address, rotValue -> field);
+    if (attributes.vecAttr.vec4.find(rotValue -> field) != attributes.vecAttr.vec4.end()){
+      *address = parseQuat(attributes.vecAttr.vec4.at(rotValue -> field));
+    } 
     return;
   }
 
