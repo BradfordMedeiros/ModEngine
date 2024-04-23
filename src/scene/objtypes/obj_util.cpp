@@ -77,6 +77,7 @@ void attrSet(GameobjAttributes& attr, unsigned int* value, const char* field){
     *value = static_cast<unsigned int>(attr.numAttributes.at(field));
   }
 }
+
 void attrSet(GameobjAttributes& attr, unsigned int* value, unsigned int defaultValue, const char* field){
   if (attr.numAttributes.find(field) != attr.numAttributes.end()){
     *value = static_cast<unsigned int>(attr.numAttributes.at(field));
@@ -84,8 +85,6 @@ void attrSet(GameobjAttributes& attr, unsigned int* value, unsigned int defaultV
     *value = defaultValue;
   }
 }
-
-
 
 void attrSet(GameobjAttributes& attr, int* _value, const char* field){
   if (attr.numAttributes.find(field) != attr.numAttributes.end()){
@@ -294,26 +293,25 @@ std::string enumStringFromEnumValue(int value, std::vector<int>& enums, std::vec
   return "";
 }
 
-void autoserializeHandleTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, std::function<Texture(std::string)> ensureTextureLoaded, std::function<void(int)> releaseTexture){
-  for (auto &value : values){
-    AutoSerializeTextureLoaderManual* textureLoaderManual = std::get_if<AutoSerializeTextureLoaderManual>(&value);
-    if (textureLoaderManual != NULL){
-      TextureLoadingData* _textureLoading = (TextureLoadingData*)(((char*)structAddress) + textureLoaderManual -> structOffset);
-      if (_textureLoading -> isLoaded){
-        // do nothing
-      }else if (_textureLoading -> textureString != ""){
-        auto texture = ensureTextureLoaded(_textureLoading -> textureString);
-        _textureLoading -> textureId = texture.textureId;
-        _textureLoading -> isLoaded = true;
-      }else{
-        _textureLoading -> textureId = -1;
-        _textureLoading -> isLoaded = true;
-      }
-      
-      //std::cout << "texture to load: " << _textureLoading -> textureString << " isloaded: " << _textureLoading -> isLoaded << std::endl;
+
+void autoserializeHandleTextureLoading(char* structAddress, AutoSerialize& value, std::function<Texture(std::string)> ensureTextureLoaded, std::function<void(int)> releaseTexture){
+  AutoSerializeTextureLoaderManual* textureLoaderManual = std::get_if<AutoSerializeTextureLoaderManual>(&value);
+  if (textureLoaderManual != NULL){
+    TextureLoadingData* _textureLoading = (TextureLoadingData*)(((char*)structAddress) + textureLoaderManual -> structOffset);
+    if (_textureLoading -> isLoaded){
+      // do nothing
+    }else if (_textureLoading -> textureString != ""){
+      auto texture = ensureTextureLoaded(_textureLoading -> textureString);
+      _textureLoading -> textureId = texture.textureId;
+      _textureLoading -> isLoaded = true;
+    }else{
+      _textureLoading -> textureId = -1;
+      _textureLoading -> isLoaded = true;
     }
+    //std::cout << "texture to load: " << _textureLoading -> textureString << " isloaded: " << _textureLoading -> isLoaded << std::endl;
   }
 }
+
 
 void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttributes& attr){
   AutoSerializeBool* boolValue = std::get_if<AutoSerializeBool>(&value);
@@ -453,7 +451,9 @@ void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values
 }
 void createAutoSerializeWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util){
   createAutoSerialize(structAddress, values, attr);
-  autoserializeHandleTextureLoading(structAddress, values, util.ensureTextureLoaded, util.releaseTexture);
+  for (auto &value : values){
+    autoserializeHandleTextureLoading(structAddress, value, util.ensureTextureLoaded, util.releaseTexture);
+  }
 }
 
 void autoserializerSerialize(char* structAddress, AutoSerialize& value, std::vector<std::pair<std::string, std::string>>& _pairs){
@@ -993,15 +993,19 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   modassert(false, "autoserialize type not found");
 }
 
-void autoserializerSetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes){
+void autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   for (auto &value : values){
     autoserializerSetAttr(structAddress, value, attributes);
   }
+  for (auto &value : values){
+    autoserializeHandleTextureLoading(structAddress, value, util.ensureTextureLoaded, util.releaseTexture);
+  }
 }
 
-void autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttr(structAddress, values, attributes);
-  autoserializeHandleTextureLoading(structAddress, values, util.ensureTextureLoaded, util.releaseTexture);
+bool autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+  auto attr = gameobjAttrFromValue(field, value);
+  autoserializerSetAttrWithTextureLoading(structAddress, values, attr, util);
+  return true;
 }
 
 std::string serializerName(AutoSerialize& serializer){
