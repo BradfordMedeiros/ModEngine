@@ -128,21 +128,6 @@ void attrSet(GameobjAttributes& attr, bool* _value, const char* onString, const 
   }
 }
 
-void attrSetLoadTextureManual(GameobjAttributes& attr, TextureLoadingData* _textureLoading, const char* field){
-  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
-    std::string textureToLoad = attr.stringAttributes.at(field);
-    //std::cout << "attr set load texture manual: tex to load: " << textureToLoad << std::endl;
-    //std::cout << "texture string: " << _textureLoading -> textureString << std::endl;
-    //std::cout << "isloaded: " << _textureLoading -> isLoaded << std::endl;
-
-    if (textureToLoad != _textureLoading -> textureString){
-      _textureLoading -> isLoaded = false;
-      _textureLoading -> textureId = -1;
-      _textureLoading -> textureString = textureToLoad;
-    }
-  }
-}
-
 void attrSetLoadTextureManual(GameobjAttributes& attr, TextureLoadingData* _textureLoading, std::string defaultTexture, const char* field){
   std::string textureToLoad = defaultTexture;
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
@@ -819,7 +804,17 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   AutoSerializeTextureLoaderManual* textureLoaderManual = std::get_if<AutoSerializeTextureLoaderManual>(&value);
   if (textureLoaderManual != NULL){
     TextureLoadingData* address = (TextureLoadingData*)(((char*)structAddress) + textureLoaderManual -> structOffset);
-    attrSetLoadTextureManual(attributes, address, textureLoaderManual -> field);
+    if (attributes.stringAttributes.find(textureLoaderManual -> field) != attributes.stringAttributes.end()){
+      std::string textureToLoad = attributes.stringAttributes.at(textureLoaderManual -> field);
+      //std::cout << "attr set load texture manual: tex to load: " << textureToLoad << std::endl;
+      //std::cout << "texture string: " << _textureLoading -> textureString << std::endl;
+      //std::cout << "isloaded: " << _textureLoading -> isLoaded << std::endl;
+      if (textureToLoad != address -> textureString){
+        address -> isLoaded = false;
+        address -> textureId = -1;
+        address -> textureString = textureToLoad;
+      }
+    }
     return;
   }
 
