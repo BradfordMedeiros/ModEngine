@@ -161,7 +161,7 @@ std::optional<AutoSerialize*> getAutoserializeByField(std::vector<AutoSerialize>
 std::optional<AttributeValuePtr> autoserializerGetAttrPtr(char* structAddress, AutoSerialize& value);
 std::optional<AttributeValuePtr> getAttributePtr(char* structAddress, std::vector<AutoSerialize>& autoserializerConfig, const char* field);
 void autoserializerGetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& _attributes);
-void autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+bool autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
 bool autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, const char* field, AttributeValue value, ObjectSetAttribUtil& util);
 std::string serializerName(AutoSerialize& serializer);
 std::optional<AutoSerialize> serializerByName(std::vector<AutoSerialize>& serializer, std::string& name);
