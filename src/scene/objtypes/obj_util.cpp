@@ -732,10 +732,7 @@ void autoserializerGetAttr(char* structAddress, std::vector<AutoSerialize>& valu
 }
 
 
-bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAttributes& attributes){
-  auto fieldName = serializerName(value);
-  auto attributeValue = getAttributeValue(attributes, fieldName.c_str());
-
+bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, const char* fieldName, std::optional<AttributeValue> attributeValue){
   AutoSerializeBool* boolValue = std::get_if<AutoSerializeBool>(&value);
   if (boolValue != NULL){
     bool* address = (bool*)(((char*)structAddress) + boolValue -> structOffset);
@@ -968,7 +965,9 @@ bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
 bool autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   bool setAny = false;
   for (auto &value : values){
-    bool setAttr = autoserializerSetAttr(structAddress, value, attributes);
+    auto fieldName = serializerName(value);
+    auto attributeValue = getAttributeValue(attributes, fieldName.c_str());
+    bool setAttr = autoserializerSetAttr(structAddress, value, fieldName.c_str(), attributeValue);
     if (setAttr){
       setAny = true;
     }
