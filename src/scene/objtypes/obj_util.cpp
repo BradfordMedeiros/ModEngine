@@ -5,17 +5,6 @@ void attrSet(GameobjAttributes& attr, std::string* value, const char* field){
     *value = attr.stringAttributes.at(field);
   }
 }
-void attrForceSet(GameobjAttributes& attr, std::string* value, const char* field){
-  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
-    *value = attr.stringAttributes.at(field);
-  }else if (attr.numAttributes.find(field) != attr.numAttributes.end()){
-    *value = serializeFloat(attr.numAttributes.at(field));
-  }else if (attr.vecAttr.vec3.find(field) != attr.vecAttr.vec3.end()){
-    *value = serializeVec(attr.vecAttr.vec3.at(field));
-  }else if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
-    *value = serializeVec(attr.vecAttr.vec4.at(field));
-  }
-}
 
 void attrSet(GameobjAttributes& attr, std::string* value, std::string defaultValue, const char* field){
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
@@ -54,11 +43,6 @@ void attrSet(GameobjAttributes& attr, float* _value, bool* _hasValue, float defa
   }
 }
 
-void attrSet(GameobjAttributes& attr, unsigned int* value, const char* field){
-  if (attr.numAttributes.find(field) != attr.numAttributes.end()){
-    *value = static_cast<unsigned int>(attr.numAttributes.at(field));
-  }
-}
 
 void attrSet(GameobjAttributes& attr, unsigned int* value, unsigned int defaultValue, const char* field){
   if (attr.numAttributes.find(field) != attr.numAttributes.end()){
@@ -811,7 +795,15 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   AutoSerializeForceString* strForcedValue = std::get_if<AutoSerializeForceString>(&value);
   if (strForcedValue != NULL){
     std::string* address = (std::string*)(((char*)structAddress) + strForcedValue -> structOffset);
-    attrForceSet(attributes, address, strForcedValue -> field);
+    if (attributes.stringAttributes.find(strForcedValue -> field) != attributes.stringAttributes.end()){
+      *address = attributes.stringAttributes.at(strForcedValue -> field);
+    }else if (attributes.numAttributes.find(strForcedValue -> field) != attributes.numAttributes.end()){
+      *address = serializeFloat(attributes.numAttributes.at(strForcedValue -> field));
+    }else if (attributes.vecAttr.vec3.find(strForcedValue -> field) != attributes.vecAttr.vec3.end()){
+      *address = serializeVec(attributes.vecAttr.vec3.at(strForcedValue -> field));
+    }else if (attributes.vecAttr.vec4.find(strForcedValue -> field) != attributes.vecAttr.vec4.end()){
+      *address = serializeVec(attributes.vecAttr.vec4.at(strForcedValue -> field));
+    }
     return;
   }
   
@@ -843,7 +835,9 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   AutoSerializeUInt* uintValue = std::get_if<AutoSerializeUInt>(&value);
   if (uintValue != NULL){
     uint* address = (uint*)(((char*)structAddress) + uintValue -> structOffset);
-    attrSet(attributes, address, uintValue -> field);
+    if (attributes.numAttributes.find(uintValue -> field) != attributes.numAttributes.end()){
+      *address = static_cast<unsigned int>(attributes.numAttributes.at(uintValue -> field));
+    }
     return;
   }
 
