@@ -141,6 +141,7 @@ struct ObjectType {
   std::function<void(GameObjectObj&, GameobjAttributes&)> objectAttributes;
   std::function<std::optional<AttributeValuePtr>(GameObjectObj&, const char* field)> objectAttribute;
   std::function<bool(GameObjectObj&, GameobjAttributes&, ObjectSetAttribUtil& util)> setAttributes;
+  std::function<bool(GameObjectObj&, const char* field, AttributeValue value, ObjectSetAttribUtil& util)> setAttribute;
   std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&, ObjectSerializeUtil&)> serialize;
   std::function<void(GameObjectObj&, ObjectRemoveUtil&)> removeObject;
 };
