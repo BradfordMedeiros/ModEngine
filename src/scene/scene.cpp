@@ -1214,7 +1214,6 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
   setCoreAttr = setAttribute(gameobj, field, value, util);
 
   if (!setCoreAttr){
-    modassert(false, "can only set for core attributes for now");
     setObjectAttr = setObjectAttribute(world.objectMapping, id, field, value, util);
   }
 

@@ -110,7 +110,7 @@ std::vector<ObjectType> objTypes = {
     .objectAttributes = convertElementValue<GameObjectCamera>(cameraObjAttr),
     .objectAttribute = convertObjectAttribute<GameObjectCamera>(getCameraAttribute),
     .setAttributes = convertElementSetValue<GameObjectCamera>(setCameraAttributes),
-    .setAttribute = nothingSetAttribute,
+    .setAttribute = convertElementSetAttrValue<GameObjectCamera>(setCameraAttribute),
     .serialize = convertSerialize<GameObjectCamera>(serializeCamera),
     .removeObject = removeDoNothing,
   },
@@ -121,7 +121,7 @@ std::vector<ObjectType> objTypes = {
     .objectAttributes = convertElementValue<GameObjectPortal>(portalObjAttr),
     .objectAttribute = convertObjectAttribute<GameObjectPortal>(getPortalAttribute),
     .setAttributes = convertElementSetValue<GameObjectPortal>(setPortalAttributes),
-    .setAttribute = nothingSetAttribute,
+    .setAttribute = convertElementSetAttrValue<GameObjectPortal>(setPortalAttribute),
     .serialize = convertSerialize<GameObjectPortal>(serializePortal),
     .removeObject = removeDoNothing,
   },
@@ -132,7 +132,7 @@ std::vector<ObjectType> objTypes = {
     .objectAttributes = convertElementValue<GameObjectLight>(lightObjAttr),
     .objectAttribute = convertObjectAttribute<GameObjectLight>(getLightAttribute),
     .setAttributes = convertElementSetValue<GameObjectLight>(setLightAttributes),
-    .setAttribute = nothingSetAttribute,
+    .setAttribute = convertElementSetAttrValue<GameObjectLight>(setLightAttribute),
     .serialize = convertSerialize<GameObjectLight>(serializeLight),
     .removeObject = removeDoNothing,
   },
@@ -143,7 +143,7 @@ std::vector<ObjectType> objTypes = {
     .objectAttributes = convertElementValue<GameObjectSound>(soundObjAttr),
     .objectAttribute = convertObjectAttribute<GameObjectSound>(getSoundAttribute),
     .setAttributes = convertElementSetValue<GameObjectSound>(setSoundAttributes),
-    .setAttribute = nothingSetAttribute,
+    .setAttribute = convertElementSetAttrValue<GameObjectSound>(setSoundAttribute),
     .serialize = convertSerialize<GameObjectSound>(serializeSound),
     .removeObject = convertRemove<GameObjectSound>(removeSound),
   },
@@ -154,7 +154,7 @@ std::vector<ObjectType> objTypes = {
     .objectAttributes = convertElementValue<GameObjectUIText>(textObjAttributes),
     .objectAttribute = convertObjectAttribute<GameObjectUIText>(getTextAttribute),
     .setAttributes = convertElementSetValue<GameObjectUIText>(setUITextAttributes),
-    .setAttribute = nothingSetAttribute,
+    .setAttribute = convertElementSetAttrValue<GameObjectUIText>(setTextAttribute),
     .serialize = convertSerialize<GameObjectUIText>(serializeText),
     .removeObject = removeDoNothing,
   },
@@ -165,7 +165,7 @@ std::vector<ObjectType> objTypes = {
     .objectAttributes = convertElementValue<GameObjectHeightmap>(heightmapObjAttr),
     .objectAttribute = convertObjectAttribute<GameObjectHeightmap>(getHeightmapAttribute),
     .setAttributes = convertElementSetValue<GameObjectHeightmap>(setHeightmapAttributes),
-    .setAttribute = nothingSetAttribute,
+    .setAttribute = convertElementSetAttrValue<GameObjectHeightmap>(setHeightmapAttribute),
     .serialize = convertSerialize<GameObjectHeightmap>(serializeHeightmap),
     .removeObject = convertRemove<GameObjectHeightmap>(removeHeightmap),
   },
@@ -187,7 +187,7 @@ std::vector<ObjectType> objTypes = {
     .objectAttributes = convertElementValue<GameObjectEmitter>(emitterObjAttr),
     .objectAttribute = convertObjectAttribute<GameObjectEmitter>(getEmitterAttribute),
     .setAttributes = convertElementSetValue<GameObjectEmitter>(setEmitterAttributes),
-    .setAttribute = nothingSetAttribute,
+    .setAttribute = convertElementSetAttrValue<GameObjectEmitter>(setEmitterAttribute),
     .serialize = convertSerialize<GameObjectEmitter>(serializeEmitter),
     .removeObject = convertRemove<GameObjectEmitter>(removeEmitterObj),
   },
@@ -220,7 +220,7 @@ std::vector<ObjectType> objTypes = {
     .objectAttributes = convertElementValue<GameObjectPrefab>(prefabObjAttr),
     .objectAttribute = convertObjectAttribute<GameObjectPrefab>(getPrefabAttribute),
     .setAttributes = convertElementSetValue<GameObjectPrefab>(setPrefabAttributes),
-    .setAttribute = nothingSetAttribute,
+    .setAttribute = convertElementSetAttrValue<GameObjectPrefab>(setPrefabAttribute),
     .serialize = convertSerialize<GameObjectPrefab>(serializePrefabObj),
     .removeObject  = convertRemove<GameObjectPrefab>(removePrefabObj),
   },
@@ -491,6 +491,15 @@ bool setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
 }
 
 bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+  GameObjectObj& toRender = mapping.at(id);
+  auto variantIndex = toRender.index();
+  for (auto &objType : objTypes){
+    if (variantIndex == objType.variantType){
+      return objType.setAttribute(toRender, field, value, util);
+    }
+  }
+  std::cout << "obj type not supported" << std::endl;
+  assert(false);
   return false;
 }
   
@@ -505,7 +514,6 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
       return objType.serialize(objectToSerialize, serializeUtil);
     }
   }
-
   std::cout << "obj type not supported" << std::endl;
   assert(false);  
   return {};

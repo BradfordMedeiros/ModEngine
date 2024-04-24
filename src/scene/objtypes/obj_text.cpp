@@ -117,3 +117,7 @@ std::vector<std::pair<std::string, std::string>> serializeText(GameObjectUIText&
 std::optional<AttributeValuePtr> getTextAttribute(GameObjectUIText& obj, const char* field){
   return getAttributePtr((char*)&obj, textAutoserializer, field);
 }
+
+bool setTextAttribute(GameObjectUIText& obj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+  return autoserializerSetAttrWithTextureLoading((char*)&obj, textAutoserializer, field, value, util);
+}

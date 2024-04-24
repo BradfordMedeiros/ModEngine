@@ -90,6 +90,5 @@ bool setMeshAttributes(GameObjectMesh& meshObj, GameobjAttributes& attributes, O
 }
 
 bool setMeshAttribute(GameObjectMesh& meshObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
-  modassert(false, "set mesh attr not yet implemented");
-  return false;
+  return autoserializerSetAttrWithTextureLoading((char*)&meshObj, meshAutoserializer, field, value, util);
 }

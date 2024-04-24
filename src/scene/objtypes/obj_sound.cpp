@@ -83,3 +83,7 @@ bool setSoundAttributes(GameObjectSound& soundObj, GameobjAttributes& attributes
 std::optional<AttributeValuePtr> getSoundAttribute(GameObjectSound& obj, const char* field){
   return getAttributePtr((char*)&obj, soundAutoserializer, field);
 }
+
+bool setSoundAttribute(GameObjectSound& obj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+  return autoserializerSetAttrWithTextureLoading((char*)&obj, soundAutoserializer, field, value, util);
+}

@@ -49,6 +49,11 @@ bool setPrefabAttributes(GameObjectPrefab& prefabObj, GameobjAttributes& attribu
 	return false;
 }
 
+bool setPrefabAttribute(GameObjectPrefab& obj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+  return autoserializerSetAttrWithTextureLoading((char*)&obj, prefabAutoserializer, field, value, util);
+}
+
+
 std::optional<AttributeValuePtr> getPrefabAttribute(GameObjectPrefab& obj, const char* field){
   //modassert(false, "getPrefabAttribute not yet implemented");
   return std::nullopt;

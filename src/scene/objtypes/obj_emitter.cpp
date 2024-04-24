@@ -252,6 +252,12 @@ bool setEmitterAttributes(GameObjectEmitter& emitterObj, GameobjAttributes& attr
   return false;
 }
 
+bool setEmitterAttribute(GameObjectEmitter& emitterObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+  bool setAnyValue = autoserializerSetAttrWithTextureLoading((char*)&emitterObj, emitterAutoserializer, field, value, util);
+  util.setEmitterEnabled(emitterObj.state);
+  return setAnyValue;
+}
+
 
 std::optional<AttributeValuePtr> getEmitterAttribute(GameObjectEmitter& obj, const char* field){
   return getAttributePtr((char*)&obj, emitterAutoserializer, field);

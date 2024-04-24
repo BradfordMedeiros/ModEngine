@@ -52,6 +52,12 @@ bool setHeightmapAttributes(GameObjectHeightmap& heightmapObj, GameobjAttributes
   }
   return true;
 }
+
+bool setHeightmapAttribute(GameObjectHeightmap& heightmapObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+  return autoserializerSetAttrWithTextureLoading((char*)&heightmapObj, heightmapAutoserializer, field, value, util);
+}
+
+
 std::vector<std::pair<std::string, std::string>> serializeHeightmap(GameObjectHeightmap& heightmapObj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
   autoserializerSerialize((char*)&heightmapObj, heightmapAutoserializer, pairs);

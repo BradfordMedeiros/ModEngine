@@ -26,5 +26,6 @@ void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes)
 bool setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
 std::vector<std::pair<std::string, std::string>> serializeText(GameObjectUIText& obj, ObjectSerializeUtil& util);
 std::optional<AttributeValuePtr> getTextAttribute(GameObjectUIText& obj, const char* field);
+bool setTextAttribute(GameObjectUIText& obj, const char* field, AttributeValue value, ObjectSetAttribUtil& util);
 
 #endif

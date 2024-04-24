@@ -34,6 +34,10 @@ bool setPortalAttributes(GameObjectPortal& portalObj, GameobjAttributes& attribu
   autoserializerSetAttrWithTextureLoading((char*)&portalObj, portalAutoserializer, attributes, util);
   return false;
 }
+bool setPortalAttribute(GameObjectPortal& portalObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+  return autoserializerSetAttrWithTextureLoading((char*)&portalObj, portalAutoserializer, field, value, util);
+}
+
 std::optional<AttributeValuePtr> getPortalAttribute(GameObjectPortal& obj, const char* field){
   return getAttributePtr((char*)&obj, portalAutoserializer, field);
 }

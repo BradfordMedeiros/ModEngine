@@ -81,3 +81,7 @@ bool setLightAttributes(GameObjectLight& lightObj, GameobjAttributes& attributes
   autoserializerSetAttrWithTextureLoading((char*)&lightObj, lightAutoserializer, attributes, util);
   return false;
 }
+
+bool setLightAttribute(GameObjectLight& lightObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+  return autoserializerSetAttrWithTextureLoading((char*)&lightObj, lightAutoserializer, field, value, util);
+}

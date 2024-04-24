@@ -55,3 +55,7 @@ bool setCameraAttributes(GameObjectCamera& cameraObj, GameobjAttributes& attribu
   autoserializerSetAttrWithTextureLoading((char*)&cameraObj, cameraAutoserializer, attributes, util);
   return false;
 }
+
+bool setCameraAttribute(GameObjectCamera& cameraObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+  return autoserializerSetAttrWithTextureLoading((char*)&cameraObj, cameraAutoserializer, field, value, util);
+}
