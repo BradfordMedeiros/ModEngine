@@ -1186,6 +1186,9 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool veloci
 
 
 void setSingleGameObjectAttr(World& world, objid id, const char* field, AttributeValue value){
+  GameObject& gameobj = getGameObject(world, id);
+  bool physicsEnableInitial = gameobj.physicsOptions.enabled;
+
   auto loadMeshObject = [&world, id](MeshData& meshdata) -> Mesh {
     return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {
       return loadTextureWorld(world, texture, id);
@@ -1210,24 +1213,26 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
   bool setCoreAttr = false;
   bool setObjectAttr = false;
 
-  GameObject& gameobj = getGameObject(world, id);
   setCoreAttr = setAttribute(gameobj, field, value, util);
+  bool physicsObjectNeedsRebuild = gameobj.physicsOptions.enabled != physicsEnableInitial;
+
 
   if (!setCoreAttr){
     setObjectAttr = setObjectAttribute(world.objectMapping, id, field, value, util);
+    // check if this changed the-physics size via some flag false placeholder
+    physicsObjectNeedsRebuild = physicsObjectNeedsRebuild || false;  
   }
 
   if (!setCoreAttr && !setObjectAttr){
-    modassert(false, "can only set for core or object attribute times for now");
+    GameobjAttributes attr = gameobjAttrFromValue(field, value);
+    mergeAttributes(gameobj.additionalAttr, attr);
   }
 
-  // get if the attribute ptr exists
-  // then get if the object attribute exists
-  // then the remaining
+  bool fieldIsVelocity = std::string(field) == "physics_velocity";
 
-  // then check the types
+  afterAttributesSet(world, id, gameobj, fieldIsVelocity, physicsObjectNeedsRebuild);
 
-  // then set flags to determine if anything needs to be done after this
+ 
 }
 
 void setAttributes(World& world, objid id, GameobjAttributes& attr){
