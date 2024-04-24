@@ -1001,30 +1001,30 @@ std::optional<std::string> subelementTargetName(std::string& name){
   return suffixTargetElement(name);
 }
 
-std::vector<AttributeKeyAndValue> allKeysAndAttributes(GameobjAttributes& attributes){
-  std::vector<AttributeKeyAndValue> values;
+std::vector<GameobjAttribute> allKeysAndAttributes(GameobjAttributes& attributes){
+  std::vector<GameobjAttribute> values;
   for (auto &[key, value] : attributes.stringAttributes){
-    values.push_back(AttributeKeyAndValue{
-      .attribute = key,
-      .payload = value,
+    values.push_back(GameobjAttribute{
+      .field = key,
+      .attributeValue = value,
     });
   }
   for (auto &[key, value] : attributes.numAttributes){
-    values.push_back(AttributeKeyAndValue{
-      .attribute = key,
-      .payload = value,
+    values.push_back(GameobjAttribute{
+      .field = key,
+      .attributeValue = value,
     });
   }
   for (auto &[key, value] : attributes.vecAttr.vec3){
-    values.push_back(AttributeKeyAndValue{
-      .attribute = key,
-      .payload = value,
+    values.push_back(GameobjAttribute{
+      .field = key,
+      .attributeValue = value,
     });
   }
   for (auto &[key, value] : attributes.vecAttr.vec4){
-    values.push_back(AttributeKeyAndValue{
-      .attribute = key,
-      .payload = value,
+    values.push_back(GameobjAttribute{
+      .field = key,
+      .attributeValue = value,
     });
   }
   return values;
@@ -1034,8 +1034,8 @@ std::vector<AttributeKeyAndValue> allKeysAndAttributes(GameobjAttributes& attrib
 std::optional<AttributeValue> getAttributeValue(GameobjAttributes& attributes, const char* field){
   auto attrs = allKeysAndAttributes(attributes);
   for (auto &attr : attrs){
-    if (attr.attribute == field){
-      return attr.payload;
+    if (attr.field == field){
+      return attr.attributeValue;
     }
   }
   return std::nullopt;

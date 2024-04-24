@@ -10,10 +10,10 @@ std::vector<Token> prefabAdditionalTokens(GameobjAttributes& attributes){
 	// std::string attribute;
   // AttributeValue payload;
   for (auto &keyAndAttr : allKeysAndAttr){
-  	auto attribute = keyAndAttr.attribute;
+  	auto attribute = keyAndAttr.field;
   	if (attribute.at(0) == '+'){
   		auto tokenTarget = attribute.substr(1, attribute.size());
-  		auto tokenPayload = keyAndAttr.payload;
+  		auto tokenPayload = keyAndAttr.attributeValue;
   		auto payload = std::get_if<std::string>(&tokenPayload);
   		modassert(payload != NULL, "prefab attribute not string value");
   		auto values = split(*payload, ':');

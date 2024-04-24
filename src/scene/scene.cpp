@@ -1136,27 +1136,6 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
 }
 
 
-
-// TODO -> eliminate all the strings in the fields and use some sort of symbol system
-void applyAttributeDelta(World& world, objid id, std::string field, AttributeValue delta){
-  GameObject& gameobj = getGameObject(world, id);
-
-  auto attrPtr = getObjectAttributePtr(world, id, field.c_str());
-  if (attrPtr.has_value()){
-    
-  }
-
-
-  auto allAttrs = objectAttributes(world, id);
-  auto attribute = getAttr(allAttrs, field);
-  modassert(attribute.has_value(), "attribute does not have a value: " + field);
-  auto attributeSum = addAttributes(attribute.value(), delta);
-  auto attrValue = gameobjAttrFromValue(field, attributeSum);
-
-  std::cout << "apply attribute: " << field << " " << print(attributeSum) << std::endl;
-  setAttributes(world, id, attrValue);
-}
-
 void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool velocitySet, bool physicsEnableChanged){
   //std::cout << "rigid bodies old: " << world.rigidbodys.size() << std::endl;
   if (physicsEnableChanged){
@@ -1229,49 +1208,26 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
   }
 
   bool fieldIsVelocity = std::string(field) == "physics_velocity";
-
   afterAttributesSet(world, id, gameobj, fieldIsVelocity, physicsObjectNeedsRebuild);
+}
 
- 
+// TODO -> eliminate all the strings in the fields and use some sort of symbol system
+void applyAttributeDelta(World& world, objid id, std::string field, AttributeValue delta){
+  GameObject& gameobj = getGameObject(world, id);
+
+  auto allAttrs = objectAttributes(world, id);
+  auto attribute = getAttr(allAttrs, field);
+  modassert(attribute.has_value(), "attribute does not have a value: " + field);
+  auto attributeSum = addAttributes(attribute.value(), delta);
+  setSingleGameObjectAttr(world, id, field.c_str(), attributeSum);
 }
 
 void setAttributes(World& world, objid id, GameobjAttributes& attr){
-  auto loadMeshObject = [&world, id](MeshData& meshdata) -> Mesh {
-    return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {
-      return loadTextureWorld(world, texture, id);
-    });    
-  };
-
-  ObjectSetAttribUtil util {
-    .setEmitterEnabled = [&world, id](bool enabled) -> void {
-      setEmitterEnabled(world.emitters, id, enabled);
-    },
-    .ensureTextureLoaded = [&world, id](std::string texturepath) -> Texture {
-      return loadTextureWorld(world, texturepath, id);
-    },
-    .releaseTexture = [&world, id](int textureId){
-      freeTextureRefsIdByOwner(world, id, textureId);
-    },
-    .loadMesh = loadMeshObject,
-    .unloadMesh = freeMesh,
-    .pathForModLayer = world.interface.modlayerPath,
-  };
-  auto shouldRebuildPhysics = setObjectAttributes(world.objectMapping, id, attr, util);
-
-  GameObject& obj = getGameObject(world, id);
-  bool oldPhysicsEnabled = obj.physicsOptions.enabled;
-
+  //auto flatAttr = gameobjAttributes2To1(attr);
   auto allAttrs = allKeysAndAttributes(attr);
-  for (auto &attrValue : allAttrs){
-    setAttribute(obj, attrValue.attribute.c_str(), attrValue.payload, util);
+  for (auto &attr : allAttrs){
+    setSingleGameObjectAttr(world, id, attr.field.c_str(), attr.attributeValue);
   }
-
-  bool newPhysicsEnabled = obj.physicsOptions.enabled;
-
-  auto autoserializerFields = getObjautoserializerFields(obj.name); 
-  auto additionalAttr = getAdditionalAttr(attr, autoserializerFields); // this should also filter out object attributes 
-  mergeAttributes(obj.additionalAttr, additionalAttr);
-  afterAttributesSet(world, id, obj, attr.vecAttr.vec3.find("physics_velocity") != attr.vecAttr.vec3.end(), oldPhysicsEnabled != newPhysicsEnabled || shouldRebuildPhysics);
 }
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative){

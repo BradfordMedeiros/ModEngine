@@ -335,12 +335,7 @@ std::string rewriteTargetName(std::string target, std::string newname);
 bool isSubelementName(std::string& name);
 std::optional<std::string> subelementTargetName(std::string& name);
 
-struct AttributeKeyAndValue {
-  std::string attribute;
-  AttributeValue payload;
-};
-
-std::vector<AttributeKeyAndValue> allKeysAndAttributes(GameobjAttributes& attributes);
+std::vector<GameobjAttribute> allKeysAndAttributes(GameobjAttributes& attributes);
 std::optional<AttributeValue> getAttributeValue(GameobjAttributes& attributes, const char* field);
 
 struct Token {

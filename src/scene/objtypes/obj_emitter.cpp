@@ -151,12 +151,12 @@ std::vector<AutoSerialize> emitterAutoserializer {
 bool isEmitterPrefix(char character){
   return character == '!' || character == '?' || character == '%' || character == '+';
 }
-std::set<std::string> emitterSubmodelAttr(std::vector<AttributeKeyAndValue>& attr){
+std::set<std::string> emitterSubmodelAttr(std::vector<GameobjAttribute>& attr){
   std::set<std::string> submodelNames;
   //std::cout << "submodel attr: [ ";
   for (auto &val : attr){
-    if (isEmitterPrefix(val.attribute.at(0))){
-      auto strippedAttribute = val.attribute.substr(1, val.attribute.size());
+    if (isEmitterPrefix(val.field.at(0))){
+      auto strippedAttribute = val.field.substr(1, val.field.size());
       auto subelementVal = subelementTargetName(strippedAttribute);
       auto mainname = mainTargetElement(strippedAttribute);
       //std::cout << val.attribute << "( " << subelementVal.has_value() << " ) [ " << (subelementVal.has_value() ? mainname : "- no name -") << " ], ";
