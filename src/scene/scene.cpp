@@ -1256,7 +1256,12 @@ void setAttributes(World& world, objid id, GameobjAttributes& attr){
 
   GameObject& obj = getGameObject(world, id);
   bool oldPhysicsEnabled = obj.physicsOptions.enabled;
-  setAllAttributes(obj, attr, util);
+
+  auto allAttrs = allKeysAndAttributes(attr);
+  for (auto &attrValue : allAttrs){
+    setAttribute(obj, attrValue.attribute.c_str(), attrValue.payload, util);
+  }
+
   bool newPhysicsEnabled = obj.physicsOptions.enabled;
 
   auto autoserializerFields = getObjautoserializerFields(obj.name); 
