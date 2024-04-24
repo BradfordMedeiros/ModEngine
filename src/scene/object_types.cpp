@@ -98,7 +98,6 @@ std::vector<ObjectType> objTypes = {
     .createObj = createRoot,
     .objectAttributes = nothingObjAttr,
     .objectAttribute = nothingObjectAttribute,
-    .setAttributes = nothingSetObjAttr,
     .setAttribute = nothingSetAttribute,
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
@@ -109,7 +108,6 @@ std::vector<ObjectType> objTypes = {
     .createObj = createCamera,
     .objectAttributes = convertElementValue<GameObjectCamera>(cameraObjAttr),
     .objectAttribute = convertObjectAttribute<GameObjectCamera>(getCameraAttribute),
-    .setAttributes = convertElementSetValue<GameObjectCamera>(setCameraAttributes),
     .setAttribute = convertElementSetAttrValue<GameObjectCamera>(setCameraAttribute),
     .serialize = convertSerialize<GameObjectCamera>(serializeCamera),
     .removeObject = removeDoNothing,
@@ -120,7 +118,6 @@ std::vector<ObjectType> objTypes = {
     .createObj = createPortal,
     .objectAttributes = convertElementValue<GameObjectPortal>(portalObjAttr),
     .objectAttribute = convertObjectAttribute<GameObjectPortal>(getPortalAttribute),
-    .setAttributes = convertElementSetValue<GameObjectPortal>(setPortalAttributes),
     .setAttribute = convertElementSetAttrValue<GameObjectPortal>(setPortalAttribute),
     .serialize = convertSerialize<GameObjectPortal>(serializePortal),
     .removeObject = removeDoNothing,
@@ -131,7 +128,6 @@ std::vector<ObjectType> objTypes = {
     .createObj = createLight,
     .objectAttributes = convertElementValue<GameObjectLight>(lightObjAttr),
     .objectAttribute = convertObjectAttribute<GameObjectLight>(getLightAttribute),
-    .setAttributes = convertElementSetValue<GameObjectLight>(setLightAttributes),
     .setAttribute = convertElementSetAttrValue<GameObjectLight>(setLightAttribute),
     .serialize = convertSerialize<GameObjectLight>(serializeLight),
     .removeObject = removeDoNothing,
@@ -142,7 +138,6 @@ std::vector<ObjectType> objTypes = {
     .createObj = createSound,
     .objectAttributes = convertElementValue<GameObjectSound>(soundObjAttr),
     .objectAttribute = convertObjectAttribute<GameObjectSound>(getSoundAttribute),
-    .setAttributes = convertElementSetValue<GameObjectSound>(setSoundAttributes),
     .setAttribute = convertElementSetAttrValue<GameObjectSound>(setSoundAttribute),
     .serialize = convertSerialize<GameObjectSound>(serializeSound),
     .removeObject = convertRemove<GameObjectSound>(removeSound),
@@ -153,7 +148,6 @@ std::vector<ObjectType> objTypes = {
     .createObj = createUIText,
     .objectAttributes = convertElementValue<GameObjectUIText>(textObjAttributes),
     .objectAttribute = convertObjectAttribute<GameObjectUIText>(getTextAttribute),
-    .setAttributes = convertElementSetValue<GameObjectUIText>(setUITextAttributes),
     .setAttribute = convertElementSetAttrValue<GameObjectUIText>(setTextAttribute),
     .serialize = convertSerialize<GameObjectUIText>(serializeText),
     .removeObject = removeDoNothing,
@@ -164,7 +158,6 @@ std::vector<ObjectType> objTypes = {
     .createObj = createHeightmap,
     .objectAttributes = convertElementValue<GameObjectHeightmap>(heightmapObjAttr),
     .objectAttribute = convertObjectAttribute<GameObjectHeightmap>(getHeightmapAttribute),
-    .setAttributes = convertElementSetValue<GameObjectHeightmap>(setHeightmapAttributes),
     .setAttribute = convertElementSetAttrValue<GameObjectHeightmap>(setHeightmapAttribute),
     .serialize = convertSerialize<GameObjectHeightmap>(serializeHeightmap),
     .removeObject = convertRemove<GameObjectHeightmap>(removeHeightmap),
@@ -175,7 +168,6 @@ std::vector<ObjectType> objTypes = {
     .createObj = createNavmesh,
     .objectAttributes = nothingObjAttr, 
     .objectAttribute = convertObjectAttribute<GameObjectNavmesh>(getNavmeshAttribute),
-    .setAttributes = nothingSetObjAttr,
     .setAttribute = nothingSetAttribute,
     .serialize = serializeNotImplemented,
     .removeObject = convertRemove<GameObjectNavmesh>(removeNavmesh),
@@ -186,7 +178,6 @@ std::vector<ObjectType> objTypes = {
     .createObj = createEmitter,
     .objectAttributes = convertElementValue<GameObjectEmitter>(emitterObjAttr),
     .objectAttribute = convertObjectAttribute<GameObjectEmitter>(getEmitterAttribute),
-    .setAttributes = convertElementSetValue<GameObjectEmitter>(setEmitterAttributes),
     .setAttribute = convertElementSetAttrValue<GameObjectEmitter>(setEmitterAttribute),
     .serialize = convertSerialize<GameObjectEmitter>(serializeEmitter),
     .removeObject = convertRemove<GameObjectEmitter>(removeEmitterObj),
@@ -197,7 +188,6 @@ std::vector<ObjectType> objTypes = {
     .createObj = createMesh,
     .objectAttributes = convertElementValue<GameObjectMesh>(meshObjAttr),
     .objectAttribute = convertObjectAttribute<GameObjectMesh>(getMeshAttribute),
-    .setAttributes = convertElementSetValue<GameObjectMesh>(setMeshAttributes),
     .setAttribute = convertElementSetAttrValue<GameObjectMesh>(setMeshAttribute),
     .serialize = convertSerialize<GameObjectMesh>(serializeMesh),
     .removeObject = removeDoNothing,
@@ -208,7 +198,6 @@ std::vector<ObjectType> objTypes = {
     .createObj = createOctree, 
     .objectAttributes = nothingObjAttr,
     .objectAttribute = convertObjectAttribute<GameObjectOctree>(getOctreeAttribute),
-    .setAttributes = nothingSetObjAttr,
     .setAttribute = nothingSetAttribute,
     .serialize = convertSerialize<GameObjectOctree>(serializeOctree),
     .removeObject  = removeDoNothing,
@@ -219,7 +208,6 @@ std::vector<ObjectType> objTypes = {
     .createObj = createPrefabObj, 
     .objectAttributes = convertElementValue<GameObjectPrefab>(prefabObjAttr),
     .objectAttribute = convertObjectAttribute<GameObjectPrefab>(getPrefabAttribute),
-    .setAttributes = convertElementSetValue<GameObjectPrefab>(setPrefabAttributes),
     .setAttribute = convertElementSetAttrValue<GameObjectPrefab>(setPrefabAttribute),
     .serialize = convertSerialize<GameObjectPrefab>(serializePrefabObj),
     .removeObject  = convertRemove<GameObjectPrefab>(removePrefabObj),
@@ -475,19 +463,6 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& toRender, 
     }
   }
   assert(false);
-}
-
-bool setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  GameObjectObj& toRender = mapping.at(id);
-  auto variantIndex = toRender.index();
-  for (auto &objType : objTypes){
-    if (variantIndex == objType.variantType){
-      return objType.setAttributes(toRender, attributes, util);
-    }
-  }
-  std::cout << "obj type not supported" << std::endl;
-  assert(false);
-  return false;
 }
 
 bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util){

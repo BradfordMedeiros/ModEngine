@@ -77,11 +77,6 @@ std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight&
   return pairs;
 }
 
-bool setLightAttributes(GameObjectLight& lightObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttrWithTextureLoading((char*)&lightObj, lightAutoserializer, attributes, util);
-  return false;
-}
-
 bool setLightAttribute(GameObjectLight& lightObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
   return autoserializerSetAttrWithTextureLoading((char*)&lightObj, lightAutoserializer, field, value, util);
 }

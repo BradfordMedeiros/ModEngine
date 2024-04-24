@@ -54,6 +54,7 @@ bool setHeightmapAttributes(GameObjectHeightmap& heightmapObj, GameobjAttributes
 }
 
 bool setHeightmapAttribute(GameObjectHeightmap& heightmapObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+  modassert(false, "set heightmap attribute not hooked up properly");
   return autoserializerSetAttrWithTextureLoading((char*)&heightmapObj, heightmapAutoserializer, field, value, util);
 }
 

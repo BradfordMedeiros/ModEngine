@@ -45,9 +45,6 @@ std::vector<std::pair<std::string, std::string>> serializePrefabObj(GameObjectPr
 void removePrefabObj(GameObjectPrefab& prefabObj, ObjectRemoveUtil& util){
 	util.unloadScene(prefabObj.sceneId);
 }
-bool setPrefabAttributes(GameObjectPrefab& prefabObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-	return false;
-}
 
 bool setPrefabAttribute(GameObjectPrefab& obj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
   return autoserializerSetAttrWithTextureLoading((char*)&obj, prefabAutoserializer, field, value, util);

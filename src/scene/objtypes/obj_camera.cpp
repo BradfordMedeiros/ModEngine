@@ -51,11 +51,6 @@ std::optional<AttributeValuePtr> getCameraAttribute(GameObjectCamera& obj, const
   return getAttributePtr((char*)&obj, cameraAutoserializer, field);
 }
 
-bool setCameraAttributes(GameObjectCamera& cameraObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttrWithTextureLoading((char*)&cameraObj, cameraAutoserializer, attributes, util);
-  return false;
-}
-
 bool setCameraAttribute(GameObjectCamera& cameraObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
   return autoserializerSetAttrWithTextureLoading((char*)&cameraObj, cameraAutoserializer, field, value, util);
 }

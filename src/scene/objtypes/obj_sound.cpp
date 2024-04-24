@@ -73,17 +73,13 @@ void removeSound(GameObjectSound& soundObj, ObjectRemoveUtil& util){
   unloadSoundState(soundObj.source, soundObj.clip); 
 }
 
-bool setSoundAttributes(GameObjectSound& soundObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttrWithTextureLoading((char*)&soundObj, soundAutoserializer, attributes, util);
+std::optional<AttributeValuePtr> getSoundAttribute(GameObjectSound& soundObj, const char* field){
+  return getAttributePtr((char*)&soundObj, soundAutoserializer, field);
+}
+
+bool setSoundAttribute(GameObjectSound& soundObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+  auto updated = autoserializerSetAttrWithTextureLoading((char*)&soundObj, soundAutoserializer, field, value, util);
   setSoundVolume(soundObj.source, soundObj.volume);
   setSoundLooping(soundObj.source, soundObj.loop);
-  return false;
-}
-
-std::optional<AttributeValuePtr> getSoundAttribute(GameObjectSound& obj, const char* field){
-  return getAttributePtr((char*)&obj, soundAutoserializer, field);
-}
-
-bool setSoundAttribute(GameObjectSound& obj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
-  return autoserializerSetAttrWithTextureLoading((char*)&obj, soundAutoserializer, field, value, util);
+  return updated;
 }

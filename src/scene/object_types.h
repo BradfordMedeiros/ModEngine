@@ -140,7 +140,6 @@ struct ObjectType {
   std::function<GameObjectObj(GameobjAttributes&, ObjectTypeUtil&)> createObj;
   std::function<void(GameObjectObj&, GameobjAttributes&)> objectAttributes;
   std::function<std::optional<AttributeValuePtr>(GameObjectObj&, const char* field)> objectAttribute;
-  std::function<bool(GameObjectObj&, GameobjAttributes&, ObjectSetAttribUtil& util)> setAttributes;
   std::function<bool(GameObjectObj&, const char* field, AttributeValue value, ObjectSetAttribUtil& util)> setAttribute;
   std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&, ObjectSerializeUtil&)> serialize;
   std::function<void(GameObjectObj&, ObjectRemoveUtil&)> removeObject;
@@ -190,8 +189,6 @@ int renderObject(
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);
 void objectAttributes(GameObjectObj& toRender, GameobjAttributes& _attributes);
 std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& toRender, const char* field);
-
-bool setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
 bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util);
 
 template<typename T>
