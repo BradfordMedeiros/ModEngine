@@ -778,28 +778,40 @@ void assertTodo(std::string message){
   assertWithBacktrace(false, "TODO hit: " + message);
 }
 
-GameobjAttributes gameobjAttrFromValue(std::string field, AttributeValue value){
+GameobjAttributes gameobjAttributes2To1(std::vector<GameobjAttribute>& attributes){
   GameobjAttributes attr {
     .stringAttributes = {},
     .numAttributes = {},
     .vecAttr = { .vec3 = {}, .vec4 = {} },
   };
-  auto stringValue = std::get_if<std::string>(&value);
-  auto floatValue = std::get_if<float>(&value);
-  auto vec3Value = std::get_if<glm::vec3>(&value);
-  auto vec4Value = std::get_if<glm::vec4>(&value);
-  if (stringValue){
-    attr.stringAttributes[field] = *stringValue;
-  }else if (floatValue){
-    attr.numAttributes[field] = *floatValue;
-  }else if (vec3Value){
-    attr.vecAttr.vec3[field] = *vec3Value;
-  }else if (vec4Value){
-    attr.vecAttr.vec4[field] = *vec4Value;
-  }else{
-    modassert(false, "invalid attribute value type");
+  for (auto &attrValue : attributes){
+    auto stringValue = std::get_if<std::string>(&attrValue.attributeValue);
+    auto floatValue = std::get_if<float>(&attrValue.attributeValue);
+    auto vec3Value = std::get_if<glm::vec3>(&attrValue.attributeValue);
+    auto vec4Value = std::get_if<glm::vec4>(&attrValue.attributeValue);
+    if (stringValue){
+      attr.stringAttributes[attrValue.field] = *stringValue;
+    }else if (floatValue){
+      attr.numAttributes[attrValue.field] = *floatValue;
+    }else if (vec3Value){
+      attr.vecAttr.vec3[attrValue.field] = *vec3Value;
+    }else if (vec4Value){
+      attr.vecAttr.vec4[attrValue.field] = *vec4Value;
+    }else{
+      modassert(false, "invalid attribute value type");
+    }    
   }
-  return attr;
+  return attr; 
+}
+
+GameobjAttributes gameobjAttrFromValue(std::string field, AttributeValue value){
+  std::vector<GameobjAttribute> attrs = { 
+    GameobjAttribute {
+      .field = field,
+      .attributeValue = value,
+    },
+  };
+  return gameobjAttributes2To1(attrs);
 }
 
 std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key){

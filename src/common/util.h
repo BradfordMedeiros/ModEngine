@@ -230,6 +230,10 @@ struct GameobjAttributes {
   std::map<std::string, float> numAttributes;
   vectorAttributes vecAttr;
 };
+
+
+GameobjAttributes gameobjAttributes2To1(std::vector<GameobjAttribute>& attributes);
+
 GameobjAttributes gameobjAttrFromValue(std::string field, AttributeValue value);
 
 std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key);
