@@ -14,14 +14,12 @@ std::optional<AttributeValuePtr> nothingObjectAttribute(GameObjectObj& obj, cons
   return std::nullopt; 
 }
 
-bool nothingSetAttribute(GameObjectObj& obj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+bool nothingSetAttribute(GameObjectObj& obj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&){
   modassert(false, std::string("set attr not implemented for this type, field: ") + std::string(field));
   return false;
 }
 
 void nothingObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes){ }// do nothing 
-bool nothingSetObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes, ObjectSetAttribUtil& util){ return false; }// do nothing 
-
 
 template<typename T>
 std::function<void(GameObjectObj& obj, GameobjAttributes& attr)> convertElementValue(std::function<void(T&, GameobjAttributes&)> getAttr) {   
@@ -51,11 +49,11 @@ std::function<bool(GameObjectObj& obj, GameobjAttributes& attr, ObjectSetAttribU
 }
 
 template<typename T>
-std::function<bool(GameObjectObj& obj, const char* field, AttributeValue value, ObjectSetAttribUtil&)> convertElementSetAttrValue(std::function<bool(T&, const char* field, AttributeValue value, ObjectSetAttribUtil&)> setAttr) {   
-  return [setAttr](GameObjectObj& obj, const char* field, AttributeValue value, ObjectSetAttribUtil& util) -> bool {
+std::function<bool(GameObjectObj& obj, const char* field, AttributeValue value, ObjectSetAttribUtil&, SetAttrFlags&)> convertElementSetAttrValue(std::function<bool(T&, const char* field, AttributeValue value, ObjectSetAttribUtil&, SetAttrFlags&)> setAttr) {   
+  return [setAttr](GameObjectObj& obj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags& flags) -> bool {
     auto objInstance = std::get_if<T>(&obj);
     assert(objInstance != NULL);
-    return setAttr(*objInstance, field, value, util);
+    return setAttr(*objInstance, field, value, util, flags);
   };
 }
 
@@ -465,12 +463,12 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& toRender, 
   assert(false);
 }
 
-bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags& flags){
   GameObjectObj& toRender = mapping.at(id);
   auto variantIndex = toRender.index();
   for (auto &objType : objTypes){
     if (variantIndex == objType.variantType){
-      return objType.setAttribute(toRender, field, value, util);
+      return objType.setAttribute(toRender, field, value, util, flags);
     }
   }
   std::cout << "obj type not supported" << std::endl;

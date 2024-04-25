@@ -77,7 +77,7 @@ std::optional<AttributeValuePtr> getSoundAttribute(GameObjectSound& soundObj, co
   return getAttributePtr((char*)&soundObj, soundAutoserializer, field);
 }
 
-bool setSoundAttribute(GameObjectSound& soundObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+bool setSoundAttribute(GameObjectSound& soundObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&){
   auto updated = autoserializerSetAttrWithTextureLoading((char*)&soundObj, soundAutoserializer, field, value, util);
   setSoundVolume(soundObj.source, soundObj.volume);
   setSoundLooping(soundObj.source, soundObj.loop);

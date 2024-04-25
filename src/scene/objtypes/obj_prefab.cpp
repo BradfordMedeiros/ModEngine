@@ -46,7 +46,7 @@ void removePrefabObj(GameObjectPrefab& prefabObj, ObjectRemoveUtil& util){
 	util.unloadScene(prefabObj.sceneId);
 }
 
-bool setPrefabAttribute(GameObjectPrefab& obj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+bool setPrefabAttribute(GameObjectPrefab& obj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&){
   return autoserializerSetAttrWithTextureLoading((char*)&obj, prefabAutoserializer, field, value, util);
 }
 

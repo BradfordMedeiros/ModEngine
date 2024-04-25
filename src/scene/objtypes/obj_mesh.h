@@ -23,6 +23,6 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util);
 std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj, ObjectSerializeUtil& util);
 void meshObjAttr(GameObjectMesh& meshObj, GameobjAttributes& _attributes);
 std::optional<AttributeValuePtr> getMeshAttribute(GameObjectMesh& obj, const char* field);
-bool setMeshAttribute(GameObjectMesh& meshObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util);
+bool setMeshAttribute(GameObjectMesh& meshObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&);
 
 #endif

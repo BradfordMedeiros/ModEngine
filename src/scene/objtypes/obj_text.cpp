@@ -112,8 +112,9 @@ std::optional<AttributeValuePtr> getTextAttribute(GameObjectUIText& obj, const c
   return getAttributePtr((char*)&obj, textAutoserializer, field);
 }
 
-bool setTextAttribute(GameObjectUIText& textObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+bool setTextAttribute(GameObjectUIText& textObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags& options){
   auto setAttr = autoserializerSetAttrWithTextureLoading((char*)&textObj, textAutoserializer, field, value, util);
   restrictWidth(textObj);
+  options.rebuildPhysics = true;
   return setAttr;
 }

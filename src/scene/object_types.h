@@ -134,13 +134,14 @@ std::string getType(std::string name);
 
 std::map<objid, GameObjectObj> getObjectMapping();
 
+
 struct ObjectType {
   std::string name;
   std::size_t variantType;
   std::function<GameObjectObj(GameobjAttributes&, ObjectTypeUtil&)> createObj;
   std::function<void(GameObjectObj&, GameobjAttributes&)> objectAttributes;
   std::function<std::optional<AttributeValuePtr>(GameObjectObj&, const char* field)> objectAttribute;
-  std::function<bool(GameObjectObj&, const char* field, AttributeValue value, ObjectSetAttribUtil& util)> setAttribute;
+  std::function<bool(GameObjectObj&, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&)> setAttribute;
   std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&, ObjectSerializeUtil&)> serialize;
   std::function<void(GameObjectObj&, ObjectRemoveUtil&)> removeObject;
 };
@@ -189,7 +190,7 @@ int renderObject(
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);
 void objectAttributes(GameObjectObj& toRender, GameobjAttributes& _attributes);
 std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& toRender, const char* field);
-bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util);
+bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&);
 
 template<typename T>
 std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){   // putting templates have to be in header?

@@ -18,6 +18,6 @@ std::optional<AttributeValuePtr> getLightAttribute(GameObjectLight& obj, const c
 void lightObjAttr(GameObjectLight& lightObj, GameobjAttributes& _attributes);
 
 std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight& obj, ObjectSerializeUtil& util);
-bool setLightAttribute(GameObjectLight& lightObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util);
+bool setLightAttribute(GameObjectLight& lightObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&);
 
 #endif

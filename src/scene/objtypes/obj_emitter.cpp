@@ -246,7 +246,7 @@ void removeEmitterObj(GameObjectEmitter& obj, ObjectRemoveUtil& util){
   util.rmEmitter();
 }
 
-bool setEmitterAttribute(GameObjectEmitter& emitterObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+bool setEmitterAttribute(GameObjectEmitter& emitterObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&){
   bool setAnyValue = autoserializerSetAttrWithTextureLoading((char*)&emitterObj, emitterAutoserializer, field, value, util);
   util.setEmitterEnabled(emitterObj.state);
   return setAnyValue;

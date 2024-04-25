@@ -84,6 +84,6 @@ std::optional<AttributeValuePtr> getMeshAttribute(GameObjectMesh& meshObj, const
   return getAttributePtr((char*)&meshObj, meshAutoserializer, field);
 }
 
-bool setMeshAttribute(GameObjectMesh& meshObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
+bool setMeshAttribute(GameObjectMesh& meshObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&){
   return autoserializerSetAttrWithTextureLoading((char*)&meshObj, meshAutoserializer, field, value, util);
 }

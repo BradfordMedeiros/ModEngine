@@ -1197,9 +1197,9 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
 
 
   if (!setCoreAttr){
-    setObjectAttr = setObjectAttribute(world.objectMapping, id, field, value, util);
-    // check if this changed the-physics size via some flag false placeholder
-    physicsObjectNeedsRebuild = physicsObjectNeedsRebuild || false;  
+    SetAttrFlags setAttrFlags { .rebuildPhysics = false };
+    setObjectAttr = setObjectAttribute(world.objectMapping, id, field, value, util, setAttrFlags);
+    physicsObjectNeedsRebuild = physicsObjectNeedsRebuild || setAttrFlags.rebuildPhysics;  
   }
 
   if (!setCoreAttr && !setObjectAttr){

@@ -20,8 +20,7 @@ void removeHeightmap(GameObjectHeightmap& heightmapObj, ObjectRemoveUtil& util);
 std::optional<AttributeValuePtr> getHeightmapAttribute(GameObjectHeightmap& obj, const char* field);
 void heightmapObjAttr(GameObjectHeightmap& geoObj, GameobjAttributes& _attributes);
 
-bool setHeightmapAttributes(GameObjectHeightmap& geoObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
-bool setHeightmapAttribute(GameObjectHeightmap& heightmapObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util);
+bool setHeightmapAttribute(GameObjectHeightmap& heightmapObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&);
 
 std::vector<std::pair<std::string, std::string>> serializeHeightmap(GameObjectHeightmap& obj, ObjectSerializeUtil& util);
 

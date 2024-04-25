@@ -49,6 +49,10 @@ struct ObjectRemoveUtil {
   std::function<void(objid)> unloadScene;
 };
 
+struct SetAttrFlags {
+  bool rebuildPhysics;
+};
+
 struct ObjectSetAttribUtil {
   std::function<void(bool)> setEmitterEnabled;
   std::function<Texture(std::string)> ensureTextureLoaded;
