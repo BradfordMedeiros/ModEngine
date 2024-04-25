@@ -556,6 +556,8 @@ extern std::vector<AutoSerialize> heightmapAutoserializer;
 extern std::vector<AutoSerialize> navmeshAutoserializer;
 extern std::vector<AutoSerialize> textAutoserializer;
 extern std::vector<AutoSerialize> prefabAutoserializer;
+extern std::vector<AutoSerialize> gameobjSerializer;
+
 std::set<std::string> getObjautoserializerFields(std::string& name){
   auto type = getType(name);
   if (type == "default"){
@@ -588,6 +590,23 @@ std::set<std::string> getObjautoserializerFields(std::string& name){
   modassert(false, "autoserializer not found");
   return {};
 }
+
+std::set<std::string> allFieldNames(GameObject& gameobj){
+  auto objFieldsNames = getObjautoserializerFields(gameobj.name);
+  auto gameobjFields = serializerFieldNames(gameobjSerializer);
+  auto allAttrs = allKeysAndAttributes(gameobj.additionalAttr);
+  std::set<std::string> allFieldNames;
+  for (auto &field : objFieldsNames){
+    allFieldNames.insert(field);
+  }
+  for (auto &field : gameobjFields){
+    allFieldNames.insert(field);
+  }
+  for (auto &attr : allAttrs){
+    allFieldNames.insert(attr.field);
+  }
+  return allFieldNames;
+};
 
 // kind of hackey, this could just be returned from add objects, but flow control is tricky.
 std::function<objid(void)> createGetUniqueObjId(std::vector<objid>& idsAdded){
@@ -1098,15 +1117,6 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   return addObjectToScene(world, sceneId, singleObj.name, singleObj.attrWithChildren, singleObj.submodelAttributes);
 }
 
-GameobjAttributes objectAttributes(World& world, objid id){
-  GameObjectObj& gameobjObj = world.objectMapping.at(id);
-  GameObject& gameobj = getGameObject(world, id);
-  GameobjAttributes attr = gameobj.additionalAttr;
-  objectAttributes(gameobjObj, attr);
-  getAllAttributes(gameobj, attr);
-  return attr;
-}
-
 std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, const char* field){
   GameObject& gameobj = getGameObject(world, id);
   auto valuePtr = getAttributePtr(gameobj, field);
@@ -1135,6 +1145,18 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
   return std::nullopt;
 }
 
+GameobjAttributes objectAttributes(World& world, objid id){
+  GameObject& gameobj = getGameObject(world, id);
+  auto allFields = allFieldNames(gameobj);
+
+  GameObjectObj& gameobjObj = world.objectMapping.at(id);
+  GameobjAttributes attr = gameobj.additionalAttr;
+  objectAttributes(gameobjObj, attr);
+  getAllAttributes(gameobj, attr);
+  return attr;
+}
+
+
 
 void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool velocitySet, bool physicsEnableChanged){
   //std::cout << "rigid bodies old: " << world.rigidbodys.size() << std::endl;
@@ -1162,7 +1184,6 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool veloci
     updateRigidBodyOpts(world.physicsEnvironment, body, opts);
   }
 }
-
 
 void setSingleGameObjectAttr(World& world, objid id, const char* field, AttributeValue value){
   GameObject& gameobj = getGameObject(world, id);
@@ -1316,7 +1337,6 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, Physic
         .scale = getScale(rigidBody.body),
         .rotation = rotation,
       });
-
       gameobj.physicsOptions.velocity = getVelocity(rigidBody.body);
       gameobj.physicsOptions.angularVelocity = getAngularVelocity(rigidBody.body);
     }
@@ -1493,7 +1513,6 @@ glm::vec3 gameobjectScale(World& world, objid id, bool isWorld){
   }
   return calcRelativeTransform(world.sandbox, id).scale;   // fix relative reference
 }
-
 glm::quat gameobjectRotation(World& world, objid id, bool isWorld){
   if (isWorld){
     return fullTransformation(world.sandbox, id).rotation;
