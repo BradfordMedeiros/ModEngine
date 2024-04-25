@@ -962,25 +962,15 @@ bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, const char
   return false;
 }
 
-bool autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  bool setAny = false;
-  for (auto &value : values){
-    auto fieldName = serializerName(value);
-    auto attributeValue = getAttributeValue(attributes, fieldName.c_str());
-    bool setAttr = autoserializerSetAttr(structAddress, value, fieldName.c_str(), attributeValue);
-    if (setAttr){
-      setAny = true;
-    }
+bool autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, const char* field, AttributeValue attrValue, ObjectSetAttribUtil& util){
+  std::string serializerField(field);
+  auto serializer = serializerByName(values, serializerField);
+  if (!serializer.has_value()){
+    return false;
   }
-  for (auto &value : values){
-    autoserializeHandleTextureLoading(structAddress, value, util.ensureTextureLoaded, util.releaseTexture);
-  }
-  return setAny;
-}
-
-bool autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
-  auto attr = gameobjAttrFromValue(field, value);
-  return autoserializerSetAttrWithTextureLoading(structAddress, values, attr, util);
+  bool setAttr = autoserializerSetAttr(structAddress, serializer.value(), field, attrValue);
+  autoserializeHandleTextureLoading(structAddress, serializer.value(), util.ensureTextureLoaded, util.releaseTexture);
+  return setAttr;
 }
 
 std::string serializerName(AutoSerialize& serializer){

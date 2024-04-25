@@ -36,7 +36,8 @@ std::optional<AttributeValuePtr> getHeightmapAttribute(GameObjectHeightmap& obj,
 void heightmapObjAttr(GameObjectHeightmap& heightmapObj, GameobjAttributes& _attributes){
   autoserializerGetAttr((char*)&heightmapObj, heightmapAutoserializer, _attributes);
 }
-bool setHeightmapAttributes(GameObjectHeightmap& heightmapObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+
+/*bool setHeightmapAttributes(GameObjectHeightmap& heightmapObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   auto oldMapName = heightmapObj.mapName;
   auto oldDim = heightmapObj.dim;
   autoserializerSetAttrWithTextureLoading((char*)&heightmapObj, heightmapAutoserializer, attributes, util);
@@ -51,7 +52,7 @@ bool setHeightmapAttributes(GameObjectHeightmap& heightmapObj, GameobjAttributes
     heightmapObj.mesh = util.loadMesh(meshData);
   }
   return true;
-}
+}*/
 
 bool setHeightmapAttribute(GameObjectHeightmap& heightmapObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags& options){
   modassert(false, "set heightmap attribute not hooked up properly");
