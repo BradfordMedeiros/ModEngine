@@ -1145,6 +1145,40 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
   return std::nullopt;
 }
 
+// Not complete, but just complete when needed
+std::optional<AttributeValue> getObjectAttribute(World& world, objid id, const char* field){
+  auto attrPtr = getObjectAttributePtr(world, id, field);
+  if (!attrPtr.has_value()){
+    return std::nullopt;
+  }
+
+  auto vec2Ptr = std::get_if<glm::vec2*>(&attrPtr.value());
+  if (vec2Ptr){
+    modassert(false, "vec2 ptr not yet implemented");
+  }
+
+  glm::vec3** vec3Ptr = std::get_if<glm::vec3*>(&attrPtr.value());
+  if (vec3Ptr){
+    return **vec3Ptr;
+  }
+
+  auto vec4Ptr = std::get_if<glm::vec4*>(&attrPtr.value());
+  auto stringPtr = std::get_if<std::string*>(&attrPtr.value());
+  auto floatPtr = std::get_if<float*>(&attrPtr.value());
+
+  modassert(false, "getObjectAttribute not implemented");
+
+//typedef std::variant< bool*, int*, uint*, glm::quat*> AttributeValuePtr;
+
+
+
+
+      //std::optional<glm::vec4*> tintValue = getTypeFromAttr<glm::vec4>(getObjectAttributePtr(testObject.value(), "tint"));
+
+}
+
+
+
 GameobjAttributes objectAttributes(World& world, objid id){
   GameObject& gameobj = getGameObject(world, id);
   auto allFields = allFieldNames(gameobj);
@@ -1232,19 +1266,14 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
   afterAttributesSet(world, id, gameobj, fieldIsVelocity, physicsObjectNeedsRebuild);
 }
 
-// TODO -> eliminate all the strings in the fields and use some sort of symbol system
 void applyAttributeDelta(World& world, objid id, std::string field, AttributeValue delta){
-  GameObject& gameobj = getGameObject(world, id);
-
-  auto allAttrs = objectAttributes(world, id);
-  auto attribute = getAttr(allAttrs, field);
+  auto attribute = getObjectAttribute(world, id, field.c_str());
   modassert(attribute.has_value(), "attribute does not have a value: " + field);
   auto attributeSum = addAttributes(attribute.value(), delta);
   setSingleGameObjectAttr(world, id, field.c_str(), attributeSum);
 }
 
 void setAttributes(World& world, objid id, GameobjAttributes& attr){
-  //auto flatAttr = gameobjAttributes2To1(attr);
   auto allAttrs = allKeysAndAttributes(attr);
   for (auto &attr : allAttrs){
     setSingleGameObjectAttr(world, id, attr.field.c_str(), attr.attributeValue);
