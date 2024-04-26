@@ -318,7 +318,6 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(int32_t id, const char* f
   return getObjectAttributePtr(world, id, field);
 }
 
-
 void setGameObjectAttr(int32_t id, GameobjAttributes& attr){
   modassert(idExists(world.sandbox, id), std::string("object does not exist: ") + std::to_string(id));
   setAttributes(world, id, attr);
@@ -326,47 +325,6 @@ void setGameObjectAttr(int32_t id, GameobjAttributes& attr){
 
 void setSingleGameObjectAttr(int32_t id, const char* field, AttributeValue value){
   setSingleGameObjectAttr(world, id, field, value);
-}
-
-
-ObjectAttrHandle getAttrHandle(objid id){
-  return ObjectAttrHandle {
-    .attr = getGameObjectAttr(id),
-    .id = id,
-  };
-}
-std::optional<glm::vec3> getVec3Attr(ObjectAttrHandle& attrHandle, std::string key){
-  auto attrValue = getVec3Attr(attrHandle.attr, key);
-  return attrValue; 
-}
-std::optional<glm::vec4> getVec4Attr(ObjectAttrHandle& attrHandle, std::string key){
-  auto attrValue = getVec4Attr(attrHandle.attr, key);
-  return attrValue; 
-}
-std::optional<std::string> getStrAttr(ObjectAttrHandle& attrHandle, const char* key){
-  auto attrValue = getStrAttr(attrHandle.attr, key);
-  return attrValue; 
-}
-std::optional<float> getFloatAttr(ObjectAttrHandle& attrHandle, const char* key){
-  auto attrValue = getFloatAttr(attrHandle.attr, key);
-  return attrValue; 
-}
-std::optional<int> getIntFromAttr(ObjectAttrHandle& attrHandle, const char* key){
-  auto attrValue = getIntFromAttr(attrHandle.attr, key);
-  return attrValue; 
-}
-
-std::optional<AttributeValue> getAttr(ObjectAttrHandle& attrHandle, const char* key){
-  auto attrValue = getAttr(attrHandle.attr, key);
-  return attrValue;
-}
-
-bool hasAttribute(ObjectAttrHandle& handle, const char* key){
-  return getAttr(handle, key).has_value();
-}
-bool hasAttribute(objid id, const char* key){
-  auto handle = getAttrHandle(id);
-  return hasAttribute(handle, key);
 }
 
 

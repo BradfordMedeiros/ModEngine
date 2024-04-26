@@ -98,20 +98,6 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(int32_t id, const char* f
 void setGameObjectAttr(int32_t id, GameobjAttributes& attr);
 void setSingleGameObjectAttr(int32_t id, const char* field, AttributeValue value);
 
-struct ObjectAttrHandle { 
-  GameobjAttributes attr;
-  objid id;
-};
-ObjectAttrHandle getAttrHandle(objid id);
-std::optional<glm::vec3> getVec3Attr(ObjectAttrHandle& attrHandle, std::string key);
-std::optional<glm::vec4> getVec4Attr(ObjectAttrHandle& attrHandle, std::string key);
-std::optional<std::string> getStrAttr(ObjectAttrHandle& attrHandle, const char* key);
-std::optional<float> getFloatAttr(ObjectAttrHandle& attrHandle, const char* key);
-std::optional<int> getIntFromAttr(ObjectAttrHandle& attrHandle, const char* key);
-std::optional<AttributeValue> getAttr(ObjectAttrHandle& attrHandle, const char* key);
-bool hasAttribute(ObjectAttrHandle& handle, const char* key);
-bool hasAttribute(objid id, const char* key);
-
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld);
 void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld);
 
