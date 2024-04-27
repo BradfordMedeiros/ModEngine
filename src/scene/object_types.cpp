@@ -19,32 +19,12 @@ bool nothingSetAttribute(GameObjectObj& obj, const char* field, AttributeValue v
   return false;
 }
 
-void nothingObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes){ }// do nothing 
-
-template<typename T>
-std::function<void(GameObjectObj& obj, GameobjAttributes& attr)> convertElementValue(std::function<void(T&, GameobjAttributes&)> getAttr) {   
-  return [getAttr](GameObjectObj& obj, GameobjAttributes& attr) -> void {
-    auto objInstance = std::get_if<T>(&obj);
-    assert(objInstance != NULL);
-    getAttr(*objInstance, attr);
-  };
-}
-
 template<typename T>
 std::function<std::optional<AttributeValuePtr>(GameObjectObj& obj, const char* field)> convertObjectAttribute(std::function<std::optional<AttributeValuePtr>(T&, const char* field)> getAttr) {   
   return [getAttr](GameObjectObj& obj, const char* field) -> std::optional<AttributeValuePtr> {
     auto objInstance = std::get_if<T>(&obj);
     assert(objInstance != NULL);
     return getAttr(*objInstance, field);
-  };
-}
-
-template<typename T>
-std::function<bool(GameObjectObj& obj, GameobjAttributes& attr, ObjectSetAttribUtil&)> convertElementSetValue(std::function<bool(T&, GameobjAttributes&, ObjectSetAttribUtil&)> setAttr) {   
-  return [setAttr](GameObjectObj& obj, GameobjAttributes& attr, ObjectSetAttribUtil& util) -> bool {
-    auto objInstance = std::get_if<T>(&obj);
-    assert(objInstance != NULL);
-    return setAttr(*objInstance, attr, util);
   };
 }
 
