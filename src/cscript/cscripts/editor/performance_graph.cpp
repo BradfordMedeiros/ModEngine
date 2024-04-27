@@ -28,12 +28,7 @@ void createObj(objid sceneId){
   modassert(objectId.has_value(), "cannot create performance-test-obj, probably already exists");
 
   auto planeObj = mainApi -> getGameObjectByName("performance-test-obj/Plane", sceneId, true);
-  GameobjAttributes newAttr {
-    .stringAttributes = {{ "texture", textureName }},
-    .numAttributes = {  },
-    .vecAttr = { .vec3 = {}, .vec4 = {} },
-  };
-  mainApi -> setGameObjectAttr(planeObj.value(), newAttr);
+  mainApi -> setGameObjectAttr(planeObj.value(), { GameobjAttribute{ .field = "texture", .attributeValue = textureName }});
 }
 
 struct CreateTexture {

@@ -75,10 +75,10 @@ std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh ob
   return pairs;  
 }
 
-void meshObjAttr(GameObjectMesh& meshObj, GameobjAttributes& _attributes){
-  _attributes.stringAttributes["mesh"] = meshObj.isRoot ? meshObj.rootMesh : "";
-  autoserializerGetAttr((char*)&meshObj, meshAutoserializer, _attributes);
-}
+//void meshObjAttr(GameObjectMesh& meshObj, GameobjAttributes& _attributes){
+//  _attributes.stringAttributes["mesh"] = meshObj.isRoot ? meshObj.rootMesh : "";
+//  autoserializerGetAttr((char*)&meshObj, meshAutoserializer, _attributes);
+//}
 
 std::optional<AttributeValuePtr> getMeshAttribute(GameObjectMesh& meshObj, const char* field){
   return getAttributePtr((char*)&meshObj, meshAutoserializer, field);

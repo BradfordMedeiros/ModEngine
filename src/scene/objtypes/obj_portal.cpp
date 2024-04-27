@@ -22,9 +22,6 @@ GameObjectPortal createPortal(GameobjAttributes& attr, ObjectTypeUtil& util){
   return obj;
 }
 
-void portalObjAttr(GameObjectPortal& portalObj, GameobjAttributes& _attributes){
-  autoserializerGetAttr((char*)&portalObj, portalAutoserializer, _attributes);
-}
 std::vector<std::pair<std::string, std::string>> serializePortal(GameObjectPortal& obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
   autoserializerSerialize((char*)&obj, portalAutoserializer, pairs);

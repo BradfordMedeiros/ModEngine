@@ -256,9 +256,6 @@ bool setEmitterAttribute(GameObjectEmitter& emitterObj, const char* field, Attri
 std::optional<AttributeValuePtr> getEmitterAttribute(GameObjectEmitter& obj, const char* field){
   return getAttributePtr((char*)&obj, emitterAutoserializer, field);
 }
-void emitterObjAttr(GameObjectEmitter& emitterObj, GameobjAttributes& _attributes){
-  autoserializerGetAttr((char*)&emitterObj, emitterAutoserializer, _attributes);
-}
 
 std::vector<std::pair<std::string, std::string>> serializeEmitter(GameObjectEmitter& emitterObj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;

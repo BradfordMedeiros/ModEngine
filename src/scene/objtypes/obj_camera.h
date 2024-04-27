@@ -15,7 +15,6 @@ struct GameObjectCamera {
 
 GameObjectCamera createCamera(GameobjAttributes& attr, ObjectTypeUtil& util);
 std::vector<std::pair<std::string, std::string>> serializeCamera(GameObjectCamera obj, ObjectSerializeUtil& util);
-void cameraObjAttr(GameObjectCamera& cameraObj, GameobjAttributes& _attributes);
 std::optional<AttributeValuePtr> getCameraAttribute(GameObjectCamera& obj, const char* field);
 bool setCameraAttribute(GameObjectCamera& cameraObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&);
 

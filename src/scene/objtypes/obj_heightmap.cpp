@@ -33,9 +33,9 @@ std::optional<AttributeValuePtr> getHeightmapAttribute(GameObjectHeightmap& obj,
   //modassert(false, "getHeightmapAttribute not yet implemented");
   return std::nullopt;
 }
-void heightmapObjAttr(GameObjectHeightmap& heightmapObj, GameobjAttributes& _attributes){
-  autoserializerGetAttr((char*)&heightmapObj, heightmapAutoserializer, _attributes);
-}
+//void heightmapObjAttr(GameObjectHeightmap& heightmapObj, GameobjAttributes& _attributes){
+//  autoserializerGetAttr((char*)&heightmapObj, heightmapAutoserializer, _attributes);
+//}
 
 /*bool setHeightmapAttributes(GameObjectHeightmap& heightmapObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   auto oldMapName = heightmapObj.mapName;

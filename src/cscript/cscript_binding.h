@@ -43,8 +43,7 @@ struct CustomApiBindings {
   int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth);
   void (*freeLine)(int32_t lineid);
   std::optional<std::string> (*getGameObjNameForId)(int32_t id);
-  GameobjAttributes (*getGameObjectAttr)(int32_t id);
-  void (*setGameObjectAttr)(int32_t id, GameobjAttributes& attr);
+  void (*setGameObjectAttr)(int32_t id, std::vector<GameobjAttribute> attrs);
   void (*setSingleGameObjectAttr)(int32_t id, const char* field, AttributeValue value);
   glm::vec3 (*getGameObjectPos)(int32_t index, bool world);
   void (*setGameObjectPosition)(int32_t index, glm::vec3 pos, bool world);

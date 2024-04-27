@@ -59,10 +59,6 @@ GameObjectSound createSound(GameobjAttributes& attr, ObjectTypeUtil& util){
   return obj;
 }
 
-void soundObjAttr(GameObjectSound& soundObj, GameobjAttributes& _attributes){
-   autoserializerGetAttr((char*)&soundObj, soundAutoserializer, _attributes);
-}
-
 std::vector<std::pair<std::string, std::string>> serializeSound(GameObjectSound& obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
   autoserializerSerialize((char*)&obj, soundAutoserializer, pairs);

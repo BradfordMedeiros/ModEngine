@@ -310,25 +310,22 @@ std::optional<std::string> getGameObjectName(int32_t index){
   return getGameObject(world, index).name;
 }
 
-GameobjAttributes getGameObjectAttr(int32_t id){
-  return objectAttributes(world, id);
-}
-
 std::optional<AttributeValuePtr> getObjectAttributePtr(int32_t id, const char* field){
   return getObjectAttributePtr(world, id, field);
 }
+std::optional<AttributeValue> getObjectAttribute(int32_t id, const char* field){
+  return getObjectAttribute(world, id, field);
+}
 
-void setGameObjectAttr(int32_t id, GameobjAttributes& attr){
+void setGameObjectAttr(int32_t id, std::vector<GameobjAttribute> attrs){
   modassert(idExists(world.sandbox, id), std::string("object does not exist: ") + std::to_string(id));
-  setAttributes(world, id, attr);
+  setAttributes(world, id, attrs);
 }
 
 void setSingleGameObjectAttr(int32_t id, const char* field, AttributeValue value){
   setSingleGameObjectAttr(world, id, field, value);
 }
 
-
-//////////////////////////////////////////////////////////////
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld){
   return gameobjectPosition(world, index, isWorld);
 }

@@ -43,9 +43,6 @@ std::vector<std::pair<std::string, std::string>> serializeCamera(GameObjectCamer
   autoserializerSerialize((char*)&obj, cameraAutoserializer, pairs);
   return pairs;
 }
-void cameraObjAttr(GameObjectCamera& cameraObj, GameobjAttributes& _attributes){
-  autoserializerGetAttr((char*)&cameraObj, cameraAutoserializer, _attributes);
-}
 
 std::optional<AttributeValuePtr> getCameraAttribute(GameObjectCamera& obj, const char* field){
   return getAttributePtr((char*)&obj, cameraAutoserializer, field);

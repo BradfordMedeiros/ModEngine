@@ -67,10 +67,6 @@ std::optional<AttributeValuePtr> getLightAttribute(GameObjectLight& obj, const c
   return getAttributePtr((char*)&obj, lightAutoserializer, field);
 }
 
-void lightObjAttr(GameObjectLight& lightObj, GameobjAttributes& _attributes){
-  autoserializerGetAttr((char*)&lightObj, lightAutoserializer, _attributes);
-}
-
 std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight& obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
   autoserializerSerialize((char*)&obj, lightAutoserializer, pairs);

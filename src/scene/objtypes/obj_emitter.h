@@ -18,7 +18,6 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
 void removeEmitterObj(GameObjectEmitter& heightmapObj, ObjectRemoveUtil& util);
 bool setEmitterAttribute(GameObjectEmitter& obj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&);
 std::optional<AttributeValuePtr> getEmitterAttribute(GameObjectEmitter& obj, const char* field);
-void emitterObjAttr(GameObjectEmitter& emitterObj, GameobjAttributes& _attributes);
 std::vector<std::pair<std::string, std::string>> serializeEmitter(GameObjectEmitter& emitterObj, ObjectSerializeUtil& util);
 
 #endif

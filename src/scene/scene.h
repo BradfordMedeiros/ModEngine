@@ -79,12 +79,11 @@ struct SingleObjDeserialization {
 };
 std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serializedObj, objid id, bool useObjId);
 
-GameobjAttributes objectAttributes(World& world, objid id);
-
 std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, const char* field);
+std::optional<AttributeValue> getObjectAttribute(World& world, objid id, const char* field);
 void setSingleGameObjectAttr(World& world, objid id, const char* field, AttributeValue value);
 
-void setAttributes(World& world, objid id, GameobjAttributes& attr);
+void setAttributes(World& world, objid id, std::vector<GameobjAttribute> attrs);
 
 std::optional<std::string> getTextureById(World& world, int id);
 std::string serializeScene(World& world, objid sceneId, bool includeIds);

@@ -1163,34 +1163,29 @@ std::optional<AttributeValue> getObjectAttribute(World& world, objid id, const c
   }
 
   auto vec4Ptr = std::get_if<glm::vec4*>(&attrPtr.value());
+  if (vec4Ptr){
+    modassert(false, "vec4Ptr not yet implemented");
+  }
+
   auto stringPtr = std::get_if<std::string*>(&attrPtr.value());
+  if (stringPtr){
+    return **stringPtr;
+  }
+
+
   auto floatPtr = std::get_if<float*>(&attrPtr.value());
+  if (floatPtr){
+    return **floatPtr;
+  }
 
-  modassert(false, "getObjectAttribute not implemented");
+  auto boolPtr = std::get_if<bool*>(&attrPtr.value());
+  if (boolPtr){
+    modassert(false, "boolPtr not yet implemented");
+  }
 
-//typedef std::variant< bool*, int*, uint*, glm::quat*> AttributeValuePtr;
-
-
-
-
-      //std::optional<glm::vec4*> tintValue = getTypeFromAttr<glm::vec4>(getObjectAttributePtr(testObject.value(), "tint"));
-
+  modassert(false, std::string("getObjectAttribute not implemented for this type, field: ") + std::string(field));
+  return std::nullopt;
 }
-
-
-
-GameobjAttributes objectAttributes(World& world, objid id){
-  GameObject& gameobj = getGameObject(world, id);
-  auto allFields = allFieldNames(gameobj);
-
-  GameObjectObj& gameobjObj = world.objectMapping.at(id);
-  GameobjAttributes attr = gameobj.additionalAttr;
-  objectAttributes(gameobjObj, attr);
-  getAllAttributes(gameobj, attr);
-  return attr;
-}
-
-
 
 void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool velocitySet, bool physicsEnableChanged){
   //std::cout << "rigid bodies old: " << world.rigidbodys.size() << std::endl;
@@ -1273,8 +1268,7 @@ void applyAttributeDelta(World& world, objid id, std::string field, AttributeVal
   setSingleGameObjectAttr(world, id, field.c_str(), attributeSum);
 }
 
-void setAttributes(World& world, objid id, GameobjAttributes& attr){
-  auto allAttrs = allKeysAndAttributes(attr);
+void setAttributes(World& world, objid id, std::vector<GameobjAttribute> allAttrs){
   for (auto &attr : allAttrs){
     setSingleGameObjectAttr(world, id, attr.field.c_str(), attr.attributeValue);
   }

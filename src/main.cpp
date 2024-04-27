@@ -1318,7 +1318,6 @@ int main(int argc, char* argv[]){
     .drawLine = addLineNextCycle,
     .freeLine = [](objid lineId) -> void { freeLine(lineData, lineId); } ,
     .getGameObjNameForId = getGameObjectName,
-    .getGameObjectAttr = getGameObjectAttr,
     .setGameObjectAttr = setGameObjectAttr,
     .setSingleGameObjectAttr = setSingleGameObjectAttr,
     .getGameObjectPos = getGameObjectPosition,

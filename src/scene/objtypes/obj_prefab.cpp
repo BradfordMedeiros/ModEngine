@@ -36,9 +36,7 @@ GameObjectPrefab createPrefabObj(GameobjAttributes& attr, ObjectTypeUtil& util){
 		.sceneId = sceneId,
 	};
 }
-void prefabObjAttr(GameObjectPrefab& prefabObj, GameobjAttributes& _attributes){
 
-}
 std::vector<std::pair<std::string, std::string>> serializePrefabObj(GameObjectPrefab& obj, ObjectSerializeUtil& util){
 	return {};
 }

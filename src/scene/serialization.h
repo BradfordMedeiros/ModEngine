@@ -74,7 +74,6 @@ std::string serializeObj(objid id, objid groupId, GameObject& gameobject, std::v
 
 void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::string payload);
 
-void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr);
 std::optional<AttributeValuePtr> getAttributePtr(GameObject& gameobj, const char* field);
 
 bool setAttribute(GameObject& gameobj, const char* field, AttributeValue value, ObjectSetAttribUtil& util);

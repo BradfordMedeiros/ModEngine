@@ -403,10 +403,6 @@ std::string serializeObj(
   return sceneData;  
 }
 
-void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
-  autoserializerGetAttr((char*)&gameobj, gameobjSerializer, _attr);
-}
-
 std::optional<AttributeValuePtr> getAttributePtr(GameObject& gameobj, const char* field){
   return getAttributePtr((char*)&gameobj, gameobjSerializer, field);
 }

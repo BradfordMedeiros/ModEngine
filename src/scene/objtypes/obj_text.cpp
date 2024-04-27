@@ -98,10 +98,6 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   return obj;
 }
 
-void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes){
-  autoserializerGetAttr((char*)&textObj, textAutoserializer, attributes);
-}
-
 std::vector<std::pair<std::string, std::string>> serializeText(GameObjectUIText& obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
   autoserializerSerialize((char*)&obj, textAutoserializer, pairs);
