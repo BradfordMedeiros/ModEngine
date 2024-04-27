@@ -123,6 +123,18 @@ T unwrapAttr(AttributeValue value) {
   return *unwrappedValue;
 }
 
+template<typename T>
+std::optional<T> unwrapAttrOpt(std::optional<AttributeValue> value) {   
+  if (!value.has_value()){
+    return std::nullopt;
+  }
+  T* unwrappedValue = std::get_if<T>(&(value.value()));
+  if (unwrappedValue == NULL){
+    assert(false);
+  }
+  return *unwrappedValue;
+}
+
 AttributeValue parseAttributeValue(std::string payload);
 AttributeValue addAttributes(AttributeValue one, AttributeValue two);
 std::string print(AttributeValue& value);
