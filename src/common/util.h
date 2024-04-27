@@ -114,6 +114,7 @@ std::optional<T*> getTypeFromAttr(std::optional<AttributeValuePtr> ptrValue){
   return valuePtr;
 }
 
+
 template<typename T>
 T unwrapAttr(AttributeValue value) {   
   T* unwrappedValue = std::get_if<T>(&value);
@@ -131,6 +132,18 @@ std::optional<T> unwrapAttrOpt(std::optional<AttributeValue> value) {
   T* unwrappedValue = std::get_if<T>(&(value.value()));
   if (unwrappedValue == NULL){
     assert(false);
+  }
+  return *unwrappedValue;
+}
+
+template<typename T>
+std::optional<T> maybeUnwrapAttrOpt(std::optional<AttributeValue> value) {   
+  if (!value.has_value()){
+    return std::nullopt;
+  }
+  T* unwrappedValue = std::get_if<T>(&(value.value()));
+  if (unwrappedValue == NULL){
+    return std::nullopt;
   }
   return *unwrappedValue;
 }
