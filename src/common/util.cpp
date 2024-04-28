@@ -604,7 +604,7 @@ AttributeValue addAttributes(AttributeValue one, AttributeValue two){
     modassert(fValueTwo != NULL, "Incompatible types between float value one and two");
     return *fValueOne + *valueTwo;
   }
-  modassert(false, "string values not supported");
+  modassert(false, "addAttributes value types not supported");
   return 0;
 }
 

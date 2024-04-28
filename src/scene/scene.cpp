@@ -1164,7 +1164,7 @@ std::optional<AttributeValue> getObjectAttribute(World& world, objid id, const c
 
   auto vec4Ptr = std::get_if<glm::vec4*>(&attrPtr.value());
   if (vec4Ptr){
-    modassert(false, "vec4Ptr not yet implemented");
+    return **vec4Ptr;
   }
 
   auto stringPtr = std::get_if<std::string*>(&attrPtr.value());
@@ -1194,8 +1194,8 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool veloci
   }
   //std::cout << "rigid bodies new: " << world.rigidbodys.size() << std::endl;
 
-  auto transformation = gameobjectTransformation(world, id, false);
-  physicsLocalTransformSet(world, id, transformation);
+  //auto transformation = gameobjectTransformation(world, id, false);
+  physicsLocalTransformSet(world, id, gameobj.transformation);
   btRigidBody* body = world.rigidbodys.find(id) != world.rigidbodys.end() ? world.rigidbodys.at(id).body : NULL;
 
   if (body != NULL){
@@ -1265,6 +1265,7 @@ void applyAttributeDelta(World& world, objid id, std::string field, AttributeVal
   auto attribute = getObjectAttribute(world, id, field.c_str());
   modassert(attribute.has_value(), "attribute does not have a value: " + field);
   auto attributeSum = addAttributes(attribute.value(), delta);
+  //modlog("emitter apply attribute", std::string(field) + ", adding value: " + print(delta) + ", new value: " + print(attributeSum));
   setSingleGameObjectAttr(world, id, field.c_str(), attributeSum);
 }
 

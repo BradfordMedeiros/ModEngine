@@ -41,8 +41,8 @@ std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
       auto newKey = key.substr(1, key.size());
       values[newKey] = EmitterDelta {
         .attributeName = newKey,
-        .value = glm::vec4(0.f, 0.f, 0.f, 0.f),
-        .variance = glm::vec4(0.f, 0.f, 0.f, 0.f),
+        .value = glm::vec3(0.f, 0.f, 0.f),
+        .variance = glm::vec3(0.f, 0.f, 0.f),
         .lifetimeEffect = {},
       };
     }
