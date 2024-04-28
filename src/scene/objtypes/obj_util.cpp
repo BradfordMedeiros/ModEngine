@@ -188,26 +188,25 @@ void autoserializeHandleTextureLoading(char* structAddress, AutoSerialize& value
   }
 }
 
-
-void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttributes& attr){
+void createAutoSerializeAttr(char* structAddress, AutoSerialize& value, std::optional<AttributeValue>&& attrValue){
   AutoSerializeBool* boolValue = std::get_if<AutoSerializeBool>(&value);
   if (boolValue != NULL){
     bool* address = (bool*)(((char*)structAddress) + boolValue -> structOffset);
-    attrSetCreate(unwrapAttrOpt<std::string>(getAttributeValue(attr, boolValue -> field)), address, boolValue -> onString, boolValue -> offString, boolValue -> defaultValue);
+    attrSetCreate(unwrapAttrOpt<std::string>(attrValue), address, boolValue -> onString, boolValue -> offString, boolValue -> defaultValue);
     return;
   }
 
   AutoSerializeString* strValue = std::get_if<AutoSerializeString>(&value);
   if (strValue != NULL){
     std::string* address = (std::string*)(((char*)structAddress) + strValue -> structOffset);
-    attrSetString(unwrapAttrOpt<std::string>(getAttributeValue(attr, strValue -> field)), address, strValue -> defaultValue);
+    attrSetString(unwrapAttrOpt<std::string>(attrValue), address, strValue -> defaultValue);
     return;
   }
 
   AutoSerializeForceString* strForcedValue = std::get_if<AutoSerializeForceString>(&value);
   if (strForcedValue != NULL){
     std::string* address = (std::string*)(((char*)structAddress) + strForcedValue -> structOffset);
-    attrForceSet(getAttributeValue(attr, strForcedValue -> field), address, strForcedValue -> defaultValue);
+    attrForceSet(attrValue, address, strForcedValue -> defaultValue);
     return;
   }
 
@@ -215,28 +214,28 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
   if (floatValue != NULL){
     float* address = (float*)(((char*)structAddress) + floatValue -> structOffset);
     bool* hasValueAddress = (!floatValue -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + floatValue -> structOffsetFiller.value());
-    attrSetFloat(unwrapAttrOpt<float>(getAttributeValue(attr, floatValue -> field)), address, hasValueAddress, floatValue -> defaultValue);
+    attrSetFloat(unwrapAttrOpt<float>(attrValue), address, hasValueAddress, floatValue -> defaultValue);
     return;
   }
 
   AutoSerializeTextureLoaderManual* textureLoaderManual = std::get_if<AutoSerializeTextureLoaderManual>(&value);
   if (textureLoaderManual != NULL){
     TextureLoadingData* address = (TextureLoadingData*)(((char*)structAddress) + textureLoaderManual -> structOffset);
-    attrSetLoadTextureManual(unwrapAttrOpt<std::string>(getAttributeValue(attr, textureLoaderManual -> field)), address, textureLoaderManual -> defaultValue);
+    attrSetLoadTextureManual(unwrapAttrOpt<std::string>(attrValue), address, textureLoaderManual -> defaultValue);
     return;
   }
 
   AutoSerializeInt* intValue = std::get_if<AutoSerializeInt>(&value);
   if (intValue != NULL){
     int* address = (int*)(((char*)structAddress) + intValue -> structOffset);
-    attrSetInt(unwrapAttrOpt<float>(getAttributeValue(attr, intValue -> field)), address, intValue -> defaultValue);    
+    attrSetInt(unwrapAttrOpt<float>(attrValue), address, intValue -> defaultValue);    
     return;
   }
 
   AutoSerializeUInt* uintValue = std::get_if<AutoSerializeUInt>(&value);
   if (uintValue != NULL){
     uint* address = (uint*)(((char*)structAddress) + uintValue -> structOffset);
-    attrSetUint(unwrapAttrOpt<float>(getAttributeValue(attr, uintValue -> field)), address, uintValue -> defaultValue);
+    attrSetUint(unwrapAttrOpt<float>(attrValue), address, uintValue -> defaultValue);
     return;
   }
 
@@ -244,7 +243,7 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
   if (vec2Value != NULL){
     glm::vec2* address = (glm::vec2*)(((char*)structAddress) + vec2Value -> structOffset);
     bool* hasValueAddress = (!vec2Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec2Value -> structOffsetFiller.value());
-    attrSetVec2(unwrapAttrOpt<std::string>(getAttributeValue(attr, vec2Value -> field)), address, hasValueAddress, vec2Value -> defaultValue);
+    attrSetVec2(unwrapAttrOpt<std::string>(attrValue), address, hasValueAddress, vec2Value -> defaultValue);
     return;
   }
 
@@ -252,7 +251,7 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
   if (vec3Value != NULL){
     glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);
     bool* hasValueAddress = (!vec3Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec3Value -> structOffsetFiller.value());
-    attrSetVec3(unwrapAttrOpt<glm::vec3>(getAttributeValue(attr, vec3Value -> field)), address, hasValueAddress, vec3Value -> defaultValue);
+    attrSetVec3(unwrapAttrOpt<glm::vec3>(attrValue), address, hasValueAddress, vec3Value -> defaultValue);
     return;
   }
 
@@ -260,52 +259,55 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
   if (vec4Value != NULL){
     glm::vec4* address = (glm::vec4*)(((char*)structAddress) + vec4Value -> structOffset);
     bool* hasValueAddress = (!vec4Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec4Value -> structOffsetFiller.value());
-    attrSetVec4(unwrapAttrOpt<glm::vec4>(getAttributeValue(attr, vec4Value -> field)), address, hasValueAddress, vec4Value -> defaultValue);
+    attrSetVec4(unwrapAttrOpt<glm::vec4>(attrValue), address, hasValueAddress, vec4Value -> defaultValue);
     return;
   }
 
   AutoSerializeRotation* rotValue = std::get_if<AutoSerializeRotation>(&value);
   if (rotValue != NULL){
     glm::quat* address = (glm::quat*)(((char*)structAddress) + rotValue -> structOffset);
-    attrSetCreateQuat(unwrapAttrOpt<glm::vec4>(getAttributeValue(attr, rotValue -> field)), address, rotValue -> defaultValue);
+    attrSetCreateQuat(unwrapAttrOpt<glm::vec4>(attrValue), address, rotValue -> defaultValue);
     return;
   }
 
   AutoSerializeEnums* enumsValue = std::get_if<AutoSerializeEnums>(&value);
   if (enumsValue != NULL){
     int* address = (int*)(((char*)structAddress) + enumsValue -> structOffset);
-    attrSetEnums(unwrapAttrOpt<std::string>(getAttributeValue(attr, enumsValue -> field)), address, enumsValue -> enums, enumsValue -> enumStrings, enumsValue -> defaultValue, enumsValue -> field);
+    attrSetEnums(unwrapAttrOpt<std::string>(attrValue), address, enumsValue -> enums, enumsValue -> enumStrings, enumsValue -> defaultValue, enumsValue -> field);
     return;
   }
 
   AutoSerializeCustom* customValue = std::get_if<AutoSerializeCustom>(&value);
   if (customValue != NULL){
     int* address = (int*)(((char*)structAddress) + customValue -> structOffset);
+
     if (customValue -> fieldType == ATTRIBUTE_VEC3){
-      if (attr.vecAttr.vec3.find(customValue -> field) == attr.vecAttr.vec3.end()){
+      auto vec3Value = maybeUnwrapAttrOpt<glm::vec3>(attrValue);
+      if (!vec3Value.has_value()){
         customValue -> deserialize(address, NULL);
       }else{
-        customValue -> deserialize(address, &(attr.vecAttr.vec3.at(customValue -> field)));
+        customValue -> deserialize(address, &vec3Value.value());
       }
     }else if (customValue -> fieldType == ATTRIBUTE_VEC4){
-      if (attr.vecAttr.vec4.find(customValue -> field) == attr.vecAttr.vec4.end()){
+      auto vec4Value = maybeUnwrapAttrOpt<glm::vec4>(attrValue);
+      if (!vec4Value.has_value()){
         customValue -> deserialize(address, NULL);
       }else{
-        customValue -> deserialize(address, &(attr.vecAttr.vec4.at(customValue -> field)));
+        customValue -> deserialize(address, &vec4Value.value());
       }
     }else if (customValue -> fieldType == ATTRIBUTE_STRING){
-      if (attr.stringAttributes.find(customValue -> field) == attr.stringAttributes.end()){
+      auto strValue = maybeUnwrapAttrOpt<std::string>(attrValue);
+      if (!strValue.has_value()){
         customValue -> deserialize(address, NULL);
       }else{
-        customValue -> deserialize(address, &(attr.stringAttributes.at(customValue -> field)));
+        customValue -> deserialize(address, &strValue.value());
       }
     }else if (customValue -> fieldType == ATTRIBUTE_FLOAT){
-      if (attr.numAttributes.find(customValue -> field) == attr.numAttributes.end()){
+      auto floatValue = maybeUnwrapAttrOpt<float>(attrValue);
+      if (!floatValue.has_value()){
         customValue -> deserialize(address, NULL);
       }else{
-        std::cout << "Custom value: " << customValue -> field << ", " << attr.numAttributes.at(customValue -> field) << std::endl;
-        float value = attr.numAttributes.at(customValue -> field);
-        customValue -> deserialize(address, &value);
+        customValue -> deserialize(address, &floatValue.value());
       }
     }else{
       modassert(false, "custom value -> invalid field type");
@@ -322,7 +324,7 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
 }
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr){
   for (auto &value : values){
-    createAutoSerialize(structAddress, value, attr);
+    createAutoSerializeAttr(structAddress, value, getAttributeValue(attr, serializerFieldName(value).c_str()));
   }
 }
 void createAutoSerializeWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util){
@@ -496,7 +498,7 @@ void autoserializerSerialize(char* structAddress, std::vector<AutoSerialize>& va
 
 std::optional<AutoSerialize*> getAutoserializeByField(std::vector<AutoSerialize>& values, const char* field){
   for (auto &value : values){
-    if (serializerName(value) == field){
+    if (serializerFieldName(value) == field){
       return &value;
     }
   }
@@ -604,7 +606,6 @@ std::optional<AttributeValuePtr> getAttributePtr(char* structAddress, std::vecto
   }
   return std::nullopt;
 }
-
 
 bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, const char* fieldName, std::optional<AttributeValue> attributeValue){
   AutoSerializeBool* boolValue = std::get_if<AutoSerializeBool>(&value);
@@ -847,7 +848,7 @@ bool autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<Au
   return setAttr;
 }
 
-std::string serializerName(AutoSerialize& serializer){
+std::string serializerFieldName(AutoSerialize& serializer){
   AutoSerializeBool* boolSerializer = std::get_if<AutoSerializeBool>(&serializer);
   if (boolSerializer != NULL){
     return boolSerializer -> field;
@@ -915,7 +916,7 @@ std::string serializerName(AutoSerialize& serializer){
 
 std::optional<AutoSerialize> serializerByName(std::vector<AutoSerialize>& serializer, std::string& name){
   for (auto &value : serializer){
-    if (serializerName(value) == name){
+    if (serializerFieldName(value) == name){
       return value;
     }
   }
@@ -925,7 +926,7 @@ std::optional<AutoSerialize> serializerByName(std::vector<AutoSerialize>& serial
 std::set<std::string> serializerFieldNames(std::vector<AutoSerialize>& serializers){
   std::set<std::string> fields;
   for (auto &autoserializer : serializers){
-    fields.insert(serializerName(autoserializer));
+    fields.insert(serializerFieldName(autoserializer));
   }
   return fields;
 }
