@@ -322,9 +322,22 @@ void createAutoSerializeAttr(char* structAddress, AutoSerialize& value, std::opt
 
   modassert(false, "autoserialize type not found");
 }
+
+
+void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, std::vector<GameobjAttribute>& attr){
+  for (auto &value : values){
+    createAutoSerializeAttr(structAddress, value, getAttributeValue(attr, serializerFieldName(value).c_str()));
+  }
+}
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr){
   for (auto &value : values){
     createAutoSerializeAttr(structAddress, value, getAttributeValue(attr, serializerFieldName(value).c_str()));
+  }
+}
+void createAutoSerializeWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, std::vector<GameobjAttribute>& attr, ObjectTypeUtil& util){
+  createAutoSerialize(structAddress, values, attr);
+  for (auto &value : values){
+    autoserializeHandleTextureLoading(structAddress, value, util.ensureTextureLoaded, util.releaseTexture);
   }
 }
 void createAutoSerializeWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util){
