@@ -217,9 +217,9 @@ std::vector<AutoSerialize> gameobjSerializer {
 
 
 void assertCoreType(AttributeValueType type, std::string& fieldname, std::string& payload){
-  auto autoserializer = serializerByName(gameobjSerializer, fieldname);
+  auto autoserializer = getAutoserializeByField(gameobjSerializer, fieldname.c_str());
   if (autoserializer.has_value()){
-    auto serializerType = typeForSerializer(autoserializer.value());
+    auto serializerType = typeForSerializer(*(autoserializer.value()));
     modassert(serializerType == type, std::string("mismatch type for: ") + fieldname + " should be: " + attributeTypeStr(serializerType) + " payload = " + payload);
   }
 }

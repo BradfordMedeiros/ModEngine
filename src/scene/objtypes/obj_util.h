@@ -166,7 +166,6 @@ std::optional<AttributeValuePtr> autoserializerGetAttrPtr(char* structAddress, A
 std::optional<AttributeValuePtr> getAttributePtr(char* structAddress, std::vector<AutoSerialize>& autoserializerConfig, const char* field);
 bool autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, const char* field, AttributeValue value, ObjectSetAttribUtil& util);
 std::string serializerFieldName(AutoSerialize& serializer);
-std::optional<AutoSerialize> serializerByName(std::vector<AutoSerialize>& serializer, std::string& name);
 std::set<std::string> serializerFieldNames(std::vector<AutoSerialize>& serializers);
 AttributeValueType typeForSerializer(AutoSerialize& serializer);
 

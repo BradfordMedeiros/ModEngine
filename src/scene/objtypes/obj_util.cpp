@@ -838,13 +838,12 @@ bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, const char
 }
 
 bool autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, const char* field, AttributeValue attrValue, ObjectSetAttribUtil& util){
-  std::string serializerField(field);
-  auto serializer = serializerByName(values, serializerField);
+  auto serializer = getAutoserializeByField(values, field);
   if (!serializer.has_value()){
     return false;
   }
-  bool setAttr = autoserializerSetAttr(structAddress, serializer.value(), field, attrValue);
-  autoserializeHandleTextureLoading(structAddress, serializer.value(), util.ensureTextureLoaded, util.releaseTexture);
+  bool setAttr = autoserializerSetAttr(structAddress, *(serializer.value()), field, attrValue);
+  autoserializeHandleTextureLoading(structAddress, *(serializer.value()), util.ensureTextureLoaded, util.releaseTexture);
   return setAttr;
 }
 
@@ -912,15 +911,6 @@ std::string serializerFieldName(AutoSerialize& serializer){
   }
   modassert(false, "could not find serializer");
   return "";
-}
-
-std::optional<AutoSerialize> serializerByName(std::vector<AutoSerialize>& serializer, std::string& name){
-  for (auto &value : serializer){
-    if (serializerFieldName(value) == name){
-      return value;
-    }
-  }
-  return std::nullopt;
 }
 
 std::set<std::string> serializerFieldNames(std::vector<AutoSerialize>& serializers){
