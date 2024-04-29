@@ -1040,3 +1040,12 @@ std::optional<AttributeValue> getAttributeValue(GameobjAttributes& attributes, c
   }
   return std::nullopt;
 }
+
+std::optional<AttributeValue> getAttributeValue(std::vector<GameobjAttribute>& attrs, const char* field){
+  for (auto &attr : attrs){
+    if (attr.field == field){
+      return attr.attributeValue;
+    }
+  }
+  return std::nullopt;
+}

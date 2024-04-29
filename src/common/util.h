@@ -362,6 +362,7 @@ std::optional<std::string> subelementTargetName(std::string& name);
 
 std::vector<GameobjAttribute> allKeysAndAttributes(GameobjAttributes& attributes);
 std::optional<AttributeValue> getAttributeValue(GameobjAttributes& attributes, const char* field);
+std::optional<AttributeValue> getAttributeValue(std::vector<GameobjAttribute>& attrs, const char* field);
 
 struct Token {
   std::string target;
