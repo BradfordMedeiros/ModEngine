@@ -1049,12 +1049,12 @@ void removeAllScenesFromWorld(World& world){
 
 GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, AttrChildrenPair& attrWithChildren, std::map<std::string, GameobjAttributes>& submodelAttributes, bool returnOnly){
   GameobjAttributes& attributes = attrWithChildren.attr;
-
-  auto idAttr = getIdFromAttr(attributes);
+  auto allAttrs = allKeysAndAttributes(attributes);
+  auto idAttr = getIdFromAttr(allAttrs);
   auto idToAdd = idAttr.has_value() ? idAttr.value() : getUniqueObjId();
 
   GameObjPair gameobjPair{
-    .gameobj = gameObjectFromFields(name, idToAdd, allKeysAndAttributes(attributes), getObjautoserializerFields(name)),
+    .gameobj = gameObjectFromFields(name, idToAdd, allAttrs, getObjautoserializerFields(name)),
   };
   std::vector<objid> idsAdded = { gameobjPair.gameobj.id }; 
   auto getId = createGetUniqueObjId(idsAdded);

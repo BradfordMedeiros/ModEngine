@@ -447,15 +447,6 @@ GameobjAttributes getAdditionalAttr(std::vector<GameobjAttribute>& attributes, s
   return extraLabels;
 }
 
-std::optional<objid> getIdFromAttr(GameobjAttributes& attributes){
-  auto idAttr = getAttributeValue(attributes, "id");
-  if (!idAttr.has_value()){
-    return std::nullopt;
-  }
-  float idFloat = unwrapAttr<float>(idAttr.value());
-  int id = static_cast<int>(idFloat);
-  return id;
-}
 std::optional<objid> getIdFromAttr(std::vector<GameobjAttribute>& attributes){
   auto idAttr = getAttributeValue(attributes, "id");
   if (!idAttr.has_value()){
