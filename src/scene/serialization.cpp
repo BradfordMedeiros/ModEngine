@@ -375,7 +375,7 @@ std::string serializeObj(
 
   // custom autoserializer
   if (children.size() > 0){
-    sceneData = sceneData + gameobjectName + ":child:" + join(children, ',') + "\n";  
+    sceneData = sceneData + gameobjectName + ":child:" + join(children, ',') + "\n";
   }
 
   if (includeIds){
@@ -456,12 +456,19 @@ std::optional<objid> getIdFromAttr(GameobjAttributes& attributes){
   int id = static_cast<int>(idFloat);
   return id;
 }
+std::optional<objid> getIdFromAttr(std::vector<GameobjAttribute>& attributes){
+  auto idAttr = getAttributeValue(attributes, "id");
+  if (!idAttr.has_value()){
+    return std::nullopt;
+  }
+  float idFloat = unwrapAttr<float>(idAttr.value());
+  int id = static_cast<int>(idFloat);
+  return id;
+}
 
-GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes, std::set<std::string> objautoserializerFields){
-  auto allAttrs = allKeysAndAttributes(attributes);
-
+GameObject gameObjectFromFields(std::string name, objid id, std::vector<GameobjAttribute> attributes, std::set<std::string> objautoserializerFields){
   GameObject object = { .id = id, .name = name };
-  createAutoSerialize((char*)&object, gameobjSerializer, allAttrs);
+  createAutoSerialize((char*)&object, gameobjSerializer, attributes);
 
   auto idAttr = getIdFromAttr(attributes);
   if (idAttr.has_value()){;
@@ -473,7 +480,7 @@ GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes at
     autoserializerFields.insert(field);
   }
 
-  object.additionalAttr = getAdditionalAttr(allAttrs, autoserializerFields);
+  object.additionalAttr = getAdditionalAttr(attributes, autoserializerFields);
   return object;
 }
 

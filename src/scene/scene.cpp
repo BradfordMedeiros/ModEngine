@@ -1054,7 +1054,7 @@ GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name,
   auto idToAdd = idAttr.has_value() ? idAttr.value() : getUniqueObjId();
 
   GameObjPair gameobjPair{
-    .gameobj = gameObjectFromFields(name, idToAdd, attributes, getObjautoserializerFields(name)),
+    .gameobj = gameObjectFromFields(name, idToAdd, allKeysAndAttributes(attributes), getObjautoserializerFields(name)),
   };
   std::vector<objid> idsAdded = { gameobjPair.gameobj.id }; 
   auto getId = createGetUniqueObjId(idsAdded);

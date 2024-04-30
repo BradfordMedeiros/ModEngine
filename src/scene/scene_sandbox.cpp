@@ -74,9 +74,9 @@ SceneDeserialization createSceneFromParsedContent(
         std::atoi(attrWithChildren.attr.stringAttributes.at("id").c_str()) : 
         getNewObjectId();
 
-      gameobjs[name] = gameObjectFromFields(name, id, attrWithChildren.attr, getObjautoserializerFields(objName));
+      gameobjs[name] = gameObjectFromFields(name, id, allKeysAndAttributes(attrWithChildren.attr), getObjautoserializerFields(objName));
     }else{
-      gameobjs[name] = gameObjectFromFields(name, scene.rootId, attrWithChildren.attr, getObjautoserializerFields(objName)); 
+      gameobjs[name] = gameObjectFromFields(name, scene.rootId, allKeysAndAttributes(attrWithChildren.attr), getObjautoserializerFields(objName)); 
     }
   }
 
@@ -144,7 +144,9 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
     };
 
     auto name = names.at(nodeId);
-    auto gameobj = gameObjectFromFields(name, id, defaultAttributesForMultiObj(transform, rootObj, additionalFields.at(nodeId)), getObjautoserializerFields(name));
+
+    auto defaultAttrs = defaultAttributesForMultiObj(transform, rootObj, additionalFields.at(nodeId));
+    auto gameobj = gameObjectFromFields(name, id, allKeysAndAttributes(defaultAttrs), getObjautoserializerFields(name));
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
 
     auto addedId = sandboxAddToScene(scene, sceneId, -1, names.at(nodeId), gameobj);
@@ -351,7 +353,9 @@ SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std
   std::sort(std::begin(layers), std::end(layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
 
   std::string name = "root";
-  auto rootObj = gameObjectFromFields(name, mainScene.rootId, rootGameObject().attr, getObjautoserializerFields(name)); 
+
+  auto attr = rootGameObject().attr;
+  auto rootObj = gameObjectFromFields(name, mainScene.rootId, allKeysAndAttributes(attr), getObjautoserializerFields(name)); 
   auto rootObjId = sandboxAddToScene(mainScene, 0, -1, rootObj.name, rootObj);
 
   SceneSandbox sandbox {
