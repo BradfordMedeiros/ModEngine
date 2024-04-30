@@ -1049,9 +1049,9 @@ void removeAllScenesFromWorld(World& world){
 
 GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, AttrChildrenPair& attrWithChildren, std::map<std::string, GameobjAttributes>& submodelAttributes, bool returnOnly){
   GameobjAttributes& attributes = attrWithChildren.attr;
-  int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
-  bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
-  auto idToAdd = useObjId ? id : getUniqueObjId();
+
+  auto idAttr = getIdFromAttr(attributes);
+  auto idToAdd = idAttr.has_value() ? idAttr.value() : getUniqueObjId();
 
   GameObjPair gameobjPair{
     .gameobj = gameObjectFromFields(name, idToAdd, attributes, getObjautoserializerFields(name)),

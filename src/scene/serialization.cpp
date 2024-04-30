@@ -447,16 +447,25 @@ GameobjAttributes getAdditionalAttr(std::vector<GameobjAttribute>& attributes, s
   return extraLabels;
 }
 
+std::optional<objid> getIdFromAttr(GameobjAttributes& attributes){
+  auto idAttr = getAttributeValue(attributes, "id");
+  if (!idAttr.has_value()){
+    return std::nullopt;
+  }
+  float idFloat = unwrapAttr<float>(idAttr.value());
+  int id = static_cast<int>(idFloat);
+  return id;
+}
+
 GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes, std::set<std::string> objautoserializerFields){
   auto allAttrs = allKeysAndAttributes(attributes);
 
   GameObject object = { .id = id, .name = name };
   createAutoSerialize((char*)&object, gameobjSerializer, allAttrs);
 
-  auto idAttr = getAttributeValue(allAttrs, "id");  //
-  if (idAttr.has_value()){
-    auto strId = unwrapAttr<std::string>(idAttr.value());
-    object.id = std::atoi(strId.c_str());
+  auto idAttr = getIdFromAttr(attributes);
+  if (idAttr.has_value()){;
+    object.id = idAttr.value();
   }
 
   std::set<std::string> autoserializerFields = serializerFieldNames(gameobjSerializer);
