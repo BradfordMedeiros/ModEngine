@@ -415,7 +415,8 @@ bool setAttribute(GameObject& gameobj, const char* field, AttributeValue value, 
 bool isReservedAttribute(std::string field, std::set<std::string>& autoserializerFields){
   return autoserializerFields.count(field) > 0;
 }
-GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes, std::set<std::string>& autoserializerFields){
+
+GameobjAttributes getAdditionalAttr(std::vector<GameobjAttribute>& attributes, std::set<std::string>& autoserializerFields){
   GameobjAttributes extraLabels {
     .stringAttributes = {},
     .numAttributes = {},
@@ -424,34 +425,38 @@ GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes, std::set<std:
       .vec4 = {},
     },
   };
-  for (auto &[key, value] : attributes.stringAttributes){
-    if (!isReservedAttribute(key, autoserializerFields)){
-      extraLabels.stringAttributes[key] = value;
-    }
-  }
-  for (auto &[key, value] : attributes.numAttributes){
-    if (!isReservedAttribute(key, autoserializerFields)){
-      extraLabels.numAttributes[key] = value;
-    }
-  }
-  for (auto &[key, value] : attributes.vecAttr.vec3){
-    if (!isReservedAttribute(key, autoserializerFields)){
-      extraLabels.vecAttr.vec3[key] = value;
-    }
-  }
-  for (auto &[key, value] : attributes.vecAttr.vec4){
-    if (!isReservedAttribute(key, autoserializerFields)){
-      extraLabels.vecAttr.vec4[key] = value;
+  for (auto &attribute : attributes){
+    if (!isReservedAttribute(attribute.field, autoserializerFields)){
+      auto isStr = std::get_if<std::string>(&attribute.attributeValue);
+      auto isVec3 = std::get_if<glm::vec3>(&attribute.attributeValue);
+      auto isVec4 = std::get_if<glm::vec4>(&attribute.attributeValue);
+      auto isFloat = std::get_if<float>(&attribute.attributeValue);
+      if (isStr){
+        extraLabels.stringAttributes[attribute.field] = *isStr;
+      }else if (isVec3){
+        extraLabels.vecAttr.vec3[attribute.field] = *isVec3;
+      }else if (isVec4){
+        extraLabels.vecAttr.vec4[attribute.field] = *isVec4;
+      }else if (isFloat){
+        extraLabels.numAttributes[attribute.field] = *isFloat;
+      }else{
+        modassert(false, "invalid type getAdditionalAttr");
+      }
     }
   }
   return extraLabels;
 }
 
 GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes, std::set<std::string> objautoserializerFields){
+  auto allAttrs = allKeysAndAttributes(attributes);
+
   GameObject object = { .id = id, .name = name };
-  createAutoSerialize((char*)&object, gameobjSerializer, attributes);
-  if (attributes.stringAttributes.find("id") != attributes.stringAttributes.end()){
-    object.id = std::atoi(attributes.stringAttributes.at("id").c_str());
+  createAutoSerialize((char*)&object, gameobjSerializer, allAttrs);
+
+  auto idAttr = getAttributeValue(allAttrs, "id");  //
+  if (idAttr.has_value()){
+    auto strId = unwrapAttr<std::string>(idAttr.value());
+    object.id = std::atoi(strId.c_str());
   }
 
   std::set<std::string> autoserializerFields = serializerFieldNames(gameobjSerializer);
@@ -459,7 +464,7 @@ GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes at
     autoserializerFields.insert(field);
   }
 
-  object.additionalAttr = getAdditionalAttr(attributes, autoserializerFields);
+  object.additionalAttr = getAdditionalAttr(allAttrs, autoserializerFields);
   return object;
 }
 

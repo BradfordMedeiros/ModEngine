@@ -158,8 +158,12 @@ struct AutoserializeReservedField {
 };
 
 typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeForceString, AutoSerializeFloat, AutoSerializeTextureLoaderManual, AutoSerializeInt, AutoSerializeUInt, AutoSerializeVec2, AutoSerializeVec3, AutoSerializeVec4, AutoSerializeRotation, AutoSerializeEnums, AutoSerializeCustom, AutoserializeReservedField> AutoSerialize;
+
+void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, std::vector<GameobjAttribute>& attr);
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr);
+void createAutoSerializeWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, std::vector<GameobjAttribute>& attr, ObjectTypeUtil& util);
 void createAutoSerializeWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util);
+
 void autoserializerSerialize(char* structAddress, std::vector<AutoSerialize>& values, std::vector<std::pair<std::string, std::string>>& _pairs);
 std::optional<AutoSerialize*> getAutoserializeByField(std::vector<AutoSerialize>& values, const char* field);
 std::optional<AttributeValuePtr> autoserializerGetAttrPtr(char* structAddress, AutoSerialize& value);
