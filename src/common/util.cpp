@@ -905,9 +905,20 @@ void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAtt
 }
 
 void mergeAttributes(std::vector<GameobjAttribute>& toAttributes, std::vector<GameobjAttribute>& fromAttributes){
+  // replace existing values
+  for (auto &attribute : toAttributes){
+    for (auto &newAttribute : fromAttributes){
+      if (attribute.field == newAttribute.field){
+        attribute.attributeValue = newAttribute.attributeValue;
+      }
+    }
+  }
+
+  // if the attribute does not yet exist, add it
   for (auto &attribute : fromAttributes){
-    modassert(!getAttributeValue(fromAttributes, attribute.field.c_str()).has_value(), "mergeAttributes duplicate value");
-    toAttributes.push_back(attribute);
+    if (!getAttributeValue(toAttributes, attribute.field.c_str())){
+      toAttributes.push_back(attribute);
+    }
   }
 }
 
