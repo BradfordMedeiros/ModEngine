@@ -1048,13 +1048,11 @@ void removeAllScenesFromWorld(World& world){
 }
 
 GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, AttrChildrenPair& attrWithChildren, std::map<std::string, GameobjAttributes>& submodelAttributes, bool returnOnly){
-  GameobjAttributes& attributes = attrWithChildren.attr;
-  auto allAttrs = allKeysAndAttributes(attributes);
-  auto idAttr = getIdFromAttr(allAttrs);
+  auto idAttr = getIdFromAttr(attrWithChildren.attr);
   auto idToAdd = idAttr.has_value() ? idAttr.value() : getUniqueObjId();
 
   GameObjPair gameobjPair{
-    .gameobj = gameObjectFromFields(name, idToAdd, allAttrs, getObjautoserializerFields(name)),
+    .gameobj = gameObjectFromFields(name, idToAdd, attrWithChildren.attr, getObjautoserializerFields(name)),
   };
   std::vector<objid> idsAdded = { gameobjPair.gameobj.id }; 
   auto getId = createGetUniqueObjId(idsAdded);
@@ -1064,6 +1062,7 @@ GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name,
   std::vector<GameObjectObj> addedGameobjObjs = {};
 
   
+  auto attributes = gameobjAttributes2To1(attrWithChildren.attr);
   addSerialObjectsToWorld(world, sceneId, idsAdded, getId, {{ name, GameobjAttributesWithId{ .id = idToAdd, .attr = attributes }}}, returnOnly, addedGameobjObjs, submodelAttributes);
   if (returnOnly){
     assert(addedGameobjObjs.size() == 1);
@@ -1079,7 +1078,7 @@ std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serial
   auto subelementAttrs = deserializeSceneTokens(dividedTokens.subelementTokens);
   std::map<std::string, GameobjAttributes> subelementAttributes;
   for (auto &[name, attrWithChildren] : subelementAttrs){
-    subelementAttributes[name] = attrWithChildren.attr;
+    subelementAttributes[name] = gameobjAttributes2To1(attrWithChildren.attr);
   }
 
   if (serialAttrs.size() > 1){
@@ -1089,7 +1088,7 @@ std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serial
   assert(serialAttrs.size() == 1);
   AttrChildrenPair& attrObj = serialAttrs.begin() -> second;
   if (useObjId){
-    attrObj.attr.numAttributes["id"] = id;
+    setOrReplaceAttr(attrObj.attr, "id", static_cast<float>(id));
   } 
   return SingleObjDeserialization{
     .name = serialAttrs.begin() -> first,
@@ -1414,7 +1413,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
           attributes.vecAttr.vec3["physics_avelocity"] = particleOpts.angularVelocity.value();
         }
         AttrChildrenPair attrChildren {
-          .attr = attributes,
+          .attr = allKeysAndAttributes(attributes),
           .children = {},
         };
 

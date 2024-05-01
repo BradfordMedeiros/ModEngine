@@ -39,7 +39,7 @@ void enforceRootObjects(Scene& scene){
 
 AttrChildrenPair rootGameObject(){
   return AttrChildrenPair{
-    .attr = GameobjAttributes {},
+    .attr = {},
     .children = {},
   };
 }
@@ -70,13 +70,11 @@ SceneDeserialization createSceneFromParsedContent(
   for (auto [name, attrWithChildren] : serialGameAttrs){
     auto objName = name;
     if (name != rootName){
-      objid id = (attrWithChildren.attr.stringAttributes.find("id") != attrWithChildren.attr.stringAttributes.end()) ? 
-        std::atoi(attrWithChildren.attr.stringAttributes.at("id").c_str()) : 
-        getNewObjectId();
-
-      gameobjs[name] = gameObjectFromFields(name, id, allKeysAndAttributes(attrWithChildren.attr), getObjautoserializerFields(objName));
+      auto idAttr = getIdFromAttr(attrWithChildren.attr);
+      objid id = idAttr.has_value() ? idAttr.value() : getNewObjectId();
+      gameobjs[name] = gameObjectFromFields(name, id, attrWithChildren.attr, getObjautoserializerFields(objName));
     }else{
-      gameobjs[name] = gameObjectFromFields(name, scene.rootId, allKeysAndAttributes(attrWithChildren.attr), getObjautoserializerFields(objName)); 
+      gameobjs[name] = gameObjectFromFields(name, scene.rootId, attrWithChildren.attr, getObjautoserializerFields(objName)); 
     }
   }
 
@@ -95,12 +93,12 @@ SceneDeserialization createSceneFromParsedContent(
 
   std::map<std::string, GameobjAttributes> additionalFields;
   for (auto &[name, attrWithChildren] : serialGameAttrs){
-    additionalFields[name] = attrWithChildren.attr;
+    additionalFields[name] = gameobjAttributes2To1(attrWithChildren.attr);
   }
 
   std::map<std::string, GameobjAttributes> subelementAttributes;
   for (auto &[name, attrWithChildren] : subelementAttrs){
-    subelementAttributes[name] = attrWithChildren.attr;
+    subelementAttributes[name] = gameobjAttributes2To1(attrWithChildren.attr);
   }
 
   SceneDeserialization deserializedScene {
@@ -145,8 +143,8 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
 
     auto name = names.at(nodeId);
 
-    auto defaultAttrs = defaultAttributesForMultiObj(transform, rootObj, additionalFields.at(nodeId));
-    auto gameobj = gameObjectFromFields(name, id, allKeysAndAttributes(defaultAttrs), getObjautoserializerFields(name));
+    auto defaultAttrs = defaultAttributesForMultiObj(transform, rootObj, allKeysAndAttributes(additionalFields.at(nodeId)));
+    auto gameobj = gameObjectFromFields(name, id, defaultAttrs, getObjautoserializerFields(name));
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
 
     auto addedId = sandboxAddToScene(scene, sceneId, -1, names.at(nodeId), gameobj);
@@ -355,7 +353,7 @@ SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std
   std::string name = "root";
 
   auto attr = rootGameObject().attr;
-  auto rootObj = gameObjectFromFields(name, mainScene.rootId, allKeysAndAttributes(attr), getObjautoserializerFields(name)); 
+  auto rootObj = gameObjectFromFields(name, mainScene.rootId, attr, getObjautoserializerFields(name)); 
   auto rootObjId = sandboxAddToScene(mainScene, 0, -1, rootObj.name, rootObj);
 
   SceneSandbox sandbox {

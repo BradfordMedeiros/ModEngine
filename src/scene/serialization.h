@@ -64,14 +64,15 @@ struct DividedTokens {
 DividedTokens divideMainAndSubelementTokens(std::vector<Token> tokens);
 
 struct AttrChildrenPair {
-  GameobjAttributes attr;
+  std::vector<GameobjAttribute> attr;
   std::vector<std::string> children;
 };
 
 std::map<std::string, AttrChildrenPair> deserializeSceneTokens(std::vector<Token> tokens);
-GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj, GameobjAttributes& additionalFields);
+std::vector<GameobjAttribute> defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj, std::vector<GameobjAttribute>&& additionalAttrs);
 std::string serializeObj(objid id, objid groupId, GameObject& gameobject, std::vector<std::string> children, bool includeIds, std::vector<std::pair<std::string, std::string>> additionalFields, std::string name = "");
 
+void addFieldDynamic(std::vector<GameobjAttribute>& attributes, std::string attribute, std::string payload);
 void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::string payload);
 
 std::optional<AttributeValuePtr> getAttributePtr(GameObject& gameobj, const char* field);

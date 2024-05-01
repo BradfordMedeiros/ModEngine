@@ -267,6 +267,7 @@ std::optional<glm::vec4> getVec4Attr(GameobjAttributes& objAttr, std::string key
 std::optional<AttributeValue> getAttr(GameobjAttributes& objAttr, std::string key);
 bool hasAttribute(GameobjAttributes& attrs, std::string& type);
 
+void setOrReplaceAttr(std::vector<GameobjAttribute>& attributes, const char* field, AttributeValue value);
 void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAttributes);
 void mergeAttributes(std::vector<GameobjAttribute>& toAttributes, std::vector<GameobjAttribute>& fromAttributes);
 

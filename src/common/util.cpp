@@ -889,6 +889,19 @@ bool hasAttribute(GameobjAttributes& attrs, std::string& type){
   return false;
 }
 
+void setOrReplaceAttr(std::vector<GameobjAttribute>& attributes, const char* field, AttributeValue value){
+  for (int i = 0; i < attributes.size(); i++){
+    if (attributes.at(i).field == std::string(field)){
+      attributes.at(i).attributeValue = value;
+      return;
+    }
+  }
+  attributes.push_back(GameobjAttribute {
+    .field = field,
+    .attributeValue = value,
+  });
+}
+
 void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAttributes){
   for (auto &[name, value] : fromAttributes.stringAttributes){
     toAttributes.stringAttributes[name] = value;

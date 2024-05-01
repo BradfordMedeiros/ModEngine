@@ -359,7 +359,7 @@ void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld){
 
 std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes){
   AttrChildrenPair attrWithChildren {
-    .attr = attributes,
+    .attr = allKeysAndAttributes(attributes),
     .children = {},
   };
 

@@ -224,6 +224,46 @@ void assertCoreType(AttributeValueType type, std::string& fieldname, std::string
   }
 }
 
+void addFieldDynamic(std::vector<GameobjAttribute>& attributes, std::string attribute, std::string payload){
+  glm::vec3 vec(0.f, 0.f, 0.f);
+  bool isVec = maybeParseVec(payload, vec);
+  if (isVec){
+    attributes.push_back(GameobjAttribute {
+      .field = attribute,
+      .attributeValue = vec,
+    });
+    assertCoreType(ATTRIBUTE_VEC3, attribute, payload);
+    return;
+  }
+
+  glm::vec4 vec4(0.f, 0.f, 0.f, 0.f);
+  bool isVec4 = maybeParseVec4(payload, vec4);
+  if (isVec4){
+    attributes.push_back(GameobjAttribute {
+      .field = attribute,
+      .attributeValue = vec4,
+    });
+    assertCoreType(ATTRIBUTE_VEC4, attribute, payload);
+    return;
+  }
+
+  float number = 0.f;
+  bool isFloat = maybeParseFloat(payload, number);
+  if (isFloat){
+    attributes.push_back(GameobjAttribute {
+      .field = attribute,
+      .attributeValue = number,
+    });
+    assertCoreType(ATTRIBUTE_FLOAT, attribute, payload);
+    return;
+  }
+  assertCoreType(ATTRIBUTE_STRING, attribute, payload);
+  attributes.push_back(GameobjAttribute {
+    .field = attribute,
+    .attributeValue = payload,
+  });
+}
+
 void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::string payload){
   glm::vec3 vec(0.f, 0.f, 0.f);
   bool isVec = maybeParseVec(payload, vec);
@@ -278,7 +318,7 @@ std::map<std::string, AttrChildrenPair> deserializeSceneTokens(std::vector<Token
     if (objectAttributes.find(token.target) == objectAttributes.end()) {
       assert(token.target.find(',') == std::string::npos);
       objectAttributes[token.target] = AttrChildrenPair {
-        .attr = GameobjAttributes { },
+        .attr = {},
         .children = {},
       };
     }
@@ -287,7 +327,7 @@ std::map<std::string, AttrChildrenPair> deserializeSceneTokens(std::vector<Token
       for (auto child : children){
         if (objectAttributes.find(child) == objectAttributes.end()){
           objectAttributes[child] = AttrChildrenPair {
-            .attr = GameobjAttributes { },
+            .attr = {},
             .children = {},
           };
         }
@@ -336,25 +376,29 @@ bool isReservedSubobjectAttribute(const char* field){
   }
   return false;
 }
-GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj, GameobjAttributes& additionalFields){
+std::vector<GameobjAttribute> defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj, std::vector<GameobjAttribute>&& additionalAttrs){
   MODTODO("default inheritance of attributes...should there really be any (aside from transform)");
-  GameobjAttributes attributes {
-    .stringAttributes = {
-      {"shader", gameobj.shader},
-      {"layer", gameobj.layer},
+
+  std::vector<GameobjAttribute> values {
+    GameobjAttribute {
+      .field = "shader",
+      .attributeValue = gameobj.shader,
     },
-    .vecAttr = {
-      .vec3 = {
-        {"position", transform.position },
-        {"scale",    transform.scale    },
-        // 
-      },
-      .vec4 = {},
+    GameobjAttribute {
+      .field = "layer",
+      .attributeValue = gameobj.layer,
+    },
+    GameobjAttribute {
+      .field = "position",
+      .attributeValue = transform.position,
+    },
+    GameobjAttribute {
+      .field = "scale",
+      .attributeValue = transform.scale,
     },
   };
-  //std::cout << "Default attributes: shader = " << gameobj.shader << ", layer = " << gameobj.layer << ", position = " << print(transform.position) << ", scale = " << print(transform.scale) << std::endl;
-  mergeAttributes(attributes, additionalFields);
-  return attributes;
+  mergeAttributes(values, additionalAttrs);
+  return values;
 }
 
 std::string serializeObj(
