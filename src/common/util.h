@@ -268,6 +268,7 @@ std::optional<AttributeValue> getAttr(GameobjAttributes& objAttr, std::string ke
 bool hasAttribute(GameobjAttributes& attrs, std::string& type);
 
 void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAttributes);
+void mergeAttributes(std::vector<GameobjAttribute>& toAttributes, std::vector<GameobjAttribute>& fromAttributes);
 
 std::string print(GameobjAttributes& attr);
 

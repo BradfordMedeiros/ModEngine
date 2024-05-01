@@ -904,6 +904,13 @@ void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAtt
   }
 }
 
+void mergeAttributes(std::vector<GameobjAttribute>& toAttributes, std::vector<GameobjAttribute>& fromAttributes){
+  for (auto &attribute : fromAttributes){
+    modassert(!getAttributeValue(fromAttributes, attribute.field.c_str()).has_value(), "mergeAttributes duplicate value");
+    toAttributes.push_back(attribute);
+  }
+}
+
 const char* levelToString(MODLOG_LEVEL level){
   if (level == MODLOG_INFO){
     return "INFO";
