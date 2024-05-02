@@ -460,32 +460,11 @@ bool isReservedAttribute(std::string field, std::set<std::string>& autoserialize
   return autoserializerFields.count(field) > 0;
 }
 
-GameobjAttributes getAdditionalAttr(std::vector<GameobjAttribute>& attributes, std::set<std::string>& autoserializerFields){
-  GameobjAttributes extraLabels {
-    .stringAttributes = {},
-    .numAttributes = {},
-    .vecAttr = vectorAttributes {
-      .vec3 = {},
-      .vec4 = {},
-    },
-  };
+std::vector<GameobjAttribute> getAdditionalAttr(std::vector<GameobjAttribute>& attributes, std::set<std::string>& autoserializerFields){
+  std::vector<GameobjAttribute> extraLabels;
   for (auto &attribute : attributes){
     if (!isReservedAttribute(attribute.field, autoserializerFields)){
-      auto isStr = std::get_if<std::string>(&attribute.attributeValue);
-      auto isVec3 = std::get_if<glm::vec3>(&attribute.attributeValue);
-      auto isVec4 = std::get_if<glm::vec4>(&attribute.attributeValue);
-      auto isFloat = std::get_if<float>(&attribute.attributeValue);
-      if (isStr){
-        extraLabels.stringAttributes[attribute.field] = *isStr;
-      }else if (isVec3){
-        extraLabels.vecAttr.vec3[attribute.field] = *isVec3;
-      }else if (isVec4){
-        extraLabels.vecAttr.vec4[attribute.field] = *isVec4;
-      }else if (isFloat){
-        extraLabels.numAttributes[attribute.field] = *isFloat;
-      }else{
-        modassert(false, "invalid type getAdditionalAttr");
-      }
+      extraLabels.push_back(attribute);
     }
   }
   return extraLabels;
@@ -515,7 +494,8 @@ GameObject gameObjectFromFields(std::string name, objid id, std::vector<GameobjA
     autoserializerFields.insert(field);
   }
 
-  object.additionalAttr = getAdditionalAttr(attributes, autoserializerFields);
+  auto additionalAttrs = getAdditionalAttr(attributes, autoserializerFields);
+  object.additionalAttr = gameobjAttributes2To1(additionalAttrs);
   return object;
 }
 
