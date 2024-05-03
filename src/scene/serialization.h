@@ -43,7 +43,7 @@ struct GameObject {
   std::string shader;
   bool netsynchronize;
   
-  GameobjAttributes additionalAttr;
+  std::vector<GameobjAttribute> additionalAttr;
 };
 
 

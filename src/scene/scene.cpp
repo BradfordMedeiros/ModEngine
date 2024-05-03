@@ -594,7 +594,7 @@ std::set<std::string> getObjautoserializerFields(std::string& name){
 std::set<std::string> allFieldNames(GameObject& gameobj){
   auto objFieldsNames = getObjautoserializerFields(gameobj.name);
   auto gameobjFields = serializerFieldNames(gameobjSerializer);
-  auto allAttrs = allKeysAndAttributes(gameobj.additionalAttr);
+  auto allAttrs = gameobj.additionalAttr;
   std::set<std::string> allFieldNames;
   for (auto &field : objFieldsNames){
     allFieldNames.insert(field);
@@ -1129,18 +1129,29 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
     return objectValuePtr;
   }
 
-  if (gameobj.additionalAttr.vecAttr.vec3.find(field) != gameobj.additionalAttr.vecAttr.vec3.end()){
-      return &gameobj.additionalAttr.vecAttr.vec3.at(field);
+  for (auto &attr : gameobj.additionalAttr){
+    if (attr.field != std::string(field)){
+      continue;
+    }
+    auto strValue = std::get_if<std::string>(&attr.attributeValue);
+    if (strValue){
+      return strValue;
+    }
+    auto vec3Value = std::get_if<glm::vec3>(&attr.attributeValue);
+    if (vec3Value){
+      return vec3Value;
+    }
+    auto vec4Value = std::get_if<glm::vec4>(&attr.attributeValue);
+    if (vec4Value){
+      return vec4Value;
+    }
+    auto floatValue = std::get_if<float>(&attr.attributeValue);
+    if (floatValue){
+      return floatValue;
+    }
+    modassert(false, std::string("invalid type getObjectAttributePtr: ") + std::string(field));
   }
-  if (gameobj.additionalAttr.vecAttr.vec4.find(field) != gameobj.additionalAttr.vecAttr.vec4.end()){
-      return &gameobj.additionalAttr.vecAttr.vec4.at(field);
-  }
-  if (gameobj.additionalAttr.stringAttributes.find(field) != gameobj.additionalAttr.stringAttributes.end()){
-      return &gameobj.additionalAttr.stringAttributes.at(field);
-  }
-  if (gameobj.additionalAttr.numAttributes.find(field) != gameobj.additionalAttr.numAttributes.end()){
-      return &gameobj.additionalAttr.numAttributes.at(field);
-  }
+
   return std::nullopt;
 }
 
@@ -1252,8 +1263,13 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
   }
 
   if (!setCoreAttr && !setObjectAttr){
-    GameobjAttributes attr = gameobjAttrFromValue(field, value);
-    mergeAttributes(gameobj.additionalAttr, attr);
+    std::vector<GameobjAttribute> newValues = {
+      GameobjAttribute {
+        .field = field, 
+        .attributeValue = value,        
+      }
+    };
+    mergeAttributes(gameobj.additionalAttr, newValues);
   }
 
   bool fieldIsVelocity = std::string(field) == "physics_velocity";
