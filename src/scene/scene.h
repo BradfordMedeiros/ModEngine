@@ -48,7 +48,7 @@ World createWorld(
   std::vector<std::string> spriteMeshes
 );
 
-void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid>& idsAdded, std::function<objid()> getNewObjectId, std::map<std::string, GameobjAttributesWithId> additionalFields, bool returnObjectOnly, std::vector<GameObjectObj>& gameobjObjs, std::map<std::string, GameobjAttributes>& submodelAttributes);
+void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid>& idsAdded, std::function<objid()> getNewObjectId, std::map<std::string, GameobjAttributesWithId> additionalFields, bool returnObjectOnly, std::vector<GameObjectObj>& gameobjObjs, std::map<std::string, std::vector<GameobjAttribute>>& submodelAttributes);
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId);
 Texture loadTextureAtlasWorld(World& world, std::string texturepath, std::vector<std::string> atlasTextures, objid ownerId);
 Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight, std::optional<objid> mappingTexture);

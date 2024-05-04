@@ -41,8 +41,8 @@ struct Scene {
 
 struct SceneDeserialization {
   Scene scene;
-  std::map<std::string, GameobjAttributes> additionalFields;
-  std::map<std::string, GameobjAttributes> subelementAttributes;
+  std::map<std::string, std::vector<GameobjAttribute>> additionalFields;
+  std::map<std::string, std::vector<GameobjAttribute>> subelementAttributes;
 };
 
 struct SceneMetadata {
@@ -92,12 +92,12 @@ Transformation fullTransformation(SceneSandbox& sandbox, objid id);
 
 struct GameobjAttributesWithId {
   objid id;
-  GameobjAttributes attr;
+  std::vector<GameobjAttribute> attr;
 };
 struct AddSceneDataValues {
   std::map<std::string, GameobjAttributesWithId>  additionalFields;
   std::vector<objid> idsAdded;
-  std::map<std::string, GameobjAttributes> subelementAttributes;
+  std::map<std::string, std::vector<GameobjAttribute>> subelementAttributes;
 };
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields);
 void removeScene(SceneSandbox& sandbox, objid sceneId);

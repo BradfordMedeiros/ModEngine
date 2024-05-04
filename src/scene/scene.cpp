@@ -645,10 +645,10 @@ World createWorld(
   // hackey, but createSceneSandbox adds root object with id 0 so this is needed
   std::vector<objid> idsAdded = { 0 };
   std::vector<GameObjectObj> addedGameobjObjs = {};
-  std::map<std::string, GameobjAttributes> submodelAttributes;
+  std::map<std::string, std::vector<GameobjAttribute>> submodelAttributes;
 
   auto getId = createGetUniqueObjId(idsAdded);
-  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, idsAdded, getId, {{ "root", GameobjAttributesWithId { .id = idsAdded.at(0), .attr = GameobjAttributes{}}}}, false, addedGameobjObjs, submodelAttributes);
+  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, idsAdded, getId, {{ "root", GameobjAttributesWithId { .id = idsAdded.at(0), .attr = {}}}}, false, addedGameobjObjs, submodelAttributes);
 
   // Default meshes that are silently loaded in the background
   for (auto &meshname : defaultMeshes){
@@ -661,35 +661,44 @@ World createWorld(
   return world;
 }
 
-std::map<objid, GameobjAttributes> applyFieldsToSubelements(std::string meshName, ModelData& data, GameobjAttributes& attr, std::map<std::string, GameobjAttributes>& overrideAttributes){
-  std::map<objid, GameobjAttributes> additionalFieldsMap;
+std::map<objid, GameobjAttributes> applyFieldsToSubelements(std::string meshName, ModelData& data, std::vector<GameobjAttribute>& attr, std::map<std::string, std::vector<GameobjAttribute>>& overrideAttributes){
+  std::map<objid, std::vector<GameobjAttribute>> additionalFieldsMap;
   for (auto [nodeId, _] : data.nodeTransform){
-    additionalFieldsMap[nodeId] = GameobjAttributes { };
+    additionalFieldsMap[nodeId] = {};
   }
 
   for (auto [nodeId, meshListIds] : data.nodeToMeshId){
     if (meshListIds.size() == 1){
       auto meshRef = meshName + "::" + std::to_string(meshListIds.at(0));
-      additionalFieldsMap.at(nodeId).stringAttributes["mesh"] = meshRef;
+      additionalFieldsMap.at(nodeId).push_back(GameobjAttribute {
+        .field = "mesh",
+        .attributeValue = meshRef,
+      });
     }else if (meshListIds.size() > 1){
       std::vector<std::string> meshRefNames;
       for (auto id : meshListIds){
         auto meshRef = meshName + "::" + std::to_string(id);
         meshRefNames.push_back(meshRef);
       }
-      additionalFieldsMap.at(nodeId).stringAttributes["meshes"] = join(meshRefNames, ',');
+      additionalFieldsMap.at(nodeId).push_back(GameobjAttribute {
+        .field = "meshes",
+        .attributeValue = join(meshRefNames, ','),
+      });
     }
   }
 
   for (auto &[id, name] : data.names){
     if (overrideAttributes.find(name) != overrideAttributes.end()){
-      GameobjAttributes& attrOverrides = overrideAttributes.at(name);
+      std::vector<GameobjAttribute>& attrOverrides = overrideAttributes.at(name);
       mergeAttributes(additionalFieldsMap.at(id), attrOverrides);
     }
   }
 
-
-  return additionalFieldsMap;
+  std::map<objid, GameobjAttributes> additionalFieldsMap2;
+  for (auto &[key, value] : additionalFieldsMap){
+    additionalFieldsMap2[key] = gameobjAttributes2To1(value);
+  }
+  return additionalFieldsMap2;
 }
 
 std::optional<std::string> getTextureById(World& world, int id){
@@ -769,8 +778,8 @@ void addObjectToWorld(
   std::string name,
   std::string topName,
   std::function<objid()> getId,
-  GameobjAttributes attr,
-  std::map<std::string, GameobjAttributes>& submodelAttributes,
+  std::vector<GameobjAttribute> attr,
+  std::map<std::string, std::vector<GameobjAttribute>>& submodelAttributes,
   ModelData* data,
   std::string rootMeshName,
   bool returnObjectOnly,
@@ -853,7 +862,8 @@ void addObjectToWorld(
         .pathForModLayer = world.interface.modlayerPath,
         .loadScene = loadScene,
       }; 
-      auto gameobjObj = createObjectType(getType(name), attr, util);
+      auto objAttr = gameobjAttributes2To1(attr);
+      auto gameobjObj = createObjectType(getType(name), objAttr, util);
       returnobjs.push_back(gameobjObj);
       return;
     }
@@ -872,7 +882,8 @@ void addObjectToWorld(
       .pathForModLayer = world.interface.modlayerPath,
       .loadScene = loadScene,
     };
-    auto gameobjObj = createObjectType(getType(name), attr, util);
+    auto objAttr = gameobjAttributes2To1(attr);
+    auto gameobjObj = createObjectType(getType(name), objAttr, util);
     addObjectType(world.objectMapping, gameobjObj, id);
 }
 
@@ -884,7 +895,7 @@ void addSerialObjectsToWorld(
   std::map<std::string, GameobjAttributesWithId> nameToAttr,
   bool returnObjectOnly,
   std::vector<GameObjectObj>& gameobjObjs,
-  std::map<std::string, GameobjAttributes>& submodelAttributes
+  std::map<std::string, std::vector<GameobjAttribute>>& submodelAttributes
 ){
 
   //for (auto &[name, _] : submodelAttributes){
@@ -1060,10 +1071,12 @@ GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name,
     addGameObjectToScene(world.sandbox, sceneId, name, gameobjPair.gameobj, attrWithChildren.children);
   }
   std::vector<GameObjectObj> addedGameobjObjs = {};
-
   
-  auto attributes = gameobjAttributes2To1(attrWithChildren.attr);
-  addSerialObjectsToWorld(world, sceneId, idsAdded, getId, {{ name, GameobjAttributesWithId{ .id = idToAdd, .attr = attributes }}}, returnOnly, addedGameobjObjs, submodelAttributes);
+  std::map<std::string, std::vector<GameobjAttribute>> submodelAttributes2;
+  for (auto &[key, attr] : submodelAttributes){
+    submodelAttributes2[key] = allKeysAndAttributes(attr);
+  }
+  addSerialObjectsToWorld(world, sceneId, idsAdded, getId, {{ name, GameobjAttributesWithId{ .id = idToAdd, .attr = attrWithChildren.attr }}}, returnOnly, addedGameobjObjs, submodelAttributes2);
   if (returnOnly){
     assert(addedGameobjObjs.size() == 1);
     gameobjPair.gameobjObj = addedGameobjObjs.at(0);

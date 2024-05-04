@@ -91,14 +91,14 @@ SceneDeserialization createSceneFromParsedContent(
   }
   enforceRootObjects(scene);
 
-  std::map<std::string, GameobjAttributes> additionalFields;
+  std::map<std::string, std::vector<GameobjAttribute>> additionalFields;
   for (auto &[name, attrWithChildren] : serialGameAttrs){
-    additionalFields[name] = gameobjAttributes2To1(attrWithChildren.attr);
+    additionalFields[name] = attrWithChildren.attr;
   }
 
-  std::map<std::string, GameobjAttributes> subelementAttributes;
+  std::map<std::string, std::vector<GameobjAttribute>> subelementAttributes;
   for (auto &[name, attrWithChildren] : subelementAttrs){
-    subelementAttributes[name] = gameobjAttributes2To1(attrWithChildren.attr);
+    subelementAttributes[name] = attrWithChildren.attr;
   }
 
   SceneDeserialization deserializedScene {
@@ -138,7 +138,7 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
 
     nameToAdditionalFields[names.at(nodeId)] = GameobjAttributesWithId{
       .id = id,
-      .attr = additionalFields.at(nodeId),
+      .attr = allKeysAndAttributes(additionalFields.at(nodeId)),
     };
 
     auto name = names.at(nodeId);
