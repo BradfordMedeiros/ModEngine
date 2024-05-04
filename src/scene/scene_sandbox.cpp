@@ -70,10 +70,8 @@ SceneDeserialization createSceneFromParsedContent(
   for (auto [name, attrWithChildren] : serialGameAttrs){
     auto objName = name;
     if (name != rootName){
-      objid id = (attrWithChildren.attr.stringAttributes.find("id") != attrWithChildren.attr.stringAttributes.end()) ? 
-        std::atoi(attrWithChildren.attr.stringAttributes.at("id").c_str()) : 
-        getNewObjectId();
-
+      auto idValue = objIdFromAttribute(attrWithChildren.attr);
+      objid id = idValue.has_value() ? idValue.value() : getNewObjectId();
       gameobjs[name] = gameObjectFromFields(name, id, attrWithChildren.attr, getObjautoserializerFields(objName));
     }else{
       gameobjs[name] = gameObjectFromFields(name, scene.rootId, attrWithChildren.attr, getObjautoserializerFields(objName)); 

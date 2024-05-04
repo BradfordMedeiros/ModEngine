@@ -684,9 +684,9 @@ int numUniqueDepthLayers(std::vector<LayerInfo> layers){
 
 std::string print(GameobjAttributes& attr){
   std::string content = "";
-  content = content + "string-attr[" + std::to_string(attr.stringAttributes.size()) + "]\n--------\n";
-  for (auto &[key, value] : attr.stringAttributes){
-    content = content + key + ":" + value + "\n\n"; 
+  content = content + "attr[" + std::to_string(attr.attr.size()) + "]\n--------\n";
+  for (auto &[key, value] : attr.attr){
+    content = content + key + ":" + print(value) + "\n\n"; 
   }
   content = content + "vec3-attr[" + std::to_string(attr.vecAttr.vec3.size()) + "]\n--------\n";
   for (auto &[key, value] : attr.vecAttr.vec3){
@@ -701,7 +701,7 @@ std::string print(GameobjAttributes& attr){
   content = content + "num-attr[" + std::to_string(attr.numAttributes.size()) + "]\n--------\n";
   for (auto &[key, value] : attr.numAttributes){
     content = content + key + ":" + std::to_string(value) + "\n\n"; 
-  }  
+  }
   return content;
 }
 
@@ -780,7 +780,7 @@ void assertTodo(std::string message){
 
 GameobjAttributes gameobjAttributes2To1(std::vector<GameobjAttribute>& attributes){
   GameobjAttributes attr {
-    .stringAttributes = {},
+    .attr = {},
     .numAttributes = {},
     .vecAttr = { .vec3 = {}, .vec4 = {} },
   };
@@ -790,7 +790,7 @@ GameobjAttributes gameobjAttributes2To1(std::vector<GameobjAttribute>& attribute
     auto vec3Value = std::get_if<glm::vec3>(&attrValue.attributeValue);
     auto vec4Value = std::get_if<glm::vec4>(&attrValue.attributeValue);
     if (stringValue){
-      attr.stringAttributes[attrValue.field] = *stringValue;
+      attr.attr[attrValue.field] = attrValue.attributeValue;
     }else if (floatValue){
       attr.numAttributes[attrValue.field] = *floatValue;
     }else if (vec3Value){
@@ -815,8 +815,12 @@ GameobjAttributes gameobjAttrFromValue(std::string field, AttributeValue value){
 }
 
 std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key){
-  if (objAttr.stringAttributes.find(key) != objAttr.stringAttributes.end()){
-    return objAttr.stringAttributes.at(key);
+  if (objAttr.attr.find(key) != objAttr.attr.end()){
+    auto strValue = std::get_if<std::string>(&objAttr.attr.at(key));
+    if (!strValue){
+      return std::nullopt;
+    }
+    return *strValue;
   }
   return std::nullopt;
 }
@@ -874,7 +878,7 @@ std::optional<AttributeValue> getAttr(GameobjAttributes& objAttr, std::string ke
 
 
 bool hasAttribute(GameobjAttributes& attrs, std::string& type){
-  if (attrs.stringAttributes.find(type) != attrs.stringAttributes.end()){
+  if (attrs.attr.find(type) != attrs.attr.end()){
     return true;
   }
   if (attrs.numAttributes.find(type) != attrs.numAttributes.end()){
@@ -890,8 +894,8 @@ bool hasAttribute(GameobjAttributes& attrs, std::string& type){
 }
 
 void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAttributes){
-  for (auto &[name, value] : fromAttributes.stringAttributes){
-    toAttributes.stringAttributes[name] = value;
+  for (auto &[name, value] : fromAttributes.attr){
+    toAttributes.attr[name] = value;
   }
   for (auto &[name, value] : fromAttributes.numAttributes){
     toAttributes.numAttributes[name] = value;
@@ -1003,7 +1007,7 @@ std::optional<std::string> subelementTargetName(std::string& name){
 
 std::vector<GameobjAttribute> allKeysAndAttributes(GameobjAttributes& attributes){
   std::vector<GameobjAttribute> values;
-  for (auto &[key, value] : attributes.stringAttributes){
+  for (auto &[key, value] : attributes.attr){
     values.push_back(GameobjAttribute{
       .field = key,
       .attributeValue = value,

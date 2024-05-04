@@ -31,7 +31,8 @@ std::vector<Token> prefabAdditionalTokens(GameobjAttributes& attributes){
 
 GameObjectPrefab createPrefabObj(GameobjAttributes& attr, ObjectTypeUtil& util){
 	auto additionalTokens = prefabAdditionalTokens(attr);
-	auto sceneId = util.loadScene(attr.stringAttributes.at("scene"), additionalTokens);
+	auto scene = getStrAttr(attr, "scene").value();
+	auto sceneId = util.loadScene(scene, additionalTokens);
 	return GameObjectPrefab {
 		.sceneId = sceneId,
 	};

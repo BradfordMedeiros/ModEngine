@@ -43,7 +43,8 @@ static auto _ = addTextureAutoserializer<GameObjectMesh>(meshAutoserializer);
 GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   // get rid of meshes attribute completely, make ensuremeshloaded return the meshes you're actually responsible for
   // basically top level ensureMesh(attr("mesh") => your nodes, then the child ones can be logic'd in via being smart about ensureMeshLoaded :) 
-  std::string rootMeshName = attr.stringAttributes.find("mesh") == attr.stringAttributes.end()  ? "" : attr.stringAttributes.at("mesh");
+  auto meshStr = getStrAttr(attr, "mesh");
+  std::string rootMeshName = !meshStr.has_value()  ? "" : meshStr.value();
   bool isRoot = false;
   auto meshNamesForObj = util.ensureMeshLoaded(rootMeshName, &isRoot);
   std::vector<std::string> meshNames;

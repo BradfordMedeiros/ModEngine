@@ -249,7 +249,7 @@ void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::
     return;
   }
   assertCoreType(ATTRIBUTE_STRING, attribute, payload);
-  attributes.stringAttributes[attribute] = payload;
+  attributes.attr[attribute] = payload;
 }
 
 DividedTokens divideMainAndSubelementTokens(std::vector<Token> tokens){
@@ -308,9 +308,14 @@ std::vector<std::pair<std::string, std::string>> coreFields(GameObject& gameobje
 
 std::vector<std::pair<std::string, std::string>> uniqueAdditionalFields(GameObject& gameobject, std::map<std::string, std::string>& serializedPairs){
   std::vector<std::pair<std::string, std::string>> fields;
-  for (auto &[field, value] : gameobject.additionalAttr.stringAttributes){
+  for (auto &[field, value] : gameobject.additionalAttr.attr){
     modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
-    fields.push_back({ field, value });
+    auto strValue = std::get_if<std::string>(&value);
+    if (strValue){
+      fields.push_back({ field, *strValue });
+    }else{
+      modassert(false, "invalid type uniqueAdditionalFields");
+    }
   }
   for (auto &[field, value] : gameobject.additionalAttr.numAttributes){
     modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
@@ -339,7 +344,7 @@ bool isReservedSubobjectAttribute(const char* field){
 GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj, GameobjAttributes& additionalFields){
   MODTODO("default inheritance of attributes...should there really be any (aside from transform)");
   GameobjAttributes attributes {
-    .stringAttributes = {
+    .attr = {
       {"shader", gameobj.shader},
       {"layer", gameobj.layer},
     },
@@ -417,16 +422,16 @@ bool isReservedAttribute(std::string field, std::set<std::string>& autoserialize
 }
 GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes, std::set<std::string>& autoserializerFields){
   GameobjAttributes extraLabels {
-    .stringAttributes = {},
+    .attr = {},
     .numAttributes = {},
     .vecAttr = vectorAttributes {
       .vec3 = {},
       .vec4 = {},
     },
   };
-  for (auto &[key, value] : attributes.stringAttributes){
+  for (auto &[key, value] : attributes.attr){
     if (!isReservedAttribute(key, autoserializerFields)){
-      extraLabels.stringAttributes[key] = value;
+      extraLabels.attr[key] = value;
     }
   }
   for (auto &[key, value] : attributes.numAttributes){
@@ -447,11 +452,25 @@ GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes, std::set<std:
   return extraLabels;
 }
 
+std::optional<objid> objIdFromAttribute(GameobjAttributes& attr){
+  if (attr.attr.find("id") == attr.attr.end()){
+    return std::nullopt;
+  }
+
+  auto strValue = std::get_if<std::string>(&attr.attr.at("id"));
+  if (!strValue){
+    return std::nullopt;
+  }
+  return std::atoi(strValue -> c_str());
+}
+
 GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes, std::set<std::string> objautoserializerFields){
   GameObject object = { .id = id, .name = name };
   createAutoSerialize((char*)&object, gameobjSerializer, attributes);
-  if (attributes.stringAttributes.find("id") != attributes.stringAttributes.end()){
-    object.id = std::atoi(attributes.stringAttributes.at("id").c_str());
+
+  auto objId = objIdFromAttribute(attributes);
+  if (objId.has_value()){
+    object.id = objId.value();
   }
 
   std::set<std::string> autoserializerFields = serializerFieldNames(gameobjSerializer);

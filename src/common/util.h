@@ -246,18 +246,12 @@ struct GameobjAttribute {
   std::string field;
   AttributeValue attributeValue;
 };
-struct GameobjAttributes2 {
-  std::vector<GameobjAttribute> attributes;
-};
 
 struct GameobjAttributes {
-  std::map<std::string, std::string> stringAttributes;
+  std::map<std::string, AttributeValue> attr;
   std::map<std::string, float> numAttributes;
   vectorAttributes vecAttr;
 };
-
-
-GameobjAttributes gameobjAttributes2To1(std::vector<GameobjAttribute>& attributes);
 
 GameobjAttributes gameobjAttrFromValue(std::string field, AttributeValue value);
 

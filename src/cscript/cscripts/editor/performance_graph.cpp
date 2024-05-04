@@ -12,8 +12,8 @@ extern CustomApiBindings* mainApi;
 
 void createObj(objid sceneId){
   GameobjAttributes attr {
-    .stringAttributes = {
-    	{ "mesh",  "./res/models/box/spriteplane.dae" },
+    .attr = {
+    	{ "mesh", "./res/models/box/spriteplane.dae" },
     },
     .numAttributes = {},
     .vecAttr = { 

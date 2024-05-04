@@ -2,14 +2,18 @@
 
 GameobjAttributes particleFields(GameobjAttributes& attributes){
   GameobjAttributes attr {
-    .stringAttributes = {},
+    .attr = {},
     .numAttributes = {},
     .vecAttr = { .vec3 = {}, .vec4 = {} },
   };
-  for (auto [key, value] : attributes.stringAttributes){
+  for (auto [key, value] : attributes.attr){
+    auto strValue = std::get_if<std::string>(&value);
+    if (!strValue){
+      modassert(false, "invalid type particleFields");
+    }
     if (key.at(0) == '+' && key.size() > 1){
       auto newKey = key.substr(1, key.size());
-      attr.stringAttributes[newKey] = value;
+      attr.attr[newKey] = *strValue;
     }
   }
   for (auto [key, value] : attributes.numAttributes){
@@ -190,15 +194,15 @@ std::optional<EmitterSpecialAttribute> extractSpecialAttribute(std::string key){
 }
 
 GameobjAttributes emitterExtractAttributes(GameobjAttributes& attributes, std::string name){
-  std::map<std::string, std::string> stringAttributes;
+  std::map<std::string, AttributeValue> attrs;
   std::map<std::string, float> numAttributes;
   std::map<std::string, glm::vec3> vec3;
   std::map<std::string, glm::vec4> vec4;
 
-  for (auto &[key, value] : attributes.stringAttributes){
+  for (auto &[key, value] : attributes.attr){
     auto extractedAttribute = extractSpecialAttribute(key);
     if (extractedAttribute.has_value() && extractedAttribute.value().subelement == name){
-      stringAttributes[extractedAttribute.value().attribute] = value;
+      attrs[extractedAttribute.value().attribute] = value;
     }
   }
   for (auto &[key, value] : attributes.numAttributes){
@@ -220,7 +224,7 @@ GameobjAttributes emitterExtractAttributes(GameobjAttributes& attributes, std::s
     }   
   }
   return GameobjAttributes {
-    .stringAttributes = stringAttributes,
+    .attr = attrs,
     .numAttributes = numAttributes,
     .vecAttr { .vec3 = vec3, .vec4 = vec4 },
   };

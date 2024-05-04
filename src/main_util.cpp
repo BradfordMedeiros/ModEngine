@@ -8,7 +8,7 @@ extern LineData lineData;
 
 objid createManipulator(){
   GameobjAttributes manipulatorAttr {
-      .stringAttributes = {
+      .attr = {
         {"mesh", "./res/models/ui/manipulator.gltf" }, 
         {"layer", "scale" },
       },
