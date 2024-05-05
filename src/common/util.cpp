@@ -688,10 +688,6 @@ std::string print(GameobjAttributes& attr){
   for (auto &[key, value] : attr.attr){
     content = content + key + ":" + print(value) + "\n\n"; 
   }
-  content = content + "vec3-attr[" + std::to_string(attr.vecAttr.vec3.size()) + "]\n--------\n";
-  for (auto &[key, value] : attr.vecAttr.vec3){
-    content = content + key + ":" + print(value) + "\n\n"; 
-  }
   return content;
 }
 
@@ -771,17 +767,14 @@ void assertTodo(std::string message){
 GameobjAttributes gameobjAttributes2To1(std::vector<GameobjAttribute>& attributes){
   GameobjAttributes attr {
     .attr = {},
-    .vecAttr = { .vec3 = {} },
   };
   for (auto &attrValue : attributes){
     auto stringValue = std::get_if<std::string>(&attrValue.attributeValue);
     auto floatValue = std::get_if<float>(&attrValue.attributeValue);
     auto vec3Value = std::get_if<glm::vec3>(&attrValue.attributeValue);
     auto vec4Value = std::get_if<glm::vec4>(&attrValue.attributeValue);
-    if (stringValue || floatValue || vec4Value){
+    if (stringValue || floatValue || vec3Value || vec4Value){
       attr.attr[attrValue.field] = attrValue.attributeValue;
-    }else if (vec3Value){
-      attr.vecAttr.vec3[attrValue.field] = *vec3Value;
     }else{
       modassert(false, "invalid attribute value type");
     }    
@@ -830,10 +823,14 @@ std::optional<int> getIntFromAttr(GameobjAttributes& objAttr, std::string key){
 }
 
 std::optional<glm::vec3> getVec3Attr(GameobjAttributes& objAttr, std::string key){
-   if (objAttr.vecAttr.vec3.find(key) != objAttr.vecAttr.vec3.end()){
-    return objAttr.vecAttr.vec3.at(key);
+  if (objAttr.attr.find(key) != objAttr.attr.end()){
+    auto vec3Value = std::get_if<glm::vec3>(&objAttr.attr.at(key));
+    if (!vec3Value){
+      return std::nullopt;
+    }
+    return *vec3Value;
   }
-  return std::nullopt; 
+  return std::nullopt;
 }
 
 std::optional<glm::vec4> getVec4Attr(GameobjAttributes& objAttr, std::string key){
@@ -873,18 +870,12 @@ bool hasAttribute(GameobjAttributes& attrs, std::string& type){
   if (attrs.attr.find(type) != attrs.attr.end()){
     return true;
   }
-  if (attrs.vecAttr.vec3.find(type) != attrs.vecAttr.vec3.end()){
-    return true;
-  }  
   return false;
 }
 
 void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAttributes){
   for (auto &[name, value] : fromAttributes.attr){
     toAttributes.attr[name] = value;
-  }
-  for (auto &[name, value] : fromAttributes.vecAttr.vec3){
-    toAttributes.vecAttr.vec3[name] = value;
   }
 }
 
@@ -988,12 +979,6 @@ std::optional<std::string> subelementTargetName(std::string& name){
 std::vector<GameobjAttribute> allKeysAndAttributes(GameobjAttributes& attributes){
   std::vector<GameobjAttribute> values;
   for (auto &[key, value] : attributes.attr){
-    values.push_back(GameobjAttribute{
-      .field = key,
-      .attributeValue = value,
-    });
-  }
-  for (auto &[key, value] : attributes.vecAttr.vec3){
     values.push_back(GameobjAttribute{
       .field = key,
       .attributeValue = value,

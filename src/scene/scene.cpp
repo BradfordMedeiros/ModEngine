@@ -1149,10 +1149,6 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
   if (objectValuePtr.has_value()){
     return objectValuePtr;
   }
-
-  if (gameobj.additionalAttr.vecAttr.vec3.find(field) != gameobj.additionalAttr.vecAttr.vec3.end()){
-      return &gameobj.additionalAttr.vecAttr.vec3.at(field);
-  }
   if (gameobj.additionalAttr.attr.find(field) != gameobj.additionalAttr.attr.end()){
       return ptrFromAttributeValue(gameobj.additionalAttr.attr.at(field));
   }
@@ -1420,12 +1416,12 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
           return std::nullopt;
         } 
         std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
-        attributes.vecAttr.vec3["position"] = particleOpts.position.has_value() ?  particleOpts.position.value() : fullTransformation(world.sandbox, emitterNodeId).position;
+        attributes.attr["position"] = particleOpts.position.has_value() ?  particleOpts.position.value() : fullTransformation(world.sandbox, emitterNodeId).position;
         if (particleOpts.velocity.has_value()){
-          attributes.vecAttr.vec3["physics_velocity"] = particleOpts.velocity.value();
+          attributes.attr["physics_velocity"] = particleOpts.velocity.value();
         }
         if (particleOpts.angularVelocity.has_value()){
-          attributes.vecAttr.vec3["physics_avelocity"] = particleOpts.angularVelocity.value();
+          attributes.attr["physics_avelocity"] = particleOpts.angularVelocity.value();
         }
         AttrChildrenPair attrChildren {
           .attr = attributes,

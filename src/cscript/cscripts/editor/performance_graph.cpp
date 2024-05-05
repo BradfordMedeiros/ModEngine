@@ -14,11 +14,7 @@ void createObj(objid sceneId){
   GameobjAttributes attr {
     .attr = {
     	{ "mesh", "./res/models/box/spriteplane.dae" },
-    },
-    .vecAttr = { 
-    	.vec3 = {
-    		{ "position", glm::vec3(1.f, 1.f, 0.f) },
-    	}, 
+    	{ "position", glm::vec3(1.f, 1.f, 0.f) },
     },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;

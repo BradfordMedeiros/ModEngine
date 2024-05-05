@@ -12,7 +12,6 @@ objid createManipulator(){
         {"mesh", "./res/models/ui/manipulator.gltf" }, 
         {"layer", "scale" },
       },
-      .vecAttr = { .vec3 = {} },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {
     {"manipulator/xaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(1.f, 1.f, 0.f, 0.8f) }} }}},
