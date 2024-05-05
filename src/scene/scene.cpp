@@ -670,14 +670,14 @@ std::map<objid, GameobjAttributes> applyFieldsToSubelements(std::string meshName
   for (auto [nodeId, meshListIds] : data.nodeToMeshId){
     if (meshListIds.size() == 1){
       auto meshRef = meshName + "::" + std::to_string(meshListIds.at(0));
-      additionalFieldsMap.at(nodeId).stringAttributes["mesh"] = meshRef;
+      additionalFieldsMap.at(nodeId).attr["mesh"] = meshRef;
     }else if (meshListIds.size() > 1){
       std::vector<std::string> meshRefNames;
       for (auto id : meshListIds){
         auto meshRef = meshName + "::" + std::to_string(id);
         meshRefNames.push_back(meshRef);
       }
-      additionalFieldsMap.at(nodeId).stringAttributes["meshes"] = join(meshRefNames, ',');
+      additionalFieldsMap.at(nodeId).attr["meshes"] = join(meshRefNames, ',');
     }
   }
 
@@ -1049,9 +1049,8 @@ void removeAllScenesFromWorld(World& world){
 
 GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, AttrChildrenPair& attrWithChildren, std::map<std::string, GameobjAttributes>& submodelAttributes, bool returnOnly){
   GameobjAttributes& attributes = attrWithChildren.attr;
-  int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
-  bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
-  auto idToAdd = useObjId ? id : getUniqueObjId();
+  auto idAttr = objIdFromAttribute(attributes);
+  objid idToAdd = idAttr.has_value() ? idAttr.value() : getUniqueObjId();
 
   GameObjPair gameobjPair{
     .gameobj = gameObjectFromFields(name, idToAdd, attributes, getObjautoserializerFields(name)),
@@ -1089,7 +1088,7 @@ std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serial
   assert(serialAttrs.size() == 1);
   AttrChildrenPair& attrObj = serialAttrs.begin() -> second;
   if (useObjId){
-    attrObj.attr.numAttributes["id"] = id;
+    attrObj.attr.attr["id"] = static_cast<float>(id);
   } 
   return SingleObjDeserialization{
     .name = serialAttrs.begin() -> first,
@@ -1117,6 +1116,27 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   return addObjectToScene(world, sceneId, singleObj.name, singleObj.attrWithChildren, singleObj.submodelAttributes);
 }
 
+AttributeValuePtr ptrFromAttributeValue(AttributeValue& attributeValue){
+  std::string* strValue = std::get_if<std::string>(&attributeValue);
+  if (strValue){
+    return strValue;
+  }
+  glm::vec3* vec3Value = std::get_if<glm::vec3>(&attributeValue);
+  if (vec3Value){
+    return vec3Value;
+  }
+  glm::vec4* vec4Value = std::get_if<glm::vec4>(&attributeValue);
+  if (vec4Value){
+    return vec4Value;
+  }
+  float* floatValue = std::get_if<float>(&attributeValue);
+  if (floatValue){
+    return floatValue;
+  }
+
+  modassert(false, "ptrFromAttributeValue invalid value type");
+}
+
 std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, const char* field){
   GameObject& gameobj = getGameObject(world, id);
   auto valuePtr = getAttributePtr(gameobj, field);
@@ -1129,18 +1149,8 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
   if (objectValuePtr.has_value()){
     return objectValuePtr;
   }
-
-  if (gameobj.additionalAttr.vecAttr.vec3.find(field) != gameobj.additionalAttr.vecAttr.vec3.end()){
-      return &gameobj.additionalAttr.vecAttr.vec3.at(field);
-  }
-  if (gameobj.additionalAttr.vecAttr.vec4.find(field) != gameobj.additionalAttr.vecAttr.vec4.end()){
-      return &gameobj.additionalAttr.vecAttr.vec4.at(field);
-  }
-  if (gameobj.additionalAttr.stringAttributes.find(field) != gameobj.additionalAttr.stringAttributes.end()){
-      return &gameobj.additionalAttr.stringAttributes.at(field);
-  }
-  if (gameobj.additionalAttr.numAttributes.find(field) != gameobj.additionalAttr.numAttributes.end()){
-      return &gameobj.additionalAttr.numAttributes.at(field);
+  if (gameobj.additionalAttr.attr.find(field) != gameobj.additionalAttr.attr.end()){
+      return ptrFromAttributeValue(gameobj.additionalAttr.attr.at(field));
   }
   return std::nullopt;
 }
@@ -1406,12 +1416,12 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
           return std::nullopt;
         } 
         std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
-        attributes.vecAttr.vec3["position"] = particleOpts.position.has_value() ?  particleOpts.position.value() : fullTransformation(world.sandbox, emitterNodeId).position;
+        attributes.attr["position"] = particleOpts.position.has_value() ?  particleOpts.position.value() : fullTransformation(world.sandbox, emitterNodeId).position;
         if (particleOpts.velocity.has_value()){
-          attributes.vecAttr.vec3["physics_velocity"] = particleOpts.velocity.value();
+          attributes.attr["physics_velocity"] = particleOpts.velocity.value();
         }
         if (particleOpts.angularVelocity.has_value()){
-          attributes.vecAttr.vec3["physics_avelocity"] = particleOpts.angularVelocity.value();
+          attributes.attr["physics_avelocity"] = particleOpts.angularVelocity.value();
         }
         AttrChildrenPair attrChildren {
           .attr = attributes,

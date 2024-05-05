@@ -79,6 +79,8 @@ std::optional<AttributeValuePtr> getAttributePtr(GameObject& gameobj, const char
 bool setAttribute(GameObject& gameobj, const char* field, AttributeValue value, ObjectSetAttribUtil& util);
 
 GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes, std::set<std::string>& autoserializerFields);
+
+std::optional<objid> objIdFromAttribute(GameobjAttributes& attr);
 GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes, std::set<std::string> objautoserializerFields);
 
 #endif

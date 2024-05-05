@@ -362,17 +362,13 @@ void drop_callback(GLFWwindow* window, int count, const char** paths){
       }
     }else if (fileType == AUDIO_EXTENSION){
       GameobjAttributes attr {
-        .stringAttributes = {{ "clip", paths[i] }}, 
-        .numAttributes = {}, 
-        .vecAttr = vectorAttributes { .vec3 = {}, .vec4 = {}},
+        .attr = {{ "clip", std::string(paths[i]) }}, 
       };
       std::map<std::string, GameobjAttributes> submodelAttributes;
       makeObjectAttr(sceneId, "&" + objectName, attr, submodelAttributes);
     }else if (fileType == MODEL_EXTENSION){
       GameobjAttributes attr {
-        .stringAttributes = {{ "mesh", paths[i] }}, 
-        .numAttributes = {}, 
-        .vecAttr = vectorAttributes { .vec3 = {}, .vec4 = {}},
+        .attr = {{ "mesh", std::string(paths[i]) }}, 
       };
       std::map<std::string, GameobjAttributes> submodelAttributes;
       makeObjectAttr(sceneId, objectName, attr, submodelAttributes);

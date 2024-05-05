@@ -143,9 +143,9 @@ int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> a
 int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName){
   auto name = std::to_string(getUniqueObjId()) + parentNodeName;
   GameobjAttributes attr {
-    .stringAttributes = {}, 
-    .numAttributes = {}, 
-    .vecAttr = vectorAttributes { .vec3 = {{"position", offset}}, .vec4 = {} },
+    .attr = {
+      {"position", offset}
+    }, 
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
   auto nodeOffsetId = makeObjectAttr(world.sandbox.mainScene.rootId, name, attr, submodelAttributes).value();

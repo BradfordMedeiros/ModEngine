@@ -2,32 +2,17 @@
 
 GameobjAttributes particleFields(GameobjAttributes& attributes){
   GameobjAttributes attr {
-    .stringAttributes = {},
-    .numAttributes = {},
-    .vecAttr = { .vec3 = {}, .vec4 = {} },
+    .attr = {},
   };
-  for (auto [key, value] : attributes.stringAttributes){
+  for (auto [key, value] : attributes.attr){
+    auto strValue = std::get_if<std::string>(&value);
+    auto floatValue = std::get_if<float>(&value);
+    auto vec3Value = std::get_if<glm::vec3>(&value);
+    auto vec4Value = std::get_if<glm::vec4>(&value);
+    modassert(strValue || floatValue || vec3Value || vec4Value, "invalid type particleFields");
     if (key.at(0) == '+' && key.size() > 1){
       auto newKey = key.substr(1, key.size());
-      attr.stringAttributes[newKey] = value;
-    }
-  }
-  for (auto [key, value] : attributes.numAttributes){
-    if (key.at(0) == '+' && key.size() > 1){
-      auto newKey = key.substr(1, key.size());
-      attr.numAttributes[newKey] = value;
-    }
-  }
-  for (auto [key, value] : attributes.vecAttr.vec3){
-    if (key.at(0) == '+' && key.size() > 1){
-      auto newKey = key.substr(1, key.size());
-      attr.vecAttr.vec3[newKey] = value;
-    }
-  }
-  for (auto [key, value] : attributes.vecAttr.vec4){
-    if (key.at(0) == '+' && key.size() > 1){
-      auto newKey = key.substr(1, key.size());
-      attr.vecAttr.vec4[newKey] = value;
+      attr.attr[newKey] = value;
     }
   }
   return attr;
@@ -36,57 +21,69 @@ GameobjAttributes particleFields(GameobjAttributes& attributes){
 std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
   std::map<std::string, EmitterDelta> values;
   ///////////////// Same code for diff types consolidate
-  for (auto [key, _] : attributes.vecAttr.vec3){
-    if ((key.at(0) == '!' || key.at(0) == '?' || key.at(0) == '%') && key.size() > 1){
-      auto newKey = key.substr(1, key.size());
-      values[newKey] = EmitterDelta {
-        .attributeName = newKey,
-        .value = glm::vec3(0.f, 0.f, 0.f),
-        .variance = glm::vec3(0.f, 0.f, 0.f),
-        .lifetimeEffect = {},
-      };
+  for (auto &[key, value] : attributes.attr){
+    auto vec3Attr = std::get_if<glm::vec3>(&value);
+    if (vec3Attr){
+      if ((key.at(0) == '!' || key.at(0) == '?' || key.at(0) == '%') && key.size() > 1){
+        auto newKey = key.substr(1, key.size());
+        values[newKey] = EmitterDelta {
+          .attributeName = newKey,
+          .value = glm::vec3(0.f, 0.f, 0.f),
+          .variance = glm::vec3(0.f, 0.f, 0.f),
+          .lifetimeEffect = {},
+        };
+      }
     }
   }
-  for (auto [key, _] : attributes.vecAttr.vec4){
-    if ((key.at(0) == '!' || key.at(0) == '?' || key.at(0) == '%') && key.size() > 1){
-      auto newKey = key.substr(1, key.size());
-      values[newKey] = EmitterDelta {
-        .attributeName = newKey,
-        .value = glm::vec4(0.f, 0.f, 0.f, 0.f),
-        .variance = glm::vec4(0.f, 0.f, 0.f, 0.f),
-        .lifetimeEffect = {},
-      };
+  for (auto &[key, value] : attributes.attr){
+    auto vec4Attr = std::get_if<glm::vec4>(&value);
+    if (vec4Attr){
+      if ((key.at(0) == '!' || key.at(0) == '?' || key.at(0) == '%') && key.size() > 1){
+        auto newKey = key.substr(1, key.size());
+        values[newKey] = EmitterDelta {
+          .attributeName = newKey,
+          .value = glm::vec4(0.f, 0.f, 0.f, 0.f),
+          .variance = glm::vec4(0.f, 0.f, 0.f, 0.f),
+          .lifetimeEffect = {},
+        };
+      }
     }
   }
   ////////////////////////////////////////////////////////////
   
   ///////////////// Same code for diff types
-  for (auto [key, value] : attributes.vecAttr.vec3){
-    std::cout <<  "emitter: adding vec3 type for: " << key << std::endl;
-    if (key.size() > 1){
-      auto newKey = key.substr(1, key.size());
-      if (key.at(0) == '!'){
-        values.at(newKey).value = value;
-      }else if (key.at(0) == '?'){
-        values.at(newKey).variance = value;
+  for (auto [key, value] : attributes.attr){
+    auto vec3Attr = std::get_if<glm::vec3>(&value);
+    if (vec3Attr){
+      std::cout <<  "emitter: adding vec3 type for: " << key << std::endl;
+      if (key.size() > 1){
+        auto newKey = key.substr(1, key.size());
+        if (key.at(0) == '!'){
+          values.at(newKey).value = value;
+        }else if (key.at(0) == '?'){
+          values.at(newKey).variance = value;
+        }
+        /*else if (key.at(0) == '%'){
+          values.at(newKey).lifetimeEffect = parseFloatVec(value);
+        }*/
       }
-      /*else if (key.at(0) == '%'){
-        values.at(newKey).lifetimeEffect = parseFloatVec(value);
-      }*/
     }
   }
-  for (auto [key, value] : attributes.vecAttr.vec4){
-    std::cout <<  "emitter: adding vec4 type for: " << key << std::endl;
-    if (key.size() > 1){
-      auto newKey = key.substr(1, key.size());
-      if (key.at(0) == '!'){
-        values.at(newKey).value = value;
-      }else if (key.at(0) == '?'){
-        values.at(newKey).variance = value;
+  for (auto [key, value] : attributes.attr){
+    auto vec4Attr = std::get_if<glm::vec4>(&value);
+    if (vec4Attr){
+      std::cout <<  "emitter: adding vec4 type for: " << key << std::endl;
+      if (key.size() > 1){
+        auto newKey = key.substr(1, key.size());
+        if (key.at(0) == '!'){
+          values.at(newKey).value = *vec4Attr;
+        }else if (key.at(0) == '?'){
+          values.at(newKey).variance = *vec4Attr;
+        }
+        /*else if (key.at(0) == '%'){
+          values.at(newKey).lifetimeEffect = parseFloatVec(value);
+        }*/
       }
-      /*else if (key.at(0) == '%'){
-        values.at(newKey).lifetimeEffect = parseFloatVec(value);
-      }*/
     }
   }
   ////////////////////////////////////////////////////////////////
@@ -190,40 +187,15 @@ std::optional<EmitterSpecialAttribute> extractSpecialAttribute(std::string key){
 }
 
 GameobjAttributes emitterExtractAttributes(GameobjAttributes& attributes, std::string name){
-  std::map<std::string, std::string> stringAttributes;
-  std::map<std::string, float> numAttributes;
-  std::map<std::string, glm::vec3> vec3;
-  std::map<std::string, glm::vec4> vec4;
+  std::map<std::string, AttributeValue> attrs;
 
-  for (auto &[key, value] : attributes.stringAttributes){
+  for (auto &[key, value] : attributes.attr){
     auto extractedAttribute = extractSpecialAttribute(key);
     if (extractedAttribute.has_value() && extractedAttribute.value().subelement == name){
-      stringAttributes[extractedAttribute.value().attribute] = value;
+      attrs[extractedAttribute.value().attribute] = value;
     }
   }
-  for (auto &[key, value] : attributes.numAttributes){
-    auto extractedAttribute = extractSpecialAttribute(key);
-    if (extractedAttribute.has_value() && extractedAttribute.value().subelement == name){
-      numAttributes[extractedAttribute.value().attribute] = value;
-    }
-  }
-  for (auto &[key, value] : attributes.vecAttr.vec3){
-    auto extractedAttribute = extractSpecialAttribute(key);
-    if (extractedAttribute.has_value() && extractedAttribute.value().subelement == name){
-      vec3[extractedAttribute.value().attribute] = value;
-    }  
-  }
-  for (auto &[key, value] : attributes.vecAttr.vec4){
-    auto extractedAttribute = extractSpecialAttribute(key);
-    if (extractedAttribute.has_value() && extractedAttribute.value().subelement == name){
-      vec4[extractedAttribute.value().attribute] = value;
-    }   
-  }
-  return GameobjAttributes {
-    .stringAttributes = stringAttributes,
-    .numAttributes = numAttributes,
-    .vecAttr { .vec3 = vec3, .vec4 = vec4 },
-  };
+  return GameobjAttributes { .attr = attrs };
 }
 
 GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& util){

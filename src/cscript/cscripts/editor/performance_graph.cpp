@@ -12,15 +12,9 @@ extern CustomApiBindings* mainApi;
 
 void createObj(objid sceneId){
   GameobjAttributes attr {
-    .stringAttributes = {
-    	{ "mesh",  "./res/models/box/spriteplane.dae" },
-    },
-    .numAttributes = {},
-    .vecAttr = { 
-    	.vec3 = {
-    		{ "position", glm::vec3(1.f, 1.f, 0.f) },
-    	}, 
-    	.vec4 = {} 
+    .attr = {
+    	{ "mesh", "./res/models/box/spriteplane.dae" },
+    	{ "position", glm::vec3(1.f, 1.f, 0.f) },
     },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;
