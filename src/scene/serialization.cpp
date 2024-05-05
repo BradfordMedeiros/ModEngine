@@ -220,11 +220,19 @@ void assertCoreType(AttributeValueType type, std::string& fieldname, std::string
   auto autoserializer = getAutoserializeByField(gameobjSerializer, fieldname.c_str());
   if (autoserializer.has_value()){
     auto serializerType = typeForSerializer(*(autoserializer.value()));
-    modassert(serializerType == type, std::string("mismatch type for: ") + fieldname + " should be: " + attributeTypeStr(serializerType) + " payload = " + payload);
+    modassert(serializerType == type, std::string("mismatch type for: ") + fieldname + " should be: " + attributeTypeStr(serializerType) + ", but got = " + attributeTypeStr(type) + " payload = " + payload);
   }
 }
 
 void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::string payload){
+  glm::vec2 vec2(0.f, 0.f);
+  bool isVec2 = maybeParseVec2(payload, vec2);
+  if (isVec2){
+    attributes.attr[attribute] = vec2;
+    assertCoreType(ATTRIBUTE_VEC2, attribute, payload);
+    return;
+  }
+
   glm::vec3 vec(0.f, 0.f, 0.f);
   bool isVec = maybeParseVec(payload, vec);
   if (isVec){
@@ -312,12 +320,15 @@ std::vector<std::pair<std::string, std::string>> uniqueAdditionalFields(GameObje
     modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
     auto strValue = std::get_if<std::string>(&value);
     auto floatValue = std::get_if<float>(&value);
+    auto vec2Value = std::get_if<glm::vec2>(&value);
     auto vec3Value = std::get_if<glm::vec3>(&value);
     auto vec4Value = std::get_if<glm::vec4>(&value);
     if (strValue){
       fields.push_back({ field, *strValue });
     }else if (floatValue){
       fields.push_back({ field, serializeFloat(*floatValue) });
+    }else if (vec2Value){
+      fields.push_back({ field, serializeVec(*vec2Value) });
     }else if (vec3Value){
       fields.push_back({ field, serializeVec(*vec3Value) });
     }else if (vec4Value){

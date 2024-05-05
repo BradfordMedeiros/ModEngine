@@ -1121,6 +1121,10 @@ AttributeValuePtr ptrFromAttributeValue(AttributeValue& attributeValue){
   if (strValue){
     return strValue;
   }
+  glm::vec2* vec2Value = std::get_if<glm::vec2>(&attributeValue);
+  if (vec2Value){
+    return vec2Value;
+  }
   glm::vec3* vec3Value = std::get_if<glm::vec3>(&attributeValue);
   if (vec3Value){
     return vec3Value;
@@ -1164,7 +1168,7 @@ std::optional<AttributeValue> getObjectAttribute(World& world, objid id, const c
 
   auto vec2Ptr = std::get_if<glm::vec2*>(&attrPtr.value());
   if (vec2Ptr){
-    modassert(false, "vec2 ptr not yet implemented");
+    return **vec2Ptr;
   }
 
   glm::vec3** vec3Ptr = std::get_if<glm::vec3*>(&attrPtr.value());

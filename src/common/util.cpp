@@ -321,7 +321,7 @@ glm::vec4 parseVec4(std::string positionRaw){
 }
 bool maybeParseVec2(std::string positionRaw, glm::vec2& _vec){
   auto parts = filterWhitespace(split(positionRaw, ' '));
-  if (parts.size() != 3){
+  if (parts.size() != 2){
     return false;
   }
   float vecParts[2] = { 0, 0 };
@@ -569,7 +569,9 @@ AttributeValue parseAttributeValue(std::string payload){
 }
 
 std::string attributeTypeStr(AttributeValueType type){
-  if (type == ATTRIBUTE_VEC3){
+  if (type == ATTRIBUTE_VEC2){
+    return "vec2";
+  }else if (type == ATTRIBUTE_VEC3){
     return "vec3";
   }else if (type == ATTRIBUTE_VEC4){
     return "vec4";
@@ -771,9 +773,10 @@ GameobjAttributes gameobjAttributes2To1(std::vector<GameobjAttribute>& attribute
   for (auto &attrValue : attributes){
     auto stringValue = std::get_if<std::string>(&attrValue.attributeValue);
     auto floatValue = std::get_if<float>(&attrValue.attributeValue);
+    auto vec2Value = std::get_if<glm::vec2>(&attrValue.attributeValue);
     auto vec3Value = std::get_if<glm::vec3>(&attrValue.attributeValue);
     auto vec4Value = std::get_if<glm::vec4>(&attrValue.attributeValue);
-    if (stringValue || floatValue || vec3Value || vec4Value){
+    if (stringValue || floatValue || vec2Value || vec3Value || vec4Value){
       attr.attr[attrValue.field] = attrValue.attributeValue;
     }else{
       modassert(false, "invalid attribute value type");

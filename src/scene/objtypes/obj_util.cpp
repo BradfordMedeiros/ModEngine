@@ -74,10 +74,9 @@ void attrSetVec3(std::optional<glm::vec3> vec3Value, glm::vec3* _value, bool* _h
   }  
 }
 
-void attrSetVec2(std::optional<std::string> strValue, glm::vec2* _value, bool* _hasValue, glm::vec2 defaultValue){
-  if (strValue.has_value()){
-    auto value = strValue.value();
-    *_value = parseVec2(value);
+void attrSetVec2(std::optional<glm::vec2> vec2Value, glm::vec2* _value, bool* _hasValue, glm::vec2 defaultValue){
+  if (vec2Value.has_value()){
+    *_value = vec2Value.value();
     if (_hasValue != NULL){
       *_hasValue = true;
     }
@@ -243,7 +242,7 @@ void createAutoSerializeAttr(char* structAddress, AutoSerialize& value, std::opt
   if (vec2Value != NULL){
     glm::vec2* address = (glm::vec2*)(((char*)structAddress) + vec2Value -> structOffset);
     bool* hasValueAddress = (!vec2Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec2Value -> structOffsetFiller.value());
-    attrSetVec2(unwrapAttrOpt<std::string>(attrValue), address, hasValueAddress, vec2Value -> defaultValue);
+    attrSetVec2(unwrapAttrOpt<glm::vec2>(attrValue), address, hasValueAddress, vec2Value -> defaultValue);
     return;
   }
 
@@ -721,8 +720,8 @@ bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, const char
     glm::vec2* address = (glm::vec2*)(((char*)structAddress) + vec2Value -> structOffset);
     bool* hasValueAddress = (!vec2Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec2Value -> structOffsetFiller.value());
     if (attributeValue.has_value()){
-      std::string stringValue = unwrapAttr<std::string>(attributeValue.value());
-      *address = parseVec2(stringValue);
+      glm::vec2 vec2Value = unwrapAttr<glm::vec2>(attributeValue.value());
+      *address = vec2Value;
       if (hasValueAddress != NULL){
         *hasValueAddress = true;
       }
@@ -927,8 +926,7 @@ AttributeValueType typeForSerializer(AutoSerialize& serializer){
   AutoSerializeForceString* forcedStringSerializer = std::get_if<AutoSerializeForceString>(&serializer);
   AutoSerializeTextureLoaderManual* textureSerializer = std::get_if<AutoSerializeTextureLoaderManual>(&serializer);
   AutoSerializeEnums* enumsSerializer = std::get_if<AutoSerializeEnums>(&serializer);
-  AutoSerializeVec2* vec2Serializer = std::get_if<AutoSerializeVec2>(&serializer);
-  if (boolSerializer != NULL || stringSerializer != NULL || forcedStringSerializer != NULL || textureSerializer != NULL || enumsSerializer != NULL || vec2Serializer != NULL){
+  if (boolSerializer != NULL || stringSerializer != NULL || forcedStringSerializer != NULL || textureSerializer != NULL || enumsSerializer != NULL){
     return ATTRIBUTE_STRING;
   }
   AutoSerializeFloat* floatSerializer = std::get_if<AutoSerializeFloat>(&serializer);
@@ -936,6 +934,10 @@ AttributeValueType typeForSerializer(AutoSerialize& serializer){
   AutoSerializeUInt* uintSerializer = std::get_if<AutoSerializeUInt>(&serializer);
   if (floatSerializer != NULL || intSerializer != NULL || uintSerializer != NULL){
     return ATTRIBUTE_FLOAT;
+  }
+  AutoSerializeVec2* vec2Serializer = std::get_if<AutoSerializeVec2>(&serializer);
+  if (vec2Serializer != NULL){
+    return ATTRIBUTE_VEC2;
   }
   AutoSerializeVec3* vec3Serializer = std::get_if<AutoSerializeVec3>(&serializer);
   if (vec3Serializer != NULL){
