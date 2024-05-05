@@ -558,6 +558,36 @@ extern std::vector<AutoSerialize> textAutoserializer;
 extern std::vector<AutoSerialize> prefabAutoserializer;
 extern std::vector<AutoSerialize> gameobjSerializer;
 
+void assertFieldTypesUnique(){
+  std::map<std::string, AttributeValueType> fieldToType = {};
+  std::vector<std::vector<AutoSerialize>*> allSerializers = {
+    &meshAutoserializer,
+    &cameraAutoserializer,
+    &portalAutoserializer,
+    &soundAutoserializer,
+    &lightAutoserializer,
+    &octreeAutoserializer,
+    &emitterAutoserializer,
+    &heightmapAutoserializer,
+    &navmeshAutoserializer,
+    &textAutoserializer,
+    &prefabAutoserializer,
+    &gameobjSerializer,
+  };
+  for (auto serializer : allSerializers){
+    auto allFields = serializerFieldNames(*serializer);
+    for (auto &fieldname : allFields){
+      auto autoserializer = getAutoserializeByField(*serializer, fieldname.c_str());
+      auto serializerType = typeForSerializer(*(autoserializer.value()));
+      if (fieldToType.find(fieldname) != fieldToType.end()){
+        auto existingType = fieldToType.at(fieldname);
+        modassert(existingType == serializerType, std::string("mixed types for: ") + fieldname);
+      }
+      fieldToType[fieldname] = serializerType;
+    }
+  }
+}
+
 std::set<std::string> getObjautoserializerFields(std::string& name){
   auto type = getType(name);
   if (type == "default"){
@@ -629,6 +659,8 @@ World createWorld(
   std::vector<std::string> defaultMeshes,
   std::vector<std::string> spriteMeshes
 ){
+  assertFieldTypesUnique();
+  
   auto objectMapping = getObjectMapping();
   World world = {
     .physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave, debugDrawer),
@@ -1137,8 +1169,8 @@ AttributeValuePtr ptrFromAttributeValue(AttributeValue& attributeValue){
   if (floatValue){
     return floatValue;
   }
-
   modassert(false, "ptrFromAttributeValue invalid value type");
+  return (float*)NULL;
 }
 
 std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, const char* field){

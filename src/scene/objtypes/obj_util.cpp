@@ -944,7 +944,7 @@ AttributeValueType typeForSerializer(AutoSerialize& serializer){
     return ATTRIBUTE_VEC3;
   }
   AutoSerializeVec4* vec4Serializer = std::get_if<AutoSerializeVec4>(&serializer);
-  if (vec3Serializer != NULL){
+  if (vec4Serializer != NULL){
     return ATTRIBUTE_VEC4;
   }
   AutoSerializeRotation* rotSerializer = std::get_if<AutoSerializeRotation>(&serializer);
@@ -960,7 +960,7 @@ AttributeValueType typeForSerializer(AutoSerialize& serializer){
     // do nothing
     return reservedField -> fieldType;
   }
-  modassert(false, "type for serializer invalid type");
+  modassert(false, std::string("type for serializer invalid type: ") + serializerFieldName(serializer));
   return ATTRIBUTE_STRING;
 }
 
