@@ -144,7 +144,6 @@ int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::stri
   auto name = std::to_string(getUniqueObjId()) + parentNodeName;
   GameobjAttributes attr {
     .attr = {}, 
-    .numAttributes = {}, 
     .vecAttr = vectorAttributes { .vec3 = {{"position", offset}}, .vec4 = {} },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {};

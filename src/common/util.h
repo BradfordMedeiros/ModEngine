@@ -249,7 +249,6 @@ struct GameobjAttribute {
 
 struct GameobjAttributes {
   std::map<std::string, AttributeValue> attr;
-  std::map<std::string, float> numAttributes;
   vectorAttributes vecAttr;
 };
 

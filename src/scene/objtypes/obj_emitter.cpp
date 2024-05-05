@@ -3,23 +3,15 @@
 GameobjAttributes particleFields(GameobjAttributes& attributes){
   GameobjAttributes attr {
     .attr = {},
-    .numAttributes = {},
     .vecAttr = { .vec3 = {}, .vec4 = {} },
   };
   for (auto [key, value] : attributes.attr){
     auto strValue = std::get_if<std::string>(&value);
-    if (!strValue){
-      modassert(false, "invalid type particleFields");
-    }
+    auto floatValue = std::get_if<float>(&value);
+    modassert(strValue || floatValue, "invalid type particleFields");
     if (key.at(0) == '+' && key.size() > 1){
       auto newKey = key.substr(1, key.size());
-      attr.attr[newKey] = *strValue;
-    }
-  }
-  for (auto [key, value] : attributes.numAttributes){
-    if (key.at(0) == '+' && key.size() > 1){
-      auto newKey = key.substr(1, key.size());
-      attr.numAttributes[newKey] = value;
+      attr.attr[newKey] = value;
     }
   }
   for (auto [key, value] : attributes.vecAttr.vec3){
@@ -195,7 +187,6 @@ std::optional<EmitterSpecialAttribute> extractSpecialAttribute(std::string key){
 
 GameobjAttributes emitterExtractAttributes(GameobjAttributes& attributes, std::string name){
   std::map<std::string, AttributeValue> attrs;
-  std::map<std::string, float> numAttributes;
   std::map<std::string, glm::vec3> vec3;
   std::map<std::string, glm::vec4> vec4;
 
@@ -203,12 +194,6 @@ GameobjAttributes emitterExtractAttributes(GameobjAttributes& attributes, std::s
     auto extractedAttribute = extractSpecialAttribute(key);
     if (extractedAttribute.has_value() && extractedAttribute.value().subelement == name){
       attrs[extractedAttribute.value().attribute] = value;
-    }
-  }
-  for (auto &[key, value] : attributes.numAttributes){
-    auto extractedAttribute = extractSpecialAttribute(key);
-    if (extractedAttribute.has_value() && extractedAttribute.value().subelement == name){
-      numAttributes[extractedAttribute.value().attribute] = value;
     }
   }
   for (auto &[key, value] : attributes.vecAttr.vec3){
@@ -225,7 +210,6 @@ GameobjAttributes emitterExtractAttributes(GameobjAttributes& attributes, std::s
   }
   return GameobjAttributes {
     .attr = attrs,
-    .numAttributes = numAttributes,
     .vecAttr { .vec3 = vec3, .vec4 = vec4 },
   };
 }

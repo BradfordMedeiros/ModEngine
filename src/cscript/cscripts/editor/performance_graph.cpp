@@ -15,7 +15,6 @@ void createObj(objid sceneId){
     .attr = {
     	{ "mesh", "./res/models/box/spriteplane.dae" },
     },
-    .numAttributes = {},
     .vecAttr = { 
     	.vec3 = {
     		{ "position", glm::vec3(1.f, 1.f, 0.f) },

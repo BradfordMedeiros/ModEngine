@@ -1049,9 +1049,8 @@ void removeAllScenesFromWorld(World& world){
 
 GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, AttrChildrenPair& attrWithChildren, std::map<std::string, GameobjAttributes>& submodelAttributes, bool returnOnly){
   GameobjAttributes& attributes = attrWithChildren.attr;
-  int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
-  bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
-  auto idToAdd = useObjId ? id : getUniqueObjId();
+  auto idAttr = objIdFromAttribute(attributes);
+  objid idToAdd = idAttr.has_value() ? idAttr.value() : getUniqueObjId();
 
   GameObjPair gameobjPair{
     .gameobj = gameObjectFromFields(name, idToAdd, attributes, getObjautoserializerFields(name)),
@@ -1089,7 +1088,7 @@ std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serial
   assert(serialAttrs.size() == 1);
   AttrChildrenPair& attrObj = serialAttrs.begin() -> second;
   if (useObjId){
-    attrObj.attr.numAttributes["id"] = id;
+    attrObj.attr.attr["id"] = static_cast<float>(id);
   } 
   return SingleObjDeserialization{
     .name = serialAttrs.begin() -> first,
@@ -1159,9 +1158,6 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
   }
   if (gameobj.additionalAttr.attr.find(field) != gameobj.additionalAttr.attr.end()){
       return ptrFromAttributeValue(gameobj.additionalAttr.attr.at(field));
-  }
-  if (gameobj.additionalAttr.numAttributes.find(field) != gameobj.additionalAttr.numAttributes.end()){
-      return &gameobj.additionalAttr.numAttributes.at(field);
   }
   return std::nullopt;
 }

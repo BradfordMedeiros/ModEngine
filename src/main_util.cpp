@@ -12,7 +12,6 @@ objid createManipulator(){
         {"mesh", "./res/models/ui/manipulator.gltf" }, 
         {"layer", "scale" },
       },
-      .numAttributes = {},
       .vecAttr = { .vec3 = {}, .vec4 = {} },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {

@@ -697,11 +697,6 @@ std::string print(GameobjAttributes& attr){
   for (auto &[key, value] : attr.vecAttr.vec4){
     content = content + key + ":" + print(value) + "\n\n"; 
   }
-
-  content = content + "num-attr[" + std::to_string(attr.numAttributes.size()) + "]\n--------\n";
-  for (auto &[key, value] : attr.numAttributes){
-    content = content + key + ":" + std::to_string(value) + "\n\n"; 
-  }
   return content;
 }
 
@@ -781,7 +776,6 @@ void assertTodo(std::string message){
 GameobjAttributes gameobjAttributes2To1(std::vector<GameobjAttribute>& attributes){
   GameobjAttributes attr {
     .attr = {},
-    .numAttributes = {},
     .vecAttr = { .vec3 = {}, .vec4 = {} },
   };
   for (auto &attrValue : attributes){
@@ -789,10 +783,8 @@ GameobjAttributes gameobjAttributes2To1(std::vector<GameobjAttribute>& attribute
     auto floatValue = std::get_if<float>(&attrValue.attributeValue);
     auto vec3Value = std::get_if<glm::vec3>(&attrValue.attributeValue);
     auto vec4Value = std::get_if<glm::vec4>(&attrValue.attributeValue);
-    if (stringValue){
+    if (stringValue || floatValue){
       attr.attr[attrValue.field] = attrValue.attributeValue;
-    }else if (floatValue){
-      attr.numAttributes[attrValue.field] = *floatValue;
     }else if (vec3Value){
       attr.vecAttr.vec3[attrValue.field] = *vec3Value;
     }else if (vec4Value){
@@ -826,19 +818,22 @@ std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string ke
 }
 
 std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key){
-  if (objAttr.numAttributes.find(key) != objAttr.numAttributes.end()){
-    return objAttr.numAttributes.at(key);
+  if (objAttr.attr.find(key) != objAttr.attr.end()){
+    auto floatValue = std::get_if<float>(&objAttr.attr.at(key));
+    if (!floatValue){
+      return std::nullopt;
+    }
+    return *floatValue;
   }
   return std::nullopt;
 }
 
 std::optional<int> getIntFromAttr(GameobjAttributes& objAttr, std::string key){
-  if (objAttr.numAttributes.find(key) != objAttr.numAttributes.end()){
-    float numValue = objAttr.numAttributes.at(key);
-    int value = static_cast<int>(numValue);
-    return value;
+  auto floatAttr = getFloatAttr(objAttr, key);
+  if (!floatAttr.has_value()){
+    return std::nullopt;
   }
-  return std::nullopt;
+  return static_cast<int>(floatAttr.value());
 }
 
 std::optional<glm::vec3> getVec3Attr(GameobjAttributes& objAttr, std::string key){
@@ -881,9 +876,6 @@ bool hasAttribute(GameobjAttributes& attrs, std::string& type){
   if (attrs.attr.find(type) != attrs.attr.end()){
     return true;
   }
-  if (attrs.numAttributes.find(type) != attrs.numAttributes.end()){
-    return true;
-  }
   if (attrs.vecAttr.vec3.find(type) != attrs.vecAttr.vec3.end()){
     return true;
   }  
@@ -896,9 +888,6 @@ bool hasAttribute(GameobjAttributes& attrs, std::string& type){
 void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAttributes){
   for (auto &[name, value] : fromAttributes.attr){
     toAttributes.attr[name] = value;
-  }
-  for (auto &[name, value] : fromAttributes.numAttributes){
-    toAttributes.numAttributes[name] = value;
   }
   for (auto &[name, value] : fromAttributes.vecAttr.vec3){
     toAttributes.vecAttr.vec3[name] = value;
@@ -1008,12 +997,6 @@ std::optional<std::string> subelementTargetName(std::string& name){
 std::vector<GameobjAttribute> allKeysAndAttributes(GameobjAttributes& attributes){
   std::vector<GameobjAttribute> values;
   for (auto &[key, value] : attributes.attr){
-    values.push_back(GameobjAttribute{
-      .field = key,
-      .attributeValue = value,
-    });
-  }
-  for (auto &[key, value] : attributes.numAttributes){
     values.push_back(GameobjAttribute{
       .field = key,
       .attributeValue = value,

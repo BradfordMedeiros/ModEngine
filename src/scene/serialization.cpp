@@ -244,7 +244,7 @@ void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::
   float number = 0.f;
   bool isFloat = maybeParseFloat(payload, number);
   if (isFloat){
-    attributes.numAttributes[attribute] = number;
+    attributes.attr[attribute] = number;
     assertCoreType(ATTRIBUTE_FLOAT, attribute, payload);
     return;
   }
@@ -311,15 +311,14 @@ std::vector<std::pair<std::string, std::string>> uniqueAdditionalFields(GameObje
   for (auto &[field, value] : gameobject.additionalAttr.attr){
     modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
     auto strValue = std::get_if<std::string>(&value);
+    auto floatValue = std::get_if<float>(&value);
     if (strValue){
       fields.push_back({ field, *strValue });
+    }else if (floatValue){
+      fields.push_back({ field, serializeFloat(*floatValue) });
     }else{
       modassert(false, "invalid type uniqueAdditionalFields");
     }
-  }
-  for (auto &[field, value] : gameobject.additionalAttr.numAttributes){
-    modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
-    fields.push_back({ field, serializeFloat(value) });
   }
   for (auto &[field, value] : gameobject.additionalAttr.vecAttr.vec3){
     modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
@@ -423,7 +422,6 @@ bool isReservedAttribute(std::string field, std::set<std::string>& autoserialize
 GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes, std::set<std::string>& autoserializerFields){
   GameobjAttributes extraLabels {
     .attr = {},
-    .numAttributes = {},
     .vecAttr = vectorAttributes {
       .vec3 = {},
       .vec4 = {},
@@ -432,11 +430,6 @@ GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes, std::set<std:
   for (auto &[key, value] : attributes.attr){
     if (!isReservedAttribute(key, autoserializerFields)){
       extraLabels.attr[key] = value;
-    }
-  }
-  for (auto &[key, value] : attributes.numAttributes){
-    if (!isReservedAttribute(key, autoserializerFields)){
-      extraLabels.numAttributes[key] = value;
     }
   }
   for (auto &[key, value] : attributes.vecAttr.vec3){
