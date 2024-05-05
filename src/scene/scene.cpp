@@ -1481,10 +1481,8 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
    
         if (particleOpts.parentId.has_value()){
           modlog("emitters", "parent to id: " + std::to_string(particleOpts.parentId.value()));
-
-
           auto constraint = getGameObject(world.sandbox, objectAdded).transformation;
-          std::cout << "old transform: " << print(oldTransformation) << std::endl;
+          //std::cout << "old transform: " << print(oldTransformation) << std::endl;
           makeParent(world.sandbox, objectAdded, particleOpts.parentId.value());
 
           useTransform2 = true;
@@ -1495,7 +1493,6 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
             .rotation = oldTransformation.rotation,
           });
           useTransform2 = false;
-
           //auto newTransformation = gameobjectTransformation(world, objectAdded, true);
           //modassert(aboutEqual(oldTransformation.position, newTransformation.position) && aboutEqual(oldTransformation.scale, newTransformation.scale), std::string("transforms not equal: old = ") + print(oldTransformation) + ", new = " + print(newTransformation));
         }

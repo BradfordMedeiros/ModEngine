@@ -6,8 +6,8 @@
 #include "./netscene.h"
 #include "./main_test.h"
 #include "./main_util.h"
-#include "./cscript/cscripts/cscript_sample.h"
-#include "./cscript/cscripts/editor/editor_scripts.h"
+#include "./cscript/cscripts/editor/perf-visualize.h"
+#include "./cscript/cscripts/editor/performance_graph.h"
 #include "./scene/common/textures_gen.h"
 #include "./sql/shell.h"
 #include "./common/watch_file.h"
@@ -1412,7 +1412,6 @@ int main(int argc, char* argv[]){
   mainApi = &pluginApi;
 
   std::vector<CScriptBinding> pluginBindings = { 
-    sampleBindingPlugin(pluginApi), 
     cscriptCreatePerformanceGraphBinding(pluginApi),
     cscriptCreatePerfVisualizeBinding(pluginApi),
   };
