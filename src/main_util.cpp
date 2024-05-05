@@ -12,12 +12,12 @@ objid createManipulator(){
         {"mesh", "./res/models/ui/manipulator.gltf" }, 
         {"layer", "scale" },
       },
-      .vecAttr = { .vec3 = {}, .vec4 = {} },
+      .vecAttr = { .vec3 = {} },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {
-    {"manipulator/xaxis", { GameobjAttributes { .vecAttr = { .vec4 = {{ "tint", glm::vec4(1.f, 1.f, 0.f, 0.8f) }} }}}},
-    {"manipulator/yaxis", { GameobjAttributes { .vecAttr = { .vec4 = {{ "tint", glm::vec4(1.f, 0.f, 1.f, 0.8f) }} }}}},
-    {"manipulator/zaxis", { GameobjAttributes { .vecAttr = { .vec4 = {{ "tint", glm::vec4(0.f, 0.f, 1.f, 0.8f) }} }}}},
+    {"manipulator/xaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(1.f, 1.f, 0.f, 0.8f) }} }}},
+    {"manipulator/yaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(1.f, 0.f, 1.f, 0.8f) }} }}},
+    {"manipulator/zaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(0.f, 0.f, 1.f, 0.8f) }} }}},
   };
   return makeObjectAttr(0, "manipulator", manipulatorAttr, submodelAttributes).value();
 }

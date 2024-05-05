@@ -236,7 +236,7 @@ void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::
   glm::vec4 vec4(0.f, 0.f, 0.f, 0.f);
   bool isVec4 = maybeParseVec4(payload, vec4);
   if (isVec4){
-    attributes.vecAttr.vec4[attribute] = vec4;
+    attributes.attr[attribute] = vec4;
     assertCoreType(ATTRIBUTE_VEC4, attribute, payload);
     return;
   }
@@ -312,19 +312,18 @@ std::vector<std::pair<std::string, std::string>> uniqueAdditionalFields(GameObje
     modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
     auto strValue = std::get_if<std::string>(&value);
     auto floatValue = std::get_if<float>(&value);
+    auto vec4Value = std::get_if<glm::vec4>(&value);
     if (strValue){
       fields.push_back({ field, *strValue });
     }else if (floatValue){
       fields.push_back({ field, serializeFloat(*floatValue) });
+    }else if (vec4Value){
+      fields.push_back({ field, serializeVec(*vec4Value) });
     }else{
       modassert(false, "invalid type uniqueAdditionalFields");
     }
   }
   for (auto &[field, value] : gameobject.additionalAttr.vecAttr.vec3){
-    modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
-    fields.push_back({ field, serializeVec(value) });
-  }
-  for (auto &[field, value] : gameobject.additionalAttr.vecAttr.vec4){
     modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
     fields.push_back({ field, serializeVec(value) });
   }
@@ -353,7 +352,6 @@ GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObj
         {"scale",    transform.scale    },
         // 
       },
-      .vec4 = {},
     },
   };
   //std::cout << "Default attributes: shader = " << gameobj.shader << ", layer = " << gameobj.layer << ", position = " << print(transform.position) << ", scale = " << print(transform.scale) << std::endl;
@@ -424,7 +422,6 @@ GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes, std::set<std:
     .attr = {},
     .vecAttr = vectorAttributes {
       .vec3 = {},
-      .vec4 = {},
     },
   };
   for (auto &[key, value] : attributes.attr){
@@ -435,11 +432,6 @@ GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes, std::set<std:
   for (auto &[key, value] : attributes.vecAttr.vec3){
     if (!isReservedAttribute(key, autoserializerFields)){
       extraLabels.vecAttr.vec3[key] = value;
-    }
-  }
-  for (auto &[key, value] : attributes.vecAttr.vec4){
-    if (!isReservedAttribute(key, autoserializerFields)){
-      extraLabels.vecAttr.vec4[key] = value;
     }
   }
   return extraLabels;

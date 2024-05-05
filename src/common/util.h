@@ -239,7 +239,6 @@ int numUniqueDepthLayers(std::vector<LayerInfo> layers);
 
 struct vectorAttributes {
   std::map<std::string, glm::vec3> vec3;
-  std::map<std::string, glm::vec4> vec4;
 };
 
 struct GameobjAttribute {

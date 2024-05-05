@@ -19,7 +19,6 @@ void createObj(objid sceneId){
     	.vec3 = {
     		{ "position", glm::vec3(1.f, 1.f, 0.f) },
     	}, 
-    	.vec4 = {} 
     },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes;

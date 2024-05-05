@@ -1153,9 +1153,6 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
   if (gameobj.additionalAttr.vecAttr.vec3.find(field) != gameobj.additionalAttr.vecAttr.vec3.end()){
       return &gameobj.additionalAttr.vecAttr.vec3.at(field);
   }
-  if (gameobj.additionalAttr.vecAttr.vec4.find(field) != gameobj.additionalAttr.vecAttr.vec4.end()){
-      return &gameobj.additionalAttr.vecAttr.vec4.at(field);
-  }
   if (gameobj.additionalAttr.attr.find(field) != gameobj.additionalAttr.attr.end()){
       return ptrFromAttributeValue(gameobj.additionalAttr.attr.at(field));
   }
