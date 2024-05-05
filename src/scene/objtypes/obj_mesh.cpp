@@ -53,7 +53,6 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
     meshNames.push_back(meshName);
     meshesToRender.push_back(util.createMeshCopy(meshName));  
   }
-
   GameObjectMesh obj {
     .meshNames = meshNames,
     .meshesToRender = meshesToRender,
@@ -61,8 +60,7 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
     .rootMesh = rootMeshName,
     .isRoot = isRoot,
   };
-  std::cout << "root mesh name: " << rootMeshName << ", node only: " << obj.nodeOnly << std::endl;
-
+  //std::cout << "root mesh name: " << rootMeshName << ", node only: " << obj.nodeOnly << std::endl;
   createAutoSerializeWithTextureLoading((char*)&obj, meshAutoserializer, attr, util);
   return obj;
 }
