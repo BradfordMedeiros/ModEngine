@@ -2553,7 +2553,7 @@ std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctre
 //    pairs.push_back(std::pair<std::string, std::string>("fromtextures", serializedData.textureState));
 //  }
   return pairs;
-}  //
+}
 
 
 void loadOctree(GameObjectOctree& octree, std::function<std::string(std::string)> loadFile, std::function<Mesh(MeshData&)> loadMesh){
