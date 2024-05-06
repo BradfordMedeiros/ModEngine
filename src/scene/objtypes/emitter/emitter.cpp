@@ -2,7 +2,6 @@
 
 void addEmitter(
   EmitterSystem& system, 
-  std::string name,
   std::string templateName,
   objid emitterNodeId, 
   float currentTime, 
@@ -15,11 +14,10 @@ void addEmitter(
   bool enabled,
   EmitterDeleteBehavior deleteBehavior
 ){
-  std::cout << "INFO: emitter: adding emitter -  " << name << ", " << currentTime << std::endl;
+  std::cout << "INFO: emitter: adding emitter -  " << emitterNodeId << ", " << currentTime << std::endl;
   std::cout << "emitter particle attrs: " << print(particleAttributes) << std::endl;
 
   Emitter emitter {
-    .name = name,
     .templateName = templateName,
     .emitterNodeId = emitterNodeId,
     .lastSpawnTime = currentTime,
@@ -43,13 +41,13 @@ struct EmitterFilterResult {
   std::vector<Emitter> remainingEmitters;
 };
 
-EmitterFilterResult filterEmitters(EmitterSystem& system, std::vector<std::string> toRemove, EmitterDeleteBehavior preserveType){
+EmitterFilterResult filterEmitters(EmitterSystem& system, std::vector<objid> toRemove, EmitterDeleteBehavior preserveType){
   std::vector<Emitter> removedEmitters;
   std::vector<Emitter> remainingEmitters;
   for (auto emitter : system.emitters){
     bool shouldRemove = false;
     for (auto emitterToRemove : toRemove){
-      if (emitter.name == emitterToRemove && emitter.deleteBehavior != preserveType){
+      if (emitter.emitterNodeId == emitterToRemove && emitter.deleteBehavior != preserveType){
         shouldRemove = true;
         break;
       }
@@ -68,8 +66,8 @@ EmitterFilterResult filterEmitters(EmitterSystem& system, std::vector<std::strin
   return result;
 }
 
-void removeEmitter(EmitterSystem& system, std::string name){
-  auto emitters = filterEmitters(system, { name }, EMITTER_FINISH);
+void removeEmitter(EmitterSystem& system, objid id ){
+  auto emitters = filterEmitters(system, { id }, EMITTER_FINISH);
   auto remainingEmitters = emitters.remainingEmitters;
   auto removedEmitters = emitters.removedEmitters;
   for (auto emitter : removedEmitters){
@@ -83,7 +81,7 @@ void removeEmitter(EmitterSystem& system, std::string name){
   }
 
   for (auto &emitter : remainingEmitters){
-    if (emitter.name == name && emitter.deleteBehavior == EMITTER_FINISH){
+    if (emitter.emitterNodeId == id && emitter.deleteBehavior == EMITTER_FINISH){
       emitter.active = false;
     }
   }
@@ -113,14 +111,14 @@ float calcLifetimeEffect(float timeElapsed, float totalDuration, std::vector<flo
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<std::optional<objid>(std::string emitterName, std::string templateName, GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions newParticleOpts)> addParticle, 
+  std::function<std::optional<objid>(std::string templateName, GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions newParticleOpts)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 ){   
-  std::vector<std::string> emittersToRemove;
+  std::vector<objid> emittersToRemove;
   for (auto &emitter : system.emitters){
     if (!emitter.active && emitter.particles.size() == 0){
-      emittersToRemove.push_back(emitter.name);
+      emittersToRemove.push_back(emitter.emitterNodeId);
     }
   }
   if (emittersToRemove.size() > 0){
@@ -190,7 +188,7 @@ void updateEmitters(
         emitter.forceParticles.pop_front();
       }
 
-      auto particleId = addParticle(emitter.name, emitter.templateName, emitter.particleAttributes, emitter.submodelAttributes, emitter.emitterNodeId, newParticleOpts);
+      auto particleId = addParticle(emitter.templateName, emitter.particleAttributes, emitter.submodelAttributes, emitter.emitterNodeId, newParticleOpts);
       if (particleId.has_value()){
         emitter.particles.push_back(ActiveParticle {
           .id = particleId.value(),

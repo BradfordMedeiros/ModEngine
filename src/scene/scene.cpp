@@ -809,8 +809,8 @@ void addObjectToWorld(
   std::vector<GameObjectObj>& returnobjs // only added to if returnObjOnly = true
 ){
     auto loadMeshObject = createScopedLoadMesh(world, id);
-    auto addEmitterObject = [&world, name, id](std::string templateName, float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::map<std::string, GameobjAttributes> submodelAttributes, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {
-      addEmitter(world.emitters, name, templateName, id, world.interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields, submodelAttributes, deltas, enabled, behavior);
+    auto addEmitterObject = [&world, id](std::string templateName, float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::map<std::string, GameobjAttributes> submodelAttributes, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {
+      addEmitter(world.emitters, templateName, id, world.interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields, submodelAttributes, deltas, enabled, behavior);
     };
     auto onCollisionChange = [&world, id]() -> void {
       //assert(false); // think about what this should do better!
@@ -990,7 +990,7 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
       std::cout << "remove camera not yet implemented" << std::endl;
       assert(false);
     },
-    [&world, name]() -> void { removeEmitter(world.emitters, name); },
+    [&world, name, objectId]() -> void { removeEmitter(world.emitters, objectId); },
     [&world](objid sceneId) -> void {
       modlog("load scene", std::string("unload scene: " + std::to_string(sceneId)));
       removeSceneFromWorld(world, sceneId);
@@ -1447,11 +1447,11 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     updateEmitters(
       world.emitters, 
       timeElapsed,
-      [&world](std::string name, std::string templateName, GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions particleOpts) -> std::optional<objid> {     
+      [&world](std::string templateName, GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions particleOpts) -> std::optional<objid> {     
         if (particleOpts.parentId.has_value() && !idExists(world.sandbox, particleOpts.parentId.value())){
           return std::nullopt;
         } 
-        std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
+        std::cout << "INFO: emitter: creating particle from emitter: " << getGameObject(world.sandbox, emitterNodeId).name << std::endl;
         attributes.attr["position"] = particleOpts.position.has_value() ?  particleOpts.position.value() : fullTransformation(world.sandbox, emitterNodeId).position;
         if (particleOpts.velocity.has_value()){
           attributes.attr["physics_velocity"] = particleOpts.velocity.value();

@@ -32,7 +32,6 @@ struct NewParticleOptions {
 
 enum EmitterDeleteBehavior { EMITTER_NOTYPE, EMITTER_DELETE, EMITTER_ORPHAN, EMITTER_FINISH };
 struct Emitter {
-  std::string name;
   std::string templateName;
   objid emitterNodeId;
   float lastSpawnTime;
@@ -55,12 +54,12 @@ struct EmitterSystem {
   std::vector<objid> additionalParticlesToRemove;
 };
 
-void addEmitter(EmitterSystem& system, std::string name, std::string templateName, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, GameobjAttributes particleAttributes, std::map<std::string, GameobjAttributes> submodelAttributes, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior deleteBehavior);
-void removeEmitter(EmitterSystem& system, std::string name);
+void addEmitter(EmitterSystem& system, std::string templateName, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, GameobjAttributes particleAttributes, std::map<std::string, GameobjAttributes> submodelAttributes, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior deleteBehavior);
+void removeEmitter(EmitterSystem& system, objid id);
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<std::optional<objid>(std::string, std::string, GameobjAttributes, std::map<std::string, GameobjAttributes>, objid, NewParticleOptions)> addParticle, 
+  std::function<std::optional<objid>(std::string, GameobjAttributes, std::map<std::string, GameobjAttributes>, objid, NewParticleOptions)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 );
