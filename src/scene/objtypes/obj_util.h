@@ -4,7 +4,7 @@
 #include <map>
 #include <set>
 #include "../common/mesh.h"
-#include "../types/emitter.h"
+#include "../objtypes/emitter/emitter.h"
 
 struct GameObjectUICommon {
   Mesh mesh;

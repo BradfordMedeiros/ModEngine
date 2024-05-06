@@ -80,7 +80,6 @@ void printMatrixInformation(glm::mat4 transform, std::string label);
 BoundInfo getBounds(std::vector<Vertex>& vertices);
 Transformation interpolate(Transformation transform1, Transformation transform2, float posamount, float scaleamount, float rotamount);
 
-
 std::string print(Vertex& vertex);
 void compareEqualVertices(std::vector<glm::vec3>& verts1, std::vector<glm::vec3>& verts2);
 

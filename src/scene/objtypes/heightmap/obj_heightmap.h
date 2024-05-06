@@ -1,9 +1,9 @@
 #ifndef MOD_OBJ_HEIGHTMAP
 #define MOD_OBJ_HEIGHTMAP
 
-#include "../../common/util.h"
-#include "../types/heightmap.h"
-#include "./obj_util.h"
+#include "../../../common/util.h"
+#include "./heightmap.h"
+#include "../obj_util.h"
 
 struct GameObjectHeightmap{
   std::string mapName;

@@ -6,7 +6,7 @@
 #include <stb_image.h>
 #include <cassert>
 #include <map>
-#include "../common/mesh.h"
+#include "../../common/mesh.h"
 
 struct HeightMapData {
   float* data;

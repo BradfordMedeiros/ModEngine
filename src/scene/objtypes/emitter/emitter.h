@@ -7,8 +7,8 @@
 #include <functional>
 #include <optional>
 #include <map>
-#include "../../common/util.h"
-#include "../common/util/types.h"
+#include "../../../common/util.h"
+#include "../../common/util/types.h"
 
 struct EmitterDelta {
   std::string attributeName;

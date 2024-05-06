@@ -6,7 +6,7 @@
 #include "./scene_sandbox.h"
 #include "./physics.h"
 #include "./object_types.h"
-#include "./types/emitter.h"
+#include "./objtypes/emitter/emitter.h"
 #include "./scene_debug.h"
 #include "./common/mesh.h"
 #include "../translations.h"

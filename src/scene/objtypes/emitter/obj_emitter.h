@@ -1,9 +1,9 @@
 #ifndef MOD_OBJ_EMITTER
 #define MOD_OBJ_EMITTER
 
-#include "../../common/util.h"
-#include "./obj_util.h"
-#include "../types/emitter.h"
+#include "../../../common/util.h"
+#include "../obj_util.h"
+#include "./emitter.h"
 
 struct GameObjectEmitter{
 	float rate;

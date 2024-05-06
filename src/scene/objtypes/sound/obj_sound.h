@@ -1,9 +1,9 @@
 #ifndef MOD_OBJ_SOUND
 #define MOD_OBJ_SOUND
 
-#include "../../common/util.h"
-#include "../types/sound.h"
-#include "./obj_util.h"
+#include "../../../common/util.h"
+#include "./sound.h"
+#include "../obj_util.h"
 
 struct GameObjectSound{
   std::string clip;  
