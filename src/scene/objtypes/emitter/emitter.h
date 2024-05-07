@@ -32,7 +32,6 @@ struct NewParticleOptions {
 
 enum EmitterDeleteBehavior { EMITTER_NOTYPE, EMITTER_DELETE, EMITTER_ORPHAN, EMITTER_FINISH };
 struct Emitter {
-  std::string templateName;
   objid emitterNodeId;
   float lastSpawnTime;
   unsigned int targetParticles;
@@ -54,23 +53,29 @@ struct EmitterSystem {
   std::vector<objid> additionalParticlesToRemove;
 };
 
-void addEmitter(EmitterSystem& system, std::string templateName, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, GameobjAttributes particleAttributes, std::map<std::string, GameobjAttributes> submodelAttributes, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior deleteBehavior);
+void addEmitter(EmitterSystem& system, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, GameobjAttributes particleAttributes, std::map<std::string, GameobjAttributes> submodelAttributes, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior deleteBehavior);
 void removeEmitter(EmitterSystem& system, objid id);
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<std::optional<objid>(std::string, GameobjAttributes, std::map<std::string, GameobjAttributes>, objid, NewParticleOptions)> addParticle, 
+  std::function<std::optional<objid>(GameobjAttributes, std::map<std::string, GameobjAttributes>, objid, NewParticleOptions)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 );
 
 void emitNewParticle(EmitterSystem& system, objid emitterNodeId, NewParticleOptions options);
-void setEmitterEnabled(EmitterSystem& system, objid emitterNodeId, bool enabled);
 
 struct EmitterUpdateOptions{
+  std::optional<unsigned int> targetParticles;
+  std::optional<float> spawnrate;
+  std::optional<float> lifetime;
+  std::optional<EmitterDeleteBehavior> deleteBehavior;
+  std::optional<GameobjAttributes> particleAttributes;
+  std::optional<std::map<std::string, GameobjAttributes>> submodelAttributes;
+  std::optional<std::vector<EmitterDelta>> deltas;
   std::optional<bool> enabled;
 };
-void updateEmitterOptions(EmitterSystem& system, objid emitterNodeId, EmitterUpdateOptions&& updateOptions);
+void updateEmitterOptions(EmitterSystem& system, objid emitterNodeId, EmitterUpdateOptions&& update);
 
 #endif
 

@@ -11,7 +11,6 @@ struct GameObjectEmitter{
 	int limit;
 	bool state;
   EmitterDeleteBehavior deleteBehavior;
-  std::string templateName;
 };
 
 GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& util);

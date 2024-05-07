@@ -51,7 +51,7 @@ objid getUniqueObjIdReserved(int claimAmount = 1);
 bool isReservedObjId(objid);
 void resetReservedId();
 
-std::string getUniqueObjectName(std::string& prefix);
+std::string getUniqueObjectName(std::string&& prefix);
 
 std::string print(bool value);
 std::string print(glm::vec3 vec);

@@ -146,11 +146,6 @@ std::vector<AutoSerialize> emitterAutoserializer {
     .field = "onremove",
     .defaultValue = EMITTER_DELETE,
   },
-  AutoSerializeString {
-    .structOffset = offsetof(GameObjectEmitter, templateName),
-    .field = "template",
-    .defaultValue = "obj",
-  }
 };
 
 
@@ -219,7 +214,7 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
   for (auto &submodel : allSubmodelPaths){
     submodelAttributes[submodel] = emitterExtractAttributes(attributes, submodel);
   }
-  addEmitter(emitterSystem, obj.templateName, util.id, util.getCurrentTime(), obj.limit, obj.rate, obj.duration, emitterAttr, submodelAttributes, emitterDeltas(attributes), obj.state, obj.deleteBehavior);
+  addEmitter(emitterSystem, util.id, util.getCurrentTime(), obj.limit, obj.rate, obj.duration, emitterAttr, submodelAttributes, emitterDeltas(attributes), obj.state, obj.deleteBehavior);
   return obj;
 }
 
@@ -229,12 +224,24 @@ void removeEmitterObj(GameObjectEmitter& obj, ObjectRemoveUtil& util){
 
 bool setEmitterAttribute(GameObjectEmitter& emitterObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&){
   bool setAnyValue = autoserializerSetAttrWithTextureLoading((char*)&emitterObj, emitterAutoserializer, field, value, util);
-  setEmitterEnabled(emitterSystem, util.id, emitterObj.state);
-
-  updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
-    .enabled = emitterObj.state,
-  });
-
+  std::string fieldName(field);
+  if (fieldName == "state"){
+    updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
+      .enabled = emitterObj.state,
+    });
+  }else if (fieldName == "rate"){
+    updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
+      .spawnrate = emitterObj.rate,
+    });
+  }else if (fieldName == "limit"){
+    updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
+      .targetParticles = emitterObj.limit,
+    });
+  }else if (fieldName == "duration"){
+    updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
+      .lifetime = emitterObj.duration,
+    }); 
+  }
   return setAnyValue;
 }
 

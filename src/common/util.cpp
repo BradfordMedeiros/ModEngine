@@ -543,7 +543,7 @@ void resetReservedId(){
 }
 
 
-std::string getUniqueObjectName(std::string& prefix){
+std::string getUniqueObjectName(std::string&& prefix){
   return prefix + std::to_string(getUniqueObjId()) + ")";
 }
 

@@ -2,7 +2,6 @@
 
 void addEmitter(
   EmitterSystem& system, 
-  std::string templateName,
   objid emitterNodeId, 
   float currentTime, 
   unsigned int targetParticles,
@@ -18,7 +17,6 @@ void addEmitter(
   std::cout << "emitter particle attrs: " << print(particleAttributes) << std::endl;
 
   Emitter emitter {
-    .templateName = templateName,
     .emitterNodeId = emitterNodeId,
     .lastSpawnTime = currentTime,
     .targetParticles = targetParticles,
@@ -111,7 +109,7 @@ float calcLifetimeEffect(float timeElapsed, float totalDuration, std::vector<flo
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<std::optional<objid>(std::string templateName, GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions newParticleOpts)> addParticle, 
+  std::function<std::optional<objid>(GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions newParticleOpts)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 ){   
@@ -188,7 +186,7 @@ void updateEmitters(
         emitter.forceParticles.pop_front();
       }
 
-      auto particleId = addParticle(emitter.templateName, emitter.particleAttributes, emitter.submodelAttributes, emitter.emitterNodeId, newParticleOpts);
+      auto particleId = addParticle(emitter.particleAttributes, emitter.submodelAttributes, emitter.emitterNodeId, newParticleOpts);
       if (particleId.has_value()){
         emitter.particles.push_back(ActiveParticle {
           .id = particleId.value(),
@@ -213,16 +211,44 @@ void emitNewParticle(EmitterSystem& system, objid emitterNodeId, NewParticleOpti
   modassert(false, std::string("could not find emitter: ") + std::to_string(emitterNodeId));
 }
 
-void setEmitterEnabled(EmitterSystem& system, objid emitterNodeId, bool enabled){
+Emitter nullEmitter {};
+Emitter& getEmitter(EmitterSystem& system, objid emitterNodeId){
   for (auto &emitter : system.emitters){
     if (emitter.emitterNodeId == emitterNodeId){
-      emitter.enabled = enabled;
-      return;
+      return emitter;
     }
   }
-  assert(false);
+  modassert(false, "no emitter for this emitter id");
+  return nullEmitter;
 }
 
 void updateEmitterOptions(EmitterSystem& system, objid emitterNodeId, EmitterUpdateOptions&& updateOptions){
   //modassert(false, "not yet implemented");
+  Emitter& emitter = getEmitter(system, emitterNodeId);
+  if (updateOptions.targetParticles.has_value()){
+    emitter.targetParticles = updateOptions.targetParticles.value();
+  }
+  if (updateOptions.spawnrate.has_value()){
+    emitter.spawnrate = updateOptions.spawnrate.value();
+  }
+  if (updateOptions.lifetime.has_value()){
+    emitter.lifetime = updateOptions.lifetime.value();
+  }
+  if (updateOptions.deleteBehavior.has_value()){
+    emitter.deleteBehavior = updateOptions.deleteBehavior.value();
+  }
+  if (updateOptions.particleAttributes.has_value()){
+    modassert(false, "particleAttributes not yet implemented");
+  }
+  if (updateOptions.submodelAttributes.has_value()){
+    modassert(false, "submodelAttributes not yet implemented");
+  }
+  if (updateOptions.deltas.has_value()){
+    modassert(false, "deltas not yet implemented");
+  }
+  if (updateOptions.enabled.has_value()){
+    emitter.enabled = updateOptions.enabled.value();
+  }
 }
+
+

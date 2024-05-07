@@ -1440,7 +1440,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     updateEmitters(
       getEmitterSystem(), 
       timeElapsed,
-      [&world](std::string templateName, GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions particleOpts) -> std::optional<objid> {     
+      [&world](GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions particleOpts) -> std::optional<objid> {     
         if (particleOpts.parentId.has_value() && !idExists(world.sandbox, particleOpts.parentId.value())){
           return std::nullopt;
         } 
@@ -1458,7 +1458,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
         };
 
         // should get rid of this copying stuff, should make subelements just refer to suffix path
-        auto newName =  getUniqueObjectName(templateName);
+        auto newName =  getUniqueObjectName("emitter");
         std::map<std::string, GameobjAttributes> submodelAttributesFixedPath;
         for (auto &[name, attr] : submodelAttributes){
           submodelAttributesFixedPath[newName + "/" + name] = attr;
