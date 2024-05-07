@@ -16,7 +16,6 @@ struct FontParams {
 	glm::vec2 bearing;
 };
 
-
 struct FontFamily {
 	std::string name;
 	float lineSpacing;

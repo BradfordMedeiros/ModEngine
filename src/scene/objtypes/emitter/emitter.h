@@ -67,5 +67,10 @@ void updateEmitters(
 void emitNewParticle(EmitterSystem& system, objid emitterNodeId, NewParticleOptions options);
 void setEmitterEnabled(EmitterSystem& system, objid emitterNodeId, bool enabled);
 
+struct EmitterUpdateOptions{
+  std::optional<bool> enabled;
+};
+void updateEmitterOptions(EmitterSystem& system, objid emitterNodeId, EmitterUpdateOptions&& updateOptions);
+
 #endif
 

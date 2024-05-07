@@ -37,6 +37,7 @@ struct ObjectTypeUtil {
   std::function<void()> onCollisionChange;
   std::function<std::string(std::string)> pathForModLayer;
   std::function<objid(std::string, std::vector<Token>&)> loadScene;
+  std::function<float()> getCurrentTime;
 };
 
 struct ObjectSerializeUtil {
@@ -45,7 +46,6 @@ struct ObjectSerializeUtil {
 
 struct ObjectRemoveUtil {
   objid id;
-  std::function<void()> rmEmitter;
   std::function<void(objid)> unloadScene;
 };
 
@@ -54,12 +54,12 @@ struct SetAttrFlags {
 };
 
 struct ObjectSetAttribUtil {
-  std::function<void(bool)> setEmitterEnabled;
   std::function<Texture(std::string)> ensureTextureLoaded;
   std::function<void(int)> releaseTexture;
   std::function<Mesh(MeshData&)> loadMesh;
   std::function<void(Mesh&)> unloadMesh;
   std::function<std::string(std::string)> pathForModLayer;
+  objid id;
 };
 
 struct AutoSerializeBool {

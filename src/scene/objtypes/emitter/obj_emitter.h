@@ -20,4 +20,6 @@ bool setEmitterAttribute(GameObjectEmitter& obj, const char* field, AttributeVal
 std::optional<AttributeValuePtr> getEmitterAttribute(GameObjectEmitter& obj, const char* field);
 std::vector<std::pair<std::string, std::string>> serializeEmitter(GameObjectEmitter& emitterObj, ObjectSerializeUtil& util);
 
+EmitterSystem& getEmitterSystem();
+
 #endif

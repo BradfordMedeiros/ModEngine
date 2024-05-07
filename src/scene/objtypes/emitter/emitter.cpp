@@ -222,3 +222,7 @@ void setEmitterEnabled(EmitterSystem& system, objid emitterNodeId, bool enabled)
   }
   assert(false);
 }
+
+void updateEmitterOptions(EmitterSystem& system, objid emitterNodeId, EmitterUpdateOptions&& updateOptions){
+  //modassert(false, "not yet implemented");
+}

@@ -23,7 +23,6 @@ struct World {
   std::map<std::string, MeshRef> meshes;
   std::map<std::string, TextureRef> textures;
   std::map<objid, std::vector<Animation>> animations;
-  EmitterSystem emitters;
   std::function<void(GameObject&)> onObjectUpdate;
   std::function<void(GameObject&)> onObjectCreate;
   std::function<void(objid, bool)> onObjectDelete;

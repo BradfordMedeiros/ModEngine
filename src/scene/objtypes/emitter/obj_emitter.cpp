@@ -1,5 +1,14 @@
 #include "./obj_emitter.h"
 
+EmitterSystem emitterSystem { 
+  .emitters = {}, 
+  .additionalParticlesToRemove = {} 
+};
+
+EmitterSystem& getEmitterSystem(){
+  return emitterSystem;
+}
+
 GameobjAttributes particleFields(GameobjAttributes& attributes){
   GameobjAttributes attr {
     .attr = {},
@@ -210,17 +219,22 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
   for (auto &submodel : allSubmodelPaths){
     submodelAttributes[submodel] = emitterExtractAttributes(attributes, submodel);
   }
-  util.addEmitter(obj.templateName, obj.rate, obj.duration, obj.limit, emitterAttr, submodelAttributes, emitterDeltas(attributes), obj.state, obj.deleteBehavior);
+  addEmitter(emitterSystem, obj.templateName, util.id, util.getCurrentTime(), obj.limit, obj.rate, obj.duration, emitterAttr, submodelAttributes, emitterDeltas(attributes), obj.state, obj.deleteBehavior);
   return obj;
 }
 
 void removeEmitterObj(GameObjectEmitter& obj, ObjectRemoveUtil& util){
-  util.rmEmitter();
+  removeEmitter(emitterSystem, util.id);
 }
 
 bool setEmitterAttribute(GameObjectEmitter& emitterObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&){
   bool setAnyValue = autoserializerSetAttrWithTextureLoading((char*)&emitterObj, emitterAutoserializer, field, value, util);
-  util.setEmitterEnabled(emitterObj.state);
+  setEmitterEnabled(emitterSystem, util.id, emitterObj.state);
+
+  updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
+    .enabled = emitterObj.state,
+  });
+
   return setAnyValue;
 }
 

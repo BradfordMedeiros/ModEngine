@@ -665,7 +665,6 @@ World createWorld(
   World world = {
     .physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave, debugDrawer),
     .objectMapping = objectMapping,
-    .emitters = EmitterSystem { .emitters = {}, .additionalParticlesToRemove = {} },
     .onObjectUpdate = onObjectUpdate,
     .onObjectCreate = onObjectCreate,
     .onObjectDelete = onObjectDelete,
@@ -809,9 +808,6 @@ void addObjectToWorld(
   std::vector<GameObjectObj>& returnobjs // only added to if returnObjOnly = true
 ){
     auto loadMeshObject = createScopedLoadMesh(world, id);
-    auto addEmitterObject = [&world, id](std::string templateName, float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::map<std::string, GameobjAttributes> submodelAttributes, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {
-      addEmitter(world.emitters, templateName, id, world.interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields, submodelAttributes, deltas, enabled, behavior);
-    };
     auto onCollisionChange = [&world, id]() -> void {
       //assert(false); // think about what this should do better!
       updatePhysicsBody(world, id);
@@ -879,11 +875,11 @@ void addObjectToWorld(
           freeTextureRefsIdByOwner(world, id, textureId);
         },
         .loadMesh = [](MeshData&) -> Mesh { return Mesh{}; },
-        .addEmitter =  [](std::string templateName, float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::map<std::string, GameobjAttributes>& submodelAttributes, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {},
         .ensureMeshLoaded = [](std::string meshName, bool* isRoot) -> std::vector<std::string> { *isRoot = true; return {  }; },
         .onCollisionChange = []() -> void {},
         .pathForModLayer = world.interface.modlayerPath,
         .loadScene = loadScene,
+        .getCurrentTime = world.interface.getCurrentTime,
       }; 
       auto gameobjObj = createObjectType(getType(name), attr, util);
       returnobjs.push_back(gameobjObj);
@@ -898,11 +894,11 @@ void addObjectToWorld(
           freeTextureRefsIdByOwner(world, id, textureId);
       },
       .loadMesh = loadMeshObject,
-      .addEmitter = addEmitterObject,
       .ensureMeshLoaded = ensureMeshLoaded,
       .onCollisionChange = onCollisionChange,
       .pathForModLayer = world.interface.modlayerPath,
       .loadScene = loadScene,
+      .getCurrentTime = world.interface.getCurrentTime,
     };
     auto gameobjObj = createObjectType(getType(name), attr, util);
     addObjectType(world.objectMapping, gameobjObj, id);
@@ -990,7 +986,6 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
       std::cout << "remove camera not yet implemented" << std::endl;
       assert(false);
     },
-    [&world, name, objectId]() -> void { removeEmitter(world.emitters, objectId); },
     [&world](objid sceneId) -> void {
       modlog("load scene", std::string("unload scene: " + std::to_string(sceneId)));
       removeSceneFromWorld(world, sceneId);
@@ -1271,9 +1266,6 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
   };
 
   ObjectSetAttribUtil util {
-    .setEmitterEnabled = [&world, id](bool enabled) -> void {
-      setEmitterEnabled(world.emitters, id, enabled);
-    },
     .ensureTextureLoaded = [&world, id](std::string texturepath) -> Texture {
       return loadTextureWorld(world, texturepath, id);
     },
@@ -1283,6 +1275,7 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
     .loadMesh = loadMeshObject,
     .unloadMesh = freeMesh,
     .pathForModLayer = world.interface.modlayerPath,
+    .id = id,
   };
 
   bool setCoreAttr = false;
@@ -1445,7 +1438,7 @@ extern bool useTransform2;
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, bool paused, Transformation& viewTransform){
   if (!paused){
     updateEmitters(
-      world.emitters, 
+      getEmitterSystem(), 
       timeElapsed,
       [&world](std::string templateName, GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions particleOpts) -> std::optional<objid> {     
         if (particleOpts.parentId.has_value() && !idExists(world.sandbox, particleOpts.parentId.value())){
