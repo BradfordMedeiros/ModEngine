@@ -1,5 +1,6 @@
 #include "./util.h"
 
+// Base IO fns ////////////////////////////////////
 std::string loadFile(std::string filepath){
    std::ifstream file(filepath.c_str());
    if (!file.good()){
@@ -34,6 +35,9 @@ std::vector<std::string> listAllFiles(std::filesystem::path path) {
   }
   return files;
 }
+
+////////////////////////////////////////////////////////////////////////
+
 
 std::optional<std::string> getExtension(std::string file){
   auto parts = split(file, '.');

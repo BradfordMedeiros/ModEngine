@@ -5,6 +5,7 @@
 #include <vector>
 #include <variant>
 #include <assert.h>
+#include <iostream>
 
 typedef std::variant<int, float> StatValue;
 // TODO -> this should be how all the values in benchmark come from
@@ -39,6 +40,8 @@ struct Stats {
   unsigned int rigidBodiesStat;
   unsigned int scenesLoadedStat;
   unsigned int fpsStat;
+  unsigned int loadModelFileStat;
+  unsigned int loadModelFileStatCacheHit;
 };
 
 void initializeStatistics();

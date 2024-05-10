@@ -1087,6 +1087,12 @@ int main(int argc, char* argv[]){
   auto levels = result["log"].as<std::vector<std::string>>();
   modlogSetEnabled(levels.size() > 0, static_cast<MODLOG_LEVEL>(result["loglevel"].as<int>()), levels);
 
+  auto benchmarkFile = result["benchmark"].as<std::string>();
+  auto shouldBenchmark = benchmarkFile != "";
+  setShouldProfile(shouldBenchmark);
+  initializeStatistics();
+  benchmark = createBenchmark(shouldBenchmark);
+
   auto runUnitTests = result["test-unit"].as<bool>();
   if (runUnitTests){
     auto returnVal = runTests();
@@ -1161,11 +1167,7 @@ int main(int argc, char* argv[]){
   const std::string framebufferShaderPath = "./res/shaders/framebuffer";
   const std::string uiShaderPath = result["uishader"].as<std::string>();
   
-  auto benchmarkFile = result["benchmark"].as<std::string>();
-  auto shouldBenchmark = benchmarkFile != "";
   auto timetoexit = result["timetoexit"].as<int>();
-
-  benchmark = createBenchmark(shouldBenchmark);
 
   std::cout << "LIFECYCLE: program starting" << std::endl;
 
@@ -1586,8 +1588,6 @@ int main(int argc, char* argv[]){
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  setShouldProfile(shouldBenchmark);
-  initializeStatistics();
 
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
