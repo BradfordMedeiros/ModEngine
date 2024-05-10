@@ -1224,6 +1224,13 @@ std::optional<AttributeValue> getObjectAttribute(World& world, objid id, const c
     modassert(false, "boolPtr not yet implemented");
   }
 
+
+  auto uintPtr = std::get_if<uint*>(&attrPtr.value());
+  if (uintPtr){ 
+    return static_cast<float>(**uintPtr);
+    modassert(false, "uintPtr not yet implemented");
+  }
+
   modassert(false, std::string("getObjectAttribute not implemented for this type, field: ") + std::string(field));
   return std::nullopt;
 }
