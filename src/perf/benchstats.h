@@ -1,14 +1,27 @@
 #ifndef MOD_BENCHSTATS
 #define MOD_BENCHSTATS
 
-#include "../common/util.h"
+#include <string>
+#include <vector>
+#include <variant>
+#include <assert.h>
 
+typedef std::variant<int, float> StatValue;
 // TODO -> this should be how all the values in benchmark come from
 // then benchmark would just be the aggregator 
 unsigned int statName(std::string name);
-void registerStat(unsigned int stat, AttributeValue amount);
-AttributeValue statValue(unsigned int);
-AttributeValue statValue(std::string& name);
+void registerStat(unsigned int stat, StatValue amount);
+StatValue statValue(unsigned int);
+StatValue statValue(std::string& name);
+
+template<typename T>
+T unwrapStat(StatValue value) {   
+  T* unwrappedValue = std::get_if<T>(&value);
+  if (unwrappedValue == NULL){
+    assert(false);
+  }
+  return *unwrappedValue;
+}
 
 struct Stats {
   float initialTime;

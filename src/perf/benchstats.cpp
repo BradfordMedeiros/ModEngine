@@ -2,7 +2,7 @@
 
 struct StatInfo {
   std::string name;
-  AttributeValue amount;
+  StatValue amount;
 };
 
 std::vector<StatInfo> stats = {};
@@ -20,20 +20,20 @@ unsigned int statName(std::string name){
 	});
 	return stats.size() - 1;
 }
-void registerStat(unsigned int stat, AttributeValue amount){
+void registerStat(unsigned int stat, StatValue amount){
   stats.at(stat).amount = amount;
 }
-AttributeValue statValue(unsigned int stat){
+StatValue statValue(unsigned int stat){
   return stats.at(stat).amount;
 }
-AttributeValue statValue(std::string& name){
+StatValue statValue(std::string& name){
 	for (int i = 0; i < stats.size(); i++){
 		auto stat = stats.at(i);
 		if (stat.name == name){
 			return stat.amount;
 		}
 	}
-	modassert(false, "invalid stat value: " + name);
+	assert(false);
 	return 0.f;
 }
 

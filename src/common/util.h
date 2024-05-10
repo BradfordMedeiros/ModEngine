@@ -375,13 +375,6 @@ T* anycast(std::any& anyValue){
   }
 }
 
-struct FrameInfo {
-  double currentTime;
-  double totalFrameTime;
-  std::vector<double> time;
-  std::vector<const char*> labels;
-};
-
 struct RotationDirection {
   glm::vec3 position;
   glm::vec3 direction;

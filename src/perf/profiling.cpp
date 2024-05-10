@@ -92,7 +92,7 @@ void stopProfile(int id){
   double currentTime = glfwGetTime();
   profile.endTime = currentTime;
 
-  modassert(std::string(profile.description) == currentStack -> description, "invalid stop profile, doesn't match framestack: " + std::string(profile.description));
+  assert(std::string(profile.description) == currentStack -> description);
   currentStack -> stopTime = currentTime;
 
   bool isStopFrame = std::string(profile.description) == "FRAME";

@@ -2,6 +2,9 @@
 cmake_minimum_required(VERSION 3.8)
 project(modengine)
 
+# Autoserialization code uses this extensively.  Should look into it, but supress since floods
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof")
+
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   message("CMAKE - ModEngine Debug")
   set(CMAKE_ENABLE_EXPORTS TRUE) # TODO -> modassert backtrace symbols

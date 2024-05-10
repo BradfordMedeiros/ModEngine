@@ -7,6 +7,8 @@
 #include <glm/gtx/compatibility.hpp>
 #include "../common/util.h"
 #include "../sql/sql.h"  // ideally move this away from being a direct dependency
+#include "../perf/profiling.h"
+#include "../perf/benchstats.h"
 
 struct CustomApiBindings {
   int32_t (*listSceneId)(int32_t objid);
@@ -111,9 +113,9 @@ struct CustomApiBindings {
   unsigned int  (*createTexture)(std::string name, unsigned int width, unsigned int height, objid ownerId);
   void (*freeTexture)(std::string name, objid ownerId);
   void (*clearTexture)(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color, std::optional<std::string> texture);
-  AttributeValue (*runStats)(std::string& field);
+  StatValue (*runStats)(std::string& field);
   unsigned int (*stat)(std::string);
-  void (*logStat)(unsigned int, AttributeValue amount);
+  void (*logStat)(unsigned int, StatValue amount);
   void (*installMod)(std::string layer);
   void (*uninstallMod)(std::string layer);
   std::vector<std::string> (*listMods)();

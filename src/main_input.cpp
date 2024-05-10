@@ -511,7 +511,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0,
     .hasPreq = false,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       state.useDefaultCamera = !state.useDefaultCamera;
       std::cout << "Camera option: " << (state.useDefaultCamera ? "default" : "new") << std::endl;
       if (state.useDefaultCamera){
@@ -528,7 +528,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0,
     .hasPreq = false,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       if (!state.useDefaultCamera){
         nextCamera();
       }
@@ -540,7 +540,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     //.prereqKey = 341,  // ctrl,
     .hasPreq = false,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       std::cout << "mode set to translate" << std::endl;
       state.manipulatorMode = TRANSLATE;
       sendAlert("mode: translate");
@@ -552,7 +552,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     //.prereqKey = 341,  // ctrl,
     .hasPreq = false,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       std::cout << "mode set to rotate" << std::endl;
       state.manipulatorMode = ROTATE;
       sendAlert("mode: rotate");
@@ -564,7 +564,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     //.prereqKey = 341,  // ctrl,
     .hasPreq = false,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       std::cout << "mode set to scale" << std::endl;
       state.manipulatorMode = SCALE;
       sendAlert("mode: scale");
@@ -576,7 +576,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       state.renderMode =  RENDER_FINAL;
       std::cout << "render mode: final" << std::endl;
     }
@@ -587,7 +587,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       state.renderMode = RENDER_DEPTH;
       std::cout << "render mode: depth" << std::endl;
     }
@@ -598,7 +598,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       state.renderMode = RENDER_PORTAL;
       std::cout << "render mode: portal" << std::endl;
     }
@@ -609,7 +609,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       state.renderMode = RENDER_PAINT;
       std::cout << "render mode: paint" << std::endl;
     }
@@ -620,7 +620,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       state.renderMode = RENDER_BLOOM;
       std::cout << "render mode: bloom" << std::endl;
     }
@@ -631,7 +631,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       state.renderMode = RENDER_GRAPHS;
       std::cout << "render mode: graph" << std::endl;
     }
@@ -642,7 +642,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       state.renderMode = RENDER_SELECTION;
       std::cout << "render mode: graph" << std::endl;
     }
@@ -653,7 +653,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       state.renderMode = RENDER_TEXTURE;
       std::cout << "render mode: graph" << std::endl;
     }
@@ -664,7 +664,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       handleClipboardSelect();
     }
   }, 
@@ -674,7 +674,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       handleCopy();
     }
   }, 
@@ -684,7 +684,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       state.multiselect = true;
     }
   },
@@ -694,7 +694,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_RELEASE,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       state.multiselect = false;
     }
   },  
@@ -704,7 +704,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_HOLD,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       if (state.disableInput){
         return;
       }
@@ -719,7 +719,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_HOLD,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       if (state.disableInput){
         return;
       }
@@ -732,7 +732,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_HOLD,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       if (state.disableInput){
         return;
       }
@@ -747,7 +747,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_HOLD,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       if (state.disableInput){
         return;
       }
@@ -760,7 +760,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       std::cout << "saving heightmap" << std::endl;
       auto selectedId = latestSelected(state.editor);
       if (selectedId.has_value() && isHeightmap(world, selectedId.value())){
@@ -774,7 +774,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 'R',  
     .hasPreq = true,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       std::cout << "rechunking data!" << std::endl;
       auto selectedObjects = selectedIds(state.editor);
 
@@ -804,7 +804,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 'R',  
     .hasPreq = true,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       std::cout << "splitting data!" << std::endl;
       auto objectId = latestSelected(state.editor);
       if (!objectId.has_value()){
@@ -830,7 +830,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       std::cout << "setting snap absolute" << std::endl;
       state.snappingMode = SNAP_ABSOLUTE;
     }
@@ -841,7 +841,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       std::cout << "setting snap continuous" << std::endl;
       state.snappingMode = SNAP_CONTINUOUS;
     }
@@ -852,7 +852,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       std::cout << "setting snap relative" << std::endl;
       state.snappingMode = SNAP_RELATIVE;
     }
@@ -863,7 +863,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       for (auto id : selectedIds(state.editor)){
         handleSnapEasy(id, true);
       }
@@ -875,7 +875,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = [&state]() -> void {
+    .fn = []() -> void {
       for (auto id : selectedIds(state.editor)){
         handleSnapEasy(id, false);
       }
@@ -887,7 +887,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = [&cameraSpeed, &state]() -> void {
+    .fn = []() -> void {
       state.cameraFast = !state.cameraFast;
       std::cout << "camera fast: " << state.cameraFast << std::endl;
       cameraSpeed = state.cameraFast ? 1.f : 0.1f;
@@ -899,7 +899,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = [&cameraSpeed, &state]() -> void {
+    .fn = []() -> void {
       state.cameraFast = !state.cameraFast;
       std::cout << "camera fast: " << state.cameraFast << std::endl;
       cameraSpeed = state.cameraFast ? 1.f : 0.1f;
@@ -912,7 +912,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_RELEASE,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = [&cameraSpeed, &state]() -> void {
+    .fn = []() -> void {
       state.cameraFast = !state.cameraFast;
       std::cout << "camera fast: " << state.cameraFast << std::endl;
       cameraSpeed = state.cameraFast ? 1.f : 0.1f;

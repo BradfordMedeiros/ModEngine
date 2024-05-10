@@ -712,7 +712,7 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
   float uiYOffset = (1.f + 3 * offsetPerLine) + state.infoTextOffset.y;
   float uiXOffset = (-1.f - offsetPerLine) + state.infoTextOffset.x;
   
-  auto currentFramerate = static_cast<int>(unwrapAttr<float>(statValue(statistics.fpsStat)));
+  auto currentFramerate = static_cast<int>(unwrapStat<float>(statValue(statistics.fpsStat)));
   //std::cout << "offsets: " << uiXOffset << " " << uiYOffset << std::endl;
   std::string additionalText =  "     <" + std::to_string((int)(255 * state.hoveredItemColor.r)) + ","  + std::to_string((int)(255 * state.hoveredItemColor.g)) + " , " + std::to_string((int)(255 * state.hoveredItemColor.b)) + ">  " + " --- " + state.selectedName;
   drawTextNdi(std::to_string(currentFramerate) + additionalText, uiXOffset, uiYOffset + offsetPerLine, state.fontsize + 1);
@@ -761,9 +761,9 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
   drawTextNdi("using object id: -1" , uiXOffset, uiYOffset + offsetPerLine * 13, state.fontsize);
 
   drawTextNdi(std::string("triangles: ") + std::to_string(statistics.numTriangles), uiXOffset, uiYOffset + offsetPerLine * 14, state.fontsize);
-  drawTextNdi(std::string("num gameobjects: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(statistics.numObjectsStat)))), uiXOffset, uiYOffset + offsetPerLine * 15, state.fontsize);
-  drawTextNdi(std::string("num rigidbodys: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(statistics.rigidBodiesStat)))), uiXOffset, uiYOffset + offsetPerLine * 16, state.fontsize);
-  drawTextNdi(std::string("num scenes loaded: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(statistics.scenesLoadedStat)))), uiXOffset, uiYOffset + offsetPerLine * 17, state.fontsize);
+  drawTextNdi(std::string("num gameobjects: ") + std::to_string(unwrapStat<int>(statValue(statistics.numObjectsStat))), uiXOffset, uiYOffset + offsetPerLine * 15, state.fontsize);
+  drawTextNdi(std::string("num rigidbodys: ") + std::to_string(unwrapStat<int>(statValue(statistics.rigidBodiesStat))), uiXOffset, uiYOffset + offsetPerLine * 16, state.fontsize);
+  drawTextNdi(std::string("num scenes loaded: ") + std::to_string(unwrapStat<int>(statValue(statistics.scenesLoadedStat))), uiXOffset, uiYOffset + offsetPerLine * 17, state.fontsize);
   drawTextNdi(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + offsetPerLine * 18, state.fontsize);
   drawTextNdi(std::string("time: ") + std::to_string(timeSeconds(false)), uiXOffset, uiYOffset + offsetPerLine * 19, state.fontsize);
   drawTextNdi(std::string("realtime: ") + std::to_string(timeSeconds(true)), uiXOffset, uiYOffset + offsetPerLine * 20, state.fontsize);
@@ -1739,7 +1739,7 @@ int main(int argc, char* argv[]){
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
 
     if (state.visualizeNormals){
-      forEveryGameobj(world.sandbox, [&world, &interface](objid id, GameObject& gameobj) -> void {
+      forEveryGameobj(world.sandbox, [](objid id, GameObject& gameobj) -> void {
         auto transform = fullTransformation(world.sandbox, id);
         auto toPosition = transform.position + (transform.rotation * glm::vec3(0.f, 0.f, -1.f));
         auto leftArrow = transform.position + (transform.rotation * glm::vec3(-0.2f, 0.f, -0.8f));
