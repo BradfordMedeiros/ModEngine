@@ -238,7 +238,7 @@ void updateEmitterOptions(EmitterSystem& system, objid emitterNodeId, EmitterUpd
     emitter.deleteBehavior = updateOptions.deleteBehavior.value();
   }
   if (updateOptions.particleAttributes.has_value()){
-    modassert(false, "particleAttributes not yet implemented");
+    mergeAttributes(emitter.particleAttributes, updateOptions.particleAttributes.value());
   }
   if (updateOptions.submodelAttributes.has_value()){
     modassert(false, "submodelAttributes not yet implemented");

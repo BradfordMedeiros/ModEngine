@@ -241,6 +241,16 @@ bool setEmitterAttribute(GameObjectEmitter& emitterObj, const char* field, Attri
     updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
       .lifetime = emitterObj.duration,
     }); 
+  }else {
+    GameobjAttributes attributes {
+      .attr = {
+        { field, value },
+      },
+    };
+    auto particleAttributes = particleFields(attributes);
+    updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
+      .particleAttributes = particleAttributes,
+    }); 
   }
   return setAnyValue;
 }

@@ -40,11 +40,6 @@ unsigned int statName(std::string name){
 	return stats.size() - 1;
 }
 void registerStat(unsigned int stat, StatValue amount){
-	if (stat == statistics.loadModelFileStat){
-		std::cout << "load model called" << std::endl;
-	}else if (stat == statistics.loadModelFileStatCacheHit){
-		std::cout << "load model called: cache hit" << std::endl;
-	}
   stats.at(stat).amount = amount;
 }
 StatValue statValue(unsigned int stat){
