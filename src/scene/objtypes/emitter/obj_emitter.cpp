@@ -33,13 +33,11 @@ std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
   for (auto &[key, value] : attributes.attr){
     auto vec3Attr = std::get_if<glm::vec3>(&value);
     if (vec3Attr){
-      if ((key.at(0) == '!' || key.at(0) == '?' || key.at(0) == '%') && key.size() > 1){
+      if (key.at(0) == '!'  && key.size() > 1){
         auto newKey = key.substr(1, key.size());
         values[newKey] = EmitterDelta {
           .attributeName = newKey,
           .value = glm::vec3(0.f, 0.f, 0.f),
-          .variance = glm::vec3(0.f, 0.f, 0.f),
-          .lifetimeEffect = {},
         };
       }
     }
@@ -47,13 +45,11 @@ std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
   for (auto &[key, value] : attributes.attr){
     auto vec4Attr = std::get_if<glm::vec4>(&value);
     if (vec4Attr){
-      if ((key.at(0) == '!' || key.at(0) == '?' || key.at(0) == '%') && key.size() > 1){
+      if (key.at(0) == '!' && key.size() > 1){
         auto newKey = key.substr(1, key.size());
         values[newKey] = EmitterDelta {
           .attributeName = newKey,
           .value = glm::vec4(0.f, 0.f, 0.f, 0.f),
-          .variance = glm::vec4(0.f, 0.f, 0.f, 0.f),
-          .lifetimeEffect = {},
         };
       }
     }
@@ -62,39 +58,14 @@ std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
   
   ///////////////// Same code for diff types
   for (auto [key, value] : attributes.attr){
-    auto vec3Attr = std::get_if<glm::vec3>(&value);
-    if (vec3Attr){
-      std::cout <<  "emitter: adding vec3 type for: " << key << std::endl;
-      if (key.size() > 1){
-        auto newKey = key.substr(1, key.size());
-        if (key.at(0) == '!'){
-          values.at(newKey).value = value;
-        }else if (key.at(0) == '?'){
-          values.at(newKey).variance = value;
-        }
-        /*else if (key.at(0) == '%'){
-          values.at(newKey).lifetimeEffect = parseFloatVec(value);
-        }*/
+    if (key.size() > 1){
+      auto newKey = key.substr(1, key.size());
+      if (key.at(0) == '!'){
+        values.at(newKey).value = value;
       }
     }
   }
-  for (auto [key, value] : attributes.attr){
-    auto vec4Attr = std::get_if<glm::vec4>(&value);
-    if (vec4Attr){
-      std::cout <<  "emitter: adding vec4 type for: " << key << std::endl;
-      if (key.size() > 1){
-        auto newKey = key.substr(1, key.size());
-        if (key.at(0) == '!'){
-          values.at(newKey).value = *vec4Attr;
-        }else if (key.at(0) == '?'){
-          values.at(newKey).variance = *vec4Attr;
-        }
-        /*else if (key.at(0) == '%'){
-          values.at(newKey).lifetimeEffect = parseFloatVec(value);
-        }*/
-      }
-    }
-  }
+
   ////////////////////////////////////////////////////////////////
 
   std::vector<EmitterDelta> deltas;
@@ -102,13 +73,7 @@ std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
     deltas.push_back(EmitterDelta{
       .attributeName = key,
       .value = value.value,
-      .variance = value.variance,
-      .lifetimeEffect = value.lifetimeEffect,
     });
-  }
-
-  for (auto &delta : deltas){
-    std::cout << "create emitter - " << delta.attributeName << " - " << print(delta.value) << " = " << print(delta.variance) << std::endl;
   }
 
   return deltas;
@@ -268,10 +233,6 @@ bool setEmitterAttribute(GameObjectEmitter& emitterObj, const char* field, Attri
       if (newDeltaPtr.has_value()){
         if (fieldName.at(0) == '!'){
           newDelta.value = requestedDelta.value;
-        }else if (fieldName.at(0) == '?'){
-          newDelta.variance = requestedDelta.variance;
-        }else if (fieldName.at(0) == '%'){
-          newDelta.lifetimeEffect = requestedDelta.lifetimeEffect;
         }
       }
       updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {

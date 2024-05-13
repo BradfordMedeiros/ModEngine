@@ -13,8 +13,6 @@
 struct EmitterDelta {
   std::string attributeName;
   AttributeValue value;   
-  AttributeValue variance;
-  std::vector<float> lifetimeEffect;
 };
 
 struct ActiveParticle {
@@ -31,6 +29,13 @@ struct NewParticleOptions {
 };
 
 enum EmitterDeleteBehavior { EMITTER_NOTYPE, EMITTER_DELETE, EMITTER_ORPHAN, EMITTER_FINISH };
+
+struct EmitterFrame {
+  int index;
+  GameobjAttributes particleAttributes;
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  std::vector<EmitterDelta> deltas; 
+};
 struct Emitter {
   objid emitterNodeId;
   float lastSpawnTime;
