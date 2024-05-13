@@ -229,18 +229,22 @@ bool setEmitterAttribute(GameObjectEmitter& emitterObj, const char* field, Attri
     updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
       .enabled = emitterObj.state,
     });
+    setAnyValue = true;
   }else if (fieldName == "rate"){
     updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
       .spawnrate = emitterObj.rate,
     });
+    setAnyValue = true;
   }else if (fieldName == "limit"){
     updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
       .targetParticles = emitterObj.limit,
     });
+    setAnyValue = true;
   }else if (fieldName == "duration"){
     updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
       .lifetime = emitterObj.duration,
-    }); 
+    });
+    setAnyValue = true;
   }else {
     GameobjAttributes attributes {
       .attr = {
@@ -248,9 +252,35 @@ bool setEmitterAttribute(GameObjectEmitter& emitterObj, const char* field, Attri
       },
     };
     auto particleAttributes = particleFields(attributes);
-    updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
-      .particleAttributes = particleAttributes,
-    }); 
+    if (particleAttributes.attr.size() > 0){
+      updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
+        .particleAttributes = particleAttributes,
+      });
+      //setAnyValue = true;
+      return setAnyValue;
+    }
+
+    auto deltas = emitterDeltas(attributes);
+    if (deltas.size() > 0){
+      EmitterDelta requestedDelta = deltas.at(0);
+      auto newDeltaPtr = getEmitterDelta(emitterSystem, util.id, requestedDelta.attributeName);
+      auto newDelta = newDeltaPtr.has_value() ? *(newDeltaPtr.value()) : requestedDelta;
+      if (newDeltaPtr.has_value()){
+        if (fieldName.at(0) == '!'){
+          newDelta.value = requestedDelta.value;
+        }else if (fieldName.at(0) == '?'){
+          newDelta.variance = requestedDelta.variance;
+        }else if (fieldName.at(0) == '%'){
+          newDelta.lifetimeEffect = requestedDelta.lifetimeEffect;
+        }
+      }
+      updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
+        .delta = newDelta,
+      });
+      return setAnyValue;
+    }
+
+
   }
   return setAnyValue;
 }
@@ -265,3 +295,4 @@ std::vector<std::pair<std::string, std::string>> serializeEmitter(GameObjectEmit
   autoserializerSerialize((char*)&emitterObj, emitterAutoserializer, pairs);
   return pairs;
 }
+

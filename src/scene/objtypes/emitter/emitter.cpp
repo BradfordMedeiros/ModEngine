@@ -222,6 +222,15 @@ Emitter& getEmitter(EmitterSystem& system, objid emitterNodeId){
   return nullEmitter;
 }
 
+std::optional<EmitterDelta*> getEmitterDelta(EmitterSystem& system, objid emitterNodeId, std::string attributeName){
+  Emitter& emitter = getEmitter(system, emitterNodeId);
+  for (auto &delta : emitter.deltas){
+    if (delta.attributeName == attributeName){
+      return &delta;
+    }
+  }
+  return std::nullopt;
+}
 void updateEmitterOptions(EmitterSystem& system, objid emitterNodeId, EmitterUpdateOptions&& updateOptions){
   //modassert(false, "not yet implemented");
   Emitter& emitter = getEmitter(system, emitterNodeId);
@@ -243,8 +252,13 @@ void updateEmitterOptions(EmitterSystem& system, objid emitterNodeId, EmitterUpd
   if (updateOptions.submodelAttributes.has_value()){
     modassert(false, "submodelAttributes not yet implemented");
   }
-  if (updateOptions.deltas.has_value()){
-    modassert(false, "deltas not yet implemented");
+  if (updateOptions.delta.has_value()){
+    auto existingDelta = getEmitterDelta(system, emitterNodeId, updateOptions.delta.value().attributeName);
+    if (!existingDelta.has_value()){
+      emitter.deltas.push_back(updateOptions.delta.value());
+    }else{
+      *(existingDelta.value()) = updateOptions.delta.value();
+    }
   }
   if (updateOptions.enabled.has_value()){
     emitter.enabled = updateOptions.enabled.value();

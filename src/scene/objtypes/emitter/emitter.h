@@ -12,7 +12,7 @@
 
 struct EmitterDelta {
   std::string attributeName;
-  AttributeValue value;
+  AttributeValue value;   
   AttributeValue variance;
   std::vector<float> lifetimeEffect;
 };
@@ -65,6 +65,8 @@ void updateEmitters(
 
 void emitNewParticle(EmitterSystem& system, objid emitterNodeId, NewParticleOptions options);
 
+std::optional<EmitterDelta*> getEmitterDelta(EmitterSystem& system, objid emitterNodeId, std::string attributeName);
+
 struct EmitterUpdateOptions{
   std::optional<unsigned int> targetParticles;
   std::optional<float> spawnrate;
@@ -72,7 +74,7 @@ struct EmitterUpdateOptions{
   std::optional<EmitterDeleteBehavior> deleteBehavior;
   std::optional<GameobjAttributes> particleAttributes;
   std::optional<std::map<std::string, GameobjAttributes>> submodelAttributes;
-  std::optional<std::vector<EmitterDelta>> deltas;
+  std::optional<EmitterDelta> delta;
   std::optional<bool> enabled;
 };
 void updateEmitterOptions(EmitterSystem& system, objid emitterNodeId, EmitterUpdateOptions&& update);
