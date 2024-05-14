@@ -93,6 +93,11 @@ std::vector<AutoSerialize> emitterAutoserializer {
     .defaultValue = 10.f,
   },
   AutoSerializeUInt {
+    .structOffset = offsetof(GameObjectEmitter, numParticlesPerFrame),
+    .field = "count",
+    .defaultValue = 1,
+  },
+  AutoSerializeUInt {
     .structOffset = offsetof(GameObjectEmitter, limit),
     .field = "limit",
     .defaultValue = 10,
@@ -222,7 +227,7 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
       },
     },
   };
-  addEmitter(emitterSystem, util.id, util.getCurrentTime(), obj.limit, obj.rate, obj.duration, particleConfig, obj.state, obj.deleteBehavior);
+  addEmitter(emitterSystem, util.id, util.getCurrentTime(), obj.limit, obj.rate, obj.duration, obj.numParticlesPerFrame, particleConfig, obj.state, obj.deleteBehavior);
   return obj;
 }
 

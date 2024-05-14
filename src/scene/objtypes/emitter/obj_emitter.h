@@ -8,6 +8,7 @@
 struct GameObjectEmitter{
 	float rate;
 	float duration;
+	int numParticlesPerFrame;
 	int limit;
 	bool state;
   EmitterDeleteBehavior deleteBehavior;

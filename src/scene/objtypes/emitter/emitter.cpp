@@ -6,7 +6,8 @@ void addEmitter(
   float currentTime, 
   unsigned int targetParticles,
   float spawnrate, 
-  float lifetime, 
+  float lifetime,
+  int numParticlesPerFrame,
   ParticleConfig particleConfig,
   bool enabled,
   EmitterDeleteBehavior deleteBehavior
@@ -15,6 +16,7 @@ void addEmitter(
   Emitter emitter {
     .emitterNodeId = emitterNodeId,
     .lastSpawnTime = currentTime,
+    .numParticlesPerFrame = numParticlesPerFrame,
     .targetParticles = targetParticles,
     .currentParticles = 0,
     .spawnrate = spawnrate,
@@ -169,22 +171,24 @@ void updateEmitters(
         emitter.forceParticles.pop_front();
       }
 
-      auto particleFrameIndex = emitter.particleFrameIndex;
-      auto particleId = addParticle(getParticleAttr(emitter, particleFrameIndex), getSubmodelAttr(emitter, particleFrameIndex), emitter.emitterNodeId, newParticleOpts);
-      emitter.particleFrameIndex++;
-      if(emitter.particleFrameIndex >= getNumberParticleFrames(emitter)){
-        emitter.particleFrameIndex = 0;
+      for (int i = 0; i < emitter.numParticlesPerFrame; i++){
+        auto particleFrameIndex = emitter.particleFrameIndex;
+        auto particleId = addParticle(getParticleAttr(emitter, particleFrameIndex), getSubmodelAttr(emitter, particleFrameIndex), emitter.emitterNodeId, newParticleOpts);
+        emitter.particleFrameIndex++;
+        if(emitter.particleFrameIndex >= getNumberParticleFrames(emitter)){
+          emitter.particleFrameIndex = 0;
+        }
+        if (particleId.has_value()){
+          emitter.particles.push_back(ActiveParticle {
+            .id = particleId.value(),
+            .frameIndex = particleFrameIndex,
+            .spawntime = currentTime,
+          });
+        }
+        emitter.currentParticles+= 1; 
+        emitter.lastSpawnTime = currentTime;
+        std::cout << "INFO: particles: adding particle" << std::endl;        
       }
-      if (particleId.has_value()){
-        emitter.particles.push_back(ActiveParticle {
-          .id = particleId.value(),
-          .frameIndex = particleFrameIndex,
-          .spawntime = currentTime,
-        });
-      }
-      emitter.currentParticles+= 1; 
-      emitter.lastSpawnTime = currentTime;
-      std::cout << "INFO: particles: adding particle" << std::endl;
     }
   }
 }

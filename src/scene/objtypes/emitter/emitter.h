@@ -51,6 +51,7 @@ struct ParticleConfig {
 struct Emitter {
   objid emitterNodeId;
   float lastSpawnTime;
+  int numParticlesPerFrame;
   unsigned int targetParticles;
   unsigned int currentParticles;
   std::deque<ActiveParticle> particles;
@@ -70,7 +71,7 @@ struct EmitterSystem {
 };
 
 
-void addEmitter(EmitterSystem& system, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, ParticleConfig particleConfig,  bool enabled, EmitterDeleteBehavior deleteBehavior);
+void addEmitter(EmitterSystem& system, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, int numParticlesPerFrame, ParticleConfig particleConfig,  bool enabled, EmitterDeleteBehavior deleteBehavior);
 void removeEmitter(EmitterSystem& system, objid id);
 void updateEmitters(
   EmitterSystem& system, 
