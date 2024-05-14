@@ -17,6 +17,7 @@ struct EmitterDelta {
 
 struct ActiveParticle {
   objid id;
+  int frameIndex;
   float spawntime;
 };
 
@@ -30,11 +31,22 @@ struct NewParticleOptions {
 
 enum EmitterDeleteBehavior { EMITTER_NOTYPE, EMITTER_DELETE, EMITTER_ORPHAN, EMITTER_FINISH };
 
-struct EmitterFrame {
-  int index;
-  GameobjAttributes particleAttributes;
-  std::map<std::string, GameobjAttributes> submodelAttributes;
-  std::vector<EmitterDelta> deltas; 
+struct ParticleAttributeFrame {
+  int frame;
+  GameobjAttributes attr;
+};
+struct SubmodelAttributeFrame {
+  int frame;
+  std::map<std::string, GameobjAttributes> attr;
+};
+struct EmitterDeltaFrame {
+  int frame;
+  std::vector<EmitterDelta> deltas;
+};
+struct ParticleConfig {
+  std::vector<ParticleAttributeFrame> particleAttributes;
+  std::vector<SubmodelAttributeFrame> submodelAttributes;
+  std::vector<EmitterDeltaFrame> deltas;
 };
 struct Emitter {
   objid emitterNodeId;
@@ -44,21 +56,21 @@ struct Emitter {
   std::deque<ActiveParticle> particles;
   float spawnrate;
   float lifetime;
-  GameobjAttributes particleAttributes;
-  std::map<std::string, GameobjAttributes> submodelAttributes;
-  std::vector<EmitterDelta> deltas;
+  ParticleConfig particleConfig;
   EmitterDeleteBehavior deleteBehavior;
 
   bool enabled;
   bool active;
   std::deque<NewParticleOptions> forceParticles;
+  int particleFrameIndex;
 };
 struct EmitterSystem {
   std::vector<Emitter> emitters;
   std::vector<objid> additionalParticlesToRemove;
 };
 
-void addEmitter(EmitterSystem& system, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, GameobjAttributes particleAttributes, std::map<std::string, GameobjAttributes> submodelAttributes, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior deleteBehavior);
+
+void addEmitter(EmitterSystem& system, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, ParticleConfig particleConfig,  bool enabled, EmitterDeleteBehavior deleteBehavior);
 void removeEmitter(EmitterSystem& system, objid id);
 void updateEmitters(
   EmitterSystem& system, 
@@ -70,7 +82,7 @@ void updateEmitters(
 
 void emitNewParticle(EmitterSystem& system, objid emitterNodeId, NewParticleOptions options);
 
-std::optional<EmitterDelta*> getEmitterDelta(EmitterSystem& system, objid emitterNodeId, std::string attributeName);
+std::optional<EmitterDelta*> getEmitterDelta(EmitterSystem& system, objid emitterNodeId, std::string attributeName, int index);
 
 struct EmitterUpdateOptions{
   std::optional<unsigned int> targetParticles;

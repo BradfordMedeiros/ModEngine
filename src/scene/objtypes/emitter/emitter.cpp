@@ -7,15 +7,11 @@ void addEmitter(
   unsigned int targetParticles,
   float spawnrate, 
   float lifetime, 
-  GameobjAttributes particleAttributes, 
-  std::map<std::string, GameobjAttributes> submodelAttributes,
-  std::vector<EmitterDelta> deltas,
+  ParticleConfig particleConfig,
   bool enabled,
   EmitterDeleteBehavior deleteBehavior
 ){
-  std::cout << "INFO: emitter: adding emitter -  " << emitterNodeId << ", " << currentTime << std::endl;
-  std::cout << "emitter particle attrs: " << print(particleAttributes) << std::endl;
-
+  //std::cout << "INFO: emitter: adding emitter -  " << emitterNodeId << ", " << currentTime << std::endl;
   Emitter emitter {
     .emitterNodeId = emitterNodeId,
     .lastSpawnTime = currentTime,
@@ -23,13 +19,12 @@ void addEmitter(
     .currentParticles = 0,
     .spawnrate = spawnrate,
     .lifetime = lifetime,
-    .particleAttributes = particleAttributes,
-    .submodelAttributes = submodelAttributes,
-    .deltas =  deltas,
+    .particleConfig = particleConfig,
     .deleteBehavior = deleteBehavior,
     .enabled = enabled,
     .active = true,
     .forceParticles = {},
+    .particleFrameIndex = 0,
   };
   system.emitters.push_back(emitter);
 }
@@ -98,6 +93,21 @@ bool shouldSpawnParticle(Emitter& emitter, float currentTime){
 }
 
 
+int getNumberParticleFrames(Emitter& emitter){
+  return emitter.particleConfig.particleAttributes.size();
+}
+GameobjAttributes& getParticleAttr(Emitter& emitter, int frame){
+  return emitter.particleConfig.particleAttributes.at(frame).attr;
+}
+
+std::map<std::string, GameobjAttributes>& getSubmodelAttr(Emitter& emitter, int frame){
+  return emitter.particleConfig.submodelAttributes.at(frame).attr;
+}
+
+std::vector<EmitterDelta>& getDeltas(Emitter& emitter, int frame){
+  return emitter.particleConfig.deltas.at(frame).deltas;
+}
+
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
@@ -118,7 +128,7 @@ void updateEmitters(
   for (auto &emitter : system.emitters){
     for (auto particle : emitter.particles){
       //std::cout << "INFO: PARTICLES: " << particleId << " , attribute: " << emitter.delta.attributeName << std::endl;
-      for (auto delta : emitter.deltas){
+      for (auto delta : getDeltas(emitter, particle.frameIndex)){   // this is incorrect, should be 
         updateParticle(particle.id, delta.attributeName, delta.value);
       }
     }
@@ -159,10 +169,16 @@ void updateEmitters(
         emitter.forceParticles.pop_front();
       }
 
-      auto particleId = addParticle(emitter.particleAttributes, emitter.submodelAttributes, emitter.emitterNodeId, newParticleOpts);
+      auto particleFrameIndex = emitter.particleFrameIndex;
+      auto particleId = addParticle(getParticleAttr(emitter, particleFrameIndex), getSubmodelAttr(emitter, particleFrameIndex), emitter.emitterNodeId, newParticleOpts);
+      emitter.particleFrameIndex++;
+      if(emitter.particleFrameIndex >= getNumberParticleFrames(emitter)){
+        emitter.particleFrameIndex = 0;
+      }
       if (particleId.has_value()){
         emitter.particles.push_back(ActiveParticle {
           .id = particleId.value(),
+          .frameIndex = particleFrameIndex,
           .spawntime = currentTime,
         });
       }
@@ -195,9 +211,9 @@ Emitter& getEmitter(EmitterSystem& system, objid emitterNodeId){
   return nullEmitter;
 }
 
-std::optional<EmitterDelta*> getEmitterDelta(EmitterSystem& system, objid emitterNodeId, std::string attributeName){
+std::optional<EmitterDelta*> getEmitterDelta(EmitterSystem& system, objid emitterNodeId, std::string attributeName, int index){
   Emitter& emitter = getEmitter(system, emitterNodeId);
-  for (auto &delta : emitter.deltas){
+  for (auto &delta : getDeltas(emitter, index)){
     if (delta.attributeName == attributeName){
       return &delta;
     }
@@ -205,6 +221,7 @@ std::optional<EmitterDelta*> getEmitterDelta(EmitterSystem& system, objid emitte
   return std::nullopt;
 }
 void updateEmitterOptions(EmitterSystem& system, objid emitterNodeId, EmitterUpdateOptions&& updateOptions){
+  int frameIndex = 0;
   //modassert(false, "not yet implemented");
   Emitter& emitter = getEmitter(system, emitterNodeId);
   if (updateOptions.targetParticles.has_value()){
@@ -220,15 +237,15 @@ void updateEmitterOptions(EmitterSystem& system, objid emitterNodeId, EmitterUpd
     emitter.deleteBehavior = updateOptions.deleteBehavior.value();
   }
   if (updateOptions.particleAttributes.has_value()){
-    mergeAttributes(emitter.particleAttributes, updateOptions.particleAttributes.value());
+    mergeAttributes(getParticleAttr(emitter, frameIndex), updateOptions.particleAttributes.value());
   }
   if (updateOptions.submodelAttributes.has_value()){
     modassert(false, "submodelAttributes not yet implemented");
   }
   if (updateOptions.delta.has_value()){
-    auto existingDelta = getEmitterDelta(system, emitterNodeId, updateOptions.delta.value().attributeName);
+    auto existingDelta = getEmitterDelta(system, emitterNodeId, updateOptions.delta.value().attributeName, frameIndex);
     if (!existingDelta.has_value()){
-      emitter.deltas.push_back(updateOptions.delta.value());
+      getDeltas(emitter, frameIndex).push_back(updateOptions.delta.value());
     }else{
       *(existingDelta.value()) = updateOptions.delta.value();
     }

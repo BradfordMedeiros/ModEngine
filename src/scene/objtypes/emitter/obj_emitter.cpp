@@ -179,7 +179,50 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
   for (auto &submodel : allSubmodelPaths){
     submodelAttributes[submodel] = emitterExtractAttributes(attributes, submodel);
   }
-  addEmitter(emitterSystem, util.id, util.getCurrentTime(), obj.limit, obj.rate, obj.duration, emitterAttr, submodelAttributes, emitterDeltas(attributes), obj.state, obj.deleteBehavior);
+
+  auto particle2 = emitterAttr;
+  particle2.attr["tint"] = glm::vec4(0.f, 0.f, 1.f, 1.f);
+
+  GameobjAttributes delta2Attrs {
+    .attr = {
+      { "!position", glm::vec3(0.f, 0.1f, 0.f) }
+    },
+  };
+  auto emitterDeltas2 = emitterDeltas(delta2Attrs);
+
+  ParticleConfig particleConfig {
+    .particleAttributes = {
+      ParticleAttributeFrame {
+        .frame = 0,
+        .attr = emitterAttr,
+      },
+      ParticleAttributeFrame {
+        .frame = 1,
+        .attr = particle2,
+      },
+    },
+    .submodelAttributes = {
+      SubmodelAttributeFrame {
+        .frame = 0,
+        .attr = submodelAttributes,
+      },
+      SubmodelAttributeFrame {
+        .frame = 1,
+        .attr = submodelAttributes,
+      },
+    },
+    .deltas = {
+      EmitterDeltaFrame {
+        .frame = 0,
+        .deltas = emitterDeltas(attributes),
+      },
+      EmitterDeltaFrame {
+        .frame = 1,
+        .deltas = emitterDeltas2,
+      },
+    },
+  };
+  addEmitter(emitterSystem, util.id, util.getCurrentTime(), obj.limit, obj.rate, obj.duration, particleConfig, obj.state, obj.deleteBehavior);
   return obj;
 }
 
@@ -228,7 +271,8 @@ bool setEmitterAttribute(GameObjectEmitter& emitterObj, const char* field, Attri
     auto deltas = emitterDeltas(attributes);
     if (deltas.size() > 0){
       EmitterDelta requestedDelta = deltas.at(0);
-      auto newDeltaPtr = getEmitterDelta(emitterSystem, util.id, requestedDelta.attributeName);
+      int frameIndex = 0;
+      auto newDeltaPtr = getEmitterDelta(emitterSystem, util.id, requestedDelta.attributeName, frameIndex);
       auto newDelta = newDeltaPtr.has_value() ? *(newDeltaPtr.value()) : requestedDelta;
       if (newDeltaPtr.has_value()){
         if (fieldName.at(0) == '!'){
