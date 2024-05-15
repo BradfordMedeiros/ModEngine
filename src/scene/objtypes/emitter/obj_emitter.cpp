@@ -9,73 +9,66 @@ EmitterSystem& getEmitterSystem(){
   return emitterSystem;
 }
 
-GameobjAttributes particleFields(GameobjAttributes& attributes){
-  GameobjAttributes attr {
-    .attr = {},
-  };
-  for (auto [key, value] : attributes.attr){
-    auto strValue = std::get_if<std::string>(&value);
-    auto floatValue = std::get_if<float>(&value);
-    auto vec3Value = std::get_if<glm::vec3>(&value);
-    auto vec4Value = std::get_if<glm::vec4>(&value);
-    modassert(strValue || floatValue || vec3Value || vec4Value, "invalid type particleFields");
-    if (key.at(0) == '+' && key.size() > 1){
+struct ParsedEmitterValue {
+  char fieldIdentifier;
+  std::string key;
+  int frameIndex;
+  AttributeValue value;
+};
+std::vector<ParsedEmitterValue> parseEmitterValues(GameobjAttributes& attributes){
+  std::vector<ParsedEmitterValue> values;
+  for (auto &[key, value] : attributes.attr){
+    if ((key.at(0) == '+' || key.at(0) == '!') && key.size() > 1){
       auto newKey = key.substr(1, key.size());
-      attr.attr[newKey] = value;
+      values.push_back(ParsedEmitterValue {
+        .fieldIdentifier = key.at(0),
+        .key = newKey,
+        .frameIndex = 0,
+        .value = value,
+      });
     }
   }
-  return attr;
+  return values;
+}
+
+std::vector<ParticleAttributeFrame> particleFieldFrames(GameobjAttributes& attributes){
+  std::vector<ParticleAttributeFrame> frames;
+
+  GameobjAttributes attr { .attr = {} };
+  auto parsedValues = parseEmitterValues(attributes);
+  for (auto &parsedValue : parsedValues){
+    if (parsedValue.fieldIdentifier == '+'){
+      attr.attr[parsedValue.key] = parsedValue.value;
+    }
+  }
+
+  ParticleAttributeFrame firstFrame {
+    .frame = 0,
+    .attr = attr,
+  };
+
+  auto secondFrame = firstFrame;
+  frames.push_back(firstFrame);
+
+  secondFrame.attr.attr["tint"] = glm::vec4(0.f, 0.f, 1.f, 0.f);
+  secondFrame.frame = 2;
+  frames.push_back(secondFrame);
+
+  return frames;
 }
 
 std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
-  std::map<std::string, EmitterDelta> values;
+  std::vector<EmitterDelta> deltas;
   ///////////////// Same code for diff types consolidate
   for (auto &[key, value] : attributes.attr){
-    auto vec3Attr = std::get_if<glm::vec3>(&value);
-    if (vec3Attr){
-      if (key.at(0) == '!'  && key.size() > 1){
-        auto newKey = key.substr(1, key.size());
-        values[newKey] = EmitterDelta {
-          .attributeName = newKey,
-          .value = glm::vec3(0.f, 0.f, 0.f),
-        };
-      }
-    }
-  }
-  for (auto &[key, value] : attributes.attr){
-    auto vec4Attr = std::get_if<glm::vec4>(&value);
-    if (vec4Attr){
-      if (key.at(0) == '!' && key.size() > 1){
-        auto newKey = key.substr(1, key.size());
-        values[newKey] = EmitterDelta {
-          .attributeName = newKey,
-          .value = glm::vec4(0.f, 0.f, 0.f, 0.f),
-        };
-      }
-    }
-  }
-  ////////////////////////////////////////////////////////////
-  
-  ///////////////// Same code for diff types
-  for (auto [key, value] : attributes.attr){
-    if (key.size() > 1){
+    if (key.at(0) == '!'  && key.size() > 1){
       auto newKey = key.substr(1, key.size());
-      if (key.at(0) == '!'){
-        values.at(newKey).value = value;
-      }
+      deltas.push_back(EmitterDelta {
+        .attributeName = newKey,
+        .value = value,
+      });
     }
   }
-
-  ////////////////////////////////////////////////////////////////
-
-  std::vector<EmitterDelta> deltas;
-  for (auto [key, value] : values){
-    deltas.push_back(EmitterDelta{
-      .attributeName = key,
-      .value = value.value,
-    });
-  }
-
   return deltas;
 }
 
@@ -120,7 +113,7 @@ std::vector<AutoSerialize> emitterAutoserializer {
 
 
 bool isEmitterPrefix(char character){
-  return character == '!' || character == '?' || character == '%' || character == '+';
+  return character == '!' || character == '+';
 }
 std::set<std::string> emitterSubmodelAttr(std::vector<GameobjAttribute>& attr){
   std::set<std::string> submodelNames;
@@ -177,16 +170,13 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
   createAutoSerializeWithTextureLoading((char*)&obj, emitterAutoserializer, attributes, util);
   assert(obj.limit >= 0);
   
-  auto emitterAttr = particleFields(attributes);
+  auto particleAttributes = particleFieldFrames(attributes);
   auto allAttributes = allKeysAndAttributes(attributes);
   auto allSubmodelPaths = emitterSubmodelAttr(allAttributes);
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
   for (auto &submodel : allSubmodelPaths){
     submodelAttributes[submodel] = emitterExtractAttributes(attributes, submodel);
   }
-
-  auto particle2 = emitterAttr;
-  particle2.attr["tint"] = glm::vec4(0.f, 0.f, 1.f, 1.f);
 
   GameobjAttributes delta2Attrs {
     .attr = {
@@ -196,16 +186,7 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
   auto emitterDeltas2 = emitterDeltas(delta2Attrs);
 
   ParticleConfig particleConfig {
-    .particleAttributes = {
-      ParticleAttributeFrame {
-        .frame = 0,
-        .attr = emitterAttr,
-      },
-      ParticleAttributeFrame {
-        .frame = 1,
-        .attr = particle2,
-      },
-    },
+    .particleAttributes = particleAttributes,
     .submodelAttributes = {
       SubmodelAttributeFrame {
         .frame = 0,
@@ -264,14 +245,14 @@ bool setEmitterAttribute(GameObjectEmitter& emitterObj, const char* field, Attri
         { field, value },
       },
     };
-    auto particleAttributes = particleFields(attributes);
-    if (particleAttributes.attr.size() > 0){
-      updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
-        .particleAttributes = particleAttributes,
-      });
-      //setAnyValue = true;
-      return setAnyValue;
-    }
+    //auto particleAttributes = particleFields(attributes);
+    //if (particleAttributes.attr.size() > 0){
+    //  updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
+    //    .particleAttributes = particleAttributes,
+    //  });
+    //  //setAnyValue = true;
+    //  return setAnyValue;
+    //}
 
     auto deltas = emitterDeltas(attributes);
     if (deltas.size() > 0){
