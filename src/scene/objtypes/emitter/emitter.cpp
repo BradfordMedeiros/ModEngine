@@ -186,6 +186,7 @@ void updateEmitters(
 
       for (int i = 0; i < emitter.numParticlesPerFrame; i++){
         auto particleFrameIndex = emitter.particleFrameIndex;
+        modlog("emitter add particle", std::to_string(particleFrameIndex));
         auto particleId = addParticle(getParticleAttr(emitter, particleFrameIndex), getSubmodelAttr(emitter, particleFrameIndex), emitter.emitterNodeId, newParticleOpts);
         emitter.particleFrameIndex++;
         if(emitter.particleFrameIndex >= getNumberParticleFrames(emitter)){

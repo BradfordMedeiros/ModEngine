@@ -1307,10 +1307,28 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
   afterAttributesSet(world, id, gameobj, fieldIsVelocity, physicsObjectNeedsRebuild);
 }
 
-void applyAttributeDelta(World& world, objid id, std::string field, AttributeValue delta){
+
+AttributeValue timeAdjustedAttribute(AttributeValue delta, float timestep){
+  auto floatAttr = std::get_if<float>(&delta);
+  if (floatAttr){
+    return *floatAttr * timestep;
+  }
+  auto vec3Attr = std::get_if<glm::vec3>(&delta);
+  if (vec3Attr){
+    return glm::vec3(vec3Attr -> x * timestep, vec3Attr -> y * timestep, vec3Attr -> z * timestep);
+  }
+
+  auto vec4Attr = std::get_if<glm::vec4>(&delta);
+  if (vec4Attr){
+    return glm::vec4(vec4Attr -> x * timestep, vec4Attr -> y * timestep, vec4Attr -> z * timestep, vec4Attr -> w * timestep);
+  }
+  modassert(false, "timeAdjustedAttribute invalid type");
+  return delta;
+}
+void applyAttributeDelta(World& world, objid id, std::string field, AttributeValue delta, float timestep){
   auto attribute = getObjectAttribute(world, id, field.c_str());
   modassert(attribute.has_value(), "attribute does not have a value: " + field);
-  auto attributeSum = addAttributes(attribute.value(), delta);
+  auto attributeSum = addAttributes(attribute.value(), timeAdjustedAttribute(delta, timestep));
   //modlog("emitter apply attribute", std::string(field) + ", adding value: " + print(delta) + ", new value: " + print(attributeSum));
   setSingleGameObjectAttr(world, id, field.c_str(), attributeSum);
 }
@@ -1504,10 +1522,10 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
           removeObjectFromScene(world, id);
         }
       },
-      [&world](objid id, std::string attribute, AttributeValue delta)  -> void {
+      [&world, timestep](objid id, std::string attribute, AttributeValue delta)  -> void {
         MODTODO("update particle attr -- WARNING ADD FPS INDEPNDENC HERE");
         std::cout << "emitter: " << attribute << ", " << print(delta) << std::endl;
-        applyAttributeDelta(world, id, attribute, delta);
+        applyAttributeDelta(world, id, attribute, delta, timestep);
       }
     );  
   }

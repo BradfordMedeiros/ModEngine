@@ -86,6 +86,7 @@ std::vector<ParticleAttributeFrame> particleFieldFrames(GameobjAttributes& attri
     if (parsedValue.fieldIdentifier == '+' && parsedValue.frameIndex.has_value()){
       frameToAttr[parsedValue.frameIndex.value()] = mainAttrs;      
     }
+  }
 
   for (auto &parsedValue : parsedValues){
     if (parsedValue.fieldIdentifier == '+'){
@@ -93,7 +94,6 @@ std::vector<ParticleAttributeFrame> particleFieldFrames(GameobjAttributes& attri
       frameToAttr.at(frameIndex).attr[parsedValue.key] = parsedValue.value;
     }
   }
-
   std::vector<ParticleAttributeFrame> frames;
   for (auto &[frame, attr] : frameToAttr){
     frames.push_back(ParticleAttributeFrame {
@@ -243,14 +243,46 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
         .frame = 1,
         .attr = submodelAttributes,
       },
+      SubmodelAttributeFrame {
+        .frame = 2,
+        .attr = submodelAttributes,
+      },
+      SubmodelAttributeFrame {
+        .frame = 3,
+        .attr = submodelAttributes,
+      },
+      SubmodelAttributeFrame {
+        .frame = 4,
+        .attr = submodelAttributes,
+      },
+      SubmodelAttributeFrame {
+        .frame = 5,
+        .attr = submodelAttributes,
+      },
     },
     .deltas = {
       EmitterDeltaFrame {
         .frame = 0,
-        .deltas = emitterDeltas(attributes),
+        .deltas = emitterDeltas2,
       },
       EmitterDeltaFrame {
         .frame = 1,
+        .deltas = emitterDeltas2,
+      },
+      EmitterDeltaFrame {
+        .frame = 2,
+        .deltas = emitterDeltas2,
+      },
+      EmitterDeltaFrame {
+        .frame = 3,
+        .deltas = emitterDeltas2,
+      },
+      EmitterDeltaFrame {
+        .frame = 4,
+        .deltas = emitterDeltas2,
+      },
+      EmitterDeltaFrame {
+        .frame = 5,
         .deltas = emitterDeltas2,
       },
     },
