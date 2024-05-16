@@ -9,51 +9,98 @@ EmitterSystem& getEmitterSystem(){
   return emitterSystem;
 }
 
+
+struct ParsedEmitterKey {
+  char fieldIdentifier;
+  std::optional<int> frameIndex;
+  std::string key;
+};
+
+std::optional<ParsedEmitterKey> parseEmitterKey(std::string key){
+  if (!(key.at(0) == '+' || key.at(0) == '!')){
+    return std::nullopt;
+  }
+  auto newKey = key.substr(1, key.size());
+  auto stringPair = carAndRest(newKey, '-');  // !position:0 0 0 or !0-position:0 0 0
+  if (stringPair.first.size() > 0 && stringPair.second.size() > 0){
+    int frameIndex = std::atoi(stringPair.first.c_str());
+    return ParsedEmitterKey {
+      .fieldIdentifier = key.at(0),
+      .frameIndex = frameIndex,
+      .key = stringPair.second,
+    };
+  }
+
+  return ParsedEmitterKey {
+    .fieldIdentifier = key.at(0),
+    .frameIndex = std::nullopt,
+    .key = newKey,
+  };
+}
+
+
 struct ParsedEmitterValue {
   char fieldIdentifier;
   std::string key;
-  int frameIndex;
+  std::optional<int> frameIndex;
   AttributeValue value;
 };
+
 std::vector<ParsedEmitterValue> parseEmitterValues(GameobjAttributes& attributes){
   std::vector<ParsedEmitterValue> values;
   for (auto &[key, value] : attributes.attr){
-    if ((key.at(0) == '+' || key.at(0) == '!') && key.size() > 1){
-      auto newKey = key.substr(1, key.size());
-      values.push_back(ParsedEmitterValue {
-        .fieldIdentifier = key.at(0),
-        .key = newKey,
-        .frameIndex = 0,
-        .value = value,
-      });
+    auto parsedEmitterKey = parseEmitterKey(key);
+    if (!parsedEmitterKey.has_value()){
+      continue;
     }
+    values.push_back(ParsedEmitterValue {
+      .fieldIdentifier = parsedEmitterKey.value().fieldIdentifier,
+      .key = parsedEmitterKey.value().key,
+      .frameIndex = parsedEmitterKey.value().frameIndex,
+      .value = value,
+    });
   }
   return values;
 }
 
-std::vector<ParticleAttributeFrame> particleFieldFrames(GameobjAttributes& attributes){
-  std::vector<ParticleAttributeFrame> frames;
-
-  GameobjAttributes attr { .attr = {} };
-  auto parsedValues = parseEmitterValues(attributes);
+GameobjAttributes mainParticleFrame(std::vector<ParsedEmitterValue>& parsedValues){
+  GameobjAttributes attr {};
   for (auto &parsedValue : parsedValues){
-    if (parsedValue.fieldIdentifier == '+'){
+    if (parsedValue.fieldIdentifier == '+' && !parsedValue.frameIndex.has_value()){
       attr.attr[parsedValue.key] = parsedValue.value;
     }
   }
+  return attr;
+}
 
-  ParticleAttributeFrame firstFrame {
-    .frame = 0,
-    .attr = attr,
-  };
+std::vector<ParticleAttributeFrame> particleFieldFrames(GameobjAttributes& attributes){
+  // todo - intentionally sort this at the end, 
+  // dont like depending on the sorting of map, too inexplicit + will be bulk updating this
+  std::map<int, GameobjAttributes> frameToAttr;
 
-  auto secondFrame = firstFrame;
-  frames.push_back(firstFrame);
+  auto parsedValues = parseEmitterValues(attributes);
+  auto mainAttrs = mainParticleFrame(parsedValues);
 
-  secondFrame.attr.attr["tint"] = glm::vec4(0.f, 0.f, 1.f, 0.f);
-  secondFrame.frame = 2;
-  frames.push_back(secondFrame);
+  frameToAttr[0] = mainAttrs;
+  for (auto &parsedValue : parsedValues){
+    if (parsedValue.fieldIdentifier == '+' && parsedValue.frameIndex.has_value()){
+      frameToAttr[parsedValue.frameIndex.value()] = mainAttrs;      
+    }
 
+  for (auto &parsedValue : parsedValues){
+    if (parsedValue.fieldIdentifier == '+'){
+      int frameIndex = parsedValue.frameIndex.has_value() ? parsedValue.frameIndex.value() : 0;
+      frameToAttr.at(frameIndex).attr[parsedValue.key] = parsedValue.value;
+    }
+  }
+
+  std::vector<ParticleAttributeFrame> frames;
+  for (auto &[frame, attr] : frameToAttr){
+    frames.push_back(ParticleAttributeFrame {
+      .frame = frame,
+      .attr = attr,
+    });
+  }
   return frames;
 }
 

@@ -1,5 +1,14 @@
 #include "./emitter.h"
 
+void assertParticleConfig(ParticleConfig& particleConfig){
+  int lastFrameIndex = particleConfig.particleAttributes.at(0).frame;
+  for (int i = 1; i < particleConfig.particleAttributes.size(); i++){
+    auto currentFrameIndex = particleConfig.particleAttributes.at(i).frame;
+    modassert(currentFrameIndex > lastFrameIndex, "frame indexs not in ascending order");
+    lastFrameIndex = currentFrameIndex;
+  }
+}
+
 void addEmitter(
   EmitterSystem& system, 
   objid emitterNodeId, 
@@ -12,6 +21,10 @@ void addEmitter(
   bool enabled,
   EmitterDeleteBehavior deleteBehavior
 ){
+
+
+  assertParticleConfig(particleConfig);
+
   //std::cout << "INFO: emitter: adding emitter -  " << emitterNodeId << ", " << currentTime << std::endl;
   Emitter emitter {
     .emitterNodeId = emitterNodeId,
