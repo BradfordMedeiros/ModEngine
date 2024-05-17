@@ -230,7 +230,6 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
   createAutoSerializeWithTextureLoading((char*)&obj, emitterAutoserializer, attributes, util);
   assert(obj.limit >= 0);
   
-  auto particleAttributes = particleFieldFrames(attributes);
   auto allAttributes = allKeysAndAttributes(attributes);
   auto allSubmodelPaths = emitterSubmodelAttr(allAttributes);
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
@@ -238,10 +237,8 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
     submodelAttributes[submodel] = emitterExtractAttributes(attributes, submodel);
   }
 
-  auto emitterDeltaFrames = emitterDeltasFrames(attributes);
-
   ParticleConfig particleConfig {
-    .particleAttributes = particleAttributes,
+    .particleAttributes = particleFieldFrames(attributes),
     .submodelAttributes = {
       SubmodelAttributeFrame {
         .frame = 0,
@@ -268,7 +265,7 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
         .attr = submodelAttributes,
       },
     },
-    .deltas = emitterDeltaFrames,
+    .deltas = emitterDeltasFrames(attributes),
   };
   addEmitter(emitterSystem, util.id, util.getCurrentTime(), obj.limit, obj.rate, obj.duration, obj.numParticlesPerFrame, particleConfig, obj.state, obj.deleteBehavior);
   return obj;
