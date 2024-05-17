@@ -63,37 +63,40 @@ std::vector<ParsedEmitterValue> parseEmitterValues(GameobjAttributes& attributes
   return values;
 }
 
-GameobjAttributes mainParticleFrame(std::vector<ParsedEmitterValue>& parsedValues){
+GameobjAttributes mainParticleFrame(std::vector<ParsedEmitterValue>& parsedValues, char fieldIdentifier){
   GameobjAttributes attr {};
   for (auto &parsedValue : parsedValues){
-    if (parsedValue.fieldIdentifier == '+' && !parsedValue.frameIndex.has_value()){
+    if (parsedValue.fieldIdentifier == fieldIdentifier && !parsedValue.frameIndex.has_value()){
       attr.attr[parsedValue.key] = parsedValue.value;
     }
   }
   return attr;
 }
 
-std::vector<ParticleAttributeFrame> particleFieldFrames(GameobjAttributes& attributes){
+std::map<int, GameobjAttributes> getFrameToAttr(GameobjAttributes& attributes, char fieldIdentifier){
   // todo - intentionally sort this at the end, 
   // dont like depending on the sorting of map, too inexplicit + will be bulk updating this
   std::map<int, GameobjAttributes> frameToAttr;
-
   auto parsedValues = parseEmitterValues(attributes);
-  auto mainAttrs = mainParticleFrame(parsedValues);
-
+  auto mainAttrs = mainParticleFrame(parsedValues, fieldIdentifier);
   frameToAttr[0] = mainAttrs;
   for (auto &parsedValue : parsedValues){
-    if (parsedValue.fieldIdentifier == '+' && parsedValue.frameIndex.has_value()){
+    if (parsedValue.fieldIdentifier == fieldIdentifier && parsedValue.frameIndex.has_value()){
       frameToAttr[parsedValue.frameIndex.value()] = mainAttrs;      
     }
   }
 
   for (auto &parsedValue : parsedValues){
-    if (parsedValue.fieldIdentifier == '+'){
+    if (parsedValue.fieldIdentifier == fieldIdentifier){
       int frameIndex = parsedValue.frameIndex.has_value() ? parsedValue.frameIndex.value() : 0;
       frameToAttr.at(frameIndex).attr[parsedValue.key] = parsedValue.value;
     }
   }
+  return frameToAttr;
+}
+
+std::vector<ParticleAttributeFrame> particleFieldFrames(GameobjAttributes& attributes){
+  auto frameToAttr = getFrameToAttr(attributes, '+');
   std::vector<ParticleAttributeFrame> frames;
   for (auto &[frame, attr] : frameToAttr){
     frames.push_back(ParticleAttributeFrame {
@@ -106,18 +109,28 @@ std::vector<ParticleAttributeFrame> particleFieldFrames(GameobjAttributes& attri
 
 std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
   std::vector<EmitterDelta> deltas;
-  ///////////////// Same code for diff types consolidate
   for (auto &[key, value] : attributes.attr){
-    if (key.at(0) == '!'  && key.size() > 1){
-      auto newKey = key.substr(1, key.size());
-      deltas.push_back(EmitterDelta {
-        .attributeName = newKey,
-        .value = value,
-      });
-    }
+    deltas.push_back(EmitterDelta {
+      .attributeName = key,
+      .value = value,
+    });
+    
   }
   return deltas;
 }
+
+std::vector<EmitterDeltaFrame> emitterDeltasFrames(GameobjAttributes& attributes){
+  auto frameToAttr = getFrameToAttr(attributes, '!');
+  std::vector<EmitterDeltaFrame> frames;
+  for (auto &[frame, attr] : frameToAttr){
+    frames.push_back(EmitterDeltaFrame {
+      .frame = frame,
+      .deltas = emitterDeltas(attr),
+    });
+  }
+  return frames;
+}
+
 
 std::vector<AutoSerialize> emitterAutoserializer {
   AutoSerializeFloat {
@@ -225,12 +238,7 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
     submodelAttributes[submodel] = emitterExtractAttributes(attributes, submodel);
   }
 
-  GameobjAttributes delta2Attrs {
-    .attr = {
-      { "!position", glm::vec3(0.f, 0.1f, 0.f) }
-    },
-  };
-  auto emitterDeltas2 = emitterDeltas(delta2Attrs);
+  auto emitterDeltaFrames = emitterDeltasFrames(attributes);
 
   ParticleConfig particleConfig {
     .particleAttributes = particleAttributes,
@@ -260,32 +268,7 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
         .attr = submodelAttributes,
       },
     },
-    .deltas = {
-      EmitterDeltaFrame {
-        .frame = 0,
-        .deltas = emitterDeltas2,
-      },
-      EmitterDeltaFrame {
-        .frame = 1,
-        .deltas = emitterDeltas2,
-      },
-      EmitterDeltaFrame {
-        .frame = 2,
-        .deltas = emitterDeltas2,
-      },
-      EmitterDeltaFrame {
-        .frame = 3,
-        .deltas = emitterDeltas2,
-      },
-      EmitterDeltaFrame {
-        .frame = 4,
-        .deltas = emitterDeltas2,
-      },
-      EmitterDeltaFrame {
-        .frame = 5,
-        .deltas = emitterDeltas2,
-      },
-    },
+    .deltas = emitterDeltaFrames,
   };
   addEmitter(emitterSystem, util.id, util.getCurrentTime(), obj.limit, obj.rate, obj.duration, obj.numParticlesPerFrame, particleConfig, obj.state, obj.deleteBehavior);
   return obj;
