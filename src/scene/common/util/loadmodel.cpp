@@ -453,34 +453,6 @@ void printTransformDebug(Transformation& transform){
 
 void printDebugModelData(ModelData& data, std::string modelPath){
   std::cout << "DEBUG: Model Data: " << modelPath << std::endl;
-  std::cout << "id to mesh ids: " << std::endl;
-  for (auto &[id, meshids] : data.nodeToMeshId){
-    std::cout << id << " - [ ";
-    for (auto meshid : meshids){
-      std::cout << meshid << " ";
-    }
-    std::cout << "]" << std::endl;
-  }
-  std::cout << std::endl;
-  std::cout << "id to name: " << std::endl;
-  for (auto &[id, name] : data.names){
-    std::cout << "(" << id << ", " << name << ")" << std::endl;
-  }
-  std::cout << std::endl;
-
-  std::cout << "childid to parentid: " << std::endl;
-  for (auto &[childid, parentid] : data.childToParent){
-    std::cout << "(" << childid << ", " << parentid << ")" << std::endl;
-  }
-  std::cout << std::endl;
-
-  std::cout << "nodeid to transform: " << std::endl;
-  for (auto &[nodeid, transform] : data.nodeTransform){
-    std::cout << "(" << nodeid << ", ";
-    printTransformDebug(transform);
-    std::cout << ")" << std::endl;
-  }
-  std::cout << std::endl;
 
   std::cout << "bone data: " << std::endl;
   for (auto &[meshid, meshData] : data.meshIdToMeshData){
@@ -494,7 +466,50 @@ void printDebugModelData(ModelData& data, std::string modelPath){
     std::cout << "])" << std::endl;
   }
   std::cout << std::endl;
+
+
+  std::cout << "nodeToMeshId ids: " << std::endl;
+  for (auto &[id, meshids] : data.nodeToMeshId){
+    std::cout << id << " - [ ";
+    for (auto meshid : meshids){
+      std::cout << meshid << " ";
+    }
+    std::cout << "]" << std::endl;
+  }
+  std::cout << std::endl;
+
+
+  std::cout << "childid to parentid: " << std::endl;
+  for (auto &[childid, parentid] : data.childToParent){
+    std::cout << "(" << childid << ", " << parentid << ")" << std::endl;
+  }
+  std::cout << std::endl;
+
+
+  std::cout << "nodeid to transform: " << std::endl;
+  for (auto &[nodeid, transform] : data.nodeTransform){
+    std::cout << "(" << nodeid << ", " << print(transform) << ")" << std::endl;
+  }
+  std::cout << std::endl;
+
+
+  std::cout << "id to name: " << std::endl;
+  for (auto &[id, name] : data.names){
+    std::cout << "(" << id << ", " << name << ")" << std::endl;
+  }
+  std::cout << std::endl;
+
+
+  std::cout << "animations: " << std::endl;
+  for (auto &animation : data.animations){
+    std::cout << "(" << animation.name  << ") " << std::endl;
+  }
+  std::cout << std::endl;
+
+
+  exit(1);
 }
+
 
 ModelData loadModel(std::string rootname, std::string modelPath){
    Assimp::Importer import;
@@ -555,7 +570,8 @@ ModelData loadModel(std::string rootname, std::string modelPath){
    // pass in full transforms, and bones, then set initialoffset to full transform of bone
    setInitialBonePoses(data, fullnodeTransform); 
    renameRootNode(data, rootname, scene -> mRootNode -> mName.C_Str());
-   //printDebugModelData(data, modelPath);
+   
+   printDebugModelData(data, modelPath);
 
    return data;
 }
