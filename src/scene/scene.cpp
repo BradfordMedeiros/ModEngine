@@ -692,7 +692,7 @@ World createWorld(
   return world;
 }
 
-std::map<objid, GameobjAttributes> applyFieldsToSubelements(std::string meshName, ModelData& data, GameobjAttributes& attr, std::map<std::string, GameobjAttributes>& overrideAttributes){
+std::map<objid, GameobjAttributes> applyFieldsToSubelements(std::string meshName, ModelData& data, std::map<std::string, GameobjAttributes>& overrideAttributes){
   std::map<objid, GameobjAttributes> additionalFieldsMap;
   for (auto [nodeId, _] : data.nodeTransform){
     additionalFieldsMap[nodeId] = GameobjAttributes { };
@@ -832,7 +832,7 @@ void addObjectToWorld(
           loadMeshData(world, meshPath, meshData, id);
         } 
 
-        auto additionalFields = applyFieldsToSubelements(meshName, data, attr, submodelAttributes);
+        auto additionalFields = applyFieldsToSubelements(meshName, data, submodelAttributes);
         auto newSerialObjs = multiObjAdd(
           world.sandbox,
           sceneId,
