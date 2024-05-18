@@ -511,8 +511,7 @@ void printDebugModelData(ModelData& data, std::string modelPath){
 
 }
 
-
-ModelData loadModelCore(std::string modelPath){
+ModelDataCore loadModelCore(std::string modelPath){
    Assimp::Importer import;
    const aiScene* scene = import.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
    if (!scene || scene -> mFlags && AI_SCENE_FLAGS_INCOMPLETE || !scene -> mRootNode){
@@ -560,29 +559,35 @@ ModelData loadModelCore(std::string modelPath){
    assert(names.size() ==  nodeToMeshId.size());
    assertAllNamesUnique(names);
 
-   ModelData data = {
-     .meshIdToMeshData = meshIdToMeshData,
-     .nodeToMeshId = nodeToMeshId,
-     .childToParent = childToParent,
-     .nodeTransform = nodeTransform,
-     .names = names,
-     .animations = animations,
-     .loadedRoot = scene -> mRootNode -> mName.C_Str(),
+   ModelDataCore coreModelData {
+      .modelData = ModelData {
+        .meshIdToMeshData = meshIdToMeshData,
+        .nodeToMeshId = nodeToMeshId,
+        .childToParent = childToParent,
+        .nodeTransform = nodeTransform,
+        .names = names,
+        .animations = animations,
+      },
+      .loadedRoot = scene -> mRootNode -> mName.C_Str(),
    };
 
    // pass in full transforms, and bones, then set initialoffset to full transform of bone
-   setInitialBonePoses(data, fullnodeTransform); 
-   
-   printDebugModelData(data, modelPath);
+   setInitialBonePoses(coreModelData.modelData, fullnodeTransform); 
+   printDebugModelData(coreModelData.modelData, modelPath);
 
-   return data;
+   return coreModelData;
 }
 
+ModelData extractModel(ModelDataCore& modelCore, std::string rootname){
+  auto modelData = modelCore.modelData;
+  renameRootNode(modelData, rootname, modelCore.loadedRoot);
+  return modelData;
+}
 
 ModelData loadModel(std::string rootname, std::string modelPath){
   auto data = loadModelCore(modelPath);
-  renameRootNode(data, rootname, data.loadedRoot);
-  return data;
+  renameRootNode(data.modelData, rootname, data.loadedRoot);
+  return data.modelData;
 }
 
 std::vector<glm::vec3> getVertexsFromModelData(ModelData& data){

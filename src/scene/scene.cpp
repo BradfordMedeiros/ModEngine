@@ -434,6 +434,10 @@ void freeAnimationsForOwner(World& world, objid id){
   world.animations.erase(id);
 }
 
+ModelData loadModelPath(World& world, std::string rootname, std::string modelPath){
+  return loadModel(rootname, world.interface.modlayerPath(modelPath));
+}
+
 void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ownerId){
   if (world.meshes.find(meshPath) != world.meshes.end()){
     world.meshes.at(meshPath).owners.insert(ownerId);
@@ -453,9 +457,6 @@ void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ow
   }
 }
 
-ModelData loadModelPath(World& world, std::string rootname, std::string modelPath){
-  return loadModel(rootname, world.interface.modlayerPath(modelPath));
-}
 
 void addMesh(World& world, std::string meshpath){
   ModelData data = loadModelPath(world, "", meshpath);
@@ -483,6 +484,33 @@ void addSpriteMesh(World& world, std::string meshPath){
       })
     };
     world.meshes.at(meshPath).textureRefs = textureRefs;
+  }
+}
+
+
+void loadModelData(World& world, std::string meshpath, int ownerId){
+  if (world.modelDatas.find(meshpath) != world.modelDatas.end()){
+    world.modelDatas.at(meshpath).owners.insert(ownerId);
+  }else{
+    world.modelDatas[meshpath] = ModelDataRef {
+      .owners = { ownerId },
+      .modelData = loadModelCore(meshpath), 
+    };
+  }
+}
+
+void freeModelDataRefsByOwner(World& world, int ownerId){
+  for (auto &[_, modelRef] : world.modelDatas){
+    modelRef.owners.erase(ownerId);
+  }
+  std::vector<std::string> modelDataToFree;
+  for (auto &[name, modelRef] : world.modelDatas){
+    if (modelRef.owners.size() == 0){
+      modelDataToFree.push_back(name);
+    }
+  }
+  for (auto name : modelDataToFree){
+    world.modelDatas.erase(name);
   }
 }
 
@@ -787,8 +815,6 @@ std::function<Mesh(MeshData&)> createScopedLoadMesh(World& world, objid id){
   return loadMeshObject;
 }
 
-
-
 void addObjectToWorld(
   World& world, 
   objid sceneId, 
@@ -814,16 +840,18 @@ void addObjectToWorld(
       }
 
       if (data == NULL){
+        loadModelData(world, meshName, id);
+
         ModelData data = loadModelPath(world, name, meshName); 
-        for (auto [meshId, meshData] : data.meshIdToMeshData){
-          auto meshPath = nameForMeshId(meshName, meshId);
-          loadMeshData(world, meshPath, meshData, id);
-        } 
         if (data.animations.size() > 0){
           world.animations[id] = data.animations;
         }  
 
-        
+        for (auto [meshId, meshData] : data.meshIdToMeshData){
+          auto meshPath = nameForMeshId(meshName, meshId);
+          loadMeshData(world, meshPath, meshData, id);
+        } 
+     
         auto additionalFields = applyFieldsToSubelements(meshName, data, submodelAttributes);
         auto newSerialObjs = multiObjAdd(
           world.sandbox,
@@ -982,6 +1010,7 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
     }
   );
   
+  freeModelDataRefsByOwner(world, objectId);
   freeMeshRefsByOwner(world, objectId);
   freeTextureRefsByOwner(world, objectId);
   freeAnimationsForOwner(world, objectId);

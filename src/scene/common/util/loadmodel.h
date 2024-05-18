@@ -41,16 +41,28 @@ struct ModelData {
   std::map<int32_t, Transformation> nodeTransform;
   std::map<int32_t, std::string> names;
   std::vector<Animation> animations;
+};
+
+struct ModelDataCore {
+  ModelData modelData;
   std::string loadedRoot;
 };
 
 // this really should be "load gameobject" --> since need children mesh
 // but no representation for scene/children/objects yet so just flattening it to models
 ModelData loadModel(std::string rootname, std::string modelPath);
+ModelDataCore loadModelCore(std::string modelPath);
+ModelData extractModel(ModelDataCore& modelCore, std::string rootname);
+
 std::vector<glm::vec3> getVertexsFromModelData(ModelData& data);
 
 std::string nameForMeshId(std::string& rootmesh, int32_t meshId);
 std::vector<std::string> meshNamesForNode(ModelData& modelData, std::string& rootmesh, std::string nodeName);
+
+struct ModelDataRef {
+  std::set<objid> owners;
+  ModelDataCore modelData;
+};
 
 #endif 
 
