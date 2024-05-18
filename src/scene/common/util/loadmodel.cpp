@@ -200,7 +200,7 @@ void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeig
   }
 }
 
-int32_t getNodeId(ModelData& data, std::string nodename){
+std::optional<int32_t> getNodeId(ModelData& data, std::string nodename){
   for (auto &[id, name] : data.names){
     if (name == nodename){
       return id;
@@ -212,8 +212,7 @@ int32_t getNodeId(ModelData& data, std::string nodename){
     std::cout << name << " ";
   }
   std::cout << "]" << std::endl;
-  assert(false);
-  return 0;
+  return std::nullopt;
 }
 
 void setInitialBonePoses(ModelData& data, std::map<int32_t, glm::mat4>& fullnodeTransform){
@@ -222,7 +221,7 @@ void setInitialBonePoses(ModelData& data, std::map<int32_t, glm::mat4>& fullnode
   }
   for (auto &[id, meshdata] : data.meshIdToMeshData){
     for (auto &bone : meshdata.bones){
-      bone.initialBonePose = fullnodeTransform.at(getNodeId(data, bone.name));
+      bone.initialBonePose = fullnodeTransform.at(getNodeId(data, bone.name).value());
       printMatrixInformation(bone.initialBonePose, std::string("offsetmatrix - " + bone.name));
     }
   }
@@ -497,8 +496,6 @@ void printDebugModelData(ModelData& data, std::string modelPath){
   std::cout << std::endl;
 }
 
-// Currently this just loads all the meshes into the models array. 
-// Should have parent/child relations and a hierarchy but todo.
 ModelData loadModel(std::string rootname, std::string modelPath){
    Assimp::Importer import;
    const aiScene* scene = import.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
@@ -514,11 +511,7 @@ ModelData loadModel(std::string rootname, std::string modelPath){
    std::map<int32_t, glm::mat4> fullnodeTransform;
    std::map<int32_t, std::string> names;
 
-   std::map<std::string, int> nodeNameToDepth;
-
    auto animations = processAnimations(rootname, scene);
-
-   std::cout << "real root node name is: " <<  scene -> mRootNode -> mName.C_Str() << std::endl;
 
    int localNodeId = -1;
    processNode(rootname, scene -> mRootNode, localNodeId, &localNodeId, 
@@ -528,7 +521,7 @@ ModelData loadModel(std::string rootname, std::string modelPath){
       nodeToMeshId[nodeId].push_back(meshId);
       meshIdToMeshData[meshId] = meshData;
     },
-    [&nodeTransform, &fullnodeTransform, &names, &nodeToMeshId, &nodeNameToDepth](std::string name, int nodeId, Transformation& trans, glm::mat4 fullTransform, int depth) -> void {
+    [&nodeTransform, &fullnodeTransform, &names, &nodeToMeshId](std::string name, int nodeId, Transformation& trans, glm::mat4 fullTransform, int depth) -> void {
       // add node
       names[nodeId] = name;  
       nodeTransform[nodeId] = trans;
@@ -537,8 +530,6 @@ ModelData loadModel(std::string rootname, std::string modelPath){
         std::vector<int> emptyMeshList;
         nodeToMeshId[nodeId] = emptyMeshList;
       }
-
-      nodeNameToDepth[name] = depth;
     },
     [&childToParent](int parentId, int nodeId) -> void {
       // add parent

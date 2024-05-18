@@ -793,6 +793,8 @@ std::function<Mesh(MeshData&)> createScopedLoadMesh(World& world, objid id){
   return loadMeshObject;
 }
 
+
+
 void addObjectToWorld(
   World& world, 
   objid sceneId, 
@@ -817,29 +819,28 @@ void addObjectToWorld(
       if (meshName == ""){
         return {};
       }
+
       if (data == NULL){
         ModelData data = loadModelPath(world, name, meshName); 
-
-        auto additionalFields = applyFieldsToSubelements(meshName, data, submodelAttributes);
-
-        if (data.animations.size() > 0){
-          world.animations[id] = data.animations;
-        }
-
         for (auto [meshId, meshData] : data.meshIdToMeshData){
           auto meshPath = nameForMeshId(meshName, meshId);
           loadMeshData(world, meshPath, meshData, id);
         } 
+        if (data.animations.size() > 0){
+          world.animations[id] = data.animations;
+        }  
 
+        
+        auto additionalFields = applyFieldsToSubelements(meshName, data, submodelAttributes);
         auto newSerialObjs = multiObjAdd(
           world.sandbox,
           sceneId,
           id,
           0,
-          data.childToParent, 
+          data.childToParent,  // these need to come from the model cache
           data.nodeTransform, 
           data.names, 
-          additionalFields,
+          additionalFields,    
           getId,
           getObjautoserializerFields
         );
