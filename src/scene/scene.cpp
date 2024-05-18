@@ -506,15 +506,9 @@ void freeMeshRefsByOwner(World& world, int ownerId){
   }
 }
 
-std::function<Mesh(std::string)> getCreateMeshCopy(World& world, std::string rootname){
-  return [&world, rootname](std::string meshname) -> Mesh {
-    Mesh meshCopy = world.meshes.at(meshname).mesh;
-    for (auto &bone : meshCopy.bones){
-      auto suffix = bone.name.substr(5, bone.name.size() - 5); // bones all names root:whatever 
-      auto newBoneName = rootname + suffix;
-      bone.name = newBoneName;
-    }
-    return meshCopy;
+std::function<Mesh(std::string)> getCreateMeshCopy(World& world){
+  return [&world](std::string meshname) -> Mesh {
+    return world.meshes.at(meshname).mesh;
   };
 }
 
@@ -800,7 +794,6 @@ void addObjectToWorld(
   objid sceneId, 
   objid id,
   std::string name,
-  std::string topName,
   std::function<objid()> getId,
   GameobjAttributes attr,
   std::map<std::string, GameobjAttributes>& submodelAttributes,
@@ -814,7 +807,7 @@ void addObjectToWorld(
       std::cout << "Custom texture loading: " << texturepath << std::endl;
       return loadTextureWorld(world, texturepath, id);
     };
-    auto ensureMeshLoaded = [&world, sceneId, id, name, topName, getId, &attr, &submodelAttributes, data, &rootMeshName, returnObjectOnly, &returnobjs](std::string meshName, bool* _isRoot) -> std::vector<std::string> {
+    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes, data, &rootMeshName, returnObjectOnly, &returnobjs](std::string meshName, bool* _isRoot) -> std::vector<std::string> {
       *_isRoot = data == NULL;
       if (meshName == ""){
         return {};
@@ -847,7 +840,7 @@ void addObjectToWorld(
 
         std::cout << "id is: " << id << std::endl;
         for (auto &[name, objAttr] : newSerialObjs){
-          addObjectToWorld(world, sceneId, objAttr.id, name, topName, getId, objAttr.attr, submodelAttributes, &data, meshName, returnObjectOnly, returnobjs);
+          addObjectToWorld(world, sceneId, objAttr.id, name, getId, objAttr.attr, submodelAttributes, &data, meshName, returnObjectOnly, returnobjs);
         }
         std::cout << std::endl;
         return meshNamesForNode(data, meshName, name);
@@ -867,7 +860,7 @@ void addObjectToWorld(
     if (returnObjectOnly){
       ObjectTypeUtil util {
         .id = id,
-        .createMeshCopy = getCreateMeshCopy(world, topName),
+        .createMeshCopy = getCreateMeshCopy(world),
         .meshes = world.meshes,
         .ensureTextureLoaded = [](std::string) -> Texture { return Texture{}; },
         .releaseTexture = [&world, id](int textureId){
@@ -885,7 +878,7 @@ void addObjectToWorld(
     }
     ObjectTypeUtil util {
       .id = id,
-      .createMeshCopy = getCreateMeshCopy(world, topName),
+      .createMeshCopy = getCreateMeshCopy(world),
       .meshes = world.meshes,
       .ensureTextureLoaded = ensureTextureLoaded,
       .releaseTexture = [&world, id](int textureId){
@@ -921,7 +914,7 @@ void addSerialObjectsToWorld(
     //std::cout << "add serial: " << name << std::endl;
     //std::cout << print(objAttr.attr) << std::endl;
     //std::cout << std::endl;
-    addObjectToWorld(world, sceneId, objAttr.id, name, name, getNewObjectId, objAttr.attr, submodelAttributes, NULL, "", returnObjectOnly, gameobjObjs);
+    addObjectToWorld(world, sceneId, objAttr.id, name, getNewObjectId, objAttr.attr, submodelAttributes, NULL, "", returnObjectOnly, gameobjObjs);
   }
   if (returnObjectOnly){
     return;

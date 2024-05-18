@@ -238,7 +238,7 @@ void renameRootNode(ModelData& data, std::string rootname, std::string realrootn
         bone.name == rootname;
         assert(false);   // figure out when this happens
       }else{
-        bone.name = generateNodeName("root:", bone.name.c_str());
+        bone.name = generateNodeName(rootname, bone.name.c_str());
       }
     }
   }
@@ -502,12 +502,14 @@ void printDebugModelData(ModelData& data, std::string modelPath){
 
   std::cout << "animations: " << std::endl;
   for (auto &animation : data.animations){
-    std::cout << "(" << animation.name  << ") " << std::endl;
+    std::cout << "(" << animation.name << "[" << std::endl;
+    for (auto &channel : animation.channels){
+      std::cout << channel.nodeName << ", "; 
+    }
+    std::cout  << "]) " << std::endl;
   }
   std::cout << std::endl;
 
-
-  exit(1);
 }
 
 
