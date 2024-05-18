@@ -11,6 +11,7 @@
 #include "./util/loadmodel.h"
 #include "./util/types.h"
 #include "./texture.h"
+#include "../../perf/benchstats.h"
 
 struct Mesh {
   unsigned int VAOPointer;
