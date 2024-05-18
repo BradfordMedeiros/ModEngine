@@ -808,10 +808,6 @@ void addObjectToWorld(
   std::vector<GameObjectObj>& returnobjs // only added to if returnObjOnly = true
 ){
     auto loadMeshObject = createScopedLoadMesh(world, id);
-    auto onCollisionChange = [&world, id]() -> void {
-      //assert(false); // think about what this should do better!
-      updatePhysicsBody(world, id);
-    };
     auto ensureTextureLoaded = [&world, id](std::string texturepath) -> Texture {
       std::cout << "Custom texture loading: " << texturepath << std::endl;
       return loadTextureWorld(world, texturepath, id);
@@ -823,6 +819,9 @@ void addObjectToWorld(
       }
       if (data == NULL){
         ModelData data = loadModelPath(world, name, meshName); 
+
+        auto additionalFields = applyFieldsToSubelements(meshName, data, submodelAttributes);
+
         if (data.animations.size() > 0){
           world.animations[id] = data.animations;
         }
@@ -832,7 +831,6 @@ void addObjectToWorld(
           loadMeshData(world, meshPath, meshData, id);
         } 
 
-        auto additionalFields = applyFieldsToSubelements(meshName, data, submodelAttributes);
         auto newSerialObjs = multiObjAdd(
           world.sandbox,
           sceneId,
@@ -876,7 +874,6 @@ void addObjectToWorld(
         },
         .loadMesh = [](MeshData&) -> Mesh { return Mesh{}; },
         .ensureMeshLoaded = [](std::string meshName, bool* isRoot) -> std::vector<std::string> { *isRoot = true; return {  }; },
-        .onCollisionChange = []() -> void {},
         .pathForModLayer = world.interface.modlayerPath,
         .loadScene = loadScene,
         .getCurrentTime = world.interface.getCurrentTime,
@@ -895,7 +892,6 @@ void addObjectToWorld(
       },
       .loadMesh = loadMeshObject,
       .ensureMeshLoaded = ensureMeshLoaded,
-      .onCollisionChange = onCollisionChange,
       .pathForModLayer = world.interface.modlayerPath,
       .loadScene = loadScene,
       .getCurrentTime = world.interface.getCurrentTime,
