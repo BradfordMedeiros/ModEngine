@@ -1,6 +1,6 @@
 #include "./loadmodel.h"
 
-std::vector<Animation> processAnimations(std::string rootname, const aiScene* scene){
+std::vector<Animation> processAnimations( const aiScene* scene){
   std::vector<Animation> animations;
 
   int numAnimations = scene -> mNumAnimations;
@@ -140,7 +140,7 @@ void printMatrix(std::string bonename, aiMatrix4x4& matrix, glm::mat4 glmMatrix)
   std::cout << "BONEINFO_MODEL: " << bonename << " " << " rotation: " << print(transform.rotation) << std::endl << std::endl;
 }
 
-BoneInfo processBones(std::string rootname, aiMesh* mesh){
+BoneInfo processBones(aiMesh* mesh){
   std::vector<Bone> meshBones;
 
   aiBone** bones = mesh -> mBones;
@@ -235,7 +235,7 @@ void renameRootNode(ModelData& data, std::string rootname, std::string realrootn
     for (auto &bone : meshdata.bones){
       // bone.name
       if (bone.name == realrootname){
-        bone.name == rootname;
+        bone.name = rootname;
         assert(false);   // figure out when this happens
       }else{
         bone.name = generateNodeName(rootname, bone.name.c_str());
@@ -294,11 +294,11 @@ std::string getTexturePath(aiTextureType type, std::string modelPath,  aiMateria
 }
 
 const bool DUMP_VERTEX_DATA = false;
-MeshData processMesh(std::string rootname, aiMesh* mesh, const aiScene* scene, std::string modelPath){
+MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
    std::vector<unsigned int> indices;
    
-   BoneInfo boneInfo = processBones(rootname, mesh);
+   BoneInfo boneInfo = processBones(mesh);
 
    std::cout << "loading modelPath: " << modelPath << std::endl;
    for (unsigned int i = 0; i < mesh -> mNumVertices; i++){
@@ -401,7 +401,6 @@ Transformation aiMatrixToTransform(aiMatrix4x4& matrix){
 }
 
 void processNode(
-  std::string rootname,
   aiNode* node, 
   int parentNodeId,
   int* localNodeId, 
@@ -429,7 +428,7 @@ void processNode(
      onLoadMesh(currentNodeId, node -> mMeshes[i]);
    }
    for (unsigned int i = 0; i < node -> mNumChildren; i++){
-     processNode(rootname, node -> mChildren[i], currentNodeId, localNodeId, onLoadMesh, onAddNode, addParent, depth + 1, transformMatrix);
+     processNode(node -> mChildren[i], currentNodeId, localNodeId, onLoadMesh, onAddNode, addParent, depth + 1, transformMatrix);
    }
 }
 
@@ -513,13 +512,14 @@ void printDebugModelData(ModelData& data, std::string modelPath){
 }
 
 
-ModelData loadModel(std::string rootname, std::string modelPath){
+ModelData loadModelCore(std::string modelPath){
    Assimp::Importer import;
    const aiScene* scene = import.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
    if (!scene || scene -> mFlags && AI_SCENE_FLAGS_INCOMPLETE || !scene -> mRootNode){
       std::cerr << "error loading model" << std::endl;
       throw std::runtime_error("Error loading model: does the file " + modelPath + " exist and is valid?");
    } 
+   std::cout << "loading file" << std::endl;
 
    std::map<int32_t, MeshData> meshIdToMeshData;
    std::map<int32_t, std::vector<int>> nodeToMeshId;
@@ -528,13 +528,13 @@ ModelData loadModel(std::string rootname, std::string modelPath){
    std::map<int32_t, glm::mat4> fullnodeTransform;
    std::map<int32_t, std::string> names;
 
-   auto animations = processAnimations(rootname, scene);
+   auto animations = processAnimations(scene);
 
    int localNodeId = -1;
-   processNode(rootname, scene -> mRootNode, localNodeId, &localNodeId, 
-    [&scene, modelPath, &meshIdToMeshData, &nodeToMeshId, &rootname](int nodeId, int meshId) -> void {
+   processNode(scene -> mRootNode, localNodeId, &localNodeId, 
+    [&scene, modelPath, &meshIdToMeshData, &nodeToMeshId](int nodeId, int meshId) -> void {
       // load mesh
-      MeshData meshData = processMesh(rootname, scene -> mMeshes[meshId], scene, modelPath);
+      MeshData meshData = processMesh(scene -> mMeshes[meshId], scene, modelPath);
       nodeToMeshId[nodeId].push_back(meshId);
       meshIdToMeshData[meshId] = meshData;
     },
@@ -567,15 +567,22 @@ ModelData loadModel(std::string rootname, std::string modelPath){
      .nodeTransform = nodeTransform,
      .names = names,
      .animations = animations,
+     .loadedRoot = scene -> mRootNode -> mName.C_Str(),
    };
 
    // pass in full transforms, and bones, then set initialoffset to full transform of bone
    setInitialBonePoses(data, fullnodeTransform); 
-   renameRootNode(data, rootname, scene -> mRootNode -> mName.C_Str());
    
    printDebugModelData(data, modelPath);
 
    return data;
+}
+
+
+ModelData loadModel(std::string rootname, std::string modelPath){
+  auto data = loadModelCore(modelPath);
+  renameRootNode(data, rootname, data.loadedRoot);
+  return data;
 }
 
 std::vector<glm::vec3> getVertexsFromModelData(ModelData& data){

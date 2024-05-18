@@ -41,6 +41,7 @@ struct ModelData {
   std::map<int32_t, Transformation> nodeTransform;
   std::map<int32_t, std::string> names;
   std::vector<Animation> animations;
+  std::string loadedRoot;
 };
 
 // this really should be "load gameobject" --> since need children mesh
