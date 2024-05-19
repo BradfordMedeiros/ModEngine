@@ -600,9 +600,6 @@ std::vector<glm::vec3> getVertexsFromModelData(ModelData& data){
   return vertexs;
 }
 
-std::string nameForMeshId(std::string& rootmesh, int32_t meshId){
-  return rootmesh + "::" + std::to_string(meshId);
-}
 int32_t nodeIdFromName(ModelData& modelData, std::string targetName){
   for (auto &[nodeId, name] : modelData.names){
     if (name == targetName){
@@ -612,6 +609,10 @@ int32_t nodeIdFromName(ModelData& modelData, std::string targetName){
   std::cout << "no node named: " << targetName << std::endl;
   assert(false);
   return -1;
+}
+
+std::string nameForMeshId(std::string& rootmesh, int32_t meshId){
+  return rootmesh + "::" + std::to_string(meshId);
 }
 std::vector<std::string> meshNamesForNode(ModelData& modelData, std::string& rootmesh, std::string nodeName){
   std::vector<std::string> meshnames;
