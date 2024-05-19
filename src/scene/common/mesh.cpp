@@ -1,5 +1,7 @@
 #include "./mesh.h"
 
+extern Stats statistics;
+
 void setVertexPosition(Mesh& mesh, unsigned int vertexIndex, glm::vec3 pos, glm::vec3 normal){
   glBindBuffer(GL_ARRAY_BUFFER, mesh.VBOPointer);
   glBufferSubData(GL_ARRAY_BUFFER, (sizeof(Vertex) * vertexIndex) + offsetof(Vertex, position), sizeof(pos), &pos);
@@ -7,6 +9,8 @@ void setVertexPosition(Mesh& mesh, unsigned int vertexIndex, glm::vec3 pos, glm:
 }
 
 Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Texture(std::string)> ensureLoadTexture){
+  registerStat(statistics.loadMeshStat, 1);
+
   assert((meshData.indices.size() % 3) == 0);
   auto numTriangles = meshData.indices.size() / 3;
 

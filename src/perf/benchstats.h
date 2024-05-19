@@ -42,6 +42,7 @@ struct Stats {
   unsigned int fpsStat;
   unsigned int loadModelFileStat;
   unsigned int loadModelFileStatCacheHit;
+  unsigned int loadMeshStat;
 };
 
 void initializeStatistics();

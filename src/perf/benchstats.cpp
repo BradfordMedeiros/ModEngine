@@ -16,6 +16,7 @@ Stats statistics {
   .fpsStat = 0,
   .loadModelFileStat = 0,
   .loadModelFileStatCacheHit = 0,
+  .loadMeshStat = 0,
 };
 
 
@@ -40,6 +41,9 @@ unsigned int statName(std::string name){
 	return stats.size() - 1;
 }
 void registerStat(unsigned int stat, StatValue amount){
+  //if (stat == statistics.loadMeshStat){
+  //  std::cout << "statload mesh" << std::endl;
+  //}
   stats.at(stat).amount = amount;
 }
 StatValue statValue(unsigned int stat){
@@ -63,4 +67,5 @@ void initializeStatistics(){
   statistics.scenesLoadedStat = statName("scenes-loaded");
   statistics.loadModelFileStat = statName("load-model-file-stat");
   statistics.loadModelFileStatCacheHit = statName("load-model-file-stat-cache-hit");
+  statistics.loadMeshStat = statName("load-mesh-stat");
 }

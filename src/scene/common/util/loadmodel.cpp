@@ -1,6 +1,6 @@
 #include "./loadmodel.h"
 
-std::vector<Animation> processAnimations(std::string rootname, const aiScene* scene){
+std::vector<Animation> processAnimations( const aiScene* scene){
   std::vector<Animation> animations;
 
   int numAnimations = scene -> mNumAnimations;
@@ -140,7 +140,7 @@ void printMatrix(std::string bonename, aiMatrix4x4& matrix, glm::mat4 glmMatrix)
   std::cout << "BONEINFO_MODEL: " << bonename << " " << " rotation: " << print(transform.rotation) << std::endl << std::endl;
 }
 
-BoneInfo processBones(std::string rootname, aiMesh* mesh){
+BoneInfo processBones(aiMesh* mesh){
   std::vector<Bone> meshBones;
 
   aiBone** bones = mesh -> mBones;
@@ -200,7 +200,7 @@ void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeig
   }
 }
 
-int32_t getNodeId(ModelData& data, std::string nodename){
+std::optional<int32_t> getNodeId(ModelData& data, std::string nodename){
   for (auto &[id, name] : data.names){
     if (name == nodename){
       return id;
@@ -212,8 +212,7 @@ int32_t getNodeId(ModelData& data, std::string nodename){
     std::cout << name << " ";
   }
   std::cout << "]" << std::endl;
-  assert(false);
-  return 0;
+  return std::nullopt;
 }
 
 void setInitialBonePoses(ModelData& data, std::map<int32_t, glm::mat4>& fullnodeTransform){
@@ -222,7 +221,7 @@ void setInitialBonePoses(ModelData& data, std::map<int32_t, glm::mat4>& fullnode
   }
   for (auto &[id, meshdata] : data.meshIdToMeshData){
     for (auto &bone : meshdata.bones){
-      bone.initialBonePose = fullnodeTransform.at(getNodeId(data, bone.name));
+      bone.initialBonePose = fullnodeTransform.at(getNodeId(data, bone.name).value());
       printMatrixInformation(bone.initialBonePose, std::string("offsetmatrix - " + bone.name));
     }
   }
@@ -236,10 +235,10 @@ void renameRootNode(ModelData& data, std::string rootname, std::string realrootn
     for (auto &bone : meshdata.bones){
       // bone.name
       if (bone.name == realrootname){
-        bone.name == rootname;
+        bone.name = rootname;
         assert(false);   // figure out when this happens
       }else{
-        bone.name = generateNodeName("root:", bone.name.c_str());
+        bone.name = generateNodeName(rootname, bone.name.c_str());
       }
     }
   }
@@ -295,11 +294,11 @@ std::string getTexturePath(aiTextureType type, std::string modelPath,  aiMateria
 }
 
 const bool DUMP_VERTEX_DATA = false;
-MeshData processMesh(std::string rootname, aiMesh* mesh, const aiScene* scene, std::string modelPath){
+MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
    std::vector<unsigned int> indices;
    
-   BoneInfo boneInfo = processBones(rootname, mesh);
+   BoneInfo boneInfo = processBones(mesh);
 
    std::cout << "loading modelPath: " << modelPath << std::endl;
    for (unsigned int i = 0; i < mesh -> mNumVertices; i++){
@@ -402,7 +401,6 @@ Transformation aiMatrixToTransform(aiMatrix4x4& matrix){
 }
 
 void processNode(
-  std::string rootname,
   aiNode* node, 
   int parentNodeId,
   int* localNodeId, 
@@ -430,7 +428,7 @@ void processNode(
      onLoadMesh(currentNodeId, node -> mMeshes[i]);
    }
    for (unsigned int i = 0; i < node -> mNumChildren; i++){
-     processNode(rootname, node -> mChildren[i], currentNodeId, localNodeId, onLoadMesh, onAddNode, addParent, depth + 1, transformMatrix);
+     processNode(node -> mChildren[i], currentNodeId, localNodeId, onLoadMesh, onAddNode, addParent, depth + 1, transformMatrix);
    }
 }
 
@@ -454,34 +452,6 @@ void printTransformDebug(Transformation& transform){
 
 void printDebugModelData(ModelData& data, std::string modelPath){
   std::cout << "DEBUG: Model Data: " << modelPath << std::endl;
-  std::cout << "id to mesh ids: " << std::endl;
-  for (auto &[id, meshids] : data.nodeToMeshId){
-    std::cout << id << " - [ ";
-    for (auto meshid : meshids){
-      std::cout << meshid << " ";
-    }
-    std::cout << "]" << std::endl;
-  }
-  std::cout << std::endl;
-  std::cout << "id to name: " << std::endl;
-  for (auto &[id, name] : data.names){
-    std::cout << "(" << id << ", " << name << ")" << std::endl;
-  }
-  std::cout << std::endl;
-
-  std::cout << "childid to parentid: " << std::endl;
-  for (auto &[childid, parentid] : data.childToParent){
-    std::cout << "(" << childid << ", " << parentid << ")" << std::endl;
-  }
-  std::cout << std::endl;
-
-  std::cout << "nodeid to transform: " << std::endl;
-  for (auto &[nodeid, transform] : data.nodeTransform){
-    std::cout << "(" << nodeid << ", ";
-    printTransformDebug(transform);
-    std::cout << ")" << std::endl;
-  }
-  std::cout << std::endl;
 
   std::cout << "bone data: " << std::endl;
   for (auto &[meshid, meshData] : data.meshIdToMeshData){
@@ -495,17 +465,60 @@ void printDebugModelData(ModelData& data, std::string modelPath){
     std::cout << "])" << std::endl;
   }
   std::cout << std::endl;
+
+
+  std::cout << "nodeToMeshId ids: " << std::endl;
+  for (auto &[id, meshids] : data.nodeToMeshId){
+    std::cout << id << " - [ ";
+    for (auto meshid : meshids){
+      std::cout << meshid << " ";
+    }
+    std::cout << "]" << std::endl;
+  }
+  std::cout << std::endl;
+
+
+  std::cout << "childid to parentid: " << std::endl;
+  for (auto &[childid, parentid] : data.childToParent){
+    std::cout << "(" << childid << ", " << parentid << ")" << std::endl;
+  }
+  std::cout << std::endl;
+
+
+  std::cout << "nodeid to transform: " << std::endl;
+  for (auto &[nodeid, transform] : data.nodeTransform){
+    std::cout << "(" << nodeid << ", " << print(transform) << ")" << std::endl;
+  }
+  std::cout << std::endl;
+
+
+  std::cout << "id to name: " << std::endl;
+  for (auto &[id, name] : data.names){
+    std::cout << "(" << id << ", " << name << ")" << std::endl;
+  }
+  std::cout << std::endl;
+
+
+  std::cout << "animations: " << std::endl;
+  for (auto &animation : data.animations){
+    std::cout << "(" << animation.name << "[" << std::endl;
+    for (auto &channel : animation.channels){
+      std::cout << channel.nodeName << ", "; 
+    }
+    std::cout  << "]) " << std::endl;
+  }
+  std::cout << std::endl;
+
 }
 
-// Currently this just loads all the meshes into the models array. 
-// Should have parent/child relations and a hierarchy but todo.
-ModelData loadModel(std::string rootname, std::string modelPath){
+ModelDataCore loadModelCore(std::string modelPath){
    Assimp::Importer import;
    const aiScene* scene = import.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
    if (!scene || scene -> mFlags && AI_SCENE_FLAGS_INCOMPLETE || !scene -> mRootNode){
       std::cerr << "error loading model" << std::endl;
       throw std::runtime_error("Error loading model: does the file " + modelPath + " exist and is valid?");
    } 
+   std::cout << "loading file" << std::endl;
 
    std::map<int32_t, MeshData> meshIdToMeshData;
    std::map<int32_t, std::vector<int>> nodeToMeshId;
@@ -514,21 +527,17 @@ ModelData loadModel(std::string rootname, std::string modelPath){
    std::map<int32_t, glm::mat4> fullnodeTransform;
    std::map<int32_t, std::string> names;
 
-   std::map<std::string, int> nodeNameToDepth;
-
-   auto animations = processAnimations(rootname, scene);
-
-   std::cout << "real root node name is: " <<  scene -> mRootNode -> mName.C_Str() << std::endl;
+   auto animations = processAnimations(scene);
 
    int localNodeId = -1;
-   processNode(rootname, scene -> mRootNode, localNodeId, &localNodeId, 
-    [&scene, modelPath, &meshIdToMeshData, &nodeToMeshId, &rootname](int nodeId, int meshId) -> void {
+   processNode(scene -> mRootNode, localNodeId, &localNodeId, 
+    [&scene, modelPath, &meshIdToMeshData, &nodeToMeshId](int nodeId, int meshId) -> void {
       // load mesh
-      MeshData meshData = processMesh(rootname, scene -> mMeshes[meshId], scene, modelPath);
+      MeshData meshData = processMesh(scene -> mMeshes[meshId], scene, modelPath);
       nodeToMeshId[nodeId].push_back(meshId);
       meshIdToMeshData[meshId] = meshData;
     },
-    [&nodeTransform, &fullnodeTransform, &names, &nodeToMeshId, &nodeNameToDepth](std::string name, int nodeId, Transformation& trans, glm::mat4 fullTransform, int depth) -> void {
+    [&nodeTransform, &fullnodeTransform, &names, &nodeToMeshId](std::string name, int nodeId, Transformation& trans, glm::mat4 fullTransform, int depth) -> void {
       // add node
       names[nodeId] = name;  
       nodeTransform[nodeId] = trans;
@@ -537,8 +546,6 @@ ModelData loadModel(std::string rootname, std::string modelPath){
         std::vector<int> emptyMeshList;
         nodeToMeshId[nodeId] = emptyMeshList;
       }
-
-      nodeNameToDepth[name] = depth;
     },
     [&childToParent](int parentId, int nodeId) -> void {
       // add parent
@@ -552,21 +559,35 @@ ModelData loadModel(std::string rootname, std::string modelPath){
    assert(names.size() ==  nodeToMeshId.size());
    assertAllNamesUnique(names);
 
-   ModelData data = {
-     .meshIdToMeshData = meshIdToMeshData,
-     .nodeToMeshId = nodeToMeshId,
-     .childToParent = childToParent,
-     .nodeTransform = nodeTransform,
-     .names = names,
-     .animations = animations,
+   ModelDataCore coreModelData {
+      .modelData = ModelData {
+        .meshIdToMeshData = meshIdToMeshData,
+        .nodeToMeshId = nodeToMeshId,
+        .childToParent = childToParent,
+        .nodeTransform = nodeTransform,
+        .names = names,
+        .animations = animations,
+      },
+      .loadedRoot = scene -> mRootNode -> mName.C_Str(),
    };
 
    // pass in full transforms, and bones, then set initialoffset to full transform of bone
-   setInitialBonePoses(data, fullnodeTransform); 
-   renameRootNode(data, rootname, scene -> mRootNode -> mName.C_Str());
-   //printDebugModelData(data, modelPath);
+   setInitialBonePoses(coreModelData.modelData, fullnodeTransform); 
+   printDebugModelData(coreModelData.modelData, modelPath);
 
-   return data;
+   return coreModelData;
+}
+
+ModelData extractModel(ModelDataCore& modelCore, std::string rootname){
+  auto modelData = modelCore.modelData;
+  renameRootNode(modelData, rootname, modelCore.loadedRoot);
+  return modelData;
+}
+
+ModelData loadModel(std::string rootname, std::string modelPath){
+  auto data = loadModelCore(modelPath);
+  renameRootNode(data.modelData, rootname, data.loadedRoot);
+  return data.modelData;
 }
 
 std::vector<glm::vec3> getVertexsFromModelData(ModelData& data){
@@ -579,9 +600,6 @@ std::vector<glm::vec3> getVertexsFromModelData(ModelData& data){
   return vertexs;
 }
 
-std::string nameForMeshId(std::string& rootmesh, int32_t meshId){
-  return rootmesh + "::" + std::to_string(meshId);
-}
 int32_t nodeIdFromName(ModelData& modelData, std::string targetName){
   for (auto &[nodeId, name] : modelData.names){
     if (name == targetName){
@@ -591,6 +609,10 @@ int32_t nodeIdFromName(ModelData& modelData, std::string targetName){
   std::cout << "no node named: " << targetName << std::endl;
   assert(false);
   return -1;
+}
+
+std::string nameForMeshId(std::string& rootmesh, int32_t meshId){
+  return rootmesh + "::" + std::to_string(meshId);
 }
 std::vector<std::string> meshNamesForNode(ModelData& modelData, std::string& rootmesh, std::string nodeName){
   std::vector<std::string> meshnames;
