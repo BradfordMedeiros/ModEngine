@@ -499,6 +499,21 @@ void loadModelData(World& world, std::string meshpath, int ownerId){
   }
 }
 
+ModelData modelDataFromCache(World& world,  std::string meshpath, std::string rootname, int ownerId){
+  loadModelData(world, meshpath, ownerId);
+  ModelDataCore& modelDataCore = world.modelDatas.at(meshpath).modelData;
+  auto modelData = extractModel(modelDataCore, rootname);
+  if (modelData.animations.size() > 0){
+    world.animations[ownerId] = modelData.animations;
+  }
+
+  for (auto [meshId, meshData] : modelData.meshIdToMeshData){
+    auto meshPath = nameForMeshId(meshpath, meshId);
+    loadMeshData(world, meshPath, meshData, ownerId);
+  } 
+  return modelData;
+}
+
 void freeModelDataRefsByOwner(World& world, int ownerId){
   for (auto &[_, modelRef] : world.modelDatas){
     modelRef.owners.erase(ownerId);
@@ -840,17 +855,7 @@ void addObjectToWorld(
       }
 
       if (data == NULL){
-        loadModelData(world, meshName, id);
-
-        ModelData data = loadModelPath(world, name, meshName); 
-        if (data.animations.size() > 0){
-          world.animations[id] = data.animations;
-        }  
-
-        for (auto [meshId, meshData] : data.meshIdToMeshData){
-          auto meshPath = nameForMeshId(meshName, meshId);
-          loadMeshData(world, meshPath, meshData, id);
-        } 
+        ModelData data = modelDataFromCache(world, meshName, name, id);
      
         auto additionalFields = applyFieldsToSubelements(meshName, data, submodelAttributes);
         auto newSerialObjs = multiObjAdd(
