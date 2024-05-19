@@ -97,6 +97,11 @@ FILE_EXTENSION_TYPE getFileType(std::string filepath){
   return UNKNOWN_EXTENSION;
 }
 
+
+bool stringContains(std::string& str, char character){
+  size_t first = str.find_first_not_of(' ');
+  return std::string::npos != first;
+}
 std::string trim(const std::string& str){
   size_t first = str.find_first_not_of(' ');
   if (std::string::npos == first){

@@ -32,6 +32,7 @@ std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector
 enum FILE_EXTENSION_TYPE { IMAGE_EXTENSION, AUDIO_EXTENSION, MODEL_EXTENSION, UNKNOWN_EXTENSION };
 FILE_EXTENSION_TYPE getFileType(std::string filepath);
 
+bool stringContains(std::string& str, char character);
 std::string trim(const std::string& str);
 std::vector<std::string> split(std::string strToSplit, char delimeter);
 std::string join(std::vector<std::string> values, char delimeter);

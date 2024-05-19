@@ -33,7 +33,7 @@ struct ObjectTypeUtil {
   std::function<void(int)> releaseTexture;
   std::function<Mesh(MeshData&)> loadMesh;
   std::function<void(std::string, float, float, int, GameobjAttributes&, std::map<std::string, GameobjAttributes>&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter;
-  std::function<std::vector<std::string>(std::string, bool*)> ensureMeshLoaded;
+  std::function<std::vector<std::string>(std::string)> ensureMeshLoaded;
   std::function<std::string(std::string)> pathForModLayer;
   std::function<objid(std::string, std::vector<Token>&)> loadScene;
   std::function<float()> getCurrentTime;

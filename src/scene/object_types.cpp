@@ -260,7 +260,7 @@ int renderObject(
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
 
-  if (meshObj != NULL && !meshObj -> isDisabled && !meshObj ->nodeOnly){
+  if (meshObj != NULL && !meshObj -> isDisabled && (meshObj -> meshesToRender.size() > 0)){
     int numTriangles = 0;
     for (auto meshToRender : meshObj -> meshesToRender){
       bool hasBones = false;
@@ -283,7 +283,7 @@ int renderObject(
     return numTriangles;
   }
 
-  if (meshObj != NULL && meshObj -> nodeOnly && (showDebugMask & 0b1)) {
+  if (meshObj != NULL && (meshObj -> meshesToRender.size() > 0) && (showDebugMask & 0b1)) {
     setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f), meshObj -> texture.textureoffset, meshObj -> texture.texturetiling, meshObj -> texture.texturesize);
     drawMesh(*defaultMeshes.nodeMesh, shaderProgram, meshObj -> texture.loadingInfo.textureId);    
     return defaultMeshes.nodeMesh -> numTriangles;
@@ -535,7 +535,7 @@ std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, obj
   auto meshObj = std::get_if<GameObjectMesh>(&Object);
   if (meshObj != NULL){
     for (int i = 0; i < meshObj -> meshNames.size(); i++){
-      if (meshObj -> meshNames.at(i) == meshObj -> rootMesh){
+      if (isRootMeshName(meshObj -> meshNames.at(i))){
         return meshObj -> meshesToRender.at(i).texture;
       }
     }

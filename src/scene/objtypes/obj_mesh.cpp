@@ -45,8 +45,7 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   // basically top level ensureMesh(attr("mesh") => your nodes, then the child ones can be logic'd in via being smart about ensureMeshLoaded :) 
   auto meshStr = getStrAttr(attr, "mesh");
   std::string rootMeshName = !meshStr.has_value()  ? "" : meshStr.value();
-  bool isRoot = false;
-  auto meshNamesForObj = util.ensureMeshLoaded(rootMeshName, &isRoot);
+  auto meshNamesForObj = util.ensureMeshLoaded(rootMeshName);
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;
   for (auto meshName : meshNamesForObj){
@@ -56,19 +55,30 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectMesh obj {
     .meshNames = meshNames,
     .meshesToRender = meshesToRender,
-    .nodeOnly = meshNames.size() == 0,
-    .rootMesh = rootMeshName,
-    .isRoot = isRoot,
   };
   //std::cout << "root mesh name: " << rootMeshName << ", node only: " << obj.nodeOnly << std::endl;
   createAutoSerializeWithTextureLoading((char*)&obj, meshAutoserializer, attr, util);
   return obj;
 }
 
+std::optional<std::string> meshToSerialize(GameObjectMesh& obj){
+  std::optional<std::string> rootMesh;
+  for (int i = 0; i < obj.meshNames.size(); i++){
+    std::string& meshname = obj.meshNames.at(i);
+    if (isRootMeshName(meshname)){
+      modassert(!rootMesh.has_value(), "multiple root meshes found for gameobj mesh");
+      rootMesh = meshname;
+    }
+  }
+  return rootMesh;
+}
+
 std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
-  if (obj.isRoot && obj.rootMesh != ""){
-    pairs.push_back(std::pair<std::string, std::string>("mesh", obj.rootMesh));
+
+  auto meshname = meshToSerialize(obj);
+  if (meshname.has_value()){
+    pairs.push_back(std::pair<std::string, std::string>("mesh", meshname.value()));
   }
   autoserializerSerialize((char*)&obj, meshAutoserializer, pairs);
   return pairs;  

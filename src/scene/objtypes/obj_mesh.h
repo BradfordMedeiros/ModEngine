@@ -9,14 +9,11 @@ struct GameObjectMesh {
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;   // @TODO  I shouldn't be storing the actual mesh here.  Instead I should just be referencing global meshes
   bool isDisabled;
-  bool nodeOnly;
-  std::string rootMesh;
   TextureInformation texture;
   TextureLoadingData normalTexture;
   float discardAmount;
   float emissionAmount;
   glm::vec4 tint;
-  bool isRoot;
 };
 
 GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util);

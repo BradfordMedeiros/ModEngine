@@ -848,8 +848,7 @@ void addObjectToWorld(
       std::cout << "Custom texture loading: " << texturepath << std::endl;
       return loadTextureWorld(world, texturepath, id);
     };
-    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes, data, &meshnameToLoad, returnObjectOnly, &returnobjs](std::string meshName, bool* _isRoot) -> std::vector<std::string> {
-      *_isRoot = data == NULL;
+    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes, data, &meshnameToLoad, returnObjectOnly, &returnobjs](std::string meshName) -> std::vector<std::string> {
       if (meshName == ""){
         return {};
       }
@@ -900,7 +899,7 @@ void addObjectToWorld(
           freeTextureRefsIdByOwner(world, id, textureId);
         },
         .loadMesh = [](MeshData&) -> Mesh { return Mesh{}; },
-        .ensureMeshLoaded = [](std::string meshName, bool* isRoot) -> std::vector<std::string> { *isRoot = true; return {  }; },
+        .ensureMeshLoaded = [](std::string meshName) -> std::vector<std::string> { return {  }; },
         .pathForModLayer = world.interface.modlayerPath,
         .loadScene = loadScene,
         .getCurrentTime = world.interface.getCurrentTime,
