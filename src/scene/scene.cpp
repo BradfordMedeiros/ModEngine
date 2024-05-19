@@ -842,7 +842,6 @@ void addObjectToWorld(
   GameobjAttributes attr,
   std::map<std::string, GameobjAttributes>& submodelAttributes,
   ModelData* data,
-  std::string meshnameToLoad,
   bool returnObjectOnly,
   std::vector<GameObjectObj>& returnobjs // only added to if returnObjOnly = true
 ){
@@ -851,33 +850,27 @@ void addObjectToWorld(
       std::cout << "Custom texture loading: " << texturepath << std::endl;
       return loadTextureWorld(world, texturepath, id);
     };
-    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes, data, &meshnameToLoad, returnObjectOnly, &returnobjs](std::string meshName) -> std::vector<std::string> {
+    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes, data, returnObjectOnly, &returnobjs](std::string meshName) -> std::vector<std::string> {
       if (meshName == ""){ // invalid mesh name, shouldn't allow
         //modassert(false, std::string("invalid mesh name:  ") + meshName);
         return {};
       }
 
       bool isRootMesh = isRootMeshName(meshName);
-      std::cout << "ensure mesh, loading: " << meshName << ", " << isRootMesh << std::endl;
-
-      if (isRootMeshName(meshName)){
-       // modassert(false, std::string("trying to load a root mesh: ") + meshName);
-      }else{
-        return; // if it's not a root mesh, we know there won't be subelements added to this
-      }
+      std::cout << "ensure mesh, loading: " << meshName << ", isRoot = " << isRootMesh << std::endl;
     
-      if (data == NULL){
-        ModelData data = modelDataFromCache(world, meshName, name, id);
+      if (isRootMesh){
+        ModelData modelData = modelDataFromCache(world, meshName, name, id);
      
-        auto additionalFields = applyFieldsToSubelements(meshName, data, submodelAttributes);
+        auto additionalFields = applyFieldsToSubelements(meshName, modelData, submodelAttributes);
         auto newSerialObjs = multiObjAdd(
           world.sandbox,
           sceneId,
           id,
           0,
-          data.childToParent,  // these need to come from the model cache
-          data.nodeTransform, 
-          data.names, 
+          modelData.childToParent,  // these need to come from the model cache
+          modelData.nodeTransform, 
+          modelData.names, 
           additionalFields,    
           getId,
           getObjautoserializerFields
@@ -885,12 +878,16 @@ void addObjectToWorld(
 
         std::cout << "id is: " << id << std::endl;
         for (auto &[name, objAttr] : newSerialObjs){
-          addObjectToWorld(world, sceneId, objAttr.id, name, getId, objAttr.attr, submodelAttributes, &data, meshName, returnObjectOnly, returnobjs);
+          addObjectToWorld(world, sceneId, objAttr.id, name, getId, objAttr.attr, submodelAttributes, &modelData, returnObjectOnly, returnobjs);
         }
         std::cout << std::endl;
-        return meshNamesForNode(data, meshName, name);
+        return meshNamesForNode(modelData, meshName, name);
       }
-      return meshNamesForNode(*data, meshnameToLoad, name);  
+
+      std::cout << "ensure mesh 2, loading:  meshname = " << meshName << ", name = " << name <<  std::endl;
+      
+      auto rootMeshName = rootMesh(meshName);
+      return meshNamesForNode(*data, rootMeshName, name);  
     }; 
 
     auto loadScene = [&world, id](std::string sceneFile, std::vector<Token>& addedTokens) -> objid {
@@ -959,7 +956,7 @@ void addSerialObjectsToWorld(
     //std::cout << "add serial: " << name << std::endl;
     //std::cout << print(objAttr.attr) << std::endl;
     //std::cout << std::endl;
-    addObjectToWorld(world, sceneId, objAttr.id, name, getNewObjectId, objAttr.attr, submodelAttributes, NULL, "", returnObjectOnly, gameobjObjs);
+    addObjectToWorld(world, sceneId, objAttr.id, name, getNewObjectId, objAttr.attr, submodelAttributes, NULL, returnObjectOnly, gameobjObjs);
   }
   if (returnObjectOnly){
     return;
