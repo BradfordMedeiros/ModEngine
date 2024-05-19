@@ -839,7 +839,7 @@ void addObjectToWorld(
   GameobjAttributes attr,
   std::map<std::string, GameobjAttributes>& submodelAttributes,
   ModelData* data,
-  std::string rootMeshName,
+  std::string meshnameToLoad,
   bool returnObjectOnly,
   std::vector<GameObjectObj>& returnobjs // only added to if returnObjOnly = true
 ){
@@ -848,7 +848,7 @@ void addObjectToWorld(
       std::cout << "Custom texture loading: " << texturepath << std::endl;
       return loadTextureWorld(world, texturepath, id);
     };
-    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes, data, &rootMeshName, returnObjectOnly, &returnobjs](std::string meshName, bool* _isRoot) -> std::vector<std::string> {
+    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes, data, &meshnameToLoad, returnObjectOnly, &returnobjs](std::string meshName, bool* _isRoot) -> std::vector<std::string> {
       *_isRoot = data == NULL;
       if (meshName == ""){
         return {};
@@ -878,7 +878,7 @@ void addObjectToWorld(
         std::cout << std::endl;
         return meshNamesForNode(data, meshName, name);
       }
-      return meshNamesForNode(*data, rootMeshName, name);  
+      return meshNamesForNode(*data, meshnameToLoad, name);  
     }; 
 
     auto loadScene = [&world, id](std::string sceneFile, std::vector<Token>& addedTokens) -> objid {
