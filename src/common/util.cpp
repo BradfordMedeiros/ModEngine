@@ -588,6 +588,8 @@ std::string attributeTypeStr(AttributeValueType type){
     return "float";
   }else if (type == ATTRIBUTE_STRING){
     return "string";
+  }else if (type == ATTRIBUTE_ARR_STRING){
+    return "arr-string";
   }
   modassert(false, "attribute type str invalid type");
   return "";
@@ -813,6 +815,17 @@ std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string ke
     return *strValue;
   }
   return std::nullopt;
+}
+
+std::optional<std::vector<std::string>> getArrStrAttr(GameobjAttributes& objAttr, std::string key){
+  if (objAttr.attr.find(key) != objAttr.attr.end()){
+    auto arrStrValue = std::get_if<std::vector<std::string>>(&objAttr.attr.at(key));
+    if (!arrStrValue){
+      return std::nullopt;
+    }
+    return *arrStrValue;
+  }
+  return std::nullopt;  
 }
 
 std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key){

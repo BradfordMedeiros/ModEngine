@@ -736,6 +736,16 @@ std::map<objid, GameobjAttributes> applyFieldsToSubelements(std::string meshName
   }
 
   for (auto [nodeId, meshListIds] : data.nodeToMeshId){ // is this actually required? 
+    std::vector<std::string> meshesForGameObj;
+    for (auto id : meshListIds){
+      auto meshRef = meshName + "=" + std::to_string(id);
+      meshesForGameObj.push_back(meshRef);
+    }
+    if (meshesForGameObj.size() > 0){
+      additionalFieldsMap.at(nodeId).attr["meshes"] = meshesForGameObj;
+    }
+
+
     if (meshListIds.size() == 1){
       auto meshRef = meshName + "=" + std::to_string(meshListIds.at(0));
       additionalFieldsMap.at(nodeId).attr["mesh"] = meshRef;
