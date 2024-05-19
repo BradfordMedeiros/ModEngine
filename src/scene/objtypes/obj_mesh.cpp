@@ -46,6 +46,7 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto meshStr = getStrAttr(attr, "mesh");
   std::string rootMeshName = !meshStr.has_value()  ? "" : meshStr.value();
   auto meshNamesForObj = util.ensureMeshLoaded(rootMeshName);
+
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;
   for (auto meshName : meshNamesForObj){

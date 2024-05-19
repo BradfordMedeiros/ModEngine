@@ -852,10 +852,20 @@ void addObjectToWorld(
       return loadTextureWorld(world, texturepath, id);
     };
     auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes, data, &meshnameToLoad, returnObjectOnly, &returnobjs](std::string meshName) -> std::vector<std::string> {
-      if (meshName == ""){
+      if (meshName == ""){ // invalid mesh name, shouldn't allow
+        //modassert(false, std::string("invalid mesh name:  ") + meshName);
         return {};
       }
 
+      bool isRootMesh = isRootMeshName(meshName);
+      std::cout << "ensure mesh, loading: " << meshName << ", " << isRootMesh << std::endl;
+
+      if (isRootMeshName(meshName)){
+       // modassert(false, std::string("trying to load a root mesh: ") + meshName);
+      }else{
+        return; // if it's not a root mesh, we know there won't be subelements added to this
+      }
+    
       if (data == NULL){
         ModelData data = modelDataFromCache(world, meshName, name, id);
      
