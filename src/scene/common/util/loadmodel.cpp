@@ -612,7 +612,10 @@ int32_t nodeIdFromName(ModelData& modelData, std::string targetName){
 }
 
 std::string nameForMeshId(std::string& rootmesh, int32_t meshId){
-  return rootmesh + "::" + std::to_string(meshId);
+  return rootmesh + "=" + std::to_string(meshId);
+}
+bool isRootMeshName(std::string& meshname){
+  return !stringContains(meshname, '=');
 }
 std::vector<std::string> meshNamesForNode(ModelData& modelData, std::string& rootmesh, std::string nodeName){
   std::vector<std::string> meshnames;

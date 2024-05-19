@@ -57,6 +57,7 @@ ModelData extractModel(ModelDataCore& modelCore, std::string rootname);
 std::vector<glm::vec3> getVertexsFromModelData(ModelData& data);
 
 std::string nameForMeshId(std::string& rootmesh, int32_t meshId);
+bool isRootMeshName(std::string& meshname);
 std::vector<std::string> meshNamesForNode(ModelData& modelData, std::string& rootmesh, std::string nodeName);
 
 struct ModelDataRef {
