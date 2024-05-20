@@ -43,17 +43,24 @@ static auto _ = addTextureAutoserializer<GameObjectMesh>(meshAutoserializer);
 GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   // get rid of meshes attribute completely, make ensuremeshloaded return the meshes you're actually responsible for
   // basically top level ensureMesh(attr("mesh") => your nodes, then the child ones can be logic'd in via being smart about ensureMeshLoaded :) 
-  auto meshStr = getStrAttr(attr, "mesh");
-  std::string rootMeshName = !meshStr.has_value()  ? "" : meshStr.value();
-  auto meshNamesForObj = util.ensureMeshLoaded(rootMeshName);
-  std::vector<std::string> meshNames;
-  std::vector<Mesh> meshesToRender;
-  for (auto meshName : meshNamesForObj){
-    meshNames.push_back(meshName);
-    meshesToRender.push_back(util.createMeshCopy(meshName));  
+  std::optional<std::string> meshStr = getStrAttr(attr, "mesh");
+  if (meshStr.has_value()){
+    util.ensureMeshLoaded(meshStr.value());  // this will modify attr and add meshes if this object has any 
   }
+
+  auto meshArrStr = getArrStrAttr(attr, "meshes");
+  auto meshesToLoad = meshArrStr.has_value() ? meshArrStr.value() : std::vector<std::string>{};
+
+  modlog("mesh", std::string("meshes are: ") + print(meshesToLoad));
+
+  std::vector<Mesh> meshesToRender;
+  for (auto &mesh : meshesToLoad){
+    meshesToRender.push_back(util.createMeshCopy(mesh));  
+  }    
+
   GameObjectMesh obj {
-    .meshNames = meshNames,
+    .rootMesh = meshStr,
+    .meshNames = meshesToLoad,
     .meshesToRender = meshesToRender,
   };
   //std::cout << "root mesh name: " << rootMeshName << ", node only: " << obj.nodeOnly << std::endl;
@@ -61,24 +68,12 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   return obj;
 }
 
-std::optional<std::string> meshToSerialize(GameObjectMesh& obj){
-  std::optional<std::string> rootMesh;
-  for (int i = 0; i < obj.meshNames.size(); i++){
-    std::string& meshname = obj.meshNames.at(i);
-    if (isRootMeshName(meshname)){
-      modassert(!rootMesh.has_value(), "multiple root meshes found for gameobj mesh");
-      rootMesh = meshname;
-    }
-  }
-  return rootMesh;
-}
-
 std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj, ObjectSerializeUtil& util){
+  // this doesn't really handle serialization for attributes properly 
   std::vector<std::pair<std::string, std::string>> pairs;
 
-  auto meshname = meshToSerialize(obj);
-  if (meshname.has_value()){
-    pairs.push_back(std::pair<std::string, std::string>("mesh", meshname.value()));
+  if (obj.rootMesh.has_value()){
+    pairs.push_back(std::pair<std::string, std::string>("mesh", obj.rootMesh.value()));
   }
   autoserializerSerialize((char*)&obj, meshAutoserializer, pairs);
   return pairs;  

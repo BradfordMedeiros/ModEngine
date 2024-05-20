@@ -99,8 +99,8 @@ float maxvalue(float x, float y, float z);
 int maxvalue(int x, int y, int z);
 
 
-enum AttributeValueType { ATTRIBUTE_VEC2, ATTRIBUTE_VEC3, ATTRIBUTE_VEC4, ATTRIBUTE_STRING, ATTRIBUTE_FLOAT };
-typedef std::variant<glm::vec2, glm::vec3, glm::vec4, std::string, float> AttributeValue;
+enum AttributeValueType { ATTRIBUTE_VEC2, ATTRIBUTE_VEC3, ATTRIBUTE_VEC4, ATTRIBUTE_STRING, ATTRIBUTE_ARR_STRING, ATTRIBUTE_FLOAT };
+typedef std::variant<glm::vec2, glm::vec3, glm::vec4, std::string, std::vector<std::string>, float> AttributeValue;
 typedef std::variant<glm::vec2*, glm::vec3*, glm::vec4*, std::string*, float*, bool*, int*, uint*, glm::quat*> AttributeValuePtr;
 std::string attributeTypeStr(AttributeValueType type);
 
@@ -250,6 +250,7 @@ struct GameobjAttributes {
 GameobjAttributes gameobjAttrFromValue(std::string field, AttributeValue value);
 
 std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key);
+std::optional<std::vector<std::string>> getArrStrAttr(GameobjAttributes& objAttr, std::string key);
 std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key);
 std::optional<int> getIntFromAttr(GameobjAttributes& objAttr, std::string key);
 std::optional<glm::vec3> getVec3Attr(GameobjAttributes& objAttr, std::string key);

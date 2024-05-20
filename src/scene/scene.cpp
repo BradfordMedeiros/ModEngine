@@ -446,6 +446,7 @@ void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ow
     }
   }else{
     std::set<std::string> textureRefs = {};
+    modlog("mesh", std::string("adding mesh to cache: ") + meshPath);
     world.meshes[meshPath] = MeshRef {
       .owners = { ownerId },
       .mesh = loadMesh("./res/textures/default.jpg", meshData, [&world, &textureRefs, &meshPath, ownerId](std::string texture) -> Texture {
@@ -551,6 +552,7 @@ void freeMeshRefsByOwner(World& world, int ownerId){
 
 std::function<Mesh(std::string)> getCreateMeshCopy(World& world){
   return [&world](std::string meshname) -> Mesh {
+    std::cout << "ensure mesh getting: " << meshname << std::endl;
     return world.meshes.at(meshname).mesh;
   };
 }
@@ -736,16 +738,13 @@ std::map<objid, GameobjAttributes> applyFieldsToSubelements(std::string meshName
   }
 
   for (auto [nodeId, meshListIds] : data.nodeToMeshId){
-    if (meshListIds.size() == 1){
-      auto meshRef = meshName + "::" + std::to_string(meshListIds.at(0));
-      additionalFieldsMap.at(nodeId).attr["mesh"] = meshRef;
-    }else if (meshListIds.size() > 1){
-      std::vector<std::string> meshRefNames;
-      for (auto id : meshListIds){
-        auto meshRef = meshName + "::" + std::to_string(id);
-        meshRefNames.push_back(meshRef);
-      }
-      additionalFieldsMap.at(nodeId).attr["meshes"] = join(meshRefNames, ',');
+    std::vector<std::string> meshesForGameObj;
+    for (auto id : meshListIds){
+      auto meshRef = meshName + "=" + std::to_string(id);
+      meshesForGameObj.push_back(meshRef);
+    }
+    if (meshesForGameObj.size() > 0){
+      additionalFieldsMap.at(nodeId).attr["meshes"] = meshesForGameObj;
     }
   }
 
@@ -836,10 +835,9 @@ void addObjectToWorld(
   objid id,
   std::string name,
   std::function<objid()> getId,
-  GameobjAttributes attr,
+  GameobjAttributes& attr,
   std::map<std::string, GameobjAttributes>& submodelAttributes,
   ModelData* data,
-  std::string meshnameToLoad,
   bool returnObjectOnly,
   std::vector<GameObjectObj>& returnobjs // only added to if returnObjOnly = true
 ){
@@ -848,36 +846,35 @@ void addObjectToWorld(
       std::cout << "Custom texture loading: " << texturepath << std::endl;
       return loadTextureWorld(world, texturepath, id);
     };
-    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes, data, &meshnameToLoad, returnObjectOnly, &returnobjs](std::string meshName) -> std::vector<std::string> {
-      if (meshName == ""){
-        return {};
-      }
+    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes, data, returnObjectOnly, &returnobjs](std::string meshName) {
+      // this assumes that the root mesh is loaded first, which i should probably cover, although it probably doesnt get hit
+      modassert(meshName.size() > 0, std::string("invalid mesh name:  ") + meshName + ", name = " + name);
+      modassert(isRootMeshName(meshName), "ensureMeshLoaded called on something that was not a root mesh");
 
-      if (data == NULL){
-        ModelData data = modelDataFromCache(world, meshName, name, id);
-     
-        auto additionalFields = applyFieldsToSubelements(meshName, data, submodelAttributes);
-        auto newSerialObjs = multiObjAdd(
-          world.sandbox,
-          sceneId,
-          id,
-          0,
-          data.childToParent,  // these need to come from the model cache
-          data.nodeTransform, 
-          data.names, 
-          additionalFields,    
-          getId,
-          getObjautoserializerFields
-        );
+      std::cout << "ensure mesh, loading: " << meshName << ", name = " << name << std::endl;
+      ModelData modelData = modelDataFromCache(world, meshName, name, id);
+      attr.attr["meshes"] =  meshNamesForNode(modelData, meshName, name);
 
-        std::cout << "id is: " << id << std::endl;
-        for (auto &[name, objAttr] : newSerialObjs){
-          addObjectToWorld(world, sceneId, objAttr.id, name, getId, objAttr.attr, submodelAttributes, &data, meshName, returnObjectOnly, returnobjs);
-        }
-        std::cout << std::endl;
-        return meshNamesForNode(data, meshName, name);
+      auto additionalFields = applyFieldsToSubelements(meshName, modelData, submodelAttributes); 
+      auto newSerialObjs = multiObjAdd(
+        world.sandbox,
+        sceneId,
+        id,
+        0,
+        modelData.childToParent,  // these need to come from the model cache
+        modelData.nodeTransform, 
+        modelData.names, 
+        additionalFields,    
+        getId,
+        getObjautoserializerFields
+      );
+
+      std::cout << "id is: " << id << std::endl;
+      for (auto &[name, objAttr] : newSerialObjs){
+        addObjectToWorld(world, sceneId, objAttr.id, name, getId, objAttr.attr, submodelAttributes, &modelData, returnObjectOnly, returnobjs);
       }
-      return meshNamesForNode(*data, meshnameToLoad, name);  
+      std::cout << std::endl;
+      
     }; 
 
     auto loadScene = [&world, id](std::string sceneFile, std::vector<Token>& addedTokens) -> objid {
@@ -946,7 +943,7 @@ void addSerialObjectsToWorld(
     //std::cout << "add serial: " << name << std::endl;
     //std::cout << print(objAttr.attr) << std::endl;
     //std::cout << std::endl;
-    addObjectToWorld(world, sceneId, objAttr.id, name, getNewObjectId, objAttr.attr, submodelAttributes, NULL, "", returnObjectOnly, gameobjObjs);
+    addObjectToWorld(world, sceneId, objAttr.id, name, getNewObjectId, objAttr.attr, submodelAttributes, NULL, returnObjectOnly, gameobjObjs);
   }
   if (returnObjectOnly){
     return;

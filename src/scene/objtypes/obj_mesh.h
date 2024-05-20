@@ -6,6 +6,7 @@
 #include "../serialization.h"
 
 struct GameObjectMesh {
+  std::optional<std::string> rootMesh;
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;   // @TODO  I shouldn't be storing the actual mesh here.  Instead I should just be referencing global meshes
   bool isDisabled;

@@ -99,8 +99,12 @@ FILE_EXTENSION_TYPE getFileType(std::string filepath){
 
 
 bool stringContains(std::string& str, char character){
-  size_t first = str.find_first_not_of(' ');
-  return std::string::npos != first;
+  for (int i = 0; i < str.size(); i++){
+    if (str.at(i) == character){
+      return true;
+    }
+  }
+  return false;
 }
 std::string trim(const std::string& str){
   size_t first = str.find_first_not_of(' ');
@@ -588,6 +592,8 @@ std::string attributeTypeStr(AttributeValueType type){
     return "float";
   }else if (type == ATTRIBUTE_STRING){
     return "string";
+  }else if (type == ATTRIBUTE_ARR_STRING){
+    return "arr-string";
   }
   modassert(false, "attribute type str invalid type");
   return "";
@@ -813,6 +819,17 @@ std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string ke
     return *strValue;
   }
   return std::nullopt;
+}
+
+std::optional<std::vector<std::string>> getArrStrAttr(GameobjAttributes& objAttr, std::string key){
+  if (objAttr.attr.find(key) != objAttr.attr.end()){
+    auto arrStrValue = std::get_if<std::vector<std::string>>(&objAttr.attr.at(key));
+    if (!arrStrValue){
+      return std::nullopt;
+    }
+    return *arrStrValue;
+  }
+  return std::nullopt;  
 }
 
 std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key){

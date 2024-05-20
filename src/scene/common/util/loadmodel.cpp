@@ -617,6 +617,10 @@ std::string nameForMeshId(std::string& rootmesh, int32_t meshId){
 bool isRootMeshName(std::string& meshname){
   return !stringContains(meshname, '=');
 }
+std::string rootMesh(std::string& meshname){
+  auto rootAndRest = carAndRest(meshname, '=');
+  return rootAndRest.first;
+}
 std::vector<std::string> meshNamesForNode(ModelData& modelData, std::string& rootmesh, std::string nodeName){
   std::vector<std::string> meshnames;
   auto meshIds = modelData.nodeToMeshId.at(nodeIdFromName(modelData, nodeName));
