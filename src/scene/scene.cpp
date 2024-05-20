@@ -837,7 +837,6 @@ void addObjectToWorld(
   std::function<objid()> getId,
   GameobjAttributes& attr,
   std::map<std::string, GameobjAttributes>& submodelAttributes,
-  ModelData* data,
   bool returnObjectOnly,
   std::vector<GameObjectObj>& returnobjs // only added to if returnObjOnly = true
 ){
@@ -846,7 +845,7 @@ void addObjectToWorld(
       std::cout << "Custom texture loading: " << texturepath << std::endl;
       return loadTextureWorld(world, texturepath, id);
     };
-    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes, data, returnObjectOnly, &returnobjs](std::string meshName) {
+    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes, returnObjectOnly, &returnobjs](std::string meshName) {
       // this assumes that the root mesh is loaded first, which i should probably cover, although it probably doesnt get hit
       modassert(meshName.size() > 0, std::string("invalid mesh name:  ") + meshName + ", name = " + name);
       modassert(isRootMeshName(meshName), "ensureMeshLoaded called on something that was not a root mesh");
@@ -871,7 +870,7 @@ void addObjectToWorld(
 
       std::cout << "id is: " << id << std::endl;
       for (auto &[name, objAttr] : newSerialObjs){
-        addObjectToWorld(world, sceneId, objAttr.id, name, getId, objAttr.attr, submodelAttributes, &modelData, returnObjectOnly, returnobjs);
+        addObjectToWorld(world, sceneId, objAttr.id, name, getId, objAttr.attr, submodelAttributes, returnObjectOnly, returnobjs);
       }
       std::cout << std::endl;
       
@@ -943,7 +942,7 @@ void addSerialObjectsToWorld(
     //std::cout << "add serial: " << name << std::endl;
     //std::cout << print(objAttr.attr) << std::endl;
     //std::cout << std::endl;
-    addObjectToWorld(world, sceneId, objAttr.id, name, getNewObjectId, objAttr.attr, submodelAttributes, NULL, returnObjectOnly, gameobjObjs);
+    addObjectToWorld(world, sceneId, objAttr.id, name, getNewObjectId, objAttr.attr, submodelAttributes, returnObjectOnly, gameobjObjs);
   }
   if (returnObjectOnly){
     return;
