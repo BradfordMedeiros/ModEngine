@@ -714,11 +714,10 @@ World createWorld(
 
   // hackey, but createSceneSandbox adds root object with id 0 so this is needed
   std::vector<objid> idsAdded = { 0 };
-  std::vector<GameObjectObj> addedGameobjObjs = {};
   std::map<std::string, GameobjAttributes> submodelAttributes;
 
   auto getId = createGetUniqueObjId(idsAdded);
-  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, idsAdded, getId, {{ "root", GameobjAttributesWithId { .id = idsAdded.at(0), .attr = GameobjAttributes{}}}}, addedGameobjObjs, submodelAttributes);
+  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, idsAdded, getId, {{ "root", GameobjAttributesWithId { .id = idsAdded.at(0), .attr = GameobjAttributes{}}}}, submodelAttributes);
 
   // Default meshes that are silently loaded in the background
   for (auto &meshname : defaultMeshes){
@@ -836,15 +835,14 @@ void addObjectToWorld(
   std::string name,
   std::function<objid()> getId,
   GameobjAttributes& attr,
-  std::map<std::string, GameobjAttributes>& submodelAttributes,
-  std::vector<GameObjectObj>& returnobjs // only added to if returnObjOnly = true
+  std::map<std::string, GameobjAttributes>& submodelAttributes
 ){
     auto loadMeshObject = createScopedLoadMesh(world, id);
     auto ensureTextureLoaded = [&world, id](std::string texturepath) -> Texture {
       std::cout << "Custom texture loading: " << texturepath << std::endl;
       return loadTextureWorld(world, texturepath, id);
     };
-    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes, &returnobjs](std::string meshName) {
+    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes](std::string meshName) {
       // this assumes that the root mesh is loaded first, which i should probably cover, although it probably doesnt get hit
       modassert(meshName.size() > 0, std::string("invalid mesh name:  ") + meshName + ", name = " + name);
       modassert(isRootMeshName(meshName), "ensureMeshLoaded called on something that was not a root mesh");
@@ -869,7 +867,7 @@ void addObjectToWorld(
 
       std::cout << "id is: " << id << std::endl;
       for (auto &[name, objAttr] : newSerialObjs){
-        addObjectToWorld(world, sceneId, objAttr.id, name, getId, objAttr.attr, submodelAttributes, returnobjs);
+        addObjectToWorld(world, sceneId, objAttr.id, name, getId, objAttr.attr, submodelAttributes);
       }
       std::cout << std::endl;
       
@@ -908,12 +906,11 @@ void addSerialObjectsToWorld(
   std::vector<objid>& idsAdded,
   std::function<objid()> getNewObjectId,
   std::map<std::string, GameobjAttributesWithId> nameToAttr,
-  std::vector<GameObjectObj>& gameobjObjs,
   std::map<std::string, GameobjAttributes>& submodelAttributes
 ){
   for (auto &[name, objAttr] : nameToAttr){
     // Warning: getNewObjectId will mutate the idsAdded.  
-    addObjectToWorld(world, sceneId, objAttr.id, name, getNewObjectId, objAttr.attr, submodelAttributes, gameobjObjs);
+    addObjectToWorld(world, sceneId, objAttr.id, name, getNewObjectId, objAttr.attr, submodelAttributes);
   }
 
 
@@ -940,10 +937,8 @@ void addSerialObjectsToWorld(
 
 objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags){
   auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData, name, tags, getObjautoserializerFields);
-  std::vector<GameObjectObj> addedGameobjObjs = {};
-
   auto getId = createGetUniqueObjId(data.idsAdded);
-  addSerialObjectsToWorld(world, sceneId, data.idsAdded, getId, data.additionalFields, addedGameobjObjs, data.subelementAttributes);
+  addSerialObjectsToWorld(world, sceneId, data.idsAdded, getId, data.additionalFields, data.subelementAttributes);
   return sceneId;
 }
 
@@ -1073,9 +1068,7 @@ void createObjectForScene(World& world, objid sceneId, std::string& name, AttrCh
   std::vector<objid> idsAdded = { gameobjPair.gameobj.id }; 
   auto getId = createGetUniqueObjId(idsAdded);
   addGameObjectToScene(world.sandbox, sceneId, name, gameobjPair.gameobj, attrWithChildren.children);
-
-  std::vector<GameObjectObj> addedGameobjObjs = {};
-  addSerialObjectsToWorld(world, sceneId, idsAdded, getId, {{ name, GameobjAttributesWithId{ .id = idToAdd, .attr = attributes }}}, addedGameobjObjs, submodelAttributes);
+  addSerialObjectsToWorld(world, sceneId, idsAdded, getId, {{ name, GameobjAttributesWithId{ .id = idToAdd, .attr = attributes }}}, submodelAttributes);
 }
 
 std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serializedObj, objid id, bool useObjId){
