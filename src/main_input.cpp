@@ -503,6 +503,10 @@ void toggleCursor(CURSOR_TYPE cursorBehavior){
   }
 }
 
+bool enableDebugCommands(){
+  return false;
+}
+
 float cameraSpeed = 1.f;
 std::vector<InputDispatch> inputFns = {
   InputDispatch{
@@ -1371,6 +1375,9 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
+      if (!enableDebugCommands()){
+        return;
+      }
       state.worldpaused = !state.worldpaused;
       std::cout << "worldpaused: " << (state.worldpaused ? "true" : "false") << std::endl;
     }

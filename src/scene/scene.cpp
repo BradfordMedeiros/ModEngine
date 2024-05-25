@@ -123,7 +123,6 @@ std::vector<glm::vec3> vertsForId(World& world, objid id){
   return vertPositions;
 }
 
-// TODO - physics bug - physicsOptions location/rotation/scale is not relative to parent 
 PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   auto physicsOptions = getGameObject(world.sandbox, id).physicsOptions;
   if (!physicsOptions.enabled){

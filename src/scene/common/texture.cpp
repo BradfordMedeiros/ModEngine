@@ -73,7 +73,7 @@ Texture loadTextureDataRed(unsigned char* data, int textureWidth, int textureHei
 }
 
 Texture loadTexture(std::string textureFilePath){
-  std::cout << "Event: loading texture: " << textureFilePath << std::endl;
+  modlog("texture-loading", textureFilePath);
 
   int textureWidth, textureHeight, numChannels;
   int forcedChannels = 4;
