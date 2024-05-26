@@ -228,8 +228,8 @@ std::string print(std::vector<objid>& values){
 }
 std::string print(std::vector<bool>& values){
   std::string strValue = "[";
-  for (auto value : values){
-    strValue += " " + print(value);
+  for (bool value : values){
+    strValue += " " + (value ? std::string("true") : std::string("false"));
   }
   strValue += " ]";
   return strValue;
@@ -299,6 +299,14 @@ std::string print(std::optional<std::string> value){
   }
   return value.value();
 }
+
+std::string print(std::optional<objid> id){
+  if (!id.has_value()){
+    return "[no value]";
+  }
+  return std::to_string(id.value());
+}
+
 
 bool maybeParseFloat(std::string value, float& _number){
   try {
