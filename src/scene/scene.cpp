@@ -1232,6 +1232,7 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool veloci
 void setSingleGameObjectAttr(World& world, objid id, const char* field, AttributeValue value){
   GameObject& gameobj = getGameObject(world, id);
   bool physicsEnableInitial = gameobj.physicsOptions.enabled;
+  bool physicsStaticInitial = gameobj.physicsOptions.isStatic;
 
   auto loadMeshObject = [&world, id](MeshData& meshdata) -> Mesh {
     return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {
@@ -1257,7 +1258,7 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
 
   setCoreAttr = setAttribute(gameobj, field, value, util);
   bool physicsObjectNeedsRebuild = gameobj.physicsOptions.enabled != physicsEnableInitial;
-
+  physicsObjectNeedsRebuild = gameobj.physicsOptions.isStatic != physicsStaticInitial;
 
   if (!setCoreAttr){
     SetAttrFlags setAttrFlags { .rebuildPhysics = false };
