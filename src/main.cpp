@@ -243,14 +243,14 @@ bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCu
   return shouldCallBindingOnObjectSelected;
 }
 
-void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::vec3 normal){
+void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::vec3 normal, float force){
   auto obj1Id = getIdForCollisionObject(world, obj1);
   auto obj2Id = getIdForCollisionObject(world, obj2);
   modassert(obj1Id.has_value(), "on object enter, obj1Id does not exist");
   modassert(obj2Id.has_value(), "on object enter, obj2Id does not exist");
   modassert(gameobjExists(obj1Id.value()) && gameobjExists(obj2Id.value()), "on Object Enter, gameobj does not exist");
   maybeTeleportObjects(world, obj1Id.value(), obj2Id.value());
-  cBindings.onCollisionEnter(obj1Id.value(), obj2Id.value(), contactPos, normal, normal * glm::vec3(-1.f, -1.f, -1.f)); 
+  cBindings.onCollisionEnter(obj1Id.value(), obj2Id.value(), contactPos, normal, normal * glm::vec3(-1.f, -1.f, -1.f), force); 
 }
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
   auto obj1Id = getIdForCollisionObject(world, obj1);

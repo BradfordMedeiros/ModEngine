@@ -174,14 +174,14 @@ void onCFrameAllScripts(){
   }
 }
 
-void onCCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal){
+void onCCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force){
   for (auto &objInstance : customObjInstances){
     if (objInstance.shouldRemove){
       continue;
     }
     auto binding = objInstance.cScriptBinding;
     assert(binding != NULL);
-    binding -> onCollisionEnter(objInstance.instanceId, objInstance.data, obj1, obj2, pos, normal, oppositeNormal);
+    binding -> onCollisionEnter(objInstance.instanceId, objInstance.data, obj1, obj2, pos, normal, oppositeNormal, force);
   }
 }
 void onCCollisionExitAllScripts(int32_t obj1, int32_t obj2){

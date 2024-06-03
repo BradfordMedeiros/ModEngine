@@ -290,8 +290,8 @@ std::vector<T> mapKeys(std::map<T, N>& values){
 typedef void(*func)();
 typedef std::function<void(int32_t id)> id_func;
 typedef std::function<void(int32_t id, void* data)> id_func_data;
-typedef std::function<void(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal)> colposfun;
-typedef std::function<void(int32_t id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal)> id_colposfun;
+typedef std::function<void(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force)> colposfun;
+typedef std::function<void(int32_t id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force)> id_colposfun;
 typedef void(*colfun)(int32_t obj1, int32_t obj2);
 typedef void(*id_colfun)(int32_t id, void* data, int32_t obj1, int32_t obj2);
 typedef void(*mousecallback)(int button, int action, int mods);

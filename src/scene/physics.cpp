@@ -334,7 +334,7 @@ void checkCollisions(physicsEnv& env){
 
     if (contactManifold -> getNumContacts() > 0){
       /// @NOTE Internally there can be more than one contact point, but it's simpler to just report one of them (maybe expose more in future)
-      btManifoldPoint& point = contactManifold -> getContactPoint(0);  
+      btManifoldPoint& point = contactManifold -> getContactPoint(0);
       btVector3 median = (point.getPositionWorldOnA() + point.getPositionWorldOnB()) / 2.f;
       
       collisionPairs.push_back(CollisionInstance {
@@ -342,6 +342,7 @@ void checkCollisions(physicsEnv& env){
         .obj2 = contactManifold -> getBody1(),
         .pos = btToGlm(median),
         .normal = glm::normalize(btToGlm(point.m_normalWorldOnB)),
+        .force = point.getAppliedImpulse(),
       });     
     }
   } 
