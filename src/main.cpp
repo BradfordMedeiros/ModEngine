@@ -1386,6 +1386,7 @@ int main(int argc, char* argv[]){
     .freeTexture = freeTexture,
     .clearTexture = clearTexture,
     .runStats = statValue,
+    .statValue = statValue,
     .stat = statName,
     .logStat = registerStat,
     .installMod = installMod,

@@ -114,6 +114,7 @@ struct CustomApiBindings {
   void (*freeTexture)(std::string name, objid ownerId);
   void (*clearTexture)(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color, std::optional<std::string> texture);
   StatValue (*runStats)(std::string& field);
+  StatValue (*statValue)(unsigned int);
   unsigned int (*stat)(std::string);
   void (*logStat)(unsigned int, StatValue amount);
   void (*installMod)(std::string layer);
