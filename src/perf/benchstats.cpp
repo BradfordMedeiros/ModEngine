@@ -60,6 +60,18 @@ StatValue statValue(std::string& name){
 	return 0.f;
 }
 
+std::string print(StatValue statValue){
+  int* intValuePtr = std::get_if<int>(&statValue);
+  if (intValuePtr){
+    return std::to_string(*intValuePtr);
+  }
+  float* floatValuePtr = std::get_if<float>(&statValue);
+  if (floatValuePtr){
+    return std::to_string(*floatValuePtr);
+  }
+  return "";
+}
+
 void initializeStatistics(){
   statistics.fpsStat = statName("fps");
   statistics.numObjectsStat = statName("object-count");

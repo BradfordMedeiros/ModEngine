@@ -767,6 +767,15 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
   drawTextNdi(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + offsetPerLine * 18, state.fontsize);
   drawTextNdi(std::string("time: ") + std::to_string(timeSeconds(false)), uiXOffset, uiYOffset + offsetPerLine * 19, state.fontsize);
   drawTextNdi(std::string("realtime: ") + std::to_string(timeSeconds(true)), uiXOffset, uiYOffset + offsetPerLine * 20, state.fontsize);
+
+  static std::string nameForStat  = args.find("stat") != args.end() ? args.at("stat") : std::string("");
+  if (nameForStat != ""){
+    auto stat = statValue(statName(nameForStat));
+    drawTextNdi(std::string(nameForStat) + ": " + print(stat), uiXOffset, uiYOffset + offsetPerLine * -2, state.fontsize * 2);
+  }
+
+
+
 }
 
 void onClientMessage(std::string message){

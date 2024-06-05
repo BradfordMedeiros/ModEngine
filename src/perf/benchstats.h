@@ -15,6 +15,8 @@ void registerStat(unsigned int stat, StatValue amount);
 StatValue statValue(unsigned int);
 StatValue statValue(std::string& name);
 
+std::string print(StatValue statValue);
+
 template<typename T>
 T unwrapStat(StatValue value) {   
   T* unwrappedValue = std::get_if<T>(&value);
