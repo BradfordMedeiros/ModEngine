@@ -1218,6 +1218,7 @@ void removeScheduledTaskByOwner(std::set<objid> ids){
 }
 
 void tickScheduledTasks(){
+  registerStat(statistics.numScheduledTasks, static_cast<int>(scheduledTasks.size()));
   for (auto &task : tasksToSchedule){
     scheduledTasks.push_back(task);
   }

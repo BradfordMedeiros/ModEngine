@@ -45,6 +45,7 @@ struct Stats {
   unsigned int loadModelFileStat;
   unsigned int loadModelFileStatCacheHit;
   unsigned int loadMeshStat;
+  unsigned int numScheduledTasks;
 };
 
 void initializeStatistics();

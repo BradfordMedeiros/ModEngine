@@ -195,7 +195,12 @@ LayerInfo* findLayerByName(std::vector<LayerInfo>& layers, std::string& layernam
       return &layer;
     }
   }
-  std::cout << "layer not found: " << layername << std::endl;
+
+  std::vector<std::string> allLayers;
+  for (auto &layer : layers){
+    allLayers.push_back(layer.name);
+  }
+  std::cout << "layer not found: " << layername << ", all = " << print(allLayers) << std::endl;
   assert(false);
   return NULL;
 }

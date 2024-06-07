@@ -17,6 +17,7 @@ Stats statistics {
   .loadModelFileStat = 0,
   .loadModelFileStatCacheHit = 0,
   .loadMeshStat = 0,
+  .numScheduledTasks = 0,
 };
 
 
@@ -80,4 +81,5 @@ void initializeStatistics(){
   statistics.loadModelFileStat = statName("load-model-file-stat");
   statistics.loadModelFileStatCacheHit = statName("load-model-file-stat-cache-hit");
   statistics.loadMeshStat = statName("load-mesh-stat");
+  statistics.numScheduledTasks = statName("num-scheduled");
 }
