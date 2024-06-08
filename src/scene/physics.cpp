@@ -515,11 +515,9 @@ std::vector<HitObject> contactTest(physicsEnv& env, std::map<objid, PhysicsValue
   std::vector<HitObject> hitobjects = {};
   auto originalId = getIdForRigidBody(rigidbodys, body);
 
-  modlog("contact test", "start");
   contactCallback.callback = [&rigidbodys, &hitobjects, body, originalId](const btCollisionObject* obj, glm::vec3 pos, glm::quat normal) -> void {
     auto id = getIdForRigidBody(rigidbodys, obj).value();
-    modlog("contact test id: ", std::to_string(id) + std::string(", original id: ") + std::to_string(originalId.value()));
-
+    //modlog("contact test id: ", std::to_string(id) + std::string(", original id: ") + std::to_string(originalId.value()));
     modassert(id != originalId, "id and original id are the same");
     hitobjects.push_back(HitObject {
       .id = id,
@@ -532,7 +530,6 @@ std::vector<HitObject> contactTest(physicsEnv& env, std::map<objid, PhysicsValue
     modassert(hitobject.id != originalId, "contacted with itself, uh lol");
   }
 
-  modlog("contact test", "end");
   env.dynamicsWorld -> contactTest(body, contactCallback);
   return hitobjects;
 }
