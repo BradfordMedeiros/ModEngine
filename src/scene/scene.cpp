@@ -308,7 +308,7 @@ void updatePhysicsBody(World& world, objid id){
     assert(rigidBody != NULL);
     rmRigidBody(world, id);
   }
-  world.rigidbodys.at(id) = addPhysicsBody(world, id, false);
+  addPhysicsBody(world, id, false);
 }
 
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
