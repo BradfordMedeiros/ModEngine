@@ -294,7 +294,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   }
   return phys;
 }
-void rmRigidBody(World& world, objid id){
+void rmRigidBodyWorld(World& world, objid id){
   auto rigidBodyPtr = world.rigidbodys.at(id).body;
   assert(rigidBodyPtr != NULL);
   rmRigidBody(world.physicsEnvironment, rigidBodyPtr);
@@ -306,7 +306,7 @@ void updatePhysicsBody(World& world, objid id){
   if (hasRigidBody){
     auto rigidBody = world.rigidbodys.at(id).body;
     assert(rigidBody != NULL);
-    rmRigidBody(world, id);
+    rmRigidBodyWorld(world, id);
   }
   addPhysicsBody(world, id, false);
 }
@@ -952,10 +952,7 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
     return;
   }
   if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
-    auto rigidBody = world.rigidbodys.at(objectId).body;
-    assert(rigidBody != NULL);
-    rmRigidBody(world.physicsEnvironment, rigidBody);
-    world.rigidbodys.erase(objectId);
+    rmRigidBodyWorld(world, objectId);
   }
 
   world.interface.stopAnimation(objectId);
@@ -1205,6 +1202,7 @@ std::optional<AttributeValue> getObjectAttribute(World& world, objid id, const c
 void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool velocitySet, bool physicsEnableChanged){
   //std::cout << "rigid bodies old: " << world.rigidbodys.size() << std::endl;
   if (physicsEnableChanged){
+    modlog("physics", std::string("rebuilding for: ") + gameobj.name);
     updatePhysicsBody(world, id);
   }
   //std::cout << "rigid bodies new: " << world.rigidbodys.size() << std::endl;

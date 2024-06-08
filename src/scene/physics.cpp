@@ -456,9 +456,10 @@ std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, PhysicsValue>& r
     const btCollisionObject* obj = result.m_collisionObjects[i];
     auto hitPoint = btPosFrom.lerp(btPosTo, result.m_hitFractions[i]);
     auto hitNormal = result.m_hitNormalWorld[i];
+    auto id = getIdForRigidBody(rigidbodys, obj).value();
     hitobjects.push_back(
       HitObject {
-        .id = getIdForRigidBody(rigidbodys, obj).value(),
+        .id = id,
         .point = btToGlm(hitPoint),  
         .normal = quatFromDirection(btToGlm(hitNormal)),
       }
@@ -472,36 +473,66 @@ class ContactResultCallback : public btCollisionWorld::ContactResultCallback
 {
 public:
     std::function<void(const btCollisionObject* obj, glm::vec3, glm::quat)> callback;
+    ContactResultCallback(btCollisionObject* testCollisionObj) : btCollisionWorld::ContactResultCallback() {
+      this -> testCollisionObj = testCollisionObj;
+    };
+
     virtual btScalar addSingleResult(
       btManifoldPoint& point,
       const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0,
       const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1
     ) override{
+      const btCollisionObject* obj0 = colObj0Wrap -> m_collisionObject;
       const btCollisionObject* obj = colObj1Wrap -> m_collisionObject;
-      //std::cout << "object hitpoint" << obj << std::endl;
+      modassert(obj0 != obj, "ContactResultCallback obj made contact with itself");
+      // this is b/c you don't know which collision obj is the obj being tested against
+      // normal is the only thing where this matters currently
+      // normal(A,B) => -1 * normal(B, A)
+      bool flipNormal = false;
+      if (obj0 == this -> testCollisionObj){   
+        flipNormal = true;
+      }
       auto median = btToGlm((point.getPositionWorldOnA() + point.getPositionWorldOnB()) / 2.f);
-      auto normal  = quatFromDirection(btToGlm(point.m_normalWorldOnB));
-      this -> callback(obj, median, normal);
+      glm::vec3 direction = btToGlm(point.m_normalWorldOnB);
+      if (!flipNormal){
+        direction.x *= -1;
+        direction.y *= -1;
+        direction.z *= -1;
+      }
+      //modlog("contact", print(direction));
+      auto normal  = quatFromDirection(direction);
+      this -> callback(!flipNormal ? obj0 : obj, median, normal);
       return 0;
     }
     virtual bool needsCollision(btBroadphaseProxy* proxy) const override {
       return true;
     } ;
+    btCollisionObject* testCollisionObj;
 };
 
 std::vector<HitObject> contactTest(physicsEnv& env, std::map<objid, PhysicsValue>& rigidbodys, btRigidBody* body){
-  auto contactCallback = ContactResultCallback();
-
+  auto contactCallback = ContactResultCallback(body);
   std::vector<HitObject> hitobjects = {};
-  contactCallback.callback = [&rigidbodys, &hitobjects, body](const btCollisionObject* obj, glm::vec3 pos, glm::quat normal) -> void {
+  auto originalId = getIdForRigidBody(rigidbodys, body);
+
+  modlog("contact test", "start");
+  contactCallback.callback = [&rigidbodys, &hitobjects, body, originalId](const btCollisionObject* obj, glm::vec3 pos, glm::quat normal) -> void {
     auto id = getIdForRigidBody(rigidbodys, obj).value();
-    modassert(id != getIdForRigidBody(rigidbodys, body).value(), "contact id is the same as id provided to contact test");
+    modlog("contact test id: ", std::to_string(id) + std::string(", original id: ") + std::to_string(originalId.value()));
+
+    modassert(id != originalId, "id and original id are the same");
     hitobjects.push_back(HitObject {
       .id = id,
       .point = pos,
       .normal = normal,
     });
   };
+
+  for (auto &hitobject : hitobjects){
+    modassert(hitobject.id != originalId, "contacted with itself, uh lol");
+  }
+
+  modlog("contact test", "end");
   env.dynamicsWorld -> contactTest(body, contactCallback);
   return hitobjects;
 }
@@ -523,21 +554,28 @@ std::vector<HitObject> contactTestShape(physicsEnv& env, std::map<objid, Physics
   };
 
   auto body = addRigidBodySphere(env, pos, 1.f, orientation, true, true, scale, opts);
+  auto originalId = getIdForRigidBody(rigidbodys, body);
+
+
   setPosition(body, pos);
   setRotation(body, orientation);
 
   std::vector<HitObject> hitobjects = {};
 
-  auto contactCallback = ContactResultCallback();
+  auto contactCallback = ContactResultCallback(body);
   contactCallback.callback = [&rigidbodys, &hitobjects, body](const btCollisionObject* obj, glm::vec3 pos, glm::quat normal) -> void {
-    modassert(obj != body, "invalid body...made contact with itself?");
-    auto id = getIdForRigidBody(rigidbodys, obj).value();
+    modassert(obj != body, "contactTest - made contact with itself");
+    auto id = getIdForRigidBody(rigidbodys, obj);
     hitobjects.push_back(HitObject {
-      .id = id,
+      .id = id.value(),
       .point = pos,
       .normal = normal,
     });
   };
+
+  for (auto &hitobject : hitobjects){
+    modassert(hitobject.id != originalId, "contacted with itself, uh lol");
+  }
   env.dynamicsWorld -> contactTest(body, contactCallback);
   rmRigidBody(env, body);
   return hitobjects;
