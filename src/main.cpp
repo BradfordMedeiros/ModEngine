@@ -289,7 +289,15 @@ void loadAllTextures(std::string& textureFolderPath){
 
     "../gameresources/build/textures/clean/grass.jpg", 
     "../gameresources/build/textures/clean/tunnel_road.jpg", 
-   
+
+    "../gameresources/build/textures/clean/cherrybark.jpg",
+    "../gameresources/build/textures/clean/foliage2.png",
+    "../gameresources/build/textures/clean/hardwood.jpg",
+
+    "../gameresources/build/textures/clean/stonydirt.jpg",
+    "../gameresources/build/textures/clean/metal_scifi.png",
+    "../gameresources/build/textures/clean/tex_Ice.jpg",
+
   };
 
   std::vector<std::string> normalTextures;
@@ -703,15 +711,21 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
     drawSpriteAround(renderingResources.uiShaderProgram, *crosshairSprite, location.x, location.y, 0.05, 0.05);
   }
   
-  if (!state.showDebug){
-    return;
-  }
-
   const float offsetPerLineMargin = 0.02f;
   float offsetPerLine = -1 * (state.fontsize / 500.f + offsetPerLineMargin);
   float uiYOffset = (1.f + 3 * offsetPerLine) + state.infoTextOffset.y;
   float uiXOffset = (-1.f - offsetPerLine) + state.infoTextOffset.x;
+
+  static std::string nameForStat  = args.find("stat") != args.end() ? args.at("stat") : std::string("");
+  if (nameForStat != ""){
+    auto stat = statValue(statName(nameForStat));
+    drawTextNdi(std::string(nameForStat) + ": " + print(stat), uiXOffset, uiYOffset + offsetPerLine * -2, state.fontsize * 2);
+  }
   
+  if (!state.showDebug){
+    return;
+  }
+
   auto currentFramerate = static_cast<int>(unwrapStat<float>(statValue(statistics.fpsStat)));
   //std::cout << "offsets: " << uiXOffset << " " << uiYOffset << std::endl;
   std::string additionalText =  "     <" + std::to_string((int)(255 * state.hoveredItemColor.r)) + ","  + std::to_string((int)(255 * state.hoveredItemColor.g)) + " , " + std::to_string((int)(255 * state.hoveredItemColor.b)) + ">  " + " --- " + state.selectedName;
@@ -767,15 +781,6 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
   drawTextNdi(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + offsetPerLine * 18, state.fontsize);
   drawTextNdi(std::string("time: ") + std::to_string(timeSeconds(false)), uiXOffset, uiYOffset + offsetPerLine * 19, state.fontsize);
   drawTextNdi(std::string("realtime: ") + std::to_string(timeSeconds(true)), uiXOffset, uiYOffset + offsetPerLine * 20, state.fontsize);
-
-  static std::string nameForStat  = args.find("stat") != args.end() ? args.at("stat") : std::string("");
-  if (nameForStat != ""){
-    auto stat = statValue(statName(nameForStat));
-    drawTextNdi(std::string(nameForStat) + ": " + print(stat), uiXOffset, uiYOffset + offsetPerLine * -2, state.fontsize * 2);
-  }
-
-
-
 }
 
 void onClientMessage(std::string message){
