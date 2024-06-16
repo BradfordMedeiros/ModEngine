@@ -61,7 +61,7 @@ struct PhysicsInfo {
 };
 
 enum AlignType { NEGATIVE_ALIGN, CENTER_ALIGN, POSITIVE_ALIGN };
-enum TextWrapType { WRAP_NONE, WRAP_CHARACTERS };
+enum TextWrapType { WRAP_NONE, WRAP_CHARACTERS, WRAP_NDI };
 struct TextWrap {
   TextWrapType type;
   float wrapamount;

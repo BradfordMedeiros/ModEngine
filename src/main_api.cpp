@@ -403,6 +403,7 @@ void drawText(std::string word, float left, float top, unsigned int fontSize, bo
       .fontSize = fontSize,
       .left = left,
       .top = top,
+      .maxWidthNdi = maxWidthNdi,
     },
     .textureId = textureId,
     .perma = permatext,

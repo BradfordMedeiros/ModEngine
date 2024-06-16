@@ -20,6 +20,7 @@ struct TextShapeData {
   unsigned int fontSize;
   float left;
   float top;
+  std::optional<float> maxWidthNdi;
 };
 
 struct RectShapeData {

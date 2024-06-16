@@ -202,8 +202,7 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::functi
         auto coords = convertTextNDICoords(textShapeData -> left, textShapeData ->  top, height, width, shape.ndi);
         auto adjustedFontSize = convertTextNdiFontsize(height, width, textShapeData -> fontSize, shape.ndi);
         FontFamily& fontFamily = fontFamilyByName(textShapeData -> fontFamily);
-
-        drawWords(uiShaderProgram, fontFamily, textShapeData -> word, coords.x, coords.y, adjustedFontSize);          
+        drawWords(uiShaderProgram, fontFamily, textShapeData -> word, coords.x, coords.y, adjustedFontSize, textShapeData -> maxWidthNdi);          
       }else if (rectShapeData != NULL){
         modassert(shape.ndi, "non-ndi rect drawing not supported"); 
         float centerXNdi = rectShapeData -> centerX;

@@ -258,8 +258,13 @@ DrawingInfoValues computeDrawingInfo(FontFamily& fontFamily, std::string word, f
   glm::vec2 cursorCenteringOffset(cursorSizing.x, cursorSizing.y);
   for (; i < word.size(); i++){
     char& character = word.at(i);
+    bool wrapNdi = false;
+    loopstart:
     //std::cout << "[" << (character == '\n' ? '@' : character) << "] ";
-    if (character == '\n' || (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount)) {
+    if (character == '\n' || 
+      (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount) || 
+      wrapNdi
+    ) {
       leftAlign = originalleftAlign;
       numCharactersOnLine = 0;
       lineNumber++;
@@ -286,6 +291,11 @@ DrawingInfoValues computeDrawingInfo(FontFamily& fontFamily, std::string word, f
     glm::vec2 characterBearing(0.f, 0.f);
     if (fontMeshes.find((int)(character)) != fontMeshes.end()){
       characterAdvance = fontMeshes.at((int)(character)).advance;
+      if (wrap.type == WRAP_NDI && (leftAlign + offsetDelta * characterAdvance) >= wrap.wrapamount){
+        wrapNdi = true;
+        goto loopstart;
+      }
+      
       characterSizing = fontMeshes.at((int)(character)).size;
       characterBearing = fontMeshes.at((int)(character)).bearing * offsetDelta;
       Mesh& fontMesh = fontMeshes.at((int)character).mesh;
@@ -313,7 +323,8 @@ DrawingInfoValues computeDrawingInfo(FontFamily& fontFamily, std::string word, f
     //std::cout << std::endl;
 
     lastCharacterAdvance = offsetDelta * characterAdvance;
-    
+
+
     if (cursorIndex == i || additionaCursorIndex == i){
       float additionalCursorOffset = cursorIndexLeft ? 0 : lastCharacterAdvance;
       ImmediateDrawingInfo cursor {
@@ -400,6 +411,13 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
   return numTriangles;
 }
 
-void drawWords(GLint shaderProgram, FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize){
-  drawWordsRelative(shaderProgram, fontFamily, glm::mat4(1.f), word, left, top, fontSize, POSITIVE_ALIGN, TextWrap { .type = WRAP_NONE, .wrapamount = 0.f }, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 }, -1);
+void drawWords(GLint shaderProgram, FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize, std::optional<float> maxWidthNdi){
+  TextWrap textWrap { .type = WRAP_NONE, .wrapamount = 0.f };
+  if (maxWidthNdi.has_value()){
+    textWrap = TextWrap {
+      .type = WRAP_NDI,
+      .wrapamount = maxWidthNdi.value(),
+    };
+  }
+  drawWordsRelative(shaderProgram, fontFamily, glm::mat4(1.f), word, left, top, fontSize, POSITIVE_ALIGN, textWrap, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 }, -1);
 }
