@@ -122,7 +122,7 @@ void copyObject(int32_t id);
 void handleCopy();
 void handleClipboardSelect();
 
-void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId);
+void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId, std::optional<float> maxWidthNdi);
 void drawText(std::string word, float left, float top, unsigned int fontSize);
 void drawTextNdi(std::string word, float left, float top, unsigned int fontSize);
 void getTextDimensionsNdi(std::string word, float fontSizeNdi, bool ndi, std::optional<std::string> fontFamily, float* _width, float* _height);

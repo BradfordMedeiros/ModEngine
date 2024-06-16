@@ -394,7 +394,7 @@ void handleClipboardSelect(){
   setClipboardFromSelected(state.editor);
 }
 
-void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId){
+void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId, std::optional<float> maxWidthNdi){
   //std::cout << "draw text: " << word << ": perma? " << permatext << std::endl;
   addShapeData(lineData, ShapeData{
     .shapeData = TextShapeData {
@@ -413,10 +413,10 @@ void drawText(std::string word, float left, float top, unsigned int fontSize, bo
 }
 
 void drawText(std::string word, float left, float top, unsigned int fontSize){
-  drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, false, std::nullopt, std::nullopt);  
+  drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, false, std::nullopt, std::nullopt, std::nullopt);  
 }
 void drawTextNdi(std::string word, float left, float top, unsigned int fontSize){
-  drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);  
+  drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt);  
 }
 
 

@@ -57,8 +57,8 @@ float convert(float res, float value){
 }
 
 void labelGridLine(CreateTexture& createTexture, float yloc){
-  mainApi -> drawText(std::to_string(static_cast<int>(round(unconvertY(yloc)))), 10,  convert(1000, yloc) + 20.f, 6, false, std::nullopt, createTexture.textureId.value(), false, std::nullopt, std::nullopt);
-  mainApi -> drawText(std::to_string(static_cast<int>(round(unconvertY(yloc)))), 950, convert(1000, yloc) + 20.f, 6, false, std::nullopt, createTexture.textureId.value(), false, std::nullopt, std::nullopt);
+  mainApi -> drawText(std::to_string(static_cast<int>(round(unconvertY(yloc)))), 10,  convert(1000, yloc) + 20.f, 6, false, std::nullopt, createTexture.textureId.value(), false, std::nullopt, std::nullopt, std::nullopt);
+  mainApi -> drawText(std::to_string(static_cast<int>(round(unconvertY(yloc)))), 950, convert(1000, yloc) + 20.f, 6, false, std::nullopt, createTexture.textureId.value(), false, std::nullopt, std::nullopt, std::nullopt);
 }
 
 void drawGrid(CreateTexture& createTexture){
@@ -70,8 +70,8 @@ void drawGrid(CreateTexture& createTexture){
 
 void addPermaData(CreateTexture& createTexture){
 	drawGrid(createTexture);
-  mainApi -> drawText("Performance - Graph of Framerate",  20, 30, 4, false, std::nullopt, createTexture.textureId.value(), false, std::nullopt, std::nullopt);
-  mainApi -> drawText(statname, 950, 30, 4, false, std::nullopt, createTexture.textureId.value(), false, std::nullopt, std::nullopt);
+  mainApi -> drawText("Performance - Graph of Framerate",  20, 30, 4, false, std::nullopt, createTexture.textureId.value(), false, std::nullopt, std::nullopt, std::nullopt);
+  mainApi -> drawText(statname, 950, 30, 4, false, std::nullopt, createTexture.textureId.value(), false, std::nullopt, std::nullopt, std::nullopt);
   mainApi -> drawLine(glm::vec3(-1.f, 0.9f, 0.f), glm::vec3(1.f, 0.9f, 0.f), false, createTexture.ownerId, std::nullopt, createTexture.textureId.value(), std::nullopt);
   mainApi -> drawLine(glm::vec3(-1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 0.f), false, createTexture.ownerId, std::nullopt, createTexture.textureId.value(), std::nullopt);
 }
