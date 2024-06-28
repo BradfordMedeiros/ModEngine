@@ -1595,6 +1595,12 @@ int main(int argc, char* argv[]){
   assert(!hasFramelimit || speedMultiplier == 1000);
   assert(fpsLag < 0 || speedMultiplier == 1000);
 
+  const char* vendor = (const char*)(glGetString(GL_VENDOR)); // Returns the vendor
+  const char* renderer = (const char*)(glGetString(GL_RENDERER)); // Returns a hint to the mode
+
+  modlog("gpu info vendor", std::string(vendor));
+  modlog("gpu info renderer", std::string(renderer));
+
   if (result["skiploop"].as<bool>()){
     goto cleanup;
   }
