@@ -246,18 +246,16 @@ bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCu
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::vec3 normal, float force){
   auto obj1Id = getIdForCollisionObject(world, obj1);
   auto obj2Id = getIdForCollisionObject(world, obj2);
-  modassert(obj1Id.has_value(), "on object enter, obj1Id does not exist");
-  modassert(obj2Id.has_value(), "on object enter, obj2Id does not exist");
-  modassert(gameobjExists(obj1Id.value()) && gameobjExists(obj2Id.value()), "on Object Enter, gameobj does not exist");
+  modassert(gameobjExists(obj1Id.value()), std::string("on object enter, obj1Id does not exist - rigidbody") + print((void*)obj1));
+  modassert(gameobjExists(obj2Id.value()), std::string("on object enter, obj2Id does not exist - rigidbody") + print((void*)obj2));
   maybeTeleportObjects(world, obj1Id.value(), obj2Id.value());
   cBindings.onCollisionEnter(obj1Id.value(), obj2Id.value(), contactPos, normal, normal * glm::vec3(-1.f, -1.f, -1.f), force); 
 }
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
   auto obj1Id = getIdForCollisionObject(world, obj1);
   auto obj2Id = getIdForCollisionObject(world, obj2);
-  modassert(obj1Id.has_value(), "on object leave, obj1Id does not exist");
-  modassert(obj2Id.has_value(), "on object leave, obj2Id does not exist");
-  modassert(gameobjExists(obj1Id.value()) && gameobjExists(obj2Id.value()), "on Object Enter, gameobj does not exist");
+  modassert(gameobjExists(obj1Id.value()), std::string("on object enter, obj1Id does not exist - rigidbody") + print((void*)obj1));
+  modassert(gameobjExists(obj2Id.value()), std::string("on object enter, obj2Id does not exist - rigidbody") + print((void*)obj2));
   cBindings.onCollisionExit(obj1Id.value(), obj2Id.value());
 }
 
@@ -787,16 +785,21 @@ void onClientMessage(std::string message){
   cBindings.onTcpMessage(message);
 }
 
-bool wroteCrash = false;
+bool signalHandlerCalled = false;
 void signalHandler(int signum) {
-  if (state.showDebug && !wroteCrash){
-    wroteCrash = true;
+  if (signalHandlerCalled){
+    return;
+  }
+  signalHandlerCalled = true;
+  std::cout << "signal handler called" << std::endl;
+  auto debugInfo = dumpDebugInfo();
+  std::cout << debugInfo << std::endl;
+  if (state.showDebug){
     auto crashFile = "./build/crash.info";
     std::cout << "wrote crash file: " << crashFile << std::endl;
-    saveFile(crashFile, dumpDebugInfo());
+    saveFile(crashFile, debugInfo);
     printBacktrace();
   }
-  exit(signum);  
 }
 
 
@@ -1073,7 +1076,6 @@ int main(int argc, char* argv[]){
    ("f,fullscreen", "Enable fullscreen mode", cxxopts::value<bool>()->default_value("false"))
    ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
-   ("d,dumpphysics", "Dump physics info to file for external processing", cxxopts::value<bool>()->default_value("false"))
    ("b,bootstrapper", "Run the server in bootstrapper only", cxxopts::value<bool>()->default_value("false"))
    ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))
    ("g,grid", "Size of grid chunking grid used for open world streaming, default to zero (no grid)", cxxopts::value<int>()->default_value("0"))
@@ -1113,7 +1115,6 @@ int main(int argc, char* argv[]){
     exit(returnVal);
   }
 
-  bool dumpPhysics = result["dumpphysics"].as<bool>();
   bool headlessmode = result["headlessmode"].as<bool>();
   int numChunkingGridCells = result["grid"].as<int>();
 
@@ -1635,7 +1636,7 @@ int main(int argc, char* argv[]){
       timePlayback.setElapsedTime(statistics.deltaTime);
     }
 
-    onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, state.enablePhysics, dumpPhysics, state.worldpaused, viewTransform);
+    onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, state.enablePhysics, state.worldpaused, viewTransform);
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
     if (useChunkingSystem){
       handleChunkLoading(

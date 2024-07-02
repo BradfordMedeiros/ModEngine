@@ -307,6 +307,12 @@ std::string print(std::optional<objid> id){
   return std::to_string(id.value());
 }
 
+std::string print(void* data){
+  std::ostringstream oss;
+  oss << data;
+  return oss.str();
+}
+
 
 bool maybeParseFloat(std::string value, float& _number){
   try {
@@ -780,8 +786,8 @@ void assertWithBacktrace(bool isTrue, std::string message){
     if (warnOnly){
       return;
     }
-    printBacktrace();    
-    exit(1);
+    printBacktrace();
+    abort();
   }
 }
 

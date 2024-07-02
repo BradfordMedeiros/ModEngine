@@ -30,8 +30,8 @@ std::string debugTransformCache(SceneSandbox& sandbox);
 std::string debugLoadedTextures(std::map<std::string, TextureRef>& textures);
 std::string debugLoadedMeshes(std::map<std::string, MeshRef>& meshes);
 std::string debugAnimations(std::map<objid, std::vector<Animation>>& animations);
+std::string debugPhysicsInfo(std::map<objid, PhysicsValue>& rigidbodys);
 
 void printPhysicsInfo(PhysicsInfo physicsInfo);
-void dumpPhysicsInfo(std::map<objid, PhysicsValue>& rigidbodys);
 
 #endif

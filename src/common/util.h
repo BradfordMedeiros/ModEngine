@@ -70,6 +70,7 @@ std::string print(std::optional<std::string> value);
 std::string print(std::set<objid> id);
 std::string print(std::vector<bool>& values);
 std::string print(std::optional<objid> id);
+std::string print(void*);
 
 glm::vec3 parseVec(std::string positionRaw);
 glm::vec4 parseVec4(std::string positionRaw);

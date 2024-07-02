@@ -106,7 +106,7 @@ struct CustomApiBindings {
   std::map<std::string, std::string> (*getArgs)();
   bool (*lock)(std::string, objid);
   bool (*unlock)(std::string, objid);
-  void (*debugInfo)(std::string infoType, std::string filepath);
+  void (*debugInfo)(std::optional<std::string> filepath);
   void (*setWorldState)(std::vector<ObjectValue> values);
   std::vector<ObjectValue> (*getWorldState)();
   void (*setLayerState)(std::vector<StrValues> values);

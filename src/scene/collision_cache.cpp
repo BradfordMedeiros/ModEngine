@@ -39,11 +39,11 @@ void CollisionCache::onObjectsCollide(std::vector<CollisionInstance>& collisionP
 
 
 void CollisionCache::rmObject(const btCollisionObject* obj){
-  std::vector<CollisionInstance> oldCollisions;   
+  std::vector<CollisionInstance> newCollisions;   
   for (auto collisionObj : this -> oldCollisions){
     if (collisionObj.obj1 != obj && collisionObj.obj2 != obj){
-      oldCollisions.push_back(collisionObj);
+      newCollisions.push_back(collisionObj);
     }
   }
-  this -> oldCollisions = oldCollisions;
+  this -> oldCollisions = newCollisions;
 }

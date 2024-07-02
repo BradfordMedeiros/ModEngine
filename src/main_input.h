@@ -26,7 +26,7 @@ struct JoyStickInfo {
 };
 
 std::string dumpDebugInfo(bool fullInfo = true);
-void debugInfo(std::string infoType, std::string filepath);
+void debugInfo(std::optional<std::string> filepath);
 
 glm::vec2 ndiCoord();
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos);

@@ -291,6 +291,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   if (rigidBody != NULL){
     phys.body = rigidBody;
     world.rigidbodys[id] = phys;
+    modlog("rigidbody", std::string("added rigid body: ") + std::to_string(id) + ", " + print((void*)rigidBody));
   }
   return phys;
 }
@@ -298,6 +299,7 @@ void rmRigidBodyWorld(World& world, objid id){
   auto rigidBodyPtr = world.rigidbodys.at(id).body;
   assert(rigidBodyPtr != NULL);
   rmRigidBody(world.physicsEnvironment, rigidBodyPtr);
+  modlog("rigidbody", std::string("rm rigid body: ") + std::to_string(id) + ", " + print((void*)rigidBodyPtr));
   world.rigidbodys.erase(id);
 }
 
@@ -1426,7 +1428,7 @@ void enforceLookAt(World& world){
 
 extern bool useTransform2;
 
-void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, bool paused, Transformation& viewTransform){
+void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool paused, Transformation& viewTransform){
   if (!paused){
     updateEmitters(
       getEmitterSystem(), 
@@ -1496,9 +1498,6 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     );  
   }
   
-  if (enablePhysics && dumpPhysics){
-    dumpPhysicsInfo(world.rigidbodys);
-  }
   //std::cout << "on world frame physics: " << enablePhysics << std::endl;
 
   stepPhysicsSimulation(world.physicsEnvironment, timestep, paused, enablePhysics);

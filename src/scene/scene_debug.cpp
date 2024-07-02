@@ -139,6 +139,14 @@ std::string debugAnimations(std::map<objid, std::vector<Animation>>& animations)
   return content; 
 }
 
+std::string debugPhysicsInfo(std::map<objid, PhysicsValue>& rigidbodys){
+  std::string content = "";
+  for (auto [id, physicsBody]: rigidbodys){
+    content += std::to_string(id) + "\n";
+  }
+  return content;
+}
+
 void printPhysicsInfo(PhysicsInfo physicsInfo){
   BoundInfo info = physicsInfo.boundInfo;
   std::cout << "x: [ " << info.xMin << ", " << info.xMax << "]" << std::endl;
@@ -148,8 +156,3 @@ void printPhysicsInfo(PhysicsInfo physicsInfo){
   std::cout << "box: (" << physicsInfo.transformation.scale.x << ", " << physicsInfo.transformation.scale.y << ", " << physicsInfo.transformation.scale.z << ")" << std::endl;
 }
 
-void dumpPhysicsInfo(std::map<objid, PhysicsValue>& rigidbodys){
-  for (auto [i, physicsBody]: rigidbodys){
-    std::cout << "PHYSICS:" << std::to_string(i) << ":" <<  print(getPosition(physicsBody.body));
-  }
-}

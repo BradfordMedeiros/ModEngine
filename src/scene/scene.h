@@ -95,7 +95,7 @@ void physicsLocalTransformSet(World& world, objid index, Transformation transfor
 
 void updatePhysicsBody(World& world, objid id);
 
-void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool dumpPhysics, bool paused, Transformation& viewTransform);
+void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool paused, Transformation& viewTransform);
 
 
 std::vector<NameAndMeshObjName> getMeshesForGameobj(World& world, objid gameobjId);

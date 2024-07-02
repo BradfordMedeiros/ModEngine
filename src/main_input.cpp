@@ -19,29 +19,37 @@ extern ManipulatorTools tools;
 extern TimePlayback timePlayback;
 
 std::string dumpDebugInfo(bool fullInfo){
-  auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
+  // this line is commented out b/c was segfaulting, probably should be written in a way that assumes the structure might be invalid
+  //auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
   auto gameobjInfo = debugAllGameObjects(world.sandbox);
   auto gameobjhInfo = debugAllGameObjectsH(world.sandbox);
   auto cacheInfo = debugTransformCache(world.sandbox);
   auto textureInfo = debugLoadedTextures(world.textures);
   auto meshInfo = debugLoadedMeshes(world.meshes);
   auto animationInfo = debugAnimations(world.animations);
-
+  auto physicsInfo = debugPhysicsInfo(world.rigidbodys);
+//
   auto benchmarkingContent = benchmarkResult(benchmark);
   auto profilingInfo = fullInfo ? dumpProfiling() : "" ;
-
-  auto content = "gameobj info - id id name\n" + gameobjInfo + "\n" + 
-    "gameobjh info - id id sceneId groupId parentId | [children]\n" + gameobjhInfo + "\n" + 
-    "transform cache - id pos scale\n" + cacheInfo + "\n" + 
-    "texture cache\n" + textureInfo + "\n" +
-    "mesh cache\n" + meshInfo + "\n" + 
-    "animation cache\n" + animationInfo + "\n" + 
-    sceneInfo +  benchmarkingContent + "\n" + profilingInfo;
+//
+    auto content = "gameobj info - id id name\n" + gameobjInfo + "\n" + 
+      "gameobjh info - id id sceneId groupId parentId | [children]\n" + gameobjhInfo + "\n" + 
+      "transform cache - id pos scale\n" + cacheInfo + "\n" + 
+      "texture cache\n" + textureInfo + "\n" +
+      "mesh cache\n" + meshInfo + "\n" + 
+      "animation cache\n" + animationInfo + "\n" +
+      "physics info\n" + physicsInfo + "\n";
+//    sceneInfo +  benchmarkingContent + "\n" + profilingInfo;
   return content;
+
 }
 
-void debugInfo(std::string infoType, std::string filepath){
-  saveFile(filepath, dumpDebugInfo(false));
+void debugInfo(std::optional<std::string> filepath){
+  if (filepath.has_value()){
+    saveFile(filepath.value(), dumpDebugInfo(false));
+  }else{
+    std::cout << dumpDebugInfo(false) << std::endl;
+  }
 }
 
 void onMouse(engineState& state, double xpos, double ypos, void(*rotateCamera)(float, float)){
@@ -1762,8 +1770,6 @@ std::vector<InputDispatch> inputFns = {
       state.rampDirection = (state.rampDirection ==  RAMP_LEFT) ? RAMP_RIGHT : RAMP_LEFT;
     }
   },
-
-
 
   /////////// end octree stuff
 
