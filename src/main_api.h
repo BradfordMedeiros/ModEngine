@@ -244,4 +244,8 @@ void setClipboardString(const char* string);
 
 void sendManipulatorEvent(MANIPULATOR_EVENT event);
 
+
+bool saveState(std::string);
+bool loadState(std::string);
+
 #endif

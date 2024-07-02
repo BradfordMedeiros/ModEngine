@@ -1269,3 +1269,12 @@ void setClipboardString(const char* string){
 void sendManipulatorEvent(MANIPULATOR_EVENT event){
   onManipulatorEvent(state.manipulatorState, tools, event);
 }
+
+bool saveState(std::string){
+  modassert(false, "save state not yet implemented");
+  return false;
+}
+bool loadState(std::string){
+  modassert(false, "load state not yet implemented");
+  return false;
+}

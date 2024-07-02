@@ -1423,6 +1423,9 @@ int main(int argc, char* argv[]){
     .setLogEndpoint = setLogEndpoint,
     .getClipboardString = getClipboardString,
     .setClipboardString = setClipboardString,
+
+    .saveState = saveState,
+    .loadState = loadState,
   };
 
 

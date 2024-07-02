@@ -139,6 +139,9 @@ struct CustomApiBindings {
   void(*setLogEndpoint)(std::optional<std::function<void(std::string&)>>);
   const char*(*getClipboardString)();
   void (*setClipboardString)(const char*);
+
+  bool (*saveState)(std::string);
+  bool (*loadState)(std::string);
   //std::vector<func_t> registerGuileFns
 };
 
