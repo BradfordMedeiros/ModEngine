@@ -147,6 +147,13 @@ std::string debugPhysicsInfo(std::map<objid, PhysicsValue>& rigidbodys){
   return content;
 }
 
+std::string debugSceneInfo(SceneSandbox& sandbox){
+  std::string content = "";
+  for (auto [id, sceneMetadata]: sandbox.sceneIdToSceneMetadata){
+    content += std::to_string(id) + " " + print(sceneMetadata.name) + " " + sceneMetadata.scenefile + "\n";
+  }
+  return content;
+}
 void printPhysicsInfo(PhysicsInfo physicsInfo){
   BoundInfo info = physicsInfo.boundInfo;
   std::cout << "x: [ " << info.xMin << ", " << info.xMax << "]" << std::endl;

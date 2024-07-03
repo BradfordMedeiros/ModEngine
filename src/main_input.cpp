@@ -28,7 +28,8 @@ std::string dumpDebugInfo(bool fullInfo){
   auto meshInfo = debugLoadedMeshes(world.meshes);
   auto animationInfo = debugAnimations(world.animations);
   auto physicsInfo = debugPhysicsInfo(world.rigidbodys);
-//
+  auto sceneInfo = debugSceneInfo(world.sandbox);
+
   auto benchmarkingContent = benchmarkResult(benchmark);
   auto profilingInfo = fullInfo ? dumpProfiling() : "" ;
 //
@@ -38,7 +39,8 @@ std::string dumpDebugInfo(bool fullInfo){
       "texture cache\n" + textureInfo + "\n" +
       "mesh cache\n" + meshInfo + "\n" + 
       "animation cache\n" + animationInfo + "\n" +
-      "physics info\n" + physicsInfo + "\n";
+      "physics info\n" + physicsInfo + "\n" + 
+      "scene info\n" + sceneInfo + "\n";
 //    sceneInfo +  benchmarkingContent + "\n" + profilingInfo;
   return content;
 
