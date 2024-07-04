@@ -207,7 +207,7 @@ std::string print(glm::vec2 vec){
   return stream.str();
 }
 std::string print(std::optional<glm::vec2> vec){
-  if (vec.has_value()){
+  if (!vec.has_value()){
     return "[no value]";
   }
   return print(vec.value());
