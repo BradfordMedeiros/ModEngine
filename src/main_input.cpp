@@ -20,7 +20,7 @@ extern TimePlayback timePlayback;
 
 std::string dumpDebugInfo(bool fullInfo){
   // this line is commented out b/c was segfaulting, probably should be written in a way that assumes the structure might be invalid
-  //auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
+  auto scenegraphInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
   auto gameobjInfo = debugAllGameObjects(world.sandbox);
   auto gameobjhInfo = debugAllGameObjectsH(world.sandbox);
   auto cacheInfo = debugTransformCache(world.sandbox);
@@ -34,6 +34,7 @@ std::string dumpDebugInfo(bool fullInfo){
   auto profilingInfo = fullInfo ? dumpProfiling() : "" ;
 //
     auto content = "gameobj info - id id name\n" + gameobjInfo + "\n" + 
+      "scenegraph info\n" + scenegraphInfo + "\n" +
       "gameobjh info - id id sceneId groupId parentId | [children]\n" + gameobjhInfo + "\n" + 
       "transform cache - id pos scale\n" + cacheInfo + "\n" + 
       "texture cache\n" + textureInfo + "\n" +
@@ -173,10 +174,10 @@ void joystickCallback(int jid, int event){
 }
 
 void onJoystick(std::vector<JoyStickInfo> infos){
-  //std::cout << "Joystick callback:" << std::endl;
-  //for (auto info : infos){
-  //  std::cout << "( " << info.index << ", " << info.value << ")" << std::endl;
-  //}
+  modlog("joystick", "onJoystick");
+  for (auto info : infos){
+    modlog("joystick", std::to_string(info.index) + ", " + std::to_string(info.value));
+  }
 }
 
 void onArrowKey(int key){

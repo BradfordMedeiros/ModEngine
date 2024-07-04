@@ -59,6 +59,7 @@ std::string print(glm::vec3 vec);
 std::string print(glm::vec4 vec);
 std::string print(glm::ivec3 vec);
 std::string print(glm::vec2 vec);
+std::string print(std::optional<glm::vec2> vec);
 std::string print(glm::quat quat);
 std::string rawprint(glm::quat quat);
 std::string print(glm::mat4 mat);

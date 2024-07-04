@@ -206,6 +206,12 @@ std::string print(glm::vec2 vec){
   stream << vec.x << " " << vec.y;
   return stream.str();
 }
+std::string print(std::optional<glm::vec2> vec){
+  if (vec.has_value()){
+    return "[no value]";
+  }
+  return print(vec.value());
+}
 
 std::string print(std::vector<std::string>& values){
   std::stringstream stream;
