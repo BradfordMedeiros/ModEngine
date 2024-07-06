@@ -71,6 +71,8 @@ Benchmark benchmark;
 DynamicLoading dynamicLoading;
 WorldTiming timings;
 
+bool showCrashInfo = false;
+
 TimePlayback timePlayback(
   statistics.initialTime, 
   [](float currentTime, float _, float elapsedTime) -> void {
@@ -787,7 +789,7 @@ void onClientMessage(std::string message){
 
 bool signalHandlerCalled = false;
 void signalHandler(int signum) {
-  if (signalHandlerCalled){
+  if (!showCrashInfo || signalHandlerCalled){
     return;
   }
   signalHandlerCalled = true;
@@ -1075,6 +1077,7 @@ int main(int argc, char* argv[]){
    ("fps-speed", "Fps speed multiplier", cxxopts::value<int>()->default_value("1000"))
    ("f,fullscreen", "Enable fullscreen mode", cxxopts::value<bool>()->default_value("false"))
    ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
+   ("crashinfo", "On crash show info", cxxopts::value<bool>()->default_value("false"))
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
    ("b,bootstrapper", "Run the server in bootstrapper only", cxxopts::value<bool>()->default_value("false"))
    ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))
@@ -1117,6 +1120,8 @@ int main(int argc, char* argv[]){
 
   bool headlessmode = result["headlessmode"].as<bool>();
   int numChunkingGridCells = result["grid"].as<int>();
+
+  showCrashInfo = result["crashinfo"].as<bool>();
 
   std::string worldfile = result["world"].as<std::string>();
   bool useChunkingSystem = worldfile != "";
