@@ -524,7 +524,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     auto newShader = getShaderByShaderString(shaderstringToId, shader, shaderProgram, allowShaderOverride, shaderFolderPath, interface.readFile);
     if (!lastShaderId.has_value() || newShader != lastShaderId.value()){
       lastShaderId = newShader;
-      sendAlert(std::string("loaded shader: ") + shader);
+      //sendAlert(std::string("loaded shader: ") + shader);
       setShaderWorld(newShader, lights, lightProjview, cameraPosition, layer.uniforms);
     }
     
