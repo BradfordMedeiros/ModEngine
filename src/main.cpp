@@ -1332,6 +1332,7 @@ int main(int argc, char* argv[]){
     .getObjectsByType = getObjectsByType,
     .getObjectsByAttr = getObjectsByAttr,
     .setActiveCamera = setActiveCamera,
+    .getActiveCamera = getActiveCamera,
     .getView = getView,
     .drawText = drawText,
     .getTextDimensionsNdi = getTextDimensionsNdi,

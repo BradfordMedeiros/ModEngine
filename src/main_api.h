@@ -43,8 +43,9 @@ objid listSceneId(int32_t id);
 
 Transformation getCameraTransform();
 void maybeResetCamera(int32_t id);
-void setActiveCamera(int32_t cameraId, float interpolationTime);
+void setActiveCamera(std::optional<int32_t> cameraId, float interpolationTime);
 void setActiveCamera(std::string name, objid sceneId);
+std::optional<objid> getActiveCamera();
 Transformation getView();
 
 void nextCamera();

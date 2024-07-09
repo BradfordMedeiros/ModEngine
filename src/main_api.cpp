@@ -870,7 +870,15 @@ void maybeResetCamera(int32_t id){
     state.cameraInterp.shouldInterpolate = false;
   }
 }
-void setActiveCamera(int32_t cameraId, float interpolationTime){
+void setActiveCamera(std::optional<int32_t> cameraIdOpt, float interpolationTime){
+  if (!cameraIdOpt.has_value()){
+    if (state.activeCameraObj){
+      auto currCameraId = state.activeCameraObj -> id;
+      maybeResetCamera(currCameraId);
+    }
+    return;
+  }
+  auto cameraId = cameraIdOpt.value();
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
   if (! (std::find(cameraIndexs.begin(), cameraIndexs.end(), cameraId) != cameraIndexs.end())){
     std::cout << "index: " << cameraId << " is not a valid index" << std::endl;
@@ -904,6 +912,13 @@ void setActiveCamera(std::string name, objid sceneId){
     assert(false);
   }
   setActiveCamera(object.value(), -1);
+}
+
+std::optional<objid> getActiveCamera(){
+  if (state.activeCameraObj == NULL){
+    return std::nullopt;
+  }
+  return state.activeCameraObj -> id;
 }
 
 Transformation getView(){
