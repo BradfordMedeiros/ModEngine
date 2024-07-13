@@ -1517,14 +1517,6 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   });  
   world.entitiesToUpdate.clear();
 
-  onObjectFrame(world.objectMapping, 
-    [&world](std::string texturepath, unsigned char* data, int textureWidth, int textureHeight) -> void {
-      updateTextureDataWorld(world, texturepath, data, textureWidth, textureHeight);
-    },
-    world.interface.drawLine,
-    timeElapsed
-  );
-
   // move this into on object frame
   auto selectedOctree = getSelectedOctreeId();
   if (selectedOctree.has_value()){
