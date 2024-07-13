@@ -1428,7 +1428,7 @@ void enforceLookAt(World& world){
 
 extern bool useTransform2;
 
-void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool paused, Transformation& viewTransform){
+void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool paused, Transformation& viewTransform, bool showVisualizations){
   if (!paused){
     updateEmitters(
       getEmitterSystem(), 
@@ -1517,17 +1517,18 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   });  
   world.entitiesToUpdate.clear();
 
-  // move this into on object frame
-  auto selectedOctree = getSelectedOctreeId();
-  if (selectedOctree.has_value()){
-    //auto transformation = fullTransformation(world.sandbox, selectedOctree.value());
-    //std::cout << "octree transformation: " << print(transformation) << std::endl;
-    auto transform = fullModelTransform(world.sandbox, selectedOctree.value());
-
-    GameObjectObj& toRender = world.objectMapping.at(selectedOctree.value());
-    GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&toRender);
-    modassert(octreeObj, "draw selection grid onFrame not octree type");
-    drawOctreeSelectionGrid(octreeObj -> octree, world.interface.drawLine, transform);
+  if (showVisualizations){
+    // move this into on object frame
+    auto selectedOctree = getSelectedOctreeId();
+    if (selectedOctree.has_value()){
+      //auto transformation = fullTransformation(world.sandbox, selectedOctree.value());
+      //std::cout << "octree transformation: " << print(transformation) << std::endl;
+      auto transform = fullModelTransform(world.sandbox, selectedOctree.value());
+      GameObjectObj& toRender = world.objectMapping.at(selectedOctree.value());
+      GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&toRender);
+      modassert(octreeObj, "draw selection grid onFrame not octree type");
+      drawOctreeSelectionGrid(octreeObj -> octree, world.interface.drawLine, transform);
+    }    
   }
 }
 

@@ -636,7 +636,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
     drawGrid3D(numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
   }
 
-  if (state.manipulatorMode == TRANSLATE && state.showGrid){
+  if (state.manipulatorMode == TRANSLATE && state.showGrid && !state.disableInput){
     for (auto id : selectedIds(state.editor)){
       auto selectedObj = id;
       if (selectedObj != -1){
@@ -1642,7 +1642,7 @@ int main(int argc, char* argv[]){
       timePlayback.setElapsedTime(statistics.deltaTime);
     }
 
-    onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, state.enablePhysics, state.worldpaused, viewTransform);
+    onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, state.enablePhysics, state.worldpaused, viewTransform, !state.disableInput);
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
     if (useChunkingSystem){
       handleChunkLoading(
@@ -1722,28 +1722,30 @@ int main(int argc, char* argv[]){
         cBindings.onObjectHover(state.currentHoverIndex, true);
       }
     }
-    
-    onManipulatorUpdate(
-      state.manipulatorState, 
-      projectionFromLayer(layers.at(0)),
-      view, 
-      state.manipulatorMode, 
-      state.manipulatorAxis,
-      state.offsetX, 
-      state.offsetY,
-      glm::vec2(adjustedCoords.x, adjustedCoords.y),
-      glm::vec2(state.resolution.x, state.resolution.y),
-      ManipulatorOptions {
-         .manipulatorPositionMode = state.manipulatorPositionMode,
-         .relativePositionMode = state.relativePositionMode,
-         .translateMirror = state.translateMirror,
-         .rotateMode = state.rotateMode,
-         .scalingGroup = state.scalingGroup,
-         .snapManipulatorScales = state.snapManipulatorScales,
-         .preserveRelativeScale = state.preserveRelativeScale,
-      },
-      tools
-    );
+
+    if (!state.disableInput){
+      onManipulatorUpdate(
+        state.manipulatorState, 
+        projectionFromLayer(layers.at(0)),
+        view, 
+        state.manipulatorMode, 
+        state.manipulatorAxis,
+        state.offsetX, 
+        state.offsetY,
+        glm::vec2(adjustedCoords.x, adjustedCoords.y),
+        glm::vec2(state.resolution.x, state.resolution.y),
+        ManipulatorOptions {
+           .manipulatorPositionMode = state.manipulatorPositionMode,
+           .relativePositionMode = state.relativePositionMode,
+           .translateMirror = state.translateMirror,
+           .rotateMode = state.rotateMode,
+           .scalingGroup = state.scalingGroup,
+           .snapManipulatorScales = state.snapManipulatorScales,
+           .preserveRelativeScale = state.preserveRelativeScale,
+        },
+        tools
+      );      
+    }
 
     if (state.shouldToggleCursor){
       modlog("toggle cursor", std::to_string(state.cursorBehavior));
@@ -1769,7 +1771,7 @@ int main(int argc, char* argv[]){
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
 
-    if (state.visualizeNormals){
+    if (!state.disableInput && state.visualizeNormals){
       forEveryGameobj(world.sandbox, [](objid id, GameObject& gameobj) -> void {
         auto transform = fullTransformation(world.sandbox, id);
         auto toPosition = transform.position + (transform.rotation * glm::vec3(0.f, 0.f, -1.f));
