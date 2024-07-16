@@ -535,11 +535,15 @@ void onManipulatorUpdate(
   glm::vec2 cursorPos,
   glm::vec2 screensize,
   ManipulatorOptions options,
-  ManipulatorTools manipulatorTools
+  ManipulatorTools manipulatorTools,
+  bool disable
 ){
   //modlog("manipulator", std::string("manipulator state: ") + manipulatorState.state);
   manipulatorTools.clearLines();
 
+  if (disable){
+    return;
+  }
   auto selectedObjs = manipulatorTools.getSelectedIds();
 
   ManipulatorUpdateInfo updateInfo {

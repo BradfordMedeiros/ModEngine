@@ -1722,30 +1722,30 @@ int main(int argc, char* argv[]){
         cBindings.onObjectHover(state.currentHoverIndex, true);
       }
     }
-
-    if (!state.disableInput){
-      onManipulatorUpdate(
-        state.manipulatorState, 
-        projectionFromLayer(layers.at(0)),
-        view, 
-        state.manipulatorMode, 
-        state.manipulatorAxis,
-        state.offsetX, 
-        state.offsetY,
-        glm::vec2(adjustedCoords.x, adjustedCoords.y),
-        glm::vec2(state.resolution.x, state.resolution.y),
-        ManipulatorOptions {
-           .manipulatorPositionMode = state.manipulatorPositionMode,
-           .relativePositionMode = state.relativePositionMode,
-           .translateMirror = state.translateMirror,
-           .rotateMode = state.rotateMode,
-           .scalingGroup = state.scalingGroup,
-           .snapManipulatorScales = state.snapManipulatorScales,
-           .preserveRelativeScale = state.preserveRelativeScale,
-        },
-        tools
-      );      
-    }
+    
+    onManipulatorUpdate(
+      state.manipulatorState, 
+      projectionFromLayer(layers.at(0)),
+      view, 
+      state.manipulatorMode, 
+      state.manipulatorAxis,
+      state.offsetX, 
+      state.offsetY,
+      glm::vec2(adjustedCoords.x, adjustedCoords.y),
+      glm::vec2(state.resolution.x, state.resolution.y),
+      ManipulatorOptions {
+         .manipulatorPositionMode = state.manipulatorPositionMode,
+         .relativePositionMode = state.relativePositionMode,
+         .translateMirror = state.translateMirror,
+         .rotateMode = state.rotateMode,
+         .scalingGroup = state.scalingGroup,
+         .snapManipulatorScales = state.snapManipulatorScales,
+         .preserveRelativeScale = state.preserveRelativeScale,
+      },
+      tools,
+      state.disableInput
+    );      
+    
 
     if (state.shouldToggleCursor){
       modlog("toggle cursor", std::to_string(state.cursorBehavior));

@@ -78,7 +78,8 @@ void onManipulatorUpdate(
   glm::vec2 cursorPos,
   glm::vec2 screensize,
   ManipulatorOptions options,
-  ManipulatorTools tools
+  ManipulatorTools tools,
+  bool disable
 );
 
 #endif
