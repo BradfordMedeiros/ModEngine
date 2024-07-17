@@ -442,6 +442,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .lastHoverIndex = -1,
     .hoveredItemColor = glm::vec3(0.f, 0.f, 0.f),
     .hoveredColor = std::nullopt,
+    .currentCursorDepth = std::nullopt,
 		.activeCamera = 0,
     .cameraInterp = CamInterpolation { .shouldInterpolate = false },
 		.additionalText = "",
