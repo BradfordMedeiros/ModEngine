@@ -317,10 +317,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 }
 
-
-void onMouseButton(){
-  std::cout << scenegraphAsDotFormat(world.sandbox, world.objectMapping) << std::endl;
-  
+void onMouseButton(){  
   auto id = state.currentHoverIndex;
   if (!idExists(world.sandbox, id) || (!isOctree(world, id))){
     return;
@@ -328,30 +325,20 @@ void onMouseButton(){
   auto layer = layerByName(getGameObject(world, id).layer);
   auto proj = projectionFromLayer(layer);
   auto rayDirection = getCursorRayDirection(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
-  Line line = {
-    .fromPos = defaultResources.defaultCamera.transformation.position,
-    .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
-  };
+  
+  glm::vec3 fromPos = defaultResources.defaultCamera.transformation.position;
+  glm::vec3 toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000);
 
-
-///////////////
   auto octreeModelMatrix = fullModelTransform(world.sandbox, id);
-  //glm::vec4 fromPosModelSpace = glm::inverse(octreeModelMatrix) * glm::vec4(line.fromPos.x, line.fromPos.y, fromPos.z, 1.f);
-  //glm::vec4 toPos =  glm::vec4(fromPos.x, fromPos.y, fromPos.z, 1.f) + glm::vec4(toPosDirection.x, toPosDirection.y, toPosDirection.z, 1.f);
-  //glm::vec4 toPosModelSpace = glm::inverse(voxelPtrModelMatrix) * toPos;
-  //glm::vec3 rayDirectionModelSpace =  toPosModelSpace - fromPosModelSpace;
+  auto adjustedPosition = glm::inverse(octreeModelMatrix) * glm::vec4(fromPos.x, fromPos.y, fromPos.z, 1.f);
+  auto adjustedDir = glm::inverse(octreeModelMatrix) * glm::vec4(toPos.x, toPos.y, toPos.z, 1.f);
 
-  auto adjustedPosition = glm::inverse(octreeModelMatrix) * glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f);
-  auto adjustedDir = glm::inverse(octreeModelMatrix) * glm::vec4(line.toPos.x, line.toPos.y, line.toPos.z, 1.f);
-  std::cout << "adjusted raycast " << print(adjustedPosition) << ", dir " << print(glm::normalize(adjustedDir)) << std::endl;
+  //addLineNextCycle(fromPos, fromPos + toPos, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
 
-  auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
-
-  GameObjectObj& objectOctree = world.objectMapping.at(id);
-  GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&objectOctree);
+  GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&world.objectMapping.at(id));
   if (octreeObj){
     modassert(octreeObj, "draw selection grid onFrame not octree type");
-    handleOctreeRaycast(octreeObj -> octree, adjustedPosition, adjustedDir, isCtrlHeld, id);
+    handleOctreeRaycast(octreeObj -> octree, adjustedPosition, adjustedDir, glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS, id);
     setSelectedOctreeId(id);       
   }
 }
