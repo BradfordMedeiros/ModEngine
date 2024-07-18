@@ -1891,6 +1891,46 @@ int main(int argc, char* argv[]){
     }
     markUserTexturesCleared();  // not really rendering, should pull this out
 
+    LayerInfo& layerInfo = layerByName("");
+    float near = layerInfo.nearplane;
+    float far = layerInfo.farplane;
+    // depth buffer pass 
+    {
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      auto finalProgram = depthProgram;
+      glUseProgram(finalProgram); 
+      glClearColor(0.f, 0.0f, 0.0f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      std::vector<UniformData> uniformData;
+      uniformData.push_back(UniformData {
+        .name = "near",
+        .value = near,
+      });
+      uniformData.push_back(UniformData {
+        .name = "far",
+        .value = far,
+      });
+      uniformData.push_back(UniformData {
+        .name = "depthTexture",
+        .value = Sampler2D {
+          .textureUnitId = 2,
+        }
+      });
+      setUniformData(finalProgram, uniformData, {});
+      glActiveTexture(GL_TEXTURE2);
+      glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(0));
+      glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
+      glBindVertexArray(defaultResources.quadVAO);
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+
+      Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+      auto distanceComponent = hoveredItemColor.r;
+      float distance = (distanceComponent * (far - near)) + near;
+   
+      state.currentCursorDepth = distance;
+
+    }
+    /////////////////////////////////////
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     auto finalProgram = (state.renderMode == RENDER_DEPTH) ? depthProgram : renderingResources.framebufferProgram;
@@ -1926,11 +1966,11 @@ int main(int argc, char* argv[]){
     });
     uniformData.push_back(UniformData {
       .name = "near",
-      .value = 0.1f,
+      .value = near,
     });
     uniformData.push_back(UniformData {
       .name = "far",
-      .value = 100.f,
+      .value = far,
     });
     uniformData.push_back(UniformData {
       .name = "fogColor",
@@ -2011,7 +2051,7 @@ int main(int argc, char* argv[]){
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
-    
+  
     if (state.renderMode == RENDER_FINAL){
       renderUI(effectiveCrosshair, pixelColor);
       drawShapeData(lineData, renderingResources.uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
