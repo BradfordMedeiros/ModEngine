@@ -348,12 +348,20 @@ void doOctreeRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPos)
 void onMouseButton(){ 
   std::cout << "mouse depth:  " << currentMouseDepth() << std::endl;
 
+  float depth = currentMouseDepth();
+  glm::vec3 fromPos = defaultResources.defaultCamera.transformation.position;
+  auto offset = defaultResources.defaultCamera.transformation.rotation * glm::vec3(0.f, 0.f, -1 * depth);
+
+
+  addLineNextCycle(fromPos, fromPos + offset, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+
+  return;
+
   auto id = state.currentHoverIndex;
   if (!idExists(world.sandbox, id) || (!isOctree(world, id))){
     return;
   }
   auto rayDirection = getMouseDirectionWorld();
-  glm::vec3 fromPos = defaultResources.defaultCamera.transformation.position;
   glm::vec3 toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000);
   //addLineNextCycle(fromPos, fromPos + toPos, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
   doOctreeRaycast(world, id, fromPos, toPos);
