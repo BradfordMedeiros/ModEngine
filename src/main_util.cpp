@@ -44,14 +44,14 @@ glm::mat4 projectionFromLayer(LayerInfo& layer){
   //return glm::perspective(glm::radians(layer.fov), (float)state.resolution.x / (float)state.resolution.y, layer.nearplane, layer.farplane); 
 }
 
-LayerInfo layerByName(std::string layername){
+LayerInfo& layerByName(std::string layername){
   for (auto &layer : world.sandbox.layers){
     if (layer.name == layername){
       return layer;
     }
   }
   modassert(false, std::string("layer does not exist: " + layername));
-  return LayerInfo{};
+  return world.sandbox.layers.at(0);
 }
 LayerInfo getLayerForId(objid id){
   return layerByName(getGameObject(world, id).layer);

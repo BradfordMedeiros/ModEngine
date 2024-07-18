@@ -1,21 +1,18 @@
 #version 330 core 
 out vec4 FragColor;
 in vec2 TexCoords;
-uniform sampler2D framebufferTexture;
-uniform sampler2D bloomTexture;
+uniform sampler2D depthTexture;
 
-uniform bool enableBloom;
-uniform float bloomAmount;
+uniform float near;
+uniform float far;
 
-float near = 0.1; 
-float far  = 1000.0; 
 
 void main(){
-  float depth  = texture(framebufferTexture, TexCoords).r;
+  float depth  = texture(depthTexture, TexCoords).r;  //
   float z = depth * 2.0 - 1.0; 
-  float depthColor  = ((2.0 * near * far) / (far + near - z * (far - near))) / far;
-  FragColor = vec4(vec3(depthColor), 1);
+  float depthAmount  = ((2.0 * near * far) / (far + near - z * (far - near))) / far;  // fraction of near/far
+  //FragColor = vec4(depthAmount, depthAmount, depthAmount, 1);
+//  FragColor = vec4(depth, depth, depth, 1);
+  FragColor = vec4(depthAmount, depthAmount, depthAmount, 1);
+
 }
-
-
-

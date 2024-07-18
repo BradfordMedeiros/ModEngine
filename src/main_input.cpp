@@ -317,6 +317,10 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 }
 
+float currentMouseDepth(){
+  return state.currentCursorDepth.value();
+}
+
 // This is wrong, because this needs to depend on the depth value
 // having trouble reading the depth value from the buffer at the moment for some reason...
 glm::vec3 getMouseDirectionWorld(){
@@ -341,7 +345,9 @@ void doOctreeRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPos)
   }
 }
 
-void onMouseButton(){  
+void onMouseButton(){ 
+  std::cout << "mouse depth:  " << currentMouseDepth() << std::endl;
+
   auto id = state.currentHoverIndex;
   if (!idExists(world.sandbox, id) || (!isOctree(world, id))){
     return;
