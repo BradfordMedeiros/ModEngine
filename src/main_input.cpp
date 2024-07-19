@@ -321,14 +321,14 @@ float currentMouseDepth(){
   return state.currentCursorDepth.value();
 }
 
-// This is wrong, because this needs to depend on the depth value
-// having trouble reading the depth value from the buffer at the moment for some reason...
 glm::vec3 getMouseDirectionWorld(){
+  float depth = currentMouseDepth();
+
   auto id = state.currentHoverIndex;
   bool objExists = idExists(world.sandbox, id);
   auto layer = objExists ? layerByName(getGameObject(world, id).layer) : layerByName(""); // "" default layer
   auto proj = projectionFromLayer(layer);
-  auto rayDirection = getCursorRayDirection(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
+  auto rayDirection = getCursorRayDirection(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight, depth);
   return rayDirection;
 }
 
@@ -352,19 +352,18 @@ void onMouseButton(){
   glm::vec3 fromPos = defaultResources.defaultCamera.transformation.position;
   auto offset = defaultResources.defaultCamera.transformation.rotation * glm::vec3(0.f, 0.f, -1 * depth);
 
-
-  addLineNextCycle(fromPos, fromPos + offset, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
-
-  return;
+  //addLineNextCycle(fromPos, fromPos + offset, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  //return;
 
   auto id = state.currentHoverIndex;
+  auto rayDirection = getMouseDirectionWorld();
+  glm::vec3 toPos = glm::vec3(rayDirection.x * depth, rayDirection.y * depth, rayDirection.z * depth);
+  addLineNextCycle(fromPos, fromPos + toPos, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+
   if (!idExists(world.sandbox, id) || (!isOctree(world, id))){
     return;
   }
-  auto rayDirection = getMouseDirectionWorld();
-  glm::vec3 toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000);
-  //addLineNextCycle(fromPos, fromPos + toPos, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
-  doOctreeRaycast(world, id, fromPos, toPos);
+  //doOctreeRaycast(world, id, fromPos, toPos);
 }
 
 void drop_callback(GLFWwindow* window, int count, const char** paths){
