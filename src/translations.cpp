@@ -66,46 +66,14 @@ float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBa
 
 // https://gamedev.stackexchange.com/questions/9693/whats-a-good-way-to-check-that-a-player-has-clicked-on-an-object-in-a-3d-game
 RotationDirection getCursorInfoWorldNdi(glm::mat4 projection, glm::mat4 view, float screenXPosNdi, float screenYPosNdi, float zDistance){
-  auto positionFrom4 = glm::inverse(view) * glm::vec4(0.f, 0.f, 0.f, 1.0);
-  glm::vec3 positionFrom(positionFrom4.x, positionFrom4.y, positionFrom4.z);
-
+  glm::vec3 positionFrom = glm::inverse(view) * glm::vec4(0.f, 0.f, 0.f, 1.0);
   auto viewDir = glm::inverse(view) * glm::vec4(0.f, 0.f, -1.f, 0.f);
+  glm::vec4 projectionCoordViewSpace = glm::inverse(projection) * glm::vec4(screenXPosNdi, screenYPosNdi, 0.f, 0.f);
+  projectionCoordViewSpace.z = 1.f;
 
-  glm::mat4 inversionMatrix = glm::inverse(projection);
-  
-  glm::vec4 projectionCoordViewSpace = inversionMatrix * glm::vec4(screenXPosNdi, screenYPosNdi, 0.f, 0.f);
-  projectionCoordViewSpace.z = 1.f;   // 0.1f is near plane, should be fed in
-
-  //glm::vec4 projectionCoordWorldSpace = glm::inverse(view) * projectionCoordViewSpace;
-
-  float z = zDistance;  // shouldn't this take into account distance
-  glm::vec4 finalCoordViewSpace = glm::vec4(projectionCoordViewSpace.x * z, projectionCoordViewSpace.y * z, projectionCoordViewSpace.z * z, 0.f);
-  //glm::vec4 finalCoordWorldSpace = glm::inverse(view) * finalCoordViewSpace;
-
-  //glm::vec3 finalPosWorld = positionFrom + glm::vec3(finalCoordWorldSpace.x, finalCoordWorldSpace.y, finalCoordWorldSpace.z);
-  //auto orientation = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), viewDir);
-  //auto relativeOffset = glm::inverse(orientation) * finalCoordViewSpace;
-  //auto finalPosition = positionFrom + glm::vec3(relativeOffset.x, relativeOffset.y, relativeOffset.z);
-  // so can i just take that vector and rotate it relative to the viewing direction, and then add it 
-
-  glm::vec4 direction = view * glm::vec4(0.f, 0.f, -1.f, 0.f);
-  glm::quat orientation = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(direction.x, direction.y, direction.z));
-
-  glm::vec3 rotatedCoord = orientation * finalCoordViewSpace;
-  auto finalPosition = positionFrom + glm::vec3(rotatedCoord.x, rotatedCoord.y, rotatedCoord.z * -1);
-
-  std::cout << "math: position: " << print(positionFrom) << std::endl;
-  std::cout << "math: projectionCoordViewSpace: " << print(projectionCoordViewSpace) << std::endl;
-  //std::cout << "math: projectionCoordWorldSpace: " << print(projectionCoordWorldSpace) << std::endl;
-  std::cout << "math: finalCoordViewSpace: " << print(finalCoordViewSpace) << std::endl;
-  std::cout << "math: rotatedCoord: " << print(rotatedCoord) << std::endl;
-  std::cout << "math: finalPosition: " << print(finalPosition) << std::endl;
-
-  auto finalDirection = glm::normalize(finalPosition - positionFrom);
-  //std::cout << "math: finalCoordWorldSpace: " << print(finalCoordWorldSpace) << std::endl;
-  //std::cout << "math: final pos: " << print(finalPosition) << std::endl;
-
-  std::cout << "math: distance: " << zDistance << std::endl;
+  glm::vec4 finalCoordViewSpace = glm::vec4(projectionCoordViewSpace.x * zDistance, projectionCoordViewSpace.y * zDistance, -1 * projectionCoordViewSpace.z * zDistance, 0.f);
+  auto finalPosition = glm::inverse(view) * glm::vec4(finalCoordViewSpace.x, finalCoordViewSpace.y, finalCoordViewSpace.z, 1.f);
+  auto finalDirection = glm::normalize(glm::vec3(finalPosition.x, finalPosition.y, finalPosition.z) - positionFrom);
 
   return RotationDirection {
     .position = positionFrom ,

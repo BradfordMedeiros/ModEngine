@@ -357,6 +357,7 @@ void doOctreeRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPos)
   }
 }
 
+objid lineId = 0;
 void onMouseButton(){ 
   std::cout << "mouse depth:  " << currentMouseDepth() << std::endl;
 
@@ -373,7 +374,11 @@ void onMouseButton(){
   //addLineNextCycle(fromPos, fromPos + toPos, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
 //
   auto rayPosition = getMousePositionWorld();
-  addLineNextCycle(fromPos, rayPosition, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  if (lineId){
+    freeLine(lineData, lineId);
+  }
+  lineId = addLineNextCycle(fromPos, rayPosition, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+
 
   if (!idExists(world.sandbox, id) || (!isOctree(world, id))){
     return;
