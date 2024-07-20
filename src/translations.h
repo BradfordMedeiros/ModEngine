@@ -24,6 +24,7 @@ RotationDirection getCursorInfoWorld(glm::mat4 projection, glm::mat4 view, float
 RotationDirection getCursorInfoWorldNdi(glm::mat4 projection, glm::mat4 view, float screenXPosNdi, float screenYPosNdi, float zDistance);
 
 glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorBottom, float screenWidth, float screenHeight, float depth);
+glm::vec3 getCursorRayPosition(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorBottom, float screenWidth, float screenHeight, float depth);
 glm::vec3 projectCursorAtDepth(glm::mat4 projection, glm::mat4 view, float nearPlane, float farPlane, glm::vec2 cursorPos, glm::vec2 screensize, float depth);
 bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2From, glm::vec3 ray2Dir, glm::vec3* _intersectPoint);
 

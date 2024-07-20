@@ -332,6 +332,18 @@ glm::vec3 getMouseDirectionWorld(){
   return rayDirection;
 }
 
+glm::vec3 getMousePositionWorld(){
+  float depth = currentMouseDepth();
+
+  auto id = state.currentHoverIndex;
+  bool objExists = idExists(world.sandbox, id);
+  auto layer = objExists ? layerByName(getGameObject(world, id).layer) : layerByName(""); // "" default layer
+  auto proj = projectionFromLayer(layer);
+  auto rayDirection = getCursorRayPosition(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight, depth);
+  return rayDirection;
+}
+
+
 void doOctreeRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPos){
   auto octreeModelMatrix = fullModelTransform(world.sandbox, id);
   auto adjustedPosition = glm::inverse(octreeModelMatrix) * glm::vec4(fromPos.x, fromPos.y, fromPos.z, 1.f);
@@ -350,15 +362,18 @@ void onMouseButton(){
 
   float depth = currentMouseDepth();
   glm::vec3 fromPos = defaultResources.defaultCamera.transformation.position;
-  auto offset = defaultResources.defaultCamera.transformation.rotation * glm::vec3(0.f, 0.f, -1 * depth);
 
   //addLineNextCycle(fromPos, fromPos + offset, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
   //return;
+  depth *= -1;
 
   auto id = state.currentHoverIndex;
-  auto rayDirection = getMouseDirectionWorld();
-  glm::vec3 toPos = glm::vec3(rayDirection.x * depth, rayDirection.y * depth, rayDirection.z * depth);
-  addLineNextCycle(fromPos, fromPos + toPos, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  //auto rayDirection = getMouseDirectionWorld();
+  //glm::vec3 toPos = glm::vec3(rayDirection.x * depth, rayDirection.y * depth, rayDirection.z * depth);
+  //addLineNextCycle(fromPos, fromPos + toPos, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+//
+  auto rayPosition = getMousePositionWorld();
+  addLineNextCycle(fromPos, rayPosition, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
 
   if (!idExists(world.sandbox, id) || (!isOctree(world, id))){
     return;

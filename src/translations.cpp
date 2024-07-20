@@ -76,36 +76,42 @@ RotationDirection getCursorInfoWorldNdi(glm::mat4 projection, glm::mat4 view, fl
   glm::vec4 projectionCoordViewSpace = inversionMatrix * glm::vec4(screenXPosNdi, screenYPosNdi, 0.f, 0.f);
   projectionCoordViewSpace.z = 1.f;   // 0.1f is near plane, should be fed in
 
-  glm::vec4 projectionCoordWorldSpace = glm::inverse(view) * projectionCoordViewSpace;
+  //glm::vec4 projectionCoordWorldSpace = glm::inverse(view) * projectionCoordViewSpace;
 
   float z = zDistance;  // shouldn't this take into account distance
   glm::vec4 finalCoordViewSpace = glm::vec4(projectionCoordViewSpace.x * z, projectionCoordViewSpace.y * z, projectionCoordViewSpace.z * z, 0.f);
-  glm::vec4 finalCoordWorldSpace = glm::inverse(view) * finalCoordViewSpace;
+  //glm::vec4 finalCoordWorldSpace = glm::inverse(view) * finalCoordViewSpace;
 
-  glm::vec3 finalPosWorld = positionFrom + glm::vec3(finalCoordWorldSpace.x, finalCoordWorldSpace.y, finalCoordWorldSpace.z);
-
-  auto orientation = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), viewDir);
-  auto relativeOffset = glm::inverse(orientation) * finalCoordViewSpace;
-
-  auto finalPosition = positionFrom + glm::vec3(relativeOffset.x, relativeOffset.y, relativeOffset.z);
+  //glm::vec3 finalPosWorld = positionFrom + glm::vec3(finalCoordWorldSpace.x, finalCoordWorldSpace.y, finalCoordWorldSpace.z);
+  //auto orientation = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), viewDir);
+  //auto relativeOffset = glm::inverse(orientation) * finalCoordViewSpace;
+  //auto finalPosition = positionFrom + glm::vec3(relativeOffset.x, relativeOffset.y, relativeOffset.z);
   // so can i just take that vector and rotate it relative to the viewing direction, and then add it 
 
-  glm::vec4 direction = glm::inverse(view) * glm::vec4(0.f, 0.f, -1.f, 0.f);
+  glm::vec4 direction = view * glm::vec4(0.f, 0.f, -1.f, 0.f);
+  glm::quat orientation = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(direction.x, direction.y, direction.z));
+
+  glm::vec3 rotatedCoord = orientation * finalCoordViewSpace;
+  auto finalPosition = positionFrom + glm::vec3(rotatedCoord.x, rotatedCoord.y, rotatedCoord.z * -1);
 
   std::cout << "math: position: " << print(positionFrom) << std::endl;
-  std::cout << "math: projectCoordView: " << print(projectionCoordViewSpace) << std::endl;
-  std::cout << "math: projectCoordView: " << print(projectionCoordViewSpace) << std::endl;
-  std::cout << "math: projectCoordWorld: " << print(projectionCoordWorldSpace) << std::endl;
-  std::cout << "math: finalCoordView: " << print(finalCoordViewSpace) << std::endl;
-  std::cout << "math: finalCoordWorld: " << print(finalCoordWorldSpace) << std::endl;
-  std::cout << "math: final pos: " << print(finalPosition) << std::endl;
+  std::cout << "math: projectionCoordViewSpace: " << print(projectionCoordViewSpace) << std::endl;
+  //std::cout << "math: projectionCoordWorldSpace: " << print(projectionCoordWorldSpace) << std::endl;
+  std::cout << "math: finalCoordViewSpace: " << print(finalCoordViewSpace) << std::endl;
+  std::cout << "math: rotatedCoord: " << print(rotatedCoord) << std::endl;
+  std::cout << "math: finalPosition: " << print(finalPosition) << std::endl;
+
+  auto finalDirection = glm::normalize(finalPosition - positionFrom);
+  //std::cout << "math: finalCoordWorldSpace: " << print(finalCoordWorldSpace) << std::endl;
+  //std::cout << "math: final pos: " << print(finalPosition) << std::endl;
 
   std::cout << "math: distance: " << zDistance << std::endl;
 
   return RotationDirection {
     .position = positionFrom ,
-    .direction = glm::normalize(glm::vec3(viewDir.x, viewDir.y, viewDir.z)),
+    .direction = finalDirection,
     .viewDir = glm::normalize(glm::vec3(viewDir.x, viewDir.y, viewDir.z)),
+    .projectedPosition = finalPosition,
   };
 }
 
@@ -118,9 +124,14 @@ RotationDirection getCursorInfoWorld(glm::mat4 projection, glm::mat4 view, float
 // I think this is wrong, test with manupulator rotation visualization
 glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorBottom, float screenWidth, float screenHeight, float depth){
   auto positionAndRotation = getCursorInfoWorld(projection, view, cursorLeft, cursorBottom, screenWidth, screenHeight, depth);
-  //std::cout << "direction is: " << print(glm::vec3(direction.x, direction.y, direction.z)) << std::endl;
   return positionAndRotation.direction;
 }
+
+glm::vec3 getCursorRayPosition(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorBottom, float screenWidth, float screenHeight, float depth){
+  auto positionAndRotation = getCursorInfoWorld(projection, view, cursorLeft, cursorBottom, screenWidth, screenHeight, depth);
+  return positionAndRotation.projectedPosition;
+}
+
 
 float zDepth(float nearPlane, float farPlane, float depth){
   return ((1 / depth) - (1 / nearPlane)) / ((1 / farPlane) - (1 / nearPlane));
