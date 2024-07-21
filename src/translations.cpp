@@ -64,19 +64,22 @@ float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBa
   return ((value - fromBaseLow) * ((toBaseHigh - toBaseLow) / (fromBaseHigh - fromBaseLow))) + toBaseLow;
 }
 
-
+// https://gamedev.stackexchange.com/questions/9693/whats-a-good-way-to-check-that-a-player-has-clicked-on-an-object-in-a-3d-game
 RotationDirection getCursorInfoWorldNdi(glm::mat4 projection, glm::mat4 view, float screenXPosNdi, float screenYPosNdi, float zDistance){
-  auto positionFrom4 = glm::inverse(view) * glm::vec4(0.f, 0.f, 0.f, 1.0);
-  glm::vec3 positionFrom(positionFrom4.x, positionFrom4.y, positionFrom4.z);
-
-  glm::mat4 inversionMatrix = glm::inverse(projection * view);
-  glm::vec4 direction = inversionMatrix * glm::vec4(screenXPosNdi, screenYPosNdi, zDistance, 1.0f);
-
+  glm::vec3 positionFrom = glm::inverse(view) * glm::vec4(0.f, 0.f, 0.f, 1.0);
   auto viewDir = glm::inverse(view) * glm::vec4(0.f, 0.f, -1.f, 0.f);
+  glm::vec4 projectionCoordViewSpace = glm::inverse(projection) * glm::vec4(screenXPosNdi, screenYPosNdi, 0.f, 0.f);
+  projectionCoordViewSpace.z = 1.f;
+
+  glm::vec4 finalCoordViewSpace = glm::vec4(projectionCoordViewSpace.x * zDistance, projectionCoordViewSpace.y * zDistance, -1 * projectionCoordViewSpace.z * zDistance, 0.f);
+  auto finalPosition = glm::inverse(view) * glm::vec4(finalCoordViewSpace.x, finalCoordViewSpace.y, finalCoordViewSpace.z, 1.f);
+  auto finalDirection = glm::normalize(glm::vec3(finalPosition.x, finalPosition.y, finalPosition.z) - positionFrom);
+
   return RotationDirection {
-    .position = positionFrom + glm::vec3(direction.x, direction.y, direction.z),
-    .direction = glm::normalize(glm::vec3(direction.x, direction.y, direction.z)),
+    .position = positionFrom ,
+    .direction = finalDirection,
     .viewDir = glm::normalize(glm::vec3(viewDir.x, viewDir.y, viewDir.z)),
+    .projectedPosition = finalPosition,
   };
 }
 
@@ -87,11 +90,16 @@ RotationDirection getCursorInfoWorld(glm::mat4 projection, glm::mat4 view, float
 }
 
 // I think this is wrong, test with manupulator rotation visualization
-glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorBottom, float screenWidth, float screenHeight){
-  auto positionAndRotation = getCursorInfoWorld(projection, view, cursorLeft, cursorBottom, screenWidth, screenHeight, 1.f /* why 1.f? */);
-  //std::cout << "direction is: " << print(glm::vec3(direction.x, direction.y, direction.z)) << std::endl;
+glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorBottom, float screenWidth, float screenHeight, float depth){
+  auto positionAndRotation = getCursorInfoWorld(projection, view, cursorLeft, cursorBottom, screenWidth, screenHeight, depth);
   return positionAndRotation.direction;
 }
+
+glm::vec3 getCursorRayPosition(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorBottom, float screenWidth, float screenHeight, float depth){
+  auto positionAndRotation = getCursorInfoWorld(projection, view, cursorLeft, cursorBottom, screenWidth, screenHeight, depth);
+  return positionAndRotation.projectedPosition;
+}
+
 
 float zDepth(float nearPlane, float farPlane, float depth){
   return ((1 / depth) - (1 / nearPlane)) / ((1 / farPlane) - (1 / nearPlane));
@@ -214,7 +222,7 @@ bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2F
 glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec3 lockvalues, ProjectCursorDebugInfo* _debugInfo, std::optional<glm::quat> orientation){
   auto positionFrom4 = glm::inverse(view) * glm::vec4(0.f, 0.f, 0.f, 1.0);
   glm::vec3 positionFrom(positionFrom4.x, positionFrom4.y, positionFrom4.z);
-  auto selectDir = getCursorRayDirection(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y);
+  auto selectDir = getCursorRayDirection(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y, 1.f);
   glm::vec3 target(lockvalues.x, lockvalues.y, lockvalues.z);
   glm::vec3 targetDir(0.f, 0.f, 0.f);
   if (manipulatorAxis == XAXIS){

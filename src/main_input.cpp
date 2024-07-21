@@ -321,21 +321,37 @@ float currentMouseDepth(){
   return state.currentCursorDepth.value();
 }
 
-// This is wrong, because this needs to depend on the depth value
-// having trouble reading the depth value from the buffer at the moment for some reason...
 glm::vec3 getMouseDirectionWorld(){
+  float depth = currentMouseDepth();
+
   auto id = state.currentHoverIndex;
   bool objExists = idExists(world.sandbox, id);
   auto layer = objExists ? layerByName(getGameObject(world, id).layer) : layerByName(""); // "" default layer
   auto proj = projectionFromLayer(layer);
-  auto rayDirection = getCursorRayDirection(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
+  auto rayDirection = getCursorRayDirection(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight, depth);
   return rayDirection;
 }
 
+glm::vec3 getMousePositionWorld(){
+  float depth = currentMouseDepth();
+
+  auto id = state.currentHoverIndex;
+  bool objExists = idExists(world.sandbox, id);
+  auto layer = objExists ? layerByName(getGameObject(world, id).layer) : layerByName(""); // "" default layer
+  auto proj = projectionFromLayer(layer);
+  auto rayDirection = getCursorRayPosition(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight, depth);
+  return rayDirection;
+}
+
+
 void doOctreeRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPos){
+  if (!idExists(world.sandbox, id) || (!isOctree(world, id))){
+    return;
+  }
   auto octreeModelMatrix = fullModelTransform(world.sandbox, id);
   auto adjustedPosition = glm::inverse(octreeModelMatrix) * glm::vec4(fromPos.x, fromPos.y, fromPos.z, 1.f);
-  auto adjustedDir = glm::inverse(octreeModelMatrix) * glm::vec4(toPos.x, toPos.y, toPos.z, 1.f);
+  auto adjustedToPos = glm::inverse(octreeModelMatrix) * glm::vec4(toPos.x, toPos.y, toPos.z, 1.f);
+  auto adjustedDir = adjustedToPos - adjustedPosition;
 
   GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&world.objectMapping.at(id));
   if (octreeObj){
@@ -345,18 +361,18 @@ void doOctreeRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPos)
   }
 }
 
+bool enableSelectionVisualization = false;
 void onMouseButton(){ 
-  std::cout << "mouse depth:  " << currentMouseDepth() << std::endl;
-
-  auto id = state.currentHoverIndex;
-  if (!idExists(world.sandbox, id) || (!isOctree(world, id))){
-    return;
-  }
-  auto rayDirection = getMouseDirectionWorld();
   glm::vec3 fromPos = defaultResources.defaultCamera.transformation.position;
-  glm::vec3 toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000);
-  //addLineNextCycle(fromPos, fromPos + toPos, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
-  doOctreeRaycast(world, id, fromPos, toPos);
+  auto rayPosition = getMousePositionWorld();
+  if (enableSelectionVisualization){
+    static objid lineId = 0;
+    if (lineId){
+      freeLine(lineData, lineId);
+    }
+    lineId = addLineNextCycle(fromPos, rayPosition, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  }
+  doOctreeRaycast(world, state.currentHoverIndex, fromPos, rayPosition);
 }
 
 void drop_callback(GLFWwindow* window, int count, const char** paths){
