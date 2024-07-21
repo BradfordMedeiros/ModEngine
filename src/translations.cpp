@@ -89,18 +89,6 @@ RotationDirection getCursorInfoWorld(glm::mat4 projection, glm::mat4 view, float
   return getCursorInfoWorldNdi(projection, view, screenXPosNdi, screenYPosNdi, zDistance);
 }
 
-// I think this is wrong, test with manupulator rotation visualization
-glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorBottom, float screenWidth, float screenHeight, float depth){
-  auto positionAndRotation = getCursorInfoWorld(projection, view, cursorLeft, cursorBottom, screenWidth, screenHeight, depth);
-  return positionAndRotation.direction;
-}
-
-glm::vec3 getCursorRayPosition(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorBottom, float screenWidth, float screenHeight, float depth){
-  auto positionAndRotation = getCursorInfoWorld(projection, view, cursorLeft, cursorBottom, screenWidth, screenHeight, depth);
-  return positionAndRotation.projectedPosition;
-}
-
-
 float zDepth(float nearPlane, float farPlane, float depth){
   return ((1 / depth) - (1 / nearPlane)) / ((1 / farPlane) - (1 / nearPlane));
 }
@@ -222,7 +210,7 @@ bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2F
 glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec3 lockvalues, ProjectCursorDebugInfo* _debugInfo, std::optional<glm::quat> orientation){
   auto positionFrom4 = glm::inverse(view) * glm::vec4(0.f, 0.f, 0.f, 1.0);
   glm::vec3 positionFrom(positionFrom4.x, positionFrom4.y, positionFrom4.z);
-  auto selectDir = getCursorRayDirection(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y, 1.f);
+  auto selectDir = getCursorInfoWorld(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y, 1.f).direction;
   glm::vec3 target(lockvalues.x, lockvalues.y, lockvalues.z);
   glm::vec3 targetDir(0.f, 0.f, 0.f);
   if (manipulatorAxis == XAXIS){

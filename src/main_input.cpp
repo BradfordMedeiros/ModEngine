@@ -328,7 +328,7 @@ glm::vec3 getMouseDirectionWorld(){
   bool objExists = idExists(world.sandbox, id);
   auto layer = objExists ? layerByName(getGameObject(world, id).layer) : layerByName(""); // "" default layer
   auto proj = projectionFromLayer(layer);
-  auto rayDirection = getCursorRayDirection(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight, depth);
+  auto rayDirection = getCursorInfoWorld(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight, depth).direction;
   return rayDirection;
 }
 
@@ -339,7 +339,7 @@ glm::vec3 getMousePositionWorld(){
   bool objExists = idExists(world.sandbox, id);
   auto layer = objExists ? layerByName(getGameObject(world, id).layer) : layerByName(""); // "" default layer
   auto proj = projectionFromLayer(layer);
-  auto rayDirection = getCursorRayPosition(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight, depth);
+  auto rayDirection = getCursorInfoWorld(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight, depth).projectedPosition;
   return rayDirection;
 }
 
@@ -361,7 +361,7 @@ void doOctreeRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPos)
   }
 }
 
-bool enableSelectionVisualization = false;
+bool enableSelectionVisualization = true;
 void onMouseButton(){ 
   glm::vec3 fromPos = defaultResources.defaultCamera.transformation.position;
   auto rayPosition = getMousePositionWorld();

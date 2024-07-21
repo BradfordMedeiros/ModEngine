@@ -197,7 +197,7 @@ RotateInfo calcRotateInfo(ManipulatorData& manipulatorState, ManipulatorTools& t
   auto meanPosition = manipulatorState.meanPosition.has_value() ? manipulatorState.meanPosition.value() : calcMeanPosition(idToPositions(update.selectedObjs.selectedIds, tools.getPosition));
   manipulatorState.meanPosition = meanPosition;
   float rotationAmount = 0.f;
-  auto selectDir = getCursorRayDirection(update.projection, update.cameraViewMatrix, update.cursorPos.x, update.cursorPos.y, update.screensize.x, update.screensize.y, 1.f);
+  auto selectDir = getCursorInfoWorld(update.projection, update.cameraViewMatrix, update.cursorPos.x, update.cursorPos.y, update.screensize.x, update.screensize.y, 1.f).direction;
 
   auto cameraPosition = getTransformationFromMatrix(glm::inverse(update.cameraViewMatrix)).position; 
   auto vecDirection = directionFromQuat(rotationOrientation);
