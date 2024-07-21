@@ -345,9 +345,13 @@ glm::vec3 getMousePositionWorld(){
 
 
 void doOctreeRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPos){
+  if (!idExists(world.sandbox, id) || (!isOctree(world, id))){
+    return;
+  }
   auto octreeModelMatrix = fullModelTransform(world.sandbox, id);
   auto adjustedPosition = glm::inverse(octreeModelMatrix) * glm::vec4(fromPos.x, fromPos.y, fromPos.z, 1.f);
-  auto adjustedDir = glm::inverse(octreeModelMatrix) * glm::vec4(toPos.x, toPos.y, toPos.z, 1.f);
+  auto adjustedToPos = glm::inverse(octreeModelMatrix) * glm::vec4(toPos.x, toPos.y, toPos.z, 1.f);
+  auto adjustedDir = adjustedToPos - adjustedPosition;
 
   GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&world.objectMapping.at(id));
   if (octreeObj){
@@ -357,33 +361,18 @@ void doOctreeRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPos)
   }
 }
 
-objid lineId = 0;
+bool enableSelectionVisualization = false;
 void onMouseButton(){ 
-  std::cout << "mouse depth:  " << currentMouseDepth() << std::endl;
-
-  float depth = currentMouseDepth();
   glm::vec3 fromPos = defaultResources.defaultCamera.transformation.position;
-
-  //addLineNextCycle(fromPos, fromPos + offset, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
-  //return;
-  depth *= -1;
-
-  auto id = state.currentHoverIndex;
-  //auto rayDirection = getMouseDirectionWorld();
-  //glm::vec3 toPos = glm::vec3(rayDirection.x * depth, rayDirection.y * depth, rayDirection.z * depth);
-  //addLineNextCycle(fromPos, fromPos + toPos, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
-//
   auto rayPosition = getMousePositionWorld();
-  if (lineId){
-    freeLine(lineData, lineId);
+  if (enableSelectionVisualization){
+    static objid lineId = 0;
+    if (lineId){
+      freeLine(lineData, lineId);
+    }
+    lineId = addLineNextCycle(fromPos, rayPosition, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
   }
-  lineId = addLineNextCycle(fromPos, rayPosition, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
-
-
-  if (!idExists(world.sandbox, id) || (!isOctree(world, id))){
-    return;
-  }
-  //doOctreeRaycast(world, id, fromPos, toPos);
+  doOctreeRaycast(world, state.currentHoverIndex, fromPos, rayPosition);
 }
 
 void drop_callback(GLFWwindow* window, int count, const char** paths){
