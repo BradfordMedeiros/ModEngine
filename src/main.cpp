@@ -517,8 +517,8 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 
      // This could easily be moved to reduce opengl context switches since the onObject sorts on layers (so just have to pass down).  
     if (state.depthBufferLayer != layer.depthBufferLayer){
-      modassert(state.depthBufferLayer < renderingResources.framebuffers.depthTextures.size(), "invalid layer index");
       state.depthBufferLayer = layer.depthBufferLayer;
+      modassert(state.depthBufferLayer < renderingResources.framebuffers.depthTextures.size(), std::string("invalid layer index: ") + std::to_string(state.depthBufferLayer) + std::string(" [") + layer.name + std::string("]"));
       setActiveDepthTexture(renderingResources.framebuffers.fbo, &renderingResources.framebuffers.depthTextures.at(0), layer.depthBufferLayer);
       glClear(GL_DEPTH_BUFFER_BIT);
     }
