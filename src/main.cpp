@@ -509,18 +509,18 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, bool textBoundingOnly){
   glUseProgram(shaderProgram);
   int numTriangles = 0;
-  int numDepthClears = 0;
 
   std::optional<GLint> lastShaderId = std::nullopt;
-  traverseSandboxByLayer(world.sandbox, [&world, &numDepthClears, shaderProgram, allowShaderOverride, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition, textBoundingOnly, &lastShaderId](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
+  traverseSandboxByLayer(world.sandbox, [&world, shaderProgram, allowShaderOverride, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition, textBoundingOnly, &lastShaderId](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
     modassert(id >= 0, "unexpected id render world");
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
      // This could easily be moved to reduce opengl context switches since the onObject sorts on layers (so just have to pass down).  
     if (state.depthBufferLayer != layer.depthBufferLayer){
+      modassert(state.depthBufferLayer < renderingResources.framebuffers.depthTextures.size(), "invalid layer index");
       state.depthBufferLayer = layer.depthBufferLayer;
+      setActiveDepthTexture(renderingResources.framebuffers.fbo, &renderingResources.framebuffers.depthTextures.at(0), layer.depthBufferLayer);
       glClear(GL_DEPTH_BUFFER_BIT);
-      numDepthClears++;
     }
 
     auto newShader = getShaderByShaderString(shaderstringToId, shader, shaderProgram, allowShaderOverride, shaderFolderPath, interface.readFile);
@@ -1927,6 +1927,7 @@ int main(int argc, char* argv[]){
       auto distanceComponent = hoveredItemColor.r;
       float distance = (distanceComponent * (far - near)) + near;
    
+      std::cout << "depth: " << distance << ", near = " << near << ", far = " << far << std::endl;
       state.currentCursorDepth = distance;
 
     }

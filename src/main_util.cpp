@@ -57,7 +57,7 @@ LayerInfo getLayerForId(objid id){
   return layerByName(getGameObject(world, id).layer);
 }
 RotationDirection getCursorInfoWorld(float ndix, float ndiy){
-  auto layer = world.sandbox.layers.at(0);
+  auto layer = layerByName("");
   auto projection = projectionFromLayer(layer);
   float screenXPosNdi = ndix;
   float screenYPosNdi = ndiy;
