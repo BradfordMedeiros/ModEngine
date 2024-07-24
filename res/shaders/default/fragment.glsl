@@ -51,7 +51,7 @@ uniform bool lightsisdir[MAX_LIGHTS];
 //uniform mat4 lightsprojview[MAX_LIGHTS];
 
 uniform vec3 ambientAmount;
-uniform float emissionAmount;
+uniform vec3 emissionAmount;
 uniform float discardTexAmount;
 uniform float bloomThreshold;
 
@@ -201,10 +201,13 @@ void main(){
 
     bool discardTexture = hasOpacityTexture && opacityColor.r < discardTexAmount;   
     vec4 texColor;
+
+    vec3 finalEmission = vec3(0, 0, 0);
     if (discardTexture){
         discard;
     }else{
-        texColor = diffuseColor + emissionAmount * (hasEmissionTexture ? vec4(emissionColor.rgb, 0) : vec4(0, 0, 0, 0));
+        texColor = diffuseColor;
+        finalEmission = (hasEmissionTexture ? vec3(emissionAmount.r * emissionColor.r, emissionAmount.g * emissionColor.g, emissionAmount.b * emissionColor.b) : vec3(0, 0, 0));
     }
     if (texColor.a < 0.1){
       discard;
@@ -233,7 +236,7 @@ void main(){
     float shadowDelta = (enableShadows && inShadow) ? shadowIntensity : 1.0;
 
     if (enableLighting){
-      FragColor = tint *  vec4(color.xyz * shadowDelta, color.w);
+      FragColor = tint *  vec4(color.xyz * shadowDelta, color.w) + vec4(finalEmission.rgb, 0);
      // if (hasNormalTexture){
      //   FragColor = vec4(1, 0, 0, 1);
      // }
