@@ -1,7 +1,7 @@
 # Includes model that demos emission texture 
 
 boxfront:mesh:./res/models/electricbox/electricbox.obj
-boxfront:emission:100
+boxfront/Cube:emission:5 0 0
 
 platform:mesh:./res/models/box/box.obj
 platform:scale:100 1 100

@@ -565,6 +565,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     glStencilMask(isPortal ? 0xFF : 0x00);
 
     if (layer.visible && id != 0){
+      //std::cout << "render object: " << getGameObject(world, id).name << std::endl;
       auto trianglesDrawn = renderObject(
         newShader, 
         id, 
@@ -622,7 +623,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
   uniformData.push_back(UniformData { .name = "hasOpacityTexture",  .value = false });
   uniformData.push_back(UniformData { .name = "hasRoughnessTexture",  .value = false });
   uniformData.push_back(UniformData { .name = "discardTexAmount",  .value = 0.f });
-  uniformData.push_back(UniformData { .name = "emissionAmount",  .value = 0.f });
+  uniformData.push_back(UniformData { .name = "emissionAmount",  .value = glm::vec3(0.f, 0.f, 0.f) });
   uniformData.push_back(UniformData { .name = "model",  .value = glm::mat4(1.f) });
   uniformData.push_back(UniformData { .name = "lightsprojview",  .value = glm::mat4(1.f) });
   uniformData.push_back(UniformData { .name = "textureOffset",  .value = glm::vec2(1.f, 1.f) });

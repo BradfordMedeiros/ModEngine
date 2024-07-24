@@ -223,12 +223,15 @@ void removeObject(
   assert(false);
 }
 
-void setShaderObjectData(GLint shaderProgram, bool hasBones, glm::vec4 tint, glm::vec2 textureOffset, glm::vec2 textureTiling, glm::vec2 textureSize){
+void setShaderObjectData(GLint shaderProgram, bool hasBones, glm::vec4 tint, glm::vec2 textureOffset, glm::vec2 textureTiling, glm::vec2 textureSize, glm::vec3 emissionAmount = glm::vec3(0.f, 0.f, 0.f)){
   glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(tint));
   glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);    
   glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(textureOffset));
   glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(textureTiling));
   glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(textureSize));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "emissionAmount"), 1, glm::value_ptr(emissionAmount));
+
+  // 
 }
 
 int renderDefaultNode(GLint shaderProgram, Mesh& mesh){
@@ -276,7 +279,7 @@ int renderObject(
         hasBones = true;
       }
 
-      setShaderObjectData(shaderProgram, hasBones, meshObj -> tint, meshObj -> texture.textureoffset, meshObj -> texture.texturetiling, meshObj -> texture.texturesize);
+      setShaderObjectData(shaderProgram, hasBones, meshObj -> tint, meshObj -> texture.textureoffset, meshObj -> texture.texturetiling, meshObj -> texture.texturesize, meshObj -> emissionAmount);
       drawMesh(meshToRender, shaderProgram, meshObj -> texture.loadingInfo.textureId, -1, drawPoints, meshObj -> normalTexture.textureId);   
       numTriangles = numTriangles + meshToRender.numTriangles; 
     }
@@ -284,7 +287,7 @@ int renderObject(
   }
 
   if (meshObj != NULL && (meshObj -> meshesToRender.size() > 0) && (showDebugMask & 0b1)) {
-    setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f), meshObj -> texture.textureoffset, meshObj -> texture.texturetiling, meshObj -> texture.texturesize);
+    setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f), meshObj -> texture.textureoffset, meshObj -> texture.texturetiling, meshObj -> texture.texturesize, meshObj -> emissionAmount);
     drawMesh(*defaultMeshes.nodeMesh, shaderProgram, meshObj -> texture.loadingInfo.textureId);    
     return defaultMeshes.nodeMesh -> numTriangles;
   }

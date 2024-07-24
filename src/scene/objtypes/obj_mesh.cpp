@@ -7,11 +7,11 @@ std::vector<AutoSerialize> meshAutoserializer {
     .field = "tint",
     .defaultValue = glm::vec4(1.f, 1.f, 1.f, 1.f),
   },
-  AutoSerializeFloat {
+  AutoSerializeVec3 {
     .structOffset = offsetof(GameObjectMesh, emissionAmount),
     .structOffsetFiller = std::nullopt,
     .field = "emission",
-    .defaultValue = 0.f,
+    .defaultValue = glm::vec3(0.f, 0.f, 0.f),
   },
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectMesh, discardAmount),

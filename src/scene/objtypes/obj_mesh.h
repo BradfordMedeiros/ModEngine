@@ -13,7 +13,7 @@ struct GameObjectMesh {
   TextureInformation texture;
   TextureLoadingData normalTexture;
   float discardAmount;
-  float emissionAmount;
+  glm::vec3 emissionAmount;
   glm::vec4 tint;
 };
 
