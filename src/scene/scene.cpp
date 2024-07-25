@@ -141,8 +141,6 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   btRigidBody* rigidBody = NULL;
 
   GameObjectObj& toRender = world.objectMapping.at(id);
-  GameObjectHeightmap* heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
-  bool isHeightmapObj = heightmapObj != NULL;
 
   GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&toRender);
   bool isOctree = octreeObj != NULL;
@@ -160,21 +158,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
     .linearDamping = physicsOptions.linearDamping,
   };
 
-  if (isHeightmapObj){
-    rigidBody = addRigidBodyHeightmap(
-      world.physicsEnvironment,
-      calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
-      physicsInfo.transformation.rotation,
-      physicsOptions.isStatic,
-      opts,
-      heightmapObj -> heightmap.data,
-      heightmapObj -> heightmap.width, 
-      heightmapObj -> heightmap.height,
-      physicsInfo.transformation.scale,
-      heightmapObj -> heightmap.minHeight,
-      heightmapObj -> heightmap.maxHeight
-    );
-  }else if (isOctree){
+  if (isOctree){
     auto physicsShapes = getPhysicsShapes(octreeObj -> octree);
     std::cout << debugInfo(physicsShapes) << std::endl;
     rigidBody = addRigidBodyOctree(world.physicsEnvironment, physicsInfo.transformation.position, physicsInfo.transformation.rotation, physicsInfo.transformation.scale, physicsOptions.isStatic, physicsOptions.hasCollisions, opts, physicsShapes.blocks, physicsShapes.shapes);
@@ -592,7 +576,6 @@ extern std::vector<AutoSerialize> soundAutoserializer;
 extern std::vector<AutoSerialize> lightAutoserializer;
 extern std::vector<AutoSerialize> octreeAutoserializer;
 extern std::vector<AutoSerialize> emitterAutoserializer;
-extern std::vector<AutoSerialize> heightmapAutoserializer;
 extern std::vector<AutoSerialize> navmeshAutoserializer;
 extern std::vector<AutoSerialize> textAutoserializer;
 extern std::vector<AutoSerialize> prefabAutoserializer;
@@ -608,7 +591,6 @@ void assertFieldTypesUnique(){
     &lightAutoserializer,
     &octreeAutoserializer,
     &emitterAutoserializer,
-    &heightmapAutoserializer,
     &navmeshAutoserializer,
     &textAutoserializer,
     &prefabAutoserializer,
@@ -646,8 +628,6 @@ std::set<std::string> getObjautoserializerFields(std::string& name){
     return {};
   }else if (type == "emitter"){
     return serializerFieldNames(emitterAutoserializer);
-  }else if (type == "heightmap"){
-    return serializerFieldNames(heightmapAutoserializer);
   }else if (type == "navmesh"){
     return serializerFieldNames(navmeshAutoserializer);
   }else if (type == "text"){

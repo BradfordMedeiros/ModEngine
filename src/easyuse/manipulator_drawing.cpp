@@ -3,7 +3,7 @@
 void drawDirectionalLine(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, glm::vec3 fromPos, glm::vec3 direction, LineColor color){
   glm::vec3 normalizedDirection = glm::normalize(direction);
   auto rotation = quatFromDirection(normalizedDirection);
-  for (int i = 0; i < 10; i++){
+  for (int i = 0; i < 30; i++){
     auto newPos = fromPos + glm::vec3(normalizedDirection.x * i, normalizedDirection.y * i, normalizedDirection.z * i);
     auto leftDash = newPos + rotation * glm::vec3(-0.1f, -0.01f, 0.5f);
     auto rightDash = newPos + rotation * glm::vec3(0.1f, -0.01f, 0.5f);

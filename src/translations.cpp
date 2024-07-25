@@ -207,10 +207,12 @@ bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2F
   return false;
 }
 
+
+float currentMouseDepth();
 glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec3 lockvalues, ProjectCursorDebugInfo* _debugInfo, std::optional<glm::quat> orientation){
   auto positionFrom4 = glm::inverse(view) * glm::vec4(0.f, 0.f, 0.f, 1.0);
   glm::vec3 positionFrom(positionFrom4.x, positionFrom4.y, positionFrom4.z);
-  auto selectDir = getCursorInfoWorld(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y, 1.f).direction;
+  auto selectDir = getCursorInfoWorld(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y, currentMouseDepth()).direction;
   glm::vec3 target(lockvalues.x, lockvalues.y, lockvalues.z);
   glm::vec3 targetDir(0.f, 0.f, 0.f);
   if (manipulatorAxis == XAXIS){
@@ -228,20 +230,9 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
   auto radians = glm::acos(glm::dot(selectDir, glm::normalize(targetDir)));
   //std::cout << "angle: " << glm::degrees(radians) << std::endl;
 
-  glm::vec3 adjTargetPos = positionFrom;
-  if (manipulatorAxis == XAXIS){
-    adjTargetPos.z = target.z;
-  }
-  if (manipulatorAxis == YAXIS){
-    adjTargetPos.x = target.x;
-  }
-  if (manipulatorAxis == ZAXIS){
-    adjTargetPos.x = target.x;
-    adjTargetPos.y = target.y;
-  }
   //std::cout << "adjusted target pos: " << print(adjTargetPos) << std::endl;
 
-  auto distanceToAdjTarget = glm::distance(positionFrom, adjTargetPos);
+  auto distanceToAdjTarget = glm::distance(positionFrom, target);
   auto distanceFinal = distanceToAdjTarget / glm::sin(radians);
   auto offsetFinal = selectDir * distanceFinal;
 
@@ -267,7 +258,7 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
 
   if (_debugInfo != NULL){
     _debugInfo -> positionFrom = positionFrom;
-    _debugInfo -> projectedTarget = adjTargetPos;
+    _debugInfo -> projectedTarget = target;
     _debugInfo -> target = target;
     _debugInfo -> intersectionPoint = finalPosition;
     _debugInfo -> selectDir = selectDir;

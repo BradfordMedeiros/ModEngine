@@ -80,7 +80,6 @@ struct CustomApiBindings {
   double (*timeSeconds)(bool realtime);
   double (*timeElapsed)();
   bool (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename);
-  void (*saveHeightmap)(objid id, std::optional<std::string> filename);
   std::map<std::string, std::string> (*listServers)();
   std::string (*connectServer)(std::string server);
   void (*disconnectServer)();

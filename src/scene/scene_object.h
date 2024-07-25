@@ -26,11 +26,6 @@ bool isOctree(World& world, objid id);
 
 std::optional<Texture> textureForId(World& world, objid id);
 
-void applyHeightmapMasking(World& world, objid id, HeightmapMask& mask, float amount, float uvx, float uvy, bool shouldAverage, float radius);
-GameObjectHeightmap& getHeightmap(World& world, objid id);
-void saveHeightmap(World& world, objid id, std::string filepath);
-bool isHeightmap(World& world, objid id);
-
 GameObjectCamera& getCamera(World& world, objid id);
 
 std::optional<glm::vec3> aiNavigate(World& world, objid id, glm::vec3 target, std::function<void(glm::vec3, glm::vec3)> drawLine);

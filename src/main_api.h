@@ -77,7 +77,6 @@ void doUnloadScenes();
 void unloadAllScenes();
 void resetScene(std::optional<objid> sceneId);
 bool saveScene(bool includeIds, objid sceneId, std::optional<std::string> filename);
-void saveHeightmap(objid id, std::optional<std::string> filename);
 
 std::vector<int32_t> listScenes(std::optional<std::vector<std::string>> tags);
 std::vector<ScenegraphDebug> scenegraph();

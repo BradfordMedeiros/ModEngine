@@ -125,15 +125,6 @@ std::vector<ObjectType> objTypes = {
     .removeObject = removeDoNothing,
   },
   ObjectType {
-    .name = "heightmap",
-    .variantType = getVariantIndex(GameObjectHeightmap{}),
-    .createObj = createHeightmap,
-    .objectAttribute = convertObjectAttribute<GameObjectHeightmap>(getHeightmapAttribute),
-    .setAttribute = convertElementSetAttrValue<GameObjectHeightmap>(setHeightmapAttribute),
-    .serialize = convertSerialize<GameObjectHeightmap>(serializeHeightmap),
-    .removeObject = convertRemove<GameObjectHeightmap>(removeHeightmap),
-  },
-  ObjectType {
     .name = "navmesh",
     .variantType = getVariantIndex(GameObjectNavmesh{}),
     .createObj = createNavmesh,
@@ -337,13 +328,6 @@ int renderObject(
     return renderDefaultNode(shaderProgram, *defaultMeshes.emitter);
   }
 
-  auto heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
-  if (heightmapObj != NULL){
-    setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f), heightmapObj -> texture.textureoffset, heightmapObj -> texture.texturetiling, heightmapObj -> texture.texturesize);
-    drawMesh(heightmapObj -> mesh, shaderProgram, heightmapObj -> texture.loadingInfo.textureId);   
-    return heightmapObj -> mesh.numTriangles;
-  }
-
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&toRender);
   if (navmeshObj != NULL){
     setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f));
@@ -511,17 +495,6 @@ std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, o
   return names;
 }
 
-std::map<objid, GameObjectHeightmap*> getHeightmaps(std::map<objid, GameObjectObj>& mapping){
-  std::map<objid, GameObjectHeightmap*> maps;
-  for (auto &[id, obj] : mapping){
-    auto heightmap = std::get_if<GameObjectHeightmap>(&obj);
-    if (heightmap != NULL){
-      maps[id] = heightmap;
-    }
-  }
-  return maps;  
-}
-
 bool isNavmesh(std::map<objid, GameObjectObj>& mapping, objid id){
   auto object = mapping.at(id); 
   auto navmesh = std::get_if<GameObjectNavmesh>(&object);
@@ -530,10 +503,6 @@ bool isNavmesh(std::map<objid, GameObjectObj>& mapping, objid id){
 
 std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id){
   auto Object = mapping.at(id); 
-  auto heightmapObj = std::get_if<GameObjectHeightmap>(&Object);
-  if (heightmapObj !=NULL){
-    return heightmapObj -> mesh.texture;
-  }
 
   auto meshObj = std::get_if<GameObjectMesh>(&Object);
   if (meshObj != NULL){

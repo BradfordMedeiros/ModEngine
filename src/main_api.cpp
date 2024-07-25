@@ -227,11 +227,6 @@ bool saveScene(bool includeIds, objid sceneId, std::optional<std::string> filena
   return false;
 }
 
-void saveHeightmap(objid id, std::optional<std::string> filename){
-  modassert(filename.has_value(), "save heightmap required specified filename (for now)");
-  saveHeightmap(world, id, filename.value());
-}
-
 std::vector<int32_t> listScenes(std::optional<std::vector<std::string>> tags){
   return allSceneIds(world.sandbox, tags);
 }
@@ -565,12 +560,7 @@ std::vector<std::string> listTextures(){
 std::vector<std::string> listSoundFiles(){
   return { listFilesWithExtensions("./res/sounds", { "wav" }) };
 }
-std::vector<std::string> listHeightmaps(){
-  return { listFilesWithExtensions("./res/heightmaps", { "png", "jpg" }) };
-}
-std::vector<std::string> listHeightmapBrushes(){
-  return { listFilesWithExtensions("./res/brush", { "png", "jpg" }) };
-}
+
 std::vector<std::string> listSceneFiles(){
   return { listFilesWithExtensions("./res/scenes", { "rawscene" }) };
 }
@@ -582,10 +572,6 @@ std::vector<std::string> listResources(std::string resourceType){
     return listTextures();
   }else if (resourceType == "models"){
     return listModels();
-  }else if (resourceType == "heightmaps"){
-    return listHeightmaps();
-  }else if (resourceType == "heightmap-brushes"){
-    return listHeightmapBrushes();
   }else if (resourceType == "scenefiles"){
     return listSceneFiles();
   }

@@ -101,42 +101,6 @@ bool isOctree(World& world, objid id){
   return std::get_if<GameObjectOctree>(&obj) != NULL;  
 }
 
-void applyHeightmapMasking(World& world, objid id, HeightmapMask& mask, float amount, float uvx, float uvy, bool shouldAverage, float radius){
-  auto heightmaps = getHeightmaps(world.objectMapping);
-  if (heightmaps.find(id) == heightmaps.end()){
-    return;
-  }
-  GameObjectHeightmap& hm = *heightmaps.at(id);
-
-  int cellX = uvx * hm.heightmap.width;
-  int cellY = uvy * hm.heightmap.height;
-  //std::cout << "cell (" << cellX << ", " << cellY << " )" << std::endl;
-  //std::cout << "uv: ( " << uvx << ", " << uvy << " )" << std::endl;  
-  applyMasking(hm.heightmap, cellX, cellY, mask, amount, [&world, id]() -> void { 
-      // We change *data fed to bullet.
-      // This can be dynamic, however according to docs min + maxHeight must fall in range. 
-      // Recreating simply ensures that the min/max height is always valid. 
-    updatePhysicsBody(world, id); 
-  }, hm.mesh, shouldAverage);
-}
-
-GameObjectHeightmap& getHeightmap(World& world, objid id){
-  auto heightmaps = getHeightmaps(world.objectMapping);
-  if (heightmaps.find(id) == heightmaps.end()){
-    assert(false);
-  }
-  GameObjectHeightmap& hm = *heightmaps.at(id);
-  return hm; 
-}
-void saveHeightmap(World& world, objid id, std::string filepath){
-  auto hm = getHeightmap(world, id);
-  saveHeightmap(hm.heightmap, filepath);
-}
-bool isHeightmap(World& world, objid id){
-  GameObjectObj& obj = world.objectMapping.at(id);
-  return std::get_if<GameObjectHeightmap>(&obj) != NULL;
-}
-
 GameObjectCamera& getCamera(World& world, objid id){
   GameObjectObj& obj = world.objectMapping.at(id);
   GameObjectCamera*  cameraObj = std::get_if<GameObjectCamera>(&obj);
@@ -308,12 +272,6 @@ void setTexture(World& world, objid index, std::string textureName, std::functio
         meshObj -> normalTexture.textureString = normalTextureName.value();
         meshObj -> normalTexture.textureId = normalTexture.value().textureId;
       }   
-    }
-
-    GameObjectHeightmap* heightmapObj = std::get_if<GameObjectHeightmap>(&world.objectMapping.at(id));
-    if (heightmapObj != NULL){
-      heightmapObj -> texture.loadingInfo.textureString = textureName;
-      heightmapObj -> texture.loadingInfo.textureId = textureId;       
     }
 
     GameObjectNavmesh* navmeshObj = std::get_if<GameObjectNavmesh>(&world.objectMapping.at(id));

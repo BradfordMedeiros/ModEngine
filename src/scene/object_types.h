@@ -14,7 +14,6 @@
 #include "./objtypes/sound/obj_sound.h"
 #include "./objtypes/obj_text.h"
 #include "./objtypes/obj_navmesh.h"
-#include "./objtypes/heightmap/obj_heightmap.h"
 #include "./objtypes/emitter/obj_emitter.h"
 #include "./objtypes/obj_mesh.h"
 #include "./objtypes/obj_octree.h"
@@ -42,7 +41,6 @@ typedef std::variant<
   GameObjectOctree,
   GameObjectRoot, 
   GameObjectEmitter,
-  GameObjectHeightmap,
   GameObjectNavmesh,
   GameObjectUIText,
   GameObjectPrefab
@@ -95,11 +93,6 @@ static Field emitterField {
   .type = "emitter",
 };
 
-static Field heightmap {
-  .prefix = '-',
-  .type = "heightmap",
-};
-
 static Field navmeshField {
   .prefix = ';',
   .type = "navmesh",
@@ -124,7 +117,6 @@ static std::vector fields = {
   octreeField,
   rootField, 
   emitterField, 
-  heightmap, 
   navmeshField, 
   uiTextField,
   prefabField,
@@ -210,7 +202,6 @@ struct NameAndMesh {
 NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id);
 
 std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, objid id);
-std::map<objid, GameObjectHeightmap*> getHeightmaps(std::map<objid, GameObjectObj>& mapping);
 bool isNavmesh(std::map<objid, GameObjectObj>& mapping, objid id);
 std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id);
 void updateObjectPositions(std::map<objid, GameObjectObj>& mapping, objid, glm::vec3 position, Transformation& viewTransform);

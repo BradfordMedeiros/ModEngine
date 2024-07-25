@@ -166,6 +166,7 @@ glm::vec3 projectAndVisualize(ManipulatorData& manipulatorState, ManipulatorTool
     &projectCursorInfo,
     applyOrientation ? tools.getSnapRotation() : std::nullopt
   );
+  tools.clearLines();
   drawProjectionVisualization(tools.drawLine, projectCursorInfo);
   return projectedPosition;
 }
@@ -524,6 +525,7 @@ void manipulatorHandleTransition(ManipulatorData& manipulatorState, ManipulatorT
 }
 
 
+bool showLastVisualization = true;
 void onManipulatorUpdate(
   ManipulatorData& manipulatorState,
   glm::mat4 projection,
@@ -539,11 +541,10 @@ void onManipulatorUpdate(
   bool disable
 ){
   //modlog("manipulator", std::string("manipulator state: ") + manipulatorState.state);
-  manipulatorTools.clearLines();
-
   if (disable){
     return;
   }
+
   auto selectedObjs = manipulatorTools.getSelectedIds();
 
   ManipulatorUpdateInfo updateInfo {

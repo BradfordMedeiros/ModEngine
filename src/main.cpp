@@ -206,12 +206,6 @@ void handlePaintingModifiesViewport(UVCoord uvsToPaint){
   glBindVertexArray(defaultResources.quadVAO);
   glDrawArrays(GL_TRIANGLES, 0, 6);
 }
-void handleTerrainPainting(UVCoord uvCoord, objid hoveredId){
-  if (state.shouldTerrainPaint && state.mouseIsDown){
-    auto mask = loadMask(state.terrainPaintBrush);
-    applyHeightmapMasking(world, hoveredId, mask, state.terrainPaintAmount, uvCoord.x, uvCoord.y, state.terrainSmoothing, state.terrainPaintRadius);
-  }
-}
 
 bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCursor){
   std::cout << "SELECT ITEM CALLED!" << std::endl;
@@ -1373,7 +1367,6 @@ int main(int argc, char* argv[]){
     .timeSeconds = timeSeconds,
     .timeElapsed = timeElapsed,
     .saveScene = saveScene,
-    .saveHeightmap = saveHeightmap,
     .listServers = listServers,
     .connectServer = connectServer,
     .disconnectServer = disconnectServer,
@@ -1851,7 +1844,6 @@ int main(int argc, char* argv[]){
     handlePaintingModifiesViewport(uvCoord);
 
     glViewport(0, 0, state.resolution.x, state.resolution.y);
-    handleTerrainPainting(uvCoord, hoveredId);
      
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
     PROFILE("PORTAL_RENDERING", 
