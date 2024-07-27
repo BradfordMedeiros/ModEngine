@@ -212,7 +212,7 @@ float currentMouseDepth();
 glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec3 lockvalues, ProjectCursorDebugInfo* _debugInfo, std::optional<glm::quat> orientation){
   auto positionFrom4 = glm::inverse(view) * glm::vec4(0.f, 0.f, 0.f, 1.0);
   glm::vec3 positionFrom(positionFrom4.x, positionFrom4.y, positionFrom4.z);
-  auto selectDir = getCursorInfoWorld(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y, currentMouseDepth()).direction;
+  auto selectDir = glm::normalize(getCursorInfoWorld(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y, currentMouseDepth()).direction);
   glm::vec3 target(lockvalues.x, lockvalues.y, lockvalues.z);
   glm::vec3 targetDir(0.f, 0.f, 0.f);
   if (manipulatorAxis == XAXIS){
@@ -222,38 +222,48 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
   }else if (manipulatorAxis == ZAXIS){
     targetDir = glm::vec3(0.f, 0.f, -1.f);
   }
+  targetDir = glm::normalize(targetDir);
 
-  if (orientation.has_value()){
-    targetDir = orientation.value() * targetDir;
-  }
+  auto dirToTarget = glm::normalize(target - positionFrom);
 
-  auto radians = glm::acos(glm::dot(selectDir, glm::normalize(targetDir)));
+
+  //if (orientation.has_value()){
+  //  targetDir = orientation.value() * targetDir;
+  //}
+
+  auto radians = glm::acos(glm::dot(selectDir, targetDir));
+  auto radians2 = glm::acos(glm::dot(dirToTarget, selectDir));
+
+  auto distanceToTarget = glm::distance(positionFrom, target);
+
+
+  auto value = glm::sin(radians2) * distanceToTarget / glm::sin(radians); 
+
   //std::cout << "angle: " << glm::degrees(radians) << std::endl;
 
   //std::cout << "adjusted target pos: " << print(adjTargetPos) << std::endl;
 
-  auto distanceToAdjTarget = glm::distance(positionFrom, target);
-  auto distanceFinal = distanceToAdjTarget / glm::sin(radians);
-  auto offsetFinal = selectDir * distanceFinal;
+
+  // this is wrong, i have one angle and one side, should calculate the other angle 
+  // and then use law of singns (side_length_of_opp_side / sin(thatangle)) = the others
+
+
+  auto finalPosition = target;
+
+  //if (orientation.has_value()){
+  //  offsetFinal = orientation.value() * offsetFinal;
+  //}
 
   if (manipulatorAxis == XAXIS){
-    offsetFinal.y = 0.f;
-    offsetFinal.z = 0.f;
+    finalPosition.x = target.x + (value * targetDir.x);
   }
   if (manipulatorAxis == YAXIS){
-    offsetFinal.x = 0.f;
-    offsetFinal.z = 0.f;
+    //finalPosition.y += offsetFinal.y;
   }
   if (manipulatorAxis == ZAXIS){
-    offsetFinal.x = 0.f;
-    offsetFinal.y = 0.f;
+    //finalPosition.z += offsetFinal.z;
   }
 
-  if (orientation.has_value()){
-    offsetFinal = orientation.value() * offsetFinal;
-  }
-
-  auto finalPosition = positionFrom + offsetFinal;
 
 
   if (_debugInfo != NULL){
