@@ -11,6 +11,7 @@ objid createManipulator(){
       .attr = {
         {"mesh", "./res/models/ui/manipulator.gltf" }, 
         {"layer", "scale" },
+        { "scale", glm::vec3(10.f, 10.f, 10.f) },
       },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {
