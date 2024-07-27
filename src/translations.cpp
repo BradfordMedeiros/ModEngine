@@ -224,45 +224,47 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
   }
   targetDir = glm::normalize(targetDir);
 
-  auto dirToTarget = glm::normalize(target - positionFrom);
+  auto dirToTarget = glm::normalize(target - positionFrom);             // where you click on the manipulator + toward the tard, a triangle
+  auto distanceToTarget = glm::distance(positionFrom, target);          // not a right triangle, so use law of sines to solve
 
+  auto dotRadian1 = glm::dot(selectDir, targetDir);
+  auto radians = glm::acos(dotRadian1);
 
-  //if (orientation.has_value()){
-  //  targetDir = orientation.value() * targetDir;
-  //}
+  auto dotRadian2 = glm::dot(dirToTarget, selectDir);
+  auto radians2 = glm::acos(dotRadian2);
 
-  auto radians = glm::acos(glm::dot(selectDir, targetDir));
-  auto radians2 = glm::acos(glm::dot(dirToTarget, selectDir));
-
-  auto distanceToTarget = glm::distance(positionFrom, target);
-
+  std::cout << "radian1: " << dotRadian1 << ", radians2: " << dotRadian2 << std::endl;
 
   auto value = glm::sin(radians2) * distanceToTarget / glm::sin(radians); 
-
-  //std::cout << "angle: " << glm::degrees(radians) << std::endl;
-
-  //std::cout << "adjusted target pos: " << print(adjTargetPos) << std::endl;
+  
+  glm::vec3 offset(0.f, 0.f, 0.f);
 
 
-  // this is wrong, i have one angle and one side, should calculate the other angle 
-  // and then use law of singns (side_length_of_opp_side / sin(thatangle)) = the others
-
-
-  auto finalPosition = target;
-
-  //if (orientation.has_value()){
-  //  offsetFinal = orientation.value() * offsetFinal;
-  //}
 
   if (manipulatorAxis == XAXIS){
-    finalPosition.x = target.x + (value * targetDir.x);
+    if (dirToTarget.x > selectDir.x){
+      offset.x = -(value * targetDir.x);
+    }else{
+      offset.x = (value * targetDir.x);
+    }
   }
   if (manipulatorAxis == YAXIS){
-    //finalPosition.y += offsetFinal.y;
+    if (dirToTarget.y > selectDir.y){
+      offset.y = -(value * targetDir.y);
+    }else{
+      offset.y = (value * targetDir.y);
+    }
   }
   if (manipulatorAxis == ZAXIS){
-    //finalPosition.z += offsetFinal.z;
+    if (dirToTarget.z > selectDir.z){
+      offset.z = (value * targetDir.z);
+    }else{
+      offset.z = -(value * targetDir.z);
+    }
   }
+
+
+  auto finalPosition = target + offset;
 
 
 
