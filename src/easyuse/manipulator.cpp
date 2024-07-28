@@ -156,7 +156,7 @@ glm::vec3 projectAndVisualize(ManipulatorData& manipulatorState, ManipulatorTool
   auto selectedObjs = tools.getSelectedIds();
   modassert(selectedObjs.mainObj.has_value(), "should not be in translate state with the obj selected");
   ProjectCursorDebugInfo projectCursorInfo{};
-  auto projectedPosition =  projectCursorPositionOntoAxis(
+  auto projectedPosition = projectCursorPositionOntoAxis(
     update.projection, 
     update.cameraViewMatrix, 
     update.cursorPos, 
@@ -399,6 +399,11 @@ std::vector<ManipulatorState> manipulatorStates = {
         auto initialTransform = getInitialTransformation(manipulatorState, targetId);
         auto initialDragScale = initialTransform.scale; 
         auto relativeScale = scaleFactor *  initialDragScale + initialDragScale;
+        if (aboutEqual(relativeScale.x, 0.f) || aboutEqual(relativeScale.y, 0.f) || aboutEqual(relativeScale.z, 0.f)){
+          continue;
+        }
+
+        std::cout << "tools scale: " << print(relativeScale) << std::endl;
         if (update.options.scalingGroup == GROUP_SCALING){
           auto scaleRatio = relativeScale / initialDragScale;
           auto offsetFromMean = initialTransform.position - manipulatorState.meanPosition.value();

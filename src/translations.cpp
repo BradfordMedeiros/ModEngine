@@ -233,13 +233,9 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
   auto dotRadian2 = glm::dot(dirToTarget, selectDir);
   auto radians2 = glm::acos(dotRadian2);
 
-  std::cout << "radian1: " << dotRadian1 << ", radians2: " << dotRadian2 << std::endl;
-
   auto value = glm::sin(radians2) * distanceToTarget / glm::sin(radians); 
   
   glm::vec3 offset(0.f, 0.f, 0.f);
-
-
 
   if (manipulatorAxis == XAXIS){
     if (dirToTarget.x > selectDir.x){
@@ -263,11 +259,7 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
     }
   }
 
-
   auto finalPosition = target + offset;
-
-
-
   if (_debugInfo != NULL){
     _debugInfo -> positionFrom = positionFrom;
     _debugInfo -> projectedTarget = target;

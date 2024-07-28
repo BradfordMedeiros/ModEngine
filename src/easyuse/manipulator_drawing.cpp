@@ -91,10 +91,11 @@ void drawRotation(
   drawLine(meanPosition, meanPosition + angleIndicator, GREEN);
 }
 
-bool drawDebugLines = true;
+bool drawDebugLines = false;
 void drawProjectionVisualization(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, ProjectCursorDebugInfo& projectCursorInfo){
-  drawHitMarker(drawLine, projectCursorInfo.intersectionPoint);
   if (drawDebugLines){
+    drawHitMarker(drawLine, projectCursorInfo.intersectionPoint);
+
     drawLine(projectCursorInfo.positionFrom, projectCursorInfo.intersectionPoint, RED);
     drawLine(projectCursorInfo.positionFrom, projectCursorInfo.projectedTarget, GREEN);
     drawLine(projectCursorInfo.positionFrom, projectCursorInfo.target, BLUE);
