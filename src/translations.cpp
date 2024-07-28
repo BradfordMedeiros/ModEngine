@@ -212,7 +212,7 @@ float currentMouseDepth();
 glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec3 lockvalues, ProjectCursorDebugInfo* _debugInfo, std::optional<glm::quat> orientation){
   auto positionFrom4 = glm::inverse(view) * glm::vec4(0.f, 0.f, 0.f, 1.0);
   glm::vec3 positionFrom(positionFrom4.x, positionFrom4.y, positionFrom4.z);
-  auto selectDir = getCursorInfoWorld(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y, currentMouseDepth()).direction;
+  auto selectDir = glm::normalize(getCursorInfoWorld(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y, currentMouseDepth()).direction);
   glm::vec3 target(lockvalues.x, lockvalues.y, lockvalues.z);
   glm::vec3 targetDir(0.f, 0.f, 0.f);
   if (manipulatorAxis == XAXIS){
@@ -222,38 +222,50 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
   }else if (manipulatorAxis == ZAXIS){
     targetDir = glm::vec3(0.f, 0.f, -1.f);
   }
+  targetDir = glm::normalize(targetDir);
 
-  if (orientation.has_value()){
-    targetDir = orientation.value() * targetDir;
-  }
+  auto dirToTarget = glm::normalize(target - positionFrom);             // where you click on the manipulator + toward the tard, a triangle
+  auto distanceToTarget = glm::distance(positionFrom, target);          // not a right triangle, so use law of sines to solve
 
-  auto radians = glm::acos(glm::dot(selectDir, glm::normalize(targetDir)));
-  //std::cout << "angle: " << glm::degrees(radians) << std::endl;
+  auto dotRadian1 = glm::dot(selectDir, targetDir);
+  auto radians = glm::acos(dotRadian1);
 
-  //std::cout << "adjusted target pos: " << print(adjTargetPos) << std::endl;
+  auto dotRadian2 = glm::dot(dirToTarget, selectDir);
+  auto radians2 = glm::acos(dotRadian2);
 
-  auto distanceToAdjTarget = glm::distance(positionFrom, target);
-  auto distanceFinal = distanceToAdjTarget / glm::sin(radians);
-  auto offsetFinal = selectDir * distanceFinal;
+  std::cout << "radian1: " << dotRadian1 << ", radians2: " << dotRadian2 << std::endl;
+
+  auto value = glm::sin(radians2) * distanceToTarget / glm::sin(radians); 
+  
+  glm::vec3 offset(0.f, 0.f, 0.f);
+
+
 
   if (manipulatorAxis == XAXIS){
-    offsetFinal.y = 0.f;
-    offsetFinal.z = 0.f;
+    if (dirToTarget.x > selectDir.x){
+      offset.x = -(value * targetDir.x);
+    }else{
+      offset.x = (value * targetDir.x);
+    }
   }
   if (manipulatorAxis == YAXIS){
-    offsetFinal.x = 0.f;
-    offsetFinal.z = 0.f;
+    if (dirToTarget.y > selectDir.y){
+      offset.y = -(value * targetDir.y);
+    }else{
+      offset.y = (value * targetDir.y);
+    }
   }
   if (manipulatorAxis == ZAXIS){
-    offsetFinal.x = 0.f;
-    offsetFinal.y = 0.f;
+    if (dirToTarget.z > selectDir.z){
+      offset.z = (value * targetDir.z);
+    }else{
+      offset.z = -(value * targetDir.z);
+    }
   }
 
-  if (orientation.has_value()){
-    offsetFinal = orientation.value() * offsetFinal;
-  }
 
-  auto finalPosition = positionFrom + offsetFinal;
+  auto finalPosition = target + offset;
+
 
 
   if (_debugInfo != NULL){
