@@ -1086,6 +1086,7 @@ int main(int argc, char* argv[]){
    ("q,headlessmode", "Hide the window of the game engine", cxxopts::value<bool>()->default_value("false"))
    ("z,layers", "Layers file to specify render layers", cxxopts::value<std::string>() -> default_value("./res/layers.layerinfo"))
    ("test-unit", "Run unit tests", cxxopts::value<bool>()->default_value("false"))
+   ("test-integ", "Run integration tests", cxxopts::value<bool>()->default_value("false"))
    ("rechunk", "Rechunk the world", cxxopts::value<int>()->default_value("0"))
    ("mods", "List of mod folders", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("font", "Default font to use", cxxopts::value<std::vector<std::string>>()->default_value("./res/textures/fonts/gamefont"))
@@ -1112,6 +1113,8 @@ int main(int argc, char* argv[]){
     auto returnVal = runTests();
     exit(returnVal);
   }
+
+  auto shouldRunIntegrationTests = result["test-integ"].as<bool>();
 
   bool headlessmode = result["headlessmode"].as<bool>();
   int numChunkingGridCells = result["grid"].as<int>();
@@ -1605,6 +1608,7 @@ int main(int argc, char* argv[]){
   modlog("gpu info vendor", std::string(vendor));
   modlog("gpu info renderer", std::string(renderer));
 
+  bool shouldQuitControl = false;
   if (result["skiploop"].as<bool>()){
     goto cleanup;
   }
@@ -1613,12 +1617,11 @@ int main(int argc, char* argv[]){
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
   PROFILE("FRAME",
     auto shouldExit = updateTime(fpsFixed, fixedDelta, speedMultiplier, timetoexit, hasFramelimit, minDeltaTime, fpsLag);
-    if (shouldExit){
+    if (shouldExit || shouldQuitControl){
       goto cleanup;
     }
     registerStatistics();
@@ -1667,6 +1670,16 @@ int main(int argc, char* argv[]){
 
     handleInput(window);
     glfwPollEvents();
+
+    if (shouldRunIntegrationTests){
+      TestResults testResults { .totalTests = 0, .testsPassed = 0 };
+      auto testingComplete = runIntegrationTests(&testResults);
+      if (testingComplete){
+        std::cout << print(testResultsStr(testResults)) << std::endl;
+        shouldQuitControl = true;
+      }
+    }
+
     cBindings.onFrame();
 
     auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
@@ -1717,9 +1730,10 @@ int main(int argc, char* argv[]){
       }
     }
     
+    static auto manipulatorLayer = layerByName("");
     onManipulatorUpdate(
       state.manipulatorState, 
-      projectionFromLayer(layers.at(0)),
+      projectionFromLayer(manipulatorLayer),
       view, 
       state.manipulatorMode, 
       state.manipulatorAxis,

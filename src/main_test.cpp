@@ -1,9 +1,8 @@
 #include "./main_test.h"
 
-typedef void (*func_t)();
 struct TestCase {
   const char* name;
-  func_t test;
+  std::function<void()> test;
 };
 
 void sampleTest(){ 
@@ -77,7 +76,6 @@ std::vector<TestCase> tests = {
   },
 };
 
-
 int runTests(){
   int totalTests = tests.size();
   int numFailures = 0;
@@ -95,4 +93,78 @@ int runTests(){
     }
   }
   return numFailures == 0 ? 0 : 1;
+}
+
+struct IntegrationTest {
+  const char* name;
+  std::function<std::any()> createTestData;
+  std::function<bool()> test;
+};
+
+struct TestRunInformation {
+  std::optional<int> currentTestIndex;
+  IntegrationTest* test;
+  std::any testData;
+};
+
+struct TestOneInformation {
+  bool madeObject;
+  bool deletedObject;
+};
+// this test should make an object, and then it will verify it exists
+// and then it will delete it, and verify it does not exist
+IntegrationTest sampleTestIntegration {
+  .name = "make object test",
+  .createTestData = []() -> std::any {
+    return TestOneInformation {
+      .madeObject = false,
+      .deletedObject = false,
+    };
+  },
+  .test = []() -> bool {
+    return false;
+  }
+};
+
+TestRunInformation runInformation {
+  .currentTestIndex = std::nullopt,
+  .test = NULL,
+  .testData = (void*)NULL,
+};
+
+
+int framecount = 0;
+
+bool runIntegrationTests(TestResults* _testResults){
+  if (!runInformation.currentTestIndex.has_value()){
+    runInformation.test = &sampleTestIntegration;
+    runInformation.testData = runInformation.test -> createTestData();
+    runInformation.currentTestIndex = 0;
+  }
+
+  framecount++;
+  if (runInformation.test){
+    auto testFinished = runInformation.test -> test();
+    if (testFinished){
+      bool testPassed = true;
+      modlog("test finished", std::string("test passed: ") + print(testPassed));
+    
+      runInformation.test = NULL;
+      runInformation.testData = (void*)NULL;
+    }    
+  }
+  bool complete = framecount > 760;
+  if (complete){
+    _testResults -> totalTests = 10,
+    _testResults -> testsPassed = 5;
+  }
+  return complete;
+}
+
+std::string testResultsStr(TestResults& testResults){
+  std::string value;
+  value += std::string("tests = ") + std::to_string(testResults.totalTests) + "\n";
+  value += std::string("passed = ") + std::to_string(testResults.testsPassed) + "\n";
+  value += std::string("failed = ") + std::to_string(testResults.totalTests - testResults.testsPassed) + "\n";
+  return value;
 }

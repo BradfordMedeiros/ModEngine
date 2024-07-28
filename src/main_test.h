@@ -10,4 +10,11 @@
 
 int runTests();
 
+struct TestResults {
+  int totalTests;
+  int testsPassed;
+};
+bool runIntegrationTests(TestResults* _testResults);
+std::string testResultsStr(TestResults& testResults);
+
 #endif
