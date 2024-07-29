@@ -95,10 +95,14 @@ int runTests(){
   return numFailures == 0 ? 0 : 1;
 }
 
+
+struct IntegTestResult {
+  bool passed;
+};
 struct IntegrationTest {
   const char* name;
   std::function<std::any()> createTestData;
-  std::function<bool()> test;
+  std::function<std::optional<IntegTestResult>()> test;
 };
 
 struct TestRunInformation {
@@ -111,8 +115,8 @@ struct TestOneInformation {
   bool madeObject;
   bool deletedObject;
 };
-// this test should make an object, and then it will verify it exists
-// and then it will delete it, and verify it does not exist
+
+int framecount = 0;
 IntegrationTest sampleTestIntegration {
   .name = "make object test",
   .createTestData = []() -> std::any {
@@ -121,9 +125,20 @@ IntegrationTest sampleTestIntegration {
       .deletedObject = false,
     };
   },
-  .test = []() -> bool {
-    return false;
+  .test = []() -> std::optional<IntegTestResult> {
+    if (framecount > 1000){
+      return IntegTestResult {
+        .passed = true,
+      };
+    }
+    return std::nullopt;
   }
+};
+
+std::vector<IntegrationTest> integrationTests {
+  sampleTestIntegration,
+  sampleTestIntegration,
+  sampleTestIntegration,
 };
 
 TestRunInformation runInformation {
@@ -133,38 +148,51 @@ TestRunInformation runInformation {
 };
 
 
-int framecount = 0;
+int totalPassed = 0;
+
+void loadTest(TestRunInformation& runInformation, int testIndex){
+  modlog("test integration loading", std::to_string(testIndex));
+
+  runInformation.currentTestIndex = testIndex;
+  runInformation.test = &integrationTests.at(runInformation.currentTestIndex.value());
+  runInformation.testData = runInformation.test -> createTestData();
+}
 
 bool runIntegrationTests(TestResults* _testResults){
+  framecount++;
+
   if (!runInformation.currentTestIndex.has_value()){
-    runInformation.test = &sampleTestIntegration;
-    runInformation.testData = runInformation.test -> createTestData();
-    runInformation.currentTestIndex = 0;
+    loadTest(runInformation, 0);
+  }
+  
+  auto testResult = runInformation.test -> test();
+  bool testFinished = testResult.has_value();
+  bool moreTestsToLoad = (runInformation.currentTestIndex.value() + 1) < integrationTests.size();
+  bool doneTesting = !moreTestsToLoad && testFinished;
+
+  if (testFinished){
+    modlog("test integration finished", std::string("test passed: ") + print(testResult.value().passed));
+    runInformation.test = NULL;
+    runInformation.testData = (void*)NULL;
+    if (testResult.value().passed){
+      totalPassed++;
+    }
   }
 
-  framecount++;
-  if (runInformation.test){
-    auto testFinished = runInformation.test -> test();
-    if (testFinished){
-      bool testPassed = true;
-      modlog("test finished", std::string("test passed: ") + print(testPassed));
-    
-      runInformation.test = NULL;
-      runInformation.testData = (void*)NULL;
-    }    
+  if (moreTestsToLoad && testFinished){
+    loadTest(runInformation, runInformation.currentTestIndex.value() + 1);
   }
-  bool complete = framecount > 760;
-  if (complete){
-    _testResults -> totalTests = 10,
-    _testResults -> testsPassed = 5;
+  if (doneTesting){
+    _testResults -> totalTests = integrationTests.size(),
+    _testResults -> testsPassed = totalPassed;
   }
-  return complete;
+  return doneTesting;
 }
 
 std::string testResultsStr(TestResults& testResults){
   std::string value;
-  value += std::string("tests = ") + std::to_string(testResults.totalTests) + "\n";
-  value += std::string("passed = ") + std::to_string(testResults.testsPassed) + "\n";
-  value += std::string("failed = ") + std::to_string(testResults.totalTests - testResults.testsPassed) + "\n";
+  value += std::string("test integration tests = ") + std::to_string(testResults.totalTests) + "\n";
+  value += std::string("test integration passed = ") + std::to_string(testResults.testsPassed) + "\n";
+  value += std::string("test integration failed = ") + std::to_string(testResults.totalTests - testResults.testsPassed) + "\n";
   return value;
 }
