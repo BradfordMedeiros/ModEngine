@@ -7,6 +7,7 @@
 #include "./translations_test.h"
 #include "./common/util_test.h"
 #include "./modlayer_test.h"
+#include "./cscript/cscript_binding.h"
 
 int runTests();
 

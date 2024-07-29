@@ -1,5 +1,8 @@
 #include "./main_test.h"
 
+extern CustomApiBindings* mainApi;
+
+///Unit tests ///////////////
 struct TestCase {
   const char* name;
   std::function<void()> test;
@@ -96,6 +99,7 @@ int runTests(){
 }
 
 
+///Integration tests ///////////////
 struct IntegTestResult {
   bool passed;
 };
@@ -106,17 +110,21 @@ struct IntegrationTest {
 };
 
 struct TestRunInformation {
+  int totalPassed;
   std::optional<int> currentTestIndex;
   IntegrationTest* test;
   std::any testData;
 };
 
+objid testSceneId(){
+  return mainApi -> rootSceneId();
+}
+
 struct Wait600Frames {
   int currentFrame;
 };
-
-IntegrationTest sampleTestIntegration {
-  .name = "make object test",
+IntegrationTest wait600FramesTest {
+  .name = "wait600FramesTest",
   .createTestData = []() -> std::any {
     return Wait600Frames {
       .currentFrame = 0,
@@ -135,24 +143,54 @@ IntegrationTest sampleTestIntegration {
   }
 };
 
+struct BasicMakeObject {
+  bool madeObject;
+  std::optional<objid> gameobjId;
+};
+IntegrationTest basicMakeObjectTest {
+  .name = "basicMakeObjectTest",
+  .createTestData = []() -> std::any {
+    return BasicMakeObject {
+      .madeObject = false,
+    };
+  },
+  .test = [](std::any& value) -> std::optional<IntegTestResult> {
+    BasicMakeObject* makeObjectData = anycast<BasicMakeObject>(value);
+    modassert(makeObjectData, "invalid type makeObjectData");
+    if(!makeObjectData -> madeObject){
+      makeObjectData -> madeObject = true;
+      GameobjAttributes attr { .attr = {} };
+      std::map<std::string, GameobjAttributes> submodelAttributes;
+      makeObjectData -> gameobjId = mainApi -> makeObjectAttr(testSceneId(), "test-object-test", attr, submodelAttributes);
+      if (!mainApi -> gameobjExists(makeObjectData -> gameobjId.value())){
+        return IntegTestResult { .passed = false };
+      }    
+      return std::nullopt;
+    }
+    if (!mainApi -> gameobjExists(makeObjectData -> gameobjId.value())){
+      return IntegTestResult { .passed = false };
+    }
+
+    return IntegTestResult { .passed = true };
+  }
+};
+
 std::vector<IntegrationTest> integrationTests {
-  sampleTestIntegration,
-  sampleTestIntegration,
-  sampleTestIntegration,
+  wait600FramesTest,
+  basicMakeObjectTest,
 };
 
-TestRunInformation runInformation {
-  .currentTestIndex = std::nullopt,
-  .test = NULL,
-  .testData = (void*)NULL,
-};
-
-
-int totalPassed = 0;
+TestRunInformation createIntegrationTest(){
+  return TestRunInformation {
+    .currentTestIndex = std::nullopt,
+    .test = NULL,
+    .testData = (void*)NULL,
+  };
+}
+TestRunInformation runInformation = createIntegrationTest();
 
 void loadTest(TestRunInformation& runInformation, int testIndex){
   modlog("test integration loading", std::to_string(testIndex));
-
   runInformation.currentTestIndex = testIndex;
   runInformation.test = &integrationTests.at(runInformation.currentTestIndex.value());
   runInformation.testData = runInformation.test -> createTestData();
@@ -173,7 +211,7 @@ bool runIntegrationTests(TestResults* _testResults){
     runInformation.test = NULL;
     runInformation.testData = (void*)NULL;
     if (testResult.value().passed){
-      totalPassed++;
+      runInformation.totalPassed++;
     }
   }
 
@@ -182,7 +220,7 @@ bool runIntegrationTests(TestResults* _testResults){
   }
   if (doneTesting){
     _testResults -> totalTests = integrationTests.size(),
-    _testResults -> testsPassed = totalPassed;
+    _testResults -> testsPassed = runInformation.totalPassed;
   }
   return doneTesting;
 }
