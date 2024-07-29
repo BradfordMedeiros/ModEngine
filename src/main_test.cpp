@@ -102,7 +102,7 @@ struct IntegTestResult {
 struct IntegrationTest {
   const char* name;
   std::function<std::any()> createTestData;
-  std::function<std::optional<IntegTestResult>()> test;
+  std::function<std::optional<IntegTestResult>(std::any&)> test;
 };
 
 struct TestRunInformation {
@@ -111,27 +111,27 @@ struct TestRunInformation {
   std::any testData;
 };
 
-struct TestOneInformation {
-  bool madeObject;
-  bool deletedObject;
+struct Wait600Frames {
+  int currentFrame;
 };
 
-int framecount = 0;
 IntegrationTest sampleTestIntegration {
   .name = "make object test",
   .createTestData = []() -> std::any {
-    return TestOneInformation {
-      .madeObject = false,
-      .deletedObject = false,
+    return Wait600Frames {
+      .currentFrame = 0,
     };
   },
-  .test = []() -> std::optional<IntegTestResult> {
-    if (framecount > 1000){
-      return IntegTestResult {
-        .passed = true,
-      };
+  .test = [](std::any& value) -> std::optional<IntegTestResult> {
+    Wait600Frames* waitFrames = anycast<Wait600Frames>(value);
+    modassert(waitFrames, "invalid type waitFrames");
+    if (waitFrames -> currentFrame < 600){
+      waitFrames -> currentFrame++;
+      return std::nullopt;
     }
-    return std::nullopt;
+    return IntegTestResult {
+      .passed = true,
+    };
   }
 };
 
@@ -159,13 +159,11 @@ void loadTest(TestRunInformation& runInformation, int testIndex){
 }
 
 bool runIntegrationTests(TestResults* _testResults){
-  framecount++;
-
   if (!runInformation.currentTestIndex.has_value()){
     loadTest(runInformation, 0);
   }
   
-  auto testResult = runInformation.test -> test();
+  auto testResult = runInformation.test -> test(runInformation.testData);
   bool testFinished = testResult.has_value();
   bool moreTestsToLoad = (runInformation.currentTestIndex.value() + 1) < integrationTests.size();
   bool doneTesting = !moreTestsToLoad && testFinished;
