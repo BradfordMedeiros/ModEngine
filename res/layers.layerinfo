@@ -29,7 +29,7 @@ ui:ortho:true
 
 scale:zindex:2
 scale:depth:2
-scale:scale:true
+scale:scale:false
 scale:!enableLighting:false
 scale:?enableLighting:bool
 

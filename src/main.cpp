@@ -1672,10 +1672,11 @@ int main(int argc, char* argv[]){
     glfwPollEvents();
 
     if (shouldRunIntegrationTests){
-      TestResults testResults { .totalTests = 0, .testsPassed = 0 };
-      auto testingComplete = runIntegrationTests(&testResults);
+      static TestRunInformation integrationTests = createIntegrationTest();
+      auto testingComplete = runIntegrationTests(integrationTests);
       if (testingComplete){
-        std::cout << print(testResultsStr(testResults)) << std::endl;
+        auto testingComplete = runIntegrationTests(integrationTests);
+        std::cout << print(testResultsStr(integrationTests.testResults.value())) << std::endl;
         shouldQuitControl = true;
       }
     }
