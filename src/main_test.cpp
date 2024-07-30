@@ -100,6 +100,9 @@ int runTests(){
 
 
 ///Integration tests ///////////////
+
+static std::vector<std::string> sceneTags { "integ-test" };
+
 struct Wait600Frames {
   int currentFrame;
 };
@@ -110,7 +113,7 @@ IntegrationTest wait600FramesTest {
       .currentFrame = 0,
     };
   },
-  .test = [](std::any& value, objid sceneId) -> std::optional<IntegTestResult> {
+  .test = [](std::any& value, objid sceneId) -> std::optional<TestRunReturn> {
     Wait600Frames* waitFrames = anycast<Wait600Frames>(value);
     modassert(waitFrames, "invalid type waitFrames");
     if (waitFrames -> currentFrame < 600){
@@ -133,7 +136,7 @@ IntegrationTest basicMakeObjectTest {
       .gameobjId = std::nullopt,
     };
   },
-  .test = [](std::any& value, objid sceneId) -> std::optional<IntegTestResult> {
+  .test = [](std::any& value, objid sceneId) -> std::optional<TestRunReturn> {
     BasicMakeObject* makeObjectData = anycast<BasicMakeObject>(value);
     modassert(makeObjectData, "invalid type makeObjectData");
     if(!makeObjectData -> gameobjId.has_value()){
@@ -155,16 +158,46 @@ IntegrationTest basicMakeObjectTest {
 struct CheckNumberGameObjects {
 
 };
+int numberOfObjects(){
+  auto objectCountAttr = mainApi -> statValue(mainApi -> stat("object-count"));
+  auto objectCount = std::get_if<int>(&objectCountAttr);
+  modassert(objectCount, "object count is not value");
+  return *objectCount;
+}
 IntegrationTest checkUnloadSceneTest {
   .name = "checkUnloadSceneTest",
   .createTestData = []() -> std::any {
     return CheckNumberGameObjects {};
   },
-  .test = [](std::any& value, objid sceneId) -> std::optional<IntegTestResult> {
+  .test = [](std::any& value, objid sceneId) -> std::optional<TestRunReturn> {
     CheckNumberGameObjects* objectsData = anycast<CheckNumberGameObjects>(value);
     modassert(objectsData, "invalid type makeObjectData");
+    static bool startedWaiting = false;
+    if (!startedWaiting){
+      startedWaiting = true;
+      return IntegTestWaitTime { 
+        .time = mainApi -> timeSeconds(true) + 1,
+      };
+    }
+
+
+    static bool makeObjects = false;
+    if (!makeObjects){
+      makeObjects = true;
+      auto madeSceneId = mainApi -> loadScene("./res/scenes/empty.p.rawscene",{}, std::nullopt, sceneTags);
+      for (int i = 0; i < 20; i++){
+        GameobjAttributes attr { .attr = {} };
+        std::map<std::string, GameobjAttributes> submodelAttributes;
+        mainApi -> makeObjectAttr(sceneId, std::string("test-object-test-") + std::to_string(getUniqueObjId()), attr, submodelAttributes);
+      }
+      return std::nullopt;  
+    }
+
+    auto numObjects = numberOfObjects();
+    modassert(false, std::string("number of objects: ") + std::to_string(numObjects));
+    modassert(false, "finished waiting");
+
     return std::nullopt;
-    //return IntegTestResult { .passed = true };
   }
 };
 
@@ -192,7 +225,6 @@ void loadTest(TestRunInformation& runInformation, int testIndex){
   runInformation.test = &integrationTests.at(runInformation.currentTestIndex.value());
   runInformation.testData = runInformation.test -> createTestData();
 
-  static std::vector<std::string> sceneTags { "integ-test" };
   if (runInformation.sceneId.has_value()){
     runInformation.sceneId = std::nullopt;
     auto integrationTestingScenes = mainApi -> listScenes(sceneTags);
@@ -214,16 +246,18 @@ bool runIntegrationTests(TestRunInformation& runInformation){
     loadTest(runInformation, 0);
   }
 
-
-  auto testResult = runInformation.test -> test(runInformation.testData, runInformation.sceneId.value());
-  auto integrationWaitTime = (testResult.has_value() ? std::get_if<IntegTestWaitTime>(&testResult.value()) : NULL);
-  
   if (runInformation.waitUntil.has_value()){
     if (mainApi -> timeSeconds(true) > runInformation.waitUntil.value()){
       runInformation.waitUntil = std::nullopt;
+    }else{
+      return false;
     }
-  }else if (integrationWaitTime){
-    runInformation.waitUntil = mainApi -> timeSeconds(true) + 5.f;
+  }
+
+  auto testResult = runInformation.test -> test(runInformation.testData, runInformation.sceneId.value());
+  auto integrationWaitTime = (testResult.has_value() ? std::get_if<IntegTestWaitTime>(&testResult.value()) : NULL);
+  if (integrationWaitTime){
+    runInformation.waitUntil = integrationWaitTime -> time;
     return false;
   }
 
