@@ -3,35 +3,19 @@
 
 #include <iostream>
 #include <vector>
-#include "./scene/scene_sandbox_test.h"
-#include "./translations_test.h"
-#include "./common/util_test.h"
-#include "./modlayer_test.h"
-#include "./cscript/cscript_binding.h"
+#include "../scene/scene_sandbox_test.h"
+#include "../translations_test.h"
+#include "../common/util_test.h"
+#include "../modlayer_test.h"
+#include "../cscript/cscript_binding.h"
+#include "./integration/common.h"
+#include "./integration/makeobject.h"
 
 int runTests();
 
 struct TestResults {
   int totalTests;
   int testsPassed;
-};
-
-struct IntegTestResult {
-  bool passed;
-  std::optional<std::string> reason;
-};
-
-struct IntegTestWaitTime {
-  float time;
-};
-
-typedef std::variant<IntegTestResult, IntegTestWaitTime> TestRunReturn;
-
-struct IntegrationTest {
-  const char* name;
-  std::optional<float> timeout = 10.f;
-  std::function<std::any()> createTestData;
-  std::function<std::optional<TestRunReturn>(std::any&, objid)> test;
 };
 
 struct TestRunInformation {

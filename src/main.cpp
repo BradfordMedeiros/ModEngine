@@ -4,13 +4,13 @@
 #include "./main_input.h"
 #include "./scene/common/vectorgfx.h"
 #include "./netscene.h"
-#include "./main_test.h"
 #include "./main_util.h"
 #include "./cscript/cscripts/plugins/perf-visualize.h"
 #include "./cscript/cscripts/plugins/performance_graph.h"
 #include "./scene/common/textures_gen.h"
 #include "./sql/shell.h"
 #include "./common/watch_file.h"
+#include "./tests/main_test.h"
 
 #ifdef ADDITIONAL_SRC_HEADER
   #include STR(ADDITIONAL_SRC_HEADER)
@@ -1624,12 +1624,12 @@ int main(int argc, char* argv[]){
     if (shouldExit || shouldQuitControl){
       goto cleanup;
     }
-    registerStatistics();
-
     resetReservedId();
     disposeTempBufferedData(lineData);
     doRemoveQueuedRemovals();
     doUnloadScenes();
+    registerStatistics();
+
     for (auto &idCoordToGet : idCoordsToGet){
       idCoordToGet.afterFrame(idCoordToGet.result, idCoordToGet.resultUv);
     }

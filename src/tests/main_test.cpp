@@ -100,111 +100,10 @@ int runTests(){
 
 
 ///Integration tests ///////////////
-
-static std::vector<std::string> sceneTags { "integ-test" };
-
-struct Wait600Frames {
-  int currentFrame;
-};
-IntegrationTest wait600FramesTest {
-  .name = "wait600FramesTest",
-  .createTestData = []() -> std::any {
-    return Wait600Frames {
-      .currentFrame = 0,
-    };
-  },
-  .test = [](std::any& value, objid sceneId) -> std::optional<TestRunReturn> {
-    Wait600Frames* waitFrames = anycast<Wait600Frames>(value);
-    modassert(waitFrames, "invalid type waitFrames");
-    if (waitFrames -> currentFrame < 600){
-      waitFrames -> currentFrame++;
-      return std::nullopt;
-    }
-    return IntegTestResult {
-      .passed = true,
-    };
-  }
-};
-
-struct BasicMakeObject {
-  std::optional<objid> gameobjId;
-};
-IntegrationTest basicMakeObjectTest {
-  .name = "basicMakeObjectTest",
-  .createTestData = []() -> std::any {
-    return BasicMakeObject {
-      .gameobjId = std::nullopt,
-    };
-  },
-  .test = [](std::any& value, objid sceneId) -> std::optional<TestRunReturn> {
-    BasicMakeObject* makeObjectData = anycast<BasicMakeObject>(value);
-    modassert(makeObjectData, "invalid type makeObjectData");
-    if(!makeObjectData -> gameobjId.has_value()){
-      GameobjAttributes attr { .attr = {} };
-      std::map<std::string, GameobjAttributes> submodelAttributes;
-      makeObjectData -> gameobjId = mainApi -> makeObjectAttr(sceneId, "test-object-test", attr, submodelAttributes);
-      if (!mainApi -> gameobjExists(makeObjectData -> gameobjId.value())){
-        return IntegTestResult { .passed = false, .reason = "object does not exist on same frame" };
-      }    
-      return std::nullopt;
-    }
-    if (!mainApi -> gameobjExists(makeObjectData -> gameobjId.value())){
-      return IntegTestResult { .passed = false, .reason = "object does not exist on second frame"};
-    }
-    return IntegTestResult { .passed = true };
-  }
-};
-
-struct CheckNumberGameObjects {
-
-};
-int numberOfObjects(){
-  auto objectCountAttr = mainApi -> statValue(mainApi -> stat("object-count"));
-  auto objectCount = std::get_if<int>(&objectCountAttr);
-  modassert(objectCount, "object count is not value");
-  return *objectCount;
-}
-IntegrationTest checkUnloadSceneTest {
-  .name = "checkUnloadSceneTest",
-  .createTestData = []() -> std::any {
-    return CheckNumberGameObjects {};
-  },
-  .test = [](std::any& value, objid sceneId) -> std::optional<TestRunReturn> {
-    CheckNumberGameObjects* objectsData = anycast<CheckNumberGameObjects>(value);
-    modassert(objectsData, "invalid type makeObjectData");
-    static bool startedWaiting = false;
-    if (!startedWaiting){
-      startedWaiting = true;
-      return IntegTestWaitTime { 
-        .time = mainApi -> timeSeconds(true) + 1,
-      };
-    }
-
-
-    static bool makeObjects = false;
-    if (!makeObjects){
-      makeObjects = true;
-      auto madeSceneId = mainApi -> loadScene("./res/scenes/empty.p.rawscene",{}, std::nullopt, sceneTags);
-      for (int i = 0; i < 20; i++){
-        GameobjAttributes attr { .attr = {} };
-        std::map<std::string, GameobjAttributes> submodelAttributes;
-        mainApi -> makeObjectAttr(sceneId, std::string("test-object-test-") + std::to_string(getUniqueObjId()), attr, submodelAttributes);
-      }
-      return std::nullopt;  
-    }
-
-    auto numObjects = numberOfObjects();
-    modassert(false, std::string("number of objects: ") + std::to_string(numObjects));
-    modassert(false, "finished waiting");
-
-    return std::nullopt;
-  }
-};
-
 std::vector<IntegrationTest> integrationTests {
-  wait600FramesTest,
   basicMakeObjectTest,
   checkUnloadSceneTest,
+  parentSceneTest,
 };
 
 TestRunInformation createIntegrationTest(){
@@ -275,8 +174,12 @@ bool runIntegrationTests(TestRunInformation& runInformation){
     runInformation.testStartTime = std::nullopt;
     if (testResult.has_value()){
       auto testResultValue = std::get_if<IntegTestResult>(&testResult.value());
-      if (testResultValue && testResultValue -> passed){
-        runInformation.totalPassed++;
+      if (testResultValue){
+        if (testResultValue -> passed){
+          runInformation.totalPassed++;
+        }else{
+          std::cout << "test integration: " << print(testResultValue -> reason) << std::endl;
+        }
       }
     }
   }
