@@ -196,6 +196,7 @@ objid addLoadingAround(objid id);
 void removeLoadingAround(objid id);
 
 void makeParent(objid child, objid parent);
+std::optional<objid> getParent(objid id);
 
 void createGeneratedMesh(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string destMesh);
 

@@ -88,42 +88,27 @@ IntegrationTest checkUnloadSceneTest {
 };
 
 /////////////////////////////////////////////////////////
-// Verifies the element is parented 
+// Verifies the element is parented correctly
 IntegrationTest parentSceneTest {
   .name = "parentSceneTest",
   .createTestData = []() -> std::any {
-    return CheckNumberGameObjects {
-      .sceneId = std::nullopt,
-      .numObjects = std::nullopt,
-    };
+    return std::nullopt;
   },
   .test = [](std::any& value, objid sceneId) -> std::optional<TestRunReturn> {
-    CheckNumberGameObjects* objectsData = anycast<CheckNumberGameObjects>(value);
-    modassert(objectsData, "invalid type makeObjectData");
-
-    if (objectsData -> numObjects.has_value() && objectsData -> sceneId.has_value()){
-      mainApi -> unloadScene(objectsData -> sceneId.value());
-      objectsData -> sceneId = std::nullopt;
-      return std::nullopt;
-    } 
-    if (objectsData -> numObjects.has_value()){
-      int startFrame = numberOfObjectsFrameStart();
-      if (startFrame != objectsData -> numObjects.value()){
-        return IntegTestResult { .passed = false, .reason = std::string("got = ") + std::to_string(startFrame) + std::string(", wanted = ") + std::to_string(objectsData -> numObjects.value()) };
-      }
-      return IntegTestResult { .passed = true };
+    auto idForScene = mainApi -> loadScene("./res/scenes/empty.p.rawscene",{}, std::nullopt, sceneTags);
+    auto parentId = mainApi -> getParent(mainApi -> rootIdForScene(idForScene));
+    if (!parentId.has_value()){
+      return IntegTestResult { .passed = false, .reason = "missing parent id for scene" };
     }
-    if (!objectsData -> sceneId.has_value()){
-      objectsData -> numObjects = numberOfObjectsFrameStart();
-      objectsData -> sceneId = mainApi -> loadScene("./res/scenes/empty.p.rawscene",{}, std::nullopt, sceneTags);
-      for (int i = 0; i < 15; i++){
-        GameobjAttributes attr { .attr = {} };
-        std::map<std::string, GameobjAttributes> submodelAttributes;
-        mainApi -> makeObjectAttr(objectsData -> sceneId.value(), std::string("test-object-test-") + std::to_string(getUniqueObjId()), attr, submodelAttributes);
-      }
-      return std::nullopt;  
+    auto mainRootId = mainApi -> rootIdForScene(mainApi -> rootSceneId());
+    if (mainRootId != parentId.value()){
+      return IntegTestResult { .passed = false, .reason = "scene not parented correctly" };
     }
-    return IntegTestResult { .passed = false };
+    mainApi -> unloadScene(idForScene);
+    return IntegTestResult { .passed = true };
   }
 };
 
+
+//std::string dumpDebugInfo(bool fullInfo);
+//std::cout << dumpDebugInfo(false) << std::endl;

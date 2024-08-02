@@ -762,7 +762,19 @@ std::optional<objid> listParentObjId(SceneSandbox& sandbox, objid sceneId){
   return gameobjecth.parentId;
 }
 
+std::optional<objid> getParent(SceneSandbox& sandbox, objid id){
+  GameObjectH& gameobjecth = getGameObjectH(sandbox, id);
+  if (gameobjecth.parentId == -1){
+    return std::nullopt;
+  }
+  return gameobjecth.parentId;
+}
+
 objid rootIdForScene(SceneSandbox& sandbox, objid sceneId){
+  std::cout << "scene id: " << sceneId << std::endl;
+  if (sceneId == 0){
+    return sandbox.mainScene.rootId;
+  }
   return sandbox.sceneIdToRootObj.at(sceneId);
 }
 

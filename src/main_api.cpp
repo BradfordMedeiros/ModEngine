@@ -1011,6 +1011,13 @@ void makeParent(objid child, objid parent){
   makeParent(world.sandbox, child, parent);
 }
 
+std::optional<objid> getParent(objid id){
+  if (!idExists(world.sandbox, id)){
+    modassert(false, std::string("id does not exist: " + std::to_string(id)));
+  }
+  return getParent(world.sandbox, id);
+}
+
 void createGeneratedMesh(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string destMesh){
   createGeneratedMesh(world, face, points, destMesh);
 }

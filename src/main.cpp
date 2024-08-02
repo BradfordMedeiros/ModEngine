@@ -1381,6 +1381,7 @@ int main(int argc, char* argv[]){
     .saveRecording = saveRecording,
     .makeObjectAttr = makeObjectAttr,
     .makeParent = makeParent,
+    .getParent = getParent,
     .raycast = raycastW,
     .contactTest = contactTest,
     .contactTestShape = contactTestShape,
