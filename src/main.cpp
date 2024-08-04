@@ -1314,6 +1314,7 @@ int main(int argc, char* argv[]){
     .parentScene = parentScene,
     .childScenes = childScenes,
     .sceneIdByName = sceneIdByName,
+    .sceneNameById = sceneNameById,
     .rootIdForScene = rootIdForScene,
     .rootSceneId = rootSceneId,
     .scenegraph = scenegraph,

@@ -297,9 +297,11 @@ std::vector<objid> getIdsInGroup(Scene& scene, objid groupId){
 }
 
 GameObject& getGameObject(Scene& scene, objid id){
+  modassert(scene.idToGameObjects.find(id) != scene.idToGameObjects.end(), "gameobj does not exist");
   return scene.idToGameObjects.at(id);
 }
 GameObjectH& getGameObjectH(Scene& scene, objid id){
+  modassert(scene.idToGameObjectsH.find(id) != scene.idToGameObjectsH.end(), "gameobjh does not exist");
   return scene.idToGameObjectsH.at(id);
 }
 objid getGroupId(Scene& scene, objid id){
@@ -365,7 +367,7 @@ SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std
 }
 
 void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, GameObject& gameobj)> onElement){
-  for (auto [id, gameObj]: sandbox.mainScene.idToGameObjects){
+  for (auto &[id, gameObj]: sandbox.mainScene.idToGameObjects){
     onElement(id, gameObj); 
   }
 }
@@ -655,8 +657,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
   assert(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());
   for (auto &[_, metadata] : sandbox.sceneIdToSceneMetadata){ // all scene names should be unique
     if (metadata.name == name && name != std::nullopt){
-      std::cout << "scene name already exists: " << name.value() << std::endl;
-      assert(false);
+      modassert(false, std::string("scene name already exists: ") + name.value());
     }
   }
 

@@ -160,6 +160,10 @@ std::optional<objid> sceneIdByName(std::string name){
   return sceneIdByName(world.sandbox, name);
 }
 
+std::optional<std::string> sceneNameById(objid id){
+  return sceneNameForSceneId(world, id);
+}
+
 objid rootIdForScene(objid sceneId){
   return rootIdForScene(world.sandbox, sceneId);
 }

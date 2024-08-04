@@ -208,7 +208,6 @@ void updateEmitters(
 }
 
 void emitNewParticle(EmitterSystem& system, objid emitterNodeId, NewParticleOptions options){
-  std::cout << "Emit new particle placehodler: " << emitterNodeId << std::endl;
   for (auto &emitter : system.emitters){
     if (emitter.emitterNodeId == emitterNodeId){
       emitter.forceParticles.push_back(options);

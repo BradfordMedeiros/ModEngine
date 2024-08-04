@@ -27,7 +27,14 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
       });
       return;   
     }
-    auto parentId = childObjH.parentId;
+    auto parentId = childObjH.parentId;  // this isn't really supposed to happen but indicates a bug
+    if (!idExists(sandbox, parentId)){
+      dotRelations.push_back(DotInfos{
+        .child = childInfo,
+        .parent = std::nullopt,
+      });
+      return;
+    }
     auto parentObj = getGameObject(sandbox, parentId);
     auto parentObjH = getGameObjectH(sandbox, parentId);
     DotInfo parentInfo {

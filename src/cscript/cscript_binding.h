@@ -21,6 +21,7 @@ struct CustomApiBindings {
   bool (*parentScene)(objid sceneId, objid* _parentSceneId);
   std::vector<objid> (*childScenes)(objid sceneId);
   std::optional<objid> (*sceneIdByName)(std::string name);
+  std::optional<std::string>(*sceneNameById)(objid id);
   objid (*rootIdForScene)(objid sceneId);
   objid (*rootSceneId)();
   std::vector<ScenegraphDebug> (*scenegraph)();
