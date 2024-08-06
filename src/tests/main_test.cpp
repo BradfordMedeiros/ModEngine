@@ -104,6 +104,8 @@ std::vector<IntegrationTest> integrationTests {
   basicMakeObjectTest,
   checkUnloadSceneTest,
   parentSceneTest,
+  prefabParentingTest,
+  prefabParentingTest2,
 };
 
 TestRunInformation createIntegrationTest(){
@@ -117,20 +119,22 @@ TestRunInformation createIntegrationTest(){
   };
 }
 
+void unloadAllTestScenes(){
+  modlog("test integration", "unloadAllTestScenes");
+  auto integrationTestingScenes = mainApi -> listScenes(sceneTags);
+  for (auto sceneId : integrationTestingScenes){
+    mainApi -> unloadScene(sceneId);
+  }
+}
 void loadTest(TestRunInformation& runInformation, int testIndex){
   modlog("test integration loading", std::to_string(testIndex));
   runInformation.currentTestIndex = testIndex;
   runInformation.testStartTime = mainApi -> timeSeconds(true);
   runInformation.test = &integrationTests.at(runInformation.currentTestIndex.value());
   runInformation.testData = runInformation.test -> createTestData();
+  runInformation.sceneId = std::nullopt;
 
-  if (runInformation.sceneId.has_value()){
-    runInformation.sceneId = std::nullopt;
-    auto integrationTestingScenes = mainApi -> listScenes(sceneTags);
-    for (auto sceneId : integrationTestingScenes){
-      mainApi -> unloadScene(sceneId);
-    }
-  }
+  unloadAllTestScenes();
   runInformation.sceneId = mainApi -> loadScene("./res/scenes/empty.p.rawscene",{}, std::nullopt, sceneTags);
 
   auto allScenes = mainApi -> listScenes(sceneTags);
@@ -188,6 +192,7 @@ bool runIntegrationTests(TestRunInformation& runInformation){
     loadTest(runInformation, runInformation.currentTestIndex.value() + 1);
   }
   if (doneTesting){
+    unloadAllTestScenes();
     runInformation.testResults = TestResults {
       .totalTests = static_cast<int>(integrationTests.size()),
       .testsPassed = runInformation.totalPassed,

@@ -172,11 +172,11 @@ objid rootSceneId(){
   return rootSceneId(world.sandbox);
 }
 
-std::vector<int32_t> queuedUnloadScenes = {};
+std::set<int32_t> queuedUnloadScenes = {};
 
 void unloadScene(int32_t sceneId){  
   std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;
-  queuedUnloadScenes.push_back(sceneId);
+  queuedUnloadScenes.insert(sceneId);
 }
 void doUnloadScenes(){
   for (auto sceneId : queuedUnloadScenes){
@@ -232,7 +232,14 @@ bool saveScene(bool includeIds, objid sceneId, std::optional<std::string> filena
 }
 
 std::vector<int32_t> listScenes(std::optional<std::vector<std::string>> tags){
-  return allSceneIds(world.sandbox, tags);
+  auto sceneIds = allSceneIds(world.sandbox, tags);
+  std::vector<objid> filteredIds;
+  for (auto sceneId : sceneIds){
+    if (queuedUnloadScenes.count(sceneId) == 0){
+      filteredIds.push_back(sceneId);
+    }
+  }
+  return filteredIds;
 }
 
 std::vector<ScenegraphDebug> scenegraph(){

@@ -6,5 +6,7 @@
 extern IntegrationTest basicMakeObjectTest;
 extern IntegrationTest checkUnloadSceneTest;
 extern IntegrationTest parentSceneTest;
+extern IntegrationTest prefabParentingTest;
+
 
 #endif

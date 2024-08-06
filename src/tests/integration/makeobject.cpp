@@ -109,6 +109,38 @@ IntegrationTest parentSceneTest {
   }
 };
 
+std::string dumpDebugInfo(bool fullInfo);
+/////////////////////////////////////////////////////////
+// Verifies prefab parenting
+IntegrationTest prefabParentingTest {
+  .name = "basicMakeObjParentingTest",
+  .createTestData = []() -> std::any {
+    return std::nullopt;
+  },
+  .test = [](std::any& value, objid sceneId) -> std::optional<TestRunReturn> {
+    GameobjAttributes attr = {
+      .attr = {
+        { "scene", "./res/scenes/empty.p.rawscene" },
+      },
+    };
+    std::map<std::string, GameobjAttributes> submodelAttributes = {};
+    auto prefabId = mainApi -> makeObjectAttr(
+        sceneId, 
+        std::string("test-child") + std::to_string(getUniqueObjId()), 
+        attr, 
+        submodelAttributes
+    ).value();
+
+    
+    std::cout << dumpDebugInfo(false) << std::endl;
+    modassert(false, "-");
+
+    return IntegTestResult { .passed = true };
+  }
+};
+
+
+
 
 //std::string dumpDebugInfo(bool fullInfo);
-//std::cout << dumpDebugInfo(false) << std::endl;
+//
