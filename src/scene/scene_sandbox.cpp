@@ -800,31 +800,6 @@ bool parentSceneId(SceneSandbox& sandbox, objid sceneId, objid* _parentSceneId){
   return false;
 }
 
-std::vector<objid> childSceneIds(SceneSandbox& sandbox, objid sceneId){
-  auto rootObjId = rootIdForScene(sandbox, sceneId);
-  auto allIds = getChildrenIdsAndParent(sandbox.mainScene, rootObjId);
-
-  std::cout << "emitter: root scene: " << sceneId << std::endl;
-  std::cout << "emitter: all ids: " << print(allIds) << std::endl;
-  std::set<objid> uniqueSceneIds;
-  for (auto id : allIds){
-    auto sceneId = getGameObjectH(sandbox, id).sceneId;
-    uniqueSceneIds.insert(sceneId);
-  }
-
-  std::cout << "emitter: all scene ids: " << print(uniqueSceneIds) << std::endl;
-
-  std::vector<objid> allSceneIds;
-  for (auto id : uniqueSceneIds){
-    if (id != sceneId){
-      allSceneIds.push_back(id);
-    }
-  }
-
-  std::cout << "emitter: final scene ids: " << print(allSceneIds) << std::endl;
-  return allSceneIds;
-}
-
 std::vector<objid> getByName(SceneSandbox& sandbox, std::string name){
   std::vector<objid> ids;
   for (auto &[id, gameobj] : sandbox.mainScene.idToGameObjects){

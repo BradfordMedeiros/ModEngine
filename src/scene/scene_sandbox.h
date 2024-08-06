@@ -123,7 +123,6 @@ std::optional<objid> getParent(SceneSandbox& sandbox, objid id);
 objid rootIdForScene(SceneSandbox& sandbox, objid sceneId);
 objid sceneId(SceneSandbox& sandbox, objid id);
 bool parentSceneId(SceneSandbox& sandbox, objid sceneId, objid* _parentSceneId);
-std::vector<objid> childSceneIds(SceneSandbox& sandbox, objid sceneId);
 
 std::vector<objid> getByName(SceneSandbox& sandbox, std::string name);
 int getNumberOfObjects(SceneSandbox& sandbox);

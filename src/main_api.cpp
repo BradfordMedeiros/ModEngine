@@ -117,11 +117,6 @@ bool parentScene(objid sceneId, objid* _parentSceneId){
   return parentSceneId(world.sandbox, sceneId, _parentSceneId);
 }
 
-std::vector<objid> childScenes(objid sceneId){
-  return childSceneIds(world.sandbox, sceneId);
-}
-
-
 int32_t loadSceneWithId(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> id){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
   std::vector<Token> addedTokens;

@@ -63,7 +63,6 @@ std::optional<ModAABB> getModAABB(int32_t index);
 
 std::vector<std::string> listSceneFiles(std::optional<objid> sceneId);
 bool parentScene(objid sceneId, objid* _parentSceneId);
-std::vector<objid> childScenes(objid sceneId);
 
 int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags);
 int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName);
