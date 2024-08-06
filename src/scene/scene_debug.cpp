@@ -27,7 +27,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
       });
       return;   
     }
-    auto parentId = childObjH.parentId;  // this isn't really supposed to happen but indicates a bug
+    auto parentId = childObjH.parentId.value();  // this isn't really supposed to happen but indicates a bug
     if (!idExists(sandbox, parentId)){
       dotRelations.push_back(DotInfos{
         .child = childInfo,
@@ -87,7 +87,7 @@ std::string debugAllGameObjectsH(SceneSandbox& sandbox){
       " " + std::to_string(gameobj.id) + 
       " " + std::to_string(gameobj.sceneId) + 
       " " + std::to_string(gameobj.groupId) + 
-      " " + std::to_string(gameobj.parentId) + " | ";
+      " " + std::to_string(gameobj.parentId.value()) + " | ";
     for (auto id : gameobj.children){
       content = content + " " + std::to_string(id);      
     }

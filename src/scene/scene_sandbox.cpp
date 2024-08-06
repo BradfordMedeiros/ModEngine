@@ -3,7 +3,10 @@
 void addObjectToCache(SceneSandbox& sandbox, objid id);
 void removeObjectFromCache(SceneSandbox& sandbox, objid id);
 
-objid sandboxAddToScene(Scene& scene, objid sceneId, objid parentId, std::string name, GameObject& gameobjectObj){
+objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parentId, std::string name, GameObject& gameobjectObj){
+  if (parentId.has_value() && parentId.value() == -1){
+    modassert(false, "meant to add no parent");
+  }
   modassert(name == gameobjectObj.name, "name does not match gameobjectObj name");
   auto gameobjectH = GameObjectH { 
     .id = gameobjectObj.id,
@@ -33,7 +36,7 @@ void enforceParentRelationship(Scene& scene, objid id, objid parentId){
 void enforceRootObjects(Scene& scene){
   scene.idToGameObjectsH.at(scene.rootId).children.clear();
   for (auto &[id, objh] : scene.idToGameObjectsH){
-    if ((objh.parentId == -1 || objh.parentId == scene.rootId) && id != scene.rootId){
+    if ((!objh.parentId.has_value() || objh.parentId.value() == scene.rootId) && id != scene.rootId){
       enforceParentRelationship(scene, id, scene.rootId);
     }
   }
@@ -82,7 +85,7 @@ SceneDeserialization createSceneFromParsedContent(
 
   scene.sceneToNameToId[sceneId] = {};
   for (auto [name, gameobjectObj] : gameobjs){
-    auto addedId = sandboxAddToScene(scene, sceneId, -1, name, gameobjectObj);
+    auto addedId = sandboxAddToScene(scene, sceneId, std::nullopt, name, gameobjectObj);
   }
 
   for (auto [name, attrWithChildren] : serialGameAttrs){
@@ -147,7 +150,7 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
     auto gameobj = gameObjectFromFields(name, id, defaultAttributesForMultiObj(transform, rootObj, additionalFields.at(nodeId)), getObjautoserializerFields(name));
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
 
-    auto addedId = sandboxAddToScene(scene, sceneId, -1, names.at(nodeId), gameobj);
+    auto addedId = sandboxAddToScene(scene, sceneId, std::nullopt, names.at(nodeId), gameobj);
     addedIds.push_back(addedId);
     scene.idToGameObjectsH.at(id).groupId = rootId;
   }
@@ -176,7 +179,7 @@ std::vector<std::string> childnames(SceneSandbox& sandbox, GameObjectH& gameobje
 }
 
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children){
-  auto addedId = sandboxAddToScene(sandbox.mainScene, sceneId, -1, name, gameobjectObj);      
+  auto addedId = sandboxAddToScene(sandbox.mainScene, sceneId, std::nullopt, name, gameobjectObj);      
   for (auto child : children){
     if (sandbox.mainScene.sceneToNameToId.at(sceneId).find(child) == sandbox.mainScene.sceneToNameToId.at(sceneId).end()){
        // @TODO - shouldn't be an error should automatically create instead
@@ -314,7 +317,7 @@ objid getIdForName(SceneSandbox& sandbox, std::string name, objid sceneId){
 bool idExists(Scene& scene, objid id){
   return scene.idToGameObjects.find(id) != scene.idToGameObjects.end();
 }
-objid parentId(Scene& scene, objid id){
+std::optional<objid> parentId(Scene& scene, objid id){
   return scene.idToGameObjectsH.at(id).parentId;
 }
 
@@ -354,7 +357,7 @@ SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std
 
   std::string name = "root";
   auto rootObj = gameObjectFromFields(name, mainScene.rootId, rootGameObject().attr, getObjautoserializerFields(name)); 
-  auto rootObjId = sandboxAddToScene(mainScene, 0, -1, rootObj.name, rootObj);
+  auto rootObjId = sandboxAddToScene(mainScene, 0, std::nullopt, rootObj.name, rootObj);
 
   SceneSandbox sandbox {
     .mainScene = mainScene,
@@ -480,15 +483,14 @@ Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId, objid
 
 Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId){
   auto parentId = getGameObjectH(sandbox, childId).parentId;
-  if (parentId == -1){
+  if (!parentId.has_value()){
     return sandbox.mainScene.absoluteTransforms.at(childId).transform;
   }
-  return calcRelativeTransform(sandbox, childId, parentId);
+  return calcRelativeTransform(sandbox, childId, parentId.value());
 }
 
 // What should the absolute transform be given a parents absolute and a relative child transform
 Transformation calcAbsoluteTransform(SceneSandbox& sandbox, objid parentId, Transformation transform){
-  modassert(parentId != -1, "scene sandbox - calc absolute Transform - parent id should not be -1");
   Transformation parentTransform = sandbox.mainScene.absoluteTransforms.at(parentId).transform;
 
   glm::mat4 parentMatrix = matrixFromComponents(parentTransform);
@@ -532,24 +534,25 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
     if (id != updatedId){
       sandbox.updatedIds.insert(id);  
     }
-    auto parentId = getGameObjectH(sandbox, id).parentId;
-    if (
-      sandbox.mainScene.absoluteTransforms.find(id) == sandbox.mainScene.absoluteTransforms.end() ||
-      sandbox.mainScene.absoluteTransforms.find(parentId) == sandbox.mainScene.absoluteTransforms.end()){
+    if (sandbox.mainScene.absoluteTransforms.find(id) == sandbox.mainScene.absoluteTransforms.end()){
       continue;
     }
-    if (parentId != -1){
-      GameObject& gameobj = getGameObject(sandbox, id);
-      if (gameobj.physicsOptions.isStatic || !gameobj.physicsOptions.enabled || justAdded /* this is so when you spawn it, the relative transform determines where it goes */){
-         auto currentConstraint = gameobj.transformation;
-         auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
-         sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
-           .transform = newTransform,
-         };       
-      }
+    auto parentId = getGameObjectH(sandbox, id).parentId;
+    if (!parentId.has_value()){
+      continue;
+    }
+    if (sandbox.mainScene.absoluteTransforms.find(parentId.value()) == sandbox.mainScene.absoluteTransforms.end()){
+      continue;
+    }
+    GameObject& gameobj = getGameObject(sandbox, id);
+    if (gameobj.physicsOptions.isStatic || !gameobj.physicsOptions.enabled || justAdded /* this is so when you spawn it, the relative transform determines where it goes */){
+       auto currentConstraint = gameobj.transformation;
+       auto newTransform = calcAbsoluteTransform(sandbox, parentId.value(), currentConstraint);
+       sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
+         .transform = newTransform,
+       };       
     }
   }
-
 }
 
 std::set<objid> updateSandbox(SceneSandbox& sandbox){
@@ -584,7 +587,7 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
     .transform =  transform,
   };
 
-  if (parentId != -1){
+  if (parentId.has_value()){
     auto oldRelativeTransform = calcRelativeTransform(sandbox, id);
     getGameObject(sandbox, id).transformation = oldRelativeTransform;
     //modassert(!aboutEqual(oldRelativeTransform.scale.x, 0.f), "0 scale for x component");
@@ -597,7 +600,7 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
 void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   auto parentId = getGameObjectH(sandbox, id).parentId;
   getGameObject(sandbox, id).transformation = transform;
-  auto newTransform = parentId == -1 ? transform : calcAbsoluteTransform(sandbox, parentId, transform);
+  auto newTransform = !parentId.has_value() ? transform : calcAbsoluteTransform(sandbox, parentId.value(), transform);
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
   };
@@ -735,7 +738,7 @@ void makeParent(SceneSandbox& sandbox, objid child, objid parent){
     assert(decendentId != parent);
   }
 
-  auto oldParentId = childObjH.parentId;
+  auto oldParentId = childObjH.parentId.value();
   GameObjectH& oldParentH = getGameObjectH(sandbox, oldParentId);
 
   oldParentH.children.erase(childObjH.id);
@@ -757,17 +760,11 @@ void makeParent(SceneSandbox& sandbox, objid child, objid parent){
 std::optional<objid> listParentObjId(SceneSandbox& sandbox, objid sceneId){
   auto rootObj = rootIdForScene(sandbox, sceneId);
   GameObjectH& gameobjecth = getGameObjectH(sandbox, rootObj);
-  if (gameobjecth.parentId == -1){
-    return std::nullopt;
-  }
   return gameobjecth.parentId;
 }
 
 std::optional<objid> getParent(SceneSandbox& sandbox, objid id){
   GameObjectH& gameobjecth = getGameObjectH(sandbox, id);
-  if (gameobjecth.parentId == -1){
-    return std::nullopt;
-  }
   return gameobjecth.parentId;
 }
 
