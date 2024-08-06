@@ -1311,7 +1311,6 @@ int main(int argc, char* argv[]){
     .resetScene = resetScene,
     .listScenes = listScenes,
     .listSceneFiles = listSceneFiles,
-    .parentScene = parentScene,
     .sceneIdByName = sceneIdByName,
     .sceneNameById = sceneNameById,
     .rootSceneId = rootSceneId,
