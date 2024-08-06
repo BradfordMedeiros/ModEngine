@@ -109,38 +109,129 @@ IntegrationTest parentSceneTest {
   }
 };
 
-std::string dumpDebugInfo(bool fullInfo);
 /////////////////////////////////////////////////////////
-// Verifies prefab parenting
+// Verifies can remove an object that was added in a different location during scene unload
+struct MakeObjectAttrData {
+  int stage;
+  std::optional<objid> sceneId;
+  std::optional<int> numObjectsStart;
+  std::optional<int> numObjectsAfterCreated;
+};
+
 IntegrationTest prefabParentingTest {
-  .name = "basicMakeObjParentingTest",
+  .name = "removeSceneMakeObjectAttrTest",
   .createTestData = []() -> std::any {
-    return std::nullopt;
+    return MakeObjectAttrData {
+      .stage = 0,
+      .sceneId = std::nullopt,
+      .numObjectsStart = std::nullopt,
+      .numObjectsAfterCreated = std::nullopt,
+    };
   },
   .test = [](std::any& value, objid sceneId) -> std::optional<TestRunReturn> {
-    GameobjAttributes attr = {
-      .attr = {
-        { "scene", "./res/scenes/empty.p.rawscene" },
-      },
-    };
-    std::map<std::string, GameobjAttributes> submodelAttributes = {};
-    auto prefabId = mainApi -> makeObjectAttr(
-        sceneId, 
-        std::string("test-child") + std::to_string(getUniqueObjId()), 
-        attr, 
-        submodelAttributes
-    ).value();
+    MakeObjectAttrData* objectsData = anycast<MakeObjectAttrData>(value);
+    modassert(objectsData, "invalid type objectsData");
 
-    
-    std::cout << dumpDebugInfo(false) << std::endl;
-    modassert(false, "-");
+    if (objectsData -> stage == 0){
+      objectsData -> stage = 1;
+      objectsData -> numObjectsStart = numberOfObjectsFrameStart();
+      objectsData -> sceneId = mainApi -> loadScene("./res/scenes/empty.p.rawscene",{}, std::nullopt, sceneTags);
 
+      GameobjAttributes attr = { .attr = {} };
+      std::map<std::string, GameobjAttributes> submodelAttributes = {};
+      auto prefabId = mainApi -> makeObjectAttr(
+          objectsData -> sceneId.value(), 
+          std::string("test-child") + std::to_string(getUniqueObjId()), 
+          attr, 
+          submodelAttributes
+      ).value();
+
+      return std::nullopt;
+    }else if (objectsData -> stage == 1){
+      objectsData -> stage = 2;
+      objectsData -> numObjectsAfterCreated = numberOfObjectsFrameStart();
+      mainApi -> unloadScene(objectsData -> sceneId.value());
+      return std::nullopt;
+    }
+
+    auto finalCount = numberOfObjectsFrameStart();
+    if (finalCount != objectsData -> numObjectsStart.value()){
+        return IntegTestResult { .passed = false, .reason = std::string("got = ") + std::to_string(finalCount) + std::string(", wanted = ") + std::to_string(objectsData -> numObjectsStart.value()) };
+    }
     return IntegTestResult { .passed = true };
   }
 };
 
+std::string dumpDebugInfo(bool fullInfo);
 
 
+struct MakeObjectAttrData2 {
+  int stage;
+  std::optional<int> numObjectsStart;
+  std::optional<objid> mainSceneId;
+  std::optional<int> numObjectsMainScene;
+  std::optional<objid> orphanSceneId;
+  std::optional<int> numObjectsOrphanScene;
+};
 
-//std::string dumpDebugInfo(bool fullInfo);
-//
+// Verifies we unload the child ids in different scenes when unload scene
+IntegrationTest prefabParentingTest2 {
+  .name = "removeSceneMakeObjectAttrTest2",
+  .createTestData = []() -> std::any {
+    return MakeObjectAttrData2 {
+      .stage = 0,
+      .numObjectsStart = std::nullopt,
+      .mainSceneId = std::nullopt,
+      .numObjectsMainScene = std::nullopt,
+      .orphanSceneId = std::nullopt,
+      .numObjectsOrphanScene = std::nullopt,
+    };
+  },
+  .test = [](std::any& value, objid sceneId) -> std::optional<TestRunReturn> {
+    MakeObjectAttrData2* objectsData = anycast<MakeObjectAttrData2>(value);
+    modassert(objectsData, "invalid type objectsData");
+
+    if (objectsData -> stage == 0){
+      objectsData -> numObjectsStart = numberOfObjectsFrameStart();
+      objectsData -> mainSceneId = mainApi -> loadScene("./res/scenes/empty.p.rawscene",{}, std::nullopt, sceneTags);
+      GameobjAttributes attr = { .attr = {} };
+      std::map<std::string, GameobjAttributes> submodelAttributes = {};
+      auto testChildId = mainApi -> makeObjectAttr(
+          objectsData -> mainSceneId.value(), 
+          std::string("test-child") + std::to_string(getUniqueObjId()), 
+          attr, 
+          submodelAttributes
+      ).value();
+
+      objectsData -> stage = 1;
+      return std::nullopt;
+    }else if (objectsData -> stage == 1){
+      objectsData -> numObjectsMainScene = numberOfObjectsFrameStart() ;
+      auto orphanSceneId = mainApi -> loadScene("./res/scenes/empty.p.rawscene",{}, std::nullopt, sceneTags);
+      GameobjAttributes attr = { .attr = {} };
+      std::map<std::string, GameobjAttributes> submodelAttributes = {};
+      auto testChildId2 = mainApi -> makeObjectAttr(
+          orphanSceneId, 
+          std::string("test-child2") + std::to_string(getUniqueObjId()), 
+          attr, 
+          submodelAttributes
+      ).value();
+      objectsData -> orphanSceneId = orphanSceneId;
+     // mainApi -> makeParent(testChildId2, testChildId);
+      objectsData -> stage = 2;
+      return std::nullopt;
+    }else if (objectsData -> stage == 2){
+      objectsData -> numObjectsOrphanScene = numberOfObjectsFrameStart();
+      mainApi -> unloadScene(objectsData -> mainSceneId.value());
+      objectsData -> stage = 3;
+      return std::nullopt;
+    }
+
+
+    std::cout << dumpDebugInfo(false) << std::endl;
+    modassert(false, "-");
+    //        return IntegTestResult { .passed = false, .reason = std::string("got = ") + std::to_string(finalCount) + std::string(", wanted = ") + std::to_string(objectsData -> numObjectsStart.value()) };
+
+    return IntegTestResult { .passed = true };
+  }
+};
