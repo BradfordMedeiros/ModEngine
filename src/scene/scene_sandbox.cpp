@@ -30,7 +30,6 @@ objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parent
 void enforceParentRelationship(Scene& scene, objid id, objid parentId){
   scene.idToGameObjectsH.at(id).parentId = parentId;
   scene.idToGameObjectsH.at(parentId).children.insert(id);
-  //scene.constraints[id] = scene.idToGameObjects.at(id).transformation;
 }
 
 void enforceRootObjects(Scene& scene){
