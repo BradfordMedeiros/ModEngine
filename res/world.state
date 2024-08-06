@@ -19,19 +19,20 @@ world:paused:true  # true / false
 diffuse:enabled:true
 specular:enabled:true
 bloom:enabled:false
-bloom:amount:2
-bloom:threshold:3
-bloomblur:amount:1
+bloom:amount:20
+bloom:threshold:2
+bloomblur:amount:10
 #exposure:amount:0.8
 pbr:enabled:false
 shadows:enabled:true
-shadows:intensity:0.7
+shadows:intensity:0.4
 attenuation:enabled:false
 
 exposure:enabled:false
 gamma:enabled:false
 
-light:amount:1 1 1
+light:amount:0.6 0.6 0.6
+
 ###############################
 
 ### Post Process ###
@@ -72,7 +73,7 @@ mouse:show-cursor:false
 
 rendering:cull:disabled
 
-editor:showgrid:true
+editor:showgrid:false
 editor:gridsize:40
 #editor:grid:1 0 -1 0
 
