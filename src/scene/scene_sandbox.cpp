@@ -388,7 +388,7 @@ bool sceneContainsTag(SceneSandbox& sandbox, objid sceneId, std::vector<std::str
 
 std::vector<objid> allSceneIds(SceneSandbox& sandbox, std::optional<std::vector<std::string>> tags){
   std::vector<objid> sceneIds;
-  for (auto [sceneId, _] : sandbox.sceneIdToRootObj){
+  for (auto [sceneId, _] : sandbox.sceneIdToSceneMetadata){
     if (!tags.has_value() || sceneContainsTag(sandbox, sceneId, tags.value())){
       sceneIds.push_back(sceneId);
     }
@@ -656,7 +656,7 @@ SceneDeserialization deserializeScene(objid sceneId, std::string content, std::f
   return createSceneFromParsedContent(sceneId, tokens, getNewObjectId, getObjautoserializerFields);
 }
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData,  std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields){
-  assert(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());
+  assert(sandbox.sceneIdToSceneMetadata.find(sceneId) == sandbox.sceneIdToSceneMetadata.end());
   for (auto &[_, metadata] : sandbox.sceneIdToSceneMetadata){ // all scene names should be unique
     if (metadata.name == name && name != std::nullopt){
       modassert(false, std::string("scene name already exists: ") + name.value());
@@ -722,7 +722,7 @@ void removeScene(SceneSandbox& sandbox, objid sceneId){
   pruneSceneId(sandbox, sceneId);
 }
 bool sceneExists(SceneSandbox& sandbox, objid sceneId){
-  return !(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());
+  return !(sandbox.sceneIdToSceneMetadata.find(sceneId) == sandbox.sceneIdToSceneMetadata.end());
 }    
 
 void makeParent(SceneSandbox& sandbox, objid child, objid parent){
@@ -746,7 +746,7 @@ void makeParent(SceneSandbox& sandbox, objid child, objid parent){
 
   bool inDifferentScenes = parentObjH.sceneId != childObjH.sceneId;
 
-  if (inDifferentScenes && sandbox.sceneIdToRootObj.find(child) != sandbox.sceneIdToRootObj.end()){
+  if (inDifferentScenes && sandbox.sceneIdToSceneMetadata.find(child) != sandbox.sceneIdToSceneMetadata.end()){
     auto ids = getChildrenIdsAndParent(sandbox.mainScene, child);
     for (auto id : ids){
       GameObjectH& objh = getGameObjectH(sandbox, id);
