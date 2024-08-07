@@ -756,12 +756,6 @@ void makeParent(SceneSandbox& sandbox, objid child, objid parent){
   updateAllChildrenPositions(sandbox, parent, true); // TODO - only update the newly parented children
 }
 
-std::optional<objid> listParentObjId(SceneSandbox& sandbox, objid sceneId){
-  auto rootObj = rootIdForScene(sandbox, sceneId);
-  GameObjectH& gameobjecth = getGameObjectH(sandbox, rootObj);
-  return gameobjecth.parentId;
-}
-
 std::optional<objid> getParent(SceneSandbox& sandbox, objid id){
   GameObjectH& gameobjecth = getGameObjectH(sandbox, id);
   return gameobjecth.parentId;

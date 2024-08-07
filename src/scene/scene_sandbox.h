@@ -117,7 +117,6 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
 );
 
 void makeParent(SceneSandbox& sandbox, objid child, objid parent);
-std::optional<objid> listParentObjId(SceneSandbox& sandbox, objid sceneId);
 std::optional<objid> getParent(SceneSandbox& sandbox, objid id);
 
 objid rootIdForScene(SceneSandbox& sandbox, objid sceneId);
