@@ -98,7 +98,7 @@ struct AddSceneDataValues {
   std::vector<objid> idsAdded;
   std::map<std::string, GameobjAttributes> subelementAttributes;
 };
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields);
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields, std::optional<objid> parentId);
 void removeScene(SceneSandbox& sandbox, objid sceneId);
 bool sceneExists(SceneSandbox& sandbox, objid sceneId);
 

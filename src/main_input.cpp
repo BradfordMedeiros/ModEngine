@@ -1059,9 +1059,9 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      //std::cout << dumpDebugInfo(false) << std::endl;
-      std::cout << dumpProfiling() << std::endl;
-      sendAlert("*dumped debug data to console*");
+      std::cout << dumpDebugInfo(false) << std::endl;
+      //std::cout << dumpProfiling() << std::endl;
+      //sendAlert("*dumped debug data to console*");
     }
   },
   InputDispatch{

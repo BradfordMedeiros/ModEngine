@@ -14,7 +14,7 @@ void sandboxBasicDeserialization(){
   std::string twoItemScene = std::string("") + 
   "object_one:position:1 0 0\n" + 
   "object_two:position:5 0 0\n";
-  addSceneDataToScenebox(sandbox, "somefilename", 1, twoItemScene, std::nullopt, std::nullopt, testObjautoserializerFields);
+  addSceneDataToScenebox(sandbox, "somefilename", 1, twoItemScene, std::nullopt, std::nullopt, testObjautoserializerFields, std::nullopt);
 
   auto numObjects = getNumberOfObjects(sandbox);
   if (numObjects != 4){  // global root, scene root, two objects in scene
@@ -28,7 +28,7 @@ void sandboxParentPosition(){
   "object_one:position:1 0 0\n" + 
   "object_one:child:object_two\n" + 
   "object_two:position:5 0 0\n";
-  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, std::nullopt, std::nullopt, testObjautoserializerFields);
+  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, std::nullopt, std::nullopt, testObjautoserializerFields, std::nullopt);
   auto objectTwoId = getGameObjectH(sandbox, "object_two", 1).id;
   auto posObjectTwo = fullTransformation(sandbox, objectTwoId);
   auto equal = aboutEqual(posObjectTwo.position, glm::vec3(6.f, 0.f, 0.f));
@@ -42,7 +42,7 @@ void sandboxMakeParentPosition(){
   std::string sceneWithChild = std::string("") + 
   "object_one:position:1 0 0\n" + 
   "object_two:position:5 0 0\n";
-  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, std::nullopt, std::nullopt, testObjautoserializerFields);
+  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, std::nullopt, std::nullopt, testObjautoserializerFields, std::nullopt);
   auto objectOneId = getGameObjectH(sandbox, "object_one", 1).id;
   auto objectTwoId = getGameObjectH(sandbox, "object_two", 1).id;
   auto posObjectTwo = fullTransformation(sandbox, objectTwoId);
@@ -74,7 +74,7 @@ void sandboxUpdateParentRelative(){
   "object_one:position:-1 0 0\n" + 
   "object_one:child:object_two\n" + 
   "object_two:position:5 0 0\n";
-  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, std::nullopt, std::nullopt, testObjautoserializerFields);
+  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, std::nullopt, std::nullopt, testObjautoserializerFields, std::nullopt);
   auto objectOneId = getGameObjectH(sandbox, "object_one", 1).id;
   auto objectTwoId = getGameObjectH(sandbox, "object_two", 1).id;
 
@@ -94,7 +94,7 @@ void sandboxUpdateParentAbsolute(){
   "object_two:position:5 0 0\n" + 
     "object_one:position:-1 0 0\n" + 
   "object_one:child:object_two\n";
-  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, std::nullopt, std::nullopt, testObjautoserializerFields);
+  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, std::nullopt, std::nullopt, testObjautoserializerFields, std::nullopt);
   auto objectOneId = getGameObjectH(sandbox, "object_one", 1).id;
   auto objectTwoId = getGameObjectH(sandbox, "object_two", 1).id;
 
@@ -115,7 +115,7 @@ void sandboxUpdateParentAndChildRelative(){
   "object_one:position:-1 0 0\n" + 
   "object_one:child:object_two\n" + 
   "object_two:position:5 0 0\n";
-  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, std::nullopt, std::nullopt, testObjautoserializerFields);
+  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, std::nullopt, std::nullopt, testObjautoserializerFields, std::nullopt);
   auto objectOneId = getGameObjectH(sandbox, "object_one", 1).id;
   auto objectTwoId = getGameObjectH(sandbox, "object_two", 1).id;
 

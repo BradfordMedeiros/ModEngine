@@ -54,8 +54,8 @@ Texture loadTextureAtlasWorld(World& world, std::string texturepath, std::vector
 Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight, std::optional<objid> mappingTexture);
 void maybeReloadTextureWorld(World& world, std::string texturepath);
 
-objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> sceneId = std::nullopt);
-objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags);
+objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> sceneId, std::optional<objid> parentId);
+objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> parentId);
 void removeSceneFromWorld(World& world, objid sceneId);
 void removeAllScenesFromWorld(World& world);
 

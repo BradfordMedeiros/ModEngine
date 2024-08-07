@@ -166,17 +166,6 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
   return nameToAdditionalFields;
 } 
 
-std::vector<std::string> childnames(SceneSandbox& sandbox, GameObjectH& gameobjecth){   
-  std::vector<std::string> childnames;
-  for (auto childid : gameobjecth.children){
-    auto childH = getGameObjectH(sandbox, childid);
-    if (childH.groupId == childid){
-      childnames.push_back(getGameObject(sandbox, childid).name);
-    }
-  }
-  return childnames;
-}
-
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children){
   auto addedId = sandboxAddToScene(sandbox.mainScene, sceneId, std::nullopt, name, gameobjectObj);      
   for (auto child : children){
@@ -214,10 +203,6 @@ std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid id){
   return objects;
 }
 
-void pruneSceneId(SceneSandbox& sandbox, objid sceneId){
-  sandbox.sceneIdToSceneMetadata.erase(sceneId);
-  sandbox.mainScene.sceneToNameToId.erase(sceneId); 
-}
 
 void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects){  
   for (auto id : objects){
@@ -308,6 +293,16 @@ std::optional<objid> parentId(Scene& scene, objid id){
   return scene.idToGameObjectsH.at(id).parentId;
 }
 
+std::vector<std::string> childnames(SceneSandbox& sandbox, GameObjectH& gameobjecth){   
+  std::vector<std::string> childnames;
+  for (auto childid : gameobjecth.children){
+    auto childH = getGameObjectH(sandbox, childid);
+    if (childH.groupId == childid){
+      childnames.push_back(getGameObject(sandbox, childid).name);
+    }
+  }
+  return childnames;
+}
 std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds){
   std::string sceneData = "# Generated scene \n";
   modassert(sceneId != sandbox.mainScene.rootId, "cannot serialize the main scene");
@@ -634,8 +629,9 @@ SceneDeserialization deserializeScene(objid sceneId, std::string content, std::f
   auto tokens = parseFormat(content);
   return createSceneFromParsedContent(sceneId, tokens, getNewObjectId, getObjautoserializerFields);
 }
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData,  std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields){
-  assert(sandbox.sceneIdToSceneMetadata.find(sceneId) == sandbox.sceneIdToSceneMetadata.end());
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData,  std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields, std::optional<objid> parentId){
+  modassert(!parentId.has_value(), "addSceneDataToScenebox parenting not yet implemented");
+  modassert(sandbox.sceneIdToSceneMetadata.find(sceneId) == sandbox.sceneIdToSceneMetadata.end(), "scene id already exists");
   for (auto &[_, metadata] : sandbox.sceneIdToSceneMetadata){ // all scene names should be unique
     if (metadata.name == name && name != std::nullopt){
       modassert(false, std::string("scene name already exists: ") + name.value());
@@ -697,7 +693,8 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
 // This should find the root of the scene and remove that element + all children (clean up empty scenes i guess? -> but would require unloading the scene!) 
 void removeScene(SceneSandbox& sandbox, objid sceneId){
   removeObjectsFromScenegraph(sandbox,listObjInScene(sandbox, sceneId));
-  pruneSceneId(sandbox, sceneId);
+  sandbox.sceneIdToSceneMetadata.erase(sceneId);
+  sandbox.mainScene.sceneToNameToId.erase(sceneId); 
 }
 bool sceneExists(SceneSandbox& sandbox, objid sceneId){
   return !(sandbox.sceneIdToSceneMetadata.find(sceneId) == sandbox.sceneIdToSceneMetadata.end());
