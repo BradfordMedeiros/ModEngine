@@ -215,20 +215,8 @@ std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid id){
 }
 
 void pruneSceneId(SceneSandbox& sandbox, objid sceneId){
-  sandbox.sceneIdToRootObj.erase(sceneId);
   sandbox.sceneIdToSceneMetadata.erase(sceneId);
   sandbox.mainScene.sceneToNameToId.erase(sceneId); 
-}
-void maybePruneScenes(SceneSandbox& sandbox){
-  std::vector<objid> sceneIdsToPrune;
-  for (auto &[sceneId, rootObjId] : sandbox.sceneIdToRootObj){
-    if (sandbox.mainScene.idToGameObjectsH.find(rootObjId) == sandbox.mainScene.idToGameObjectsH.end()){
-      sceneIdsToPrune.push_back(sceneId);
-    }
-  }
-  for (auto sceneId : sceneIdsToPrune){
-    pruneSceneId(sandbox, sceneId);
-  }
 }
 
 void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects){  
@@ -322,27 +310,19 @@ std::optional<objid> parentId(Scene& scene, objid id){
 
 std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds){
   std::string sceneData = "# Generated scene \n";
+  modassert(sceneId != sandbox.mainScene.rootId, "cannot serialize the main scene");
   for (auto [id, obj]: sandbox.mainScene.idToGameObjectsH){
     if (obj.sceneId != sceneId){
       continue;
     }
-    if (id == sandbox.mainScene.rootId){
-      continue;
-    }
-
     auto gameobj = getGameObject(sandbox, id);
     auto gameobjecth = getGameObjectH(sandbox, id);
-    if (rootIdForScene(sandbox, gameobjecth.sceneId) == gameobj.id){
-      continue;
-    }
-
     auto additionalFields = getAdditionalFields(id); 
     auto children = childnames(sandbox, gameobjecth);
     sceneData = sceneData + serializeObj(id, gameobjecth.groupId, gameobj, children, includeIds, additionalFields,  "");
   }
   return sceneData;
 }
-
 
 SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields){
   Scene mainScene {
@@ -373,7 +353,6 @@ void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, GameObj
     onElement(id, gameObj); 
   }
 }
-
 
 bool sceneContainsTag(SceneSandbox& sandbox, objid sceneId, std::vector<std::string>& tags){
   for (auto &tag : sandbox.sceneIdToSceneMetadata.at(sceneId).tags){
@@ -678,7 +657,6 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
     sandbox.mainScene.sceneToNameToId.at(sceneId)[name] = id;
   }
   auto rootId = deserializedScene.scene.rootId;
-  sandbox.sceneIdToRootObj[deserializedScene.scene.idToGameObjectsH.at(rootId).sceneId] = rootId;
 
   sandbox.sceneIdToSceneMetadata[sceneId] = SceneMetadata{
     .scenefile = sceneFileName,
@@ -759,14 +737,6 @@ void makeParent(SceneSandbox& sandbox, objid child, objid parent){
 std::optional<objid> getParent(SceneSandbox& sandbox, objid id){
   GameObjectH& gameobjecth = getGameObjectH(sandbox, id);
   return gameobjecth.parentId;
-}
-
-objid rootIdForScene(SceneSandbox& sandbox, objid sceneId){
-  std::cout << "scene id: " << sceneId << std::endl;
-  if (sceneId == 0){
-    return sandbox.mainScene.rootId;
-  }
-  return sandbox.sceneIdToRootObj.at(sceneId);
 }
 
 objid sceneId(SceneSandbox& sandbox, objid id){

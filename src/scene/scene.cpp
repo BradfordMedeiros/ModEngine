@@ -855,10 +855,11 @@ void addObjectToWorld(
     }; 
 
     auto loadScene = [&world, id](std::string sceneFile, std::vector<Token>& addedTokens) -> objid {
-      modlog("load scene", std::string("loading scene: " + sceneFile));
+      //modassert(false, "loadscene prefab not yet implemented");
+      //modlog("load scene", std::string("loading scene: " + sceneFile));
       auto sceneId = addSceneToWorld(world, sceneFile, addedTokens, std::nullopt, std::nullopt, std::nullopt);  // should make original obj the parent
-      auto rootId = rootIdForScene(world.sandbox, sceneId);
-      makeParent(world.sandbox, rootId, id);
+      //auto rootId = rootIdForScene(world.sandbox, sceneId);
+      //makeParent(world.sandbox, rootId, id);
       updatePhysicsFromSandbox(world);
       return sceneId;
     };
@@ -979,7 +980,6 @@ void removeObjectByIdFromScene(World& world, objid gameobjId){
     removeObjectById(world, id, name, scriptName, netsynchronized);
   }
   removeObjectsFromScenegraph(world.sandbox, idsToRemove);
-  maybePruneScenes(world.sandbox);
 }
 
 void removeObjectFromScene(World& world, objid objectId){  

@@ -64,7 +64,6 @@ std::vector<std::string> childnames(SceneSandbox& sandbox, GameObjectH& gameobje
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children);
 
 std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid);
-void maybePruneScenes(SceneSandbox& sandbox);
 void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects);
 std::vector<objid> listObjInScene(SceneSandbox& sandbox, std::optional<objid> sceneId);
 std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds);
@@ -119,7 +118,6 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
 void makeParent(SceneSandbox& sandbox, objid child, objid parent);
 std::optional<objid> getParent(SceneSandbox& sandbox, objid id);
 
-objid rootIdForScene(SceneSandbox& sandbox, objid sceneId);
 objid sceneId(SceneSandbox& sandbox, objid id);
 
 std::vector<objid> getByName(SceneSandbox& sandbox, std::string name);

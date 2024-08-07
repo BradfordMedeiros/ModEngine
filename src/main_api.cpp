@@ -132,19 +132,21 @@ int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> a
 
 
 int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName){
-  auto name = std::to_string(getUniqueObjId()) + parentNodeName;
-  GameobjAttributes attr {
-    .attr = {
-      {"position", offset}
-    }, 
-  };
-  std::map<std::string, GameobjAttributes> submodelAttributes = {};
-  auto nodeOffsetId = makeObjectAttr(world.sandbox.mainScene.rootId, name, attr, submodelAttributes).value();
-  std::cout << "load scene offset: " << print(offset) << std::endl;
-  auto sceneId = loadScene(sceneFile, {}, std::nullopt, std::nullopt);
-  auto rootId = rootIdForScene(world.sandbox, sceneId);
-  makeParent(world.sandbox, rootId, nodeOffsetId);
-  return nodeOffsetId;
+  modassert(false, "loadSceneParentOffset not implemented");
+  return 0;
+  //auto name = std::to_string(getUniqueObjId()) + parentNodeName;
+  //GameobjAttributes attr {
+  //  .attr = {
+  //    {"position", offset}
+  //  }, 
+  //};
+  //std::map<std::string, GameobjAttributes> submodelAttributes = {};
+  //auto nodeOffsetId = makeObjectAttr(world.sandbox.mainScene.rootId, name, attr, submodelAttributes).value();
+  //std::cout << "load scene offset: " << print(offset) << std::endl;
+  //auto sceneId = loadScene(sceneFile, {}, std::nullopt, std::nullopt);
+  //auto rootId = rootIdForScene(world.sandbox, sceneId);
+  //makeParent(world.sandbox, rootId, nodeOffsetId);
+  //return nodeOffsetId;
 }
 
 std::optional<objid> sceneIdByName(std::string name){
@@ -153,10 +155,6 @@ std::optional<objid> sceneIdByName(std::string name){
 
 std::optional<std::string> sceneNameById(objid id){
   return sceneNameForSceneId(world, id);
-}
-
-objid rootIdForScene(objid sceneId){
-  return rootIdForScene(world.sandbox, sceneId);
 }
 
 objid rootSceneId(){
