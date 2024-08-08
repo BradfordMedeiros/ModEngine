@@ -625,10 +625,6 @@ Transformation fullTransformation(SceneSandbox& sandbox, objid id){
   return getTransformationFromMatrix(fullModelTransform(sandbox, id));
 }
 
-SceneDeserialization deserializeScene(objid sceneId, std::string content, std::function<objid()> getNewObjectId, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields){
-  auto tokens = parseFormat(content);
-  return createSceneFromParsedContent(sceneId, tokens, getNewObjectId, getObjautoserializerFields);
-}
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData,  std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields, std::optional<objid> parentId){
   modassert(!parentId.has_value(), "addSceneDataToScenebox parenting not yet implemented");
   modassert(sandbox.sceneIdToSceneMetadata.find(sceneId) == sandbox.sceneIdToSceneMetadata.end(), "scene id already exists");
@@ -638,7 +634,8 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
     }
   }
 
-  SceneDeserialization deserializedScene = deserializeScene(sceneId, sceneData, getUniqueObjId, getObjautoserializerFields);
+  auto tokens = parseFormat(sceneData);
+  SceneDeserialization deserializedScene = createSceneFromParsedContent(sceneId, tokens, getUniqueObjId, getObjautoserializerFields);
 
   for (auto &[id, obj] : deserializedScene.scene.idToGameObjects){
     sandbox.mainScene.idToGameObjects[id] = obj;
