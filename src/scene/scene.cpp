@@ -698,7 +698,7 @@ World createWorld(
   std::map<std::string, GameobjAttributes> submodelAttributes;
 
   auto getId = createGetUniqueObjId(idsAdded);
-  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, idsAdded, getId, {{ "root", GameobjAttributesWithId { .id = idsAdded.at(0), .attr = GameobjAttributes{}}}}, submodelAttributes);
+  addSerialObjectsToWorld(world, 0, idsAdded, getId, {{ "root", GameobjAttributesWithId { .id = idsAdded.at(0), .attr = GameobjAttributes{}}}}, submodelAttributes);
 
   // Default meshes that are silently loaded in the background
   for (auto &meshname : defaultMeshes){
@@ -855,7 +855,7 @@ void addObjectToWorld(
     }; 
 
     auto loadScene = [&world, id](std::string sceneFile, std::vector<Token>& addedTokens) -> objid {
-      modassert(false, "loadscene prefab not yet implemented");
+      //modassert(false, "loadscene prefab not yet implemented");
       //modlog("load scene", std::string("loading scene: " + sceneFile));
       auto sceneId = addSceneToWorld(world, sceneFile, addedTokens, std::nullopt, std::nullopt, std::nullopt, id);  // should make original obj the parent
       updatePhysicsFromSandbox(world);

@@ -24,7 +24,6 @@ struct TransformCacheElement {
 };
 
 struct Scene {
-  objid rootId;
   std::map<objid, GameObject> idToGameObjects;
   std::map<objid, GameObjectH> idToGameObjectsH;
   std::map<objid, std::map<std::string, objid>> sceneToNameToId;
