@@ -113,9 +113,6 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
     .tags = tags.has_value() ? tags.value() : std::vector<std::string>({}),
   }; 
 
-  // todo - enforce top level parenting here
-  // enforceParentRelationship(sandbox.mainScene, rootId, sandbox.mainScene.rootId);
-
   std::vector<objid> idsAdded;
   for (auto &[id, obj] :  sandbox.mainScene.idToGameObjectsH){
     if (obj.sceneId == sceneId){
