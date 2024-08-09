@@ -5,19 +5,18 @@ void removeObjectFromCache(SceneSandbox& sandbox, objid id);
 
 void enforceParentRelationship(Scene& scene, objid id, objid parentId){
   auto oldParent = scene.idToGameObjectsH.at(id).parentId;
-  if (oldParent.has_value()){
-    scene.idToGameObjectsH.at(oldParent.value()).children.erase(id);
+  if (oldParent){
+    scene.idToGameObjectsH.at(oldParent).children.erase(id);
   }
   scene.idToGameObjectsH.at(id).parentId = parentId;
   scene.idToGameObjectsH.at(parentId).children.insert(id);
 }
 
-objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parentId, GameObject& gameobjectObj){
-  modassert(!(parentId.has_value() && parentId.value() == -1), "meant to add no parent");
 
+objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parentId, GameObject& gameobjectObj){
   auto gameobjectH = GameObjectH { 
     .id = gameobjectObj.id,
-    .parentId = parentId,
+    .parentId = parentId.has_value() ? parentId.value() : 0,
     .groupId = gameobjectObj.id,
     .sceneId = sceneId,
   };
@@ -485,10 +484,10 @@ Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId, objid
 
 Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId){
   auto parentId = getGameObjectH(sandbox, childId).parentId;
-  if (!parentId.has_value()){
+  if (parentId == 0){
     return sandbox.mainScene.absoluteTransforms.at(childId).transform;
   }
-  return calcRelativeTransform(sandbox, childId, parentId.value());
+  return calcRelativeTransform(sandbox, childId, parentId);
 }
 
 // What should the absolute transform be given a parents absolute and a relative child transform
@@ -540,16 +539,16 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
       continue;
     }
     auto parentId = getGameObjectH(sandbox, id).parentId;
-    if (!parentId.has_value()){
+    if (parentId == 0){
       continue;
     }
-    if (sandbox.mainScene.absoluteTransforms.find(parentId.value()) == sandbox.mainScene.absoluteTransforms.end()){
+    if (sandbox.mainScene.absoluteTransforms.find(parentId) == sandbox.mainScene.absoluteTransforms.end()){
       continue;
     }
     GameObject& gameobj = getGameObject(sandbox, id);
     if (gameobj.physicsOptions.isStatic || !gameobj.physicsOptions.enabled || justAdded /* this is so when you spawn it, the relative transform determines where it goes */){
        auto currentConstraint = gameobj.transformation;
-       auto newTransform = calcAbsoluteTransform(sandbox, parentId.value(), currentConstraint);
+       auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
        sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
          .transform = newTransform,
        };       
@@ -588,7 +587,7 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
     .transform =  transform,
   };
 
-  if (parentId.has_value()){
+  if (parentId != 0){
     auto oldRelativeTransform = calcRelativeTransform(sandbox, id);
     getGameObject(sandbox, id).transformation = oldRelativeTransform;
     //modassert(!aboutEqual(oldRelativeTransform.scale.x, 0.f), "0 scale for x component");
@@ -600,7 +599,7 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
 void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   auto parentId = getGameObjectH(sandbox, id).parentId;
   getGameObject(sandbox, id).transformation = transform;
-  auto newTransform = !parentId.has_value() ? transform : calcAbsoluteTransform(sandbox, parentId.value(), transform);
+  auto newTransform = parentId == 0 ? transform : calcAbsoluteTransform(sandbox, parentId, transform);
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
   };

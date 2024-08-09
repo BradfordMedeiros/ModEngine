@@ -28,15 +28,9 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
       return;   
     }
     auto parentId = childObjH.parentId;  // this isn't really supposed to happen but indicates a bug
-    if (!parentId.has_value() || !idExists(sandbox, parentId.value())){
-      dotRelations.push_back(DotInfos{
-        .child = childInfo,
-        .parent = std::nullopt,
-      });
-      return;
-    }
-    auto parentObj = getGameObject(sandbox, parentId.value());
-    auto parentObjH = getGameObjectH(sandbox, parentId.value());
+ 
+    auto parentObj = getGameObject(sandbox, parentId);
+    auto parentObjH = getGameObjectH(sandbox, parentId);
     DotInfo parentInfo {
       .name = parentObj.name,
       .id = parentObj.id,
@@ -45,7 +39,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
       .position = parentObj.transformation.position,
       .scale = parentObj.transformation.scale,
       .rotation = parentObj.transformation.rotation, 
-      .meshes = getMeshNames(objectMapping, parentId.value()),
+      .meshes = getMeshNames(objectMapping, parentId),
     };
     dotRelations.push_back(DotInfos{
       .child = childInfo,
@@ -87,7 +81,7 @@ std::string debugAllGameObjectsH(SceneSandbox& sandbox){
       " " + std::to_string(gameobj.id) + 
       " " + std::to_string(gameobj.sceneId) + 
       " " + std::to_string(gameobj.groupId) + 
-      " " + std::to_string(gameobj.parentId.has_value() ? gameobj.parentId.value() : 0) + " | ";
+      " " + std::to_string(gameobj.parentId) + " | ";
     for (auto id : gameobj.children){
       content = content + " " + std::to_string(id);      
     }

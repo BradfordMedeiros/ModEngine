@@ -13,7 +13,7 @@
 
 struct GameObjectH {
   objid id;
-  std::optional<objid> parentId;
+  objid parentId;
   std::set<objid> children;
   objid groupId;       // grouping mechanism for nodes.  It is either its own id, or explicitly stated when created. 
   objid sceneId;
