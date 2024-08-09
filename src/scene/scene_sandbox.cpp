@@ -83,7 +83,6 @@ SceneDeserialization createSceneFromParsedContent(
 }
 
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData,  std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields, std::optional<objid> parentId){
-  modassert(!parentId.has_value(), "addSceneDataToScenebox parenting not yet implemented");
   modassert(sandbox.sceneIdToSceneMetadata.find(sceneId) == sandbox.sceneIdToSceneMetadata.end(), "scene id already exists");
   for (auto &[_, metadata] : sandbox.sceneIdToSceneMetadata){ // all scene names should be unique
     if (metadata.name == name && name != std::nullopt){
@@ -99,7 +98,10 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
   }
   for (auto &[id, obj] : deserializedScene.scene.idToGameObjectsH){
     sandbox.mainScene.idToGameObjectsH[id] = obj;
+    enforceParentRelationship(sandbox.mainScene, id, parentId.has_value() ? parentId.value() : 0);
   }
+
+
   
   assert(sandbox.mainScene.sceneToNameToId.find(sceneId) ==  sandbox.mainScene.sceneToNameToId.end());
   sandbox.mainScene.sceneToNameToId[sceneId] = {};

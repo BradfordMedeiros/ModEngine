@@ -855,9 +855,7 @@ void addObjectToWorld(
     }; 
 
     auto loadScene = [&world, id](std::string sceneFile, std::vector<Token>& addedTokens) -> objid {
-      //modassert(false, "loadscene prefab not yet implemented");
-      //modlog("load scene", std::string("loading scene: " + sceneFile));
-      auto sceneId = addSceneToWorld(world, sceneFile, addedTokens, std::nullopt, std::nullopt, std::nullopt, id);  // should make original obj the parent
+      auto sceneId = addSceneToWorld(world, sceneFile, addedTokens, std::nullopt, std::nullopt, std::nullopt, id);
       updatePhysicsFromSandbox(world);
       return sceneId;
     };
@@ -924,7 +922,7 @@ objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sce
 
 objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> sceneId, std::optional<objid> parentId){
   auto sceneData = world.interface.readFile(sceneFile) + "\n" + serializeSceneTokens(addedTokens);  // maybe should clean this up to prevent string hackeyness
-  return addSceneToWorldFromData(world, sceneFile, sceneId.has_value() ? sceneId.value() : getUniqueObjId(), sceneData, name, tags, std::nullopt);
+  return addSceneToWorldFromData(world, sceneFile, sceneId.has_value() ? sceneId.value() : getUniqueObjId(), sceneData, name, tags, parentId);
 }
 
 // todo verify removing data like eg clearing meshes, animations,etc
