@@ -55,20 +55,18 @@ SceneDeserialization createSceneFromParsedContent(
   }
 
   scene.sceneToNameToId[sceneId] = {};
+
   for (auto [name, gameobjectObj] : gameobjs){
     modassert(name == gameobjectObj.name, "names do not match");
     sandboxAddToScene(scene, sceneId, std::nullopt, gameobjectObj);
   }
 
+  std::map<std::string, GameobjAttributes> additionalFields;
   for (auto [name, attrWithChildren] : serialGameAttrs){
     for (auto childName : attrWithChildren.children){
       auto parentId = scene.sceneToNameToId.at(sceneId).at(name);
       enforceParentRelationship(scene, scene.sceneToNameToId.at(sceneId).at(childName), parentId);
     }
-  }
-
-  std::map<std::string, GameobjAttributes> additionalFields;
-  for (auto &[name, attrWithChildren] : serialGameAttrs){
     additionalFields[name] = attrWithChildren.attr;
   }
 

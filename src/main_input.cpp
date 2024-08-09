@@ -1060,6 +1060,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       std::cout << dumpDebugInfo(false) << std::endl;
+      modassert(false, "-");
       //std::cout << dumpProfiling() << std::endl;
       //sendAlert("*dumped debug data to console*");
     }

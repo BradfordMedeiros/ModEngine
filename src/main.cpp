@@ -1940,7 +1940,7 @@ int main(int argc, char* argv[]){
       auto distanceComponent = hoveredItemColor.r;
       float distance = (distanceComponent * (far - near)) + near;
    
-      std::cout << "depth: " << distance << ", near = " << near << ", far = " << far << std::endl;
+      //std::cout << "depth: " << distance << ", near = " << near << ", far = " << far << std::endl;
       state.currentCursorDepth = distance;
 
     }
