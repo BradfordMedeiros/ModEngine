@@ -82,13 +82,15 @@ SceneDeserialization createSceneFromParsedContent(
   return deserializedScene;
 }
 
+// todo if this is an existing scene, it doesn't sponsor tags 
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData,  std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields, std::optional<objid> parentId){
-  modassert(sandbox.sceneIdToSceneMetadata.find(sceneId) == sandbox.sceneIdToSceneMetadata.end(), "scene id already exists");
   for (auto &[_, metadata] : sandbox.sceneIdToSceneMetadata){ // all scene names should be unique
     if (metadata.name == name && name != std::nullopt){
       modassert(false, std::string("scene name already exists: ") + name.value());
     }
   }
+
+  bool existingScene = sandbox.mainScene.sceneToNameToId.find(sceneId) != sandbox.mainScene.sceneToNameToId.end();
 
   auto tokens = parseFormat(sceneData);
   SceneDeserialization deserializedScene = createSceneFromParsedContent(sceneId, tokens, getUniqueObjId, getObjautoserializerFields);
@@ -98,22 +100,28 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
   }
   for (auto &[id, obj] : deserializedScene.scene.idToGameObjectsH){
     sandbox.mainScene.idToGameObjectsH[id] = obj;
-    enforceParentRelationship(sandbox.mainScene, id, parentId.has_value() ? parentId.value() : 0);
+    if (parentId.has_value() && obj.parentId == 0){
+      enforceParentRelationship(sandbox.mainScene, id, parentId.value());
+    }
+    //
   }
 
 
-  
-  assert(sandbox.mainScene.sceneToNameToId.find(sceneId) ==  sandbox.mainScene.sceneToNameToId.end());
-  sandbox.mainScene.sceneToNameToId[sceneId] = {};
+  if (!existingScene){
+    assert(sandbox.mainScene.sceneToNameToId.find(sceneId) ==  sandbox.mainScene.sceneToNameToId.end());
+    sandbox.mainScene.sceneToNameToId[sceneId] = {};
+    sandbox.sceneIdToSceneMetadata[sceneId] = SceneMetadata{
+      .scenefile = sceneFileName,
+      .name = name,
+      .tags = tags.has_value() ? tags.value() : std::vector<std::string>({}),
+    }; 
+  }
+
   for (auto &[name, id] : deserializedScene.scene.sceneToNameToId.at(sceneId)){
+    modassert(sandbox.mainScene.sceneToNameToId.at(sceneId).find(name) == sandbox.mainScene.sceneToNameToId.at(sceneId).end(), "duplicate name");
     sandbox.mainScene.sceneToNameToId.at(sceneId)[name] = id;
   }
 
-  sandbox.sceneIdToSceneMetadata[sceneId] = SceneMetadata{
-    .scenefile = sceneFileName,
-    .name = name,
-    .tags = tags.has_value() ? tags.value() : std::vector<std::string>({}),
-  }; 
 
   std::vector<objid> idsAdded;
   for (auto &[id, obj] :  sandbox.mainScene.idToGameObjectsH){
@@ -525,7 +533,7 @@ std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId)
   return ids;
 }
 
-void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool justAdded = false){
+void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool justAdded){
   //std::cout << "should update id: " << updatedId << std::endl;
   // do a breath first search, and then update it in that order
   auto updatedIdElements = bfsElementAndChildren(sandbox, updatedId);

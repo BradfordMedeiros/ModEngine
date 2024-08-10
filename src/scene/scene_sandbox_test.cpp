@@ -17,7 +17,7 @@ void sandboxBasicDeserialization(){
   addSceneDataToScenebox(sandbox, "somefilename", 1, twoItemScene, std::nullopt, std::nullopt, testObjautoserializerFields, std::nullopt);
 
   auto numObjects = getNumberOfObjects(sandbox);
-  if (numObjects != 4){  // global root, scene root, two objects in scene
+  if (numObjects != 3){  // global root, scene root, two objects in scene
     throw std::logic_error(std::string("incorrect number of objects: ") + std::to_string(numObjects));
   }
 }

@@ -88,6 +88,8 @@ void traverseSandboxByLayer(SceneSandbox& sandbox, std::function<void(objid, glm
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id);
 Transformation fullTransformation(SceneSandbox& sandbox, objid id);
 
+void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool justAdded = false);
+
 struct GameobjAttributesWithId {
   objid id;
   GameobjAttributes attr;

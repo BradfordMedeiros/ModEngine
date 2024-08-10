@@ -854,10 +854,10 @@ void addObjectToWorld(
       
     }; 
 
-    auto loadScene = [&world, id](std::string sceneFile, std::vector<Token>& addedTokens) -> objid {
-      auto sceneId = addSceneToWorld(world, sceneFile, addedTokens, std::nullopt, std::nullopt, std::nullopt, id);
+    auto loadScene = [&world, id, sceneId](std::string sceneFile, std::vector<Token>& addedTokens) -> objid {
+      auto newSceneId = addSceneToWorld(world, sceneFile, addedTokens, std::nullopt, std::nullopt, std::nullopt, id);
       updatePhysicsFromSandbox(world);
-      return sceneId;
+      return newSceneId;
     };
 
     ObjectTypeUtil util {
