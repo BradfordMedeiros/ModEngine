@@ -182,3 +182,88 @@ void sandboxRelativeTransform(){
     }
   }
 }
+
+void sandboxRemoveSceneTest(){
+  SceneSandbox sandbox = createSceneSandbox({ LayerInfo{ .name = "", } }, testObjautoserializerFields);
+  std::string testScene1= std::string("") + 
+  "testobject:position:-1 0 0\n";
+  std::string testScene2 = std::string("") + 
+  "testobject:position:-1 0 0\n";
+
+  addSceneDataToScenebox(sandbox, "somefilename1", 1, testScene1, std::nullopt, std::nullopt, testObjautoserializerFields, std::nullopt);
+  addSceneDataToScenebox(sandbox, "somefilename2", 2, testScene2, std::nullopt, std::nullopt, testObjautoserializerFields, std::nullopt);
+
+  auto objectOneId = getGameObjectH(sandbox, "testobject", 1).id;
+  auto objectTwoId = getGameObjectH(sandbox, "testobject", 2).id;
+
+  {
+    auto sceneIds = allSceneIds(sandbox, std::nullopt);
+    if (sceneIds.size() != 2){
+      throw std::logic_error(std::string("unexpected number of scenes: got ") + std::to_string(sceneIds.size()));
+    }
+  }
+  removeScene(sandbox, 1);
+  {
+    auto sceneIds = allSceneIds(sandbox, std::nullopt);
+    if (sceneIds.size() != 1){
+      throw std::logic_error(std::string("unexpected number of scenes: got ") + std::to_string(sceneIds.size()));
+    }
+  }
+  removeScene(sandbox, 2);
+
+  {
+    auto sceneIds = allSceneIds(sandbox, std::nullopt);
+    if (sceneIds.size() != 0){
+      throw std::logic_error(std::string("unexpected number of scenes: got ") + std::to_string(sceneIds.size()));
+    }
+  }
+}
+
+void sandboxRemoveSceneParentTest(){
+  SceneSandbox sandbox = createSceneSandbox({ LayerInfo{ .name = "", } }, testObjautoserializerFields);
+  std::string testScene1= std::string("") + 
+  "testobject:position:-1 0 0\n";
+  std::string testScene2 = std::string("") + 
+  "testobject:position:-1 0 0\n";
+
+  addSceneDataToScenebox(sandbox, "somefilename1", 1, testScene1, std::nullopt, std::nullopt, testObjautoserializerFields, std::nullopt);
+  addSceneDataToScenebox(sandbox, "somefilename2", 2, testScene2, std::nullopt, std::nullopt, testObjautoserializerFields, std::nullopt);
+
+  auto objectOneId = getGameObjectH(sandbox, "testobject", 1).id;
+  auto objectTwoId = getGameObjectH(sandbox, "testobject", 2).id;
+
+  makeParent(sandbox, objectTwoId, objectOneId);
+
+  {
+    auto sceneIds = allSceneIds(sandbox, std::nullopt);
+    if (sceneIds.size() != 2){
+      throw std::logic_error(std::string("unexpected number of scenes: got ") + std::to_string(sceneIds.size()));
+    }
+    {
+      auto numObjectsInScene = listObjInScene(sandbox, 1).size();
+      if (numObjectsInScene != 1){
+        throw std::logic_error(std::string("unexpected number of scenes: got ") + std::to_string(numObjectsInScene));
+      };      
+    }
+    {
+      auto numObjectsInScene = listObjInScene(sandbox, 2).size();
+      if (numObjectsInScene != 1){
+        throw std::logic_error(std::string("unexpected number in scenes 2: got ") + std::to_string(numObjectsInScene));
+      };      
+    }
+  }
+  removeScene(sandbox, 1);
+
+  {
+    auto sceneIds = allSceneIds(sandbox, std::nullopt);
+    if (sceneIds.size() != 1 || sceneIds.at(0) != 2){
+      throw std::logic_error(std::string("after remove unexpected number of scenes: got ") + std::to_string(sceneIds.size()));
+    }
+    auto numObjectsInScene = listObjInScene(sandbox, 2).size();
+    if (numObjectsInScene != 0){
+      throw std::logic_error(std::string("after remove unexpected number in scenes 2: got ") + std::to_string(numObjectsInScene));
+    };      
+  }  
+
+
+}

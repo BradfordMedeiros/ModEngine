@@ -11,5 +11,7 @@ void sandboxUpdateParentRelative();
 void sandboxUpdateParentAbsolute();
 void sandboxUpdateParentAndChildRelative();
 void sandboxRelativeTransform();
+void sandboxRemoveSceneTest();
+void sandboxRemoveSceneParentTest();
 
 #endif

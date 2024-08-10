@@ -657,6 +657,7 @@ Transformation fullTransformation(SceneSandbox& sandbox, objid id){
 }
 
 void removeScene(SceneSandbox& sandbox, objid sceneId){
+  modassert(sceneId != 0, "cannot remove root scene");
   removeObjectsFromScenegraph(sandbox, listObjInScene(sandbox, sceneId)); // @TODO this should get children too
   sandbox.sceneIdToSceneMetadata.erase(sceneId);
   sandbox.mainScene.sceneToNameToId.erase(sceneId); 

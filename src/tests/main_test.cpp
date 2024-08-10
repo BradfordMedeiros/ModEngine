@@ -46,6 +46,14 @@ std::vector<TestCase> tests = {
     .test = sandboxRelativeTransform,
   },
   TestCase {
+    .name = "sandboxRemoveSceneTest",
+    .test = sandboxRemoveSceneTest,
+  },
+  TestCase {
+    .name = "sandboxRemoveSceneParentTest",
+    .test = sandboxRemoveSceneParentTest,
+  },
+  TestCase {
     .name = "moveRelativeIdentityTest",
     .test = moveRelativeIdentityTest,
   },
