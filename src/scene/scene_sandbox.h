@@ -65,6 +65,7 @@ void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name
 std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid);
 void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects);
 std::vector<objid> listObjInScene(SceneSandbox& sandbox, std::optional<objid> sceneId);
+std::vector<objid> listObjAndDescInScene(SceneSandbox& sandbox, objid sceneId);
 std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds);
 ///////////////////////////////
 

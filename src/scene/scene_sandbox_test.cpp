@@ -5,6 +5,10 @@
 
 // but maybe this should check if a read for a child is dirty and then it could recalculate?
 
+
+//std::string debugAllGameObjects(SceneSandbox& sandbox);
+//std::string debugAllGameObjectsH(SceneSandbox& sandbox);
+
 static std::set<std::string> testObjautoserializerFields(std::string& name){
   return {};
 };
@@ -223,7 +227,8 @@ void sandboxRemoveSceneParentTest(){
   SceneSandbox sandbox = createSceneSandbox({ LayerInfo{ .name = "", } }, testObjautoserializerFields);
   std::string testScene1= std::string("") + 
   "testobject:position:-1 0 0\n";
-  std::string testScene2 = std::string("") + 
+  std::string testScene2 = std::string("") +
+  "testobjectrun:position:-1 0 0\n" + 
   "testobject:position:-1 0 0\n";
 
   addSceneDataToScenebox(sandbox, "somefilename1", 1, testScene1, std::nullopt, std::nullopt, testObjautoserializerFields, std::nullopt);
@@ -247,7 +252,7 @@ void sandboxRemoveSceneParentTest(){
     }
     {
       auto numObjectsInScene = listObjInScene(sandbox, 2).size();
-      if (numObjectsInScene != 1){
+      if (numObjectsInScene != 2){
         throw std::logic_error(std::string("unexpected number in scenes 2: got ") + std::to_string(numObjectsInScene));
       };      
     }
@@ -260,7 +265,7 @@ void sandboxRemoveSceneParentTest(){
       throw std::logic_error(std::string("after remove unexpected number of scenes: got ") + std::to_string(sceneIds.size()));
     }
     auto numObjectsInScene = listObjInScene(sandbox, 2).size();
-    if (numObjectsInScene != 0){
+    if (numObjectsInScene != 1){
       throw std::logic_error(std::string("after remove unexpected number in scenes 2: got ") + std::to_string(numObjectsInScene));
     };      
   }  

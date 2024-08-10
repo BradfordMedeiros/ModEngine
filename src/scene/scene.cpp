@@ -1013,7 +1013,7 @@ void removeSceneFromWorld(World& world, objid sceneId){
     return;   // @todo maybe better to throw error instead
   }
 
-  for (auto objectId : listObjInScene(world.sandbox, sceneId)){
+  for (auto objectId : listObjAndDescInScene(world.sandbox, sceneId)){
     if (!idExists(world.sandbox, objectId)){  // this is needed b/c removeobject by id can in turn end up removing other entities
       continue;
     }

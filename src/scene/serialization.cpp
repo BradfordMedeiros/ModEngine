@@ -282,7 +282,7 @@ std::map<std::string, AttrChildrenPair> deserializeSceneTokens(std::vector<Token
   std::map<std::string, AttrChildrenPair> objectAttributes;
 
   for (Token token : tokens){
-    assert(token.target != "" && token.attribute != "" && token.payload != "");
+    modassert(token.target != "" && token.attribute != "" && token.payload != "", "empty tokens");
     if (objectAttributes.find(token.target) == objectAttributes.end()) {
       assert(token.target.find(',') == std::string::npos);
       objectAttributes[token.target] = AttrChildrenPair {

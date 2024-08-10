@@ -98,9 +98,6 @@ int runTests(){
     }catch(std::logic_error ex){
       std::cout << i << " : " << test.name << " : fail - " << ex.what() << std::endl;
       numFailures++;
-    }catch(...){
-      std::cout << i << " : " << test.name << " : fail -- error unknown" << std::endl;
-      numFailures++;
     }
   }
   return numFailures == 0 ? 0 : 1;
