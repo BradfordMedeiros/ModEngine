@@ -95,17 +95,18 @@ IntegrationTest parentSceneTest {
     return std::nullopt;
   },
   .test = [](std::any& value, objid sceneId) -> std::optional<TestRunReturn> {
-    auto idForScene = mainApi -> loadScene("./res/scenes/empty.p.rawscene",{}, std::nullopt, sceneTags);
-    auto parentId = mainApi -> getParent(mainApi -> rootIdForScene(idForScene));
-    if (!parentId.has_value()){
-      return IntegTestResult { .passed = false, .reason = "missing parent id for scene" };
-    }
-    auto mainRootId = mainApi -> rootIdForScene(mainApi -> rootSceneId());
-    if (mainRootId != parentId.value()){
-      return IntegTestResult { .passed = false, .reason = "scene not parented correctly" };
-    }
-    mainApi -> unloadScene(idForScene);
-    return IntegTestResult { .passed = true };
+    modassert(false, "not yet implemented");
+    //auto idForScene = mainApi -> loadScene("./res/scenes/empty.p.rawscene",{}, std::nullopt, sceneTags);
+    //auto parentId = mainApi -> getParent(mainApi -> rootIdForScene(idForScene));
+    //if (!parentId.has_value()){
+    //  return IntegTestResult { .passed = false, .reason = "missing parent id for scene" };
+    //}
+    //auto mainRootId = mainApi -> rootIdForScene(mainApi -> rootSceneId());
+    //if (mainRootId != parentId.value()){
+    //  return IntegTestResult { .passed = false, .reason = "scene not parented correctly" };
+    //}
+    //mainApi -> unloadScene(idForScene);
+    //return IntegTestResult { .passed = true };
   }
 };
 

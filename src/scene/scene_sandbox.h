@@ -24,7 +24,6 @@ struct TransformCacheElement {
 };
 
 struct Scene {
-  objid rootId;
   std::map<objid, GameObject> idToGameObjects;
   std::map<objid, GameObjectH> idToGameObjectsH;
   std::map<objid, std::map<std::string, objid>> sceneToNameToId;
@@ -64,7 +63,6 @@ std::vector<std::string> childnames(SceneSandbox& sandbox, GameObjectH& gameobje
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children);
 
 std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid);
-void maybePruneScenes(SceneSandbox& sandbox);
 void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects);
 std::vector<objid> listObjInScene(SceneSandbox& sandbox, std::optional<objid> sceneId);
 std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds);
@@ -90,6 +88,8 @@ void traverseSandboxByLayer(SceneSandbox& sandbox, std::function<void(objid, glm
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id);
 Transformation fullTransformation(SceneSandbox& sandbox, objid id);
 
+void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool justAdded = false);
+
 struct GameobjAttributesWithId {
   objid id;
   GameobjAttributes attr;
@@ -99,7 +99,7 @@ struct AddSceneDataValues {
   std::vector<objid> idsAdded;
   std::map<std::string, GameobjAttributes> subelementAttributes;
 };
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields);
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields, std::optional<objid> parentId);
 void removeScene(SceneSandbox& sandbox, objid sceneId);
 bool sceneExists(SceneSandbox& sandbox, objid sceneId);
 
@@ -117,13 +117,9 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
 );
 
 void makeParent(SceneSandbox& sandbox, objid child, objid parent);
-std::optional<objid> listParentObjId(SceneSandbox& sandbox, objid sceneId);
 std::optional<objid> getParent(SceneSandbox& sandbox, objid id);
 
-objid rootIdForScene(SceneSandbox& sandbox, objid sceneId);
 objid sceneId(SceneSandbox& sandbox, objid id);
-bool parentSceneId(SceneSandbox& sandbox, objid sceneId, objid* _parentSceneId);
-std::vector<objid> childSceneIds(SceneSandbox& sandbox, objid sceneId);
 
 std::vector<objid> getByName(SceneSandbox& sandbox, std::string name);
 int getNumberOfObjects(SceneSandbox& sandbox);

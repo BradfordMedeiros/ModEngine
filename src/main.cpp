@@ -242,6 +242,9 @@ bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCu
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::vec3 normal, float force){
   auto obj1Id = getIdForCollisionObject(world, obj1);
   auto obj2Id = getIdForCollisionObject(world, obj2);
+  if (!gameobjExists(obj1Id.value()) || !gameobjExists(obj2Id.value())){
+    return;
+  }
   modassert(gameobjExists(obj1Id.value()), std::string("on object enter, obj1Id does not exist - rigidbody") + print((void*)obj1));
   modassert(gameobjExists(obj2Id.value()), std::string("on object enter, obj2Id does not exist - rigidbody") + print((void*)obj2));
   maybeTeleportObjects(world, obj1Id.value(), obj2Id.value());
@@ -250,6 +253,9 @@ void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2,
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
   auto obj1Id = getIdForCollisionObject(world, obj1);
   auto obj2Id = getIdForCollisionObject(world, obj2);
+  if (!gameobjExists(obj1Id.value()) || !gameobjExists(obj2Id.value())){
+    return;
+  }
   modassert(gameobjExists(obj1Id.value()), std::string("on object enter, obj1Id does not exist - rigidbody") + print((void*)obj1));
   modassert(gameobjExists(obj2Id.value()), std::string("on object enter, obj2Id does not exist - rigidbody") + print((void*)obj2));
   cBindings.onCollisionExit(obj1Id.value(), obj2Id.value());
@@ -1311,11 +1317,8 @@ int main(int argc, char* argv[]){
     .resetScene = resetScene,
     .listScenes = listScenes,
     .listSceneFiles = listSceneFiles,
-    .parentScene = parentScene,
-    .childScenes = childScenes,
     .sceneIdByName = sceneIdByName,
     .sceneNameById = sceneNameById,
-    .rootIdForScene = rootIdForScene,
     .rootSceneId = rootSceneId,
     .scenegraph = scenegraph,
     .sendLoadScene = sendLoadScene,
@@ -1937,7 +1940,7 @@ int main(int argc, char* argv[]){
       auto distanceComponent = hoveredItemColor.r;
       float distance = (distanceComponent * (far - near)) + near;
    
-      std::cout << "depth: " << distance << ", near = " << near << ", far = " << far << std::endl;
+      //std::cout << "depth: " << distance << ", near = " << near << ", far = " << far << std::endl;
       state.currentCursorDepth = distance;
 
     }

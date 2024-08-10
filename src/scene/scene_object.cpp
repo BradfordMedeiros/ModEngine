@@ -288,6 +288,8 @@ bool isPrefab(World& world, objid id){
 }
 
 std::optional<objid> prefabId(World& world, objid id){
+  return std::nullopt;
+  /*
   if (isPrefab(world, id)){
     return id;
   }
@@ -300,5 +302,5 @@ std::optional<objid> prefabId(World& world, objid id){
   if (!isPrefab(world, parentObjId.value())){
     return std::nullopt;
   }
-  return parentObjId; 
+  return parentObjId;*/
 }

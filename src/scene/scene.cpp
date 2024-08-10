@@ -698,7 +698,7 @@ World createWorld(
   std::map<std::string, GameobjAttributes> submodelAttributes;
 
   auto getId = createGetUniqueObjId(idsAdded);
-  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, idsAdded, getId, {{ "root", GameobjAttributesWithId { .id = idsAdded.at(0), .attr = GameobjAttributes{}}}}, submodelAttributes);
+  addSerialObjectsToWorld(world, 0, idsAdded, getId, {{ "root", GameobjAttributesWithId { .id = idsAdded.at(0), .attr = GameobjAttributes{}}}}, submodelAttributes);
 
   // Default meshes that are silently loaded in the background
   for (auto &meshname : defaultMeshes){
@@ -854,13 +854,10 @@ void addObjectToWorld(
       
     }; 
 
-    auto loadScene = [&world, id](std::string sceneFile, std::vector<Token>& addedTokens) -> objid {
-      modlog("load scene", std::string("loading scene: " + sceneFile));
-      auto sceneId = addSceneToWorld(world, sceneFile, addedTokens, std::nullopt, std::nullopt, std::nullopt);  // should make original obj the parent
-      auto rootId = rootIdForScene(world.sandbox, sceneId);
-      makeParent(world.sandbox, rootId, id);
+    auto loadScene = [&world, id, sceneId](std::string sceneFile, std::vector<Token>& addedTokens) -> objid {
+      auto newSceneId = addSceneToWorld(world, sceneFile, addedTokens, std::nullopt, std::nullopt, std::nullopt, id);
       updatePhysicsFromSandbox(world);
-      return sceneId;
+      return newSceneId;
     };
 
     ObjectTypeUtil util {
@@ -916,16 +913,16 @@ void addSerialObjectsToWorld(
   }
 }
 
-objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags){
-  auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData, name, tags, getObjautoserializerFields);
+objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> parentId){
+  auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData, name, tags, getObjautoserializerFields, parentId);
   auto getId = createGetUniqueObjId(data.idsAdded);
   addSerialObjectsToWorld(world, sceneId, data.idsAdded, getId, data.additionalFields, data.subelementAttributes);
   return sceneId;
 }
 
-objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> sceneId){
+objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> sceneId, std::optional<objid> parentId){
   auto sceneData = world.interface.readFile(sceneFile) + "\n" + serializeSceneTokens(addedTokens);  // maybe should clean this up to prevent string hackeyness
-  return addSceneToWorldFromData(world, sceneFile, sceneId.has_value() ? sceneId.value() : getUniqueObjId(), sceneData, name, tags);
+  return addSceneToWorldFromData(world, sceneFile, sceneId.has_value() ? sceneId.value() : getUniqueObjId(), sceneData, name, tags, parentId);
 }
 
 // todo verify removing data like eg clearing meshes, animations,etc
@@ -979,7 +976,6 @@ void removeObjectByIdFromScene(World& world, objid gameobjId){
     removeObjectById(world, id, name, scriptName, netsynchronized);
   }
   removeObjectsFromScenegraph(world.sandbox, idsToRemove);
-  maybePruneScenes(world.sandbox);
 }
 
 void removeObjectFromScene(World& world, objid objectId){  
