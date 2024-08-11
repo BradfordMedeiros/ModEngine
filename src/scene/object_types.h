@@ -30,8 +30,6 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-struct GameObjectRoot {};
-
 typedef std::variant<
   GameObjectMesh, 
   GameObjectCamera, 
@@ -39,7 +37,6 @@ typedef std::variant<
   GameObjectSound, 
   GameObjectLight, 
   GameObjectOctree,
-  GameObjectRoot, 
   GameObjectEmitter,
   GameObjectNavmesh,
   GameObjectUIText,
@@ -83,11 +80,6 @@ static Field octreeField {
   .type = "octree",
 };
 
-static Field rootField {
-  .prefix = '~',
-  .type = "root",
-};
-
 static Field emitterField {
   .prefix = '+',
   .type = "emitter",
@@ -115,7 +107,6 @@ static std::vector fields = {
   sound, 
   light, 
   octreeField,
-  rootField, 
   emitterField, 
   navmeshField, 
   uiTextField,

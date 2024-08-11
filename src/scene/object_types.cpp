@@ -65,20 +65,7 @@ std::vector<std::pair<std::string, std::string>> serializeNotImplemented(GameObj
 
 void removeDoNothing(GameObjectObj& obj, ObjectRemoveUtil& util){}
 
-GameObjectObj createRoot(GameobjAttributes& attr, ObjectTypeUtil& util){
-  return GameObjectRoot{};
-}
-
 std::vector<ObjectType> objTypes = {
-  ObjectType {
-    .name = "root",
-    .variantType = getVariantIndex(GameObjectRoot{}),
-    .createObj = createRoot,
-    .objectAttribute = nothingObjectAttribute,
-    .setAttribute = nothingSetAttribute,
-    .serialize = serializeNotImplemented,
-    .removeObject = removeDoNothing,
-  },
   ObjectType {
     .name = "camera",
     .variantType = getVariantIndex(GameObjectCamera{}),
@@ -313,14 +300,6 @@ int renderObject(
     modassert(octreeMesh, "no octree mesh available");
     drawMesh(*octreeMesh, shaderProgram);
     return octreeMesh -> numTriangles;
-  }
-
-  auto rootObj = std::get_if<GameObjectRoot>(&toRender);
-  if (rootObj != NULL){
-    if ((showDebugMask & 0b10000)){
-      return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
-    }
-    return 0;
   }
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
