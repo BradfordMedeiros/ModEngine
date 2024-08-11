@@ -87,6 +87,21 @@ std::vector<TestCase> tests = {
   },
 };
 
+enum CONSOLE_COLOR { CONSOLE_COLOR_GREEN, CONSOLE_COLOR_RED };
+void printColor(std::string str, std::optional<CONSOLE_COLOR> color){
+  if (!color.has_value()){
+    std::cout << str;
+    return;
+  }
+  if (color.value() == CONSOLE_COLOR_GREEN){
+    std::cout << "\033[1;32m" << str << "\033[0m\n";
+  }else if (color.value() == CONSOLE_COLOR_RED){
+    std::cout << "\033[1;31m" << str << "\033[0m\n";
+  }else{
+    modassert(false, "invalid color");
+  }
+}
+
 int runTests(){
   int totalTests = tests.size();
   int numFailures = 0;
@@ -95,14 +110,14 @@ int runTests(){
     try {
       test.test();
       std::string value = std::to_string(i) + std::string(" : ") + std::string(test.name) + std::string(" : pass\n"); 
-      printGreen(value);
+      printColor(value, CONSOLE_COLOR_GREEN);
     }catch(std::logic_error ex){
       std::string value = std::to_string(i) + std::string(" : ") + std::string(test.name) + std::string(" : fail : ") + ex.what() + std::string("\n"); 
-      printRed(value);
+      printColor(value, CONSOLE_COLOR_RED);
       numFailures++;
     }
   }
-  std::cout << "Tests passed: " << std::endl << std::to_string(totalTests - numFailures) << " / " << totalTests << " passed" << std::endl;
+  std::cout << "{ \"total\" : " << totalTests << ", \"passed\" : " << totalTests - numFailures << " } " << std::endl;
   return numFailures == 0 ? 0 : 1;
 }
 
