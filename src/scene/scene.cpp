@@ -134,9 +134,9 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   }
 
   PhysicsInfo& physicsInfo = physicsInfoOpt.value();
-  std::cout << "physics info for : " << getGameObject(world, id).name << print(physicsInfo.transformation) << std::endl;
-  std::cout << "physics info bound: " << print(physicsInfo.boundInfo) << std::endl;
-  std::cout << std::endl << std::endl;
+  //std::cout << "physics info for : " << getGameObject(world, id).name << print(physicsInfo.transformation) << std::endl;
+  //std::cout << "physics info bound: " << print(physicsInfo.boundInfo) << std::endl;
+  //std::cout << std::endl << std::endl;
 
   btRigidBody* rigidBody = NULL;
 
@@ -843,13 +843,9 @@ void addObjectToWorld(
         getId,
         getObjautoserializerFields
       );
-
-      std::cout << "id is: " << id << std::endl;
       for (auto &[name, objAttr] : newSerialObjs){
         addObjectToWorld(world, sceneId, objAttr.id, name, getId, objAttr.attr, submodelAttributes);
       }
-      std::cout << std::endl;
-      
     }; 
 
     auto loadScene = [&world, id, sceneId](std::string sceneFile, std::vector<Token>& addedTokens) -> objid {

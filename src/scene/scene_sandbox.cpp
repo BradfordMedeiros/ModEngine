@@ -703,6 +703,9 @@ void makeParent(SceneSandbox& sandbox, objid child, objid parent){
 
 std::optional<objid> getParent(SceneSandbox& sandbox, objid id){
   GameObjectH& gameobjecth = getGameObjectH(sandbox, id);
+  if (gameobjecth.parentId == 0){
+    return std::nullopt;
+  }
   return gameobjecth.parentId;
 }
 

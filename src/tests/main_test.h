@@ -10,6 +10,7 @@
 #include "../cscript/cscript_binding.h"
 #include "./integration/common.h"
 #include "./integration/makeobject.h"
+#include "./integration/colors.h"
 
 int runTests();
 

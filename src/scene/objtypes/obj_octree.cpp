@@ -269,10 +269,10 @@ FaceTexture texCoords(int imageIndex, TextureOrientation texOrientation = TEXTUR
   float yMin = multiplier.y * offset.y;
   float yMax = (multiplier.y * offset.y) + multiplier.y;
 
-  std::cout << "update texcoord ndi x: " << multiplier.x << ", " << offset.x << ", * = " << (multiplier.x * offset.x) << std::endl;
-  std::cout << "update texcoord ndi y: " << multiplier.y << ", " << offset.y << ", * = " << (multiplier.y * offset.y) << std::endl;
-  std::cout << "update texcoords: " << print(glm::vec2(xMin, xMax)) << std::endl;
-  std::cout << "update --------------------------" << std::endl;
+  //std::cout << "update texcoord ndi x: " << multiplier.x << ", " << offset.x << ", * = " << (multiplier.x * offset.x) << std::endl;
+  //std::cout << "update texcoord ndi y: " << multiplier.y << ", " << offset.y << ", * = " << (multiplier.y * offset.y) << std::endl;
+  //std::cout << "update texcoords: " << print(glm::vec2(xMin, xMax)) << std::endl;
+  //std::cout << "update --------------------------" << std::endl;
   FaceTexture faceTexture {
     .textureIndex = imageIndex,
     .texCoordsTopLeft = glm::vec2(xMin, yMax),
@@ -586,7 +586,6 @@ ValueAndSubdivision indexForOctreePath(std::vector<int> path){
     sumIndex += flatIndexToXYZ(index);;
     subdivisionLevel++;
   }
-  std::cout << std::endl;
   return ValueAndSubdivision {
     .value = sumIndex,
     .subdivisionLevel = subdivisionLevel,
@@ -1899,12 +1898,7 @@ void raycastSubdivision(Octree& octree, glm::vec3 fromPos, glm::vec3 toPosDirect
 RaycastResult doRaycast(Octree& octree, glm::vec3 fromPos, glm::vec3 toPosDirection, int subdivisionDepth){
   modassert(subdivisionDepth >= 1, "subdivisionDepth must be >= 1");
   std::vector<RaycastIntersection> finalIntersections;
-  std::cout << "GET raycast START" << std::endl;
-
   raycastSubdivision(octree, fromPos, toPosDirection, glm::ivec3(0, 0, 0), 1, subdivisionDepth, finalIntersections);
-
-  std::cout << "GET raycast END" << std::endl;
-  std::cout << std::endl << std::endl;
 
   return RaycastResult {
     .fromPos = fromPos,
@@ -1938,11 +1932,11 @@ std::optional<ClosestIntersection> getClosestIntersection(RaycastResult& raycast
 bool cellFilledIn(Octree& octree, RaycastIntersection& intersection, int subdivision){
   auto xyzIndex = flatIndexToXYZ(intersection.index) + intersection.blockOffset;;
   auto path = octreePath(xyzIndex.x, xyzIndex.y, xyzIndex.z, subdivision);
-  std::cout << "octreepath: ";
-  for (auto index : path){
-    std::cout << "(" << index.x << ", " << index.y << ", " << index.z << "), ";
-  }
-  std::cout << std::endl;
+  //std::cout << "octreepath: ";
+  //for (auto index : path){
+  //  std::cout << "(" << index.x << ", " << index.y << ", " << index.z << "), ";
+  //}
+  //std::cout << std::endl;
 
   OctreeDivision* currentSubdivision = &octree.rootNode;
   for (auto xyzIndex : path){
@@ -2524,11 +2518,7 @@ void writeOctreeTexture(GameObjectOctree& gameobjOctree, Octree& octree, std::fu
     }
   }
 
-  std::cout << "write octree texture-------------------" << std::endl;
-
-  std::cout << std::endl << std::endl;
   gameobjOctree.mesh = createOctreeMesh(octree, loadMesh);
-
 }
 
 int getOctreeTextureId(){

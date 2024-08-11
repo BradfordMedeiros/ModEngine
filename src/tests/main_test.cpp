@@ -94,12 +94,15 @@ int runTests(){
     auto test = tests.at(i);
     try {
       test.test();
-      std::cout << i << " : " << test.name << " : pass" << std::endl;
+      std::string value = std::to_string(i) + std::string(" : ") + std::string(test.name) + std::string(" : pass\n"); 
+      printGreen(value);
     }catch(std::logic_error ex){
-      std::cout << i << " : " << test.name << " : fail - " << ex.what() << std::endl;
+      std::string value = std::to_string(i) + std::string(" : ") + std::string(test.name) + std::string(" : fail : ") + ex.what() + std::string("\n"); 
+      printRed(value);
       numFailures++;
     }
   }
+  std::cout << "Tests passed: " << std::endl << std::to_string(totalTests - numFailures) << " / " << totalTests << " passed" << std::endl;
   return numFailures == 0 ? 0 : 1;
 }
 
