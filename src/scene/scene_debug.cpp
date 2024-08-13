@@ -90,6 +90,15 @@ std::string debugAllGameObjectsH(SceneSandbox& sandbox){
   return content;
 }
 
+std::string debugAllGameObjectObj(std::map<objid, GameObjectObj>& objectMapping){
+  std::string content = "";
+  for (auto &[id, _] : objectMapping){
+    content += std::to_string(id);
+    content = content + "\n";
+  }
+  return content; 
+}
+
 std::string debugTransformCache(SceneSandbox& sandbox){
   std::string content = "";
   for (auto &[id, transformElement] : sandbox.mainScene.absoluteTransforms){
