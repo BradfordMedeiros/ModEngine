@@ -285,11 +285,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     std::cout << "texture index: " << state.textureIndex << std::endl;
   }
 
-  if (key == GLFW_KEY_Q && action == 1){
-    state.shouldTerrainPaint = !state.shouldTerrainPaint;
-    std::cout << "toggling terrain paint: " << state.shouldTerrainPaint << std::endl;
-  }
-
   /*if (key == GLFW_KEY_N && action == 1){
     return;
     assert(!state.isRecording);

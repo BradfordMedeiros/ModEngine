@@ -1697,7 +1697,7 @@ int main(int argc, char* argv[]){
     state.forceSelectIndex = 0; // stateupdate
 
     bool shouldCallBindingOnObjectSelected = false;
-    if ((selectTargetId != getManipulatorId(state.manipulatorState)) && shouldSelectItem && !state.shouldTerrainPaint){
+    if ((selectTargetId != getManipulatorId(state.manipulatorState)) && shouldSelectItem){
       std::cout << "INFO: select item called" << std::endl;
 
       std::cout << "select target id: " << selectTargetId << std::endl;
