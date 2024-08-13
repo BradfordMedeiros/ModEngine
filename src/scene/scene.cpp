@@ -924,12 +924,14 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
   if (!idExists(world.sandbox, objectId)){
     return;
   }
+
+  world.onObjectDelete(objectId, netsynchronized);
+
   if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
     rmRigidBodyWorld(world, objectId);
   }
 
   world.interface.stopAnimation(objectId);
-  world.onObjectDelete(objectId, netsynchronized);
   removeObject(
     world.objectMapping, 
     objectId, 
@@ -952,7 +954,7 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
   }
 }
 
-void removeObjectByIdFromScene(World& world, objid gameobjId){
+void removeObjectFromScene(World& world, objid gameobjId){
   if (!idExists(world.sandbox, gameobjId)){
     //std::cout << "id does not exist: " << gameobjId << std::endl;
     //assert(false);
@@ -972,21 +974,13 @@ void removeObjectByIdFromScene(World& world, objid gameobjId){
   removeObjectsFromScenegraph(world.sandbox, idsToRemove);
 }
 
-void removeObjectFromScene(World& world, objid objectId){  
-  if (!idExists(world.sandbox, objectId)){
-    return;
-  }
-  std::cout << "removing object: " << objectId << objectId << " " << getGameObject(world, objectId).name << std::endl;
-  removeObjectByIdFromScene(world, objectId);
-}
-
 void removeGroupFromScene(World& world, objid idInGroup){  
   if (!idExists(world.sandbox, idInGroup)){
     return;
   }
   std::cout << "removing object: " << idInGroup << " " << getGameObject(world, idInGroup).name << std::endl;
   for (auto gameobjId : getIdsInGroupByObjId(world.sandbox, idInGroup)){
-    removeObjectByIdFromScene(world, gameobjId);
+    removeObjectFromScene(world, gameobjId);
   }
 }
 
