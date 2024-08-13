@@ -23,6 +23,7 @@ objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parent
   modassert(scene.idToGameObjectsH.find(gameobjectObj.id) == scene.idToGameObjectsH.end(), "id already exists");
   scene.idToGameObjectsH[gameobjectObj.id] = gameobjectH;
   scene.idToGameObjects[gameobjectObj.id] = gameobjectObj;
+  modlog("sandbox add id", std::to_string(gameobjectObj.id));
 
   modassert(scene.sceneToNameToId.find(sceneId) != scene.sceneToNameToId.end(), std::string("scene does not exist: ") + std::to_string(sceneId));
   if (scene.sceneToNameToId.at(sceneId).find(gameobjectObj.name) != scene.sceneToNameToId.at(sceneId).end()){
@@ -97,6 +98,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
   for (auto &[id, obj] : deserializedScene.scene.idToGameObjects){
     modassert(sandbox.mainScene.idToGameObjects.find(id) == sandbox.mainScene.idToGameObjects.end(), "duplicate id");
     sandbox.mainScene.idToGameObjects[id] = obj;
+    modlog("sandbox add id", std::to_string(id));
   }
   for (auto &[id, obj] : deserializedScene.scene.idToGameObjectsH){
     sandbox.mainScene.idToGameObjectsH[id] = obj;
@@ -254,6 +256,7 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objec
     auto sceneId = scene.idToGameObjectsH.at(id).sceneId;
     scene.idToGameObjects.erase(id);
     scene.idToGameObjectsH.erase(id);
+    modlog("sandbox remove id", std::to_string(id));
     removeObjectFromCache(sandbox, id);
 
     scene.sceneToNameToId.at(sceneId).erase(objectName);
