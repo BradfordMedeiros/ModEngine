@@ -72,7 +72,6 @@ objid rootSceneId();
 void unloadScene(int32_t sceneId);
 void doUnloadScenes();
 
-void unloadAllScenes();
 void resetScene(std::optional<objid> sceneId);
 bool saveScene(bool includeIds, objid sceneId, std::optional<std::string> filename);
 

@@ -173,9 +173,6 @@ void doUnloadScenes(){
   }
   queuedUnloadScenes = {};
 }
-void unloadAllScenes(){
-  removeAllScenesFromWorld(world);
-}
 
 // This implementation could be a lot better.  
 // This ought to just update the old attributes to the new ones instead of unloaded/reloading

@@ -1313,7 +1313,6 @@ int main(int argc, char* argv[]){
     .listSceneId = listSceneId,
     .loadScene = loadScene,
     .unloadScene = unloadScene,
-    .unloadAllScenes = unloadAllScenes,
     .resetScene = resetScene,
     .listScenes = listScenes,
     .listSceneFiles = listSceneFiles,

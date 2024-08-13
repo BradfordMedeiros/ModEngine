@@ -57,7 +57,6 @@ void maybeReloadTextureWorld(World& world, std::string texturepath);
 objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> sceneId, std::optional<objid> parentId);
 objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> parentId);
 void removeSceneFromWorld(World& world, objid sceneId);
-void removeAllScenesFromWorld(World& world);
 
 struct GameObjPair {
   GameObject gameobj;

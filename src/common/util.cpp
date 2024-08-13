@@ -619,6 +619,24 @@ std::string attributeTypeStr(AttributeValueType type){
   return "";
 }
 
+AttributeValue timeAdjustedAttribute(AttributeValue delta, float timestep){
+  auto floatAttr = std::get_if<float>(&delta);
+  if (floatAttr){
+    return *floatAttr * timestep;
+  }
+  auto vec3Attr = std::get_if<glm::vec3>(&delta);
+  if (vec3Attr){
+    return glm::vec3(vec3Attr -> x * timestep, vec3Attr -> y * timestep, vec3Attr -> z * timestep);
+  }
+
+  auto vec4Attr = std::get_if<glm::vec4>(&delta);
+  if (vec4Attr){
+    return glm::vec4(vec4Attr -> x * timestep, vec4Attr -> y * timestep, vec4Attr -> z * timestep, vec4Attr -> w * timestep);
+  }
+  modassert(false, "timeAdjustedAttribute invalid type");
+  return delta;
+}
+
 AttributeValue addAttributes(AttributeValue one, AttributeValue two){
   auto valueOne = std::get_if<glm::vec3>(&one);
   auto valueTwo = std::get_if<glm::vec3>(&two);

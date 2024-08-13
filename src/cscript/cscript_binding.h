@@ -14,7 +14,6 @@ struct CustomApiBindings {
   int32_t (*listSceneId)(int32_t objid);
   int32_t (*loadScene)(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags);
   void (*unloadScene)(int32_t id);
-  void (*unloadAllScenes)();
   void (*resetScene)(std::optional<objid> sceneId);
   std::vector<int32_t> (*listScenes)(std::optional<std::vector<std::string>> tags);
   std::vector<std::string> (*listSceneFiles)(std::optional<objid> sceneId);

@@ -106,6 +106,8 @@ enum AttributeValueType { ATTRIBUTE_VEC2, ATTRIBUTE_VEC3, ATTRIBUTE_VEC4, ATTRIB
 typedef std::variant<glm::vec2, glm::vec3, glm::vec4, std::string, std::vector<std::string>, float> AttributeValue;
 typedef std::variant<glm::vec2*, glm::vec3*, glm::vec4*, std::string*, float*, bool*, int*, uint*, glm::quat*> AttributeValuePtr;
 std::string attributeTypeStr(AttributeValueType type);
+AttributeValue timeAdjustedAttribute(AttributeValue delta, float timestep);
+
 
 template <typename T>
 std::optional<T*> getTypeFromAttr(std::optional<AttributeValuePtr> ptrValue){

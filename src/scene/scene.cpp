@@ -1013,11 +1013,6 @@ void removeSceneFromWorld(World& world, objid sceneId){
   }
   removeScene(world.sandbox, sceneId);
 }
-void removeAllScenesFromWorld(World& world){
-  for (auto sceneId : allSceneIds(world.sandbox, std::nullopt)){
-    removeSceneFromWorld(world, sceneId);
-  }
-}
 
 void createObjectForScene(World& world, objid sceneId, std::string& name, AttrChildrenPair& attrWithChildren, std::map<std::string, GameobjAttributes>& submodelAttributes){
   GameobjAttributes& attributes = attrWithChildren.attr;
@@ -1241,24 +1236,6 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
   afterAttributesSet(world, id, gameobj, fieldIsVelocity, physicsObjectNeedsRebuild);
 }
 
-
-AttributeValue timeAdjustedAttribute(AttributeValue delta, float timestep){
-  auto floatAttr = std::get_if<float>(&delta);
-  if (floatAttr){
-    return *floatAttr * timestep;
-  }
-  auto vec3Attr = std::get_if<glm::vec3>(&delta);
-  if (vec3Attr){
-    return glm::vec3(vec3Attr -> x * timestep, vec3Attr -> y * timestep, vec3Attr -> z * timestep);
-  }
-
-  auto vec4Attr = std::get_if<glm::vec4>(&delta);
-  if (vec4Attr){
-    return glm::vec4(vec4Attr -> x * timestep, vec4Attr -> y * timestep, vec4Attr -> z * timestep, vec4Attr -> w * timestep);
-  }
-  modassert(false, "timeAdjustedAttribute invalid type");
-  return delta;
-}
 void applyAttributeDelta(World& world, objid id, std::string field, AttributeValue delta, float timestep){
   auto attribute = getObjectAttribute(world, id, field.c_str());
   modassert(attribute.has_value(), "attribute does not have a value: " + field);
