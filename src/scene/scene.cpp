@@ -921,6 +921,8 @@ objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& a
 
 // todo verify removing data like eg clearing meshes, animations,etc
 void removeObjectById(World& world, objid objectId, std::string name, std::string scriptName, bool netsynchronized){
+  modlog("removeObjectById", std::to_string(objectId));
+
   if (!idExists(world.sandbox, objectId)){
     return;
   }
@@ -999,6 +1001,7 @@ bool copyObjectToScene(World& world, objid id){
 }
 
 void removeSceneFromWorld(World& world, objid sceneId){
+  modlog("removeSceneFromWorld", std::to_string(sceneId));
   if (!sceneExists(world.sandbox, sceneId)) {
     std::cout << "INFO: SCENE MANAGEMENT: tried to remove (" << sceneId << ") but it does not exist" << std::endl;
     return;   // @todo maybe better to throw error instead
