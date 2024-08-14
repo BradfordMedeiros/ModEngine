@@ -955,12 +955,14 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
 }
 
 void removeObjectFromScene(World& world, objid gameobjId){
+  modlog("removeObjectFromScene", std::to_string(gameobjId));
   if (!idExists(world.sandbox, gameobjId)){
     //std::cout << "id does not exist: " << gameobjId << std::endl;
     //assert(false);
     return;
   }
   auto idsToRemove = idsToRemoveFromScenegraph(world.sandbox, gameobjId);
+  modlog("removeObjectFromScene idsToRemove", print(idsToRemove));
   for (auto id : idsToRemove){
     if (!idExists(world.sandbox, id)){ // needed b/c removeobjectbyid could remove other entities in scene
       continue;
@@ -975,6 +977,7 @@ void removeObjectFromScene(World& world, objid gameobjId){
 }
 
 void removeGroupFromScene(World& world, objid idInGroup){  
+  modlog("removeGroupFromScene", std::to_string(idInGroup));
   if (!idExists(world.sandbox, idInGroup)){
     return;
   }
@@ -1053,7 +1056,6 @@ std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serial
     .submodelAttributes = subelementAttributes,
   };
 }
-
 
 objid addObjectToScene(World& world, objid sceneId, std::string name, AttrChildrenPair attrWithChildren, std::map<std::string, GameobjAttributes>& submodelAttributes){
   createObjectForScene(world, sceneId, name, attrWithChildren, submodelAttributes);
