@@ -171,6 +171,7 @@ GameObjectObj createObjectType(std::string objectType, GameobjAttributes& attr, 
 
 void addObjectType(std::map<objid, GameObjectObj>& mapping, GameObjectObj& gameobj, objid id){
   assert(mapping.find(id) == mapping.end());
+  modlog("objecttype - add", std::to_string(id));
   mapping[id] = gameobj;
 }
 
@@ -193,6 +194,7 @@ void removeObject(
         .unloadScene = unloadScene
       };
       objType.removeObject(Object, util);
+      modlog("objecttype - remove", std::to_string(id));
       mapping.erase(id);
       return;
     }
