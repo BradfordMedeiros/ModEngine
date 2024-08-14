@@ -1434,6 +1434,8 @@ int main(int argc, char* argv[]){
 
     .saveState = saveState,
     .loadState = loadState,
+
+    .dumpDebugInfo = dumpDebugInfo,
   };
 
 

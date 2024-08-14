@@ -1101,7 +1101,7 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
     return valuePtr;
   }
   
-  modassert(world.objectMapping.find(id) != world.objectMapping.end(), "getObjectAttributePtr gameobjObj does not exist");
+  modassert(world.objectMapping.find(id) != world.objectMapping.end(), std::string("getObjectAttributePtr gameobjObj does not exist: ") + std::to_string(id));
   GameObjectObj& gameobjObj = world.objectMapping.at(id);
   auto objectValuePtr = getObjectAttributePtr(gameobjObj, field);
   if (objectValuePtr.has_value()){

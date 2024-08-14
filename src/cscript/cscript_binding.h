@@ -141,6 +141,8 @@ struct CustomApiBindings {
 
   bool (*saveState)(std::string);
   bool (*loadState)(std::string);
+
+  std::string (*dumpDebugInfo)(bool);
   //std::vector<func_t> registerGuileFns
 };
 
