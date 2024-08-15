@@ -21,10 +21,11 @@ objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parent
     .sceneId = sceneId,
   };
   modassert(scene.idToGameObjectsH.find(gameobjectObj.id) == scene.idToGameObjectsH.end(), "id already exists");
+  modassert(scene.sceneToNameToId.find(sceneId) != scene.sceneToNameToId.end(), std::string("scene does not exist: ") + std::to_string(sceneId));
+
   scene.idToGameObjectsH[gameobjectObj.id] = gameobjectH;
   scene.idToGameObjects[gameobjectObj.id] = gameobjectObj;
 
-  modassert(scene.sceneToNameToId.find(sceneId) != scene.sceneToNameToId.end(), std::string("scene does not exist: ") + std::to_string(sceneId));
   if (scene.sceneToNameToId.at(sceneId).find(gameobjectObj.name) != scene.sceneToNameToId.at(sceneId).end()){
     modassert(false, std::string("name already exists: " + gameobjectObj.name))
   }

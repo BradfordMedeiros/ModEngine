@@ -1006,6 +1006,44 @@ void removeGroupFromScene(World& world, objid idInGroup){
   }
 }
 
+// This is a shitty side effect of the fact that you can add an object in onObjectDelete
+// It's probably a good idea to consider delaying the creation of the object to the next 
+// frame and then this can be removed, but then that has issues for setAttr etc fuck
+// Alternatively, maybe remove the callbacks, and then maintain a list you can query in the next frame?
+// idk
+// maybe this isn't too bad, might need to make the listObj more efficient ? 
+// just kind of gross
+std::vector<objid> stableObjInScene(World& world, objid sceneId){
+  const int LOOP_LIMIT = 1000;
+  std::set<objid> idAlreadyCalledDelete;
+  for (int i = 0; i < LOOP_LIMIT; i++){
+    bool newObject = false;
+    auto objectIds = listObjAndDescInScene(world.sandbox, sceneId);
+    bool oneExists = false;
+    for (auto objectId : objectIds){
+      if (!idExists(world.sandbox, objectId)){
+        continue;
+      }
+      oneExists = true;
+      auto gameobj = getGameObject(world, objectId);
+      auto netsynchronized = gameobj.netsynchronize;
+      if (idAlreadyCalledDelete.count(objectId) == 0){
+        newObject = true;
+        world.onObjectDelete(objectId, netsynchronized);
+        idAlreadyCalledDelete.insert(objectId);
+      }
+      if (!newObject){
+        return objectIds;
+      }
+    }
+    if (!oneExists){
+      return {};
+    }
+  }
+  modassert(false, "stableObjInScene default return  reached loop limit should not have happened");
+  return {};
+}
+
 void removeSceneFromWorld(World& world, objid sceneId){
   modlog("removeSceneFromWorld", std::to_string(sceneId));
   if (!sceneExists(world.sandbox, sceneId)) {
@@ -1013,17 +1051,7 @@ void removeSceneFromWorld(World& world, objid sceneId){
     return;   // @todo maybe better to throw error instead
   }
 
-  auto objectIds = listObjAndDescInScene(world.sandbox, sceneId);
-
-  for (auto objectId : objectIds){
-    if (!idExists(world.sandbox, objectId)){
-      continue;
-    }
-    auto gameobj = getGameObject(world, objectId);
-    auto netsynchronized = gameobj.netsynchronize;
-    world.onObjectDelete(objectId, netsynchronized);
-  }
-
+  auto objectIds = stableObjInScene(world, sceneId);
   std::set<objid> scenesToUnload;
   for (auto objectId : objectIds){
     if (!idExists(world.sandbox, objectId)){  // this is needed b/c removeobject by id can in turn end up removing other entities
