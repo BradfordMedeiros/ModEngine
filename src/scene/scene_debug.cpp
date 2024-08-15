@@ -18,7 +18,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
       .position = childObj.transformation.position,
       .scale = childObj.transformation.scale,
       .rotation = childObj.transformation.rotation, 
-      .meshes = getMeshNames(objectMapping, id),
+      //.meshes = getMeshNames(objectMapping, id),
     };
     if (id == 0){
       dotRelations.push_back(DotInfos{
@@ -39,7 +39,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
       .position = parentObj.transformation.position,
       .scale = parentObj.transformation.scale,
       .rotation = parentObj.transformation.rotation, 
-      .meshes = getMeshNames(objectMapping, parentId),
+      //.meshes = getMeshNames(objectMapping, parentId),
     };
     dotRelations.push_back(DotInfos{
       .child = childInfo,

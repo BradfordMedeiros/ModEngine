@@ -790,6 +790,7 @@ void onClientMessage(std::string message){
 
 bool signalHandlerCalled = false;
 void signalHandler(int signum) {
+  return;
   if (!showCrashInfo || signalHandlerCalled){
     return;
   }

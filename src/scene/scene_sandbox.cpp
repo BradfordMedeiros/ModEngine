@@ -23,7 +23,6 @@ objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parent
   modassert(scene.idToGameObjectsH.find(gameobjectObj.id) == scene.idToGameObjectsH.end(), "id already exists");
   scene.idToGameObjectsH[gameobjectObj.id] = gameobjectH;
   scene.idToGameObjects[gameobjectObj.id] = gameobjectObj;
-  modlog("sandbox add id", std::to_string(gameobjectObj.id));
 
   modassert(scene.sceneToNameToId.find(sceneId) != scene.sceneToNameToId.end(), std::string("scene does not exist: ") + std::to_string(sceneId));
   if (scene.sceneToNameToId.at(sceneId).find(gameobjectObj.name) != scene.sceneToNameToId.at(sceneId).end()){
@@ -331,11 +330,11 @@ std::vector<objid> getIdsInGroup(Scene& scene, objid groupId){
 }
 
 GameObject& getGameObject(Scene& scene, objid id){
-  modassert(scene.idToGameObjects.find(id) != scene.idToGameObjects.end(), "gameobj does not exist");
+  modassert(scene.idToGameObjects.find(id) != scene.idToGameObjects.end(), "getGameObject gameobj does not exist");
   return scene.idToGameObjects.at(id);
 }
 GameObjectH& getGameObjectH(Scene& scene, objid id){
-  modassert(scene.idToGameObjectsH.find(id) != scene.idToGameObjectsH.end(), "gameobjh does not exist");
+  modassert(scene.idToGameObjectsH.find(id) != scene.idToGameObjectsH.end(), "getGameObjectH gameobjh does not exist");
   return scene.idToGameObjectsH.at(id);
 }
 objid getGroupId(Scene& scene, objid id){
@@ -684,7 +683,7 @@ Transformation fullTransformation(SceneSandbox& sandbox, objid id){
 void removeScene(SceneSandbox& sandbox, objid sceneId){
   modassert(sceneId != 0, "cannot remove root scene");
   modassert (sandbox.mainScene.sceneToNameToId.find(sceneId) != sandbox.mainScene.sceneToNameToId.end(), "scene does not exist");
-  removeObjectsFromScenegraph(sandbox, listObjAndDescInScene(sandbox, sceneId)); // @TODO this should get children too
+  //removeObjectsFromScenegraph(sandbox, listObjAndDescInScene(sandbox, sceneId)); // @TODO this should get children too
   sandbox.sceneIdToSceneMetadata.erase(sceneId);
   sandbox.mainScene.sceneToNameToId.erase(sceneId); 
 }
