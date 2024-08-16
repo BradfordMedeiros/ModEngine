@@ -1532,6 +1532,8 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     // move this into on object frame
     auto selectedOctree = getSelectedOctreeId();
     if (selectedOctree.has_value()){
+      modassert(idExists(world.sandbox, selectedOctree.value()), "octree id selected but does not exist");
+
       //auto transformation = fullTransformation(world.sandbox, selectedOctree.value());
       //std::cout << "octree transformation: " << print(transformation) << std::endl;
       auto transform = fullModelTransform(world.sandbox, selectedOctree.value());

@@ -1502,6 +1502,9 @@ int main(int argc, char* argv[]){
       std::cout << "deleted obj id: " << id << std::endl;
       maybeResetCamera(id);
       unsetSelectedIndex(state.editor, id, true);
+      if (getSelectedOctreeId().has_value() && getSelectedOctreeId().value() == id){
+        setSelectedOctreeId(std::nullopt);
+      }
       removeScheduledTaskByOwner({ id });
       netObjectDelete(id, isNet, netcode, bootStrapperMode);
       cBindings.onObjectRemoved(id);

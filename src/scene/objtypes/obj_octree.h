@@ -96,7 +96,7 @@ struct PhysicsShapes {
 
 PhysicsShapes getPhysicsShapes(Octree& octree);
 std::string debugInfo(PhysicsShapes& physicsShapes);
-void setSelectedOctreeId(objid id);
+void setSelectedOctreeId(std::optional<objid> id);
 std::optional<objid> getSelectedOctreeId();
 Octree deserializeOctree(std::string& value);
 
