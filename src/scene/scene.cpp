@@ -473,7 +473,6 @@ void addSpriteMesh(World& world, std::string meshPath){
   }
 }
 
-
 void loadModelData(World& world, std::string meshpath, int ownerId){
   if (world.modelDatas.find(meshpath) != world.modelDatas.end()){
     world.modelDatas.at(meshpath).owners.insert(ownerId);
@@ -849,6 +848,7 @@ void addObjectToWorld(
     }; 
 
     auto loadScene = [&world, id, sceneId](std::string sceneFile, std::vector<Token>& addedTokens) -> objid {
+      modlog("prefab load scene", std::to_string(id));
       auto newSceneId = addSceneToWorld(world, sceneFile, addedTokens, std::nullopt, std::nullopt, std::nullopt, id);
       updatePhysicsFromSandbox(world);
       return newSceneId;
@@ -920,14 +920,12 @@ objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& a
 }
 
 // todo verify removing data like eg clearing meshes, animations,etc
-void removeObjectById(World& world, objid objectId, std::string name, std::string scriptName, bool netsynchronized){
+void removeObjectById(World& world, objid objectId, std::string name, std::string scriptName, bool netsynchronized, std::set<objid>& _scenesToUnload){
   modlog("removeObjectById", std::to_string(objectId));
 
   if (!idExists(world.sandbox, objectId)){
     return;
   }
-
-  world.onObjectDelete(objectId, netsynchronized);
 
   if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
     rmRigidBodyWorld(world, objectId);
@@ -941,9 +939,9 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
       std::cout << "remove camera not yet implemented" << std::endl;
       assert(false);
     },
-    [&world](objid sceneId) -> void {
-      modlog("load scene", std::string("unload scene: " + std::to_string(sceneId)));
-      removeSceneFromWorld(world, sceneId);
+    [&world, &_scenesToUnload](objid sceneId) -> void {
+      modlog("prefab unload scene", std::to_string(sceneId));
+      _scenesToUnload.insert(sceneId);
     }
   );
   
@@ -956,6 +954,11 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
   }
 }
 
+// TODO - the logic for remove object, remove scene should be the same code path
+// The way this should work is that you should query all the objects that need to be unloaded on remove
+// and then just remove all of it.  I would like this called once per frame and all the scenes and ids
+// batched per frame ideally, and then this can prevent onObjectDelete having a partial state of removal on that frame
+
 void removeObjectFromScene(World& world, objid gameobjId){
   modlog("removeObjectFromScene", std::to_string(gameobjId));
   if (!idExists(world.sandbox, gameobjId)){
@@ -964,7 +967,17 @@ void removeObjectFromScene(World& world, objid gameobjId){
     return;
   }
   auto idsToRemove = idsToRemoveFromScenegraph(world.sandbox, gameobjId);
+  for (auto id : idsToRemove){
+    if (!idExists(world.sandbox, id)){
+      continue;
+    }
+    auto gameobj = getGameObject(world, id);
+    auto netsynchronized = gameobj.netsynchronize;
+    world.onObjectDelete(id, netsynchronized);
+  }
   modlog("removeObjectFromScene idsToRemove", print(idsToRemove));
+
+  std::set<objid> scenesToUnload;
   for (auto id : idsToRemove){
     if (!idExists(world.sandbox, id)){ // needed b/c removeobjectbyid could remove other entities in scene
       continue;
@@ -973,9 +986,13 @@ void removeObjectFromScene(World& world, objid gameobjId){
     auto name = gameobj.name;
     auto scriptName = gameobj.script;
     auto netsynchronized = gameobj.netsynchronize;
-    removeObjectById(world, id, name, scriptName, netsynchronized);
+    removeObjectById(world, id, name, scriptName, netsynchronized, scenesToUnload);
   }
   removeObjectsFromScenegraph(world.sandbox, idsToRemove);
+
+  for (auto sceneId : scenesToUnload){
+    removeSceneFromWorld(world, sceneId);
+  }
 }
 
 void removeGroupFromScene(World& world, objid idInGroup){  
@@ -989,15 +1006,42 @@ void removeGroupFromScene(World& world, objid idInGroup){
   }
 }
 
-bool copyObjectToScene(World& world, objid id){
-  std::cout << "INFO: SCENE: COPY OBJECT: " << id << std::endl;
-  auto serializedObject = serializeObject(world, id, true, getGameObject(world, id).name + "-copy-" + std::to_string(getUniqueObjId()));
-  if (!deserializeSingleObj(serializedObject, id, false).has_value()){  // really bad hack 
-    modlog("copy object", "copy object failure, more than one object tried to be copied");
-    return false;
+// This is a shitty side effect of the fact that you can add an object in onObjectDelete
+// It's probably a good idea to consider delaying the creation of the object to the next 
+// frame and then this can be removed, but then that has issues for setAttr etc fuck
+// Alternatively, maybe remove the callbacks, and then maintain a list you can query in the next frame?
+// idk
+// maybe this isn't too bad, might need to make the listObj more efficient ? 
+// just kind of gross
+std::vector<objid> stableObjInScene(World& world, objid sceneId){
+  const int LOOP_LIMIT = 1000;
+  std::set<objid> idAlreadyCalledDelete;
+  for (int i = 0; i < LOOP_LIMIT; i++){
+    bool newObject = false;
+    auto objectIds = listObjAndDescInScene(world.sandbox, sceneId);
+    bool oneExists = false;
+    for (auto objectId : objectIds){
+      if (!idExists(world.sandbox, objectId)){
+        continue;
+      }
+      oneExists = true;
+      auto gameobj = getGameObject(world, objectId);
+      auto netsynchronized = gameobj.netsynchronize;
+      if (idAlreadyCalledDelete.count(objectId) == 0){
+        newObject = true;
+        world.onObjectDelete(objectId, netsynchronized);
+        idAlreadyCalledDelete.insert(objectId);
+      }
+      if (!newObject){
+        return objectIds;
+      }
+    }
+    if (!oneExists){
+      return {};
+    }
   }
-  addObjectToScene(world, getGameObjectH(world.sandbox, id).sceneId, serializedObject, -1, false);
-  return true;
+  modassert(false, "stableObjInScene default return  reached loop limit should not have happened");
+  return {};
 }
 
 void removeSceneFromWorld(World& world, objid sceneId){
@@ -1007,7 +1051,9 @@ void removeSceneFromWorld(World& world, objid sceneId){
     return;   // @todo maybe better to throw error instead
   }
 
-  for (auto objectId : listObjAndDescInScene(world.sandbox, sceneId)){
+  auto objectIds = stableObjInScene(world, sceneId);
+  std::set<objid> scenesToUnload;
+  for (auto objectId : objectIds){
     if (!idExists(world.sandbox, objectId)){  // this is needed b/c removeobject by id can in turn end up removing other entities
       continue;
     }
@@ -1015,9 +1061,25 @@ void removeSceneFromWorld(World& world, objid sceneId){
     auto name = gameobj.name;
     auto scriptName = gameobj.script;
     auto netsynchronized = gameobj.netsynchronize;
-    removeObjectById(world, objectId, name, scriptName, netsynchronized);
+    removeObjectById(world, objectId, name, scriptName, netsynchronized, scenesToUnload);
   }
-  removeScene(world.sandbox, sceneId);
+  removeObjectsFromScenegraph(world.sandbox, objectIds);
+  removeScene(world.sandbox, sceneId); // this just needs to prune the scene
+
+  for (auto sceneId : scenesToUnload){
+    removeSceneFromWorld(world, sceneId);
+  }
+}
+
+bool copyObjectToScene(World& world, objid id){
+  std::cout << "INFO: SCENE: COPY OBJECT: " << id << std::endl;
+  auto serializedObject = serializeObject(world, id, true, getGameObject(world, id).name + "-copy-" + std::to_string(getUniqueObjId()));
+  if (!deserializeSingleObj(serializedObject, id, false).has_value()){  // really bad hack 
+    modlog("copy object", "copy object failure, more than one object tried to be copied");
+    return false;
+  }
+  addObjectToScene(world, getGameObjectH(world.sandbox, id).sceneId, serializedObject, -1, false);
+  return true;
 }
 
 void createObjectForScene(World& world, objid sceneId, std::string& name, AttrChildrenPair& attrWithChildren, std::map<std::string, GameobjAttributes>& submodelAttributes){
@@ -1100,13 +1162,14 @@ AttributeValuePtr ptrFromAttributeValue(AttributeValue& attributeValue){
 
 std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, const char* field){
   modassert(world.sandbox.mainScene.idToGameObjects.find(id) != world.sandbox.mainScene.idToGameObjects.end(), "getObjectAttributePtr gameobj does not exist");
+  modassert(world.objectMapping.find(id) != world.objectMapping.end(), std::string("getObjectAttributePtr gameobjObj does not exist: ") + std::to_string(id));
+
   GameObject& gameobj = getGameObject(world, id);
   auto valuePtr = getAttributePtr(gameobj, field);
   if (valuePtr.has_value()){
     return valuePtr;
   }
   
-  modassert(world.objectMapping.find(id) != world.objectMapping.end(), std::string("getObjectAttributePtr gameobjObj does not exist: ") + std::to_string(id));
   GameObjectObj& gameobjObj = world.objectMapping.at(id);
   auto objectValuePtr = getObjectAttributePtr(gameobjObj, field);
   if (objectValuePtr.has_value()){
@@ -1469,6 +1532,8 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     // move this into on object frame
     auto selectedOctree = getSelectedOctreeId();
     if (selectedOctree.has_value()){
+      modassert(idExists(world.sandbox, selectedOctree.value()), "octree id selected but does not exist");
+
       //auto transformation = fullTransformation(world.sandbox, selectedOctree.value());
       //std::cout << "octree transformation: " << print(transformation) << std::endl;
       auto transform = fullModelTransform(world.sandbox, selectedOctree.value());

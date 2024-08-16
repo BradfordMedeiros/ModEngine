@@ -2559,7 +2559,7 @@ void saveOctree(GameObjectOctree& octree, std::function<void(std::string, std::s
   saveFile(octree.map, serializedData);
 }
 
-void setSelectedOctreeId(objid id){
+void setSelectedOctreeId(std::optional<objid> id){
   selectedOctreeId = id;
 }
 std::optional<objid> getSelectedOctreeId(){
