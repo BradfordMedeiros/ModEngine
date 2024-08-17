@@ -466,7 +466,7 @@ returndata:
 
 std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, objid id){
   std::vector<std::string> names;
-  if (id == -1){
+  if (id == 0){
     return names;
   }
   for (auto name : getMeshesForId(mapping, id).meshNames){

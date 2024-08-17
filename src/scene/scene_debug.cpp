@@ -10,6 +10,8 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
   std::vector<DotInfos> dotRelations;
   forEveryGameobj(sandbox, [&sandbox, &objectMapping, &dotRelations](objid id, GameObject& childObj) -> void {
     auto childObjH = getGameObjectH(sandbox, id);
+
+    bool objectMappingExists = objectMapping.find(id) != objectMapping.end();
     DotInfo childInfo {
       .name = childObj.name,
       .id = childObjH.id,
@@ -18,7 +20,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
       .position = childObj.transformation.position,
       .scale = childObj.transformation.scale,
       .rotation = childObj.transformation.rotation, 
-      //.meshes = getMeshNames(objectMapping, id),
+      .meshes = objectMappingExists ? getMeshNames(objectMapping, id) : std::vector<std::string>{},
     };
     if (id == 0){
       dotRelations.push_back(DotInfos{
@@ -31,6 +33,8 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
  
     auto parentObj = getGameObject(sandbox, parentId);
     auto parentObjH = getGameObjectH(sandbox, parentId);
+
+    bool parentObjectMappingExists = objectMapping.find(parentId) != objectMapping.end();
     DotInfo parentInfo {
       .name = parentObj.name,
       .id = parentObj.id,
@@ -39,7 +43,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
       .position = parentObj.transformation.position,
       .scale = parentObj.transformation.scale,
       .rotation = parentObj.transformation.rotation, 
-      //.meshes = getMeshNames(objectMapping, parentId),
+      .meshes = parentObjectMappingExists ? getMeshNames(objectMapping, parentId) : std::vector<std::string>{},
     };
     dotRelations.push_back(DotInfos{
       .child = childInfo,
