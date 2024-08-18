@@ -187,8 +187,10 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
       continue;
     }
     if (textureIdSame(shape.textureId, textureId)){
+      auto shaderToUse = shape.shader.has_value() ? shape.shader.value() : uiShaderProgram;
       if (shaderIsDifferent(shape.shader, lastShaderId)){
-          glUseProgram(uiShaderProgram);
+
+          glUseProgram(shaderToUse);
           std::vector<UniformData> uniformData;
           uniformData.push_back(UniformData {
             .name = "projection",
@@ -204,21 +206,15 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
               .textureUnitId = 0,
             },
           });
-          setUniformData(uiShaderProgram, uniformData, { "model", "encodedid2", "tint" });
+          setUniformData(shaderToUse, uniformData, { "model", "encodedid2", "tint" });
           glEnable(GL_BLEND);
-
-        if (!shape.shader.has_value()){
-          // use default shader
-          modlog("load shader", "default shader");
-        }else {
-          modlog("load shader", std::to_string(shape.shader.value()));
-        }
+    
         lastShaderId = shape.shader.value();
       }
 
       //std::cout << "drawing words: " << text.word << std::endl;
-      glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
-      glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(shape.tint));
+      glUniform1i(glGetUniformLocation(shaderToUse, "forceTint"), false);
+      glUniform4fv(glGetUniformLocation(shaderToUse, "tint"), 1, glm::value_ptr(shape.tint));
       if (shape.selectionId.has_value()){
         //std::cout << "selection id value: " << text.selectionId.value() << std::endl;
         auto id = shape.selectionId.value();
