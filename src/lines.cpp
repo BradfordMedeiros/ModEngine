@@ -165,13 +165,57 @@ float convertTextNdiFontsize(float height, float width, float fontsize, bool isn
   return fontsize;
 }
 
-void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::optional<std::string>)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram){
+bool shaderIsDifferent(std::optional<unsigned int> shader1, std::optional<unsigned int> shader2){
+  if (!shader1.has_value() && !shader2.has_value()){
+    return false;
+  }else if (shader1.has_value() && !shader2.has_value()){
+    return true;
+  }else if (!shader1.has_value() && shader2.has_value()){
+    return true;
+  }else if (shader1.value() != shader2.value()){
+    return true;
+  }
+  return false;
+}
+
+void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 ndiOrtho, std::function<FontFamily&(std::optional<std::string>)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram){
   //std::cout << "text number: " << lineData.text.size() << std::endl;
+
+  std::optional<unsigned int> lastShaderId;
   for (auto &shape : lineData.shapes){
     if (selectionProgram && !shape.selectionId.has_value()){
       continue;
     }
     if (textureIdSame(shape.textureId, textureId)){
+      if (shaderIsDifferent(shape.shader, lastShaderId)){
+          glUseProgram(uiShaderProgram);
+          std::vector<UniformData> uniformData;
+          uniformData.push_back(UniformData {
+            .name = "projection",
+            .value = ndiOrtho,
+          });
+          uniformData.push_back(UniformData {
+            .name = "forceTint",
+            .value = false,
+          });
+          uniformData.push_back(UniformData {
+            .name = "textureData",
+            .value = Sampler2D {
+              .textureUnitId = 0,
+            },
+          });
+          setUniformData(uiShaderProgram, uniformData, { "model", "encodedid2", "tint" });
+          glEnable(GL_BLEND);
+
+        if (!shape.shader.has_value()){
+          // use default shader
+          modlog("load shader", "default shader");
+        }else {
+          modlog("load shader", std::to_string(shape.shader.value()));
+        }
+        lastShaderId = shape.shader.value();
+      }
+
       //std::cout << "drawing words: " << text.word << std::endl;
       glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
       glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(shape.tint));
