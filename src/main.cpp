@@ -172,7 +172,6 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   glUniform1i(glGetUniformLocation(renderingResources.uiShaderProgram, "forceTint"), true);
   glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
   drawAllLines(lineData, renderingResources.uiShaderProgram, texture.textureId);
-  drawShapeData(lineData, renderingResources.uiShaderProgram, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
 }
 
 void handlePaintingModifiesViewport(UVCoord uvsToPaint){
