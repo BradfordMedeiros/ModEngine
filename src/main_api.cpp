@@ -403,6 +403,7 @@ void drawText(std::string word, float left, float top, unsigned int fontSize, bo
     .ndi = ndi,
     .tint = tint.has_value() ? tint.value() : glm::vec4(1.f, 1.f, 1.f, 1.f),
     .selectionId = selectionId,
+    .shader = std::nullopt,
   });
 }
 
@@ -439,7 +440,7 @@ int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontS
   return drawWordsRelative(shaderProgram, fontFamilyByName(fontFamilyName), fullModelTransform(world.sandbox, id), word, 0, 0, fontSize, align, wrap, virtualization, cursor.cursorIndex, cursor.cursorIndexLeft, cursor.highlightLength, drawBoundingOnly);
 }
 
-void drawRect(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture){
+void drawRect(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<unsigned int> shaderId){
   //std::cout << "draw text: " << word << ": perma? " << permatext << std::endl;
   addShapeData(lineData, ShapeData{
     .shapeData = RectShapeData {
@@ -454,6 +455,7 @@ void drawRect(float centerX, float centerY, float width, float height, bool perm
     .ndi = ndi,
     .tint = tint.has_value() ? tint.value() : glm::vec4(1.f, 1.f, 1.f, 1.f),
     .selectionId = selectionId,
+    .shader = std::nullopt,
   });
 }
 
@@ -468,6 +470,7 @@ void drawLine2D(glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<gl
     .ndi = ndi,
     .tint = tint.has_value() ? tint.value() : glm::vec4(1.f, 1.f, 1.f, 1.f),
     .selectionId = selectionId,
+    .shader = std::nullopt,
   });
 }
 
