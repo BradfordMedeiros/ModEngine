@@ -705,7 +705,6 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
   setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "tint" });
   glEnable(GL_BLEND);
 
-
   if(crosshairSprite != NULL && !state.isRotateSelection && state.showCursor){
     glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
     auto location = pixelCoordToNdi(glm::ivec2(state.cursorLeft, state.currentScreenHeight - state.cursorTop), glm::vec2(state.currentScreenWidth, state.currentScreenHeight));
@@ -783,6 +782,7 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
   drawTextNdi(std::string("time: ") + std::to_string(timeSeconds(false)), uiXOffset, uiYOffset + offsetPerLine * 19, state.fontsize);
   drawTextNdi(std::string("realtime: ") + std::to_string(timeSeconds(true)), uiXOffset, uiYOffset + offsetPerLine * 20, state.fontsize);
 }
+
 
 void onClientMessage(std::string message){
   cBindings.onTcpMessage(message);
@@ -2073,6 +2073,25 @@ int main(int argc, char* argv[]){
   
     if (state.renderMode == RENDER_FINAL){
       renderUI(effectiveCrosshair, pixelColor);
+
+      glUseProgram(renderingResources.uiShaderProgram);
+      std::vector<UniformData> uniformData;
+      uniformData.push_back(UniformData {
+        .name = "projection",
+        .value = ndiOrtho,
+      });
+      uniformData.push_back(UniformData {
+        .name = "forceTint",
+        .value = false,
+      });
+      uniformData.push_back(UniformData {
+        .name = "textureData",
+        .value = Sampler2D {
+          .textureUnitId = 0,
+        },
+      });
+      setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "tint" });
+      glEnable(GL_BLEND);
       drawShapeData(lineData, renderingResources.uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
     }
     glEnable(GL_DEPTH_TEST);
