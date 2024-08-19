@@ -81,6 +81,7 @@ unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentSh
 }
 
 unsigned int loadShaderIntoCache(std::string shaderString, std::map<std::string, GLint>& shaderstringToId, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile){
+  modassert(shaderstringToId.find(shaderString) == shaderstringToId.end(), "shader already loaded");
   auto shaderId = loadShader(vertexShaderFilepath, fragmentShaderFilepath, readFile);
   shaderstringToId[shaderString] = shaderId;
   return shaderId;

@@ -1199,7 +1199,6 @@ int main(int argc, char* argv[]){
   auto textureFolderPath = result["texture"].as<std::string>();
   const std::string framebufferShaderPath = "./res/shaders/framebuffer";
   const std::string uiShaderPath = result["uishader"].as<std::string>();
-  const std::string ui2ShaderPath = "./res/shaders/ui2";
 
   auto timetoexit = result["timetoexit"].as<int>();
 
@@ -1288,8 +1287,6 @@ int main(int argc, char* argv[]){
   modlog("shaders", std::string("ui shader file path is ") + uiShaderPath);
   renderingResources.uiShaderProgram = loadShaderIntoCache("ui", shaderstringToId, uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile);
 
-  loadShaderIntoCache("ui2", shaderstringToId, ui2ShaderPath + "/vertex.glsl",  ui2ShaderPath + "/fragment.glsl", interface.readFile);
-
   std::string selectionShaderPath = "./res/shaders/selection";
   modlog("shaders", std::string("selection shader path is ") + selectionShaderPath);
   unsigned int selectionProgram = loadShaderIntoCache("selection", shaderstringToId, selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl", interface.readFile);
@@ -1354,6 +1351,9 @@ int main(int argc, char* argv[]){
     .drawLine = addLineNextCycle,
     .freeLine = [](objid lineId) -> void { freeLine(lineData, lineId); } ,
     .shaderByName = shaderByName,
+    .loadShader = [](std::string name, std::string path) -> unsigned int{
+      return loadShaderIntoCache(name, shaderstringToId, path + "/vertex.glsl", path + "/fragment.glsl", interface.readFile);
+    },
     .getGameObjNameForId = getGameObjectName,
     .setGameObjectAttr = setGameObjectAttr,
     .setSingleGameObjectAttr = setSingleGameObjectAttr,
