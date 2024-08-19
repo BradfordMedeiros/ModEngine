@@ -703,7 +703,7 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
       .textureUnitId = 0,
     },
   });
-  setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "tint" });
+  setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "tint", "time" });
   glEnable(GL_BLEND);
 
   if(crosshairSprite != NULL && !state.isRotateSelection && state.showCursor){
@@ -1192,7 +1192,8 @@ int main(int argc, char* argv[]){
   auto textureFolderPath = result["texture"].as<std::string>();
   const std::string framebufferShaderPath = "./res/shaders/framebuffer";
   const std::string uiShaderPath = result["uishader"].as<std::string>();
-  
+  const std::string ui2ShaderPath = result["uishader"].as<std::string>();
+
   auto timetoexit = result["timetoexit"].as<int>();
 
   std::cout << "LIFECYCLE: program starting" << std::endl;
@@ -1279,6 +1280,8 @@ int main(int argc, char* argv[]){
 
   modlog("shaders", std::string("ui shader file path is ") + uiShaderPath);
   renderingResources.uiShaderProgram = loadShaderIntoCache("ui", shaderstringToId, uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile);
+
+  loadShaderIntoCache("ui2", shaderstringToId, ui2ShaderPath + "/vertex.glsl",  ui2ShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string selectionShaderPath = "./res/shaders/selection";
   modlog("shaders", std::string("selection shader path is ") + selectionShaderPath);
@@ -2099,7 +2102,7 @@ int main(int argc, char* argv[]){
           .textureUnitId = 0,
         },
       });
-      setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "tint" });
+      setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "tint", "time" });
       glEnable(GL_BLEND);
       drawShapeData(lineData, renderingResources.uiShaderProgram, ndiOrtho, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
     }

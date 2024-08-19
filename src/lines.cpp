@@ -178,6 +178,7 @@ bool shaderIsDifferent(std::optional<unsigned int> shader1, std::optional<unsign
   return false;
 }
 
+float getTotalTime();
 void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 ndiOrtho, std::function<FontFamily&(std::optional<std::string>)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram){
   //std::cout << "text number: " << lineData.text.size() << std::endl;
 
@@ -213,6 +214,8 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
       }
 
       //std::cout << "drawing words: " << text.word << std::endl;
+
+      glUniform1f(glGetUniformLocation(shaderToUse, "time"), getTotalTime());
       glUniform1i(glGetUniformLocation(shaderToUse, "forceTint"), false);
       glUniform4fv(glGetUniformLocation(shaderToUse, "tint"), 1, glm::value_ptr(shape.tint));
       if (shape.selectionId.has_value()){
