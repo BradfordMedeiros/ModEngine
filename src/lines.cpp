@@ -179,8 +179,12 @@ bool shaderIsDifferent(std::optional<unsigned int> shader1, std::optional<unsign
 }
 
 float getTotalTime();
+
+// This could sort the line data in some fashion to minimize context switches
+// eg add different shader types to different queues
 void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 ndiOrtho, std::function<FontFamily&(std::optional<std::string>)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram){
   //std::cout << "text number: " << lineData.text.size() << std::endl;
+  bool allowShaderOverride = !selectionProgram; // which means that shaders use the geometry of the selection program
 
   std::optional<unsigned int> lastShaderId;
   for (auto &shape : lineData.shapes){
@@ -189,7 +193,7 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
     }
     if (textureIdSame(shape.textureId, textureId)){
       auto shaderToUse = shape.shader.has_value() ? shape.shader.value() : uiShaderProgram;
-      if (shaderIsDifferent(shape.shader, lastShaderId)){
+      if (shaderIsDifferent(shape.shader, lastShaderId) && allowShaderOverride){
 
           glUseProgram(shaderToUse);
           std::vector<UniformData> uniformData;
@@ -210,7 +214,7 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
           setUniformData(shaderToUse, uniformData, { "model", "encodedid2", "tint" });
           glEnable(GL_BLEND);
     
-        lastShaderId = shape.shader.value();
+        lastShaderId = shape.shader;
       }
 
       //std::cout << "drawing words: " << text.word << std::endl;

@@ -1053,6 +1053,13 @@ Mesh* updateAndGetCursor(objid hoveredId){
   return effectiveCrosshair;
 }
 
+std::optional<unsigned int> shaderByName(std::string name){
+  if (shaderstringToId.find(name) == shaderstringToId.end()){
+    return std::nullopt;
+  }
+  return shaderstringToId.at(name); 
+}
+
 
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
@@ -1192,7 +1199,7 @@ int main(int argc, char* argv[]){
   auto textureFolderPath = result["texture"].as<std::string>();
   const std::string framebufferShaderPath = "./res/shaders/framebuffer";
   const std::string uiShaderPath = result["uishader"].as<std::string>();
-  const std::string ui2ShaderPath = result["uishader"].as<std::string>();
+  const std::string ui2ShaderPath = "./res/shaders/ui2";
 
   auto timetoexit = result["timetoexit"].as<int>();
 
@@ -1346,12 +1353,7 @@ int main(int argc, char* argv[]){
     .drawLine2D = drawLine2D,
     .drawLine = addLineNextCycle,
     .freeLine = [](objid lineId) -> void { freeLine(lineData, lineId); } ,
-    .shaderByName = [](std::string name) -> std::optional<unsigned int> {
-      if (shaderstringToId.find(name) == shaderstringToId.end()){
-        return std::nullopt;
-      }
-      return shaderstringToId.at(name); 
-    },
+    .shaderByName = shaderByName,
     .getGameObjNameForId = getGameObjectName,
     .setGameObjectAttr = setGameObjectAttr,
     .setSingleGameObjectAttr = setSingleGameObjectAttr,
@@ -2084,9 +2086,10 @@ int main(int argc, char* argv[]){
     if (state.renderMode == RENDER_FINAL){
       renderUI(effectiveCrosshair, pixelColor);
 
+      auto shader = renderingResources.uiShaderProgram;
 
       // below and render screepspace lines can probably be consoliated
-      glUseProgram(renderingResources.uiShaderProgram);
+      glUseProgram(shader);
       std::vector<UniformData> uniformData;
       uniformData.push_back(UniformData {
         .name = "projection",
@@ -2102,9 +2105,11 @@ int main(int argc, char* argv[]){
           .textureUnitId = 0,
         },
       });
-      setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "tint", "time" });
+      setUniformData(shader, uniformData, { "model", "encodedid2", "tint", "time" });
       glEnable(GL_BLEND);
-      drawShapeData(lineData, renderingResources.uiShaderProgram, ndiOrtho, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
+
+
+      drawShapeData(lineData, shader /*renderingResources.uiShaderProgram*/, ndiOrtho, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
     }
     glEnable(GL_DEPTH_TEST);
 
