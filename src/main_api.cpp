@@ -455,7 +455,7 @@ void drawRect(float centerX, float centerY, float width, float height, bool perm
     .ndi = ndi,
     .tint = tint.has_value() ? tint.value() : glm::vec4(1.f, 1.f, 1.f, 1.f),
     .selectionId = selectionId,
-    .shader = std::nullopt,
+    .shader = shaderId,
   });
 }
 

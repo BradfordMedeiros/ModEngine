@@ -165,16 +165,63 @@ float convertTextNdiFontsize(float height, float width, float fontsize, bool isn
   return fontsize;
 }
 
-void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::optional<std::string>)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram){
+bool shaderIsDifferent(std::optional<unsigned int> shader1, std::optional<unsigned int> shader2){
+  if (!shader1.has_value() && !shader2.has_value()){
+    return false;
+  }else if (shader1.has_value() && !shader2.has_value()){
+    return true;
+  }else if (!shader1.has_value() && shader2.has_value()){
+    return true;
+  }else if (shader1.value() != shader2.value()){
+    return true;
+  }
+  return false;
+}
+
+float getTotalTime();
+
+// This could sort the line data in some fashion to minimize context switches
+// eg add different shader types to different queues
+void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 ndiOrtho, std::function<FontFamily&(std::optional<std::string>)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram){
   //std::cout << "text number: " << lineData.text.size() << std::endl;
+  bool allowShaderOverride = !selectionProgram; // which means that shaders use the geometry of the selection program
+
+  std::optional<unsigned int> lastShaderId;
   for (auto &shape : lineData.shapes){
     if (selectionProgram && !shape.selectionId.has_value()){
       continue;
     }
     if (textureIdSame(shape.textureId, textureId)){
+      auto shaderToUse = shape.shader.has_value() ? shape.shader.value() : uiShaderProgram;
+      if (shaderIsDifferent(shape.shader, lastShaderId) && allowShaderOverride){
+
+          glUseProgram(shaderToUse);
+          std::vector<UniformData> uniformData;
+          uniformData.push_back(UniformData {
+            .name = "projection",
+            .value = ndiOrtho,
+          });
+          uniformData.push_back(UniformData {
+            .name = "forceTint",
+            .value = false,
+          });
+          uniformData.push_back(UniformData {
+            .name = "textureData",
+            .value = Sampler2D {
+              .textureUnitId = 0,
+            },
+          });
+          setUniformData(shaderToUse, uniformData, { "model", "encodedid2", "tint" });
+          glEnable(GL_BLEND);
+    
+        lastShaderId = shape.shader;
+      }
+
       //std::cout << "drawing words: " << text.word << std::endl;
-      glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
-      glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(shape.tint));
+
+      glUniform1f(glGetUniformLocation(shaderToUse, "time"), getTotalTime());
+      glUniform1i(glGetUniformLocation(shaderToUse, "forceTint"), false);
+      glUniform4fv(glGetUniformLocation(shaderToUse, "tint"), 1, glm::value_ptr(shape.tint));
       if (shape.selectionId.has_value()){
         //std::cout << "selection id value: " << text.selectionId.value() << std::endl;
         auto id = shape.selectionId.value();

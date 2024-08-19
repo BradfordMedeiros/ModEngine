@@ -9,6 +9,8 @@
 #include "./common/util.h"
 
 unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile);
+unsigned int loadShaderIntoCache(std::string shaderString, std::map<std::string, GLint>& shaderstringToId, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile);
+
 GLint getShaderByShaderString(std::map<std::string, GLint>& shaderstringToId, std::string shaderString, GLint shaderProgram, bool allowShaderOverride, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile);
 
 

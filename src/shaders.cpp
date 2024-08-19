@@ -80,6 +80,12 @@ unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentSh
    return shaderProgramId;
 }
 
+unsigned int loadShaderIntoCache(std::string shaderString, std::map<std::string, GLint>& shaderstringToId, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile){
+  auto shaderId = loadShader(vertexShaderFilepath, fragmentShaderFilepath, readFile);
+  shaderstringToId[shaderString] = shaderId;
+  return shaderId;
+}
+
 struct ShaderStringVals {
   std::optional<std::string> vertex;
   std::optional<std::string> fragment;

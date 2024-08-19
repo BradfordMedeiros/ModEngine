@@ -168,11 +168,12 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
     glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(clearColor));
     drawMesh(*defaultResources.defaultMeshes.unitXYRect, renderingResources.uiShaderProgram, clearTextureId.value());
   }
+
   glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
   glUniform1i(glGetUniformLocation(renderingResources.uiShaderProgram, "forceTint"), true);
   glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
   drawAllLines(lineData, renderingResources.uiShaderProgram, texture.textureId);
-  drawShapeData(lineData, renderingResources.uiShaderProgram, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
+  drawShapeData(lineData, renderingResources.uiShaderProgram, ndiOrtho, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
 }
 
 void handlePaintingModifiesViewport(UVCoord uvsToPaint){
@@ -702,7 +703,7 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
       .textureUnitId = 0,
     },
   });
-  setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "tint" });
+  setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "tint", "time" });
   glEnable(GL_BLEND);
 
   if(crosshairSprite != NULL && !state.isRotateSelection && state.showCursor){
@@ -1052,6 +1053,13 @@ Mesh* updateAndGetCursor(objid hoveredId){
   return effectiveCrosshair;
 }
 
+std::optional<unsigned int> shaderByName(std::string name){
+  if (shaderstringToId.find(name) == shaderstringToId.end()){
+    return std::nullopt;
+  }
+  return shaderstringToId.at(name); 
+}
+
 
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
@@ -1191,7 +1199,8 @@ int main(int argc, char* argv[]){
   auto textureFolderPath = result["texture"].as<std::string>();
   const std::string framebufferShaderPath = "./res/shaders/framebuffer";
   const std::string uiShaderPath = result["uishader"].as<std::string>();
-  
+  const std::string ui2ShaderPath = "./res/shaders/ui2";
+
   auto timetoexit = result["timetoexit"].as<int>();
 
   std::cout << "LIFECYCLE: program starting" << std::endl;
@@ -1267,33 +1276,35 @@ int main(int argc, char* argv[]){
   glPointSize(10.f);
 
   modlog("shaders", std::string("shader file path is ") + shaderFolderPath);
-  unsigned int shaderProgram = loadShader(shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl", interface.readFile);
+  unsigned int shaderProgram = loadShaderIntoCache("default", shaderstringToId, shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl", interface.readFile);
   
   modlog("shaders", std::string("framebuffer file path is ") + framebufferShaderPath);
-  renderingResources.framebufferProgram = loadShader(framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl", interface.readFile);
+  renderingResources.framebufferProgram = loadShaderIntoCache("framebuffer", shaderstringToId, framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string depthShaderPath = "./res/shaders/depth";
   modlog("shaders", std::string("depth file path is ") + depthShaderPath);
-  unsigned int depthProgram = loadShader(depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl", interface.readFile);
+  unsigned int depthProgram = loadShaderIntoCache("depth", shaderstringToId, depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl", interface.readFile);
 
   modlog("shaders", std::string("ui shader file path is ") + uiShaderPath);
-  renderingResources.uiShaderProgram = loadShader(uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile);
+  renderingResources.uiShaderProgram = loadShaderIntoCache("ui", shaderstringToId, uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile);
+
+  loadShaderIntoCache("ui2", shaderstringToId, ui2ShaderPath + "/vertex.glsl",  ui2ShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string selectionShaderPath = "./res/shaders/selection";
   modlog("shaders", std::string("selection shader path is ") + selectionShaderPath);
-  unsigned int selectionProgram = loadShader(selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl", interface.readFile);
+  unsigned int selectionProgram = loadShaderIntoCache("selection", shaderstringToId, selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string drawingShaderPath = "./res/shaders/drawing";
   modlog("shaders", std::string("drawing shader path is: ") + drawingShaderPath);
-  renderingResources.drawingProgram = loadShader(drawingShaderPath + "/vertex.glsl", drawingShaderPath + "/fragment.glsl", interface.readFile);
+  renderingResources.drawingProgram = loadShaderIntoCache("drawing", shaderstringToId, drawingShaderPath + "/vertex.glsl", drawingShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string blurShaderPath = "./res/shaders/blur";
   modlog("shaders", std::string("blur shader path is: ") + blurShaderPath);
-  unsigned int blurProgram = loadShader(blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile);
+  unsigned int blurProgram = loadShaderIntoCache("blur", shaderstringToId, blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string basicShaderPath = "./res/shaders/basic";
   modlog("shaders", std::string("basic shader path is: ") + basicShaderPath);
-  unsigned int basicProgram = loadShader(basicShaderPath + "/vertex.glsl", basicShaderPath+ "/fragment.glsl", interface.readFile);
+  unsigned int basicProgram = loadShaderIntoCache("basic", shaderstringToId, basicShaderPath + "/vertex.glsl", basicShaderPath+ "/fragment.glsl", interface.readFile);
 
   renderStages = loadRenderStages(
     renderingResources.framebuffers.fbo, 
@@ -1342,6 +1353,7 @@ int main(int argc, char* argv[]){
     .drawLine2D = drawLine2D,
     .drawLine = addLineNextCycle,
     .freeLine = [](objid lineId) -> void { freeLine(lineData, lineId); } ,
+    .shaderByName = shaderByName,
     .getGameObjNameForId = getGameObjectName,
     .setGameObjectAttr = setGameObjectAttr,
     .setSingleGameObjectAttr = setSingleGameObjectAttr,
@@ -1825,7 +1837,7 @@ int main(int argc, char* argv[]){
 
     glUniformMatrix4fv(glGetUniformLocation(renderStages.selection.shader, "projview"), 1, GL_FALSE, glm::value_ptr(ndiOrtho));
     glDisable(GL_DEPTH_TEST);
-    drawShapeData(lineData, renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
+    drawShapeData(lineData, renderStages.selection.shader, ndiOrtho, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
     glEnable(GL_DEPTH_TEST);
 
     //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
@@ -2074,7 +2086,10 @@ int main(int argc, char* argv[]){
     if (state.renderMode == RENDER_FINAL){
       renderUI(effectiveCrosshair, pixelColor);
 
-      glUseProgram(renderingResources.uiShaderProgram);
+      auto shader = renderingResources.uiShaderProgram;
+
+      // below and render screepspace lines can probably be consoliated
+      glUseProgram(shader);
       std::vector<UniformData> uniformData;
       uniformData.push_back(UniformData {
         .name = "projection",
@@ -2090,9 +2105,11 @@ int main(int argc, char* argv[]){
           .textureUnitId = 0,
         },
       });
-      setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "tint" });
+      setUniformData(shader, uniformData, { "model", "encodedid2", "tint", "time" });
       glEnable(GL_BLEND);
-      drawShapeData(lineData, renderingResources.uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
+
+
+      drawShapeData(lineData, shader /*renderingResources.uiShaderProgram*/, ndiOrtho, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
     }
     glEnable(GL_DEPTH_TEST);
 
