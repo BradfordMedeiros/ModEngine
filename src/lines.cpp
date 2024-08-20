@@ -192,8 +192,9 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
       continue;
     }
     if (textureIdSame(shape.textureId, textureId)){
-      auto shaderToUse = shape.shader.has_value() ? shape.shader.value() : uiShaderProgram;
-      if (shaderIsDifferent(shape.shader, lastShaderId) && allowShaderOverride){
+      auto shapeOptionsShader = shape.shader.has_value() ? shape.shader.value().shaderId : std::optional<unsigned int>(std::nullopt);
+      auto shaderToUse = shapeOptionsShader.has_value() ? shapeOptionsShader.value() : uiShaderProgram;
+      if (shaderIsDifferent(shaderToUse, lastShaderId) && allowShaderOverride){
 
           glUseProgram(shaderToUse);
           std::vector<UniformData> uniformData;
@@ -214,7 +215,7 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
           setUniformData(shaderToUse, uniformData, { "model", "encodedid2", "tint", "time" });
           glEnable(GL_BLEND);
     
-        lastShaderId = shape.shader;
+        lastShaderId = shapeOptionsShader;
       }
 
       //std::cout << "drawing words: " << text.word << std::endl;

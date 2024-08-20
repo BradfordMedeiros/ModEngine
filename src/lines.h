@@ -46,7 +46,7 @@ struct ShapeData  {
   bool ndi;
   glm::vec4 tint;
   std::optional<objid> selectionId;
-  std::optional<unsigned int> shader;
+  std::optional<ShapeOptions> shader;
 };
 
 struct LineByColor {

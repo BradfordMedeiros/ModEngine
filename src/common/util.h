@@ -407,4 +407,8 @@ struct PositionAndScaleVerts {
   std::vector<Transformation> specialBlocks;
 };
 
+struct ShapeOptions {
+  std::optional<unsigned int> shaderId = std::nullopt;
+};
+
 #endif

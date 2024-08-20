@@ -387,7 +387,7 @@ void handleClipboardSelect(){
   setClipboardFromSelected(state.editor);
 }
 
-void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId, std::optional<float> maxWidthNdi, std::optional<unsigned int> shaderId){
+void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId, std::optional<float> maxWidthNdi, std::optional<ShapeOptions> shaderId){
   //std::cout << "draw text: " << word << ": perma? " << permatext << std::endl;
   addShapeData(lineData, ShapeData{
     .shapeData = TextShapeData {
@@ -440,7 +440,7 @@ int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontS
   return drawWordsRelative(shaderProgram, fontFamilyByName(fontFamilyName), fullModelTransform(world.sandbox, id), word, 0, 0, fontSize, align, wrap, virtualization, cursor.cursorIndex, cursor.cursorIndexLeft, cursor.highlightLength, drawBoundingOnly);
 }
 
-void drawRect(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<unsigned int> shaderId){
+void drawRect(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId){
   //std::cout << "draw text: " << word << ": perma? " << permatext << std::endl;
   addShapeData(lineData, ShapeData{
     .shapeData = RectShapeData {
@@ -459,7 +459,7 @@ void drawRect(float centerX, float centerY, float width, float height, bool perm
   });
 }
 
-void drawLine2D(glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<unsigned int> shaderId){
+void drawLine2D(glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId){
   addShapeData(lineData, ShapeData{
     .shapeData = LineShapeData {
       .fromPos = fromPos,
