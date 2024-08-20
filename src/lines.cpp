@@ -211,7 +211,7 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
               .textureUnitId = 0,
             },
           });
-          setUniformData(shaderToUse, uniformData, { "model", "encodedid2", "tint" });
+          setUniformData(shaderToUse, uniformData, { "model", "encodedid2", "tint", "time" });
           glEnable(GL_BLEND);
     
         lastShaderId = shape.shader;
