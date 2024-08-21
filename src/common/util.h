@@ -409,6 +409,7 @@ struct PositionAndScaleVerts {
 
 struct ShapeOptions {
   std::optional<unsigned int> shaderId = std::nullopt;
+  std::optional<int> zIndex = std::nullopt;
 };
 
 #endif
