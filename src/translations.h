@@ -73,4 +73,6 @@ glm::vec3 calcOffsetFromRotationReverse(glm::vec3 position, std::optional<glm::v
 std::string print(Transformation& transform);
 bool testOnlyAboutEqual(Transformation& transform1, Transformation& transform2);
 
+glm::vec2 uvToNdi(glm::vec2);
+
 #endif 

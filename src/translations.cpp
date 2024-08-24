@@ -409,3 +409,9 @@ std::string print(Transformation& transform){
 bool testOnlyAboutEqual(Transformation& transform1, Transformation& transform2){
   return aboutEqual(transform1.position, transform2.position) && aboutEqual(transform1.scale, transform2.scale);
 }
+
+glm::vec2 uvToNdi(glm::vec2 coord){
+  float xCoord = convertBase(coord.x, 0, 1, -1, 1);
+  float yCoord = convertBase(coord.y, 0, 1, -1, 1);
+  return glm::vec2(xCoord, yCoord);
+}
