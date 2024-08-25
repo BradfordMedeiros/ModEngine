@@ -132,6 +132,30 @@ void registerStatistics(){
   registerStat(statistics.fpsStat, statistics.currentFps);
 }
 
+
+struct IdAtCoords {
+  float ndix;
+  float ndiy;
+  bool onlyGameObjId;
+  std::optional<objid> result;
+  glm::vec2 resultUv;
+  std::optional<objid> textureId;
+  std::function<void(std::optional<objid>, glm::vec2)> afterFrame;
+};
+
+std::vector<IdAtCoords> idCoordsToGet;
+void idAtCoordAsync(float ndix, float ndiy, bool onlyGameObjId, std::optional<objid> textureId, std::function<void(std::optional<objid>, glm::vec2)> afterFrame){
+  idCoordsToGet.push_back(IdAtCoords {
+    .ndix = ndix,
+    .ndiy = ndiy,
+    .onlyGameObjId = onlyGameObjId,
+    .result = std::nullopt,
+    .resultUv = glm::vec2(0.f, 0.f),
+    .textureId = textureId,
+    .afterFrame = afterFrame,
+  });
+}
+
 void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId){
   auto texSize = getTextureSizeInfo(texture);
   auto texSize2 = getTextureSizeInfo(texture2);
@@ -174,6 +198,26 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
   drawAllLines(lineData, renderingResources.uiShaderProgram, texture.textureId);
   drawShapeData(lineData, renderingResources.uiShaderProgram, ndiOrtho, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
+
+  for (auto &idCoordToGet : idCoordsToGet){
+    if (!idCoordToGet.textureId.has_value()){
+      continue;
+    }
+    if (idCoordToGet.textureId.value() != texture.textureId){
+      continue;
+    }
+    auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.ndix, idCoordToGet.ndiy), glm::vec2(texSize.width, texSize.height));
+    auto id = getIdFromPixelCoord(pixelCoord.x, pixelCoord.y);
+    if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
+    }else if (idCoordToGet.onlyGameObjId && !idExists(world.sandbox, id)){
+      //modassert(false, std::string("id does not exist: ") + std::to_string(id));
+    }else{
+      idCoordToGet.result = id;
+    }
+    auto uvCoordWithTex = getUVCoordAndTextureId(pixelCoord.x, pixelCoord.y);
+    auto uvCoord = toUvCoord(uvCoordWithTex);
+    idCoordToGet.resultUv = glm::vec2(uvCoord.x, uvCoord.y);
+  }
 }
 
 void handlePaintingModifiesViewport(UVCoord uvsToPaint){
@@ -997,29 +1041,6 @@ RenderStagesDofInfo getDofInfo(bool* _shouldRender){
 void onGLFWEerror(int error, const char* description){
   std::cerr << "Error: " << description << std::endl;
 }
-
-
-struct IdAtCoords {
-  float ndix;
-  float ndiy;
-  bool onlyGameObjId;
-  std::optional<objid> result;
-  glm::vec2 resultUv;
-  std::function<void(std::optional<objid>, glm::vec2)> afterFrame;
-};
-
-std::vector<IdAtCoords> idCoordsToGet;
-void idAtCoordAsync(float ndix, float ndiy, bool onlyGameObjId, std::function<void(std::optional<objid>, glm::vec2)> afterFrame){
-  idCoordsToGet.push_back(IdAtCoords {
-    .ndix = ndix,
-    .ndiy = ndiy,
-    .onlyGameObjId = onlyGameObjId,
-    .result = std::nullopt,
-    .resultUv = glm::vec2(0.f, 0.f),
-    .afterFrame = afterFrame,
-  });
-}
-
 
 void setSelected(std::optional<std::set<objid>> ids){
   clearSelectedIndexs(state.editor);
@@ -1851,6 +1872,9 @@ int main(int argc, char* argv[]){
     state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate
 
     for (auto &idCoordToGet : idCoordsToGet){
+      if (idCoordToGet.textureId.has_value()){
+        continue;
+      }
       auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.ndix, idCoordToGet.ndiy), state.resolution);
 
       auto id = getIdFromPixelCoord(pixelCoord.x, pixelCoord.y);
