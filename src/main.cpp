@@ -206,8 +206,9 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
     if (idCoordToGet.textureId.value() != texture.textureId){
       continue;
     }
+
     auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.ndix, idCoordToGet.ndiy), glm::vec2(texSize.width, texSize.height));
-    auto id = getIdFromPixelCoord(pixelCoord.x, pixelCoord.y);
+    auto id = getIdFromPixelCoordAttachment1(pixelCoord.x, pixelCoord.y);
     if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
     }else if (idCoordToGet.onlyGameObjId && !idExists(world.sandbox, id)){
       //modassert(false, std::string("id does not exist: ") + std::to_string(id));

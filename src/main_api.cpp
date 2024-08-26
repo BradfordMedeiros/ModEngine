@@ -1108,8 +1108,8 @@ unsigned int createTexture(std::string name, unsigned int width, unsigned int he
     .selectionTextureId = selectionTextureId,
     .autoclear = false,
     .shouldClear = true,
-    .clearTextureId = std::nullopt, //world.textures.at("./res/textures/wood.jpg").texture.textureId,//,
-    .clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f),
+    .clearTextureId = std::nullopt,
+    .clearColor = glm::vec4(0.f, 0.f, 0.f, 0.f),
   });
 
   modlog("create-texture", "number of textures: " + std::to_string(userTextures.size()));

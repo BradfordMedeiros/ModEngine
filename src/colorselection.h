@@ -15,6 +15,7 @@ struct Color {
 Color getPixelColor(GLint x, GLint y);
 objid getIdFromColor(Color color);
 objid getIdFromPixelCoord(GLint x, GLint y);
+objid getIdFromPixelCoordAttachment1(GLint x, GLint y);
 glm::vec4 getColorFromGameobject(objid id);
 std::string printColor(Color color);
 
