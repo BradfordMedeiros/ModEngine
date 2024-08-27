@@ -4,7 +4,10 @@ layout(location = 0) out vec4 FragColor;
 layout(location = 1) out vec4 UVCoords;
 
 uniform int textureid;
+
 uniform vec4 encodedid;
+uniform vec4 encodedid2;
+
 in vec2 TexCoord;
 
 void main(){

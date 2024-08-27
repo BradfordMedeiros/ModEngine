@@ -205,7 +205,8 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
   std::optional<unsigned int> lastShaderId;
 
   auto zIndexs = uniqueZIndexs(lineData);
-
+  glDisable(GL_BLEND);
+  
   for (auto zIndex : zIndexs){
     for (auto &shape : lineData.shapes){
       // if the zIndex is not specified, act as if 0 was specified
@@ -222,9 +223,9 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
       }
       if (textureIdSame(shape.textureId, textureId)){
         auto shapeOptionsShader = shape.shader.has_value() ? shape.shader.value().shaderId : std::optional<unsigned int>(std::nullopt);
-        auto shaderToUse = shapeOptionsShader.has_value() ? shapeOptionsShader.value() : uiShaderProgram;
+        auto shaderToUse = uiShaderProgram;
+        glUseProgram(shaderToUse);
         if (shaderIsDifferent(shaderToUse, lastShaderId) && allowShaderOverride){
-            glUseProgram(shaderToUse);
             std::vector<UniformData> uniformData;
             uniformData.push_back(UniformData {
               .name = "projection",
@@ -241,7 +242,7 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
               },
             });
             setUniformData(shaderToUse, uniformData, { "model", "encodedid2", "tint", "time" });
-            glEnable(GL_BLEND);
+            //glEnable(GL_BLEND);
           lastShaderId = shapeOptionsShader;
         }
         glUniform1f(glGetUniformLocation(shaderToUse, "time"), getTotalTime());
@@ -250,7 +251,12 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
         if (shape.selectionId.has_value()){
           //std::cout << "selection id value: " << text.selectionId.value() << std::endl;
           auto id = shape.selectionId.value();
-          auto color = getColorFromGameobject(id);
+          //auto color = getColorFromGameobject(id);
+          auto color = glm::vec4(0.3f, 0.4f, 0.5f, 0.6f);
+
+          auto color2 = color;
+
+
           Color colorTypeColor {
             .r = color.x,
             .g = color.y, 
@@ -259,11 +265,19 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
           };
           auto restoredId = getIdFromColor(colorTypeColor);
           //std::cout << "color is: " << print(colorTypeColor) << " - " << id << " - " << restoredId << std::endl;
-          glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid"), 1, glm::value_ptr(color));
-          glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid2"), 1, glm::value_ptr(color));
+
+          auto encodedIdLocation = glGetUniformLocation(shaderToUse, "encodedid");
+          //modassert(encodedIdLocation >= 0, std::string("invalid location for encodedid: ") + std::to_string(encodedIdLocation));
+
+          glUniform4fv(encodedIdLocation, 1, glm::value_ptr(color));
+          glUniform4fv(glGetUniformLocation(shaderToUse, "encodedid2"), 1, glm::value_ptr(color2));
         }else{
-          glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(0)));
-          glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0)));
+
+          auto encodedIdLocation = glGetUniformLocation(shaderToUse, "encodedid");
+          //modassert(encodedIdLocation >= 0, "2 invalid location for encodedid");
+          
+          glUniform4fv(encodedIdLocation, 1, glm::value_ptr(getColorFromGameobject(0)));
+          glUniform4fv(glGetUniformLocation(shaderToUse, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0)));
         }
         auto textShapeData = std::get_if<TextShapeData>(&shape.shapeData);
         auto rectShapeData = std::get_if<RectShapeData>(&shape.shapeData);
@@ -281,8 +295,8 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
           float widthNdi = rectShapeData -> width;
           float heightNdi = rectShapeData -> height;
           glm::mat4 scaledAndTranslated = glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(centerXNdi, centerYNdi, 0.f)), glm::vec3(widthNdi, heightNdi, 1.f));
-          glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(scaledAndTranslated));
-          glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
+          glUniformMatrix4fv(glGetUniformLocation(shaderToUse, "model"), 1, GL_FALSE, glm::value_ptr(scaledAndTranslated));
+          glUniform1i(glGetUniformLocation(shaderToUse, "forceTint"), false);
           unsigned int textureId = -1;
           if (rectShapeData -> texture.has_value()){
             auto texId = getTextureId(rectShapeData -> texture.value());
@@ -290,11 +304,11 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
               textureId = texId.value();
             }
           }
-          drawMesh(unitXYRect, uiShaderProgram, textureId);
+          drawMesh(unitXYRect, shaderToUse, textureId);
         }else if (lineShapeData != NULL){
           modassert(shape.ndi, "non-ndi line drawing not supported"); 
-          glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
-          glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
+          glUniformMatrix4fv(glGetUniformLocation(shaderToUse, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+          glUniform1i(glGetUniformLocation(shaderToUse, "forceTint"), true);
           std::vector<Line> lines;
           lines.push_back(Line {
             .fromPos = lineShapeData -> fromPos,

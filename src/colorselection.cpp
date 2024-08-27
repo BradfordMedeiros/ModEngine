@@ -29,6 +29,7 @@ objid getIdFromPixelCoord(GLint x, GLint y){
 }
 objid getIdFromPixelCoordAttachment1(GLint x, GLint y){
   Color hoveredItemColor = getPixelColorAttachment1(x, y);
+  modlog("on game ui color", print(hoveredItemColor) + "\n");
   auto hoveredId = getIdFromColor(hoveredItemColor);
   return hoveredId;
 }

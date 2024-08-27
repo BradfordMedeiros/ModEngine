@@ -26,6 +26,24 @@ Texture loadTextureEmpty(int textureWidth, int textureHeight, int numChannels){
   return tex;
 }
 
+Texture loadTextureSelection(int textureWidth, int textureHeight){
+  unsigned int texture;
+  glGenTextures(1, &texture);
+
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, textureWidth, textureHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+  Texture tex {
+    .textureId = texture,
+  };
+  return tex;
+}
+
+
 Texture loadTextureData(unsigned char* data, int textureWidth, int textureHeight, int numChannels){
   modassert(textureWidth > 0, "ERROR - loadTextureData - texture width must be > 0");
   modassert(textureHeight > 0, "ERROR - loadTextureData - height width must be > 0");

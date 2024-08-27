@@ -24,6 +24,7 @@ struct TextureRef {
 };
 
 Texture loadTextureEmpty(int textureWidth, int textureHeight, int numChannels);
+Texture loadTextureSelection(int textureWidth, int textureHeight);
 Texture loadTextureData(unsigned char* data, int textureWidth, int textureHeight, int numChannels);
 Texture loadTextureDataRed(unsigned char* data, int textureWidth, int textureHeight);
 Texture loadTexture(std::string textureFilePath);

@@ -17,6 +17,10 @@ uniform float exposure;
 uniform bool enableGammaCorrection;
 uniform bool enableExposure;
 
+
+uniform vec4 encodedid;
+uniform vec4 encodedid2;
+
 void calculateFogEffect(in float depthAmount, out vec4 fogAmount){
   if (depthAmount < mincutoff || depthAmount > maxcuttoff){
     fogAmount = vec4(0, 0, 0, 0);

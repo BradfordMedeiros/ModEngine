@@ -1100,8 +1100,8 @@ UserTexture* userTextureById(unsigned int id){
 unsigned int createTexture(std::string name, unsigned int width, unsigned int height, objid ownerId){
   MODTODO("create texture -> use ownership id of the script being used");
   std::cout << "create texture: " << name << std::endl;
-  auto selectionTextureId = loadTextureWorldEmpty(world, name +"_selection_texture", ownerId, width, height, std::nullopt).textureId;
-  auto textureID = loadTextureWorldEmpty(world, name, ownerId, width, height, selectionTextureId).textureId;
+  auto selectionTextureId = loadTextureSelection(width, height).textureId;
+  auto textureID = loadTextureWorldEmpty(world, name, ownerId, width, height, std::nullopt).textureId;
   userTextures.push_back(UserTexture{
     .id = textureID,
     .ownerId = ownerId,

@@ -156,6 +156,16 @@ void idAtCoordAsync(float ndix, float ndiy, bool onlyGameObjId, std::optional<ob
   });
 }
 
+
+std::optional<IdAtCoords*> maybeGetIdAtCoords(Texture& texture){
+  for (auto &idCoordToGet : idCoordsToGet){
+    if (idCoordToGet.textureId.has_value() && idCoordToGet.textureId.value() == texture.textureId){
+      return &idCoordToGet;
+    }
+  }
+  return std::nullopt; 
+}
+
 void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId){
   auto texSize = getTextureSizeInfo(texture);
   auto texSize2 = getTextureSizeInfo(texture2);
@@ -166,17 +176,24 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   setActiveDepthTexture(renderingResources.framebuffers.fbo, &renderingResources.framebuffers.textureDepthTextures.at(0), 0);
 
   glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
+  GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+  glDrawBuffers(2, buffers_to_render);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,  texture2.textureId, 0);
   
+  modassert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "framebuffer incomplete");
+
+
   glUseProgram(renderingResources.uiShaderProgram);
   glDisable(GL_BLEND);
   glDisable(GL_DEPTH_TEST);
+  glDisable(GL_STENCIL_TEST);
 
   //modassert(false, "todo - make this work with setUniformData");
 
-  if (shouldClear){ 
-    glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
+  if (true){ 
+    glClearColor(1.f, 0.f, 0.f, 1.f);
+    //glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
   }
 
@@ -196,29 +213,27 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
   glUniform1i(glGetUniformLocation(renderingResources.uiShaderProgram, "forceTint"), true);
   glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
-  drawAllLines(lineData, renderingResources.uiShaderProgram, texture.textureId);
+  //drawAllLines(lineData, renderingResources.uiShaderProgram, texture.textureId);
   drawShapeData(lineData, renderingResources.uiShaderProgram, ndiOrtho, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
 
-  for (auto &idCoordToGet : idCoordsToGet){
-    if (!idCoordToGet.textureId.has_value()){
-      continue;
-    }
-    if (idCoordToGet.textureId.value() != texture.textureId){
-      continue;
-    }
+  auto idCoordToGet = maybeGetIdAtCoords(texture);
+  if (idCoordToGet.has_value()){
 
-    auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.ndix, idCoordToGet.ndiy), glm::vec2(texSize.width, texSize.height));
+    auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.value()->ndix, idCoordToGet.value()->ndiy), glm::vec2(texSize2.width, texSize2.height));
     auto id = getIdFromPixelCoordAttachment1(pixelCoord.x, pixelCoord.y);
+    modlog("on game ui modengine", std::to_string(id));
+    modlog("on game ui pixelcoord", std::to_string(pixelCoord.x) + " " + std::to_string(pixelCoord.y));
     if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
-    }else if (idCoordToGet.onlyGameObjId && !idExists(world.sandbox, id)){
+    }else if (idCoordToGet.value()->onlyGameObjId && !idExists(world.sandbox, id)){
       //modassert(false, std::string("id does not exist: ") + std::to_string(id));
     }else{
-      idCoordToGet.result = id;
+      idCoordToGet.value()->result = id;
     }
     auto uvCoordWithTex = getUVCoordAndTextureId(pixelCoord.x, pixelCoord.y);
     auto uvCoord = toUvCoord(uvCoordWithTex);
-    idCoordToGet.resultUv = glm::vec2(uvCoord.x, uvCoord.y);
+    idCoordToGet.value()->resultUv = glm::vec2(uvCoord.x, uvCoord.y);
   }
+  
 }
 
 void handlePaintingModifiesViewport(UVCoord uvsToPaint){

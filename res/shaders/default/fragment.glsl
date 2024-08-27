@@ -55,6 +55,8 @@ uniform vec3 emissionAmount;
 uniform float discardTexAmount;
 uniform float bloomThreshold;
 
+uniform vec4 encodedid;
+uniform vec4 encodedid2;
 
 int getNumLights(){
   return min(numlights, MAX_LIGHTS);
