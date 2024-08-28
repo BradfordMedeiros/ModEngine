@@ -405,14 +405,9 @@ std::string print(std::vector<UniformData>& uniforms){
 std::optional<std::string> nameByShaderId(GLint shaderProgram){
   for (auto &[shaderString, shaderId] : shaderstringToId){
     if (shaderId == shaderProgram){
-      modlog("shader nameByShaderId lookup", "found");
       return shaderString;
     }
-    modlog("shader name to id: ", shaderString);
   }
-
-  std::cout << "shader id is: " << shaderProgram << std::endl;
-  modlog("shader nameByShaderId lookup", std::string("not found: ") + std::to_string(shaderProgram));
   modassert(false, "");
   return std::nullopt;
 }

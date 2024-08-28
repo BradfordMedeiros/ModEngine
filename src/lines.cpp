@@ -142,7 +142,7 @@ void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigne
       }
     }
     if (lines.size() > 0){
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(lineByColor.tint));
+      glUniform4fv(shaderGetUniform(shaderProgram, "tint"), 1, glm::value_ptr(lineByColor.tint));
       drawLines(lines, lineByColor.linewidth); 
     }
   }
@@ -281,7 +281,7 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
           float widthNdi = rectShapeData -> width;
           float heightNdi = rectShapeData -> height;
           glm::mat4 scaledAndTranslated = glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(centerXNdi, centerYNdi, 0.f)), glm::vec3(widthNdi, heightNdi, 1.f));
-          glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(scaledAndTranslated));
+          glUniformMatrix4fv(shaderGetUniform(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(scaledAndTranslated));
           glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
           unsigned int textureId = -1;
           if (rectShapeData -> texture.has_value()){
@@ -293,7 +293,7 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
           drawMesh(unitXYRect, uiShaderProgram, textureId);
         }else if (lineShapeData != NULL){
           modassert(shape.ndi, "non-ndi line drawing not supported"); 
-          glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+          glUniformMatrix4fv(shaderGetUniform(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
           glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
           std::vector<Line> lines;
           lines.push_back(Line {
