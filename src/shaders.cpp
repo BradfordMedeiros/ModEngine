@@ -410,6 +410,8 @@ std::optional<std::string> nameByShaderId(GLint shaderProgram){
     }
     modlog("shader name to id: ", shaderString);
   }
+
+  std::cout << "shader id is: " << shaderProgram << std::endl;
   modlog("shader nameByShaderId lookup", std::string("not found: ") + std::to_string(shaderProgram));
   modassert(false, "");
   return std::nullopt;
@@ -417,6 +419,7 @@ std::optional<std::string> nameByShaderId(GLint shaderProgram){
 
 int shaderGetUniform(unsigned int shaderProgram, const char* name){
   auto uniformValue = glGetUniformLocation(shaderProgram, name);
-  //modassert(uniformValue != -1, std::string("uniform value invalid: " + std::string(name) + " " + print(nameByShaderId(uniformValue))));
+  modassert(nameByShaderId(shaderProgram).has_value(), "shader does not have a value: ");
+  modassert(uniformValue != -1, std::string("uniform value invalid: " + std::string(name) + " " + print(nameByShaderId(shaderProgram))));
   return uniformValue;
 }
