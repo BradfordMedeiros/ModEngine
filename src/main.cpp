@@ -36,7 +36,7 @@ bool bootStrapperMode = false;
 std::map<std::string, std::string> args;
 DrawingParams drawParams = getDefaultDrawingParams();
 extern std::vector<InputDispatch> inputFns;     
-std::map<std::string, GLint> shaderstringToId;
+extern std::map<std::string, GLint> shaderstringToId;
 
 // per frame variable data 
 bool selectItemCalled = false;
@@ -180,22 +180,22 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
   }
 
-  glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho));
-  glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0)));
+  glUniformMatrix4fv(shaderGetUniform(renderingResources.uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho));
+  glUniform4fv(shaderGetUniform(renderingResources.uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0)));
 
   if (shouldClear && clearTextureId.has_value()){
-    glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(
+    glUniformMatrix4fv(shaderGetUniform(renderingResources.uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(
       glm::mat4(1.0f), 
       glm::vec3(2.f, 2.f, 2.f)
     )));
-    glUniform1i(glGetUniformLocation(renderingResources.uiShaderProgram, "forceTint"), false);
-    glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(clearColor));
+    glUniform1i(shaderGetUniform(renderingResources.uiShaderProgram, "forceTint"), false);
+    glUniform4fv(shaderGetUniform(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(clearColor));
     drawMesh(*defaultResources.defaultMeshes.unitXYRect, renderingResources.uiShaderProgram, clearTextureId.value());
   }
 
-  glUniformMatrix4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
-  glUniform1i(glGetUniformLocation(renderingResources.uiShaderProgram, "forceTint"), true);
-  glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+  glUniformMatrix4fv(shaderGetUniform(renderingResources.uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+  glUniform1i(shaderGetUniform(renderingResources.uiShaderProgram, "forceTint"), true);
+  glUniform4fv(shaderGetUniform(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
   drawAllLines(lineData, renderingResources.uiShaderProgram, texture.textureId);
   drawShapeData(lineData, renderingResources.uiShaderProgram, ndiOrtho, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
 
@@ -239,14 +239,14 @@ void handlePaintingModifiesViewport(UVCoord uvsToPaint){
   glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToPaint.value().textureId, 0);
 
-  glUniformMatrix4fv(glGetUniformLocation(renderingResources.drawingProgram, "model"), 1, GL_FALSE, glm::value_ptr(
+  glUniformMatrix4fv(shaderGetUniform(renderingResources.drawingProgram, "model"), 1, GL_FALSE, glm::value_ptr(
     glm::scale(
       glm::translate(glm::mat4(1.0f), uvToNDC(uvsToPaint)), 
       glm::vec3(0.01f, 0.01f, 0.01f) * drawParams.scale)
     )
   );
-  glUniform1f(glGetUniformLocation(renderingResources.drawingProgram, "opacity"), drawParams.opacity);
-  glUniform4fv(glGetUniformLocation(renderingResources.drawingProgram, "tint"), 1, glm::value_ptr(drawParams.tint));
+  glUniform1f(shaderGetUniform(renderingResources.drawingProgram, "opacity"), drawParams.opacity);
+  glUniform4fv(shaderGetUniform(renderingResources.drawingProgram, "tint"), 1, glm::value_ptr(drawParams.tint));
 
   glBindTexture(GL_TEXTURE_2D, activeTextureId());
   glBindVertexArray(defaultResources.quadVAO);
@@ -366,22 +366,22 @@ void loadAllTextures(std::string& textureFolderPath){
 // Kind of crappy since the uniforms don't unset their values after rendering, but order should be deterministic so ... ok
 void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
   for (auto &uniform : uniforms.intUniforms){
-    glUniform1i(glGetUniformLocation(shader, uniform.uniformName.c_str()), uniform.value);
+    glUniform1i(shaderGetUniform(shader, uniform.uniformName.c_str()), uniform.value);
   }
   for (auto &uniform : uniforms.floatUniforms){
-    glUniform1f(glGetUniformLocation(shader, uniform.uniformName.c_str()), uniform.value);
+    glUniform1f(shaderGetUniform(shader, uniform.uniformName.c_str()), uniform.value);
   }
   for (auto &uniform : uniforms.vec3Uniforms){
-    glUniform3fv(glGetUniformLocation(shader, uniform.uniformName.c_str()), 1, glm::value_ptr(uniform.value));
+    glUniform3fv(shaderGetUniform(shader, uniform.uniformName.c_str()), 1, glm::value_ptr(uniform.value));
   }
   for (auto &uniform : uniforms.floatArrUniforms){
     for (int i = 0; i < uniform.value.size(); i++){
-      glUniform1f(glGetUniformLocation(shader,  (uniform.uniformName + "[" + std::to_string(i) + "]").c_str()), uniform.value.at(i));
+      glUniform1f(shaderGetUniform(shader,  (uniform.uniformName + "[" + std::to_string(i) + "]").c_str()), uniform.value.at(i));
     }
   }
   for (auto &uniform : uniforms.builtInUniforms){  // todo -> avoid string comparisons
     if (uniform.builtin == "resolution"){
-      glUniform2iv(glGetUniformLocation(shader, uniform.uniformName.c_str()), 1, glm::value_ptr(state.resolution));
+      glUniform2iv(shaderGetUniform(shader, uniform.uniformName.c_str()), 1, glm::value_ptr(state.resolution));
     }else{
       std::cout << "uniform not supported: " << uniform.builtin << std::endl;
       assert(false);
@@ -569,7 +569,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       glClear(GL_DEPTH_BUFFER_BIT);
     }
 
-    auto newShader = getShaderByShaderString(shaderstringToId, shader, shaderProgram, allowShaderOverride, shaderFolderPath, interface.readFile);
+    auto newShader = (shader == "" || !allowShaderOverride) ? shaderProgram : getShaderByShaderString(shader, shaderFolderPath, interface.readFile);
     if (!lastShaderId.has_value() || newShader != lastShaderId.value()){
       lastShaderId = newShader;
       //sendAlert(std::string("loaded shader: ") + shader);
@@ -585,14 +585,14 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     if (meshObj != NULL && meshObj -> meshesToRender.size() > 0){
       // @TODO i use first mesh to get sizing for bounding box, obviously that's questionable
       auto bounding = getBoundRatio(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh.boundInfo, meshObj -> meshesToRender.at(0).boundInfo);
-      glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(getMatrixForBoundRatio(bounding, modelMatrix), glm::vec3(1.01f, 1.01f, 1.01f))));
+      glUniformMatrix4fv(shaderGetUniform(newShader, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(getMatrixForBoundRatio(bounding, modelMatrix), glm::vec3(1.01f, 1.01f, 1.01f))));
       if (objectSelected){
         drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh, newShader);
       }
     }
 
     glUniformMatrix4fv(
-      glGetUniformLocation(newShader, "model"), 1, GL_FALSE, 
+      shaderGetUniform(newShader, "model"), 1, GL_FALSE, 
       glm::value_ptr(layer.scale ? calculateScaledMatrix(view, modelMatrix, layer.fov) : modelMatrix)
     );
 
@@ -623,7 +623,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
         state.drawPoints,
         drawWord,
         [&modelMatrix, &newShader](glm::vec3 pos) -> int {
-          glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(modelMatrix, pos)));
+          glUniformMatrix4fv(shaderGetUniform(newShader, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(modelMatrix, pos)));
           return drawSphere();
         },
         defaultResources.defaultMeshes,
@@ -705,7 +705,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
     }    
   }
 
-  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 0.f, 1.f, 1.f)));     
+  glUniform4fv(shaderGetUniform(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 0.f, 1.f, 1.f)));     
   if (state.showDebug){
     drawCoordinateSystem(100.f);
   }
@@ -727,7 +727,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
     .builtInUniforms = {},
   };
   setShaderData(shaderProgram, projection, value, lights, false, glm::vec3(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z), 0, lightProjView, cameraPosition, noUniforms);
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+  glUniformMatrix4fv(shaderGetUniform(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
 
@@ -752,7 +752,7 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
   glEnable(GL_BLEND);
 
   if(crosshairSprite != NULL && !state.isRotateSelection && state.showCursor){
-    glUniform4fv(glGetUniformLocation(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+    glUniform4fv(shaderGetUniform(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
     auto location = pixelCoordToNdi(glm::ivec2(state.cursorLeft, state.currentScreenHeight - state.cursorTop), glm::vec2(state.currentScreenWidth, state.currentScreenHeight));
     drawSpriteAround(renderingResources.uiShaderProgram, *crosshairSprite, location.x, location.y, 0.05, 0.05);
   }
@@ -876,7 +876,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     for (int i = 0; i < renderStep.textures.size(); i++){
       auto &textureData = renderStep.textures.at(i);
       int activeTextureOffset = 7 + i; // this is funny, but basically other textures before this use up to 5, probably should centralize these values
-      glUniform1i(glGetUniformLocation(renderStep.shader, textureData.nameInShader.c_str()), activeTextureOffset);
+      glUniform1i(shaderGetUniform(renderStep.shader, textureData.nameInShader.c_str()), activeTextureOffset);
       glActiveTexture(GL_TEXTURE0 + activeTextureOffset);
       if (textureData.type == RENDER_TEXTURE_REGULAR){
         glBindTexture(GL_TEXTURE_2D, world.textures.at(textureData.textureName).texture.textureId);
@@ -929,6 +929,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     if (renderStep.renderWorld){
       // important - redundant call to glUseProgram
       glm::mat4* projection = context.projection.has_value() ? &context.projection.value() : NULL;
+      modlog("render world shader", std::string(renderStep.name) + " " + std::to_string(renderStep.shader));
       auto worldTriangles = renderWorld(context.world, renderStep.shader, renderStep.allowShaderOverride, projection, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraTransform.position, renderStep.textBoundingOnly);
       triangles += worldTriangles;
     }
@@ -1297,33 +1298,33 @@ int main(int argc, char* argv[]){
   glPointSize(10.f);
 
   modlog("shaders", std::string("shader file path is ") + shaderFolderPath);
-  unsigned int shaderProgram = loadShaderIntoCache("default", shaderstringToId, shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl", interface.readFile);
+  unsigned int shaderProgram = loadShaderIntoCache("default", shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl", interface.readFile);
   
   modlog("shaders", std::string("framebuffer file path is ") + framebufferShaderPath);
-  renderingResources.framebufferProgram = loadShaderIntoCache("framebuffer", shaderstringToId, framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl", interface.readFile);
+  renderingResources.framebufferProgram = loadShaderIntoCache("framebuffer", framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string depthShaderPath = "./res/shaders/depth";
   modlog("shaders", std::string("depth file path is ") + depthShaderPath);
-  unsigned int depthProgram = loadShaderIntoCache("depth", shaderstringToId, depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl", interface.readFile);
+  unsigned int depthProgram = loadShaderIntoCache("depth", depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl", interface.readFile);
 
   modlog("shaders", std::string("ui shader file path is ") + uiShaderPath);
-  renderingResources.uiShaderProgram = loadShaderIntoCache("ui", shaderstringToId, uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile);
+  renderingResources.uiShaderProgram = loadShaderIntoCache("ui", uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string selectionShaderPath = "./res/shaders/selection";
   modlog("shaders", std::string("selection shader path is ") + selectionShaderPath);
-  unsigned int selectionProgram = loadShaderIntoCache("selection", shaderstringToId, selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl", interface.readFile);
+  unsigned int selectionProgram = loadShaderIntoCache("selection", selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string drawingShaderPath = "./res/shaders/drawing";
   modlog("shaders", std::string("drawing shader path is: ") + drawingShaderPath);
-  renderingResources.drawingProgram = loadShaderIntoCache("drawing", shaderstringToId, drawingShaderPath + "/vertex.glsl", drawingShaderPath + "/fragment.glsl", interface.readFile);
+  renderingResources.drawingProgram = loadShaderIntoCache("drawing", drawingShaderPath + "/vertex.glsl", drawingShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string blurShaderPath = "./res/shaders/blur";
   modlog("shaders", std::string("blur shader path is: ") + blurShaderPath);
-  unsigned int blurProgram = loadShaderIntoCache("blur", shaderstringToId, blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile);
+  unsigned int blurProgram = loadShaderIntoCache("blur", blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string basicShaderPath = "./res/shaders/basic";
   modlog("shaders", std::string("basic shader path is: ") + basicShaderPath);
-  unsigned int basicProgram = loadShaderIntoCache("basic", shaderstringToId, basicShaderPath + "/vertex.glsl", basicShaderPath+ "/fragment.glsl", interface.readFile);
+  unsigned int basicProgram = loadShaderIntoCache("basic", basicShaderPath + "/vertex.glsl", basicShaderPath+ "/fragment.glsl", interface.readFile);
 
   renderStages = loadRenderStages(
     renderingResources.framebuffers.fbo, 
@@ -1374,7 +1375,7 @@ int main(int argc, char* argv[]){
     .freeLine = [](objid lineId) -> void { freeLine(lineData, lineId); } ,
     .shaderByName = shaderByName,
     .loadShader = [](std::string name, std::string path) -> unsigned int{
-      return loadShaderIntoCache(name, shaderstringToId, path + "/vertex.glsl", path + "/fragment.glsl", interface.readFile);
+      return loadShaderIntoCache(name, path + "/vertex.glsl", path + "/fragment.glsl", interface.readFile);
     },
     .getGameObjNameForId = getGameObjectName,
     .setGameObjectAttr = setGameObjectAttr,
@@ -1857,7 +1858,7 @@ int main(int argc, char* argv[]){
     // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
     renderWithProgram(renderContext, renderStages.selection);
 
-    glUniformMatrix4fv(glGetUniformLocation(renderStages.selection.shader, "projview"), 1, GL_FALSE, glm::value_ptr(ndiOrtho));
+    glUniformMatrix4fv(shaderGetUniform(renderStages.selection.shader, "projview"), 1, GL_FALSE, glm::value_ptr(ndiOrtho));
     glDisable(GL_DEPTH_TEST);
     drawShapeData(lineData, renderStages.selection.shader, ndiOrtho, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
     glEnable(GL_DEPTH_TEST);

@@ -206,7 +206,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
   for (int i  = 0; i < additionalShaders.size(); i++){
     auto additionalShader = additionalShaders.at(i);
     auto shaderPath = additionalShader.shader;
-    unsigned int shaderProgram = loadShader(shaderPath + "/vertex.glsl", shaderPath + "/fragment.glsl", readFile);
+    unsigned int shaderProgram = loadShaderIntoCache(shaderPath, shaderPath + "/vertex.glsl", shaderPath + "/fragment.glsl", readFile);
     bool isEvenIndex = (i % 2) == 0;
     RenderStep renderStep {
       .name = additionalShader.name,

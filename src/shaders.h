@@ -8,10 +8,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "./common/util.h"
 
-unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile);
-unsigned int loadShaderIntoCache(std::string shaderString, std::map<std::string, GLint>& shaderstringToId, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile);
-
-GLint getShaderByShaderString(std::map<std::string, GLint>& shaderstringToId, std::string shaderString, GLint shaderProgram, bool allowShaderOverride, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile);
+unsigned int loadShaderIntoCache(std::string shaderString, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile);
+GLint getShaderByShaderString(std::string shaderString, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile);
 
 
 struct Sampler2D { 
@@ -27,5 +25,7 @@ struct UniformData {
 };
 void setUniformData(unsigned int program, std::vector<UniformData>& uniformData, std::vector<const char*>&& excludedNames);
 std::string print(std::vector<UniformData>& uniforms);
+
+int shaderGetUniform(unsigned int program, const char* name);
 
 #endif 

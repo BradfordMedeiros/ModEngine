@@ -2,6 +2,8 @@
 
 #define SHADER_INFO_LOG_LENGTH 512
 
+std::map<std::string, GLint> shaderstringToId;
+
 struct shaderError {
   bool isError;
   std::string errorMessage;	
@@ -80,10 +82,11 @@ unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentSh
    return shaderProgramId;
 }
 
-unsigned int loadShaderIntoCache(std::string shaderString, std::map<std::string, GLint>& shaderstringToId, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile){
-  modassert(shaderstringToId.find(shaderString) == shaderstringToId.end(), "shader already loaded");
+unsigned int loadShaderIntoCache(std::string shaderString, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile){
+  modassert(shaderstringToId.find(shaderString) == shaderstringToId.end(), "shader already loaded")
   auto shaderId = loadShader(vertexShaderFilepath, fragmentShaderFilepath, readFile);
   shaderstringToId[shaderString] = shaderId;
+  modlog("loading shader into cache", shaderString + std::string(" ") + std::to_string(shaderId));
   return shaderId;
 }
 
@@ -95,24 +98,20 @@ struct ShaderStringVals {
 ShaderStringVals parseShaderString(std::string& shaderString){
   // format: fragment, vertex (whitespace trimmed). 
   auto values = filterWhitespace(split(shaderString, ','));
-  modassert(values.size() == 1 || values.size() == 2, "shader string size must be 1 or 2, got " + shaderString);
+  modassert(values.size() == 1 || values.size() == 2, std::string("shader string size must be 1 or 2, got ") + shaderString);
   return ShaderStringVals {
     .vertex = values.size() > 1 ? values.at(1) : std::optional<std::string>(std::nullopt),
     .fragment = values.size() > 0 ? values.at(0) : std::optional<std::string>(std::nullopt),
   };
 }
 
-GLint getShaderByShaderString(std::map<std::string, GLint>& shaderstringToId, std::string shaderString, GLint shaderProgram, bool allowShaderOverride, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile){
-  if (shaderString == "" || !allowShaderOverride){
-    return shaderProgram;
-  }
+GLint getShaderByShaderString(std::string shaderString, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile){
+  modassert(shaderString.size() != 0, "getShaderByShaderString shader string size is 0");
   if (shaderstringToId.find(shaderString) == shaderstringToId.end()){
     auto parsedShaderString = parseShaderString(shaderString);
     auto vertexShaderPath = parsedShaderString.vertex.has_value() ? parsedShaderString.vertex.value() : shaderFolderPath + "/vertex.glsl";
     auto fragmentShaderPath = parsedShaderString.fragment.has_value() ? parsedShaderString.fragment.value() : shaderFolderPath + "/fragment.glsl";
-
-    auto shaderId = loadShader(vertexShaderPath, fragmentShaderPath, readFile);
-    shaderstringToId[shaderString] = shaderId;
+    loadShaderIntoCache(shaderString, vertexShaderPath, fragmentShaderPath, readFile);
   }
   return shaderstringToId.at(shaderString);
 }
@@ -401,4 +400,23 @@ std::string print(std::vector<UniformData>& uniforms){
     value += "] ";
   }
   return value;
+}
+
+std::optional<std::string> nameByShaderId(GLint shaderProgram){
+  for (auto &[shaderString, shaderId] : shaderstringToId){
+    if (shaderId == shaderProgram){
+      modlog("shader nameByShaderId lookup", "found");
+      return shaderString;
+    }
+    modlog("shader name to id: ", shaderString);
+  }
+  modlog("shader nameByShaderId lookup", std::string("not found: ") + std::to_string(shaderProgram));
+  modassert(false, "");
+  return std::nullopt;
+}
+
+int shaderGetUniform(unsigned int shaderProgram, const char* name){
+  auto uniformValue = glGetUniformLocation(shaderProgram, name);
+  //modassert(uniformValue != -1, std::string("uniform value invalid: " + std::string(name) + " " + print(nameByShaderId(uniformValue))));
+  return uniformValue;
 }
