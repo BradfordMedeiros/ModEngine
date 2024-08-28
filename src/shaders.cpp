@@ -442,5 +442,5 @@ void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4& val
   glUniformMatrix4fv(glGetUniformLocation(shaderToUse, name), 1, GL_FALSE, glm::value_ptr(value));
 }
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4&& value){
-  shaderSetUniform(program, name, value);
+  shaderSetUniform(shaderToUse, name, value);
 }
