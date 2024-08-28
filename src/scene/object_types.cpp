@@ -204,7 +204,7 @@ void removeObject(
 }
 
 void setShaderObjectData(GLint shaderProgram, bool hasBones, glm::vec4 tint, glm::vec2 textureOffset, glm::vec2 textureTiling, glm::vec2 textureSize, glm::vec3 emissionAmount = glm::vec3(0.f, 0.f, 0.f)){
-  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(tint));
+  shaderSetUniform(shaderProgram, "tint", tint);
   glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);    
   glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(textureOffset));
   glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(textureTiling));

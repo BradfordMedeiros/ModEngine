@@ -181,7 +181,7 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   }
 
   glUniformMatrix4fv(shaderGetUniform(renderingResources.uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho));
-  glUniform4fv(shaderGetUniform(renderingResources.uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0)));
+  shaderSetUniform(renderingResources.uiShaderProgram, "encodedid2", getColorFromGameobject(0));
 
   if (shouldClear && clearTextureId.has_value()){
     glUniformMatrix4fv(shaderGetUniform(renderingResources.uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(
@@ -189,13 +189,13 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
       glm::vec3(2.f, 2.f, 2.f)
     )));
     glUniform1i(shaderGetUniform(renderingResources.uiShaderProgram, "forceTint"), false);
-    glUniform4fv(shaderGetUniform(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(clearColor));
+    shaderSetUniform(renderingResources.uiShaderProgram, "tint", clearColor);
     drawMesh(*defaultResources.defaultMeshes.unitXYRect, renderingResources.uiShaderProgram, clearTextureId.value());
   }
 
   glUniformMatrix4fv(shaderGetUniform(renderingResources.uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
   glUniform1i(shaderGetUniform(renderingResources.uiShaderProgram, "forceTint"), true);
-  glUniform4fv(shaderGetUniform(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+  shaderSetUniform(renderingResources.uiShaderProgram, "tint", glm::vec4(1.f, 1.f, 1.f, 1.f));
   drawAllLines(lineData, renderingResources.uiShaderProgram, texture.textureId);
   drawShapeData(lineData, renderingResources.uiShaderProgram, ndiOrtho, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
 
@@ -246,7 +246,7 @@ void handlePaintingModifiesViewport(UVCoord uvsToPaint){
     )
   );
   glUniform1f(shaderGetUniform(renderingResources.drawingProgram, "opacity"), drawParams.opacity);
-  glUniform4fv(shaderGetUniform(renderingResources.drawingProgram, "tint"), 1, glm::value_ptr(drawParams.tint));
+  shaderSetUniform(renderingResources.drawingProgram, "tint", drawParams.tint);
 
   glBindTexture(GL_TEXTURE_2D, activeTextureId());
   glBindVertexArray(defaultResources.quadVAO);
@@ -542,8 +542,8 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
 }
 void setShaderDataObject(GLint shader, glm::vec3 color, objid id, glm::mat4 projview){
   //std::cout << "set shader data object" << std::endl; 
-  glUniform4fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(glm::vec4(color.x, color.y, color.z, 1.f)));
-  glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
+  shaderSetUniform(shader, "tint", glm::vec4(color.x, color.y, color.z, 1.f));
+  shaderSetUniform(shader, "encodedid", getColorFromGameobject(id));
   glUniformMatrix4fv(shaderGetUniform(shader, "projview"), 1, GL_FALSE, glm::value_ptr(projview));
 }
 void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
@@ -705,7 +705,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
     }    
   }
 
-  glUniform4fv(shaderGetUniform(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 0.f, 1.f, 1.f)));     
+  shaderSetUniform(shaderProgram, "tint", glm::vec4(0.f, 0.f, 1.f, 1.f));     
   if (state.showDebug){
     drawCoordinateSystem(100.f);
   }
@@ -752,7 +752,7 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
   glEnable(GL_BLEND);
 
   if(crosshairSprite != NULL && !state.isRotateSelection && state.showCursor){
-    glUniform4fv(shaderGetUniform(renderingResources.uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+    shaderSetUniform(renderingResources.uiShaderProgram, "tint", glm::vec4(1.f, 1.f, 1.f, 1.f));
     auto location = pixelCoordToNdi(glm::ivec2(state.cursorLeft, state.currentScreenHeight - state.cursorTop), glm::vec2(state.currentScreenWidth, state.currentScreenHeight));
     drawSpriteAround(renderingResources.uiShaderProgram, *crosshairSprite, location.x, location.y, 0.05, 0.05);
   }
@@ -929,7 +929,6 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     if (renderStep.renderWorld){
       // important - redundant call to glUseProgram
       glm::mat4* projection = context.projection.has_value() ? &context.projection.value() : NULL;
-      modlog("render world shader", std::string(renderStep.name) + " " + std::to_string(renderStep.shader));
       auto worldTriangles = renderWorld(context.world, renderStep.shader, renderStep.allowShaderOverride, projection, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraTransform.position, renderStep.textBoundingOnly);
       triangles += worldTriangles;
     }

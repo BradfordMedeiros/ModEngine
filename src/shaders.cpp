@@ -418,3 +418,29 @@ int shaderGetUniform(unsigned int shaderProgram, const char* name){
   modassert(uniformValue != -1, std::string("uniform value invalid: " + std::string(name) + " " + print(nameByShaderId(shaderProgram))));
   return uniformValue;
 }
+
+void shaderSetUniform(unsigned int shaderProgram, const char* name, glm::vec4& value){
+  glUniform4fv(glGetUniformLocation(shaderProgram, name), 1, glm::value_ptr(value));
+}
+void shaderSetUniform(unsigned int shaderProgram, const char* name, glm::vec4&& value){
+  shaderSetUniform(shaderProgram, name, value);
+}
+
+void shaderSetUniform(unsigned int shaderToUse, const char* name, float&& value){
+  glUniform1f(glGetUniformLocation(shaderToUse, name), value);
+}
+
+void shaderSetUniformInt(unsigned int shaderToUse, const char* name, int&& value){
+   glUniform1i(glGetUniformLocation(shaderToUse, name), value);
+}
+
+void shaderSetUniformBool(unsigned int shaderToUse, const char* name, bool&& value){
+   glUniform1i(glGetUniformLocation(shaderToUse, name), value ? 1 : 0);
+}
+
+void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4& value){
+  glUniformMatrix4fv(glGetUniformLocation(shaderToUse, name), 1, GL_FALSE, glm::value_ptr(value));
+}
+void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4&& value){
+  shaderSetUniform(program, name, value);
+}

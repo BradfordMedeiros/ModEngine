@@ -20,6 +20,7 @@
 #include "./objtypes/obj_prefab.h"
 #include "./objtypes/obj_util.h"
 #include "../colorselection.h"
+#include "../shaders.h"
 
 #include <unistd.h>
 #include <glm/glm.hpp>
