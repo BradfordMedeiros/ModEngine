@@ -55,7 +55,7 @@ Transformation viewTransform {
   .rotation = quatFromDirection(glm::vec3(0.f, 0.f, -1.f)),
 };
 glm::mat4 view;
-const glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);  
+glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);  
 
 
 // core system 
@@ -180,21 +180,18 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
   }
 
-  glUniformMatrix4fv(shaderGetUniform(renderingResources.uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho));
+  shaderSetUniform(renderingResources.uiShaderProgram, "projection", ndiOrtho);
   shaderSetUniform(renderingResources.uiShaderProgram, "encodedid2", getColorFromGameobject(0));
 
   if (shouldClear && clearTextureId.has_value()){
-    glUniformMatrix4fv(shaderGetUniform(renderingResources.uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(
-      glm::mat4(1.0f), 
-      glm::vec3(2.f, 2.f, 2.f)
-    )));
-    glUniform1i(shaderGetUniform(renderingResources.uiShaderProgram, "forceTint"), false);
+    shaderSetUniform(renderingResources.uiShaderProgram, "model", glm::scale(glm::mat4(1.0f), glm::vec3(2.f, 2.f, 2.f)));
+    shaderSetUniformBool(renderingResources.uiShaderProgram, "forceTint", false);
     shaderSetUniform(renderingResources.uiShaderProgram, "tint", clearColor);
     drawMesh(*defaultResources.defaultMeshes.unitXYRect, renderingResources.uiShaderProgram, clearTextureId.value());
   }
 
-  glUniformMatrix4fv(shaderGetUniform(renderingResources.uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
-  glUniform1i(shaderGetUniform(renderingResources.uiShaderProgram, "forceTint"), true);
+  shaderSetUniform(renderingResources.uiShaderProgram, "model", glm::mat4(1.f));
+  shaderSetUniformBool(renderingResources.uiShaderProgram, "forceTint", true);
   shaderSetUniform(renderingResources.uiShaderProgram, "tint", glm::vec4(1.f, 1.f, 1.f, 1.f));
   drawAllLines(lineData, renderingResources.uiShaderProgram, texture.textureId);
   drawShapeData(lineData, renderingResources.uiShaderProgram, ndiOrtho, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
@@ -239,13 +236,13 @@ void handlePaintingModifiesViewport(UVCoord uvsToPaint){
   glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToPaint.value().textureId, 0);
 
-  glUniformMatrix4fv(shaderGetUniform(renderingResources.drawingProgram, "model"), 1, GL_FALSE, glm::value_ptr(
+  shaderSetUniform(renderingResources.drawingProgram, "model",
     glm::scale(
       glm::translate(glm::mat4(1.0f), uvToNDC(uvsToPaint)), 
       glm::vec3(0.01f, 0.01f, 0.01f) * drawParams.scale)
-    )
+    
   );
-  glUniform1f(shaderGetUniform(renderingResources.drawingProgram, "opacity"), drawParams.opacity);
+  shaderSetUniform(renderingResources.drawingProgram, "opacity", drawParams.opacity);
   shaderSetUniform(renderingResources.drawingProgram, "tint", drawParams.tint);
 
   glBindTexture(GL_TEXTURE_2D, activeTextureId());
@@ -366,17 +363,17 @@ void loadAllTextures(std::string& textureFolderPath){
 // Kind of crappy since the uniforms don't unset their values after rendering, but order should be deterministic so ... ok
 void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
   for (auto &uniform : uniforms.intUniforms){
-    glUniform1i(shaderGetUniform(shader, uniform.uniformName.c_str()), uniform.value);
+    shaderSetUniformInt(shader, uniform.uniformName.c_str(), uniform.value);
   }
   for (auto &uniform : uniforms.floatUniforms){
-    glUniform1f(shaderGetUniform(shader, uniform.uniformName.c_str()), uniform.value);
+    shaderSetUniform(shader, uniform.uniformName.c_str(), uniform.value);
   }
   for (auto &uniform : uniforms.vec3Uniforms){
-    glUniform3fv(shaderGetUniform(shader, uniform.uniformName.c_str()), 1, glm::value_ptr(uniform.value));
+    shaderSetUniform(shader, uniform.uniformName.c_str(), uniform.value);
   }
   for (auto &uniform : uniforms.floatArrUniforms){
     for (int i = 0; i < uniform.value.size(); i++){
-      glUniform1f(shaderGetUniform(shader,  (uniform.uniformName + "[" + std::to_string(i) + "]").c_str()), uniform.value.at(i));
+      shaderSetUniform(shader,  (uniform.uniformName + "[" + std::to_string(i) + "]").c_str(), uniform.value.at(i));
     }
   }
   for (auto &uniform : uniforms.builtInUniforms){  // todo -> avoid string comparisons
@@ -523,18 +520,18 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
   for (int i = 0; i < lights.size(); i++){
     glm::vec3 position = lights.at(i).transform.position;
     auto& light = lights.at(i); 
-    glUniform3fv(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
-    glUniform3fv(glGetUniformLocation(shader, ("lightscolor[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(light.light.color));
-    glUniform3fv(glGetUniformLocation(shader, ("lightsdir[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(directionFromQuat(light.transform.rotation)));
-    glUniform3fv(glGetUniformLocation(shader, ("lightsatten[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(light.light.attenuation));
-    glUniform1f(glGetUniformLocation(shader,  ("lightsmaxangle[" + std::to_string(i) + "]").c_str()), light.light.type == LIGHT_SPOTLIGHT ? light.light.maxangle : -10.f);
-    glUniform1f(glGetUniformLocation(shader,  ("lightsangledelta[" + std::to_string(i) + "]").c_str()), light.light.angledelta);
-    glUniform1i(glGetUniformLocation(shader,  ("lightsisdir[" + std::to_string(i) + "]").c_str()), light.light.type == LIGHT_DIRECTIONAL);
+    shaderSetUniform(shader, ("lights[" + std::to_string(i) + "]").c_str(), position);
+    shaderSetUniform(shader, ("lightscolor[" + std::to_string(i) + "]").c_str(), light.light.color);
+    shaderSetUniform(shader, ("lightsdir[" + std::to_string(i) + "]").c_str(), directionFromQuat(light.transform.rotation));
+    shaderSetUniform(shader, ("lightsatten[" + std::to_string(i) + "]").c_str(), light.light.attenuation);
+    shaderSetUniform(shader,  ("lightsmaxangle[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_SPOTLIGHT ? light.light.maxangle : -10.f);
+    shaderSetUniform(shader,  ("lightsangledelta[" + std::to_string(i) + "]").c_str(), light.light.angledelta);
+    shaderSetUniformBool(shader,  ("lightsisdir[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_DIRECTIONAL);
 
     if (lightProjview.size() > i){
       glActiveTexture(GL_TEXTURE3);
       glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(1));
-      glUniformMatrix4fv(glGetUniformLocation(shader, "lightsprojview"), 1, GL_FALSE, glm::value_ptr(lightProjview.at(i)));
+      shaderSetUniform(shader, "lightsprojview", lightProjview.at(i));
     }
   }
   glActiveTexture(GL_TEXTURE0); 
@@ -544,7 +541,7 @@ void setShaderDataObject(GLint shader, glm::vec3 color, objid id, glm::mat4 proj
   //std::cout << "set shader data object" << std::endl; 
   shaderSetUniform(shader, "tint", glm::vec4(color.x, color.y, color.z, 1.f));
   shaderSetUniform(shader, "encodedid", getColorFromGameobject(id));
-  glUniformMatrix4fv(shaderGetUniform(shader, "projview"), 1, GL_FALSE, glm::value_ptr(projview));
+  shaderSetUniform(shader, "projview", projview);
 }
 void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
   auto projview = (orthographic ? glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) : proj) * view;
@@ -585,16 +582,13 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     if (meshObj != NULL && meshObj -> meshesToRender.size() > 0){
       // @TODO i use first mesh to get sizing for bounding box, obviously that's questionable
       auto bounding = getBoundRatio(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh.boundInfo, meshObj -> meshesToRender.at(0).boundInfo);
-      glUniformMatrix4fv(shaderGetUniform(newShader, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(getMatrixForBoundRatio(bounding, modelMatrix), glm::vec3(1.01f, 1.01f, 1.01f))));
+      shaderSetUniform(newShader, "model", glm::scale(getMatrixForBoundRatio(bounding, modelMatrix), glm::vec3(1.01f, 1.01f, 1.01f)));
       if (objectSelected){
         drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh, newShader);
       }
     }
 
-    glUniformMatrix4fv(
-      shaderGetUniform(newShader, "model"), 1, GL_FALSE, 
-      glm::value_ptr(layer.scale ? calculateScaledMatrix(view, modelMatrix, layer.fov) : modelMatrix)
-    );
+    shaderSetUniform(newShader, "model", (layer.scale ? calculateScaledMatrix(view, modelMatrix, layer.fov) : modelMatrix));
 
     bool isPortal = false;
     bool isPerspectivePortal = false;
@@ -623,7 +617,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
         state.drawPoints,
         drawWord,
         [&modelMatrix, &newShader](glm::vec3 pos) -> int {
-          glUniformMatrix4fv(shaderGetUniform(newShader, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(modelMatrix, pos)));
+          shaderSetUniform(newShader, "model", glm::translate(modelMatrix, pos));
           return drawSphere();
         },
         defaultResources.defaultMeshes,
@@ -727,7 +721,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
     .builtInUniforms = {},
   };
   setShaderData(shaderProgram, projection, value, lights, false, glm::vec3(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z), 0, lightProjView, cameraPosition, noUniforms);
-  glUniformMatrix4fv(shaderGetUniform(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+  shaderSetUniform(shaderProgram, "model", glm::mat4(1.f));
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
 
@@ -876,7 +870,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     for (int i = 0; i < renderStep.textures.size(); i++){
       auto &textureData = renderStep.textures.at(i);
       int activeTextureOffset = 7 + i; // this is funny, but basically other textures before this use up to 5, probably should centralize these values
-      glUniform1i(shaderGetUniform(renderStep.shader, textureData.nameInShader.c_str()), activeTextureOffset);
+      shaderSetUniformInt(renderStep.shader, textureData.nameInShader.c_str(), activeTextureOffset);
       glActiveTexture(GL_TEXTURE0 + activeTextureOffset);
       if (textureData.type == RENDER_TEXTURE_REGULAR){
         glBindTexture(GL_TEXTURE_2D, world.textures.at(textureData.textureName).texture.textureId);
@@ -1857,7 +1851,7 @@ int main(int argc, char* argv[]){
     // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
     renderWithProgram(renderContext, renderStages.selection);
 
-    glUniformMatrix4fv(shaderGetUniform(renderStages.selection.shader, "projview"), 1, GL_FALSE, glm::value_ptr(ndiOrtho));
+    shaderSetUniform(renderStages.selection.shader, "projview", ndiOrtho);
     glDisable(GL_DEPTH_TEST);
     drawShapeData(lineData, renderStages.selection.shader, ndiOrtho, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
     glEnable(GL_DEPTH_TEST);

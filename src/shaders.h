@@ -27,10 +27,13 @@ void setUniformData(unsigned int program, std::vector<UniformData>& uniformData,
 std::string print(std::vector<UniformData>& uniforms);
 
 int shaderGetUniform(unsigned int program, const char* name);
+void shaderSetUniform(unsigned int program, const char* name, glm::vec3& value);
+void shaderSetUniform(unsigned int program, const char* name, glm::vec3&& value);
 void shaderSetUniform(unsigned int program, const char* name, glm::vec4& value);
 void shaderSetUniform(unsigned int program, const char* name, glm::vec4&& value);
-
+void shaderSetUniform(unsigned int program, const char* name, float& value);
 void shaderSetUniform(unsigned int program, const char* name, float&& value);
+void shaderSetUniformInt(unsigned int program, const char* name, int& value);
 void shaderSetUniformInt(unsigned int program, const char* name, int&& value);
 void shaderSetUniformBool(unsigned int shaderToUse, const char* name, bool&& value);
 void shaderSetUniform(unsigned int program, const char* name, glm::mat4& value);
