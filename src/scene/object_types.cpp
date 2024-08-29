@@ -205,13 +205,11 @@ void removeObject(
 
 void setShaderObjectData(GLint shaderProgram, bool hasBones, glm::vec4 tint, glm::vec2 textureOffset, glm::vec2 textureTiling, glm::vec2 textureSize, glm::vec3 emissionAmount = glm::vec3(0.f, 0.f, 0.f)){
   shaderSetUniform(shaderProgram, "tint", tint);
-  glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);    
-  glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(textureOffset));
-  glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(textureTiling));
-  glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(textureSize));
-  glUniform3fv(glGetUniformLocation(shaderProgram, "emissionAmount"), 1, glm::value_ptr(emissionAmount));
-
-  // 
+  shaderSetUniformBool(shaderProgram, "hasBones", hasBones);    
+  shaderSetUniform(shaderProgram, "textureOffset", textureOffset);
+  shaderSetUniform(shaderProgram, "textureTiling", textureTiling);
+  shaderSetUniform(shaderProgram, "textureSize", textureSize);
+  shaderSetUniform(shaderProgram, "emissionAmount", emissionAmount);
 }
 
 int renderDefaultNode(GLint shaderProgram, Mesh& mesh){
