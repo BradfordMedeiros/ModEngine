@@ -249,9 +249,9 @@ int renderObject(
         for (int i = 0; i < 100; i++){
           auto boneUniformLocation = glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str());
           if (i >= meshToRender.bones.size()){
-            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+            shaderSetUniform(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str(), glm::mat4(1.f));
           }else{
-            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(meshToRender.bones.at(i).offsetMatrix));
+            shaderSetUniform(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str(), meshToRender.bones.at(i).offsetMatrix);
           }
         }
         hasBones = true;
@@ -335,7 +335,7 @@ int renderObject(
       }
       pointIndex++;
 
-      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, point)));
+      shaderSetUniform(shaderProgram, "model", glm::translate(model, point));
 
       static glm::vec4 selectedColor  = glm::vec4(0.f, 0.f, 1.f, 0.5f);
       static glm::vec4 notSelectedColor  = glm::vec4(1.f, 0.f, 0.f, 0.5f);
@@ -343,8 +343,8 @@ int renderObject(
       auto isSelected = selectedId == objectId;
       glm::vec4 color = isSelected ? glm::vec4(0.f, 0.f, 1.f, 0.5f) : glm::vec4(1.f, 0.f, 0.f, 0.5f);
       //std::cout << "selected: " << selectedId << ", object id: " << objectId << ", isSelected = " << isSelected << ", color = " << print(color) << std::endl;
-      glUniform4fv(glGetUniformLocation(shaderProgram, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(objectId)));
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(isSelected ? selectedColor : notSelectedColor));
+      shaderSetUniform(shaderProgram, "encodedid", getColorFromGameobject(objectId));
+      shaderSetUniform(shaderProgram, "tint", isSelected ? selectedColor : notSelectedColor);
       renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     });
     if (!selectionMode){
@@ -541,7 +541,6 @@ void onObjectSelected(objid id){
 
 void onObjectUnselected(){
   modlog("on object unselected: ", "");
-
   selectedId = 0;
 }
 
