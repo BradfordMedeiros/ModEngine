@@ -378,7 +378,7 @@ void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
   }
   for (auto &uniform : uniforms.builtInUniforms){  // todo -> avoid string comparisons
     if (uniform.builtin == "resolution"){
-      glUniform2iv(shaderGetUniform(shader, uniform.uniformName.c_str()), 1, glm::value_ptr(state.resolution));
+      shaderSetUniformIVec2(shader, uniform.uniformName.c_str(), state.resolution);
     }else{
       std::cout << "uniform not supported: " << uniform.builtin << std::endl;
       assert(false);

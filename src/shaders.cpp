@@ -419,6 +419,9 @@ int shaderGetUniform(unsigned int shaderProgram, const char* name){
   return uniformValue;
 }
 
+void shaderSetUniformIVec2(unsigned int shaderProgram, const char* name, glm::ivec2& value){
+  glUniform2iv(glGetUniformLocation(shaderProgram, name), 1, glm::value_ptr(value));
+}
 void shaderSetUniform(unsigned int shaderProgram, const char* name, glm::vec2& value){
   glUniform2fv(glGetUniformLocation(shaderProgram, name), 1, glm::value_ptr(value));
 }

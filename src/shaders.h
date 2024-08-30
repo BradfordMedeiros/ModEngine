@@ -27,6 +27,8 @@ void setUniformData(unsigned int program, std::vector<UniformData>& uniformData,
 std::string print(std::vector<UniformData>& uniforms);
 
 int shaderGetUniform(unsigned int program, const char* name);
+
+void shaderSetUniformIVec2(unsigned int program, const char* name, glm::ivec2& value);
 void shaderSetUniform(unsigned int program, const char* name, glm::vec2& value);
 void shaderSetUniform(unsigned int program, const char* name, glm::vec2&& value);
 void shaderSetUniform(unsigned int program, const char* name, glm::vec3& value);
