@@ -45,8 +45,45 @@ unsigned int compileShader(std::string shaderContent, unsigned int shaderType){
    return shader;
 }
 
+// #include "somefilepath"    spacing doesn't matter, but there needs to be a single space between the file and include
+std::string getIncludePath(std::string& includeLine){
+  auto tokens = filterWhitespace(split(includeLine, ' '));
+  modassert(tokens.at(0) == "#include", "getIncludePath not an #include string");
+  modassert(tokens.size() == 2, "getIncludePath token size should be 2, extra tokens on string?");
+  auto filePath = tokens.at(1);
+  modassert(filePath.at(0) == '\"' && filePath.at(filePath.size() -1) == '\"', "getIncludePath invalid path");
+  auto filepathTrimmed = filePath.substr(1, filePath.size() - 2);
+  return filepathTrimmed;
+}
+
+std::vector<std::string> getIncludes(std::string& fileContent, std::function<std::string(std::string)> readFile, std::set<std::string> alreadyIncludedFiles){
+  auto values = split(fileContent, '\n');
+  std::vector<std::string> finalContent;
+  for (auto &value : values){
+    if (value.find("#include") != std::string::npos){
+      auto includeFilePath = getIncludePath(value);
+      modassert(alreadyIncludedFiles.count(includeFilePath) == 0, std::string("shader include loop detected: ") + includeFilePath);
+      alreadyIncludedFiles.insert(includeFilePath);
+      auto includeStrContent = readFile(includeFilePath);
+      auto includeContent = getIncludes(includeStrContent, readFile, alreadyIncludedFiles);
+      for (auto &includedValue : includeContent){
+        finalContent.push_back(includedValue);
+      }
+      continue;
+    }
+    std::cout << value << std::endl;
+    finalContent.push_back(value);
+  }
+  return finalContent;
+}
+
+std::string readShaderResolveIncludes(std::string file, std::function<std::string(std::string)> readFile){
+  auto shaderStr = readFile(file);
+  return join(getIncludes(shaderStr, readFile, { file }), '\n');
+}
+
 unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile){
-   unsigned int vertexShaderId = compileShader(readFile(vertexShaderFilepath), GL_VERTEX_SHADER);
+   unsigned int vertexShaderId = compileShader(readShaderResolveIncludes(vertexShaderFilepath, readFile), GL_VERTEX_SHADER);
    shaderError vertexShaderError = checkShaderError(vertexShaderId);
    if (vertexShaderError.isError){
      std::cerr << "ERROR: compiling vertex shader failed: " << vertexShaderError.errorMessage << std::endl;
@@ -54,7 +91,7 @@ unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentSh
      modlog("shaders", "compiled vertex shader success");
    }
 
-   unsigned int fragmentShaderId = compileShader(readFile(fragmentShaderFilepath), GL_FRAGMENT_SHADER);
+   unsigned int fragmentShaderId = compileShader(readShaderResolveIncludes(fragmentShaderFilepath, readFile), GL_FRAGMENT_SHADER);
    shaderError fragmentShaderError = checkShaderError(fragmentShaderId);
    if (fragmentShaderError.isError){
      std::cerr << "ERROR: compiling fragment shader failed: " << fragmentShaderError.errorMessage << std::endl;
@@ -412,59 +449,66 @@ std::optional<std::string> nameByShaderId(GLint shaderProgram){
   return std::nullopt;
 }
 
+
+
+const bool VALIDATE_SHADER_EXISTS = false;
 int shaderGetUniform(unsigned int shaderProgram, const char* name){
   auto uniformValue = glGetUniformLocation(shaderProgram, name);
-  modassert(nameByShaderId(shaderProgram).has_value(), "shader does not have a value: ");
-  modassert(uniformValue != -1, std::string("uniform value invalid: " + std::string(name) + " " + print(nameByShaderId(shaderProgram))));
+  if (VALIDATE_SHADER_EXISTS){
+    modassert(nameByShaderId(shaderProgram).has_value(), "shader does not have a value: ");
+  }
+  if (uniformValue == -1){
+  //  modassert(false, std::string("uniform value invalid: " + std::string(name) + " " + print(nameByShaderId(shaderProgram))));
+  }
   return uniformValue;
 }
 
 void shaderSetUniformIVec2(unsigned int shaderProgram, const char* name, glm::ivec2& value){
-  glUniform2iv(glGetUniformLocation(shaderProgram, name), 1, glm::value_ptr(value));
+  glUniform2iv(shaderGetUniform(shaderProgram, name), 1, glm::value_ptr(value));
 }
 void shaderSetUniform(unsigned int shaderProgram, const char* name, glm::vec2& value){
-  glUniform2fv(glGetUniformLocation(shaderProgram, name), 1, glm::value_ptr(value));
+  glUniform2fv(shaderGetUniform(shaderProgram, name), 1, glm::value_ptr(value));
 }
 void shaderSetUniform(unsigned int shaderProgram, const char* name, glm::vec2&& value){
   shaderSetUniform(shaderProgram, name, value);
 }
 void shaderSetUniform(unsigned int shaderProgram, const char* name, glm::vec3& value){
-  glUniform3fv(glGetUniformLocation(shaderProgram, name), 1, glm::value_ptr(value));
+  glUniform3fv(shaderGetUniform(shaderProgram, name), 1, glm::value_ptr(value));
 }
 void shaderSetUniform(unsigned int shaderProgram, const char* name, glm::vec3&& value){
   shaderSetUniform(shaderProgram, name, value);
 }
 
 void shaderSetUniform(unsigned int shaderProgram, const char* name, glm::vec4& value){
-  glUniform4fv(glGetUniformLocation(shaderProgram, name), 1, glm::value_ptr(value));
+  glUniform4fv(shaderGetUniform(shaderProgram, name), 1, glm::value_ptr(value));
 }
 void shaderSetUniform(unsigned int shaderProgram, const char* name, glm::vec4&& value){
   shaderSetUniform(shaderProgram, name, value);
 }
 
 void shaderSetUniform(unsigned int shaderToUse, const char* name, float& value){
-  glUniform1f(glGetUniformLocation(shaderToUse, name), value);
+  glUniform1f(shaderGetUniform(shaderToUse, name), value);
 }
 void shaderSetUniform(unsigned int shaderToUse, const char* name, float&& value){
   shaderSetUniform(shaderToUse, name, value);
 }
 
 void shaderSetUniformInt(unsigned int shaderToUse, const char* name, int& value){
-   glUniform1i(glGetUniformLocation(shaderToUse, name), value);
+   glUniform1i(shaderGetUniform(shaderToUse, name), value);
 }
 void shaderSetUniformInt(unsigned int shaderToUse, const char* name, int&& value){
   shaderSetUniformInt(shaderToUse, name, value);
 }
 
 void shaderSetUniformBool(unsigned int shaderToUse, const char* name, bool& value){
-  glUniform1i(glGetUniformLocation(shaderToUse, name), value ? 1 : 0);
+  glUniform1i(shaderGetUniform(shaderToUse, name), value ? 1 : 0);
 }
 void shaderSetUniformBool(unsigned int shaderToUse, const char* name, bool&& value){
   shaderSetUniformBool(shaderToUse, name, value);
 }
 
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4& value){
-  glUniformMatrix4fv(glGetUniformLocation(shaderToUse, name), 1, GL_FALSE, glm::value_ptr(value));
+  glUniformMatrix4fv(shaderGetUniform(shaderToUse, name), 1, GL_FALSE, glm::value_ptr(value));
 }
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4&& value){
   shaderSetUniform(shaderToUse, name, value);

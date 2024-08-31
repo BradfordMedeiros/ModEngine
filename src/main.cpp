@@ -1315,10 +1315,6 @@ int main(int argc, char* argv[]){
   modlog("shaders", std::string("blur shader path is: ") + blurShaderPath);
   unsigned int blurProgram = loadShaderIntoCache("blur", blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile);
 
-  std::string basicShaderPath = "./res/shaders/basic";
-  modlog("shaders", std::string("basic shader path is: ") + basicShaderPath);
-  unsigned int basicProgram = loadShaderIntoCache("basic", basicShaderPath + "/vertex.glsl", basicShaderPath+ "/fragment.glsl", interface.readFile);
-
   renderStages = loadRenderStages(
     renderingResources.framebuffers.fbo, 
     renderingResources.framebuffers.framebufferTexture, renderingResources.framebuffers.framebufferTexture2, renderingResources.framebuffers.framebufferTexture3, renderingResources.framebuffers.framebufferTexture4,
@@ -1329,7 +1325,6 @@ int main(int argc, char* argv[]){
       .selectionProgram = selectionProgram,
       .uiShaderProgram = renderingResources.uiShaderProgram,
       .shaderProgram = shaderProgram,
-      .basicProgram = basicProgram,
     },
     interface.readFile
   );

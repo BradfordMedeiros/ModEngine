@@ -364,34 +364,6 @@ RenderStages loadRenderStages(
       .textures = {},
   };    
 
-  RenderStep basicTexture{
-    .name = "BASICTEXTURE-RENDERING",
-    .enable = true,
-    .fbo = fbo,
-    .colorAttachment0 = framebufferTexture,
-    .colorAttachment1 = framebufferTexture2,
-    .depthTextureIndex = 0,
-    .shader = shaders.basicProgram,
-    .quadTexture = 0,
-    .hasColorAttachment1 = true,
-    .renderWorld = false,
-    .renderSkybox = false,
-    .renderQuad = false,
-    .renderQuad3D = true,
-    .blend = false,
-    .enableStencil = false,
-    .allowShaderOverride = false,
-    .textBoundingOnly = false,
-    .uniforms = {
-      .intUniforms = {},
-      .floatUniforms = {},
-      .floatArrUniforms = {},
-      .vec3Uniforms = {},
-      .builtInUniforms = {},
-    },
-    .textures = {},
-  };
-
     // depends on framebuffer texture, outputs to framebuffer texture 2
     // Blurring draws the framebuffer texture 
     // The blur program blurs it one in one direction and saves in framebuffer texture 3 
@@ -533,7 +505,6 @@ RenderStages loadRenderStages(
     .bloom2 = bloomStep2,
     .dof1 = dof1,
     .dof2 = dof2,
-    .basicTexture = basicTexture,
     .additionalRenderSteps = additionalRenderSteps,
     .portalTextures = portalTextures,
     .numPortalTextures = numPortalTextures,

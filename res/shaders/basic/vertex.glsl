@@ -1,14 +1,10 @@
 #version 330 core
+layout (location = 0) in vec2 aPos;
+layout (location = 1) in vec2 aTexCoords;
 
-layout (location = 0) in vec3 aPos;
-layout (location = 2) in vec2 aTexCoords;
-
-out vec2 TexCoord;
-out vec3 FragPos;
-uniform mat4 projview;
+out vec2 TexCoords;
 
 void main(){
-    vec4 modelPosition =  vec4(aPos.xyz, 1.0);
-    gl_Position = projview * modelPosition;
-    TexCoord = aTexCoords;
-} 
+  gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);
+  TexCoords = aTexCoords;
+}

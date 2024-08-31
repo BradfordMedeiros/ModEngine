@@ -11,7 +11,6 @@ struct RenderShaders {
   unsigned int selectionProgram;
   unsigned int uiShaderProgram;
   unsigned int shaderProgram;
-  unsigned int basicProgram;
 };
 
 enum RenderTextureType { RENDER_TEXTURE_REGULAR, RENDER_TEXTURE_FRAMEBUFFER };
@@ -53,7 +52,6 @@ struct RenderStages {
   RenderStep bloom2;
   RenderStep dof1;
   RenderStep dof2;
-  RenderStep basicTexture;
   std::vector<RenderStep> additionalRenderSteps;
 
   // dependent data
