@@ -32,4 +32,10 @@ TestRunInformation createIntegrationTest();
 bool runIntegrationTests(TestRunInformation& runInformation);
 std::string testResultsStr(TestResults& testResults);
 
+struct FeatureScene {
+  std::string sceneFile;
+  std::optional<std::function<void()>> fn;
+};
+bool runFeatureScene(std::string name);
+
 #endif

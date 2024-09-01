@@ -231,3 +231,32 @@ std::string testResultsStr(TestResults& testResults){
   value += std::string("test integration failed = ") + std::to_string(testResults.totalTests - testResults.testsPassed) + "\n";
   return value;
 }
+
+
+/////////////////////////////////////
+
+std::map<std::string, FeatureScene> featureScenes = {
+  { "tint", FeatureScene {
+    .sceneFile = "./res/scenes/features/lighting/tint.p.rawscene",
+    .fn = std::nullopt,
+  }},
+};
+
+
+std::string printFeatures(){
+  std::string value = "";
+  for (auto &[name, scene] : featureScenes){
+    value += name + " - " + scene.sceneFile + "\n";
+  }
+  return value;
+}
+
+bool runFeatureScene(std::string name){
+  if (featureScenes.find(name) == featureScenes.end()){
+    std::cout << printFeatures() << std::endl;
+    return true;
+  }
+  FeatureScene& featureScene = featureScenes.at(name);
+  mainApi -> loadScene(featureScene.sceneFile,{}, std::nullopt, sceneTags);
+  return false;
+}

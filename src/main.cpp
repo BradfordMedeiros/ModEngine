@@ -1118,6 +1118,7 @@ int main(int argc, char* argv[]){
    ("z,layers", "Layers file to specify render layers", cxxopts::value<std::string>() -> default_value("./res/layers.layerinfo"))
    ("test-unit", "Run unit tests", cxxopts::value<bool>()->default_value("false"))
    ("test-integ", "Run integration tests", cxxopts::value<bool>()->default_value("false"))
+   ("test-feature", "Run feature scene", cxxopts::value<std::string>()->default_value(""))
    ("rechunk", "Rechunk the world", cxxopts::value<int>()->default_value("0"))
    ("mods", "List of mod folders", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("font", "Default font to use", cxxopts::value<std::vector<std::string>>()->default_value("./res/textures/fonts/gamefont"))
@@ -1641,6 +1642,14 @@ int main(int argc, char* argv[]){
   modlog("gpu info vendor", std::string(vendor));
   modlog("gpu info renderer", std::string(renderer));
 
+  auto featureTest = result["test-feature"].as<std::string>();
+  if (featureTest != ""){
+    auto shouldExit = runFeatureScene(featureTest);
+    if (shouldExit){
+      exit(0);
+    }
+  }
+
   bool shouldQuitControl = false;
   if (result["skiploop"].as<bool>()){
     goto cleanup;
@@ -1649,6 +1658,7 @@ int main(int argc, char* argv[]){
   state.cullEnabled ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
