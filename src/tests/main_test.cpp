@@ -236,6 +236,7 @@ std::string testResultsStr(TestResults& testResults){
 /////////////////////////////////////
 
 std::map<std::string, FeatureScene> featureScenes = {
+  // Lighting
   { "tint", FeatureScene {
     .sceneFile = "./res/scenes/features/lighting/tint.p.rawscene",
     .fn = std::nullopt,
@@ -248,6 +249,14 @@ std::map<std::string, FeatureScene> featureScenes = {
     .sceneFile = "./res/scenes/features/lighting/lights.p.rawscene",
     .fn = std::nullopt,
   }},
+  { "lights-dir", FeatureScene {
+    .sceneFile = "./res/scenes/features/lighting/light_directional.p.rawscene",
+    .fn = std::nullopt,
+  }},
+  { "lights-spotlight", FeatureScene {
+    .sceneFile = "./res/scenes/features/lighting/light_spotlight.p.rawscene",
+    .fn = std::nullopt,
+  }},
   { "transparency", FeatureScene {
     .sceneFile = "./res/scenes/features/lighting/transparency.p.rawscene",
     .fn = std::nullopt,
@@ -256,6 +265,58 @@ std::map<std::string, FeatureScene> featureScenes = {
     .sceneFile = "./res/scenes/features/lighting/normal.p.rawscene",
     .fn = std::nullopt,
   }},
+
+  // Objtypes
+  { "camera", FeatureScene {
+    .sceneFile = "./res/scenes/features/objtypes/camera.p.rawscene",
+    .fn = std::nullopt,
+  }},
+  { "camera-dof", FeatureScene {
+    .sceneFile = "./res/scenes/features/objtypes/camera-dof.p.rawscene",
+    .fn = std::nullopt,
+  }},
+  { "camera-interp", FeatureScene {
+    .sceneFile = "./res/scenes/features/objtypes/camera-interp.p.rawscene",
+    .fn = std::nullopt,
+  }},
+
+  { "portal", FeatureScene {
+    .sceneFile = "./res/scenes/features/objtypes/portal.p.rawscene",
+    .fn = std::nullopt,
+  }},
+  { "portal-fixed", FeatureScene {
+    .sceneFile = "./res/scenes/features/objtypes/portal-fixed.p.rawscene",
+    .fn = std::nullopt,
+  }},
+
+  { "sounds", FeatureScene {
+    .sceneFile = "./res/scenes/features/objtypes/sounds.p.rawscene",
+    .fn = std::nullopt,
+  }},
+
+  // Physics 
+
+  // Textures
+  { "subimage", FeatureScene {
+    .sceneFile = "./res/scenes/features/textures/subimage.p.rawscene",
+    .fn = std::nullopt,
+  }},  
+
+  { "lookat", FeatureScene {
+    .sceneFile = "./res/scenes/features/lookat.p.rawscene",
+    .fn = std::nullopt,
+  }},  
+
+  { "selection", FeatureScene {
+    .sceneFile = "./res/scenes/features/scripting/selection.p.rawscene",
+    .fn = std::nullopt,
+  }},  
+
+  // Scenegraph
+  { "parent", FeatureScene {
+    .sceneFile = "./res/scenes/features/scenegraph/parent.p.rawscene",
+    .fn = std::nullopt,
+  }}, 
 };
 
 

@@ -10,7 +10,5 @@ box:position:0 -2 0
 
 gun:mesh:./res/models/box/box.obj
 gun:position:1 0 0 
-gun:lookat:>maincamera
+gun:lookat:box
 
->maincamera:position:0 0 0
->maincamera:physics:dynamic

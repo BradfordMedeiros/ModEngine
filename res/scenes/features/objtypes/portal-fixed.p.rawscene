@@ -8,9 +8,7 @@ platform:position:0 -5 0
 @mainportal:position: 0 2 0
 @mainportal:camera:>maincamera
 @mainportal:scale:10 10 4
-@mainportal:rotation:0 3.1412 0
 
 @secondaryportal:position: 25 2 0
 @secondaryportal:camera:>secondcamera
 @secondaryportal:scale:10 10 4
-@secondaryportal:rotation:0 3.1412 0 
