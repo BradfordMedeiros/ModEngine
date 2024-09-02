@@ -1,16 +1,16 @@
 # Demonstrates camera system
 
-platform:mesh:./res/models/box/box.obj
-platform:scale:100 1 100
-platform:position:0 -5 0
+#platform:mesh:./res/models/box/box.obj
+#platform:scale:100 1 100
+#platform:position:0 -5 0
 
 box:mesh:./res/models/box/box.obj
-box:position:0 5 0
+box:position:0 0 0
 box:child:follower
 
 follower:mesh:./res/models/box/box.obj
 follower:position:0 2 0
-follower:child:follower2
-
-#follower2:mesh:./res/models/box/box.obj
-#follower2:position:0 2 0
+#follower:child:follower2
+#
+##follower2:mesh:./res/models/box/box.obj
+##follower2:position:0 2 0

@@ -36,6 +36,8 @@ struct FeatureScene {
   std::string sceneFile;
   std::optional<std::function<void()>> fn;
 };
-bool runFeatureScene(std::string name);
+
+void printFeatureSceneHelp();
+void runFeatureScene(std::string name);
 
 #endif

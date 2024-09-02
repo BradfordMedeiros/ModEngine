@@ -1147,6 +1147,11 @@ int main(int argc, char* argv[]){
   }
 
   auto shouldRunIntegrationTests = result["test-integ"].as<bool>();
+  auto featureTest = result["test-feature"].as<std::string>();
+  if (featureTest == "help"){
+    printFeatureSceneHelp();
+    exit(0);
+  }
 
   bool headlessmode = result["headlessmode"].as<bool>();
   int numChunkingGridCells = result["grid"].as<int>();
@@ -1642,12 +1647,8 @@ int main(int argc, char* argv[]){
   modlog("gpu info vendor", std::string(vendor));
   modlog("gpu info renderer", std::string(renderer));
 
-  auto featureTest = result["test-feature"].as<std::string>();
   if (featureTest != ""){
-    auto shouldExit = runFeatureScene(featureTest);
-    if (shouldExit){
-      exit(0);
-    }
+    runFeatureScene(featureTest);
   }
 
   bool shouldQuitControl = false;

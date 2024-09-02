@@ -240,6 +240,22 @@ std::map<std::string, FeatureScene> featureScenes = {
     .sceneFile = "./res/scenes/features/lighting/tint.p.rawscene",
     .fn = std::nullopt,
   }},
+  { "emission", FeatureScene {
+    .sceneFile = "./res/scenes/features/lighting/emission.p.rawscene",
+    .fn = std::nullopt,
+  }},
+  { "lights", FeatureScene {
+    .sceneFile = "./res/scenes/features/lighting/lights.p.rawscene",
+    .fn = std::nullopt,
+  }},
+  { "transparency", FeatureScene {
+    .sceneFile = "./res/scenes/features/lighting/transparency.p.rawscene",
+    .fn = std::nullopt,
+  }},
+  { "normal", FeatureScene {
+    .sceneFile = "./res/scenes/features/lighting/normal.p.rawscene",
+    .fn = std::nullopt,
+  }},
 };
 
 
@@ -251,12 +267,13 @@ std::string printFeatures(){
   return value;
 }
 
-bool runFeatureScene(std::string name){
+void printFeatureSceneHelp(){
+  std::cout << printFeatures() << std::endl;
+}
+void runFeatureScene(std::string name){
   if (featureScenes.find(name) == featureScenes.end()){
-    std::cout << printFeatures() << std::endl;
-    return true;
+    modassert(false, "invalid feature scene name");
   }
   FeatureScene& featureScene = featureScenes.at(name);
   mainApi -> loadScene(featureScene.sceneFile,{}, std::nullopt, sceneTags);
-  return false;
 }
