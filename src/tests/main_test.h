@@ -34,8 +34,9 @@ bool runIntegrationTests(TestRunInformation& runInformation);
 std::string testResultsStr(TestResults& testResults);
 
 struct FeatureScene {
-  std::string sceneFile;
+  std::optional<std::string> sceneFile;
   std::optional<std::function<CScriptBinding(CustomApiBindings& api)>> createBinding;
+  bool scriptAuto = false;
 };
 
 void printFeatureSceneHelp();

@@ -8,5 +8,6 @@
 CScriptBinding cscriptCreateSelectionBinding(CustomApiBindings& api);
 CScriptBinding cscriptCreateScreenshotBinding(CustomApiBindings& api);
 CScriptBinding cscriptCreateTextBinding(CustomApiBindings& api);
+CScriptBinding cscriptCreateTimeBinding(CustomApiBindings& api);
 
 #endif

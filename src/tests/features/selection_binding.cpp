@@ -35,3 +35,16 @@ CScriptBinding cscriptCreateTextBinding(CustomApiBindings& api){
   };
   return binding;
 }
+
+
+CScriptBinding cscriptCreateTimeBinding(CustomApiBindings& api){
+  auto binding = createCScriptBinding("test/test-text", api);
+  binding.onFrame = [&api](int32_t id, void* data) -> void {
+    modlog("time - not realtime", std::to_string(api.timeSeconds(false)));
+    modlog("time - realtime", std::to_string(api.timeSeconds(true)));
+    modlog("time - elapsed", std::to_string(api.timeElapsed()));
+  };
+  return binding;
+}
+
+

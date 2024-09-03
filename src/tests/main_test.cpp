@@ -341,23 +341,28 @@ std::map<std::string, FeatureScene> featureScenes = {
 
 
   // Misc 
-
   { "screenshot", FeatureScene {
     .sceneFile = "./res/scenes/features/scripting/screenshot.rawscene",
     .createBinding = cscriptCreateScreenshotBinding,
   }},  
-
   { "text", FeatureScene {
-    .sceneFile = "./res/scenes/features/scripting/text.rawscene",
+    .sceneFile = std::nullopt,
     .createBinding = cscriptCreateTextBinding,
-  }},  
+    .scriptAuto = true,
+  }},
+
+  { "time", FeatureScene {
+    .sceneFile = std::nullopt,
+    .createBinding = cscriptCreateTimeBinding,
+    .scriptAuto = true,
+  }},
 };
 
 
 std::string printFeatures(){
   std::string value = "";
   for (auto &[name, scene] : featureScenes){
-    value += name + " - " + scene.sceneFile + "\n";
+    value += name + " - " + print(scene.sceneFile) + "\n";
   }
   return value;
 }
@@ -378,5 +383,19 @@ void runFeatureScene(std::string name){
     modassert(false, "invalid feature scene name");
   }
   FeatureScene& featureScene = featureScenes.at(name);
-  mainApi -> loadScene(featureScene.sceneFile,{}, std::nullopt, sceneTags);
+  auto sceneId = featureScene.sceneFile.has_value() ?
+    mainApi -> loadScene(featureScene.sceneFile.value(), {}, std::nullopt, sceneTags) :
+    mainApi -> loadScene("./res/scenes/example.p.rawscene", {}, std::nullopt, sceneTags);
+  
+
+  std::map<std::string, GameobjAttributes> submodelAttributes = {};
+  if (featureScene.scriptAuto && featureScene.createBinding.has_value()){
+    auto bindingName = featureScene.createBinding.value()(*mainApi).bindingMatcher;
+    GameobjAttributes attr = {
+      .attr = {
+        { "script", bindingName },
+      },
+    };
+    mainApi -> makeObjectAttr(sceneId, std::string("testscript"), attr, submodelAttributes).value();
+  }
 }
