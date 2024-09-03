@@ -1,9 +1,0 @@
-<line:position:0 0 0
-<line:points:0 0 0|5 0 0|7 0 2
-<line:script:./res/scenes/features/objtypes/lineeditor.scm
-<line:script:./res/scenes/features/serialization/get-attr.scm
-
-test:script:./res/scenes/features/serialization/set-attr.scm
-test:target:<line
-
-serialize:script:./res/scenes/features/serialization/serialize.scm

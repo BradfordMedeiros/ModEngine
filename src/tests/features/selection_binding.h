@@ -6,7 +6,7 @@
 #include "../../cscript/cscript_binding.h"
 
 CScriptBinding cscriptCreateSelectionBinding(CustomApiBindings& api);
-
 CScriptBinding cscriptCreateScreenshotBinding(CustomApiBindings& api);
+CScriptBinding cscriptCreateTextBinding(CustomApiBindings& api);
 
 #endif

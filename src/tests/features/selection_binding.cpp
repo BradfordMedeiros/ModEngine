@@ -25,3 +25,13 @@ CScriptBinding cscriptCreateScreenshotBinding(CustomApiBindings& api){
 
   return binding;
 }
+
+CScriptBinding cscriptCreateTextBinding(CustomApiBindings& api){
+  auto binding = createCScriptBinding("test/test-text", api);
+  binding.onFrame = [&api](int32_t id, void* data) -> void {
+    modlog("test/test-text", "onFrame");
+    const char* str = "a b c d e\n\nf g h i j\n\nk l m n o\n\np q r s t\n\nu v w x y\n\nz\n! @ # $ %\n\n^ & * ( )\n\n_ + -\n1 2 3 4 5\n\n6 7 8 9 0\n\n";
+    api.drawText(str, 0, 0.f, 10.f, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  };
+  return binding;
+}

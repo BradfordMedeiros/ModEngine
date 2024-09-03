@@ -71,10 +71,7 @@ CScriptBinding cscriptCreatePerfVisualizeBinding(CustomApiBindings& api){
 			);
     	mainApi -> drawText(sample.labels.at(i), 0, 0.2 + i * 0.1, 8, false, color, std::nullopt, true, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   	}
-
   };
-
-
 
   return binding;
 }

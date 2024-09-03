@@ -346,6 +346,11 @@ std::map<std::string, FeatureScene> featureScenes = {
     .sceneFile = "./res/scenes/features/scripting/screenshot.rawscene",
     .createBinding = cscriptCreateScreenshotBinding,
   }},  
+
+  { "text", FeatureScene {
+    .sceneFile = "./res/scenes/features/scripting/text.rawscene",
+    .createBinding = cscriptCreateTextBinding,
+  }},  
 };
 
 

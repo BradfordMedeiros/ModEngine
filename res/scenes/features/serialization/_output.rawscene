@@ -1,9 +1,0 @@
-# Generated scene 
-test:script:./res/scenes/features/serialization/set-attr.scm
-test:target:mesh/Plane_Plane.001
-mesh/Plane_Plane.001:texture:./res/textures/blacktop.jpg
-serialize:script:./res/scenes/features/serialization/serialize.scm
-mesh:mesh:./res/models/controls/unitxy.obj
-mesh:script:./res/scenes/features/serialization/get-attr.scm
-mesh:texture:./res/textures/blacktop.jpg
-mesh:texturetiling:10 10
