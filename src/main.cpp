@@ -1475,6 +1475,16 @@ int main(int argc, char* argv[]){
     cscriptCreatePerformanceGraphBinding(pluginApi),
     cscriptCreatePerfVisualizeBinding(pluginApi),
   };
+
+
+  if (featureTest != ""){
+    FeatureScene& featureScene = getFeatureScene(featureTest);
+    if (featureScene.createBinding.has_value()){
+      pluginBindings.push_back(featureScene.createBinding.value()(pluginApi));
+    }
+  }
+
+
   #ifdef ADDITIONAL_SRC_HEADER
     auto userBindings = getUserBindings(pluginApi);
     for (auto userBinding : userBindings){

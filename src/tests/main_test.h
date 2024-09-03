@@ -10,6 +10,7 @@
 #include "../cscript/cscript_binding.h"
 #include "./integration/common.h"
 #include "./integration/makeobject.h"
+#include "./features/selection_binding.h"
 
 int runTests();
 
@@ -34,10 +35,12 @@ std::string testResultsStr(TestResults& testResults);
 
 struct FeatureScene {
   std::string sceneFile;
-  std::optional<std::function<void()>> fn;
+  std::optional<std::function<CScriptBinding(CustomApiBindings& api)>> createBinding;
 };
 
 void printFeatureSceneHelp();
+
+FeatureScene& getFeatureScene(std::string name);
 void runFeatureScene(std::string name);
 
 #endif

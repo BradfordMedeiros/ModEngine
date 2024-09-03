@@ -1,5 +1,11 @@
 
-bigbase:position:1.000000 25.000000 1.000000
+bigbase:position:1.000000 35.000000 -210.000000
 bigbase:scale:64.899582 9.199999 56.199715
 bigbase:mesh:./res/models/box/box.obj
-bigbase:script:./res/scenes/features/scripting/selection.scm
+bigbase:script:test/test-selection
+
+
+bigbase2:position:1.000000 15.000000 -230.000000
+bigbase2:scale:64.899582 9.199999 56.199715
+bigbase2:mesh:./res/models/box/box.obj
+bigbase2:script:test/test-selection

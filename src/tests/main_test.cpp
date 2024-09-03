@@ -239,84 +239,113 @@ std::map<std::string, FeatureScene> featureScenes = {
   // Lighting
   { "tint", FeatureScene {
     .sceneFile = "./res/scenes/features/lighting/tint.p.rawscene",
-    .fn = std::nullopt,
+    .createBinding = std::nullopt,
   }},
   { "emission", FeatureScene {
     .sceneFile = "./res/scenes/features/lighting/emission.p.rawscene",
-    .fn = std::nullopt,
+    .createBinding = std::nullopt,
   }},
   { "lights", FeatureScene {
     .sceneFile = "./res/scenes/features/lighting/lights.p.rawscene",
-    .fn = std::nullopt,
+    .createBinding = std::nullopt,
   }},
   { "lights-dir", FeatureScene {
     .sceneFile = "./res/scenes/features/lighting/light_directional.p.rawscene",
-    .fn = std::nullopt,
+    .createBinding = std::nullopt,
   }},
   { "lights-spotlight", FeatureScene {
     .sceneFile = "./res/scenes/features/lighting/light_spotlight.p.rawscene",
-    .fn = std::nullopt,
+    .createBinding = std::nullopt,
   }},
   { "transparency", FeatureScene {
     .sceneFile = "./res/scenes/features/lighting/transparency.p.rawscene",
-    .fn = std::nullopt,
+    .createBinding = std::nullopt,
   }},
   { "normal", FeatureScene {
     .sceneFile = "./res/scenes/features/lighting/normal.p.rawscene",
-    .fn = std::nullopt,
+    .createBinding = std::nullopt,
   }},
 
   // Objtypes
   { "camera", FeatureScene {
     .sceneFile = "./res/scenes/features/objtypes/camera.p.rawscene",
-    .fn = std::nullopt,
+    .createBinding = std::nullopt,
   }},
   { "camera-dof", FeatureScene {
     .sceneFile = "./res/scenes/features/objtypes/camera-dof.p.rawscene",
-    .fn = std::nullopt,
+    .createBinding = std::nullopt,
   }},
   { "camera-interp", FeatureScene {
     .sceneFile = "./res/scenes/features/objtypes/camera-interp.p.rawscene",
-    .fn = std::nullopt,
+    .createBinding = std::nullopt,
   }},
 
   { "portal", FeatureScene {
     .sceneFile = "./res/scenes/features/objtypes/portal.p.rawscene",
-    .fn = std::nullopt,
+    .createBinding = std::nullopt,
   }},
   { "portal-fixed", FeatureScene {
     .sceneFile = "./res/scenes/features/objtypes/portal-fixed.p.rawscene",
-    .fn = std::nullopt,
+    .createBinding = std::nullopt,
   }},
 
   { "sounds", FeatureScene {
     .sceneFile = "./res/scenes/features/objtypes/sounds.p.rawscene",
-    .fn = std::nullopt,
+    .createBinding = std::nullopt,
   }},
 
   // Physics 
+  { "physics.gravity", FeatureScene {
+    .sceneFile = "./res/scenes/features/physics/gravity.rawscene",
+    .createBinding = std::nullopt,
+  }},  
+  { "physics.collisiontypes", FeatureScene {
+    .sceneFile = "./res/scenes/features/physics/collisiontypes.p.rawscene",
+    .createBinding = std::nullopt,
+  }},  
+  { "physics.exactshape", FeatureScene {
+    .sceneFile = "./res/scenes/features/physics/exactshape.p.rawscene",
+    .createBinding = std::nullopt,
+  }},  
+  { "physics.layers", FeatureScene {
+    .sceneFile = "./res/scenes/features/physics/physics-layers.p.rawscene",
+    .createBinding = std::nullopt,
+  }},  
+  { "physics.velocity", FeatureScene {
+    .sceneFile = "./res/scenes/features/physics/velocity.rawscene",
+    .createBinding = std::nullopt,
+  }},  
+
 
   // Textures
   { "subimage", FeatureScene {
     .sceneFile = "./res/scenes/features/textures/subimage.p.rawscene",
-    .fn = std::nullopt,
+    .createBinding = std::nullopt,
   }},  
 
   { "lookat", FeatureScene {
     .sceneFile = "./res/scenes/features/lookat.p.rawscene",
-    .fn = std::nullopt,
+    .createBinding = std::nullopt,
   }},  
 
   { "selection", FeatureScene {
     .sceneFile = "./res/scenes/features/scripting/selection.p.rawscene",
-    .fn = std::nullopt,
+    .createBinding = cscriptCreateSelectionBinding,
   }},  
 
   // Scenegraph
   { "parent", FeatureScene {
     .sceneFile = "./res/scenes/features/scenegraph/parent.p.rawscene",
-    .fn = std::nullopt,
-  }}, 
+    .createBinding = std::nullopt,
+  }},
+
+
+  // Misc 
+
+  { "screenshot", FeatureScene {
+    .sceneFile = "./res/scenes/features/scripting/screenshot.rawscene",
+    .createBinding = cscriptCreateScreenshotBinding,
+  }},  
 };
 
 
@@ -330,6 +359,14 @@ std::string printFeatures(){
 
 void printFeatureSceneHelp(){
   std::cout << printFeatures() << std::endl;
+}
+
+FeatureScene& getFeatureScene(std::string name){
+  if (featureScenes.find(name) == featureScenes.end()){
+    modassert(false, "invalid feature scene name");
+  }
+  FeatureScene& featureScene = featureScenes.at(name);
+  return featureScene;
 }
 void runFeatureScene(std::string name){
   if (featureScenes.find(name) == featureScenes.end()){
