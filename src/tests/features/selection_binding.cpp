@@ -47,4 +47,53 @@ CScriptBinding cscriptCreateTimeBinding(CustomApiBindings& api){
   return binding;
 }
 
+CScriptBinding cscriptCreateInterpBinding(CustomApiBindings& api){
+  auto binding = createCScriptBinding("test/test-camera", api);
 
+  std::vector<std::string> cameras {
+    ">camera1",
+    ">camera2",
+    ">camera3",
+  };
+
+  binding.onMouseCallback = [&api, cameras](objid id, void* data, int button, int action, int mods) -> void {
+    if (action != 1){
+      return;
+    }
+    float transitionTime = 4.f;
+    auto sceneId = api.listSceneId(id);
+    auto activeCamera = api.getActiveCamera();
+    if (!activeCamera.has_value()){
+      auto nextCameraId = api.getGameObjectByName(cameras.at(0), sceneId, true).value();
+      api.setActiveCamera(nextCameraId, transitionTime);
+    }else{
+      auto gameobjName = api.getGameObjNameForId(activeCamera.value()).value();
+      std::optional<int> foundCameraIndex;
+      for (int i = 0; i < cameras.size(); i++){
+        if (cameras.at(i) == gameobjName){
+          foundCameraIndex = i;
+          break;
+        }
+      }
+      foundCameraIndex = (foundCameraIndex.value() + 1) % cameras.size();
+      auto nextCamera = cameras.at(foundCameraIndex.value());
+      auto nextCameraId = api.getGameObjectByName(nextCamera, sceneId, true).value();
+      api.setActiveCamera(nextCameraId, transitionTime);
+    }
+  };
+  return binding;
+}
+
+
+CScriptBinding cscriptSoundBinding(CustomApiBindings& api){
+  auto binding = createCScriptBinding("test/test-sound", api);
+  binding.onMouseCallback = [&api](objid id, void* data, int button, int action, int mods) -> void {
+    if (action != 1){
+      return;
+    }
+    auto sceneId = api.listSceneId(id);
+    auto sampleId = api.getGameObjectByName("&sample", sceneId, true).value();
+    api.playClipById(sampleId, std::nullopt, std::nullopt);
+  };
+  return binding;
+}

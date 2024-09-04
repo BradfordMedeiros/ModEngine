@@ -277,23 +277,37 @@ std::map<std::string, FeatureScene> featureScenes = {
   }},
   { "camera-interp", FeatureScene {
     .sceneFile = "./res/scenes/features/objtypes/camera-interp.p.rawscene",
-    .createBinding = std::nullopt,
+    .createBinding = cscriptCreateInterpBinding,
   }},
 
-  { "portal", FeatureScene {
-    .sceneFile = "./res/scenes/features/objtypes/portal.p.rawscene",
+  { "emitter-subelement", FeatureScene {
+    .sceneFile = "./res/scenes/features/objtypes/emitter-subelement.p.rawscene",
+    .createBinding = std::nullopt,
+  }},
+  { "emitter", FeatureScene {
+    .sceneFile = "./res/scenes/features/objtypes/emitter.p.rawscene",
+    .createBinding = std::nullopt,
+  }},
+  { "octree", FeatureScene {
+    .sceneFile = "./res/scenes/features/objtypes/octree.p.rawscene",
     .createBinding = std::nullopt,
   }},
   { "portal-fixed", FeatureScene {
     .sceneFile = "./res/scenes/features/objtypes/portal-fixed.p.rawscene",
     .createBinding = std::nullopt,
   }},
-
-  { "sounds", FeatureScene {
-    .sceneFile = "./res/scenes/features/objtypes/sounds.p.rawscene",
+  { "portal", FeatureScene {
+    .sceneFile = "./res/scenes/features/objtypes/portal.p.rawscene",
     .createBinding = std::nullopt,
   }},
-
+  { "sound", FeatureScene {
+    .sceneFile = "./res/scenes/features/objtypes/sounds.p.rawscene",
+    .createBinding = cscriptSoundBinding,
+  }},
+  { "sound-loop", FeatureScene {
+    .sceneFile = "./res/scenes/features/objtypes/soundslooping.p.rawscene",
+    .createBinding = cscriptSoundBinding,
+  }},
   // Physics 
   { "physics.gravity", FeatureScene {
     .sceneFile = "./res/scenes/features/physics/gravity.rawscene",

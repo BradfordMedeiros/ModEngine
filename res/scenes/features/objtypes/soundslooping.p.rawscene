@@ -5,6 +5,6 @@ platform:scale:100 1 100
 platform:position:0 -5 0
 
 &sample:clip:./res/sounds/sample.wav
-&sample:script:./res/scenes/features/objtypes/sounds.scm
+&sample:script:test/test-sound
 &sample:loop:true
 &sample:position:1 0 1
