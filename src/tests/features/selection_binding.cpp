@@ -97,3 +97,21 @@ CScriptBinding cscriptSoundBinding(CustomApiBindings& api){
   };
   return binding;
 }
+
+CScriptBinding cscriptCreateEmissionBinding(CustomApiBindings& api){
+  auto binding = createCScriptBinding("test/test-sound", api);
+  binding.onFrame = [&api](int32_t id, void* data) -> void {
+    auto sceneId = api.listSceneId(id);
+    auto cubeId = api.getGameObjectByName("boxfront/Cube", sceneId, true).value();
+
+    auto currentTime = api.timeSeconds(false);
+
+    float duration = 5.f;
+    float remainingTime = currentTime - (duration * static_cast<int>(currentTime / duration));
+
+    modlog("emission remaining time", std::to_string(remainingTime));
+    glm::vec3 emissionAmount(0.f, remainingTime / duration, 0.f);
+    api.setSingleGameObjectAttr(cubeId, "emission", emissionAmount);
+  };
+  return binding; 
+}

@@ -253,7 +253,8 @@ std::map<std::string, FeatureScene> featureScenes = {
   }},
   { "emission", FeatureScene {
     .sceneFile = "./res/scenes/features/lighting/emission.p.rawscene",
-    .createBinding = std::nullopt,
+    .createBinding = cscriptCreateEmissionBinding,
+    .scriptAuto = true,
   }},
   { "lights", FeatureScene {
     .sceneFile = "./res/scenes/features/lighting/lights.p.rawscene",

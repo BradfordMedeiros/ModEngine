@@ -11,5 +11,6 @@ CScriptBinding cscriptCreateTextBinding(CustomApiBindings& api);
 CScriptBinding cscriptCreateTimeBinding(CustomApiBindings& api);
 CScriptBinding cscriptCreateInterpBinding(CustomApiBindings& api);
 CScriptBinding cscriptSoundBinding(CustomApiBindings& api);
+CScriptBinding cscriptCreateEmissionBinding(CustomApiBindings& api);
 
 #endif
