@@ -12,4 +12,4 @@ normalbox:position:-5 -2 -20
 custombox:mesh:./res/models/box/box.obj
 custombox:scale:2 2 2
 custombox:position:5 -2 -20
-custombox:fragshader:./res/shaders/discard_lowintensity/fragment.glsl
+custombox:shader:./res/shaders/discard_lowintensity/fragment.glsl

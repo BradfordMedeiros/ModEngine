@@ -236,7 +236,17 @@ std::string testResultsStr(TestResults& testResults){
 /////////////////////////////////////
 
 std::map<std::string, FeatureScene> featureScenes = {
+  { "rotation", FeatureScene {
+    .sceneFile = "./res/scenes/features/rotation.p.rawscene",
+    .createBinding = std::nullopt,
+  }},
+
   // Lighting
+  { "shader", FeatureScene {
+    .sceneFile = "./res/scenes/features/lighting/customshader.p.rawscene",
+    .createBinding = std::nullopt,
+  }},
+
   { "tint", FeatureScene {
     .sceneFile = "./res/scenes/features/lighting/tint.p.rawscene",
     .createBinding = std::nullopt,

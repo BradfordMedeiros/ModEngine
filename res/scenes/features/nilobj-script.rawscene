@@ -1,7 +1,0 @@
-
-|list2:position:1 0 0
-|list2:script:native/samplescript
-
-platform:mesh:./res/models/box/box.obj
-platform:scale: 100 1 100
-platform:position:0 -10 0
