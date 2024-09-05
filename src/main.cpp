@@ -181,7 +181,7 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   }
 
   shaderSetUniform(renderingResources.uiShaderProgram, "projection", ndiOrtho);
-  shaderSetUniform(renderingResources.uiShaderProgram, "encodedid2", getColorFromGameobject(0));
+  shaderSetUniform(renderingResources.uiShaderProgram, "encodedid", getColorFromGameobject(0));
 
   if (shouldClear && clearTextureId.has_value()){
     shaderSetUniform(renderingResources.uiShaderProgram, "model", glm::scale(glm::mat4(1.0f), glm::vec3(2.f, 2.f, 2.f)));
@@ -518,15 +518,17 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
  
 
   for (int i = 0; i < lights.size(); i++){
-    glm::vec3 position = lights.at(i).transform.position;
-    auto& light = lights.at(i); 
-    shaderSetUniform(shader, ("lights[" + std::to_string(i) + "]").c_str(), position);
-    shaderSetUniform(shader, ("lightscolor[" + std::to_string(i) + "]").c_str(), light.light.color);
-    shaderSetUniform(shader, ("lightsdir[" + std::to_string(i) + "]").c_str(), directionFromQuat(light.transform.rotation));
-    shaderSetUniform(shader, ("lightsatten[" + std::to_string(i) + "]").c_str(), light.light.attenuation);
-    shaderSetUniform(shader,  ("lightsmaxangle[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_SPOTLIGHT ? light.light.maxangle : -10.f);
-    shaderSetUniform(shader,  ("lightsangledelta[" + std::to_string(i) + "]").c_str(), light.light.angledelta);
-    shaderSetUniformBool(shader,  ("lightsisdir[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_DIRECTIONAL);
+    if (shader != renderStages.selection.shader){
+      glm::vec3 position = lights.at(i).transform.position;
+      auto& light = lights.at(i); 
+      shaderSetUniform(shader, ("lights[" + std::to_string(i) + "]").c_str(), position);
+      shaderSetUniform(shader, ("lightscolor[" + std::to_string(i) + "]").c_str(), light.light.color);
+      shaderSetUniform(shader, ("lightsdir[" + std::to_string(i) + "]").c_str(), directionFromQuat(light.transform.rotation));
+      shaderSetUniform(shader, ("lightsatten[" + std::to_string(i) + "]").c_str(), light.light.attenuation);
+      shaderSetUniform(shader,  ("lightsmaxangle[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_SPOTLIGHT ? light.light.maxangle : -10.f);
+      shaderSetUniform(shader,  ("lightsangledelta[" + std::to_string(i) + "]").c_str(), light.light.angledelta);
+      shaderSetUniformBool(shader,  ("lightsisdir[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_DIRECTIONAL);
+    }
 
     if (lightProjview.size() > i){
       glActiveTexture(GL_TEXTURE3);
@@ -539,8 +541,12 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
 }
 void setShaderDataObject(GLint shader, glm::vec3 color, objid id, glm::mat4 projview){
   //std::cout << "set shader data object" << std::endl; 
-  shaderSetUniform(shader, "tint", glm::vec4(color.x, color.y, color.z, 1.f));
-  shaderSetUniform(shader, "encodedid", getColorFromGameobject(id));
+  if (shader != renderStages.selection.shader){
+    shaderSetUniform(shader, "tint", glm::vec4(color.x, color.y, color.z, 1.f));
+  }
+  if (shader == renderStages.selection.shader){
+    shaderSetUniform(shader, "encodedid", getColorFromGameobject(id));
+  }
   shaderSetUniform(shader, "projview", projview);
 }
 void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
@@ -608,6 +614,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       //std::cout << "render object: " << getGameObject(world, id).name << std::endl;
       auto trianglesDrawn = renderObject(
         newShader, 
+        newShader == renderStages.selection.shader,
         id, 
         world.objectMapping, 
         state.showDebug ? state.showDebugMask : 0,
@@ -621,7 +628,6 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
           return drawSphere();
         },
         defaultResources.defaultMeshes,
-        renderCustomObj,
         textBoundingOnly
       );
       numTriangles = numTriangles + trianglesDrawn;
@@ -742,7 +748,7 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
       .textureUnitId = 0,
     },
   });
-  setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid2", "tint", "time" });
+  setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid", "tint", "time" });
   glEnable(GL_BLEND);
 
   if(crosshairSprite != NULL && !state.isRotateSelection && state.showCursor){
@@ -2140,7 +2146,7 @@ int main(int argc, char* argv[]){
           .textureUnitId = 0,
         },
       });
-      setUniformData(shader, uniformData, { "model", "encodedid2", "tint", "time" });
+      setUniformData(shader, uniformData, { "model", "encodedid", "tint", "time" });
       glEnable(GL_BLEND);
 
 

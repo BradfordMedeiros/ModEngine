@@ -12,7 +12,6 @@
 void registerAllBindings(std::vector<CScriptBinding> pluginBindings);
 void loadCScript(int id, const char* name, int sceneId, bool bootstrapperMode, bool isFreeScript);
 void unloadCScript(int id);
-void renderCustomObj(int id);
 void afterFrameForScripts();
 
 struct CScriptBindingCallbacks {

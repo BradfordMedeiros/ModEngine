@@ -154,7 +154,8 @@ struct DefaultMeshes {
 };
 
 int renderObject(
-  GLint shaderProgram, 
+  GLint shaderProgram,
+  bool isSelectionShader,
   objid id, 
   std::map<objid, GameObjectObj>& mapping,
   int showDebugMask,
@@ -165,7 +166,6 @@ int renderObject(
   std::function<int(GLint, objid, std::string, unsigned int, AlignType, TextWrap, TextVirtualization, UiTextCursor, std::string, bool)> drawWord,
   std::function<int(glm::vec3)> drawSphere,
   DefaultMeshes& defaultMeshes,
-  std::function<void(int)> onRender,
   bool selectionMode
 );
 

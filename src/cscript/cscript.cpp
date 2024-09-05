@@ -151,15 +151,6 @@ void afterFrameForScripts(){
   //std::cout << "scripts: " << print(customObjInstances) << std::endl;
 }
 
-void renderCustomObj(int id){
-  //auto instanceExists = customObjInstances.find(id) != customObjInstances.end();
-  //if (instanceExists){
-  //  auto objInstance = customObjInstances.at(id);
-  //  auto binding = objInstance.cScriptBinding;
-  //  binding -> render(objInstance.data);   
-  //}
-}
-
 
 //// Callbacks ////
 

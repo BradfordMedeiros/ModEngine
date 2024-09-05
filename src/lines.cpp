@@ -240,13 +240,15 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
                 .textureUnitId = 0,
               },
             });
-            setUniformData(shaderToUse, uniformData, { "model", "encodedid2", "tint", "time" });
+            setUniformData(shaderToUse, uniformData, { "model", "encodedid", "tint", "time" });
             glEnable(GL_BLEND);
           lastShaderId = shapeOptionsShader;
         }
-        shaderSetUniform(shaderToUse, "time", getTotalTime());
-        shaderSetUniformBool(shaderToUse, "forceTint", false);
-        shaderSetUniform(shaderToUse, "tint", shape.tint);
+        if (!selectionProgram){
+          //shaderSetUniform(shaderToUse, "time", getTotalTime());
+          shaderSetUniformBool(shaderToUse, "forceTint", false);
+          shaderSetUniform(shaderToUse, "tint", shape.tint);
+        }
         if (shape.selectionId.has_value()){
           //std::cout << "selection id value: " << text.selectionId.value() << std::endl;
           auto id = shape.selectionId.value();
@@ -260,10 +262,8 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
           auto restoredId = getIdFromColor(colorTypeColor);
           //std::cout << "color is: " << print(colorTypeColor) << " - " << id << " - " << restoredId << std::endl;
           shaderSetUniform(uiShaderProgram, "encodedid", color);
-          shaderSetUniform(uiShaderProgram, "encodedid2", color);
         }else{
           shaderSetUniform(uiShaderProgram, "encodedid", getColorFromGameobject(0));
-          shaderSetUniform(uiShaderProgram, "encodedid2", getColorFromGameobject(0));
         }
         auto textShapeData = std::get_if<TextShapeData>(&shape.shapeData);
         auto rectShapeData = std::get_if<RectShapeData>(&shape.shapeData);
@@ -282,8 +282,9 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
           float heightNdi = rectShapeData -> height;
           glm::mat4 scaledAndTranslated = glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(centerXNdi, centerYNdi, 0.f)), glm::vec3(widthNdi, heightNdi, 1.f));
           shaderSetUniform(uiShaderProgram, "model", scaledAndTranslated);
-          
-          shaderSetUniformBool(uiShaderProgram, "forceTint", false);
+          if (!selectionProgram){
+            shaderSetUniformBool(uiShaderProgram, "forceTint", false);
+          }
           unsigned int textureId = -1;
           if (rectShapeData -> texture.has_value()){
             auto texId = getTextureId(rectShapeData -> texture.value());
@@ -295,7 +296,9 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
         }else if (lineShapeData != NULL){
           modassert(shape.ndi, "non-ndi line drawing not supported"); 
           shaderSetUniform(uiShaderProgram, "model", glm::mat4(1.f));
-          shaderSetUniformBool(uiShaderProgram, "forceTint", true);
+          if (!selectionProgram){
+            shaderSetUniformBool(uiShaderProgram, "forceTint", true);
+          }
           std::vector<Line> lines;
           lines.push_back(Line {
             .fromPos = lineShapeData -> fromPos,

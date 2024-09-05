@@ -458,7 +458,7 @@ int shaderGetUniform(unsigned int shaderProgram, const char* name){
     modassert(nameByShaderId(shaderProgram).has_value(), "shader does not have a value: ");
   }
   if (uniformValue == -1){
-  //  modassert(false, std::string("uniform value invalid: " + std::string(name) + " " + print(nameByShaderId(shaderProgram))));
+    modassert(false, std::string("uniform value invalid: " + std::string(name) + " " + print(nameByShaderId(shaderProgram))));
   }
   return uniformValue;
 }
