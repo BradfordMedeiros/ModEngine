@@ -156,7 +156,7 @@ void idAtCoordAsync(float ndix, float ndiy, bool onlyGameObjId, std::optional<ob
   });
 }
 
-void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId){
+void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId){
   auto texSize = getTextureSizeInfo(texture);
   auto texSize2 = getTextureSizeInfo(texture2);
   modassert(texSize.width == texSize2.width && texSize.height == texSize2.height, "screenspace - invalid tex sizes, texsize = " + print(glm::vec2(texSize.width, texSize.height)) + ", texsize2 = " + print(glm::vec2(texSize2.width, texSize2.height)));
@@ -1958,7 +1958,7 @@ int main(int argc, char* argv[]){
       Texture tex2 {
         .textureId = userTexture.selectionTextureId,
       };
-      renderScreenspaceLines(tex, tex2, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor, userTexture.clearTextureId);
+      renderScreenspaceShapes(tex, tex2, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor, userTexture.clearTextureId);
     }
     markUserTexturesCleared();  // not really rendering, should pull this out
 

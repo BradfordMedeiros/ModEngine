@@ -347,6 +347,18 @@ Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid owner
   return texture;  
 }
 
+Texture loadTextureWorldSelection(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight, std::optional<objid> mappingTexture){
+  std::cout << "load texture world empty: " << texturepath << std::endl;
+  modassert(world.textures.find(texturepath) == world.textures.end(), "texture is already loaded: " + texturepath);
+  Texture texture = loadTextureSelection(textureWidth, textureHeight);
+  world.textures[texturepath] = TextureRef {
+    .owners = { ownerId },
+    .texture = texture,
+    .mappingTexture = mappingTexture,
+  };
+  return texture;  
+}
+
 void maybeReloadTextureWorld(World& world, std::string texturepath){
   if (world.textures.find(texturepath) == world.textures.end()){
     modlog("scene", std::string("texture not reloaded because does not exist: ") + texturepath);

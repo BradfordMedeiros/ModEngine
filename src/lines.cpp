@@ -241,8 +241,7 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
               },
             });
             setUniformData(shaderToUse, uniformData, { "model", "encodedid", "tint", "time" });
-            glEnable(GL_BLEND);
-          lastShaderId = shapeOptionsShader;
+            lastShaderId = shapeOptionsShader;
         }
         if (!selectionProgram){
           //shaderSetUniform(shaderToUse, "time", getTotalTime());
@@ -260,8 +259,16 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
             .a = color.w,
           };
           auto restoredId = getIdFromColor(colorTypeColor);
-          //std::cout << "color is: " << print(colorTypeColor) << " - " << id << " - " << restoredId << std::endl;
-          shaderSetUniform(uiShaderProgram, "encodedid", color);
+          
+          if (shape.textureId.has_value()){
+            std::cout << "color is: " << print(colorTypeColor) << " - " << id << " - " << restoredId << std::endl;
+          }
+
+          if (false && shape.textureId.has_value()){
+            shaderSetUniform(uiShaderProgram, "encodedid", glm::vec4(0.f, 0.f, 1.f, 0.7f));
+          }else{
+            shaderSetUniform(uiShaderProgram, "encodedid", color);
+          }
         }else{
           shaderSetUniform(uiShaderProgram, "encodedid", getColorFromGameobject(0));
         }
