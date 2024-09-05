@@ -4,7 +4,7 @@ in vec2 TexCoord;
 uniform sampler2D textureData;
 uniform bool forceTint;
 uniform vec4 tint;
-uniform vec4 encodedid2;
+uniform vec4 encodedid;
 
 layout (location = 0) out vec4 FragColor;
 layout (location = 1) out vec4 FragColor2;
@@ -21,5 +21,5 @@ void main(){
   }else{
     FragColor = texColor * tint;
   }
-  FragColor2 = encodedid2;
+  FragColor2 = encodedid;
 }
