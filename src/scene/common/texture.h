@@ -12,6 +12,7 @@
 #include "glad/glad.h"
 #include "./util/loadmodel.h"
 #include "./util/types.h"
+#include "./textures_gen.h"
 
 struct Texture {
    unsigned int textureId;
@@ -24,6 +25,7 @@ struct TextureRef {
 };
 
 Texture loadTextureEmpty(int textureWidth, int textureHeight, int numChannels);
+Texture loadTextureSelection(int textureWidth, int textureHeight);
 Texture loadTextureData(unsigned char* data, int textureWidth, int textureHeight, int numChannels);
 Texture loadTextureDataRed(unsigned char* data, int textureWidth, int textureHeight);
 Texture loadTexture(std::string textureFilePath);
