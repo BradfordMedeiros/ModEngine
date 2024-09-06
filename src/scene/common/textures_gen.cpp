@@ -63,14 +63,8 @@ Framebuffers generateFramebuffers(int resolutionX, int resolutionY){
   glGenFramebuffers(1, &framebuffers.fbo);
 
   genFramebufferTexture(&framebuffers.framebufferTexture, resolutionX, resolutionY);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebuffers.framebufferTexture, 0);
-
   genFramebufferTexture(&framebuffers.framebufferTexture2, resolutionX, resolutionY);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebuffers.framebufferTexture2, 0);
-
   genFramebufferTexture(&framebuffers.framebufferTexture3, resolutionX, resolutionY);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, framebuffers.framebufferTexture3, 0);
-
   genFramebufferTexture(&framebuffers.framebufferTexture4, resolutionX, resolutionY);
 
   generateDepthTextures(&framebuffers.depthTextures.at(0), framebuffers.depthTextures.size(), resolutionX, resolutionY);
