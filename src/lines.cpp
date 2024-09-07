@@ -261,14 +261,9 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
           auto restoredId = getIdFromColor(colorTypeColor);
           
           if (shape.textureId.has_value()){
-            std::cout << "color is: " << print(colorTypeColor) << " - " << id << " - " << restoredId << std::endl;
+            std::cout << "ui pick color in color is: " << print(colorTypeColor) << " - " << id << " - " << restoredId << std::endl;
           }
-
-          if (false && shape.textureId.has_value()){
-            shaderSetUniform(uiShaderProgram, "encodedid", glm::vec4(0.f, 0.f, 1.f, 0.7f));
-          }else{
-            shaderSetUniform(uiShaderProgram, "encodedid", color);
-          }
+          shaderSetUniform(uiShaderProgram, "encodedid", glm::vec4(color.x, color.y, color.z, color.w));
         }else{
           shaderSetUniform(uiShaderProgram, "encodedid", getColorFromGameobject(0));
         }

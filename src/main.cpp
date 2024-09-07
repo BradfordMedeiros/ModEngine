@@ -166,9 +166,13 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
   setActiveDepthTexture(renderingResources.framebuffers.fbo, &renderingResources.framebuffers.textureDepthTextures.at(0), 0);
 
   glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
+  GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+  glDrawBuffers(2, buffers_to_render);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,  texture2.textureId, 0);
-  
+
+  modassert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "framebuffer incomplete");
+
   glUseProgram(renderingResources.uiShaderProgram);
   glDisable(GL_BLEND);
   glDisable(GL_DEPTH_TEST);
@@ -195,6 +199,7 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
   shaderSetUniform(renderingResources.uiShaderProgram, "tint", glm::vec4(1.f, 1.f, 1.f, 1.f));
   drawAllLines(lineData, renderingResources.uiShaderProgram, texture.textureId);
   drawShapeData(lineData, renderingResources.uiShaderProgram, ndiOrtho, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
+
 
   for (auto &idCoordToGet : idCoordsToGet){
     if (!idCoordToGet.textureId.has_value()){
