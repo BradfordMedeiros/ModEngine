@@ -85,7 +85,8 @@ void saveRecording(std::string name, Recording& recording, std::function<std::st
 int maxTimeForRecording(Recording& recording){
   return recording.keyframes.at(recording.keyframes.size() - 1).time;
 }
-int indexForRecording(Recording& recording, float time){
+
+int findFirstKeyframeGreaterThanTime(Recording& recording, float time){
   for (int i = 0; i < recording.keyframes.size(); i++){
     if (recording.keyframes.at(i).time > time){
       return i;
@@ -93,16 +94,42 @@ int indexForRecording(Recording& recording, float time){
   }
   return recording.keyframes.size() - 1;
 }
-
-struct PropertyIndexs {
-  int lowIndex;
-  int highIndex;
-  float percentage;
-  bool complete;
-};
-
 PropertyIndexs indexsForRecording(Recording& recording, float time){
-  auto highIndex = indexForRecording(recording, time);
+  auto highIndex = findFirstKeyframeGreaterThanTime(recording, time);
+  auto lowIndex = highIndex - 1;
+  if (lowIndex < 0){
+    lowIndex = 0;
+  }
+
+  auto lowTimestamp = recording.keyframes.at(lowIndex).time;
+  auto highTimestamp = recording.keyframes.at(highIndex).time;
+
+  auto elapsed = time - lowTimestamp;
+  auto totalTime = highTimestamp - lowTimestamp;
+  auto percentage = elapsed / totalTime;
+  bool complete = percentage > 1.f;
+
+  PropertyIndexs properties {
+    .lowIndex = lowIndex,
+    .highIndex = highIndex,
+    .percentage = lowIndex == highIndex ? 1.f : (complete ? 1.f : percentage),
+    .complete = complete,
+  };
+  return properties;
+}
+
+int findFirstKeyframeLessThanTime(Recording& recording, float time){
+  auto recordingLength = maxTimeForRecording(recording);
+  auto desiredTime = recordingLength - time;
+  for (int i = (recording.keyframes.size() - 1); i >= 0; i--){
+    if ((-1 * (recording.keyframes.at(i).time - recordingLength)) > desiredTime){
+      return i;
+    }
+  }
+  return 0;
+}
+PropertyIndexs indexsForRecordingReverse(Recording& recording, float time){
+  auto highIndex = findFirstKeyframeLessThanTime(recording, time);
   auto lowIndex = highIndex - 1;
   if (lowIndex < 0){
     lowIndex = 0;
@@ -141,10 +168,14 @@ std::vector<Property> recordingPropertiesInterpolated(Recording& recording, floa
     adjustedTime = adjustedTime - maxTime * static_cast<int>((adjustedTime / maxTime));
   }
   auto recordingIndexs = indexsForRecording(recording, adjustedTime);
+  std::cout << "time = " << adjustedTime << ", low index: " << recordingIndexs.lowIndex << ", highIndex = " << recordingIndexs.highIndex << ", percentage = " << recordingIndexs.percentage << ", complete = " << recordingIndexs.complete << std::endl;
+
+  auto recordingIndexs2 = indexsForRecordingReverse(recording, adjustedTime);
+  std::cout << "time2 = " << adjustedTime << ", low index: " << recordingIndexs2.lowIndex << ", highIndex = " << recordingIndexs2.highIndex << ", percentage = " << recordingIndexs2.percentage << ", complete = " << recordingIndexs2.complete << std::endl;
+
   auto lowProperty = recording.keyframes.at(recordingIndexs.lowIndex).properties;
   auto highProperty = recording.keyframes.at(recordingIndexs.highIndex).properties;
   *_isComplete = recordingIndexs.complete;
-  std::cout << "time = " << adjustedTime << ", low index: " << recordingIndexs.lowIndex << ", highIndex = " << recordingIndexs.highIndex << ", percentage = " << recordingIndexs.percentage << ", complete = " << recordingIndexs.complete << std::endl;
   std::vector<Property> properties;
   for (auto property : lowProperty){
     auto nextProperty = maybeGetProperty(highProperty, property.propertyName);

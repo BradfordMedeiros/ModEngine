@@ -31,4 +31,14 @@ std::vector<Property> recordingPropertiesInterpolated(Recording& recording, floa
 // eg tint 0.9 0.2 0.4
 AttributeValue parsePropertySuffix(std::string key, std::string value);
 
+
+// exposed for test only
+struct PropertyIndexs {
+  int lowIndex;
+  int highIndex;
+  float percentage;
+  bool complete;
+};
+PropertyIndexs indexsForRecording(Recording& recording, float time);
+
 #endif
