@@ -149,7 +149,7 @@ std::optional<Property> maybeGetProperty(std::vector<Property>& properties, std:
 std::vector<Property> recordingPropertiesInterpolated(Recording& recording, float time, std::function<AttributeValue(AttributeValue, AttributeValue, float)> interpolate, float recordingStartTime, RecordingPlaybackType type, bool reverse, bool* _isComplete){
   float adjustedTime = time - recordingStartTime;
   int maxTime = maxTimeForRecording(recording);
-  if (type == RECORDING_PLAY_LOOP){
+  if (type == RECORDING_PLAY_LOOP || type == RECORDING_PLAY_LOOP_REVERSE){
     adjustedTime = adjustedTime - maxTime * static_cast<int>((adjustedTime / maxTime));
   }
   auto recordingIndexs = reverse ?  indexsForRecordingReverse(recording, adjustedTime) : indexsForRecording(recording, adjustedTime);
@@ -158,6 +158,10 @@ std::vector<Property> recordingPropertiesInterpolated(Recording& recording, floa
   auto lowProperty = recording.keyframes.at(recordingIndexs.lowIndex).properties;
   auto highProperty = recording.keyframes.at(recordingIndexs.highIndex).properties;
   *_isComplete = recordingIndexs.complete;
+  if (type == RECORDING_PLAY_LOOP || type == RECORDING_PLAY_LOOP_REVERSE){
+    modlog("recording", "had to mark loop not complete");
+    *_isComplete = false;
+  }
   std::vector<Property> properties;
   for (auto property : lowProperty){
     auto nextProperty = maybeGetProperty(highProperty, property.propertyName);

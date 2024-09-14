@@ -671,6 +671,7 @@ void tickRecordings(float time){
     auto interpolatedProperties = recordingPropertiesInterpolated(recording.recording, time, interpolateAttribute, recording.startTime, recording.type, recording.playInReverse, &isComplete);
     if (isComplete){
       modassert(recording.type != RECORDING_PLAY_LOOP, "recording playback - got complete loop type");
+      modassert(recording.type != RECORDING_PLAY_LOOP_REVERSE, "recording playback - got complete loop type");
       recordingsToRemove.push_back(id);
     }
     for (auto &property: interpolatedProperties){
