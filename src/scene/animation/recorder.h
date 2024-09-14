@@ -40,5 +40,6 @@ struct PropertyIndexs {
   bool complete;
 };
 PropertyIndexs indexsForRecording(Recording& recording, float time);
+PropertyIndexs indexsForRecordingReverse(Recording& recording, float time);
 
 #endif

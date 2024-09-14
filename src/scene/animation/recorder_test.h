@@ -5,5 +5,6 @@
 #include "./recorder.h"
 
 void recorderIndexsForRecordingTest();
+void recorderIndexsForRecordingReverseTest();
 
 #endif

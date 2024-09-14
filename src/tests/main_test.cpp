@@ -89,6 +89,10 @@ std::vector<TestCase> tests = {
     .name = "recorderIndexsForRecordingTest",
     .test = recorderIndexsForRecordingTest,
   },
+  TestCase {
+    .name = "recorderIndexsForRecordingReverseTest",
+    .test = recorderIndexsForRecordingReverseTest,
+  },
 };
 
 enum CONSOLE_COLOR { CONSOLE_COLOR_GREEN, CONSOLE_COLOR_RED };
