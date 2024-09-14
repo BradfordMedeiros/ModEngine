@@ -363,7 +363,7 @@ struct Token {
   std::string payload;
 };
 
-enum RecordingPlaybackType { RECORDING_PLAY_ONCE, RECORDING_PLAY_LOOP };
+enum RecordingPlaybackType { RECORDING_PLAY_ONCE, RECORDING_PLAY_ONCE_REVERSE, RECORDING_PLAY_LOOP };
 
 struct ModAABB {
   glm::vec3 position;

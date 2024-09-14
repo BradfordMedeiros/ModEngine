@@ -1421,6 +1421,7 @@ int main(int argc, char* argv[]){
     .sendMessageUdp = sendDataUdp,
     .playRecording = playRecording,
     .stopRecording = stopRecording,
+    .recordingLength = recordingLength,
     .createRecording = createRecording,
     .saveRecording = saveRecording,
     .makeObjectAttr = makeObjectAttr,
@@ -2153,7 +2154,6 @@ int main(int argc, char* argv[]){
       });
       setUniformData(shader, uniformData, { "model", "encodedid", "tint", "time" });
       glEnable(GL_BLEND);
-
 
       drawShapeData(lineData, shader /*renderingResources.uiShaderProgram*/, ndiOrtho, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
     }

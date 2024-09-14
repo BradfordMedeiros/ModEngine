@@ -148,7 +148,7 @@ double timeElapsed();
 
 void playRecording(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type);
 void stopRecording(objid id);
-
+float recordingLength(std::string recordingPath);
 void tickRecording(float time, GameObject& gameobject);
 void tickRecordings(float time);
 

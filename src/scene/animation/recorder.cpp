@@ -82,7 +82,7 @@ void saveRecording(std::string name, Recording& recording, std::function<std::st
   saveFile(name, serializeRecording(recording, serializePropertySuffix));
 }
 
-int maxTimeForRecording(Recording& recording, float time){
+int maxTimeForRecording(Recording& recording){
   return recording.keyframes.at(recording.keyframes.size() - 1).time;
 }
 int indexForRecording(Recording& recording, float time){
@@ -134,9 +134,9 @@ std::optional<Property> maybeGetProperty(std::vector<Property>& properties, std:
   return std::nullopt;
 }
 
-std::vector<Property> recordingPropertiesInterpolated(Recording& recording, float time, std::function<AttributeValue(AttributeValue, AttributeValue, float)> interpolate, float recordingStartTime, RecordingPlaybackType type, bool* _isComplete){
+std::vector<Property> recordingPropertiesInterpolated(Recording& recording, float time, std::function<AttributeValue(AttributeValue, AttributeValue, float)> interpolate, float recordingStartTime, RecordingPlaybackType type, bool reverse, bool* _isComplete){
   float adjustedTime = time - recordingStartTime;
-  int maxTime = maxTimeForRecording(recording, adjustedTime);
+  int maxTime = maxTimeForRecording(recording);
   if (type == RECORDING_PLAY_LOOP){
     adjustedTime = adjustedTime - maxTime * static_cast<int>((adjustedTime / maxTime));
   }

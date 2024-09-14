@@ -626,23 +626,37 @@ void saveRecording(objid recordingId, std::string filepath){
 }
 
 struct PlayingRecording {
+  std::string recordingPath;
   float startTime;
   RecordingPlaybackType type;
   Recording recording;
+  bool playInReverse;
 };
+
+
 std::map<objid, PlayingRecording> playingRecordings;
 void playRecording(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type){
+  auto recordingType = type.has_value() ? type.value() : RECORDING_PLAY_ONCE;
+  auto isReverseRecording = recordingType == RECORDING_PLAY_ONCE_REVERSE;
+
   stopRecording(id);
+
   playingRecordings[id] = PlayingRecording {
+    .recordingPath = recordingPath,
     .startTime = getTotalTime(),
-    .type = type.has_value() ? type.value() : RECORDING_PLAY_ONCE,
+    .type = recordingType,
     .recording = loadRecording(recordingPath, parsePropertySuffix, interface.readFile),
+    .playInReverse = isReverseRecording,
   };
 }
 void stopRecording(objid id){
   if (playingRecordings.find(id) != playingRecordings.end()){
     playingRecordings.erase(id);
   }
+}
+float recordingLength(std::string recordingPath){
+  auto recording = loadRecording(recordingPath, parsePropertySuffix, interface.readFile);
+  return maxTimeForRecording(recording);
 }
 
 void tickRecordings(float time){
@@ -654,7 +668,7 @@ void tickRecordings(float time){
   std::vector<objid> recordingsToRemove;
   for (auto &[id, recording] : playingRecordings){
     bool isComplete = false;
-    auto interpolatedProperties = recordingPropertiesInterpolated(recording.recording, time, interpolateAttribute, recording.startTime, recording.type, &isComplete);
+    auto interpolatedProperties = recordingPropertiesInterpolated(recording.recording, time, interpolateAttribute, recording.startTime, recording.type, recording.playInReverse, &isComplete);
     if (isComplete){
       modassert(recording.type != RECORDING_PLAY_LOOP, "recording playback - got complete loop type");
       recordingsToRemove.push_back(id);

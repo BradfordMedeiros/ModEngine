@@ -20,10 +20,11 @@ struct Recording {
 Recording createRecording();
 void saveRecordingIndex(Recording& recording, std::string name, AttributeValue value, float time);
 
+int maxTimeForRecording(Recording& recording);
 Recording loadRecording(std::string name, std::function<AttributeValue(std::string, std::string)> parsePropertySuffix, std::function<std::string(std::string)> readFile);
 void saveRecording(std::string name, Recording& recording, std::function<std::string(std::string, AttributeValue)> serializePropertySuffix);
 
-std::vector<Property> recordingPropertiesInterpolated(Recording& recording, float time, std::function<AttributeValue(AttributeValue, AttributeValue, float)> interpolate, float recordingStartTime, RecordingPlaybackType type, bool* _isComplete);
+std::vector<Property> recordingPropertiesInterpolated(Recording& recording, float time, std::function<AttributeValue(AttributeValue, AttributeValue, float)> interpolate, float recordingStartTime, RecordingPlaybackType type, bool reverse, bool* _isComplete);
 
 // property suffix looks like the parts of the tokens on the right hand side
 // eg position 10
