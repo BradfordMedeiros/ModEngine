@@ -224,6 +224,38 @@ void assertCoreType(AttributeValueType type, std::string& fieldname, std::string
   }
 }
 
+// property suffix looks like the parts of the tokens on the right hand side
+// eg position 10
+// eg tint 0.9 0.2 0.4
+AttributeValue parsePropertySuffix(std::string attribute, std::string payload){
+  glm::vec2 vec2(0.f, 0.f);
+  bool isVec2 = maybeParseVec2(payload, vec2);
+  if (isVec2){
+    return vec2;
+  }
+
+  glm::vec3 vec(0.f, 0.f, 0.f);
+  bool isVec = maybeParseVec(payload, vec);
+  if (isVec){
+    return vec;
+  }
+
+  glm::vec4 vec4(0.f, 0.f, 0.f, 0.f);
+  bool isVec4 = maybeParseVec4(payload, vec4);
+  if (isVec4){
+    return vec4;
+  }
+
+  float number = 0.f;
+  bool isFloat = maybeParseFloat(payload, number);
+  if (isFloat){
+    return number;
+  }
+
+  modassert(false, "return string...we sure?");
+  return payload;
+}
+
 void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::string payload){
   glm::vec2 vec2(0.f, 0.f);
   bool isVec2 = maybeParseVec2(payload, vec2);

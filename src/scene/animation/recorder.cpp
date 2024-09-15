@@ -176,17 +176,3 @@ std::vector<Property> recordingPropertiesInterpolated(Recording& recording, floa
   }
   return properties;
 }
-
-// property suffix looks like the parts of the tokens on the right hand side
-// eg position 10
-// eg tint 0.9 0.2 0.4
-AttributeValue parsePropertySuffix(std::string key, std::string value){
-  MODTODO("combine parse property suffix with getAttribute in serialization");
-  if (key == "position" || key == "scale"){
-    return parseVec(value);
-  }
-  if (key == "tint"){
-    return parseVec4(value);
-  }
-  return value;
-}
