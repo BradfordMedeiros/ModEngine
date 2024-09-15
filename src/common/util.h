@@ -21,6 +21,31 @@
 #include <queue>
 #include <execinfo.h>
 
+void printBacktrace();
+void assertWithBacktrace(bool isTrue, std::string message);
+void assertTodo(std::string message);
+
+#ifdef MODDEBUG
+  #define modassert(m,x) assertWithBacktrace(m, x);
+  #ifdef ASSERT_TODOS
+    #define MODTODO(m) assertTodo(m);
+  #else
+    #define MODTODO(m) ;
+  #endif
+#else
+  #define modassert(m,x) ;
+  #define MODTODO(m) ;
+#endif
+
+#define VAL(x) #x
+#define STR(macro) VAL(macro)   // stringified the value, eg for include 
+
+enum MODLOG_LEVEL { MODLOG_INFO = 0, MODLOG_WARNING = 1, MODLOG_ERROR = 2 };
+void modlog(const char* identifier, const char* value, MODLOG_LEVEL level = MODLOG_INFO);
+void modlog(const char* identifier, std::string value, MODLOG_LEVEL level = MODLOG_INFO);
+void modlogSetEnabled(bool filterLogs, MODLOG_LEVEL level, std::vector<std::string> levels);
+void modlogSetLogEndpoint(std::optional<std::function<void(std::string&)>> fn);
+
 std::string loadFile(std::string filepath);
 void saveFile(std::string filepath, std::string content);
 void rmFile(std::string filepath);
@@ -125,7 +150,7 @@ template<typename T>
 T unwrapAttr(AttributeValue value) {   
   T* unwrappedValue = std::get_if<T>(&value);
   if (unwrappedValue == NULL){
-    assert(false);
+    modassert(false, "unwrapAttr invalid type");
   }
   return *unwrappedValue;
 }
@@ -323,30 +348,6 @@ typedef std::function<void(int32_t, std::string&)> id_stringfunc;
 
 typedef void(*messagefunc)(std::queue<StringAttribute>&);
 
-void printBacktrace();
-void assertWithBacktrace(bool isTrue, std::string message);
-void assertTodo(std::string message);
-
-#ifdef MODDEBUG
-  #define modassert(m,x) assertWithBacktrace(m, x);
-  #ifdef ASSERT_TODOS
-    #define MODTODO(m) assertTodo(m);
-  #else
-    #define MODTODO(m) ;
-  #endif
-#else
-  #define modassert(m,x) ;
-  #define MODTODO(m) ;
-#endif
-
-#define VAL(x) #x
-#define STR(macro) VAL(macro)   // stringified the value, eg for include 
-
-enum MODLOG_LEVEL { MODLOG_INFO = 0, MODLOG_WARNING = 1, MODLOG_ERROR = 2 };
-void modlog(const char* identifier, const char* value, MODLOG_LEVEL level = MODLOG_INFO);
-void modlog(const char* identifier, std::string value, MODLOG_LEVEL level = MODLOG_INFO);
-void modlogSetEnabled(bool filterLogs, MODLOG_LEVEL level, std::vector<std::string> levels);
-void modlogSetLogEndpoint(std::optional<std::function<void(std::string&)>> fn);
 
 std::string mainTargetElement(std::string target);
 std::string suffixTargetElement(std::string target);

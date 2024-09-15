@@ -1,5 +1,33 @@
 #include "./util.h"
 
+const int maxCallstack = 128;
+bool warnOnly = false;
+
+void printBacktrace(){ 
+  void* callstack[maxCallstack];
+  int frames = backtrace(callstack, maxCallstack);
+  char** strs = backtrace_symbols(callstack, frames);
+  for (int i = 0; i < frames; ++i) {
+    printf("%s\n", strs[i]);
+  }
+  free(strs);
+}
+void assertWithBacktrace(bool isTrue, std::string message){
+  if (!isTrue){
+    std::cout << message << std::endl;
+    if (warnOnly){
+      return;
+    }
+    printBacktrace();
+    abort();
+  }
+}
+
+void assertTodo(std::string message){
+  assertWithBacktrace(false, "TODO hit: " + message);
+}
+
+
 // Base IO fns ////////////////////////////////////
 std::string loadFile(std::string filepath){
    std::ifstream file(filepath.c_str());
@@ -811,33 +839,6 @@ bool aboutEqual(AttributeValue one, AttributeValue two){
 
 bool isIdentityVec(glm::vec4 vec){
   return vec.x = 1 && vec.y == 1 && vec.z == 1 && vec.w == 1;
-}
-
-const int maxCallstack = 128;
-bool warnOnly = false;
-
-void printBacktrace(){ 
-  void* callstack[maxCallstack];
-  int frames = backtrace(callstack, maxCallstack);
-  char** strs = backtrace_symbols(callstack, frames);
-  for (int i = 0; i < frames; ++i) {
-    printf("%s\n", strs[i]);
-  }
-  free(strs);
-}
-void assertWithBacktrace(bool isTrue, std::string message){
-  if (!isTrue){
-    std::cout << message << std::endl;
-    if (warnOnly){
-      return;
-    }
-    printBacktrace();
-    abort();
-  }
-}
-
-void assertTodo(std::string message){
-  assertWithBacktrace(false, "TODO hit: " + message);
 }
 
 GameobjAttributes gameobjAttributes2To1(std::vector<GameobjAttribute>& attributes){

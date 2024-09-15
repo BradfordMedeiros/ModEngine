@@ -766,7 +766,7 @@ bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, const char
   if (rotValue != NULL){
     glm::quat* address = (glm::quat*)(((char*)structAddress) + rotValue -> structOffset);
     if (attributeValue.has_value()){
-      glm::vec4 vec4Value = unwrapAttr<glm::vec4>(rotValue -> field);
+      glm::vec4 vec4Value = unwrapAttr<glm::vec4>(attributeValue.value());
       *address = parseQuat(vec4Value);
       return true;
     } 
