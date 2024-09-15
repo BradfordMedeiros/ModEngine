@@ -168,7 +168,7 @@ std::vector<Property> recordingPropertiesInterpolated(Recording& recording, floa
     if (nextProperty.has_value()){
       properties.push_back(Property{
         .propertyName = property.propertyName,
-        .value = interpolate(property.value, nextProperty -> value, recordingIndexs.percentage),
+        .value = interpolateAttribute(property.value, nextProperty -> value, recordingIndexs.percentage),
       });
     }else{
       properties.push_back(property);
@@ -184,6 +184,9 @@ AttributeValue parsePropertySuffix(std::string key, std::string value){
   MODTODO("combine parse property suffix with getAttribute in serialization");
   if (key == "position" || key == "scale"){
     return parseVec(value);
+  }
+  if (key == "tint"){
+    return parseVec4(value);
   }
   return value;
 }
