@@ -198,6 +198,11 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
   shaderSetUniformBool(renderingResources.uiShaderProgram, "forceTint", true);
   shaderSetUniform(renderingResources.uiShaderProgram, "tint", glm::vec4(1.f, 1.f, 1.f, 1.f));
   drawAllLines(lineData, renderingResources.uiShaderProgram, texture.textureId);
+
+  glEnable(GL_BLEND);
+  glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendFunci(1, GL_ONE, GL_ZERO);
+
   drawShapeData(lineData, renderingResources.uiShaderProgram, ndiOrtho, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
 
 
@@ -755,6 +760,8 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
   });
   setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid", "tint", "time" });
   glEnable(GL_BLEND);
+  glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendFunci(1, GL_ONE, GL_ZERO);
 
   if(crosshairSprite != NULL && !state.isRotateSelection && state.showCursor){
     shaderSetUniform(renderingResources.uiShaderProgram, "tint", glm::vec4(1.f, 1.f, 1.f, 1.f));
@@ -909,6 +916,8 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     glEnable(GL_DEPTH_TEST);
     if (renderStep.blend){
       glEnable(GL_BLEND);
+      glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glBlendFunci(1, GL_ONE, GL_ZERO);
     }else{
       glDisable(GL_BLEND);
     }
@@ -1247,8 +1256,8 @@ int main(int argc, char* argv[]){
   setInitialState(state, "./res/world.state", statistics.now, interface.readFile, result["noinput"].as<bool>()); 
 
   glfwInit();
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   //glfwWindowHint(GLFW_DECORATED, false);
   glfwSetErrorCallback(onGLFWEerror);
@@ -1680,8 +1689,8 @@ int main(int argc, char* argv[]){
 
   state.cullEnabled ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
   glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+  glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendFunci(1, GL_ONE, GL_ZERO);
 
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
@@ -1925,6 +1934,8 @@ int main(int argc, char* argv[]){
 
     glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
     glEnable(GL_BLEND);
+    glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunci(1, GL_ONE, GL_ZERO);
     handlePaintingModifiesViewport(uvCoord);
 
     glViewport(0, 0, state.resolution.x, state.resolution.y);
@@ -2153,8 +2164,9 @@ int main(int argc, char* argv[]){
         },
       });
       setUniformData(shader, uniformData, { "model", "encodedid", "tint", "time" });
-      glEnable(GL_BLEND);
-
+      glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glBlendFunci(1, GL_ONE, GL_ZERO);
+      
       drawShapeData(lineData, shader /*renderingResources.uiShaderProgram*/, ndiOrtho, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
     }
     glEnable(GL_DEPTH_TEST);
