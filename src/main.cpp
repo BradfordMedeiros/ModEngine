@@ -741,7 +741,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
 
-void renderUI(Mesh* crosshairSprite, Color pixelColor){
+void renderUI(Color pixelColor){
   glUseProgram(renderingResources.uiShaderProgram);
   std::vector<UniformData> uniformData;
   uniformData.push_back(UniformData {
@@ -762,12 +762,6 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor){
   glEnable(GL_BLEND);
   glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glBlendFunci(1, GL_ONE, GL_ZERO);
-
-  if(crosshairSprite != NULL && !state.isRotateSelection && state.showCursor){
-    shaderSetUniform(renderingResources.uiShaderProgram, "tint", glm::vec4(1.f, 1.f, 1.f, 1.f));
-    auto location = pixelCoordToNdi(glm::ivec2(state.cursorLeft, state.currentScreenHeight - state.cursorTop), glm::vec2(state.currentScreenWidth, state.currentScreenHeight));
-    drawSpriteAround(renderingResources.uiShaderProgram, *crosshairSprite, location.x, location.y, 0.05, 0.05);
-  }
   
   const float offsetPerLineMargin = 0.02f;
   float offsetPerLine = -1 * (state.fontsize / 500.f + offsetPerLineMargin);
@@ -1065,28 +1059,6 @@ void setSelected(std::optional<std::set<objid>> ids){
     }
     setSelectedIndex(state.editor, id, !state.multiselect);
   }
-}
-
-Mesh* updateAndGetCursor(objid hoveredId){
-  bool hoveredIdInScene = idExists(world.sandbox, hoveredId);   // stateupdate
-
-  std::string cursorForLayer("./res/textures/crosshairs/crosshair008.png");
-  if (hoveredIdInScene){
-    auto hoveredLayer = getLayerForId(hoveredId);
-    if (hoveredLayer.cursor != ""){
-      cursorForLayer = hoveredLayer.cursor;
-    }
-  }
-  if (cursorForLayer == "none"){
-    defaultResources.defaultMeshes.defaultCrosshairSprite = NULL;
-  }else{
-    defaultResources.defaultMeshes.defaultCrosshairSprite = &world.meshes.at(cursorForLayer).mesh;
-  }
-  Mesh* effectiveCrosshair = defaultResources.defaultMeshes.defaultCrosshairSprite;
-  if (defaultResources.defaultMeshes.crosshairSprite != NULL){
-    effectiveCrosshair = defaultResources.defaultMeshes.crosshairSprite;
-  }
-  return effectiveCrosshair;
 }
 
 std::optional<unsigned int> shaderByName(std::string name){
@@ -1533,20 +1505,6 @@ int main(int argc, char* argv[]){
   };
 
   std::vector<std::string> allTexturesToLoad = {  "./res/textures/crosshairs/crosshair029.png", "./res/textures/crosshairs/crosshair008.png" };
-  for (auto &layer : layers){
-    if (layer.cursor == ""){
-      continue;
-    }
-    if (layer.cursor == "none"){
-      continue;
-    }
-    for (auto &texture : allTexturesToLoad){
-      if (layer.cursor == texture){
-        continue;
-      }
-    }
-    allTexturesToLoad.push_back(layer.cursor);
-  }
 
   world = createWorld(
     onObjectEnter, 
@@ -1610,12 +1568,8 @@ int main(int argc, char* argv[]){
       .lightMesh = &world.meshes.at("../gameresources/build/objtypes/light.gltf").mesh,
       .emitter = &world.meshes.at("../gameresources/build/objtypes/emitter.gltf").mesh,
       .nav = &world.meshes.at("./res/models/ui/node.obj").mesh,
-      .defaultCrosshairSprite = &world.meshes.at("./res/textures/crosshairs/crosshair008.png").mesh,
-      .crosshairSprite = NULL,
     }
   };
-
-  setCrosshairSprite();  // needs to be after create world since depends on these meshes being loaded
 
   dynamicLoading = createDynamicLoading(worldfile, interface.readFile);
   if (result["rechunk"].as<int>()){
@@ -1760,7 +1714,6 @@ int main(int argc, char* argv[]){
 
     auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
 
-    Mesh* effectiveCrosshair = updateAndGetCursor(state.currentHoverIndex);
     bool selectItemCalledThisFrame = selectItemCalled;
     selectItemCalled = false;  // reset the state
     auto selectTargetId = state.forceSelectIndex == 0 ? state.currentHoverIndex : state.forceSelectIndex;
@@ -2142,7 +2095,7 @@ int main(int argc, char* argv[]){
 
   
     if (state.renderMode == RENDER_FINAL){
-      renderUI(effectiveCrosshair, pixelColor);
+      renderUI(pixelColor);
 
       auto shader = renderingResources.uiShaderProgram;
 

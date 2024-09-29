@@ -136,7 +136,6 @@ struct engineState {
   std::string borderTexture;
   ANTIALIASING_TYPE antialiasingMode;
 
-  std::string crosshair;
   std::string windowname;
   std::string iconpath;
 

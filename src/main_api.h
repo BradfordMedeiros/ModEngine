@@ -169,7 +169,6 @@ void setNavmeshTexture(unsigned int);
 void setTexture(objid index, std::string textureName);
 
 void setState(std::string stateName);
-void setCrosshairSprite();
 
 void windowPositionCallback(GLFWwindow* window, int xpos, int ypos);
 void windowSizeCallback(GLFWwindow* window, int width, int height);

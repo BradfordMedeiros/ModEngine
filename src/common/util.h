@@ -263,7 +263,6 @@ struct LayerInfo {
   float nearplane;
   float farplane;
   int selectIndex;
-  std::string cursor;
   RenderUniforms uniforms;
 };
 int numUniqueDepthLayers(std::vector<LayerInfo> layers);

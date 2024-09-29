@@ -739,14 +739,6 @@ void setState(std::string stateName){
   }
 }
 
-void  setCrosshairSprite(){
-  if (state.crosshair == ""){
-    defaultResources.defaultMeshes.crosshairSprite = NULL;
-    return;
-  }
-  defaultResources.defaultMeshes.crosshairSprite = &world.meshes.at(state.crosshair).mesh;
-}
-
 void windowPositionCallback(GLFWwindow* window, int xpos, int ypos){
   if (!state.fullscreen){
     state.savedWindowsize.x = xpos;
@@ -804,7 +796,6 @@ void setWorldState(std::vector<ObjectValue> values){
     setCulling(state.cullEnabled);
   }
   //// todo add updates for each state ... should check if it was changed in state maybe?
-  setCrosshairSprite();
 }
 
 std::vector<ObjectValue> getWorldState(){
