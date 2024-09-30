@@ -722,11 +722,7 @@ void maybeChangeTexture(int index){
 }
 
 void setState(std::string stateName){
-  if (stateName == "paint_on"){
-    state.shouldPaint = true;
-  }else if (stateName == "paint_off"){
-    state.shouldPaint = false;
-  }else if (stateName == "translate"){
+  if (stateName == "translate"){
     state.manipulatorMode = TRANSLATE;
   }else if (stateName == "scale"){
     state.manipulatorMode = SCALE;

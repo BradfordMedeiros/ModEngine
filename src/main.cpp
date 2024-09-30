@@ -20,7 +20,6 @@ CustomApiBindings* mainApi;
 // application rendering stuff
 struct RenderingResources { 
   unsigned int framebufferProgram;
-  unsigned int drawingProgram;
   unsigned int uiShaderProgram;
   Framebuffers framebuffers;
 };
@@ -226,38 +225,6 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
     auto uvCoord = toUvCoord(uvCoordWithTex);
     idCoordToGet.resultUv = glm::vec2(uvCoord.x, uvCoord.y);
   }
-}
-
-void handlePaintingModifiesViewport(UVCoord uvsToPaint){
-  if (!state.shouldPaint || !textureToPaint.has_value()){
-    return;
-  }
-
-  glUseProgram(renderingResources.drawingProgram); 
-
-  glBindTexture(GL_TEXTURE_2D, textureToPaint.value().textureId);
-  int w, h;
-  int miplevel = 0;
-  glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_WIDTH, &w);
-  glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_HEIGHT, &h);
-
-  glViewport(0, 0, w, h);
-
-  glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToPaint.value().textureId, 0);
-
-  shaderSetUniform(renderingResources.drawingProgram, "model",
-    glm::scale(
-      glm::translate(glm::mat4(1.0f), uvToNDC(uvsToPaint)), 
-      glm::vec3(0.01f, 0.01f, 0.01f) * drawParams.scale)
-    
-  );
-  shaderSetUniform(renderingResources.drawingProgram, "opacity", drawParams.opacity);
-  shaderSetUniform(renderingResources.drawingProgram, "tint", drawParams.tint);
-
-  glBindTexture(GL_TEXTURE_2D, activeTextureId());
-  glBindVertexArray(defaultResources.quadVAO);
-  glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCursor){
@@ -1305,10 +1272,6 @@ int main(int argc, char* argv[]){
   modlog("shaders", std::string("selection shader path is ") + selectionShaderPath);
   unsigned int selectionProgram = loadShaderIntoCache("selection", selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl", interface.readFile);
 
-  std::string drawingShaderPath = "./res/shaders/drawing";
-  modlog("shaders", std::string("drawing shader path is: ") + drawingShaderPath);
-  renderingResources.drawingProgram = loadShaderIntoCache("drawing", drawingShaderPath + "/vertex.glsl", drawingShaderPath + "/fragment.glsl", interface.readFile);
-
   std::string blurShaderPath = "./res/shaders/blur";
   modlog("shaders", std::string("blur shader path is: ") + blurShaderPath);
   unsigned int blurProgram = loadShaderIntoCache("blur", blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile);
@@ -1885,14 +1848,6 @@ int main(int argc, char* argv[]){
     }
     renderContext.lightProjview = lightMatrixs;
 
-    glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
-    glEnable(GL_BLEND);
-    glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBlendFunci(1, GL_ONE, GL_ZERO);
-    handlePaintingModifiesViewport(uvCoord);
-
-    glViewport(0, 0, state.resolution.x, state.resolution.y);
-     
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
     PROFILE("PORTAL_RENDERING", 
       portalIdCache = renderPortals(renderContext);

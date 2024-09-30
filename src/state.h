@@ -79,7 +79,6 @@ struct engineState {
   bool showBoneWeight;
   bool useBoneTransform;
   int textureIndex;
-  bool shouldPaint;
   bool enableBloom;
   float bloomThreshold;
   float bloomAmount;

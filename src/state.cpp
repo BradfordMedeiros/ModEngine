@@ -467,7 +467,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.showBoneWeight = false,
   	.useBoneTransform = true,
   	.textureIndex = 0,
-  	.shouldPaint = false,
   	.enableBloom = false, 
     .bloomThreshold = 2.7f,
   	.bloomAmount = 1.f,   
