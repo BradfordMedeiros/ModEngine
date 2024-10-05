@@ -1414,6 +1414,7 @@ int main(int argc, char* argv[]){
     .idAtCoordAsync = idAtCoordAsync,
     .gameobjExists = gameobjExists,
     .prefabId = prefabId,
+    .positionToNdi = positionToNdi,
     .setLogEndpoint = setLogEndpoint,
     .getClipboardString = getClipboardString,
     .setClipboardString = setClipboardString,

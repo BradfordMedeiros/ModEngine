@@ -139,6 +139,8 @@ struct CustomApiBindings {
   bool (*gameobjExists)(objid id);
   std::optional<objid> (*prefabId)(objid id);
 
+  glm::vec3 (*positionToNdi)(glm::vec3 position);
+
   void(*setLogEndpoint)(std::optional<std::function<void(std::string&)>>);
   const char*(*getClipboardString)();
   void (*setClipboardString)(const char*);

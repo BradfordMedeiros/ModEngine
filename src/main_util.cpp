@@ -163,18 +163,14 @@ ManipulatorTools tools {
 
 
 
-glm::vec2 positionToNdi(glm::vec3 position){
+glm::vec3 positionToNdi(glm::vec3 position){
   auto viewTransform = getCameraTransform();
   auto view = renderView(viewTransform.position, viewTransform.rotation);
   auto projection = projectionFromLayer(world.sandbox.layers.at(0));
-  glm::mat4 modelTransform = view;
-  auto transformedValue = modelTransform * glm::vec4(position.x, position.y, position.z, 1.f);
-  auto finalValue = projection * transformedValue;
-  auto dividedValue = glm::vec4(finalValue.x / finalValue.w, finalValue.y / finalValue.w, finalValue.z / finalValue.w, 1.f);
-
-  modlog("waypoint transformedValue1", print(transformedValue));
-  modlog("waypoint transformedValue2", print(finalValue));
-  modlog("waypoint transformedValue2", print(dividedValue));
-
-  return glm::vec2(dividedValue.x, dividedValue.y);
+  auto transformedValue = projection * view * glm::vec4(position.x, position.y, position.z, 1.f);
+  auto dividedValue = glm::vec4(transformedValue.x / transformedValue.w, transformedValue.y / transformedValue.w, transformedValue.z / transformedValue.w, transformedValue.z / glm::abs(transformedValue.w));
+  //modlog("waypoint transformedValue1", print(transformedValue));
+  //modlog("waypoint transformedValue2", print(finalValue));
+  //modlog("waypoint transformedValue2", print(dividedValue));
+  return glm::vec3(dividedValue.x, dividedValue.y, dividedValue.w);
 }
