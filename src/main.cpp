@@ -1299,6 +1299,8 @@ int main(int argc, char* argv[]){
     .listSceneFiles = listSceneFiles,
     .sceneIdByName = sceneIdByName,
     .sceneNameById = sceneNameById,
+    .listObjAndDescInScene = listObjAndDescInScene,
+    .getChildrenIdsAndParent = getChildrenIdsAndParent,
     .rootSceneId = rootSceneId,
     .scenegraph = scenegraph,
     .sendLoadScene = sendLoadScene,

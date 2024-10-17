@@ -229,6 +229,13 @@ std::vector<int32_t> listScenes(std::optional<std::vector<std::string>> tags){
   return filteredIds;
 }
 
+std::vector<objid> listObjAndDescInScene(objid sceneId){
+  return listObjAndDescInScene(world.sandbox, sceneId);
+}
+std::set<objid> getChildrenIdsAndParent(objid id){
+  return getChildrenIdsAndParent(world.sandbox.mainScene, id);
+}
+
 std::vector<ScenegraphDebug> scenegraph(){
   std::vector<ScenegraphDebug> parentToChild;
   auto dotRelations = getDotRelations(world.sandbox, world.objectMapping);
