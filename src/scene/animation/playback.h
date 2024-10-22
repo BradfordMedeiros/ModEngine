@@ -8,7 +8,7 @@
 #include "./animation.h"
 
 void playbackAnimation(
-  Animation animation, 
+  Animation& animation, 
   float currentTime, 
   std::vector<NameAndMeshObjName> meshNameToMeshes, 
   std::function<glm::mat4(std::string, std::string)> getModelMatrix,
@@ -17,8 +17,8 @@ void playbackAnimation(
 );
 
 void playbackAnimationBlend(
-  Animation animation,
-  Animation animation2,
+  Animation& animation,
+  Animation& animation2,
   float currentTime,
   float currentTimeAnimation2,
   float blendFactor,

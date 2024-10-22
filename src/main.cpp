@@ -1351,6 +1351,7 @@ int main(int argc, char* argv[]){
     .listAnimations = listAnimations,
     .playAnimation = playAnimation,
     .stopAnimation = stopAnimation,
+    .setAnimationPose = setAnimationPose,
     .listClips = listSounds,
     .playClip = playSoundState,
     .playClipById = playSoundState,

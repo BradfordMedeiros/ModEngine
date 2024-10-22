@@ -508,6 +508,10 @@ void stopAnimation(int32_t id){
   removeAnimation(world, timings, id);
 }
 
+void setAnimationPose(int32_t id, std::string animationToPlay, float time){
+  setAnimationPose(world, id, animationToPlay, time);
+}
+
 
 bool objIdInVector(std::vector<objid> ids, objid id){
   for (auto compareId : ids){

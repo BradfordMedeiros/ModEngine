@@ -135,6 +135,7 @@ void drawLine2D(glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<gl
 std::vector<std::string> listAnimations(int32_t id);
 void playAnimation(int32_t id, std::string animationToPlay, AnimationType animationType);
 void stopAnimation(int32_t id);
+void setAnimationPose(int32_t id, std::string animationToPlay, float time);
 
 std::vector<std::string> listSounds(int32_t id);
 void playSound(std::string sound);

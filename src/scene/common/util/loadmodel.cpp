@@ -183,7 +183,7 @@ void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeig
   }
 
   if (weighting.size() > size || size != 4){
-    std::cout << "weighting size: " << weighting.size() << ", size: " << size << std::endl;
+    std::cout << "actual weighting size: " << weighting.size() << ", max target size: " << size << std::endl;
     assert(false);
   }
 
@@ -293,12 +293,44 @@ std::string getTexturePath(aiTextureType type, std::string modelPath,  aiMateria
   return relativePath.string();
 }
 
+
+std::string print(std::set<unsigned int>& values){
+  std::string value;
+  for (auto &val : values){
+    value = value + " " + std::to_string(val);
+  }
+  return value;
+}
+
+std::string print(std::vector<BoneWeighting>& bones, BoneInfo& boneInfo){
+  std::string val;
+  for (auto &bone : bones){
+    val = val + " " + boneInfo.bones.at(bone.boneId).name;
+  }
+  return val;
+}
+
+void printBoneWeighting(BoneInfo& boneInfo){
+
+  {
+    for (auto &[vertexId, bones] : boneInfo.vertexBoneWeight){
+      if (bones.size() > 4){
+        std::cout << "printBoneWeighting: too many bones, vertex = " << vertexId << ", num_bones = " << std::to_string(bones.size()) << ", bones = " << print(bones, boneInfo) << std::endl;
+        bones.clear();
+      }
+    }
+  }
+}
+
+
 const bool DUMP_VERTEX_DATA = false;
 MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
    std::vector<unsigned int> indices;
    
    BoneInfo boneInfo = processBones(mesh);
+
+   printBoneWeighting(boneInfo);
 
    std::cout << "loading modelPath: " << modelPath << std::endl;
    for (unsigned int i = 0; i < mesh -> mNumVertices; i++){

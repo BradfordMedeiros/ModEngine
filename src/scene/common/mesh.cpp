@@ -70,7 +70,7 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
 
   for (auto vertex : meshData.vertices){
     for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
-      if (vertex.boneIndexes[i] > 50){
+      if (vertex.boneIndexes[i] >= 100){
         std::cout << "value is: " << vertex.boneIndexes[i] << std::endl;
         assert(false);
       }

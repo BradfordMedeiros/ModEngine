@@ -42,5 +42,6 @@ void updateBonePose(World& world, objid id);
 
 void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay, float initialTime, AnimationType animationType);
 void removeAnimation(World& world, WorldTiming& timings, objid id);
+void setAnimationPose(World& world, objid id, std::string animationToPlay, float time);
 
 #endif

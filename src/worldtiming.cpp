@@ -74,6 +74,38 @@ std::function<void(std::string name, Transformation pose)> scopeSetPose(World& w
 
 bool resetInitialPose = true;
 bool enableBlending = true;
+
+void tickAnimation(World& world, AnimationData& playback, float currentTime){
+  auto meshNameToMeshes = getMeshesForGameobj(world, playback.groupId);
+  if (enableBlending && playback.blendData.has_value()){
+    float timeElapsedBlendStart = currentTime - playback.blendData.value().blendStartTime;
+    float aFactor = glm::min(1.f, timeElapsedBlendStart / 3.5f);
+    // if afactor > 1.f or something like that, could get rid of the old animation value
+    //modassert(false, "blend not yet supported");
+    playbackAnimationBlend(
+      playback.animation,
+      playback.blendData.value().animation, 
+      currentTime - playback.initTime,
+      currentTime - playback.blendData.value().oldAnimationInit, 
+      aFactor,
+      meshNameToMeshes, 
+      scopeGetModelMatrix(world, playback.idScene), 
+      scopeSetPose(world, playback.idScene), 
+      playback.rootname
+    );
+  }else{
+    playbackAnimation(
+      playback.animation, 
+      currentTime - playback.initTime, 
+      meshNameToMeshes, 
+      scopeGetModelMatrix(world, playback.idScene), 
+      scopeSetPose(world, playback.idScene), 
+      playback.rootname
+    );
+  }
+}
+
+
 void tickAnimations(World& world, WorldTiming& timings, float currentTime){
   //std::cout << "animations num active playbacks: " << timings.animations.playbacks.size() << std::endl;
   for (auto &[id, playback] : timings.animations.playbacks){
@@ -84,37 +116,10 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
       modlog("animation", "removed playbacks because of internal group id");
       return;
     }
+
+    tickAnimation(world, playback, currentTime);
     //modlog("animation", "ticking animation for groupid: " + std::to_string(playback.groupId));
-    auto meshNameToMeshes = getMeshesForGameobj(world, playback.groupId);
 
-    if (enableBlending && playback.blendData.has_value()){
-      float timeElapsedBlendStart = currentTime - playback.blendData.value().blendStartTime;
-      float aFactor = glm::min(1.f, timeElapsedBlendStart / 0.5f);
-
-      // if afactor > 1.f or something like that, could get rid of the old animation value
-
-      //modassert(false, "blend not yet supported");
-      playbackAnimationBlend(
-        playback.animation,
-        playback.blendData.value().animation, 
-        currentTime - playback.initTime,
-        currentTime - playback.blendData.value().oldAnimationInit, 
-        aFactor,
-        meshNameToMeshes, 
-        scopeGetModelMatrix(world, playback.idScene), 
-        scopeSetPose(world, playback.idScene), 
-        playback.rootname
-      );
-    }else{
-      playbackAnimation(
-        playback.animation, 
-        currentTime - playback.initTime, 
-        meshNameToMeshes, 
-        scopeGetModelMatrix(world, playback.idScene), 
-        scopeSetPose(world, playback.idScene), 
-        playback.rootname
-      );
-    }
   }
 
 
@@ -229,4 +234,22 @@ void removeAnimation(World& world, WorldTiming& timings, objid id){
   modlog("animation", std::string("removing animation for obj: ") + std::to_string(id));
   auto groupId = getGroupId(world.sandbox, id);
   timings.playbacksToRemove.push_back(groupId);
+}
+
+void setAnimationPose(World& world, objid id, std::string animationToPlay, float time){
+  auto groupId = getGroupId(world.sandbox, id);
+  auto rootname = getGameObject(world, groupId).name;
+  auto animation = getAnimation(world, groupId, animationToPlay).value();
+
+  auto meshNameToMeshes = getMeshesForGameobj(world, groupId);
+  auto idScene = sceneId(world.sandbox, groupId);
+
+  playbackAnimation(
+    animation, 
+    time,
+    meshNameToMeshes, 
+    scopeGetModelMatrix(world, idScene), 
+    scopeSetPose(world, idScene), 
+    rootname
+  );
 }
