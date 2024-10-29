@@ -301,15 +301,14 @@ void shaderSetTextureName(const char* name, unsigned int textureId);
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
   if (world.textures.find(texturepath) != world.textures.end()){
     world.textures.at(texturepath).owners.insert(ownerId);
-    auto texture = world.textures.at(texturepath).texture;
-    shaderSetTextureName(texturepath.c_str(), texture.textureId);
-    return texture;
+    return world.textures.at(texturepath).texture;
   }
   auto texturePath = world.interface.modlayerPath(texturepath);
   if (!fileExists(texturePath) && ownerId != -1){ // root owner for default models etc, should never use default texs
     return loadTextureWorld(world, "./res/models/box/grid.png", ownerId);
   }
   Texture texture = loadTexture(texturePath);
+  shaderSetTextureName(texturepath.c_str(), texture.textureId);
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,

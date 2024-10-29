@@ -1,5 +1,7 @@
 #include "./object_types.h"
 
+void shaderLogDebug(const char* str);
+
 std::map<objid, GameObjectObj> getObjectMapping() {
 	std::map<objid, GameObjectObj> objectMapping;
 	return objectMapping;
@@ -222,8 +224,6 @@ int renderDefaultNode(GLint shaderProgram, bool isSelectionShader, Mesh& mesh){
   return mesh.numTriangles;
 }
 
-
-
 objid selectedId = 0;
 int renderObject(
   GLint shaderProgram,
@@ -245,7 +245,8 @@ int renderObject(
 
   if (meshObj != NULL && !meshObj -> isDisabled && (meshObj -> meshesToRender.size() > 0)){
     int numTriangles = 0;
-    for (auto meshToRender : meshObj -> meshesToRender){
+    for (int x = 0; x < meshObj -> meshesToRender.size(); x++){
+      Mesh& meshToRender = meshObj -> meshesToRender.at(x);
       bool hasBones = false;
       if (meshToRender.bones.size() > 0){
         for (int i = 0; i < 100; i++){
@@ -260,6 +261,7 @@ int renderObject(
       }
 
       setShaderObjectData(shaderProgram, isSelectionShader, hasBones, meshObj -> tint, meshObj -> texture.textureoffset, meshObj -> texture.texturetiling, meshObj -> texture.texturesize, meshObj -> emissionAmount);
+      shaderLogDebug((std::string("draw mesh: ") + meshObj -> meshNames.at(x)).c_str());
       drawMesh(meshToRender, shaderProgram, meshObj -> texture.loadingInfo.textureId, -1, drawPoints, meshObj -> normalTexture.textureId);   
       numTriangles = numTriangles + meshToRender.numTriangles; 
     }

@@ -517,6 +517,7 @@ void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4&& va
 
 #define SHADER_DEBUG_INFO
 
+// https://www.khronos.org/opengl/wiki/Debug_Output
 void shaderStartSection(const char* str){
   #ifdef SHADER_DEBUG_INFO
     glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, str);
@@ -535,9 +536,8 @@ void shaderSetTextureName(const char* name, unsigned int textureId){
 }
 
 void shaderLogDebug(const char* str){
-  #ifdef SHADER_DEBUG_INFO
-    // https://registry.khronos.org/OpenGL-Refpages/gl4/html/glDebugMessageInsert.xhtml
+  #ifdef SHADER_DEBUG_INFO  
     glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0,  GL_DEBUG_SEVERITY_MEDIUM, -1 /* -1 => null terminated string*/, str); 
+    glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_MARKER, 0,  GL_DEBUG_SEVERITY_MEDIUM, -1 /* -1 => null terminated string*/, str); 
   #endif
 }
