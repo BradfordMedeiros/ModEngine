@@ -513,3 +513,31 @@ void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4& val
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4&& value){
   shaderSetUniform(shaderToUse, name, value);
 }
+
+
+#define SHADER_DEBUG_INFO
+
+void shaderStartSection(const char* str){
+  #ifdef SHADER_DEBUG_INFO
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, str);
+  #endif
+}
+void shaderEndSection(){
+  #ifdef SHADER_DEBUG_INFO
+    glPopDebugGroup();
+  #endif
+}
+
+void shaderSetTextureName(const char* name, unsigned int textureId){
+  #ifdef SHADER_DEBUG_INFO
+    glObjectLabel(GL_TEXTURE, textureId, -1, name);
+  #endif
+}
+
+void shaderLogDebug(const char* str){
+  #ifdef SHADER_DEBUG_INFO
+    // https://registry.khronos.org/OpenGL-Refpages/gl4/html/glDebugMessageInsert.xhtml
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0,  GL_DEBUG_SEVERITY_MEDIUM, -1 /* -1 => null terminated string*/, str); 
+  #endif
+}

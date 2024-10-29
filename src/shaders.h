@@ -44,4 +44,9 @@ void shaderSetUniformBool(unsigned int shaderToUse, const char* name, bool&& val
 void shaderSetUniform(unsigned int program, const char* name, glm::mat4& value);
 void shaderSetUniform(unsigned int program, const char* name, glm::mat4&& value);
 
+void shaderStartSection(const char* str);
+void shaderEndSection();
+void shaderLogDebug(const char* str);
+void shaderSetTextureName(const char* name, unsigned int textureId);
+
 #endif 

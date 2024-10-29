@@ -297,10 +297,13 @@ void updatePhysicsBody(World& world, objid id){
   addPhysicsBody(world, id, false);
 }
 
+void shaderSetTextureName(const char* name, unsigned int textureId);
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
   if (world.textures.find(texturepath) != world.textures.end()){
     world.textures.at(texturepath).owners.insert(ownerId);
-    return world.textures.at(texturepath).texture;
+    auto texture = world.textures.at(texturepath).texture;
+    shaderSetTextureName(texturepath.c_str(), texture.textureId);
+    return texture;
   }
   auto texturePath = world.interface.modlayerPath(texturepath);
   if (!fileExists(texturePath) && ownerId != -1){ // root owner for default models etc, should never use default texs

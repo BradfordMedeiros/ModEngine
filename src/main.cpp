@@ -789,17 +789,22 @@ void renderUI(Color pixelColor){
   drawTextNdi("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), uiXOffset, uiYOffset + offsetPerLine * 9, state.fontsize);
   drawTextNdi("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , uiXOffset, uiYOffset + offsetPerLine * 10, state.fontsize);
 
-  drawTextNdi(std::string("animation info: ") + (timePlayback.isPaused() ? "paused" : "playing"), uiXOffset, uiYOffset + offsetPerLine * 11, state.fontsize);
-  drawTextNdi("using animation: " + std::to_string(-1) + " / " + std::to_string(-1) , uiXOffset, uiYOffset + offsetPerLine * 12, state.fontsize);
-  drawTextNdi("using object id: -1" , uiXOffset, uiYOffset + offsetPerLine * 13, state.fontsize);
+  auto idExists = gameobjExists(state.currentHoverIndex);
+  std::string name = idExists ? getGameObjectName(state.currentHoverIndex).value() : "[none]";
+  drawTextNdi("hovered id: " + std::to_string(state.currentHoverIndex) + " - " + name, uiXOffset, uiYOffset + offsetPerLine * 11, state.fontsize);
 
-  drawTextNdi(std::string("triangles: ") + std::to_string(statistics.numTriangles), uiXOffset, uiYOffset + offsetPerLine * 14, state.fontsize);
-  drawTextNdi(std::string("num gameobjects: ") + std::to_string(unwrapStat<int>(statValue(statistics.numObjectsStat))), uiXOffset, uiYOffset + offsetPerLine * 15, state.fontsize);
-  drawTextNdi(std::string("num rigidbodys: ") + std::to_string(unwrapStat<int>(statValue(statistics.rigidBodiesStat))), uiXOffset, uiYOffset + offsetPerLine * 16, state.fontsize);
-  drawTextNdi(std::string("num scenes loaded: ") + std::to_string(unwrapStat<int>(statValue(statistics.scenesLoadedStat))), uiXOffset, uiYOffset + offsetPerLine * 17, state.fontsize);
-  drawTextNdi(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + offsetPerLine * 18, state.fontsize);
-  drawTextNdi(std::string("time: ") + std::to_string(timeSeconds(false)), uiXOffset, uiYOffset + offsetPerLine * 19, state.fontsize);
-  drawTextNdi(std::string("realtime: ") + std::to_string(timeSeconds(true)), uiXOffset, uiYOffset + offsetPerLine * 20, state.fontsize);
+
+  drawTextNdi(std::string("animation info: ") + (timePlayback.isPaused() ? "paused" : "playing"), uiXOffset, uiYOffset + offsetPerLine * 12, state.fontsize);
+  drawTextNdi("using animation: " + std::to_string(-1) + " / " + std::to_string(-1) , uiXOffset, uiYOffset + offsetPerLine * 13, state.fontsize);
+  drawTextNdi("using object id: -1" , uiXOffset, uiYOffset + offsetPerLine * 14, state.fontsize);
+
+  drawTextNdi(std::string("triangles: ") + std::to_string(statistics.numTriangles), uiXOffset, uiYOffset + offsetPerLine * 15, state.fontsize);
+  drawTextNdi(std::string("num gameobjects: ") + std::to_string(unwrapStat<int>(statValue(statistics.numObjectsStat))), uiXOffset, uiYOffset + offsetPerLine * 16, state.fontsize);
+  drawTextNdi(std::string("num rigidbodys: ") + std::to_string(unwrapStat<int>(statValue(statistics.rigidBodiesStat))), uiXOffset, uiYOffset + offsetPerLine * 17, state.fontsize);
+  drawTextNdi(std::string("num scenes loaded: ") + std::to_string(unwrapStat<int>(statValue(statistics.scenesLoadedStat))), uiXOffset, uiYOffset + offsetPerLine * 18, state.fontsize);
+  drawTextNdi(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + offsetPerLine * 19, state.fontsize);
+  drawTextNdi(std::string("time: ") + std::to_string(timeSeconds(false)), uiXOffset, uiYOffset + offsetPerLine * 20, state.fontsize);
+  drawTextNdi(std::string("realtime: ") + std::to_string(timeSeconds(true)), uiXOffset, uiYOffset + offsetPerLine * 21, state.fontsize);
 }
 
 
@@ -1196,7 +1201,7 @@ int main(int argc, char* argv[]){
 
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   //glfwWindowHint(GLFW_DECORATED, false);
   glfwSetErrorCallback(onGLFWEerror);
@@ -1805,13 +1810,17 @@ int main(int argc, char* argv[]){
     updateRenderStages(renderStages, dofInfo);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
-    // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
-    renderWithProgram(renderContext, renderStages.selection);
 
-    shaderSetUniform(renderStages.selection.shader, "projview", ndiOrtho);
-    glDisable(GL_DEPTH_TEST);
-    drawShapeData(lineData, renderStages.selection.shader, ndiOrtho, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
-    glEnable(GL_DEPTH_TEST);
+    PROFILE("SELECTION",
+      // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
+      renderWithProgram(renderContext, renderStages.selection);
+
+      shaderSetUniform(renderStages.selection.shader, "projview", ndiOrtho);
+      glDisable(GL_DEPTH_TEST);
+      drawShapeData(lineData, renderStages.selection.shader, ndiOrtho, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
+      glEnable(GL_DEPTH_TEST);
+
+    )
 
     //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
     auto uvCoordWithTex = getUVCoordAndTextureId(adjustedCoords.x, adjustedCoords.y);
@@ -1880,16 +1889,18 @@ int main(int argc, char* argv[]){
     }
 
     auto screenspaceTextureIds = textureIdsToRender();
-    for (auto userTexture : screenspaceTextureIds){
-      Texture tex {
-        .textureId = userTexture.id,
-      };
-      Texture tex2 {
-        .textureId = userTexture.selectionTextureId,
-      };
-      renderScreenspaceShapes(tex, tex2, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor, userTexture.clearTextureId);
-    }
-    markUserTexturesCleared();  // not really rendering, should pull this out
+    PROFILE("USER-TEXTURES",
+      for (auto userTexture : screenspaceTextureIds){
+        Texture tex {
+          .textureId = userTexture.id,
+        };
+        Texture tex2 {
+          .textureId = userTexture.selectionTextureId,
+        };
+        renderScreenspaceShapes(tex, tex2, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor, userTexture.clearTextureId);
+      }
+      markUserTexturesCleared();  // not really rendering, should pull this out
+    )
 
     LayerInfo& layerInfo = layerByName("");
     float near = layerInfo.nearplane;

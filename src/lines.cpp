@@ -134,18 +134,20 @@ bool textureIdSame(std::optional<unsigned int> lineTexture, std::optional<unsign
 
 
 void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigned int> textureId){
-  for (auto &lineByColor : lineData.lineColors){
-    std::vector<Line> lines;
-    for (auto &line : lineByColor.lines){
-      if (textureIdSame(line.textureId, textureId)){
-        lines.push_back(line.line);
+  PROFILE("drawAllLines",
+    for (auto &lineByColor : lineData.lineColors){
+      std::vector<Line> lines;
+      for (auto &line : lineByColor.lines){
+        if (textureIdSame(line.textureId, textureId)){
+          lines.push_back(line.line);
+        }
+      }
+      if (lines.size() > 0){
+        shaderSetUniform(shaderProgram, "tint", lineByColor.tint);
+        drawLines(lines, lineByColor.linewidth); 
       }
     }
-    if (lines.size() > 0){
-      shaderSetUniform(shaderProgram, "tint", lineByColor.tint);
-      drawLines(lines, lineByColor.linewidth); 
-    }
-  }
+  )
 }
 
 void addShapeData(LineData& lineData, ShapeData shapeData){
@@ -200,6 +202,7 @@ std::vector<int> uniqueZIndexs(LineData& lineData){
 // eg add different shader types to different queues
 void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 ndiOrtho, std::function<FontFamily&(std::optional<std::string>)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram){
   //std::cout << "text number: " << lineData.text.size() << std::endl;
+PROFILE("drawShapeData",
   bool allowShaderOverride = !selectionProgram; // which means that shaders use the geometry of the selection program
 
   std::optional<unsigned int> lastShaderId;
@@ -315,6 +318,7 @@ void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 n
       }
     }
   }
+)
 }
 void disposeTempBufferedData(LineData& lineData){
   removeTempShapeData(lineData);

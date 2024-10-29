@@ -6,6 +6,7 @@
 #include "./scene/sprites/sprites.h"
 #include "./colorselection.h"
 #include "./shaders.h"
+#include "./perf/profiling.h"
 
 struct LineDrawingOptions {
   Line line;

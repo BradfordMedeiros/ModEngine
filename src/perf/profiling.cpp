@@ -58,7 +58,11 @@ void printFrameStack(FrameStackInfo& frame, int depth = 0){
   std::cout << " ]\n";
 }
 
+void shaderStartSection(const char* str);
+void shaderEndSection();
+
 int startProfile(const char* description){
+  shaderStartSection(description);
   if (!shouldProfile){
     return 0;
   }
@@ -85,6 +89,7 @@ int startProfile(const char* description){
   return profiles.size() - 1;
 }
 void stopProfile(int id){
+  shaderEndSection();
   if (!shouldProfile){
     return;
   }
