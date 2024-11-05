@@ -488,6 +488,7 @@ void addSpriteMesh(World& world, std::string meshPath){
 }
 
 void loadModelData(World& world, std::string meshpath, int ownerId){
+  modlog("load model data", meshpath);
   if (world.modelDatas.find(meshpath) != world.modelDatas.end()){
     world.modelDatas.at(meshpath).owners.insert(ownerId);
   }else{
@@ -501,6 +502,24 @@ void loadModelData(World& world, std::string meshpath, int ownerId){
 ModelData modelDataFromCache(World& world,  std::string meshpath, std::string rootname, int ownerId){
   loadModelData(world, meshpath, ownerId);
   ModelDataCore& modelDataCore = world.modelDatas.at(meshpath).modelData;
+  auto modelData = extractModel(modelDataCore, rootname);
+  if (modelData.animations.size() > 0){
+    world.animations[ownerId] = modelData.animations;
+  }
+
+  for (auto [meshId, meshData] : modelData.meshIdToMeshData){
+    auto meshPath = nameForMeshId(meshpath, meshId);
+    loadMeshData(world, meshPath, meshData, ownerId);
+  } 
+  return modelData;
+}
+
+ModelData modelDataFromCacheFromData(World& world, std::string meshpath, std::string rootname, int ownerId, ModelDataCore& modelDataCore){
+  world.modelDatas[meshpath] = ModelDataRef {
+    .owners = { ownerId },
+    .modelData = modelDataCore, 
+  };
+
   auto modelData = extractModel(modelDataCore, rootname);
   if (modelData.animations.size() > 0){
     world.animations[ownerId] = modelData.animations;

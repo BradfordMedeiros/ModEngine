@@ -225,7 +225,23 @@ void emit(World& world, objid id, NewParticleOptions particleOpts){
 
 void createGeneratedMesh(World& world, std::vector<glm::vec3>& face, std::vector<glm::vec3>& points, std::string destMesh){
   auto generatedMesh = generateMesh(face, points);
-  loadMeshData(world, destMesh, generatedMesh, -1); // -1 since this mesh doesn't belong to an object, which it probably should.
+  ModelDataCore modelDataCore {
+    .modelData = ModelData {
+      .meshIdToMeshData = {{ 0, generatedMesh }},
+      .nodeToMeshId = {{ 0, { 0 }}},
+      .childToParent = {},
+      .nodeTransform = {{ 0, Transformation {
+          .position = glm::vec3(0.f, 0.f, 0.f),
+          .scale = glm::vec3(1.f, 1.f, 1.f),
+          .rotation = MOD_ORIENTATION_FORWARD,
+        }}
+      },
+      .names = {{ 0, "test" }},
+      .animations = {},      
+    },
+    .loadedRoot = "test",
+  };
+  modelDataFromCacheFromData(world, destMesh, "testrootname", -1, modelDataCore);
 }
 
 std::vector<TextureAndName> worldTextures(World& world){
