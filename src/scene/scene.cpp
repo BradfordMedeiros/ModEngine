@@ -1320,7 +1320,8 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
 
   setCoreAttr = setAttribute(gameobj, field, value, util);
   bool physicsObjectNeedsRebuild = gameobj.physicsOptions.enabled != physicsEnableInitial;
-  physicsObjectNeedsRebuild = gameobj.physicsOptions.isStatic != physicsStaticInitial;
+  physicsObjectNeedsRebuild = physicsObjectNeedsRebuild || (gameobj.physicsOptions.isStatic != physicsStaticInitial);
+
 
   if (!setCoreAttr){
     SetAttrFlags setAttrFlags { .rebuildPhysics = false };

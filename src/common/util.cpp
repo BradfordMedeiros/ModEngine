@@ -700,6 +700,10 @@ std::string print(AttributeValue& value){
   if (attrFloatValue != NULL){
     return std::to_string(*attrFloatValue) + "[float]";
   }
+  auto attrVec2Value = std::get_if<glm::vec2>(&value);
+  if (attrVec2Value != NULL){
+    return print(*attrVec2Value) + "[vec2]";
+  }
   auto attrVec3Value = std::get_if<glm::vec3>(&value);
   if (attrVec3Value != NULL){
     return print(*attrVec3Value) + "[vec3]";
