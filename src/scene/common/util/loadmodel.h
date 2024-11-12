@@ -40,6 +40,7 @@ struct ModelData {
   std::map<int32_t, int32_t> childToParent;
   std::map<int32_t, Transformation> nodeTransform;
   std::map<int32_t, std::string> names;
+  std::set<int32_t> bones;
   std::vector<Animation> animations;
 };
 

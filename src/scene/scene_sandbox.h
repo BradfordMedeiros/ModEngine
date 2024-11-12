@@ -115,7 +115,8 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
   std::map<objid, std::string> names, 
   std::map<objid, GameobjAttributes> additionalFields,
   std::function<objid()> getNewObjectId,
-  std::function<std::set<std::string>(std::string&)> getObjautoserializerFields
+  std::function<std::set<std::string>(std::string&)> getObjautoserializerFields,
+  std::set<objid> boneIds
 );
 
 void makeParent(SceneSandbox& sandbox, objid child, objid parent);

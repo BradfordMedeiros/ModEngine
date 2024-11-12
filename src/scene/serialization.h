@@ -42,7 +42,8 @@ struct GameObject {
   std::string script;
   std::string shader;
   bool netsynchronize;
-  
+  bool isBone;
+
   GameobjAttributes additionalAttr;
 };
 
@@ -82,6 +83,6 @@ bool setAttribute(GameObject& gameobj, const char* field, AttributeValue value, 
 GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes, std::set<std::string>& autoserializerFields);
 
 std::optional<objid> objIdFromAttribute(GameobjAttributes& attr);
-GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes, std::set<std::string> objautoserializerFields);
+GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes, std::set<std::string> objautoserializerFields, bool isBone);
 
 #endif

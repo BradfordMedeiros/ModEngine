@@ -219,7 +219,7 @@ void setShaderObjectData(GLint shaderProgram, bool isSelectionShader, bool hasBo
 int renderDefaultNode(GLint shaderProgram, bool isSelectionShader, Mesh& mesh){
   // Transformation getTransformationFromMatrix(glm::mat4 matrix){
   // unscale this model matrix
-  setShaderObjectData(shaderProgram, isSelectionShader, mesh.bones.size() > 0, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f));
+  setShaderObjectData(shaderProgram, isSelectionShader, mesh.bones.size() > 0, glm::vec4(1.f, 1.f, 0.f, 1.f), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f));
   drawMesh(mesh, shaderProgram);
   return mesh.numTriangles;
 }
@@ -235,10 +235,9 @@ int renderObject(
   unsigned int navmeshTexture,
   glm::mat4 model,
   bool drawPoints,
-  std::function<int(GLint, objid, std::string, unsigned int, AlignType, TextWrap, TextVirtualization, UiTextCursor, std::string, bool)> drawWord,
-  std::function<int(glm::vec3)> drawSphere,
   DefaultMeshes& defaultMeshes,
-  bool selectionMode
+  bool selectionMode,
+  RenderObjApi api
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -268,10 +267,10 @@ int renderObject(
     return numTriangles;
   }
 
+
   if (meshObj != NULL && (meshObj -> meshesToRender.size() > 0) && (showDebugMask & 0b1)) {
-    setShaderObjectData(shaderProgram, isSelectionShader, false, glm::vec4(1.f, 1.f, 1.f, 1.f), meshObj -> texture.textureoffset, meshObj -> texture.texturetiling, meshObj -> texture.texturesize, meshObj -> emissionAmount);
-    drawMesh(*defaultMeshes.nodeMesh, shaderProgram, meshObj -> texture.loadingInfo.textureId);    
-    return defaultMeshes.nodeMesh -> numTriangles;
+    //api.drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 100.f, 0.f), glm::vec4(1.f, 0.f, 0.f, 1.f));
+    return renderDefaultNode(shaderProgram, isSelectionShader, *defaultMeshes.nodeMesh);
   }
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
@@ -363,7 +362,7 @@ int renderObject(
   auto textObj = std::get_if<GameObjectUIText>(&toRender);
   if (textObj != NULL){
     setShaderObjectData(shaderProgram, isSelectionShader, false, textObj -> tint, glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f));   
-    return drawWord(shaderProgram, id, textObj -> value, 1000.f /* 1000.f => -1,1 range for each quad */, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor, textObj -> fontFamily, selectionMode);
+    return api.drawWord(shaderProgram, id, textObj -> value, 1000.f /* 1000.f => -1,1 range for each quad */, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor, textObj -> fontFamily, selectionMode);
   }
 
   auto prefabObj = std::get_if<GameObjectPrefab>(&toRender);

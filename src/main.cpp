@@ -589,6 +589,14 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 
     if (layer.visible && id != 0){
       //std::cout << "render object: " << getGameObject(world, id).name << std::endl;
+      RenderObjApi api {
+        .drawLine = interface.drawLine,
+        .drawSphere = [&modelMatrix, &newShader](glm::vec3 pos) -> int {
+          shaderSetUniform(newShader, "model", glm::translate(modelMatrix, pos));
+          return drawSphere();
+        },
+        .drawWord = drawWord,
+      };
       auto trianglesDrawn = renderObject(
         newShader, 
         newShader == renderStages.selection.shader,
@@ -599,13 +607,9 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
         state.navmeshTextureId.has_value() ? state.navmeshTextureId.value() : -1,
         modelMatrix,
         state.drawPoints,
-        drawWord,
-        [&modelMatrix, &newShader](glm::vec3 pos) -> int {
-          shaderSetUniform(newShader, "model", glm::translate(modelMatrix, pos));
-          return drawSphere();
-        },
         defaultResources.defaultMeshes,
-        textBoundingOnly
+        textBoundingOnly,
+        api
       );
       numTriangles = numTriangles + trianglesDrawn;
     }

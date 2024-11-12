@@ -183,12 +183,14 @@ void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeig
   }
 
   if (weighting.size() > size || size != 4){
-    std::cout << "actual weighting size: " << weighting.size() << ", max target size: " << size << std::endl;
-    assert(false);
+    std::cout << "printBoneWeighting actual weighting size: " << weighting.size() << ", max target size: " << size << std::endl;
+    //std::cout << "actual weighting size: " << weighting.size() << ", max target size: " << size << std::endl;
+    //assert(false);
   }
 
   for (int i = 0; i < size; i++){
     if (i < weighting.size()){
+      modlog("Animation weighting size", std::to_string(weighting.size()));
       auto weight = weighting.at(i);
       indices[i] = weight.boneId;
       weights[i] = weight.weight;
@@ -316,7 +318,7 @@ void printBoneWeighting(BoneInfo& boneInfo){
     for (auto &[vertexId, bones] : boneInfo.vertexBoneWeight){
       if (bones.size() > 4){
         std::cout << "printBoneWeighting: too many bones, vertex = " << vertexId << ", num_bones = " << std::to_string(bones.size()) << ", bones = " << print(bones, boneInfo) << std::endl;
-        bones.clear();
+        //modassert(false, "too many bones");
       }
     }
   }
@@ -329,6 +331,7 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<unsigned int> indices;
    
    BoneInfo boneInfo = processBones(mesh);
+   modlog("Animation bone size", std::to_string(boneInfo.bones.size()));
 
    printBoneWeighting(boneInfo);
 
@@ -562,12 +565,17 @@ ModelDataCore loadModelCore(std::string modelPath){
    auto animations = processAnimations(scene);
 
    int localNodeId = -1;
+   std::set<std::string> boneNames;
    processNode(scene -> mRootNode, localNodeId, &localNodeId, 
-    [&scene, modelPath, &meshIdToMeshData, &nodeToMeshId](int nodeId, int meshId) -> void {
+    [&scene, modelPath, &meshIdToMeshData, &nodeToMeshId, &boneNames](int nodeId, int meshId) -> void {
       // load mesh
       MeshData meshData = processMesh(scene -> mMeshes[meshId], scene, modelPath);
       nodeToMeshId[nodeId].push_back(meshId);
       meshIdToMeshData[meshId] = meshData;
+      
+      for (auto &bone : meshData.bones){
+        boneNames.insert(bone.name);
+      }
     },
     [&nodeTransform, &fullnodeTransform, &names, &nodeToMeshId](std::string name, int nodeId, Transformation& trans, glm::mat4 fullTransform, int depth) -> void {
       // add node
@@ -591,6 +599,14 @@ ModelDataCore loadModelCore(std::string modelPath){
    assert(names.size() ==  nodeToMeshId.size());
    assertAllNamesUnique(names);
 
+   std::set<int32_t> boneIds;
+   for (auto &[id, name] : names){
+      if (boneNames.count(name) > 0){
+        boneIds.insert(id);
+      }
+   }
+
+   modlog("found bone ids: ", print(boneIds));
    ModelDataCore coreModelData {
       .modelData = ModelData {
         .meshIdToMeshData = meshIdToMeshData,
@@ -598,6 +614,7 @@ ModelDataCore loadModelCore(std::string modelPath){
         .childToParent = childToParent,
         .nodeTransform = nodeTransform,
         .names = names,
+        .bones = boneIds,
         .animations = animations,
       },
       .loadedRoot = scene -> mRootNode -> mName.C_Str(),

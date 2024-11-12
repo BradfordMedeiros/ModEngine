@@ -2,7 +2,7 @@
 
 std::string getDotInfoForNode(DotInfo& info){
   return std::string("\"") + info.name + "(id: " + std::to_string(info.id) + ", sceneId:" + std::to_string(info.sceneId) + ", " + "groupId: " + std::to_string(info.groupId) + 
-  ") pos: " + print(info.position) + " scale: " + print(info.scale) +  " rot: " + print(info.rotation) + 
+  ") pos: " + print(info.position) + " scale: " + print(info.scale) +  " rot: " + print(info.rotation) + " bone = " + std::string(info.isBone ? "true" : "false") +
   " meshes: [" + join(info.meshes, ' ') + "]\"";
 }
 
@@ -20,6 +20,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
       .position = childObj.transformation.position,
       .scale = childObj.transformation.scale,
       .rotation = childObj.transformation.rotation, 
+      .isBone = childObj.isBone,
       .meshes = objectMappingExists ? getMeshNames(objectMapping, id) : std::vector<std::string>{},
     };
     if (id == 0){
@@ -42,7 +43,8 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
       .groupId = parentObjH.groupId,
       .position = parentObj.transformation.position,
       .scale = parentObj.transformation.scale,
-      .rotation = parentObj.transformation.rotation, 
+      .rotation = parentObj.transformation.rotation,
+      .isBone = childObj.isBone,
       .meshes = parentObjectMappingExists ? getMeshNames(objectMapping, parentId) : std::vector<std::string>{},
     };
     dotRelations.push_back(DotInfos{

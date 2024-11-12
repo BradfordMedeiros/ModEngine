@@ -152,6 +152,12 @@ struct DefaultMeshes {
   Mesh* defaultCrosshairSprite;
 };
 
+struct RenderObjApi {
+  std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine;
+  std::function<int(glm::vec3)> drawSphere;
+  std::function<int(GLint, objid, std::string, unsigned int, AlignType, TextWrap, TextVirtualization, UiTextCursor, std::string, bool)> drawWord;
+};
+
 int renderObject(
   GLint shaderProgram,
   bool isSelectionShader,
@@ -162,10 +168,9 @@ int renderObject(
   unsigned int navmeshTexture,
   glm::mat4 model,
   bool drawPoints,
-  std::function<int(GLint, objid, std::string, unsigned int, AlignType, TextWrap, TextVirtualization, UiTextCursor, std::string, bool)> drawWord,
-  std::function<int(glm::vec3)> drawSphere,
   DefaultMeshes& defaultMeshes,
-  bool selectionMode
+  bool selectionMode,
+  RenderObjApi api
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);

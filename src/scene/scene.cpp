@@ -873,7 +873,8 @@ void addObjectToWorld(
         modelData.names, 
         additionalFields,    
         getId,
-        getObjautoserializerFields
+        getObjautoserializerFields,
+        modelData.bones
       );
       for (auto &[name, objAttr] : newSerialObjs){
         addObjectToWorld(world, sceneId, objAttr.id, name, getId, objAttr.attr, submodelAttributes);
@@ -1121,7 +1122,7 @@ void createObjectForScene(World& world, objid sceneId, std::string& name, AttrCh
   objid idToAdd = idAttr.has_value() ? idAttr.value() : getUniqueObjId();
 
   GameObjPair gameobjPair{
-    .gameobj = gameObjectFromFields(name, idToAdd, attributes, getObjautoserializerFields(name)),
+    .gameobj = gameObjectFromFields(name, idToAdd, attributes, getObjautoserializerFields(name), false),
   };
   std::vector<objid> idsAdded = { gameobjPair.gameobj.id }; 
   auto getId = createGetUniqueObjId(idsAdded);

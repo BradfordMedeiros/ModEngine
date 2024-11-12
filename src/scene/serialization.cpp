@@ -478,7 +478,7 @@ std::optional<objid> objIdFromAttribute(GameobjAttributes& attr){
   return std::atoi(strValue -> c_str());
 }
 
-GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes, std::set<std::string> objautoserializerFields){
+GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes, std::set<std::string> objautoserializerFields, bool isBone){
   GameObject object = { .id = id, .name = name };
   createAutoSerialize((char*)&object, gameobjSerializer, attributes);
 
@@ -493,6 +493,7 @@ GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes at
   }
 
   object.additionalAttr = getAdditionalAttr(attributes, autoserializerFields);
+  object.isBone = isBone;
   return object;
 }
 

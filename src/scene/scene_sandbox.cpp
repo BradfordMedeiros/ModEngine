@@ -51,7 +51,7 @@ SceneDeserialization createSceneFromParsedContent(
     std::string value = name;
     auto idValue = objIdFromAttribute(attrWithChildren.attr);
     objid id = idValue.has_value() ? idValue.value() : getNewObjectId();
-    gameobjs[value] = gameObjectFromFields(value, id, attrWithChildren.attr, getObjautoserializerFields(value));
+    gameobjs[value] = gameObjectFromFields(value, id, attrWithChildren.attr, getObjautoserializerFields(value), false);
   }
 
   scene.sceneToNameToId[sceneId] = {};
@@ -162,7 +162,8 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
   std::map<objid, std::string> names,
   std::map<objid, GameobjAttributes> additionalFields,
   std::function<objid()> getNewObjectId,
-  std::function<std::set<std::string>(std::string&)> getObjautoserializerFields
+  std::function<std::set<std::string>(std::string&)> getObjautoserializerFields,
+  std::set<objid> boneIds
 ){
   Scene& scene = sandbox.mainScene; 
   std::vector<LayerInfo>& layers = sandbox.layers;
@@ -185,7 +186,8 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
     };
 
     auto name = names.at(nodeId);
-    auto gameobj = gameObjectFromFields(name, id, defaultAttributesForMultiObj(transform, rootObj, additionalFields.at(nodeId)), getObjautoserializerFields(name));
+    auto isBone = boneIds.count(nodeId) > 0;
+    auto gameobj = gameObjectFromFields(name, id, defaultAttributesForMultiObj(transform, rootObj, additionalFields.at(nodeId)), getObjautoserializerFields(name), isBone);
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
 
     modassert(names.at(nodeId) == gameobj.name, "names do not match");
@@ -388,7 +390,7 @@ SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std
   std::sort(std::begin(layers), std::end(layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
 
   std::string name = "root";
-  auto rootObj = gameObjectFromFields(name, 0, GameobjAttributes {}, getObjautoserializerFields(name)); 
+  auto rootObj = gameObjectFromFields(name, 0, GameobjAttributes {}, getObjautoserializerFields(name), false); 
   auto rootObjId = sandboxAddToScene(mainScene, 0, std::nullopt, rootObj);
 
   SceneSandbox sandbox {

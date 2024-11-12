@@ -35,7 +35,6 @@ struct Mesh {
   int numTriangles;
   int numVertices;  // if this is < 0, invalid don't depend on
   int numIndices;   // if this is < 0, invalid don't depend on
-
   //std::vector<Vertex> debugVertexs;
 };
 
