@@ -17,46 +17,6 @@ void drawCube(float width, float height, float depth){
   drawLines(allLines);
 }
 
-int drawSphere(){                  // lots of repeat code here, should generalize
-  static unsigned int resolution = 30;
-  std::vector<Line> allLines;
-
-  float lastX  = 1;
-  float lastY = 0;
-  for (unsigned int i = 1; i <= resolution;  i++){
-    float radianAngle = i * ((2 * M_PI) / resolution);
-    float x = cos(radianAngle);
-    float y = sin(radianAngle);
-    allLines.push_back(Line{ .fromPos = glm::vec3(lastX, lastY, 0), .toPos = glm::vec3(x, y, 0) });
-    lastX = x;
-    lastY = y;
-  }
-  
-  lastX  = 1;
-  lastY = 0;
-  for (unsigned int i = 1; i <= resolution;  i++){
-    float radianAngle = i * ((2 * M_PI) / resolution);
-    float x = cos(radianAngle);
-    float y = sin(radianAngle);
-    allLines.push_back(Line{ .fromPos = glm::vec3(lastX, 0, lastY), .toPos = glm::vec3(x, 0, y) });
-    lastX = x;
-    lastY = y;
-  }
-
-  lastX  = 1;
-  lastY = 0;
-  for (unsigned int i = 1; i <= resolution;  i++){
-    float radianAngle = i * ((2 * M_PI) / resolution);
-    float x = cos(radianAngle);
-    float y = sin(radianAngle);
-    allLines.push_back(Line{ .fromPos = glm::vec3(0, lastX, lastY), .toPos = glm::vec3(0, x, y) });
-    lastX = x;
-    lastY = y;
-  }
-
-  return drawLines(allLines);
-}
-
 void applyOrientationToLines(std::vector<Line>& allLines, std::optional<glm::quat> orientation){
   if (!orientation.has_value()){
     return;
@@ -177,4 +137,44 @@ void drawCoordinateSystem(float size){
   allLines.push_back(Line { .fromPos = glm::vec3(0.f, -1.f * size, 0.f), .toPos = glm::vec3(0.f, 1.f * size, 0.f) });
   allLines.push_back(Line { .fromPos = glm::vec3(0.f, 0.f, -1.f * size), .toPos = glm::vec3(0.f, 0.f, 1.f * size) });
   drawLines(allLines);
+}
+
+std::vector<Line> drawSphere(){
+  static unsigned int resolution = 30;
+  std::vector<Line> allLines;
+
+  float lastX  = 1;
+  float lastY = 0;
+  for (unsigned int i = 1; i <= resolution;  i++){
+    float radianAngle = i * ((2 * M_PI) / resolution);
+    float x = cos(radianAngle);
+    float y = sin(radianAngle);
+    allLines.push_back(Line{ .fromPos = glm::vec3(lastX, lastY, 0), .toPos = glm::vec3(x, y, 0) });
+    lastX = x;
+    lastY = y;
+  }
+  
+  lastX  = 1;
+  lastY = 0;
+  for (unsigned int i = 1; i <= resolution;  i++){
+    float radianAngle = i * ((2 * M_PI) / resolution);
+    float x = cos(radianAngle);
+    float y = sin(radianAngle);
+    allLines.push_back(Line{ .fromPos = glm::vec3(lastX, 0, lastY), .toPos = glm::vec3(x, 0, y) });
+    lastX = x;
+    lastY = y;
+  }
+
+  lastX  = 1;
+  lastY = 0;
+  for (unsigned int i = 1; i <= resolution;  i++){
+    float radianAngle = i * ((2 * M_PI) / resolution);
+    float x = cos(radianAngle);
+    float y = sin(radianAngle);
+    allLines.push_back(Line{ .fromPos = glm::vec3(0, lastX, lastY), .toPos = glm::vec3(0, x, y) });
+    lastX = x;
+    lastY = y;
+  }
+
+  return allLines;
 }

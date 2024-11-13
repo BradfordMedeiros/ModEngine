@@ -21,4 +21,5 @@ glm::vec3 getTintIfSelected(bool isSelected);
 float exposureAmount();
 glm::vec3 positionToNdi(glm::vec3 position);
 
+
 #endif

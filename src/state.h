@@ -27,6 +27,7 @@ struct engineState {
   bool enablePhysicsDebug;
   bool visualizeNormals;
   bool showDebug;
+  bool showBones;
   int showDebugMask;
   bool isRotateSelection;
   bool selectionDisabled;

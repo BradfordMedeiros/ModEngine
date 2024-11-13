@@ -301,22 +301,20 @@ std::vector<objid> listObjAndDescInScene(SceneSandbox& sandbox, objid sceneId){
 struct traversalData {
   objid id;
   glm::mat4 modelMatrix;
-  glm::mat4 parentMatrix;
 };
-void traverseSandboxByLayer(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, LayerInfo&, std::string)> onObject){
+void traverseSandboxByLayer(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, LayerInfo&, std::string)> onObject){
   std::vector<traversalData> datum;
   for (auto &[id, transformCacheElement] : sandbox.mainScene.absoluteTransforms){
     datum.push_back(traversalData{
       .id = id,
       .modelMatrix = matrixFromComponents(transformCacheElement.transform),
-      .parentMatrix = glm::mat4(1.f),
     });
   }
   for (auto layer : sandbox.layers){      // @TODO could organize this before to not require pass on each frame
     for (auto data : datum){
       auto gameobject = sandbox.mainScene.idToGameObjects.at(data.id);
       if (gameobject.layer == layer.name){
-        onObject(data.id, data.modelMatrix, data.parentMatrix, layer, gameobject.shader);
+        onObject(data.id, data.modelMatrix, layer, gameobject.shader);
       }
     }  
   }

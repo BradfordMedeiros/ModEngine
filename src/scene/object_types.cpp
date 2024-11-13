@@ -224,6 +224,17 @@ int renderDefaultNode(GLint shaderProgram, bool isSelectionShader, Mesh& mesh){
   return mesh.numTriangles;
 }
 
+glm::vec4 getAlternatingColor(){
+  static int index = 0;
+  static std::vector<glm::vec4> colors = { 
+    glm::vec4(1.f, 0.f, 0.f, 1.f), 
+    glm::vec4(0.f, 1.f, 0.f, 1.f), 
+    glm::vec4(0.f, 0.f, 1.f, 1.f), 
+  };
+  index = (index + 1) % 3;
+  return colors.at(index);
+}
+
 objid selectedId = 0;
 int renderObject(
   GLint shaderProgram,
@@ -237,6 +248,7 @@ int renderObject(
   bool drawPoints,
   DefaultMeshes& defaultMeshes,
   bool selectionMode,
+  bool drawBones,
   RenderObjApi api
 ){
   GameObjectObj& toRender = mapping.at(id);
@@ -268,6 +280,16 @@ int renderObject(
   }
 
 
+  if (drawBones && api.isBone(id)){
+    auto transform = getTransformationFromMatrix(model);
+    auto parentId = api.getParentId(id);
+    if (parentId.has_value()){
+      auto boneTransform = api.getTransform(id);
+      auto parentTransform = api.getTransform(parentId.value());
+      api.drawLine(boneTransform.position, parentTransform.position, getAlternatingColor());
+      api.drawSphere(boneTransform.position);
+    }
+  }
   if (meshObj != NULL && (meshObj -> meshesToRender.size() > 0) && (showDebugMask & 0b1)) {
     //api.drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 100.f, 0.f), glm::vec4(1.f, 0.f, 0.f, 1.f));
     return renderDefaultNode(shaderProgram, isSelectionShader, *defaultMeshes.nodeMesh);

@@ -255,6 +255,7 @@ std::vector<ObjectStateMapping> mapping = {
   },
 
   simpleBoolSerializer("editor", "debug", offsetof(engineState, showDebug)),
+  simpleBoolSerializer("editor", "showbones", offsetof(engineState, showBones)),
   simpleIntSerializer("editor", "debugmask", offsetof(engineState, showDebugMask)),
   simpleBoolSerializer("diffuse", "enabled", offsetof(engineState, enableDiffuse)),
   simpleBoolSerializer("specular", "enabled", offsetof(engineState, enableSpecular)),
@@ -422,6 +423,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .enablePhysicsDebug = false,
 		.visualizeNormals = false,
     .showDebug = false,
+    .showBones = false,
     .showDebugMask = 0,
 		.isRotateSelection = false,
     .selectionDisabled = false,

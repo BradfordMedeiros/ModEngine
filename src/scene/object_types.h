@@ -154,8 +154,11 @@ struct DefaultMeshes {
 
 struct RenderObjApi {
   std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine;
-  std::function<int(glm::vec3)> drawSphere;
+  std::function<void(glm::vec3)> drawSphere;
   std::function<int(GLint, objid, std::string, unsigned int, AlignType, TextWrap, TextVirtualization, UiTextCursor, std::string, bool)> drawWord;
+  std::function<bool(objid)> isBone;
+  std::function<std::optional<objid>(objid)> getParentId;
+  std::function<Transformation(objid)> getTransform;
 };
 
 int renderObject(
@@ -170,6 +173,7 @@ int renderObject(
   bool drawPoints,
   DefaultMeshes& defaultMeshes,
   bool selectionMode,
+  bool drawBones,
   RenderObjApi api
 );
 

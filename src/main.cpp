@@ -537,7 +537,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   int numTriangles = 0;
 
   std::optional<GLint> lastShaderId = std::nullopt;
-  traverseSandboxByLayer(world.sandbox, [&world, shaderProgram, allowShaderOverride, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition, textBoundingOnly, &lastShaderId](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
+  traverseSandboxByLayer(world.sandbox, [&world, shaderProgram, allowShaderOverride, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition, textBoundingOnly, &lastShaderId](int32_t id, glm::mat4 modelMatrix, LayerInfo& layer, std::string shader) -> void {
     modassert(id >= 0, "unexpected id render world");
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
@@ -592,10 +592,23 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       RenderObjApi api {
         .drawLine = interface.drawLine,
         .drawSphere = [&modelMatrix, &newShader](glm::vec3 pos) -> int {
-          shaderSetUniform(newShader, "model", glm::translate(modelMatrix, pos));
-          return drawSphere();
+          auto sphereLines = drawSphere();
+          const float sphereScale = 0.05f;
+          for (auto &line : sphereLines){
+            // can use addShaepData next cycle with selection id if we want to be able to drag these around
+            interface.drawLine(line.fromPos * sphereScale + pos, line.toPos * sphereScale + pos, glm::vec4(0.f, 0.f, 1.f, 1.f));
+          }
         },
         .drawWord = drawWord,
+        .isBone = [&world](objid id) -> bool {
+          return getGameObject(world.sandbox, id).isBone;
+        },
+        .getParentId = [&world](objid id) -> std::optional<objid> {
+          return getGameObjectH(world.sandbox, id).parentId;
+        },
+        .getTransform = [&world](objid id) -> Transformation {
+          return fullTransformation(world.sandbox, id);
+        },
       };
       auto trianglesDrawn = renderObject(
         newShader, 
@@ -609,6 +622,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
         state.drawPoints,
         defaultResources.defaultMeshes,
         textBoundingOnly,
+        state.showBones,
         api
       );
       numTriangles = numTriangles + trianglesDrawn;
