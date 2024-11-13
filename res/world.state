@@ -7,9 +7,12 @@
 # nav     =  0b 1000000
 # soe more options in object_types.cpp renderObject
 editor:debug:false
+
+### why this debug mask nonsense?  Why not just seperate state options for each?
 #editor:debugmask:126  # this & the above number determines if the debug object should show
 
 editor:debugmask:8
+editor:showbones:true
 
 physics:enabled:true
 physics:debug:false
@@ -45,7 +48,7 @@ fog:maxcutoff:0.9999
 
 ### Effects ###
 #dof:state:enabled
-skybox:texture:./res/textures/skyboxs/sky/
+skybox:texture:./res/textures/skyboxs/desert/
 skybox:color:1 1 1
 skybox:enable:true
 ###############################
@@ -94,7 +97,7 @@ editor:snapangle:10
 editor:snaptranslate:1.7
 
 
-debug:textoffset:0 -1.2
+debug:textoffset:0 -1.0
 
 editor:groupselection:true
 
