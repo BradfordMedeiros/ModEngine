@@ -44,7 +44,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
       .position = parentObj.transformation.position,
       .scale = parentObj.transformation.scale,
       .rotation = parentObj.transformation.rotation,
-      .isBone = childObj.isBone,
+      .isBone = parentObj.isBone,
       .meshes = parentObjectMappingExists ? getMeshNames(objectMapping, parentId) : std::vector<std::string>{},
     };
     dotRelations.push_back(DotInfos{
