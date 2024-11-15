@@ -95,6 +95,8 @@ std::string print(std::vector<objid>& values);
 std::string print(std::optional<std::string> value);
 std::string print(std::set<objid> id);
 std::string print(std::vector<bool>& values);
+std::string print(std::set<std::string>& values);
+std::string print(std::set<unsigned int>& values);
 std::string print(std::optional<objid> id);
 std::string print(void*);
 

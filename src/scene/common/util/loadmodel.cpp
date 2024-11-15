@@ -56,7 +56,6 @@ std::vector<Animation> processAnimations( const aiScene* scene){
   return animations;
 }
 
-
 aiMatrix4x4 glmMatrixToAi(glm::mat4 mat){
   return aiMatrix4x4(
     mat[0][0],mat[0][1],mat[0][2],mat[0][3],
@@ -264,7 +263,6 @@ void renameRootNode(ModelData& data, std::string rootname, std::string realrootn
   }
 }
 
-
 void dumpVerticesData(std::string modelPath, MeshData& model){
   for (auto vertex : model.vertices){
     std::string vertexInfo = "";
@@ -295,15 +293,6 @@ std::string getTexturePath(aiTextureType type, std::string modelPath,  aiMateria
   return relativePath.string();
 }
 
-
-std::string print(std::set<unsigned int>& values){
-  std::string value;
-  for (auto &val : values){
-    value = value + " " + std::to_string(val);
-  }
-  return value;
-}
-
 std::string print(std::vector<BoneWeighting>& bones, BoneInfo& boneInfo){
   std::string val;
   for (auto &bone : bones){
@@ -313,13 +302,10 @@ std::string print(std::vector<BoneWeighting>& bones, BoneInfo& boneInfo){
 }
 
 void printBoneWeighting(BoneInfo& boneInfo){
-
-  {
-    for (auto &[vertexId, bones] : boneInfo.vertexBoneWeight){
-      if (bones.size() > 4){
-        std::cout << "printBoneWeighting: too many bones, vertex = " << vertexId << ", num_bones = " << std::to_string(bones.size()) << ", bones = " << print(bones, boneInfo) << std::endl;
-        //modassert(false, "too many bones");
-      }
+  for (auto &[vertexId, bones] : boneInfo.vertexBoneWeight){
+    if (bones.size() > 4){
+      std::cout << "printBoneWeighting: too many bones, vertex = " << vertexId << ", num_bones = " << std::to_string(bones.size()) << ", bones = " << print(bones, boneInfo) << std::endl;
+      //modassert(false, "too many bones");
     }
   }
 }
@@ -595,16 +581,20 @@ ModelDataCore loadModelCore(std::string modelPath){
     glm::mat4(1.f)
   );
  
-   assert(nodeToMeshId.size() == nodeTransform.size());
-   assert(names.size() ==  nodeToMeshId.size());
-   assertAllNamesUnique(names);
+  assert(nodeToMeshId.size() == nodeTransform.size());
+  assert(names.size() ==  nodeToMeshId.size());
+  assertAllNamesUnique(names);
 
-   std::set<int32_t> boneIds;
-   for (auto &[id, name] : names){
-      if (boneNames.count(name) > 0){
-        boneIds.insert(id);
-      }
-   }
+  modlog("process bones: ", print(boneNames));
+
+  std::set<int32_t> boneIds;
+  for (auto &[id, name] : names){
+    if (boneNames.count(name) > 0){
+      boneIds.insert(id);
+    }else if (name.find("mixamorig") != std::string::npos || name.find("Armature") != std::string::npos){ // obviously not good
+      boneIds.insert(id);
+    }
+  }
 
    modlog("found bone ids: ", print(boneIds));
    ModelDataCore coreModelData {

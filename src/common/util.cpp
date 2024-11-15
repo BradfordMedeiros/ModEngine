@@ -250,6 +250,20 @@ std::string print(std::vector<std::string>& values){
   stream << "]";
   return stream.str();
 }
+std::string print(std::set<std::string>& values){
+  std::string value;
+  for (auto &val : values){
+    value = value + " " + val;
+  }
+  return value;
+}
+std::string print(std::set<unsigned int>& values){
+  std::string value;
+  for (auto &val : values){
+    value = value + " " + std::to_string(val);
+  }
+  return value;
+}
 
 std::string print(std::vector<objid>& values){
   std::stringstream stream;
