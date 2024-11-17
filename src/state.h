@@ -76,6 +76,7 @@ struct engineState {
   bool enablePBR;
   bool enableAttenuation;
   bool enableVoxelLighting;
+  bool visualizeVoxelLightingCells;
   bool enableShadows;
   float shadowIntensity;
   bool showBoneWeight;

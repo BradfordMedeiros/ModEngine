@@ -49,26 +49,22 @@ uniform float lightsmaxangle[MAX_LIGHTS];
 uniform float lightsangledelta[MAX_LIGHTS];
 uniform bool lightsisdir[MAX_LIGHTS];
 
-uniform vec3 voxellights[8];
-uniform int voxelcellwidth;
-uniform bool enableVoxelLighting;
-
-//uniform mat4 lightsprojview[MAX_LIGHTS];
-
 uniform vec3 ambientAmount;
 uniform vec3 emissionAmount;
 uniform float discardTexAmount;
 uniform float bloomThreshold;
 
-// if the grid is 8 
 
-int numCellsDim = 2;
+// numCellsDim ^ 3 = voxelLightSize
+int numCellsDim = 8;
+uniform vec3 voxellights[512];
+
+uniform int voxelcellwidth;
+uniform bool enableVoxelLighting;
 
 float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBaseLow, float toBaseHigh){
   return ((value - fromBaseLow) * ((toBaseHigh - toBaseLow) / (fromBaseHigh - fromBaseLow))) + toBaseLow;
 }
-
-
 int xyzToIndex(int x, int y, int z){
   return x + (numCellsDim * y) + (numCellsDim * numCellsDim * z);
 }
@@ -76,48 +72,26 @@ vec3 lookupAmbientLight(){
   if (!enableVoxelLighting){
     return ambientAmount;
   }
-  int numCellsPerRow = 2;
-  int totalCells = numCellsPerRow * numCellsPerRow * numCellsPerRow;
 
-  //int newValueX = int(convertBase(FragPos.x, cellWidth * -8, cellWidth * 8, 0, 8));
-//  //if (newValueX >= 8){
-//  //  newValueX = 8;
-//  //}
-//  //if (newValueX < 0){
-//  //  newValueX = 0;
-//  //}
-//
-//
-//
-  //int finalIndex = xyzToIndex(newValueX, newValueX, newValueX);
+  bool outOfRange = false;
+  int newValueX = int(convertBase(FragPos.x, voxelcellwidth * 8 * -0.5, voxelcellwidth * 8 * 0.5, 0, 8));
+  if (newValueX >= 8 || newValueX < 0){
+    outOfRange = true;
+  }
+  int newValueY = int(convertBase(FragPos.y, voxelcellwidth * 8 * -0.5, voxelcellwidth * 8 * 0.5, 0, 8));
+  if (newValueY >= 8 || newValueY < 0){
+    outOfRange = true;
+  }
+  int newValueZ = int(convertBase(FragPos.z, voxelcellwidth * 8 * -0.5, voxelcellwidth * 8 * 0.5, 0, 8));
+  if (newValueZ >= 8 || newValueZ < 0){
+    outOfRange = true; 
+  }
 
-  // consider FragPos.x = 20
-
-  // (64 - 20) / (128) = (2 - x) / 2 
-  // -1 * (2 * (64 - 20) / 128 * 2) = x
-
-  //int cellWidth = 2;
-  //(worldHigh - FragPos.x) / (worldHigh - worldLow) = (cellWidth - x) / (cellWidth - 0);
-  //x = - cellWidth * (worldHigh - FragPos.x) / (worldHigh - worldLow) + cellWidth
-
-
-
-  // should define a negative fragpos range  fragpos_low  and fragpos_high, and a positive one 
-  // then just change of range (fragpos_high - x) / (fragpos_high - fragpos_low) = (high_cell - newx) / (cell_high - cell_low)
-
- 
-  int cellXInt = int(round(FragPos.x)) / voxelcellwidth;                 // cellYInt is 24
-  int remainingCellX = cellXInt % numCellsDim;  // 0 
-
-  int cellYInt = int(round(FragPos.y)) / voxelcellwidth;                 // cellYInt is 24
-  int remainingCellY = cellYInt % numCellsDim;  // 0 
-
-  int cellZInt = int(round(FragPos.z)) / voxelcellwidth;                 // cellYInt is 24
-  int remainingCellZ = cellZInt % numCellsDim;  // 0 
-
-  int finalIndex = xyzToIndex(remainingCellX, remainingCellY, remainingCellZ);
-
-  return voxellights[finalIndex];
+  if (outOfRange){  // maybe i should clamp this instead? 
+    return vec3(0, 0, 0);
+  }
+  int finalIndex2 = xyzToIndex(newValueX, newValueY, newValueZ);
+  return voxellights[finalIndex2];
 }
 
 int getNumLights(){
