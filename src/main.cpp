@@ -448,7 +448,7 @@ std::vector<UniformData> getDefaultShaderUniforms(std::optional<glm::mat4> projv
   });
   uniformData.push_back(UniformData {
     .name = "enableVoxelLighting",
-    .value = true,
+    .value = state.enableVoxelLighting,
   });
   uniformData.push_back(UniformData {
     .name = "ambientAmount",
