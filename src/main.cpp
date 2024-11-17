@@ -3,6 +3,7 @@
 
 #include "./main_input.h"
 #include "./scene/common/vectorgfx.h"
+#include "./scene/scene_lighting.h"
 #include "./netscene.h"
 #include "./main_util.h"
 #include "./cscript/cscripts/plugins/perf-visualize.h"
@@ -485,51 +486,6 @@ std::vector<UniformData> getDefaultShaderUniforms(std::optional<glm::mat4> projv
   return uniformData;  
 }
 
-
-struct LightingCell {
-  int lightIndex;
-  glm::vec3 color;
-};
-struct VoxelLightingData {
-  int voxelCellWidth;
-  std::vector<LightingCell> cells;
-};  
-
-std::vector<LightingCell> generateLightingCells(int size){
-  std::vector<LightingCell> cells;
-  for (int x = 0; x < size; x++){
-    for (int y = 0; y < size; y++){
-      for (int z = 0; z < size; z++){
-        cells.push_back(LightingCell {
-          .lightIndex = 0,
-          .color = glm::vec3((x % 8) / 8.f, (y % 8) / 8.f, (z % 8) / 8.f),
-        });
-      }
-    }
-  }
-  return cells;
-}
-
-VoxelLightingData lightingData {
-  .voxelCellWidth = 16,
-  .cells = generateLightingCells(8),
-};
-
-struct LightingUpdate {
-  int index;
-  glm::vec3 color;
-};
-std::vector<LightingUpdate> getLightUpdates(){
-  std::vector<LightingUpdate> lightUpdates;
-  for (int i = 0; i < lightingData.cells.size(); i++){
-    lightUpdates.push_back(LightingUpdate {
-      .index = i,
-      .color = lightingData.cells.at(i).color,
-    });
-  }
-  return lightUpdates;
-}
-
 void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
   //std::cout << "set shader data world" << std::endl; 
   glUseProgram(shader);
@@ -563,7 +519,7 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
       for (auto &lightUpdate : lightUpdates){
         shaderSetUniform(shader, ("voxellights[" + std::to_string(lightUpdate.index) + "]").c_str(), lightUpdate.color);
       }
-      shaderSetUniformInt(shader, "voxelcellwidth", lightingData.voxelCellWidth);
+      shaderSetUniformInt(shader, "voxelcellwidth", getLightingCellWidth());
     }
 
     if (lightProjview.size() > i){
@@ -738,7 +694,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
   }
 
   if (state.visualizeVoxelLightingCells){
-    drawGrid3D(4, lightingData.voxelCellWidth, 0.f, 0.f, 0.f);
+    drawGrid3D(4, getLightingCellWidth(), 0.f, 0.f, 0.f);
   }
 
   if (state.manipulatorMode == TRANSLATE && state.showGrid && !state.disableInput){
