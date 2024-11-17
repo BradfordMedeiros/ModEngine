@@ -1595,7 +1595,6 @@ Mesh createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loadMesh){
     vertices.push_back(createVertex2(points.at(i + 1).position, points.at(i + 1).coord, normal));
     vertices.push_back(createVertex2(points.at(i + 2).position, points.at(i + 2).coord, normal));
 
-
     Vertex& v1 = vertices.at(vertices.size() - 3);
     Vertex& v2 = vertices.at(vertices.size() - 2);
     Vertex& v3 = vertices.at(vertices.size() - 1);

@@ -1,6 +1,6 @@
 
 vec3 calculatePhongLight(vec3 normal){
-  vec3 ambient = ambientAmount;   
+  vec3 ambient = lookupAmbientLight();   
   vec3 totalDiffuse  = vec3(0, 0, 0);     
   vec3 totalSpecular = vec3(0, 0, 0);     
 

@@ -118,6 +118,7 @@ bool updateTime(bool fpsFixed, float fixedDelta, float speedMultiplier, int time
   return false;
 }
 
+
 void registerStatistics(){
   int numObjects = getNumberOfObjects(world.sandbox);
   registerStat(statistics.numObjectsStat, numObjects);
@@ -446,6 +447,10 @@ std::vector<UniformData> getDefaultShaderUniforms(std::optional<glm::mat4> projv
     .value = state.enableSpecular,
   });
   uniformData.push_back(UniformData {
+    .name = "enableVoxelLighting",
+    .value = true,
+  });
+  uniformData.push_back(UniformData {
     .name = "ambientAmount",
     .value = glm::vec3(state.ambient),
   });
@@ -480,6 +485,12 @@ std::vector<UniformData> getDefaultShaderUniforms(std::optional<glm::mat4> projv
   return uniformData;  
 }
 
+
+struct VoxelLightingData {
+  int voxelCellWidth;
+
+};  
+
 void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
   //std::cout << "set shader data world" << std::endl; 
   glUseProgram(shader);
@@ -489,7 +500,7 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
     "textureid", "bones[0]", "encodedid", "hasBones", "model", "discardTexAmount", 
     "emissionAmount", 
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture",
-    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]",
+    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxellights[0]", "voxelcellwidth",
     "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview"
   });
  
@@ -505,6 +516,15 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
       shaderSetUniform(shader,  ("lightsmaxangle[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_SPOTLIGHT ? light.light.maxangle : -10.f);
       shaderSetUniform(shader,  ("lightsangledelta[" + std::to_string(i) + "]").c_str(), light.light.angledelta);
       shaderSetUniformBool(shader,  ("lightsisdir[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_DIRECTIONAL);
+    }
+
+    // obviously this doesn't need to be set so often
+    if (shader != renderStages.selection.shader){
+      for (int i = 0; i < 8; i++){
+        glm::vec3 color(i * 1.f / 8.f, i * 1.f / 8.f, i * 1.f / 8.f);
+        shaderSetUniform(shader, ("voxellights[" + std::to_string(i) + "]").c_str(), color);
+      }
+      shaderSetUniformInt(shader, "voxelcellwidth", 8);
     }
 
     if (lightProjview.size() > i){
@@ -670,7 +690,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
   uniformData.push_back(UniformData { .name = "textureOffset",  .value = glm::vec2(1.f, 1.f) });
   uniformData.push_back(UniformData { .name = "textureSize",  .value = glm::vec2(1.f, 1.f) });
   uniformData.push_back(UniformData { .name = "textureTiling",  .value = glm::vec2(1.f, 1.f) });
-  setUniformData(shaderProgram, uniformData, { "bones[0]", "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]" });
+  setUniformData(shaderProgram, uniformData, { "bones[0]", "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxellights[0]", "voxelcellwidth" });
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
   if (state.showDebug && numChunkingGridCells > 0){
