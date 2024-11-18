@@ -1,5 +1,13 @@
 #include "./scene_lighting.h"
 
+int voxelCellWidth = 8;
+
+
+int xyzToIndex(int x , int y, int z){
+	int numCellsDim = voxelCellWidth;
+	return x + (numCellsDim * y) + (numCellsDim * numCellsDim * z);
+}
+
 std::vector<LightingCell> generateLightingCells(int size){
   std::vector<LightingCell> cells;
   for (int x = 0; x < size; x++){
@@ -15,10 +23,29 @@ std::vector<LightingCell> generateLightingCells(int size){
   return cells;
 }
 
+std::vector<LightingCell> generateLightingCellsDebug(int size){
+  auto cells = generateLightingCells(size);
+  for (int y = 0; y < size; y++){
+  	for (int x = 0; x < (size - 1); x++){
+  		auto nearIndex = xyzToIndex(x, y, 0);
+  		auto farIndex = xyzToIndex(x, y, (size - 1));
+  		cells.at(nearIndex).color = glm::vec3(1.f, 1.f, 1.f);
+   		cells.at(farIndex).color = glm::vec3(1.f, 1.f, 1.f);
+  	}
+  	for (int z = 0; z < (size - 1); z++){
+  		auto nearIndex = xyzToIndex(0, y, z);
+   		auto farIndex = xyzToIndex((size - 1), y, z);
+  		cells.at(nearIndex).color = glm::vec3(1.f, 1.f, 1.f);
+  		cells.at(farIndex).color = glm::vec3(1.f, 1.f, 1.f);
+  	}
+  }
+  return cells;
+}
+
 
 VoxelLightingData lightingData {
-  .voxelCellWidth = 8,
-  .cells = generateLightingCells(8),  // this is hardcoded in the shader
+  .voxelCellWidth = voxelCellWidth,
+  .cells = generateLightingCellsDebug(8),  // this is hardcoded in the shader
 };
 
 std::string printDebugVoxelLighting(){
@@ -45,13 +72,11 @@ int lightingPositionToIndex(glm::vec3 position){
 		lightingData.voxelCellWidth * 8 * -0.5, lightingData.voxelCellWidth * 8 * 0.5, 
 		0, 8
 	);
-
-	int numCellsDim = lightingData.voxelCellWidth;
-	return x + (numCellsDim * y) + (numCellsDim * numCellsDim * z);
+	return xyzToIndex(x, y, z);
 }
 
 void addVoxelLight(objid lightIndex, glm::vec3 position){
-	int radius = 3;
+	int radius = 1;
 	glm::vec3 color(1.f, 1.f, 1.f);
 
 	modlog("voxel lighting add: ", std::to_string(lightIndex));
@@ -69,7 +94,6 @@ void addVoxelLight(objid lightIndex, glm::vec3 position){
 	}
 
 	std::cout << "voxel lighting lighting data: " << print(printDebugVoxelLighting()) << std::endl;
-
 }
 void removeVoxelLight(objid lightIndex){
 	modlog("voxel lighting remove: ", std::to_string(lightIndex));
