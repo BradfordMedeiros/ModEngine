@@ -12,7 +12,6 @@ void enforceParentRelationship(Scene& scene, objid id, objid parentId){
   scene.idToGameObjectsH.at(parentId).children.insert(id);
 }
 
-
 objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parentId, GameObject& gameobjectObj){
   auto gameobjectH = GameObjectH { 
     .id = gameobjectObj.id,

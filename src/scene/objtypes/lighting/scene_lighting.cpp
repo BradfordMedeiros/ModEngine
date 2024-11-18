@@ -68,6 +68,7 @@ void addVoxelLight(objid lightIndex, glm::vec3 position){
 		for (int y = 0; y < radius; y++){
 			for (int z = 0; z < radius; z++){
 				auto index = lightingPositionToIndex(glm::vec3(position.x + x, position.y + y, position.z + z));
+				modassert(index >= 0 && index < lightingData.cells.size(), std::string("Invalid light index, got = ") + std::to_string(index));
 				lightingData.cells.at(index) = LightingCell {
 					.lightIndex = lightIndex,
 					.color = color,
@@ -93,7 +94,8 @@ void removeVoxelLight(objid lightIndex){
 
 // obviously this could be more efficient
 // eg could keep a mapping of cell ids to shortcut to them
-void updateVoxelLight(objid lightIndex, glm::vec3 position){
+void updateVoxelLightPosition(objid lightIndex, glm::vec3 position){
+	modlog("update voxel light position", print(position));
 	removeVoxelLight(lightIndex);
 	addVoxelLight(lightIndex, position);
 }

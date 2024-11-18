@@ -25,6 +25,6 @@ int getLightingCellWidth();
 std::vector<LightingUpdate> getLightUpdates();
 void addVoxelLight(objid lightIndex, glm::vec3 position);
 void removeVoxelLight(objid lightIndex);
-void updateVoxelLight(objid lightIndex, glm::vec3 position);
+void updateVoxelLightPosition(objid lightIndex, glm::vec3 position);
 
 #endif

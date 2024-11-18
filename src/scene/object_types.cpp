@@ -531,7 +531,11 @@ void updateObjectPositions(std::map<objid, GameObjectObj>& mapping, objid id, gl
     }else{
       setSoundPosition(soundObj -> source, position.x, position.y, position.z);
     }
-    
+  }
+
+  auto lightObj = std::get_if<GameObjectLight>(&object);
+  if (lightObj != NULL){
+    updateVoxelLightPosition(id, position);
   }
 }
 
