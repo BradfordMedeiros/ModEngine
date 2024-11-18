@@ -9,15 +9,6 @@ std::vector<LightingCell> generateLightingCells(int size){
           .lightIndex = 0,
           .color = glm::vec3(0.f, 0.f, 0.f),
         });
-
-      	// gradient code
-        //float red = (x % size) / static_cast<float>(size);
-        //float green = (y % size) / static_cast<float>(size);
-        //float blue = (z % size) / static_cast<float>(size);
-        //cells.push_back(LightingCell {
-        //  .lightIndex = 0,
-        //  .color = glm::vec3(red, green, blue),
-        //});
       }
     }
   }
