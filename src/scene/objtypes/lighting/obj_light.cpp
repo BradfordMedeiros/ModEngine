@@ -60,7 +60,12 @@ std::vector<AutoSerialize> lightAutoserializer {
 GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectLight obj {};
   createAutoSerializeWithTextureLoading((char*)&obj, lightAutoserializer, attr, util);
+  addVoxelLight(util.id, glm::vec3(0.f, 0.f, 0.f));
   return obj;
+}
+
+void removeLight(GameObjectLight& lightObj, ObjectRemoveUtil& util){
+  removeVoxelLight(util.id);
 }
 
 std::optional<AttributeValuePtr> getLightAttribute(GameObjectLight& obj, const char* field){

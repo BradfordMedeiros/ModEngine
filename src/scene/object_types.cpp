@@ -93,7 +93,7 @@ std::vector<ObjectType> objTypes = {
     .objectAttribute = convertObjectAttribute<GameObjectLight>(getLightAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectLight>(setLightAttribute),
     .serialize = convertSerialize<GameObjectLight>(serializeLight),
-    .removeObject = removeDoNothing,
+    .removeObject = convertRemove<GameObjectLight>(removeLight),
   },
   ObjectType {
     .name = "sound",

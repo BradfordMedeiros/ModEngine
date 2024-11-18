@@ -4,7 +4,8 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "../common/util.h"
+#include "../../../common/util.h"
+#include "../../../translations.h"
 
 struct LightingCell {
   objid lightIndex;
@@ -22,7 +23,8 @@ struct LightingUpdate {
 
 int getLightingCellWidth();
 std::vector<LightingUpdate> getLightUpdates();
-void addLight(objid lightIndex, glm::vec3 position, glm::vec3 color, float radius);
-void removeLight(objid lightIndex);
+void addVoxelLight(objid lightIndex, glm::vec3 position);
+void removeVoxelLight(objid lightIndex);
+void updateVoxelLight(objid lightIndex, glm::vec3 position);
 
 #endif

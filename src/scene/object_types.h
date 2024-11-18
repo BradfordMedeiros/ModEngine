@@ -10,7 +10,7 @@
 #include "./serialization.h"
 #include "./objtypes/obj_camera.h"
 #include "./objtypes/obj_portal.h"
-#include "./objtypes/obj_light.h"
+#include "./objtypes/lighting/obj_light.h"
 #include "./objtypes/sound/obj_sound.h"
 #include "./objtypes/obj_text.h"
 #include "./objtypes/obj_navmesh.h"

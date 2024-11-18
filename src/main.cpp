@@ -3,7 +3,7 @@
 
 #include "./main_input.h"
 #include "./scene/common/vectorgfx.h"
-#include "./scene/scene_lighting.h"
+#include "./scene/objtypes/lighting/scene_lighting.h"
 #include "./netscene.h"
 #include "./main_util.h"
 #include "./cscript/cscripts/plugins/perf-visualize.h"
@@ -500,6 +500,16 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
   });
  
 
+  if (shader != renderStages.selection.shader){
+    auto lightUpdates = getLightUpdates();
+    for (auto &lightUpdate : lightUpdates){
+      std::cout << "voxel lighting : " << lightUpdate.index << ", color = " << print(lightUpdate.color) << std::endl;
+      shaderSetUniform(shader, ("voxellights[" + std::to_string(lightUpdate.index) + "]").c_str(), lightUpdate.color);
+    }
+    shaderSetUniformInt(shader, "voxelcellwidth", getLightingCellWidth());
+  }
+
+
   for (int i = 0; i < lights.size(); i++){
     if (shader != renderStages.selection.shader){
       glm::vec3 position = lights.at(i).transform.position;
@@ -511,15 +521,6 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
       shaderSetUniform(shader,  ("lightsmaxangle[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_SPOTLIGHT ? light.light.maxangle : -10.f);
       shaderSetUniform(shader,  ("lightsangledelta[" + std::to_string(i) + "]").c_str(), light.light.angledelta);
       shaderSetUniformBool(shader,  ("lightsisdir[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_DIRECTIONAL);
-    }
-
-    // obviously this doesn't need to be set so often
-    if (shader != renderStages.selection.shader){
-      auto lightUpdates = getLightUpdates();
-      for (auto &lightUpdate : lightUpdates){
-        shaderSetUniform(shader, ("voxellights[" + std::to_string(lightUpdate.index) + "]").c_str(), lightUpdate.color);
-      }
-      shaderSetUniformInt(shader, "voxelcellwidth", getLightingCellWidth());
     }
 
     if (lightProjview.size() > i){
