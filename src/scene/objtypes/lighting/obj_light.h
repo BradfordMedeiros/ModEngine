@@ -12,6 +12,7 @@ struct GameObjectLight {
   float maxangle;
   float angledelta;
   glm::vec3 attenuation;
+  int voxelSize;
 };
 
 GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util);

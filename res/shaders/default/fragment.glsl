@@ -56,6 +56,7 @@ uniform float bloomThreshold;
 
 
 // numCellsDim ^ 3 = voxelLightSize
+
 int numCellsDim = 8;
 uniform vec3 voxellights[512];
 
@@ -74,16 +75,22 @@ vec3 lookupAmbientLight(){
   }
 
   bool outOfRange = false;
-  int newValueX = int(convertBase(FragPos.x, voxelcellwidth * 8 * -0.5, voxelcellwidth * 8 * 0.5, 0, 8));
-  if (newValueX >= 8 || newValueX < 0){
+
+  float newValueXFloat = convertBase(FragPos.x, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
+  int newValueX = int(newValueXFloat);
+  if (newValueXFloat >= numCellsDim || newValueXFloat < 0){
     outOfRange = true;
   }
-  int newValueY = int(convertBase(FragPos.y, voxelcellwidth * 8 * -0.5, voxelcellwidth * 8 * 0.5, 0, 8));
-  if (newValueY >= 8 || newValueY < 0){
+
+  float newValueYFloat = convertBase(FragPos.y, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
+  int newValueY = int(newValueYFloat);
+  if (newValueYFloat >= numCellsDim || newValueYFloat < 0){
     outOfRange = true;
   }
-  int newValueZ = int(convertBase(FragPos.z, voxelcellwidth * 8 * -0.5, voxelcellwidth * 8 * 0.5, 0, 8));
-  if (newValueZ >= 8 || newValueZ < 0){
+
+  float newValueZFloat = convertBase(FragPos.z, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
+  int newValueZ = int(newValueZFloat);
+  if (newValueZFloat >= numCellsDim || newValueZFloat < 0){
     outOfRange = true; 
   }
 

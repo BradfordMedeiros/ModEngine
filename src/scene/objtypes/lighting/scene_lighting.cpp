@@ -1,10 +1,9 @@
 #include "./scene_lighting.h"
 
 int voxelCellWidth = 8;
-
+int numCellsDim = 8;
 
 int xyzToIndex(int x , int y, int z){
-	int numCellsDim = voxelCellWidth;
 	return x + (numCellsDim * y) + (numCellsDim * numCellsDim * z);
 }
 
@@ -26,13 +25,16 @@ std::vector<LightingCell> generateLightingCells(int size){
 std::vector<LightingCell> generateLightingCellsDebug(int size){
   auto cells = generateLightingCells(size);
   for (int y = 0; y < size; y++){
-  	for (int x = 0; x < (size - 1); x++){
+  	if (y == 0){
+  		continue;
+  	}
+  	for (int x = 0; x < size; x++){
   		auto nearIndex = xyzToIndex(x, y, 0);
   		auto farIndex = xyzToIndex(x, y, (size - 1));
   		cells.at(nearIndex).color = glm::vec3(1.f, 1.f, 1.f);
    		cells.at(farIndex).color = glm::vec3(1.f, 1.f, 1.f);
   	}
-  	for (int z = 0; z < (size - 1); z++){
+  	for (int z = 0; z < size ; z++){
   		auto nearIndex = xyzToIndex(0, y, z);
    		auto farIndex = xyzToIndex((size - 1), y, z);
   		cells.at(nearIndex).color = glm::vec3(1.f, 1.f, 1.f);
@@ -45,7 +47,7 @@ std::vector<LightingCell> generateLightingCellsDebug(int size){
 
 VoxelLightingData lightingData {
   .voxelCellWidth = voxelCellWidth,
-  .cells = generateLightingCellsDebug(8),  // this is hardcoded in the shader
+  .cells = generateLightingCellsDebug(numCellsDim),  // this is hardcoded in the shader
 };
 
 std::string printDebugVoxelLighting(){
@@ -56,34 +58,50 @@ std::string printDebugVoxelLighting(){
 	return data;
 }
 
-int lightingPositionToIndex(glm::vec3 position){
-	auto x = convertBase(
+std::optional<int> lightingPositionToIndex(glm::vec3 position, glm::ivec3 offset){
+	auto x = offset.x + static_cast<int>(convertBase(
 		position.x, 
-		lightingData.voxelCellWidth * 8 * -0.5, lightingData.voxelCellWidth * 8 * 0.5, 
-		0, 8
-	);
-	auto y = convertBase(
+		lightingData.voxelCellWidth * numCellsDim * -0.5, lightingData.voxelCellWidth * numCellsDim * 0.5, 
+		0, numCellsDim
+	));
+	auto y = offset.y + static_cast<int>(convertBase(
 		position.y, 
-		lightingData.voxelCellWidth * 8 * -0.5, lightingData.voxelCellWidth * 8 * 0.5, 
-		0, 8
-	);
-	auto z = convertBase(
+		lightingData.voxelCellWidth * numCellsDim * -0.5, lightingData.voxelCellWidth * numCellsDim * 0.5, 
+		0, numCellsDim
+	));
+	auto z = offset.z + static_cast<int>(convertBase(
 		position.z, 
-		lightingData.voxelCellWidth * 8 * -0.5, lightingData.voxelCellWidth * 8 * 0.5, 
-		0, 8
-	);
-	return xyzToIndex(x, y, z);
+		lightingData.voxelCellWidth * numCellsDim * -0.5, lightingData.voxelCellWidth * numCellsDim * 0.5, 
+		0, numCellsDim
+	));
+
+	if (x < 0 || x >= numCellsDim){
+		return std::nullopt;
+	}
+	if (y < 0 || y >= numCellsDim){
+		return std::nullopt;
+	}
+	if (z < 0 || z >= numCellsDim){
+		return std::nullopt;
+	}
+	auto index = xyzToIndex(x, y, z);
+	modlog("voxel lighting lightingPositionToIndex", std::to_string(index) + " " + print(glm::vec3(x, y, z)));
+	return index;
 }
 
-void addVoxelLight(objid lightIndex, glm::vec3 position){
-	int radius = 1;
+void addVoxelLight(objid lightIndex, glm::vec3 position, int radius){
 	glm::vec3 color(1.f, 1.f, 1.f);
 
 	modlog("voxel lighting add: ", std::to_string(lightIndex));
-	for (int x = 0; x < radius; x++){
-		for (int y = 0; y < radius; y++){
-			for (int z = 0; z < radius; z++){
-				auto index = lightingPositionToIndex(glm::vec3(position.x + x, position.y + y, position.z + z));
+	for (int x = (-radius + 1); x < radius; x++){
+		for (int y = (-radius + 1); y < radius; y++){ 
+			for (int z = (-radius + 1); z < radius; z++){
+				auto lightValue = lightingPositionToIndex(glm::vec3(position.x, position.y, position.z), glm::ivec3(x, y, z));
+				if (!lightValue.has_value()){
+					continue;
+				}
+				auto index = lightValue.value();
+				modassert(lightingData.cells.at(index).lightIndex == 0, "light cell already occupied");
 				modassert(index >= 0 && index < lightingData.cells.size(), std::string("Invalid light index, got = ") + std::to_string(index));
 				lightingData.cells.at(index) = LightingCell {
 					.lightIndex = lightIndex,
@@ -109,10 +127,10 @@ void removeVoxelLight(objid lightIndex){
 
 // obviously this could be more efficient
 // eg could keep a mapping of cell ids to shortcut to them
-void updateVoxelLightPosition(objid lightIndex, glm::vec3 position){
+void updateVoxelLightPosition(objid lightIndex, glm::vec3 position, int radius){
 	modlog("update voxel light position", print(position));
 	removeVoxelLight(lightIndex);
-	addVoxelLight(lightIndex, position);
+	addVoxelLight(lightIndex, position, radius);
 }
 
 int getLightingCellWidth(){

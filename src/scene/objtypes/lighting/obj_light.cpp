@@ -54,13 +54,18 @@ std::vector<AutoSerialize> lightAutoserializer {
     .structOffsetFiller = std::nullopt,
     .field = "angledelta",
     .defaultValue = 0.f,
-  }
+  },
+  AutoSerializeInt {
+    .structOffset = offsetof(GameObjectLight, voxelSize),
+    .field = "voxelsize",
+    .defaultValue = 1,
+  },
 };
 
 GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectLight obj {};
   createAutoSerializeWithTextureLoading((char*)&obj, lightAutoserializer, attr, util);
-  addVoxelLight(util.id, glm::vec3(0.f, 0.f, 0.f));
+  addVoxelLight(util.id, glm::vec3(0.f, 0.f, 0.f), obj.voxelSize);
   return obj;
 }
 

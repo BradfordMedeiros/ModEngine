@@ -535,7 +535,7 @@ void updateObjectPositions(std::map<objid, GameObjectObj>& mapping, objid id, gl
 
   auto lightObj = std::get_if<GameObjectLight>(&object);
   if (lightObj != NULL){
-    updateVoxelLightPosition(id, position);
+    updateVoxelLightPosition(id, position, lightObj -> voxelSize);
   }
 }
 

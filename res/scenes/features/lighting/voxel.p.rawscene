@@ -1,0 +1,55 @@
+# Demonstrates basic usage of an event system
+
+platform0:mesh:./res/models/box/crate.gltf
+platform0:scale:100 1 100
+platform0:position:0 0 0
+
+platform1:mesh:./res/models/box/crate.gltf
+platform1:scale:100 1 100
+platform1:position:0 10 0
+
+platform2:mesh:./res/models/box/crate.gltf
+platform2:scale:100 1 100
+platform2:position:0 20 0
+
+platform3:mesh:./res/models/box/crate.gltf
+platform3:scale:100 1 100
+platform3:position:0 30 0
+
+platform4:mesh:./res/models/box/crate.gltf
+platform4:scale:100 1 100
+platform4:position:0 40 0
+
+platform5:mesh:./res/models/box/crate.gltf
+platform5:scale:100 1 100
+platform5:position:0 -10 0
+
+platform6:mesh:./res/models/box/crate.gltf
+platform6:scale:100 1 100
+platform6:position:0 -20 0
+
+platform7:mesh:./res/models/box/crate.gltf
+platform7:scale:100 1 100
+platform7:position:0 -30 0
+
+platform8:mesh:./res/models/box/crate.gltf
+platform8:scale:100 1 100
+platform8:position:0 -40 0
+
+platform9:mesh:./res/models/box/crate.gltf
+platform9:scale:100 1 100
+platform9:position:0 -50 0
+
+
+door:mesh:./res/models/box/crate.gltf
+
+!lightone:position:0 1 0
+!lightone:color:1 0 0
+!lightone:voxelsize:2
+
+#!lighttwo:position:-10 2 0
+#!lighttwo:color:0 1 0
+
+
+#!lightthree:position:10 2 0
+#!lightthree:color:0 0 1
