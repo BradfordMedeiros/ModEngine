@@ -12,6 +12,7 @@ std::vector<LightInfo> getLightInfo(World& world){
     LightInfo light {
       .transform = lightTransform,
       .light = *lightObject,
+      .id = objectId,
     };
     lights.push_back(light);
   }

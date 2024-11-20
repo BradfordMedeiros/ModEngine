@@ -7,13 +7,13 @@ int xyzToIndex(int x , int y, int z){
 	return x + (numCellsDim * y) + (numCellsDim * numCellsDim * z);
 }
 
-std::vector<LightingCell> generateLightingCells(int size){
+std::vector<LightingCell> generateLightingCells(int size, int lightIndex = 0){
   std::vector<LightingCell> cells;
   for (int x = 0; x < size; x++){
     for (int y = 0; y < size; y++){
       for (int z = 0; z < size; z++){
       	cells.push_back(LightingCell {
-          .lightIndex = 0,
+          .lightIndex = lightIndex,
           .color = glm::vec3(0.f, 0.f, 0.f),
         });
       }
@@ -23,7 +23,7 @@ std::vector<LightingCell> generateLightingCells(int size){
 }
 
 std::vector<LightingCell> generateLightingCellsDebug(int size){
-  auto cells = generateLightingCells(size);
+  auto cells = generateLightingCells(size, -2);
   for (int y = 0; y < size; y++){
   	if (y == 0){
   		continue;
@@ -101,7 +101,7 @@ void addVoxelLight(objid lightIndex, glm::vec3 position, int radius){
 					continue;
 				}
 				auto index = lightValue.value();
-				modassert(lightingData.cells.at(index).lightIndex == 0, "light cell already occupied");
+				//modassert(lightingData.cells.at(index).lightIndex == 0, "light cell already occupied");
 				modassert(index >= 0 && index < lightingData.cells.size(), std::string("Invalid light index, got = ") + std::to_string(index));
 				lightingData.cells.at(index) = LightingCell {
 					.lightIndex = lightIndex,
@@ -146,6 +146,7 @@ std::vector<LightingUpdate> getLightUpdates(){
   for (int i = 0; i < lightingData.cells.size(); i++){
     lightUpdates.push_back(LightingUpdate {
       .index = i,
+      .lightIndex = lightingData.cells.at(i).lightIndex,
       .color = lightingData.cells.at(i).color,
     });
   }

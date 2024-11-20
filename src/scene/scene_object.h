@@ -6,6 +6,7 @@
 struct LightInfo {
   Transformation transform;
   GameObjectLight light;
+  objid id;
 };
 std::vector<LightInfo> getLightInfo(World& world);
 

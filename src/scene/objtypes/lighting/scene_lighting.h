@@ -18,6 +18,7 @@ struct VoxelLightingData {
 
 struct LightingUpdate {
   int index;
+  objid lightIndex;
   glm::vec3 color;
 };
 
