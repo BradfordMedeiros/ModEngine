@@ -1904,12 +1904,7 @@ int main(int argc, char* argv[]){
 
     // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
     std::vector<glm::mat4> lightMatrixs;
-    if (state.enableShadows){
-      PROFILE(
-        "RENDERING-SHADOWMAPS",
-        lightMatrixs = renderShadowMaps(renderContext);
-      )
-    }
+
     renderContext.lightProjview = lightMatrixs;
 
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
