@@ -56,10 +56,11 @@ uniform float bloomThreshold;
 
 
 // numCellsDim ^ 3 = voxelLightSize
+// https://stackoverflow.com/questions/20647207/glsl-replace-large-uniform-int-array-with-buffer-or-texture
+// todo make lighting info here a ubo
 
 int numCellsDim = 8;
-uniform vec3 voxellights[512];
-
+uniform int voxelindexs[512];
 uniform int voxelcellwidth;
 uniform bool enableVoxelLighting;
 
@@ -69,11 +70,8 @@ float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBa
 int xyzToIndex(int x, int y, int z){
   return x + (numCellsDim * y) + (numCellsDim * numCellsDim * z);
 }
-vec3 lookupAmbientLight(){
-  if (!enableVoxelLighting){
-    return ambientAmount;
-  }
 
+int calcLightIndex(){
   bool outOfRange = false;
 
   float newValueXFloat = convertBase(FragPos.x, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
@@ -95,10 +93,22 @@ vec3 lookupAmbientLight(){
   }
 
   if (outOfRange){  // maybe i should clamp this instead? 
-    return vec3(0, 0, 0);
+    return -1;
   }
   int finalIndex2 = xyzToIndex(newValueX, newValueY, newValueZ);
-  return voxellights[finalIndex2];
+  int lightIndex = voxelindexs[finalIndex2];
+  return lightIndex;
+}
+
+void getLights(out int lights[5]){
+  lights[0] = calcLightIndex();
+  for (int i = 1; i < 5; i++){
+    lights[i] = -1;  // -1 => no light
+  }
+}
+
+vec3 lookupAmbientLight(){
+  return ambientAmount;
 }
 
 int getNumLights(){

@@ -4,15 +4,27 @@ vec3 calculatePhongLight(vec3 normal){
   vec3 totalDiffuse  = vec3(0, 0, 0);     
   vec3 totalSpecular = vec3(0, 0, 0);     
 
-  for (int i = 0; i < getNumLights(); i++){
-    vec3 lightPos = lights[i];
-    vec3 lightDir = lightsisdir[i] ?  lightsdir[i] : normalize(lightPos - FragPos);
+  int voxelLights[5];
+  getLights(voxelLights);
 
-    float angle = dot(lightDir, normalize(-lightsdir[i]));
+  for (int x = 0; x < 5; x++){
+    int lightIndex = voxelLights[x];
+    if (lightIndex == -1){
+      // no lights
+      continue;
+    }else if (lightIndex == -2){
+      //totalDiffuse += vec3(1, 1, 1);
+      continue;
+    }
+
+    vec3 lightPos = lights[lightIndex];
+    vec3 lightDir = lightsisdir[lightIndex] ?  lightsdir[lightIndex] : normalize(lightPos - FragPos);
+
+    float angle = dot(lightDir, normalize(-lightsdir[lightIndex]));
 
     float angleFactor = 1;
-    float minAngle = lightsmaxangle[i];
-    float maxAngle = minAngle + lightsangledelta[i];
+    float minAngle = lightsmaxangle[lightIndex];
+    float maxAngle = minAngle + lightsangledelta[lightIndex];
     float angleAmount = mix(minAngle, maxAngle, angle);
     if (angle < maxAngle){
       if (angle < minAngle){
@@ -25,10 +37,10 @@ vec3 calculatePhongLight(vec3 normal){
     vec3 viewDir = normalize(cameraPosition - FragPos);
     vec3 reflectDir = reflect(-lightDir, normal);  
     vec3 specular = pow(max(dot(viewDir, reflectDir), 0.0), 32) * vec3(1.0, 1.0, 1.0);  
-    float attenuation = calcAttenutation(i);
+    float attenuation = calcAttenutation(lightIndex);
 
-    totalDiffuse = totalDiffuse + angleFactor * (attenuation * diffuse * lightscolor[i]);
-    totalSpecular = totalSpecular + angleFactor * (attenuation * specular * lightscolor[i]);
+    totalDiffuse = totalDiffuse + angleFactor * (attenuation * diffuse * lightscolor[lightIndex]);
+    totalSpecular = totalSpecular + angleFactor * (attenuation * specular * lightscolor[lightIndex]);
   }
 
   vec3 diffuseValue = enableDiffuse ? totalDiffuse : vec3(0, 0, 0);
