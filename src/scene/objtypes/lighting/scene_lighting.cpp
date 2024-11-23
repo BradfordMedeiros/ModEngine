@@ -47,6 +47,7 @@ std::vector<LightingCell> generateLightingCellsDebug(int size){
 
 VoxelLightingData lightingData {
   .voxelCellWidth = voxelCellWidth,
+  .numCellsDim = numCellsDim,
   .cells = generateLightingCellsDebug(numCellsDim),  // this is hardcoded in the shader
 };
 
@@ -151,4 +152,9 @@ std::vector<LightingUpdate> getLightUpdates(){
     });
   }
   return lightUpdates;
+}
+
+
+VoxelLightingData& getVoxelLightingData(){
+	return lightingData;
 }

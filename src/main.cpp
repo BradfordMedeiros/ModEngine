@@ -1481,6 +1481,7 @@ int main(int argc, char* argv[]){
     .saveState = saveState,
     .loadState = loadState,
 
+    .getVoxelLightingData = getVoxelLightingData,
     .dumpDebugInfo = dumpDebugInfo,
   };
 

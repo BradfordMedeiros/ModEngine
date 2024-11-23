@@ -9,6 +9,7 @@
 #include "../sql/sql.h"  // ideally move this away from being a direct dependency
 #include "../perf/profiling.h"
 #include "../perf/benchstats.h"
+#include "../scene/objtypes/lighting/scene_lighting.h"
 
 struct CustomApiBindings {
   int32_t (*listSceneId)(int32_t objid);
@@ -149,6 +150,8 @@ struct CustomApiBindings {
 
   bool (*saveState)(std::string);
   bool (*loadState)(std::string);
+
+  VoxelLightingData& (*getVoxelLightingData)();
 
   std::string (*dumpDebugInfo)(bool);
   //std::vector<func_t> registerGuileFns
