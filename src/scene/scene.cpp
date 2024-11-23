@@ -817,7 +817,7 @@ std::string serializeObject(World& world, objid id, bool includeSubmodelAttr, st
   return serializedData;
 }
 
-void updatePhysicsFromSandbox(World& world){
+std::set<objid> updatePhysicsFromSandbox(World& world){
   auto updatedIds = updateSandbox(world.sandbox);  
   for (auto index : updatedIds){
     auto transform = fullTransformation(world.sandbox, index);
@@ -828,6 +828,7 @@ void updatePhysicsFromSandbox(World& world){
       setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
     }
   }
+  return updatedIds;
 }
 
 std::function<Mesh(MeshData&)> createScopedLoadMesh(World& world, objid id){
@@ -1545,22 +1546,26 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   }
   
   //std::cout << "on world frame physics: " << enablePhysics << std::endl;
-
   stepPhysicsSimulation(world.physicsEnvironment, timestep, paused, enablePhysics);
   updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);  
-  
-  forEveryGameobj(world.sandbox, [&world, &viewTransform](objid id, GameObject& gameobj) -> void {
-    auto absolutePosition = fullTransformation(world.sandbox, id).position;
-    updateObjectPositions(world.objectMapping, id, absolutePosition, viewTransform);
-  });
 
   enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
-  updatePhysicsFromSandbox(world);
+  auto updatedIds = updatePhysicsFromSandbox(world);
+  for (auto updatedId : updatedIds){
+    world.entitiesToUpdate.insert(updatedId);
+  }
+
+  for (auto id : world.entitiesToUpdate){
+    auto absolutePosition = fullTransformation(world.sandbox, id).position;
+    updateObjectPositions(world.objectMapping, id, absolutePosition, viewTransform);
+  }
+
   forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
     if (id == getGroupId(world.sandbox, id) && world.entitiesToUpdate.find(id) != world.entitiesToUpdate.end()){
       world.onObjectUpdate(gameobj);
     }
-  });  
+  });
+
   world.entitiesToUpdate.clear();
 
   if (showVisualizations){

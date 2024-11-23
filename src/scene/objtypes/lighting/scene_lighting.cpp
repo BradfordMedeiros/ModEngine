@@ -111,8 +111,7 @@ void addVoxelLight(objid lightIndex, glm::vec3 position, int radius){
 			}
 		}
 	}
-
-	std::cout << "voxel lighting lighting data: " << print(printDebugVoxelLighting()) << std::endl;
+	//std::cout << "voxel lighting lighting data: " << print(printDebugVoxelLighting()) << std::endl;
 }
 void removeVoxelLight(objid lightIndex){
 	modlog("voxel lighting remove: ", std::to_string(lightIndex));
@@ -122,8 +121,7 @@ void removeVoxelLight(objid lightIndex){
 			cell.color = glm::vec3(0.f, 0.f, 0.f);
 		}
 	}
-
-	std::cout << "voxel lighting lighting data: " << print(printDebugVoxelLighting()) << std::endl;
+	//std::cout << "voxel lighting lighting data: " << print(printDebugVoxelLighting()) << std::endl;
 }
 
 // obviously this could be more efficient
