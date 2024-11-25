@@ -1,6 +1,6 @@
 #include "./scene_lighting.h"
 
-int voxelCellWidth = 8;
+int voxelCellWidth = 32;
 int numCellsDim = 8;
 
 int xyzToIndex(int x , int y, int z){

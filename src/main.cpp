@@ -284,6 +284,35 @@ void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2)
 }
 
 
+std::vector<std::string> listOctreeTextures(){
+  std::vector<std::string> octreeTextures { 
+    "./res/textures/grid.png", 
+    "../gameresources/build/textures/clean/pebbles2.png",
+
+    "../gameresources/build/textures/clean/grass.jpg", 
+    "../gameresources/build/textures/clean/tunnel_road.jpg", 
+
+    "../gameresources/build/textures/clean/cherrybark.jpg",
+    "../gameresources/build/textures/clean/foliage2.png",
+    "../gameresources/build/textures/clean/hardwood.jpg",
+
+    "../gameresources/build/textures/clean/stonydirt.jpg",
+    "../gameresources/build/textures/clean/metal_scifi.png",
+    "../gameresources/build/textures/clean/tex_Ice.jpg",
+
+    "../gameresources/build/textures/clean/stonewall.jpg",
+    "../gameresources/build/textures/metal_grating.jpg",
+    "../gameresources/build/textures/paintings/luna.png",
+
+    "../gameresources/build/uncategorized/bluetransparent.png",
+    "../gameresources/build/textures/const_fence.png",
+
+    "/home/brad/Desktop/test3.png",
+
+  };
+  return octreeTextures;
+}
+
 // This is wasteful, as obviously I shouldn't be loading in all the textures on load, but ok for now. 
 // This shoiuld really just be creating a list of names, and then the cycle above should cycle between possible textures to load, instead of what is loaded 
 void loadAllTextures(std::string& textureFolderPath){
@@ -305,25 +334,10 @@ void loadAllTextures(std::string& textureFolderPath){
     "../gameresources/build/textures/clean/pebbles2.png"
   };*/
 
-  std::vector<std::string> textures { 
-    "./res/textures/grid.png", 
-    "../gameresources/build/textures/clean/pebbles2.png",
-
-    "../gameresources/build/textures/clean/grass.jpg", 
-    "../gameresources/build/textures/clean/tunnel_road.jpg", 
-
-    "../gameresources/build/textures/clean/cherrybark.jpg",
-    "../gameresources/build/textures/clean/foliage2.png",
-    "../gameresources/build/textures/clean/hardwood.jpg",
-
-    "../gameresources/build/textures/clean/stonydirt.jpg",
-    "../gameresources/build/textures/clean/metal_scifi.png",
-    "../gameresources/build/textures/clean/tex_Ice.jpg",
-
-  };
+  std::vector<std::string> octreeTextures = listOctreeTextures();
 
   std::vector<std::string> normalTextures;
-  for (auto &texture : textures){
+  for (auto &texture : octreeTextures){
     auto normalTexture = lookupNormalTexture(world, texture);
     if (normalTexture.has_value()){
       normalTextures.push_back(normalTexture.value());
@@ -332,11 +346,17 @@ void loadAllTextures(std::string& textureFolderPath){
     }
   }
 
-  loadTextureAtlasWorld(world, "octree-atlas:normal", normalTextures, -1);
-  loadTextureAtlasWorld(world, "octree-atlas:main",   textures, -1);
-  setAtlasDimensions(AtlasDimensions {
-    .textureNames = textures,
-  });
+  PROFILE("TEXTURES-LOAD-OCTREEATLAS",
+    auto start = std::chrono::steady_clock::now();
+    loadTextureAtlasWorld(world, "octree-atlas:normal", normalTextures, -1);
+    loadTextureAtlasWorld(world, "octree-atlas:main",   octreeTextures, -1);
+    setAtlasDimensions(AtlasDimensions {
+      .textureNames = octreeTextures,
+    });
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::milliseconds timeSeconds = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    modlog("texture octree loading time(ms)", std::to_string(timeSeconds.count())); // eventually just cleanup perf to allow PROFILE to give this info generically
+  )
 }
 
 // Kind of crappy since the uniforms don't unset their values after rendering, but order should be deterministic so ... ok
@@ -1097,6 +1117,8 @@ GLFWmonitor* monitor = NULL;
 const GLFWvidmode* mode = NULL;
 
 int main(int argc, char* argv[]){
+  auto start = std::chrono::steady_clock::now();
+
   signal(SIGABRT, signalHandler);  
 
   std::string argsString = "";
@@ -1669,6 +1691,12 @@ int main(int argc, char* argv[]){
   glEnable(GL_BLEND);
   glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glBlendFunci(1, GL_ONE, GL_ZERO);
+
+  {
+    auto firstFrame = std::chrono::steady_clock::now();
+    std::chrono::milliseconds timeSeconds = std::chrono::duration_cast<std::chrono::milliseconds>(firstFrame - start);
+    modlog("loading time first frame (ms)", std::to_string(timeSeconds.count()));
+  }
 
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){

@@ -119,7 +119,6 @@ std::string dumpProfiling(){
 }
 
 
-// mock for now, needs implementation
 FrameInfo getFrameInfo(){
   auto currentTime = lastFrame.startTime;
   auto totalFrameTime = lastFrame.stopTime.value() - lastFrame.startTime;
@@ -142,3 +141,4 @@ FrameInfo getFrameInfo(){
     .labels = labels,
   };
 }
+

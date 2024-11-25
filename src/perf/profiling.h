@@ -25,5 +25,6 @@ struct FrameInfo {
 };
 
 FrameInfo getFrameInfo();
+std::optional<float> getLastDuration(const char* description);
 
 #endif
