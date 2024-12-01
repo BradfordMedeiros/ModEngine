@@ -60,9 +60,12 @@ uniform float bloomThreshold;
 // todo make lighting info here a ubo
 
 int numCellsDim = 8;
-uniform int voxelindexs[512];
 uniform int voxelcellwidth;
 uniform bool enableVoxelLighting;
+
+layout(std140, binding = 0) uniform LargeBlock {
+  int voxelindexs2[512];  // vec4 alignment....could pack better probably then
+};
 
 float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBaseLow, float toBaseHigh){
   return ((value - fromBaseLow) * ((toBaseHigh - toBaseLow) / (fromBaseHigh - fromBaseLow))) + toBaseLow;
@@ -91,12 +94,11 @@ int calcLightIndex(){
   if (newValueZFloat >= numCellsDim || newValueZFloat < 0){
     outOfRange = true; 
   }
-
   if (outOfRange){  // maybe i should clamp this instead? 
     return -1;
   }
   int finalIndex2 = xyzToIndex(newValueX, newValueY, newValueZ);
-  int lightIndex = voxelindexs[finalIndex2];
+  int lightIndex = voxelindexs2[finalIndex2];
   return lightIndex;
 }
 

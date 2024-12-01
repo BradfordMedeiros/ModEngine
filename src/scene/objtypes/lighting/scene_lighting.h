@@ -9,7 +9,6 @@
 
 struct LightingCell {
   objid lightIndex;
-  glm::vec3 color;
 };
 struct VoxelLightingData {
   int voxelCellWidth;
@@ -20,7 +19,6 @@ struct VoxelLightingData {
 struct LightingUpdate {
   int index;
   objid lightIndex;
-  glm::vec3 color;
 };
 
 int getLightingCellWidth();

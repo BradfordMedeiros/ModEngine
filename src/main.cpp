@@ -23,6 +23,7 @@ struct RenderingResources {
   unsigned int framebufferProgram;
   unsigned int uiShaderProgram;
   Framebuffers framebuffers;
+  UniformBuffer voxelLighting;
 };
 
 RenderingResources renderingResources { };
@@ -302,7 +303,7 @@ std::vector<std::string> listOctreeTextures(){
 
     "../gameresources/build/textures/clean/stonewall.jpg",
     "../gameresources/build/textures/metal_grating.jpg",
-    "../gameresources/build/textures/paintings/luna.png",
+    "../gameresources/build/textures/moonman.jpg",
 
     "../gameresources/build/uncategorized/bluetransparent.png",
     "../gameresources/build/textures/const_fence.png",
@@ -527,7 +528,7 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
     "textureid", "bones[0]", "encodedid", "hasBones", "model", "discardTexAmount", 
     "emissionAmount", 
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture",
-    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs[0]", "voxelcellwidth",
+    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth",
     "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview"
   });
  
@@ -535,9 +536,11 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
   if (shader != renderStages.selection.shader){
     auto lightUpdates = getLightUpdates();
     for (auto &lightUpdate : lightUpdates){
-      std::cout << "voxel lighting : " << lightUpdate.index << ", color = " << print(lightUpdate.color) << std::endl;
-      shaderSetUniformInt(shader, ("voxelindexs[" + std::to_string(lightUpdate.index) + "]").c_str(), getLightsArrayIndex(lights, lightUpdate.lightIndex));
-
+      std::cout << "voxel lighting : " << lightUpdate.index << std::endl;
+      
+      int lightArrayIndex = getLightsArrayIndex(lights, lightUpdate.lightIndex);
+      modassert(lightUpdate.index < 512, "lightUpdate.index too large");
+      updateBufferData(renderingResources.voxelLighting , sizeof(glm::vec4) * lightUpdate.index, sizeof(int), &lightArrayIndex);
     }
     shaderSetUniformInt(shader, "voxelcellwidth", getLightingCellWidth());
   }
@@ -580,6 +583,8 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   setShaderWorld(shader, lights, lightProjview, cameraPosition, uniforms);
   setShaderDataObject(shader, color, id, projview);
 }
+
+
 
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, bool textBoundingOnly){
   glUseProgram(shaderProgram);
@@ -719,7 +724,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
   uniformData.push_back(UniformData { .name = "textureOffset",  .value = glm::vec2(1.f, 1.f) });
   uniformData.push_back(UniformData { .name = "textureSize",  .value = glm::vec2(1.f, 1.f) });
   uniformData.push_back(UniformData { .name = "textureTiling",  .value = glm::vec2(1.f, 1.f) });
-  setUniformData(shaderProgram, uniformData, { "bones[0]", "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs[0]", "voxelcellwidth" });
+  setUniformData(shaderProgram, uniformData, { "bones[0]", "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth" });
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
   if (state.showDebug && numChunkingGridCells > 0){
@@ -1112,6 +1117,7 @@ std::optional<unsigned int> shaderByName(std::string name){
 }
 
 
+
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
 const GLFWvidmode* mode = NULL;
@@ -1307,6 +1313,21 @@ int main(int argc, char* argv[]){
   renderingResources.framebuffers = generateFramebuffers(state.resolution.x, state.resolution.y);
   glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
   setActiveDepthTexture(renderingResources.framebuffers.fbo, &renderingResources.framebuffers.depthTextures.at(0), 0);
+
+  renderingResources.voxelLighting = generateUniformBuffer(sizeof(glm::vec4) * 512);
+  {
+    int zeroBuffer[512] = {};
+    for (int i = 0; i < 512; i++){
+      zeroBuffer[i] = -1;
+    }
+   // std::cout << "voxel lighting light : ";
+    for (int i = 0; i < 512; i++){
+      updateBufferData(renderingResources.voxelLighting, sizeof(glm::vec4) * i, sizeof(int), &zeroBuffer[i]);
+    //  std::cout << zeroBuffer[i] << " ";
+    }
+    //std::cout << std::endl;
+  }
+
 
   if (!glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE){
     std::cerr << "ERROR: framebuffer incomplete" << std::endl;

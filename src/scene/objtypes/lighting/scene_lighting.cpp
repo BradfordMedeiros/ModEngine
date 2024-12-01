@@ -1,20 +1,19 @@
 #include "./scene_lighting.h"
 
-int voxelCellWidth = 32;
+int voxelCellWidth = 8;
 int numCellsDim = 8;
 
 int xyzToIndex(int x , int y, int z){
 	return x + (numCellsDim * y) + (numCellsDim * numCellsDim * z);
 }
 
-std::vector<LightingCell> generateLightingCells(int size, int lightIndex = 0){
+std::vector<LightingCell> generateLightingCells(int size, int lightIndex = -1){
   std::vector<LightingCell> cells;
   for (int x = 0; x < size; x++){
     for (int y = 0; y < size; y++){
       for (int z = 0; z < size; z++){
       	cells.push_back(LightingCell {
           .lightIndex = lightIndex,
-          .color = glm::vec3(0.f, 0.f, 0.f),
         });
       }
     }
@@ -31,14 +30,14 @@ std::vector<LightingCell> generateLightingCellsDebug(int size){
   	for (int x = 0; x < size; x++){
   		auto nearIndex = xyzToIndex(x, y, 0);
   		auto farIndex = xyzToIndex(x, y, (size - 1));
-  		cells.at(nearIndex).color = glm::vec3(1.f, 1.f, 1.f);
-   		cells.at(farIndex).color = glm::vec3(1.f, 1.f, 1.f);
+  		cells.at(nearIndex).lightIndex = -2;
+   		cells.at(farIndex).lightIndex = -2;
   	}
   	for (int z = 0; z < size ; z++){
   		auto nearIndex = xyzToIndex(0, y, z);
    		auto farIndex = xyzToIndex((size - 1), y, z);
-  		cells.at(nearIndex).color = glm::vec3(1.f, 1.f, 1.f);
-  		cells.at(farIndex).color = glm::vec3(1.f, 1.f, 1.f);
+  		cells.at(nearIndex).lightIndex = -2;
+   		cells.at(farIndex).lightIndex = -2;
   	}
   }
   return cells;
@@ -48,13 +47,13 @@ std::vector<LightingCell> generateLightingCellsDebug(int size){
 VoxelLightingData lightingData {
   .voxelCellWidth = voxelCellWidth,
   .numCellsDim = numCellsDim,
-  .cells = generateLightingCellsDebug(numCellsDim),  // this is hardcoded in the shader
+  .cells = generateLightingCells(numCellsDim),  // this is hardcoded in the shader
 };
 
 std::string printDebugVoxelLighting(){
 	std::string data = "";
 	for (auto &cell : lightingData.cells){
-		data += "(" + std::to_string(cell.lightIndex) + " = " + print(cell.color) + ") ";
+		data += "(" + std::to_string(cell.lightIndex) + " ) ";
 	}
 	return data;
 }
@@ -106,19 +105,17 @@ void addVoxelLight(objid lightIndex, glm::vec3 position, int radius){
 				modassert(index >= 0 && index < lightingData.cells.size(), std::string("Invalid light index, got = ") + std::to_string(index));
 				lightingData.cells.at(index) = LightingCell {
 					.lightIndex = lightIndex,
-					.color = color,
 				};
 			}
 		}
 	}
-	//std::cout << "voxel lighting lighting data: " << print(printDebugVoxelLighting()) << std::endl;
+	std::cout << "voxel lighting lighting data: " << print(printDebugVoxelLighting()) << std::endl;
 }
 void removeVoxelLight(objid lightIndex){
 	modlog("voxel lighting remove: ", std::to_string(lightIndex));
 	for (auto &cell : lightingData.cells){
 		if (cell.lightIndex == lightIndex){
-			cell.lightIndex = 0;
-			cell.color = glm::vec3(0.f, 0.f, 0.f);
+			cell.lightIndex = -1;
 		}
 	}
 	//std::cout << "voxel lighting lighting data: " << print(printDebugVoxelLighting()) << std::endl;
@@ -146,7 +143,6 @@ std::vector<LightingUpdate> getLightUpdates(){
     lightUpdates.push_back(LightingUpdate {
       .index = i,
       .lightIndex = lightingData.cells.at(i).lightIndex,
-      .color = lightingData.cells.at(i).color,
     });
   }
   return lightUpdates;

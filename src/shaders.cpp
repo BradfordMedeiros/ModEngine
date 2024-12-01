@@ -544,14 +544,15 @@ void shaderLogDebug(const char* str){
 
 //////////////////////
 UniformBuffer generateUniformBuffer(size_t size){
+  modlog("generateUniformBuffer creating buffer size", std::to_string(size));
   unsigned int ubo;
   glGenBuffers(1, &ubo);
 
   glBindBuffer(GL_UNIFORM_BUFFER, ubo);
   glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_STATIC_DRAW);
+  glBindBufferRange(GL_UNIFORM_BUFFER, 0 /* binding port, aka layout in the uniform block in glsl*/, ubo, 0, size);
   glBindBuffer(GL_UNIFORM_BUFFER, 0);
   
-  glBindBufferRange(GL_UNIFORM_BUFFER, 0, ubo, 0, size);
   return UniformBuffer {
     .ubo = ubo,
   };

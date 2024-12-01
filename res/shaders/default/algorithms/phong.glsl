@@ -13,7 +13,7 @@ vec3 calculatePhongLight(vec3 normal){
       // no lights
       continue;
     }else if (lightIndex == -2){
-      //totalDiffuse += vec3(1, 1, 1);
+      totalDiffuse += vec3(0, 1, 0);
       continue;
     }
 
