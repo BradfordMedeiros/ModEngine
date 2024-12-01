@@ -541,3 +541,26 @@ void shaderLogDebug(const char* str){
     glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_MARKER, 0,  GL_DEBUG_SEVERITY_MEDIUM, -1 /* -1 => null terminated string*/, str); 
   #endif
 }
+
+//////////////////////
+UniformBuffer generateUniformBuffer(size_t size){
+  unsigned int ubo;
+  glGenBuffers(1, &ubo);
+
+  glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+  glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_STATIC_DRAW);
+  glBindBuffer(GL_UNIFORM_BUFFER, 0);
+  
+  glBindBufferRange(GL_UNIFORM_BUFFER, 0, ubo, 0, size);
+  return UniformBuffer {
+    .ubo = ubo,
+  };
+}
+void freeBuffer(UniformBuffer& uniformBuffer){
+  glDeleteBuffers(1, &uniformBuffer.ubo);
+}
+void updateBufferData(UniformBuffer& uniformBuffer, size_t offsetIntoBuffer, size_t sizeToWrite, void* data){
+  glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer.ubo);
+  glBufferSubData(GL_UNIFORM_BUFFER, offsetIntoBuffer, sizeToWrite, data);
+  glBindBuffer(GL_UNIFORM_BUFFER, 0);  
+}
