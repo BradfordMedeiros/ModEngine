@@ -6,5 +6,7 @@
 void utilParseAndSerializeQuatTest();
 void orientationFromPosTest();
 
+void envSubstTest();
+
 #endif
 

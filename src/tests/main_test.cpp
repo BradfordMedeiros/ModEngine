@@ -74,6 +74,10 @@ std::vector<TestCase> tests = {
     .test = orientationFromPosTest,
   },
   TestCase {
+    .name = "envSubstTest",
+    .test = envSubstTest,
+  },
+  TestCase {
     .name = "directionToQuatConversionTest",
     .test = directionToQuatConversionTest,
   },

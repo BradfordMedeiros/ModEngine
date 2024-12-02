@@ -1104,3 +1104,79 @@ std::optional<AttributeValue> getAttributeValue(GameobjAttributes& attributes, c
   }
   return std::nullopt;
 }
+
+std::vector<SubstMatch> envSubstMatches(std::string& content){
+  std::vector<SubstMatch> matches;
+  for (int i = 0; i < content.size(); i++){
+    char character = content.at(i);
+    std::optional<SubstMatch> currMatch;
+    if (character == '$'){
+      for (int j = i + 1; j < content.size(); j++){
+        if (content.at(j) == ' ' || content.at(j) == '\n'){
+          // found the end
+
+          auto length = j - i - 1;
+          currMatch = SubstMatch {
+            .index = i,
+            .endIndex = j,
+            .key = content.substr(i + 1, length),
+          };
+          i = j;
+          break;
+        }
+        if (j == (content.size() - 1)){
+          auto length = j - i;
+          currMatch = SubstMatch {
+            .index = i,
+            .endIndex = j + 1,
+            .key = content.substr(i + 1, length),
+          };
+          i = j;
+          break;    
+        }
+        if (content.at(j) == '$'){
+          auto length = j - i - 1;
+          currMatch = SubstMatch {
+            .index = i,
+            .endIndex = j,
+            .key = content.substr(i + 1, length),
+          };
+          i = (j - 1);
+          break;
+        }
+      }
+      if (currMatch.has_value()){
+        matches.push_back(currMatch.value());
+      }
+    }
+  }
+  return matches;
+}
+
+std::string envSubst(std::string content, std::unordered_map<std::string, std::string> values){
+  // replaces $VALUE with values provided
+  auto matches = envSubstMatches(content);
+  std::string finalValue = "";
+  //std::cout << "env: content: " << content << std::endl;
+  //for (auto &match : matches){
+  //  std::cout << "env: " << match.index << ", " << match.endIndex << ", " << match.key << ", key length = " << match.key.size() << std::endl;
+  //}
+  for (int i = 0; i < content.size(); i++){
+    for (auto &match : matches){
+      if (match.index == i){
+        i = match.endIndex;
+        //std::cout << "env: subst: " << match.key << std::endl;
+        modassert(values.find(match.key) != values.end(), std::string("no matching key for: ") + match.key);
+        finalValue = finalValue + values.at(match.key);
+        if (i >= content.size()){
+          goto returnEnvSubstData;
+        }
+        continue;
+      }
+    }
+    finalValue = finalValue + content.at(i);
+  }
+returnEnvSubstData:
+
+  return finalValue;
+}

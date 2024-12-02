@@ -78,3 +78,57 @@ void orientationFromPosTest(){
     }
   }
 }
+
+
+struct envSubstTestContent {
+  std::string content;
+  std::string result;
+  std::unordered_map<std::string, std::string> templateArgs;
+};
+
+void envSubstTest(){
+  std::vector<envSubstTestContent> tests = {
+    envSubstTestContent {
+      .content = "$number",
+      .result = "123",
+      .templateArgs = { {"number", "123" }},
+    },
+    envSubstTestContent {
+      .content = "$number",
+      .result = "456",
+      .templateArgs = { {"number", "456" }},
+    },
+    envSubstTestContent {
+      .content = "$another",
+      .result = "hello",
+      .templateArgs = { {"another", "hello" }},
+    },
+    envSubstTestContent {
+      .content = "$one ",
+      .result = "this is one ",
+      .templateArgs = { {"one", "this is one" } },
+    },
+    envSubstTestContent {
+      .content = "$three$four",
+      .result = "anotherhello",
+      .templateArgs = { {"three", "another" }, { "four", "hello" }},
+    },
+    envSubstTestContent {
+      .content = "$five\n$six",
+      .result = "hello\nworld",
+      .templateArgs = { {"five", "hello" }, {"six", "world" }},
+    },
+    envSubstTestContent {
+      .content = "$five [value]\n$six",
+      .result = "hello [value]\nworld",
+      .templateArgs = { {"five", "hello" }, {"six", "world" }},
+    },
+  };
+
+  for (auto &test : tests){
+    std::string templatedValue = envSubst(test.content, test.templateArgs);
+    if (test.result != templatedValue){
+      throw std::logic_error("unexpected substitution: expected: " + test.result + "(" + std::to_string(test.result.size()) + ")" + " got: " + templatedValue + "(" +  std::to_string(templatedValue.size()) + ")");
+    }
+  }
+}

@@ -83,7 +83,7 @@ std::string readShaderResolveIncludes(std::string file, std::function<std::strin
 }
 
 unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile){
-   unsigned int vertexShaderId = compileShader(readShaderResolveIncludes(vertexShaderFilepath, readFile), GL_VERTEX_SHADER);
+   unsigned int vertexShaderId = compileShader(envSubst(readShaderResolveIncludes(vertexShaderFilepath, readFile), {}), GL_VERTEX_SHADER);
    shaderError vertexShaderError = checkShaderError(vertexShaderId);
    if (vertexShaderError.isError){
      std::cerr << "ERROR: compiling vertex shader failed: " << vertexShaderError.errorMessage << std::endl;
@@ -91,7 +91,7 @@ unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentSh
      modlog("shaders", "compiled vertex shader success");
    }
 
-   unsigned int fragmentShaderId = compileShader(readShaderResolveIncludes(fragmentShaderFilepath, readFile), GL_FRAGMENT_SHADER);
+   unsigned int fragmentShaderId = compileShader(envSubst(readShaderResolveIncludes(fragmentShaderFilepath, readFile), {}), GL_FRAGMENT_SHADER);
    shaderError fragmentShaderError = checkShaderError(fragmentShaderId);
    if (fragmentShaderError.isError){
      std::cerr << "ERROR: compiling fragment shader failed: " << fragmentShaderError.errorMessage << std::endl;

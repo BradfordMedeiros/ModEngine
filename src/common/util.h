@@ -414,4 +414,12 @@ struct ShapeOptions {
   std::optional<int> zIndex = std::nullopt;
 };
 
+struct SubstMatch {
+  int index;
+  int endIndex;
+  std::string key;
+};
+std::vector<SubstMatch> envSubstMatches(std::string& content);
+std::string envSubst(std::string content, std::unordered_map<std::string, std::string> values);
+
 #endif
