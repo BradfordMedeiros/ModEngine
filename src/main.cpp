@@ -87,7 +87,7 @@ TimePlayback timePlayback(
 
 std::unordered_map<std::string, std::string>& getTemplateValues(){
   static std::unordered_map<std::string, std::string> templateValues {
-    { "MAX_LIGHTS", "64" },
+    { "LIGHT_BUFFER_SIZE", "64" },
     { "BONES_BUFFER", "100" },
   };
 

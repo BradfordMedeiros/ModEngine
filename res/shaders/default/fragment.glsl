@@ -39,15 +39,14 @@ uniform vec2 textureOffset;
 uniform vec2 textureTiling;
 uniform vec2 textureSize;
 
-#define MAX_LIGHTS $MAX_LIGHTS 
 uniform int numlights;
-uniform vec3 lights[MAX_LIGHTS];
-uniform vec3 lightscolor[MAX_LIGHTS];
-uniform vec3 lightsdir[MAX_LIGHTS];
-uniform vec3 lightsatten[MAX_LIGHTS];
-uniform float lightsmaxangle[MAX_LIGHTS];
-uniform float lightsangledelta[MAX_LIGHTS];
-uniform bool lightsisdir[MAX_LIGHTS];
+uniform vec3 lights[ $LIGHT_BUFFER_SIZE ];
+uniform vec3 lightscolor[ $LIGHT_BUFFER_SIZE ];
+uniform vec3 lightsdir[ $LIGHT_BUFFER_SIZE ];
+uniform vec3 lightsatten[ $LIGHT_BUFFER_SIZE ];
+uniform float lightsmaxangle[ $LIGHT_BUFFER_SIZE ];
+uniform float lightsangledelta[ $LIGHT_BUFFER_SIZE ];
+uniform bool lightsisdir[ $LIGHT_BUFFER_SIZE ];
 
 uniform vec3 ambientAmount;
 uniform vec3 emissionAmount;
@@ -114,7 +113,7 @@ vec3 lookupAmbientLight(){
 }
 
 int getNumLights(){
-  return min(numlights, MAX_LIGHTS);
+  return min(numlights, $LIGHT_BUFFER_SIZE );
 }
 
 float calcAttenutation(int lightNumber){
