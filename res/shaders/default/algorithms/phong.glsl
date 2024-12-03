@@ -7,7 +7,7 @@ vec3 calculatePhongLight(vec3 normal){
   int voxelLights[ $LIGHTS_PER_VOXEL ];
   getLights(voxelLights);
 
-  for (int x = 0; x < 5; x++){
+  for (int x = 0; x < $LIGHTS_PER_VOXEL; x++){
     int lightIndex = voxelLights[x];
     if (lightIndex == -1){
       // no lights

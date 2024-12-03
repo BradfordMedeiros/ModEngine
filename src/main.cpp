@@ -84,14 +84,22 @@ TimePlayback timePlayback(
   []() -> void {}
 ); 
 
-std::unordered_map<std::string, std::string> templateValues {
-  { "MAX_LIGHTS", "64" },
-  { "VOXEL_ARR_SIZE", "512" },
-  { "LIGHTS_PER_VOXEL", "5" },
-  { "NUM_CELLS_DIM", "8" },
-  { "BONES_BUFFER", "100" },
-};
 
+std::unordered_map<std::string, std::string>& getTemplateValues(){
+  static std::unordered_map<std::string, std::string> templateValues {
+    { "MAX_LIGHTS", "64" },
+    { "BONES_BUFFER", "100" },
+  };
+
+  VoxelLightingData& lightingData = getVoxelLightingData();
+  auto numCellsDim = lightingData.numCellsDim;
+  int totalSize = (numCellsDim * numCellsDim * numCellsDim);
+  templateValues["VOXEL_ARR_SIZE"] = std::to_string(totalSize);
+  templateValues["NUM_CELLS_DIM"] = std::to_string(numCellsDim);
+  templateValues["LIGHTS_PER_VOXEL"] = std::to_string(lightingData.lightsPerVoxel);
+
+  return templateValues;
+}
 
 bool updateTime(bool fpsFixed, float fixedDelta, float speedMultiplier, int timetoexit, bool hasFramelimit, float minDeltaTime, float fpsLag){
   static float currentFps = 0.f;
@@ -613,7 +621,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       glClear(GL_DEPTH_BUFFER_BIT);
     }
 
-    auto newShader = (shader == "" || !allowShaderOverride) ? shaderProgram : getShaderByShaderString(shader, shaderFolderPath, interface.readFile, templateValues);
+    auto newShader = (shader == "" || !allowShaderOverride) ? shaderProgram : getShaderByShaderString(shader, shaderFolderPath, interface.readFile, getTemplateValues);
     if (!lastShaderId.has_value() || newShader != lastShaderId.value()){
       lastShaderId = newShader;
       //sendAlert(std::string("loaded shader: ") + shader);
@@ -1129,7 +1137,7 @@ std::optional<unsigned int> shaderByName(std::string name){
 
 void reloadShaders(){
   modlog("shaders", "reloading");
-  mainShaders.shaderProgram = reloadShaderInCache(mainShaders.shaderProgram, interface.readFile, templateValues);
+  mainShaders.shaderProgram = reloadShaderInCache(mainShaders.shaderProgram, interface.readFile, getTemplateValues());
 }
 
 
@@ -1372,25 +1380,25 @@ int main(int argc, char* argv[]){
   glPointSize(10.f);
 
   modlog("shaders", std::string("shader file path is ") + shaderFolderPath);
-  unsigned int shaderProgram = loadShaderIntoCache("default", shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl", interface.readFile, templateValues);
+  unsigned int shaderProgram = loadShaderIntoCache("default", shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
   
   modlog("shaders", std::string("framebuffer file path is ") + framebufferShaderPath);
-  renderingResources.framebufferProgram = loadShaderIntoCache("framebuffer", framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl", interface.readFile, templateValues);
+  renderingResources.framebufferProgram = loadShaderIntoCache("framebuffer", framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
 
   std::string depthShaderPath = "./res/shaders/depth";
   modlog("shaders", std::string("depth file path is ") + depthShaderPath);
-  unsigned int depthProgram = loadShaderIntoCache("depth", depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl", interface.readFile, templateValues);
+  unsigned int depthProgram = loadShaderIntoCache("depth", depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
 
   modlog("shaders", std::string("ui shader file path is ") + uiShaderPath);
-  renderingResources.uiShaderProgram = loadShaderIntoCache("ui", uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile, templateValues);
+  renderingResources.uiShaderProgram = loadShaderIntoCache("ui", uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
 
   std::string selectionShaderPath = "./res/shaders/selection";
   modlog("shaders", std::string("selection shader path is ") + selectionShaderPath);
-  unsigned int selectionProgram = loadShaderIntoCache("selection", selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl", interface.readFile, templateValues);
+  unsigned int selectionProgram = loadShaderIntoCache("selection", selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
 
   std::string blurShaderPath = "./res/shaders/blur";
   modlog("shaders", std::string("blur shader path is: ") + blurShaderPath);
-  unsigned int blurProgram = loadShaderIntoCache("blur", blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile, templateValues);
+  unsigned int blurProgram = loadShaderIntoCache("blur", blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
 
   mainShaders = RenderShaders {
     .blurProgram = blurProgram,
@@ -1405,7 +1413,7 @@ int main(int argc, char* argv[]){
     &renderingResources.framebuffers.portalTextures.at(0), renderingResources.framebuffers.portalTextures.size(),
     mainShaders,
     interface.readFile,
-    templateValues
+    getTemplateValues()
   );
 
   CustomApiBindings pluginApi{
@@ -1444,7 +1452,7 @@ int main(int argc, char* argv[]){
     .freeLine = [](objid lineId) -> void { freeLine(lineData, lineId); } ,
     .shaderByName = shaderByName,
     .loadShader = [](std::string name, std::string path) -> unsigned int{
-      return loadShaderIntoCache(name, path + "/vertex.glsl", path + "/fragment.glsl", interface.readFile, templateValues);
+      return loadShaderIntoCache(name, path + "/vertex.glsl", path + "/fragment.glsl", interface.readFile, getTemplateValues());
     },
     .getGameObjNameForId = getGameObjectName,
     .setGameObjectAttr = setGameObjectAttr,

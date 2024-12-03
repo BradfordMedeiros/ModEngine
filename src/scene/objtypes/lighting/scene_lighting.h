@@ -11,6 +11,7 @@ struct LightingCell {
   objid lightIndex;
 };
 struct VoxelLightingData {
+  int lightsPerVoxel;
   int voxelCellWidth;
   int numCellsDim;
   std::vector<LightingCell> cells;

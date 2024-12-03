@@ -161,12 +161,13 @@ ShaderStringVals parseShaderString(std::string& shaderString){
   };
 }
 
-unsigned int getShaderByShaderString(std::string shaderString, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args){
+unsigned int getShaderByShaderString(std::string shaderString, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile, std::function<std::unordered_map<std::string, std::string>&()> getArgs){
   modassert(shaderString.size() != 0, "getShaderByShaderString shader string size is 0");
   if (shaderstringToId.find(shaderString) == shaderstringToId.end()){
     auto parsedShaderString = parseShaderString(shaderString);
     auto vertexShaderPath = parsedShaderString.vertex.has_value() ? parsedShaderString.vertex.value() : shaderFolderPath + "/vertex.glsl";
     auto fragmentShaderPath = parsedShaderString.fragment.has_value() ? parsedShaderString.fragment.value() : shaderFolderPath + "/fragment.glsl";
+    auto args = getArgs();
     loadShaderIntoCache(shaderString, vertexShaderPath, fragmentShaderPath, readFile, args);
   }
   return shaderstringToId.at(shaderString).programId;
