@@ -39,7 +39,7 @@ uniform vec2 textureOffset;
 uniform vec2 textureTiling;
 uniform vec2 textureSize;
 
-#define MAX_LIGHTS 32
+#define MAX_LIGHTS $MAX_LIGHTS 
 uniform int numlights;
 uniform vec3 lights[MAX_LIGHTS];
 uniform vec3 lightscolor[MAX_LIGHTS];
@@ -59,12 +59,12 @@ uniform float bloomThreshold;
 // https://stackoverflow.com/questions/20647207/glsl-replace-large-uniform-int-array-with-buffer-or-texture
 // todo make lighting info here a ubo
 
-int numCellsDim = 8;
+int numCellsDim = $NUM_CELLS_DIM;
 uniform int voxelcellwidth;
 uniform bool enableVoxelLighting;
 
 layout(std140, binding = 0) uniform LargeBlock {
-  int voxelindexs2[512];  // vec4 alignment....could pack better probably then
+  int voxelindexs2[ $VOXEL_ARR_SIZE ];  // vec4 alignment....could pack better probably then
 };
 
 float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBaseLow, float toBaseHigh){
@@ -102,9 +102,9 @@ int calcLightIndex(){
   return lightIndex;
 }
 
-void getLights(out int lights[5]){
+void getLights(out int lights[ $LIGHTS_PER_VOXEL ]){
   lights[0] = calcLightIndex();
-  for (int i = 1; i < 5; i++){
+  for (int i = 1; i < $LIGHTS_PER_VOXEL ; i++){
     lights[i] = -1;  // -1 => no light
   }
 }

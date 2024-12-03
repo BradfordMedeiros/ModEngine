@@ -2,7 +2,12 @@
 
 #define SHADER_INFO_LOG_LENGTH 512
 
-std::map<std::string, GLint> shaderstringToId;
+struct ShaderInformation {
+  unsigned int programId;
+  std::string vertexShader;
+  std::string fragmentShader;
+};
+std::map<std::string, ShaderInformation> shaderstringToId;
 
 struct shaderError {
   bool isError;
@@ -82,8 +87,8 @@ std::string readShaderResolveIncludes(std::string file, std::function<std::strin
   return join(getIncludes(shaderStr, readFile, { file }), '\n');
 }
 
-unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile){
-   unsigned int vertexShaderId = compileShader(envSubst(readShaderResolveIncludes(vertexShaderFilepath, readFile), {}), GL_VERTEX_SHADER);
+unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args){
+   unsigned int vertexShaderId = compileShader(envSubst(readShaderResolveIncludes(vertexShaderFilepath, readFile), args), GL_VERTEX_SHADER);
    shaderError vertexShaderError = checkShaderError(vertexShaderId);
    if (vertexShaderError.isError){
      std::cerr << "ERROR: compiling vertex shader failed: " << vertexShaderError.errorMessage << std::endl;
@@ -91,7 +96,7 @@ unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentSh
      modlog("shaders", "compiled vertex shader success");
    }
 
-   unsigned int fragmentShaderId = compileShader(envSubst(readShaderResolveIncludes(fragmentShaderFilepath, readFile), {}), GL_FRAGMENT_SHADER);
+   unsigned int fragmentShaderId = compileShader(envSubst(readShaderResolveIncludes(fragmentShaderFilepath, readFile), args), GL_FRAGMENT_SHADER);
    shaderError fragmentShaderError = checkShaderError(fragmentShaderId);
    if (fragmentShaderError.isError){
      std::cerr << "ERROR: compiling fragment shader failed: " << fragmentShaderError.errorMessage << std::endl;
@@ -100,7 +105,7 @@ unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentSh
    }
 
    if (vertexShaderError.isError || fragmentShaderError.isError){
-     throw std::runtime_error("error compiling shaders"); 
+     modassert(false, "error compiling shaders"); 
    }
    
    unsigned int shaderProgramId = glCreateProgram();
@@ -110,7 +115,7 @@ unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentSh
    shaderError programError = checkProgramLinkError(shaderProgramId);
    if (programError.isError){
      std::cerr << "ERROR: linking shader program" << programError.errorMessage << std::endl;
-     throw std::runtime_error("error linking shaders");
+     modassert(false, "error linking shaders");
    }
    modlog("shaders", "compiled shader program success");
 
@@ -119,12 +124,26 @@ unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentSh
    return shaderProgramId;
 }
 
-unsigned int loadShaderIntoCache(std::string shaderString, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile){
+unsigned int loadShaderIntoCache(std::string shaderString, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args){
   modassert(shaderstringToId.find(shaderString) == shaderstringToId.end(), "shader already loaded")
-  auto shaderId = loadShader(vertexShaderFilepath, fragmentShaderFilepath, readFile);
-  shaderstringToId[shaderString] = shaderId;
+  auto shaderId = loadShader(vertexShaderFilepath, fragmentShaderFilepath, readFile, args);
+  shaderstringToId[shaderString] = ShaderInformation {
+    .programId = shaderId,
+    .vertexShader = vertexShaderFilepath,
+    .fragmentShader = fragmentShaderFilepath,
+  };
   modlog("loading shader into cache", shaderString + std::string(" ") + std::to_string(shaderId));
   return shaderId;
+}
+
+unsigned int reloadShaderInCache(unsigned shaderId, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args){
+  for (auto &[shaderString, shaderInfo] : shaderstringToId){
+    if (shaderInfo.programId == shaderId){
+      auto shaderId = loadShader(shaderInfo.vertexShader, shaderInfo.fragmentShader, readFile, args);
+      shaderInfo.programId = shaderId;
+      return shaderId;
+    }
+  }
 }
 
 struct ShaderStringVals {
@@ -142,15 +161,15 @@ ShaderStringVals parseShaderString(std::string& shaderString){
   };
 }
 
-GLint getShaderByShaderString(std::string shaderString, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile){
+unsigned int getShaderByShaderString(std::string shaderString, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args){
   modassert(shaderString.size() != 0, "getShaderByShaderString shader string size is 0");
   if (shaderstringToId.find(shaderString) == shaderstringToId.end()){
     auto parsedShaderString = parseShaderString(shaderString);
     auto vertexShaderPath = parsedShaderString.vertex.has_value() ? parsedShaderString.vertex.value() : shaderFolderPath + "/vertex.glsl";
     auto fragmentShaderPath = parsedShaderString.fragment.has_value() ? parsedShaderString.fragment.value() : shaderFolderPath + "/fragment.glsl";
-    loadShaderIntoCache(shaderString, vertexShaderPath, fragmentShaderPath, readFile);
+    loadShaderIntoCache(shaderString, vertexShaderPath, fragmentShaderPath, readFile, args);
   }
-  return shaderstringToId.at(shaderString);
+  return shaderstringToId.at(shaderString).programId;
 }
 
 std::vector<UniformData> queryUniforms(unsigned int program){
@@ -440,8 +459,8 @@ std::string print(std::vector<UniformData>& uniforms){
 }
 
 std::optional<std::string> nameByShaderId(GLint shaderProgram){
-  for (auto &[shaderString, shaderId] : shaderstringToId){
-    if (shaderId == shaderProgram){
+  for (auto &[shaderString, shaderInfo] : shaderstringToId){
+    if (shaderInfo.programId == shaderProgram){
       return shaderString;
     }
   }

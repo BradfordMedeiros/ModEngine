@@ -189,7 +189,8 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
   unsigned int fbo,
   unsigned int framebufferTexture, 
   unsigned int framebufferTexture2,
-  std::function<std::string(std::string)> readFile
+  std::function<std::string(std::string)> readFile,
+  std::unordered_map<std::string, std::string>& args
 ){
   auto tokens = parseFormat(readFile(postprocessingFile));
   auto additionalShaders = parseRenderStages(tokens, framebufferTexture, framebufferTexture2);
@@ -206,7 +207,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
   for (int i  = 0; i < additionalShaders.size(); i++){
     auto additionalShader = additionalShaders.at(i);
     auto shaderPath = additionalShader.shader;
-    unsigned int shaderProgram = loadShaderIntoCache(shaderPath, shaderPath + "/vertex.glsl", shaderPath + "/fragment.glsl", readFile);
+    unsigned int shaderProgram = loadShaderIntoCache(shaderPath, shaderPath + "/vertex.glsl", shaderPath + "/fragment.glsl", readFile, args);
     bool isEvenIndex = (i % 2) == 0;
     RenderStep renderStep {
       .name = additionalShader.name,
@@ -215,7 +216,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
       .colorAttachment0 = isEvenIndex ? framebufferTexture2 : framebufferTexture,
       .colorAttachment1 = 0,
       .depthTextureIndex = 0,
-      .shader = shaderProgram,
+      .shader = &shaderProgram,
       .quadTexture = isEvenIndex ? framebufferTexture : framebufferTexture2,
       .hasColorAttachment1 = false,
       .renderWorld = false,
@@ -249,8 +250,9 @@ RenderStages loadRenderStages(
   unsigned int framebufferTexture, unsigned int framebufferTexture2, unsigned int framebufferTexture3, unsigned int framebufferTexture4,
   unsigned int* depthTextures, int numDepthTextures,
   unsigned int* portalTextures, int numPortalTextures,
-  RenderShaders shaders,
-  std::function<std::string(std::string)> readFile
+  RenderShaders& shaders,
+  std::function<std::string(std::string)> readFile,
+  std::unordered_map<std::string, std::string>& args
 ){
   assert(numDepthTextures > 1);
   assert(numPortalTextures > 1);
@@ -261,7 +263,7 @@ RenderStages loadRenderStages(
     .colorAttachment0 = framebufferTexture4,
     .colorAttachment1 = framebufferTexture2,  // this stores UV coord
     .depthTextureIndex = 0,
-    .shader = shaders.selectionProgram,
+    .shader = &shaders.selectionProgram,
     .quadTexture = 0,
     .hasColorAttachment1 = true,
     .renderWorld = true,
@@ -288,7 +290,7 @@ RenderStages loadRenderStages(
       .colorAttachment0 = framebufferTexture, 
       .colorAttachment1 = framebufferTexture2,
       .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
-      .shader = shaders.selectionProgram,
+      .shader = &shaders.selectionProgram,
       .quadTexture = 0,
       .hasColorAttachment1 = true,
       .renderWorld = true,
@@ -316,7 +318,7 @@ RenderStages loadRenderStages(
     .colorAttachment0 = framebufferTexture,
     .colorAttachment1 = framebufferTexture2,
     .depthTextureIndex = 0,
-    .shader = shaders.shaderProgram,
+    .shader = &shaders.shaderProgram,
     .quadTexture = 0,
     .hasColorAttachment1 = true,
     .renderWorld = true,
@@ -343,7 +345,7 @@ RenderStages loadRenderStages(
       .colorAttachment0 = portalTextures[0], // this gets updated
       .colorAttachment1 = 0,
       .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
-      .shader = shaders.shaderProgram,
+      .shader = &shaders.shaderProgram,
       .quadTexture = framebufferTexture,
       .hasColorAttachment1 = false,
       .renderWorld = true,
@@ -378,7 +380,7 @@ RenderStages loadRenderStages(
     .colorAttachment0 = framebufferTexture3,
     .colorAttachment1 = 0,
     .depthTextureIndex = 1,
-    .shader = shaders.blurProgram,
+    .shader = &shaders.blurProgram,
     .quadTexture = framebufferTexture2,
     .hasColorAttachment1 = true,
     .renderWorld = false,
@@ -410,7 +412,7 @@ RenderStages loadRenderStages(
     .colorAttachment0 = framebufferTexture2,
     .colorAttachment1 = 0,
     .depthTextureIndex = 1,
-    .shader = shaders.blurProgram,
+    .shader = &shaders.blurProgram,
     .quadTexture = framebufferTexture3,
     .hasColorAttachment1 = true,
     .renderWorld = false,
@@ -443,7 +445,7 @@ RenderStages loadRenderStages(
     .colorAttachment0 = framebufferTexture3,
     .colorAttachment1 = 0,
     .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
-    .shader = shaders.blurProgram,
+    .shader = &shaders.blurProgram,
     .quadTexture = framebufferTexture,
     .hasColorAttachment1 = false,
     .renderWorld = false,
@@ -494,7 +496,7 @@ RenderStages loadRenderStages(
   dof2.uniforms.intUniforms.at(0).value = false;
   dof2.textures.at(0).framebufferTextureId = framebufferTexture3;
 
-  auto additionalRenderSteps = parseAdditionalRenderSteps("./res/postprocessing", fbo, framebufferTexture, framebufferTexture2, readFile);
+  auto additionalRenderSteps = parseAdditionalRenderSteps("./res/postprocessing", fbo, framebufferTexture, framebufferTexture2, readFile, args);
 
   RenderStages stages {
     .selection = selectionRender,
@@ -600,7 +602,7 @@ unsigned int finalRenderingTexture(RenderStages& stages){   // additional render
 
 std::string renderStageToString(RenderStep& step){
   std::string text = step.name + "\n---------\n";
-  text = text + "shader: " + std::to_string(step.shader) + "\n";
+  text = text + "shader: " + std::to_string(*step.shader) + "\n";
   text = text + "enable: " + (step.enable ?  "true" : "false") + "\n";
   text = text + "colorAttachment0: " + std::to_string(step.colorAttachment0) + "\n";
   text = text + "colorAttachment1: " + std::to_string(step.colorAttachment1) + " (has attachment = " + (step.hasColorAttachment1 ? "true" : "false") + ")\n";

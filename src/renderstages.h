@@ -28,7 +28,7 @@ struct RenderStep {
   unsigned int colorAttachment0;
   unsigned int colorAttachment1;
   unsigned int depthTextureIndex;
-  unsigned int shader;
+  unsigned int* shader;
   unsigned int quadTexture;
   bool hasColorAttachment1;
   bool renderWorld;
@@ -68,8 +68,9 @@ RenderStages loadRenderStages(
   unsigned int framebufferTexture4,
   unsigned int* depthTextures, int numDepthTextures,
   unsigned int* portalTextures, int numPortalTextures,
-  RenderShaders shaders,
-  std::function<std::string(std::string)> readFile
+  RenderShaders& shaders,
+  std::function<std::string(std::string)> readFile,
+  std::unordered_map<std::string, std::string>& args
 );
 
 struct RenderStagesDofInfo {

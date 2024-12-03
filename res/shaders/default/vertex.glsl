@@ -9,7 +9,7 @@ layout (location = 8) in float aBoneWeight[4];
 
 uniform mat4 model;
 uniform mat4 projview;
-uniform mat4 bones[100];
+uniform mat4 bones[ $BONES_BUFFER ];
 uniform bool hasBones;
 
 uniform mat4 lightsprojview;

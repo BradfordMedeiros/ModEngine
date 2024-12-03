@@ -27,7 +27,7 @@ struct RenderingResources {
 };
 
 RenderingResources renderingResources { };
-
+RenderShaders mainShaders {};
 
 // long lived app resources
 DefaultResources defaultResources {};
@@ -73,6 +73,8 @@ DynamicLoading dynamicLoading;
 WorldTiming timings;
 
 bool showCrashInfo = false;
+bool shouldReloadShaders = false;
+float lastReloadTime = 0.f;
 
 TimePlayback timePlayback(
   statistics.initialTime, 
@@ -81,6 +83,14 @@ TimePlayback timePlayback(
   }, 
   []() -> void {}
 ); 
+
+std::unordered_map<std::string, std::string> templateValues {
+  { "MAX_LIGHTS", "64" },
+  { "VOXEL_ARR_SIZE", "512" },
+  { "LIGHTS_PER_VOXEL", "5" },
+  { "NUM_CELLS_DIM", "8" },
+  { "BONES_BUFFER", "100" },
+};
 
 
 bool updateTime(bool fpsFixed, float fixedDelta, float speedMultiplier, int timetoexit, bool hasFramelimit, float minDeltaTime, float fpsLag){
@@ -533,7 +543,7 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
   });
  
 
-  if (shader != renderStages.selection.shader){
+  if (shader != *renderStages.selection.shader){
     auto lightUpdates = getLightUpdates();
     for (auto &lightUpdate : lightUpdates){
       std::cout << "voxel lighting : " << lightUpdate.index << std::endl;
@@ -547,7 +557,7 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
 
 
   for (int i = 0; i < lights.size(); i++){
-    if (shader != renderStages.selection.shader){
+    if (shader != *renderStages.selection.shader){
       glm::vec3 position = lights.at(i).transform.position;
       auto& light = lights.at(i); 
       shaderSetUniform(shader, ("lights[" + std::to_string(i) + "]").c_str(), position);
@@ -570,10 +580,10 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
 }
 void setShaderDataObject(GLint shader, glm::vec3 color, objid id, glm::mat4 projview){
   //std::cout << "set shader data object" << std::endl; 
-  if (shader != renderStages.selection.shader){
+  if (shader != *renderStages.selection.shader){
     shaderSetUniform(shader, "tint", glm::vec4(color.x, color.y, color.z, 1.f));
   }
-  if (shader == renderStages.selection.shader){
+  if (shader == *renderStages.selection.shader){
     shaderSetUniform(shader, "encodedid", getColorFromGameobject(id));
   }
   shaderSetUniform(shader, "projview", projview);
@@ -603,7 +613,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       glClear(GL_DEPTH_BUFFER_BIT);
     }
 
-    auto newShader = (shader == "" || !allowShaderOverride) ? shaderProgram : getShaderByShaderString(shader, shaderFolderPath, interface.readFile);
+    auto newShader = (shader == "" || !allowShaderOverride) ? shaderProgram : getShaderByShaderString(shader, shaderFolderPath, interface.readFile, templateValues);
     if (!lastShaderId.has_value() || newShader != lastShaderId.value()){
       lastShaderId = newShader;
       //sendAlert(std::string("loaded shader: ") + shader);
@@ -666,7 +676,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       };
       auto trianglesDrawn = renderObject(
         newShader, 
-        newShader == renderStages.selection.shader,
+        newShader == *renderStages.selection.shader,
         id, 
         world.objectMapping, 
         state.showDebug ? state.showDebugMask : 0,
@@ -925,12 +935,12 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
       std::cout << "Warning: render step not enabled: " << renderStep.name << std::endl;
       return triangles;
     }
-    glUseProgram(renderStep.shader);
-    setRenderUniformData(renderStep.shader, renderStep.uniforms);
+    glUseProgram(*renderStep.shader);
+    setRenderUniformData(*renderStep.shader, renderStep.uniforms);
     for (int i = 0; i < renderStep.textures.size(); i++){
       auto &textureData = renderStep.textures.at(i);
       int activeTextureOffset = 7 + i; // this is funny, but basically other textures before this use up to 5, probably should centralize these values
-      shaderSetUniformInt(renderStep.shader, textureData.nameInShader.c_str(), activeTextureOffset);
+      shaderSetUniformInt(*renderStep.shader, textureData.nameInShader.c_str(), activeTextureOffset);
       glActiveTexture(GL_TEXTURE0 + activeTextureOffset);
       if (textureData.type == RENDER_TEXTURE_REGULAR){
         glBindTexture(GL_TEXTURE_2D, world.textures.at(textureData.textureName).texture.textureId);
@@ -952,7 +962,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
 
     if (state.showSkybox && renderStep.renderSkybox){
       glDepthMask(GL_FALSE);
-      renderSkybox(renderStep.shader, context.view, context.cameraTransform.position);  // Probably better to render this at the end 
+      renderSkybox(*renderStep.shader, context.view, context.cameraTransform.position);  // Probably better to render this at the end 
       glDepthMask(GL_TRUE);    
     }
     glEnable(GL_DEPTH_TEST);
@@ -968,7 +978,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
       std::vector<LightInfo> lights = {};
       std::vector<glm::mat4> lightProjview = {};
       RenderUniforms uniforms { };
-      setShaderData(renderStep.shader, ndiOrtho, glm::mat4(1.f), lights, false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjview, glm::vec3(0.f, 0.f, 0.f), uniforms);
+      setShaderData(*renderStep.shader, ndiOrtho, glm::mat4(1.f), lights, false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjview, glm::vec3(0.f, 0.f, 0.f), uniforms);
       glActiveTexture(GL_TEXTURE0); 
       glBindTexture(GL_TEXTURE_2D, renderStep.quadTexture);
       glBindVertexArray(defaultResources.quadVAO3D);
@@ -985,7 +995,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     if (renderStep.renderWorld){
       // important - redundant call to glUseProgram
       glm::mat4* projection = context.projection.has_value() ? &context.projection.value() : NULL;
-      auto worldTriangles = renderWorld(context.world, renderStep.shader, renderStep.allowShaderOverride, projection, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraTransform.position, renderStep.textBoundingOnly);
+      auto worldTriangles = renderWorld(context.world, *renderStep.shader, renderStep.allowShaderOverride, projection, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraTransform.position, renderStep.textBoundingOnly);
       triangles += worldTriangles;
     }
 
@@ -1117,6 +1127,11 @@ std::optional<unsigned int> shaderByName(std::string name){
 }
 
 
+void reloadShaders(){
+  modlog("shaders", "reloading");
+  mainShaders.shaderProgram = reloadShaderInCache(mainShaders.shaderProgram, interface.readFile, templateValues);
+}
+
 
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
@@ -1169,6 +1184,7 @@ int main(int argc, char* argv[]){
    ("loglevel", "Log level", cxxopts::value<int>()->default_value("0"))
    ("sqlshell", "Launch into sql shell", cxxopts::value<bool>()->default_value("false"))
    ("watch", "Watch file system for resource changes", cxxopts::value<std::string>()->default_value(""))
+   ("reload", "Reload shaders", cxxopts::value<bool>()->default_value("false"))
    ("h,help", "Print help")
   ;        
 
@@ -1200,6 +1216,7 @@ int main(int argc, char* argv[]){
   int numChunkingGridCells = result["grid"].as<int>();
 
   showCrashInfo = result["crashinfo"].as<bool>();
+  shouldReloadShaders = result["reload"].as<bool>();
 
   std::string worldfile = result["world"].as<std::string>();
   bool useChunkingSystem = worldfile != "";
@@ -1355,38 +1372,40 @@ int main(int argc, char* argv[]){
   glPointSize(10.f);
 
   modlog("shaders", std::string("shader file path is ") + shaderFolderPath);
-  unsigned int shaderProgram = loadShaderIntoCache("default", shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl", interface.readFile);
+  unsigned int shaderProgram = loadShaderIntoCache("default", shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl", interface.readFile, templateValues);
   
   modlog("shaders", std::string("framebuffer file path is ") + framebufferShaderPath);
-  renderingResources.framebufferProgram = loadShaderIntoCache("framebuffer", framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl", interface.readFile);
+  renderingResources.framebufferProgram = loadShaderIntoCache("framebuffer", framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl", interface.readFile, templateValues);
 
   std::string depthShaderPath = "./res/shaders/depth";
   modlog("shaders", std::string("depth file path is ") + depthShaderPath);
-  unsigned int depthProgram = loadShaderIntoCache("depth", depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl", interface.readFile);
+  unsigned int depthProgram = loadShaderIntoCache("depth", depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl", interface.readFile, templateValues);
 
   modlog("shaders", std::string("ui shader file path is ") + uiShaderPath);
-  renderingResources.uiShaderProgram = loadShaderIntoCache("ui", uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile);
+  renderingResources.uiShaderProgram = loadShaderIntoCache("ui", uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile, templateValues);
 
   std::string selectionShaderPath = "./res/shaders/selection";
   modlog("shaders", std::string("selection shader path is ") + selectionShaderPath);
-  unsigned int selectionProgram = loadShaderIntoCache("selection", selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl", interface.readFile);
+  unsigned int selectionProgram = loadShaderIntoCache("selection", selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl", interface.readFile, templateValues);
 
   std::string blurShaderPath = "./res/shaders/blur";
   modlog("shaders", std::string("blur shader path is: ") + blurShaderPath);
-  unsigned int blurProgram = loadShaderIntoCache("blur", blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile);
+  unsigned int blurProgram = loadShaderIntoCache("blur", blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile, templateValues);
 
+  mainShaders = RenderShaders {
+    .blurProgram = blurProgram,
+    .selectionProgram = selectionProgram,
+    .uiShaderProgram = renderingResources.uiShaderProgram,
+    .shaderProgram = shaderProgram,
+  };
   renderStages = loadRenderStages(
     renderingResources.framebuffers.fbo, 
     renderingResources.framebuffers.framebufferTexture, renderingResources.framebuffers.framebufferTexture2, renderingResources.framebuffers.framebufferTexture3, renderingResources.framebuffers.framebufferTexture4,
     &renderingResources.framebuffers.depthTextures.at(0), renderingResources.framebuffers.depthTextures.size(),
     &renderingResources.framebuffers.portalTextures.at(0), renderingResources.framebuffers.portalTextures.size(),
-    RenderShaders {
-      .blurProgram = blurProgram,
-      .selectionProgram = selectionProgram,
-      .uiShaderProgram = renderingResources.uiShaderProgram,
-      .shaderProgram = shaderProgram,
-    },
-    interface.readFile
+    mainShaders,
+    interface.readFile,
+    templateValues
   );
 
   CustomApiBindings pluginApi{
@@ -1425,7 +1444,7 @@ int main(int argc, char* argv[]){
     .freeLine = [](objid lineId) -> void { freeLine(lineData, lineId); } ,
     .shaderByName = shaderByName,
     .loadShader = [](std::string name, std::string path) -> unsigned int{
-      return loadShaderIntoCache(name, path + "/vertex.glsl", path + "/fragment.glsl", interface.readFile);
+      return loadShaderIntoCache(name, path + "/vertex.glsl", path + "/fragment.glsl", interface.readFile, templateValues);
     },
     .getGameObjNameForId = getGameObjectName,
     .setGameObjectAttr = setGameObjectAttr,
@@ -1731,6 +1750,10 @@ int main(int argc, char* argv[]){
     doRemoveQueuedRemovals();
     doUnloadScenes();
     registerStatistics();
+    if (shouldReloadShaders && ((getTotalTime() - lastReloadTime) > 5.f)){
+      reloadShaders();
+      lastReloadTime = getTotalTime();
+    }
 
     for (auto &idCoordToGet : idCoordsToGet){
       idCoordToGet.afterFrame(idCoordToGet.result, idCoordToGet.resultUv);
@@ -1916,9 +1939,9 @@ int main(int argc, char* argv[]){
       // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
       renderWithProgram(renderContext, renderStages.selection);
 
-      shaderSetUniform(renderStages.selection.shader, "projview", ndiOrtho);
+      shaderSetUniform(*renderStages.selection.shader, "projview", ndiOrtho);
       glDisable(GL_DEPTH_TEST);
-      drawShapeData(lineData, renderStages.selection.shader, ndiOrtho, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
+      drawShapeData(lineData, *renderStages.selection.shader, ndiOrtho, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
       glEnable(GL_DEPTH_TEST);
 
     )

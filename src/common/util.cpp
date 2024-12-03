@@ -1112,7 +1112,7 @@ std::vector<SubstMatch> envSubstMatches(std::string& content){
     std::optional<SubstMatch> currMatch;
     if (character == '$'){
       for (int j = i + 1; j < content.size(); j++){
-        if (content.at(j) == ' ' || content.at(j) == '\n'){
+        if (content.at(j) == ' ' || content.at(j) == '\n' || content.at(j) == ';'){
           // found the end
 
           auto length = j - i - 1;
@@ -1166,7 +1166,7 @@ std::string envSubst(std::string content, std::unordered_map<std::string, std::s
       if (match.index == i){
         i = match.endIndex;
         //std::cout << "env: subst: " << match.key << std::endl;
-        modassert(values.find(match.key) != values.end(), std::string("no matching key for: ") + match.key);
+        modassert(values.find(match.key) != values.end(), std::string("no matching key for: ") + match.key + "(" + std::to_string(match.key.size()) + ")");
         finalValue = finalValue + values.at(match.key);
         if (i >= content.size()){
           goto returnEnvSubstData;

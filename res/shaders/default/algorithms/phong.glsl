@@ -4,7 +4,7 @@ vec3 calculatePhongLight(vec3 normal){
   vec3 totalDiffuse  = vec3(0, 0, 0);     
   vec3 totalSpecular = vec3(0, 0, 0);     
 
-  int voxelLights[5];
+  int voxelLights[ $LIGHTS_PER_VOXEL ];
   getLights(voxelLights);
 
   for (int x = 0; x < 5; x++){
