@@ -126,7 +126,7 @@ void envSubstTest(){
   };
 
   for (auto &test : tests){
-    std::string templatedValue = envSubst(test.content, test.templateArgs);
+    std::string templatedValue = envSubst(test.content, test.templateArgs).result;
     if (test.result != templatedValue){
       throw std::logic_error("unexpected substitution: expected: " + test.result + "(" + std::to_string(test.result.size()) + ")" + " got: " + templatedValue + "(" +  std::to_string(templatedValue.size()) + ")");
     }

@@ -87,46 +87,59 @@ std::string readShaderResolveIncludes(std::string file, std::function<std::strin
   return join(getIncludes(shaderStr, readFile, { file }), '\n');
 }
 
-unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args){
-   unsigned int vertexShaderId = compileShader(envSubst(readShaderResolveIncludes(vertexShaderFilepath, readFile), args), GL_VERTEX_SHADER);
+std::optional<unsigned int> loadShader(std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args){
+   auto programCodeVertex = envSubst(readShaderResolveIncludes(vertexShaderFilepath, readFile), args);
+   if (!programCodeVertex.valid){
+     modlog("shaders", "failed loading vertex: " + programCodeVertex.error);
+     return std::nullopt;
+   }
+   auto programCodeFragment = envSubst(readShaderResolveIncludes(fragmentShaderFilepath, readFile), args);
+   if (!programCodeFragment.valid){
+     modlog("shaders", "failed loading fragment: " + programCodeFragment.error);
+    return std::nullopt;
+   }
+
+   unsigned int vertexShaderId = compileShader(programCodeVertex.result, GL_VERTEX_SHADER);
    shaderError vertexShaderError = checkShaderError(vertexShaderId);
    if (vertexShaderError.isError){
-     std::cerr << "ERROR: compiling vertex shader failed: " << vertexShaderError.errorMessage << std::endl;
+     std::cerr << "ERROR: compiling vertex shader failed: " << vertexShaderError.errorMessage << ", file = " << vertexShaderFilepath <<std::endl;
    }else{
      modlog("shaders", "compiled vertex shader success");
    }
 
-   unsigned int fragmentShaderId = compileShader(envSubst(readShaderResolveIncludes(fragmentShaderFilepath, readFile), args), GL_FRAGMENT_SHADER);
+   unsigned int fragmentShaderId = compileShader(programCodeFragment.result, GL_FRAGMENT_SHADER);
    shaderError fragmentShaderError = checkShaderError(fragmentShaderId);
    if (fragmentShaderError.isError){
-     std::cerr << "ERROR: compiling fragment shader failed: " << fragmentShaderError.errorMessage << std::endl;
+     std::cerr << "ERROR: compiling fragment shader failed: " << fragmentShaderError.errorMessage << ", file = " << fragmentShaderFilepath << std::endl;
    }else{
      modlog("shaders", "compiled fragment shader success");
    }
 
    if (vertexShaderError.isError || fragmentShaderError.isError){
-     modassert(false, "error compiling shaders"); 
+     return std::nullopt;
    }
    
    unsigned int shaderProgramId = glCreateProgram();
    glAttachShader(shaderProgramId, vertexShaderId);
    glAttachShader(shaderProgramId, fragmentShaderId);
    glLinkProgram(shaderProgramId);
-   shaderError programError = checkProgramLinkError(shaderProgramId);
-   if (programError.isError){
-     std::cerr << "ERROR: linking shader program" << programError.errorMessage << std::endl;
-     modassert(false, "error linking shaders");
-   }
-   modlog("shaders", "compiled shader program success");
 
    glDeleteShader(vertexShaderId);
    glDeleteShader(fragmentShaderId);
+
+   shaderError programError = checkProgramLinkError(shaderProgramId);
+   if (programError.isError){
+     std::cerr << "ERROR: linking shader program" << programError.errorMessage << std::endl;
+     return std::nullopt;
+   }
+   modlog("shaders", "compiled shader program success");
+
    return shaderProgramId;
 }
 
 unsigned int* loadShaderIntoCache(std::string shaderString, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args){
   modassert(shaderstringToId.find(shaderString) == shaderstringToId.end(), "shader already loaded")
-  auto shaderId = loadShader(vertexShaderFilepath, fragmentShaderFilepath, readFile, args);
+  auto shaderId = loadShader(vertexShaderFilepath, fragmentShaderFilepath, readFile, args).value();
   shaderstringToId[shaderString] = ShaderInformation {
     .programId = shaderId,
     .vertexShader = vertexShaderFilepath,
@@ -140,7 +153,10 @@ void reloadShaders(std::function<std::string(std::string)> readFile, std::unorde
   modlog("shaders", "reloading");
   for (auto &[shaderString, shaderInfo] : shaderstringToId){
     auto shaderId = loadShader(shaderInfo.vertexShader, shaderInfo.fragmentShader, readFile, args);
-    shaderInfo.programId = shaderId;
+    if (shaderId.has_value()){
+      glDeleteProgram(shaderInfo.programId);
+      shaderInfo.programId = shaderId.value();
+    }
   }
 }
 

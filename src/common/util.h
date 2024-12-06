@@ -420,6 +420,12 @@ struct SubstMatch {
   std::string key;
 };
 std::vector<SubstMatch> envSubstMatches(std::string& content);
-std::string envSubst(std::string content, std::unordered_map<std::string, std::string> values);
+
+struct EnvSubstResult {
+  std::string result;
+  std::string error;
+  bool valid;
+};
+EnvSubstResult envSubst(std::string content, std::unordered_map<std::string, std::string> values);
 
 #endif

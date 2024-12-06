@@ -1153,7 +1153,7 @@ std::vector<SubstMatch> envSubstMatches(std::string& content){
   return matches;
 }
 
-std::string envSubst(std::string content, std::unordered_map<std::string, std::string> values){
+EnvSubstResult envSubst(std::string content, std::unordered_map<std::string, std::string> values){
   // replaces $VALUE with values provided
   auto matches = envSubstMatches(content);
   std::string finalValue = "";
@@ -1166,7 +1166,9 @@ std::string envSubst(std::string content, std::unordered_map<std::string, std::s
       if (match.index == i){
         i = match.endIndex;
         //std::cout << "env: subst: " << match.key << std::endl;
-        modassert(values.find(match.key) != values.end(), std::string("no matching key for: ") + match.key + "(" + std::to_string(match.key.size()) + ")");
+        if (values.find(match.key) == values.end()){
+          return EnvSubstResult { .error = std::string("no matching key for: ") + match.key + "(" + std::to_string(match.key.size()) + ")", .valid = false };
+        }
         finalValue = finalValue + values.at(match.key);
         if (i >= content.size()){
           goto returnEnvSubstData;
@@ -1177,6 +1179,5 @@ std::string envSubst(std::string content, std::unordered_map<std::string, std::s
     finalValue = finalValue + content.at(i);
   }
 returnEnvSubstData:
-
-  return finalValue;
+  return EnvSubstResult { .result = finalValue, .valid = true };
 }
