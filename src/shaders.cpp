@@ -124,7 +124,7 @@ unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentSh
    return shaderProgramId;
 }
 
-unsigned int loadShaderIntoCache(std::string shaderString, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args){
+unsigned int* loadShaderIntoCache(std::string shaderString, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args){
   modassert(shaderstringToId.find(shaderString) == shaderstringToId.end(), "shader already loaded")
   auto shaderId = loadShader(vertexShaderFilepath, fragmentShaderFilepath, readFile, args);
   shaderstringToId[shaderString] = ShaderInformation {
@@ -133,16 +133,14 @@ unsigned int loadShaderIntoCache(std::string shaderString, std::string vertexSha
     .fragmentShader = fragmentShaderFilepath,
   };
   modlog("loading shader into cache", shaderString + std::string(" ") + std::to_string(shaderId));
-  return shaderId;
+  return &shaderstringToId.at(shaderString).programId;
 }
 
-unsigned int reloadShaderInCache(unsigned shaderId, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args){
+void reloadShaders(std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args){
+  modlog("shaders", "reloading");
   for (auto &[shaderString, shaderInfo] : shaderstringToId){
-    if (shaderInfo.programId == shaderId){
-      auto shaderId = loadShader(shaderInfo.vertexShader, shaderInfo.fragmentShader, readFile, args);
-      shaderInfo.programId = shaderId;
-      return shaderId;
-    }
+    auto shaderId = loadShader(shaderInfo.vertexShader, shaderInfo.fragmentShader, readFile, args);
+    shaderInfo.programId = shaderId;
   }
 }
 

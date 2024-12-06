@@ -20,8 +20,8 @@ CustomApiBindings* mainApi;
 
 // application rendering stuff
 struct RenderingResources { 
-  unsigned int framebufferProgram;
-  unsigned int uiShaderProgram;
+  unsigned int* framebufferProgram;
+  unsigned int* uiShaderProgram;
   Framebuffers framebuffers;
   UniformBuffer voxelLighting;
 };
@@ -193,7 +193,7 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
 
   modassert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "framebuffer incomplete");
 
-  glUseProgram(renderingResources.uiShaderProgram);
+  glUseProgram(*renderingResources.uiShaderProgram);
   glDisable(GL_BLEND);
   glDisable(GL_DEPTH_TEST);
 
@@ -204,26 +204,26 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
   }
 
-  shaderSetUniform(renderingResources.uiShaderProgram, "projection", ndiOrtho);
-  shaderSetUniform(renderingResources.uiShaderProgram, "encodedid", getColorFromGameobject(0));
+  shaderSetUniform(*renderingResources.uiShaderProgram, "projection", ndiOrtho);
+  shaderSetUniform(*renderingResources.uiShaderProgram, "encodedid", getColorFromGameobject(0));
 
   if (shouldClear && clearTextureId.has_value()){
-    shaderSetUniform(renderingResources.uiShaderProgram, "model", glm::scale(glm::mat4(1.0f), glm::vec3(2.f, 2.f, 2.f)));
-    shaderSetUniformBool(renderingResources.uiShaderProgram, "forceTint", false);
-    shaderSetUniform(renderingResources.uiShaderProgram, "tint", clearColor);
-    drawMesh(*defaultResources.defaultMeshes.unitXYRect, renderingResources.uiShaderProgram, clearTextureId.value());
+    shaderSetUniform(*renderingResources.uiShaderProgram, "model", glm::scale(glm::mat4(1.0f), glm::vec3(2.f, 2.f, 2.f)));
+    shaderSetUniformBool(*renderingResources.uiShaderProgram, "forceTint", false);
+    shaderSetUniform(*renderingResources.uiShaderProgram, "tint", clearColor);
+    drawMesh(*defaultResources.defaultMeshes.unitXYRect, *renderingResources.uiShaderProgram, clearTextureId.value());
   }
 
-  shaderSetUniform(renderingResources.uiShaderProgram, "model", glm::mat4(1.f));
-  shaderSetUniformBool(renderingResources.uiShaderProgram, "forceTint", true);
-  shaderSetUniform(renderingResources.uiShaderProgram, "tint", glm::vec4(1.f, 1.f, 1.f, 1.f));
-  drawAllLines(lineData, renderingResources.uiShaderProgram, texture.textureId);
+  shaderSetUniform(*renderingResources.uiShaderProgram, "model", glm::mat4(1.f));
+  shaderSetUniformBool(*renderingResources.uiShaderProgram, "forceTint", true);
+  shaderSetUniform(*renderingResources.uiShaderProgram, "tint", glm::vec4(1.f, 1.f, 1.f, 1.f));
+  drawAllLines(lineData, *renderingResources.uiShaderProgram, texture.textureId);
 
   glEnable(GL_BLEND);
   glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glBlendFunci(1, GL_ONE, GL_ZERO);
 
-  drawShapeData(lineData, renderingResources.uiShaderProgram, ndiOrtho, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
+  drawShapeData(lineData, *renderingResources.uiShaderProgram, ndiOrtho, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
 
 
   for (auto &idCoordToGet : idCoordsToGet){
@@ -702,7 +702,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   
     glStencilFunc(GL_EQUAL, 1, 0xFF);
     if (isPortal && portalTextureInCache && isPerspectivePortal){
-      glUseProgram(renderingResources.framebufferProgram); 
+      glUseProgram(*renderingResources.framebufferProgram); 
       glDisable(GL_DEPTH_TEST);
       glBindVertexArray(defaultResources.quadVAO);
       glBindTexture(GL_TEXTURE_2D,  portalIdCache.at(id));
@@ -803,7 +803,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
 }
 
 void renderUI(Color pixelColor){
-  glUseProgram(renderingResources.uiShaderProgram);
+  glUseProgram(*renderingResources.uiShaderProgram);
   std::vector<UniformData> uniformData;
   uniformData.push_back(UniformData {
     .name = "projection",
@@ -819,7 +819,7 @@ void renderUI(Color pixelColor){
       .textureUnitId = 0,
     },
   });
-  setUniformData(renderingResources.uiShaderProgram, uniformData, { "model", "encodedid", "tint", "time" });
+  setUniformData(*renderingResources.uiShaderProgram, uniformData, { "model", "encodedid", "tint", "time" });
   glEnable(GL_BLEND);
   glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glBlendFunci(1, GL_ONE, GL_ZERO);
@@ -1135,12 +1135,6 @@ std::optional<unsigned int> shaderByName(std::string name){
 }
 
 
-void reloadShaders(){
-  modlog("shaders", "reloading");
-  mainShaders.shaderProgram = reloadShaderInCache(mainShaders.shaderProgram, interface.readFile, getTemplateValues());
-}
-
-
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
 const GLFWvidmode* mode = NULL;
@@ -1380,25 +1374,25 @@ int main(int argc, char* argv[]){
   glPointSize(10.f);
 
   modlog("shaders", std::string("shader file path is ") + shaderFolderPath);
-  unsigned int shaderProgram = loadShaderIntoCache("default", shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
+  unsigned int* shaderProgram = loadShaderIntoCache("default", shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
   
   modlog("shaders", std::string("framebuffer file path is ") + framebufferShaderPath);
   renderingResources.framebufferProgram = loadShaderIntoCache("framebuffer", framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
 
   std::string depthShaderPath = "./res/shaders/depth";
   modlog("shaders", std::string("depth file path is ") + depthShaderPath);
-  unsigned int depthProgram = loadShaderIntoCache("depth", depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
+  unsigned int* depthProgram = loadShaderIntoCache("depth", depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
 
   modlog("shaders", std::string("ui shader file path is ") + uiShaderPath);
   renderingResources.uiShaderProgram = loadShaderIntoCache("ui", uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
 
   std::string selectionShaderPath = "./res/shaders/selection";
   modlog("shaders", std::string("selection shader path is ") + selectionShaderPath);
-  unsigned int selectionProgram = loadShaderIntoCache("selection", selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
+  unsigned int* selectionProgram = loadShaderIntoCache("selection", selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
 
   std::string blurShaderPath = "./res/shaders/blur";
   modlog("shaders", std::string("blur shader path is: ") + blurShaderPath);
-  unsigned int blurProgram = loadShaderIntoCache("blur", blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
+  unsigned int* blurProgram = loadShaderIntoCache("blur", blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
 
   mainShaders = RenderShaders {
     .blurProgram = blurProgram,
@@ -1451,7 +1445,7 @@ int main(int argc, char* argv[]){
     .drawLine = addLineNextCycle,
     .freeLine = [](objid lineId) -> void { freeLine(lineData, lineId); } ,
     .shaderByName = shaderByName,
-    .loadShader = [](std::string name, std::string path) -> unsigned int{
+    .loadShader = [](std::string name, std::string path) -> unsigned int* {
       return loadShaderIntoCache(name, path + "/vertex.glsl", path + "/fragment.glsl", interface.readFile, getTemplateValues());
     },
     .getGameObjNameForId = getGameObjectName,
@@ -1759,7 +1753,7 @@ int main(int argc, char* argv[]){
     doUnloadScenes();
     registerStatistics();
     if (shouldReloadShaders && ((getTotalTime() - lastReloadTime) > 5.f)){
-      reloadShaders();
+      reloadShaders(interface.readFile, getTemplateValues());
       lastReloadTime = getTotalTime();
     }
 
@@ -2002,7 +1996,7 @@ int main(int argc, char* argv[]){
 
     statistics.numTriangles = renderWithProgram(renderContext, renderStages.main);
     Color colorFromSelection = getPixelColor(adjustedCoords.x, adjustedCoords.y);
-    renderVector(shaderProgram, view, numChunkingGridCells);
+    renderVector(*shaderProgram, view, numChunkingGridCells);
 
     Color pixelColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     state.hoveredColor = glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b);
@@ -2041,7 +2035,7 @@ int main(int argc, char* argv[]){
     // depth buffer pass 
     {
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
-      auto finalProgram = depthProgram;
+      auto finalProgram = *depthProgram;
       glUseProgram(finalProgram); 
       glClearColor(0.f, 0.0f, 0.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -2078,7 +2072,7 @@ int main(int argc, char* argv[]){
     /////////////////////////////////////
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    auto finalProgram = (state.renderMode == RENDER_DEPTH) ? depthProgram : renderingResources.framebufferProgram;
+    auto finalProgram = (state.renderMode == RENDER_DEPTH) ? *depthProgram : *renderingResources.framebufferProgram;
     glUseProgram(finalProgram); 
     glClearColor(0.f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -2200,7 +2194,7 @@ int main(int argc, char* argv[]){
     if (state.renderMode == RENDER_FINAL){
       renderUI(pixelColor);
 
-      auto shader = renderingResources.uiShaderProgram;
+      auto shader = *renderingResources.uiShaderProgram;
 
       // below and render screepspace lines can probably be consoliated
       glUseProgram(shader);

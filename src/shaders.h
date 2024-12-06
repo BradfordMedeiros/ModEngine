@@ -8,9 +8,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "./common/util.h"
 
-unsigned int loadShaderIntoCache(std::string shaderString, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args);
+unsigned int* loadShaderIntoCache(std::string shaderString, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args);
 unsigned int getShaderByShaderString(std::string shaderString, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile, std::function<std::unordered_map<std::string, std::string>&()> getArgs);
-unsigned int reloadShaderInCache(unsigned shaderId, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args);
+void reloadShaders(std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args);
 
 struct Sampler2D { 
   int textureUnitId; 
