@@ -1506,6 +1506,7 @@ int main(int argc, char* argv[]){
     .loadAround = addLoadingAround,
     .rmLoadAround = removeLoadingAround,
     .generateMesh = createGeneratedMesh,
+    .generateMeshRaw = createGeneratedMeshRaw,
     .getArgs = getArgs,
     .lock = lock,
     .unlock = unlock,

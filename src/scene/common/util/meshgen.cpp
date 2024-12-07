@@ -176,3 +176,34 @@ MeshData generateMesh(std::vector<glm::vec3>& face, std::vector<glm::vec3>& poin
   };
   return meshdata;
 }
+
+MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<unsigned int>& indices){
+  assert(indices.size() % 3 == 0);
+  std::vector<glm::vec2> texCoords = {
+    glm::vec2(0.f, 0.f),
+    glm::vec2(1.f, 0.f),
+    glm::vec2(1.f, 1.f),
+    glm::vec2(0.f, 0.f),
+    glm::vec2(1.f, 0.f),
+    glm::vec2(1.f, 1.f),
+  };
+
+  std::vector<Vertex> vertices;
+  for (int i = 0; i < verts.size(); i++){
+    vertices.push_back(createVertex(verts.at(i), texCoords.at(i % 6)));
+  }
+
+  MeshData meshdata {
+    .vertices = vertices,
+    .indices = indices,
+    .diffuseTexturePath = "./res/textures/wood.jpg",
+    .hasDiffuseTexture = true,
+    .emissionTexturePath = "",
+    .hasEmissionTexture = false,
+    .opacityTexturePath = "",
+    .hasOpacityTexture = false,
+    .boundInfo = getBounds(vertices),
+    .bones = {},
+  };
+  return meshdata;
+}

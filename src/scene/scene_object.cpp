@@ -245,6 +245,27 @@ void createGeneratedMesh(World& world, std::vector<glm::vec3>& face, std::vector
   modelDataFromCacheFromData(world, destMesh, "testrootname", -1, modelDataCore);
 }
 
+void createGeneratedMeshRaw(World& world, std::vector<glm::vec3>& verts, std::vector<unsigned int>& indexs, std::string destMesh){
+  auto generatedMesh = generateMeshRaw(verts, indexs);
+  ModelDataCore modelDataCore {
+    .modelData = ModelData {
+      .meshIdToMeshData = {{ 0, generatedMesh }},
+      .nodeToMeshId = {{ 0, { 0 }}},
+      .childToParent = {},
+      .nodeTransform = {{ 0, Transformation {
+          .position = glm::vec3(0.f, 0.f, 0.f),
+          .scale = glm::vec3(1.f, 1.f, 1.f),
+          .rotation = MOD_ORIENTATION_FORWARD,
+        }}
+      },
+      .names = {{ 0, "test" }},
+      .animations = {},      
+    },
+    .loadedRoot = "test",
+  };
+  modelDataFromCacheFromData(world, destMesh, "testrootname", -1, modelDataCore);
+}
+
 std::vector<TextureAndName> worldTextures(World& world){
   std::vector<TextureAndName> textures;
   for (auto [textureName, texture] : world.textures){

@@ -42,6 +42,7 @@ bool idInGroup(World& world, objid id, std::vector<objid> groupIds);
 void emit(World& world, objid id, NewParticleOptions particleOpts);
 
 void createGeneratedMesh(World& world, std::vector<glm::vec3>& face, std::vector<glm::vec3>& points, std::string destMesh);
+void createGeneratedMeshRaw(World& world, std::vector<glm::vec3>& verts, std::vector<unsigned int>& indexs, std::string destMesh);
 
 struct TextureAndName {
   Texture texture;
