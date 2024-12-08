@@ -177,20 +177,13 @@ MeshData generateMesh(std::vector<glm::vec3>& face, std::vector<glm::vec3>& poin
   return meshdata;
 }
 
-MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<unsigned int>& indices){
-  assert(indices.size() % 3 == 0);
-  std::vector<glm::vec2> texCoords = {
-    glm::vec2(0.f, 0.f),
-    glm::vec2(1.f, 0.f),
-    glm::vec2(1.f, 1.f),
-    glm::vec2(0.f, 0.f),
-    glm::vec2(1.f, 0.f),
-    glm::vec2(1.f, 1.f),
-  };
+MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices){
+  modassert(indices.size() % 3 == 0, "indices must be multiple of 3");
+  modassert(verts.size() == uvCoords.size(), "verts must be same size of uvCoords");
 
   std::vector<Vertex> vertices;
   for (int i = 0; i < verts.size(); i++){
-    vertices.push_back(createVertex(verts.at(i), texCoords.at(i % 6)));
+    vertices.push_back(createVertex(verts.at(i), uvCoords.at(i)));
   }
 
   MeshData meshdata {

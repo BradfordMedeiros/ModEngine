@@ -109,7 +109,7 @@ struct CustomApiBindings {
   objid (*loadAround)(objid);
   void (*rmLoadAround)(objid);
   void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string);
-  void (*generateMeshRaw)(std::vector<glm::vec3>& verts, std::vector<unsigned int>& indexs, std::string);
+  void (*generateMeshRaw)(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indexs, std::string);
   std::map<std::string, std::string> (*getArgs)();
   bool (*lock)(std::string, objid);
   bool (*unlock)(std::string, objid);

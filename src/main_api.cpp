@@ -1035,8 +1035,8 @@ std::optional<objid> getParent(objid id){
 void createGeneratedMesh(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string destMesh){
   createGeneratedMesh(world, face, points, destMesh);
 }
-void createGeneratedMeshRaw(std::vector<glm::vec3>& verts, std::vector<unsigned int>& indexs, std::string destMesh){
-  createGeneratedMeshRaw(world, verts, indexs, "water");
+void createGeneratedMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indexs, std::string destMesh){
+  createGeneratedMeshRaw(world, verts, uvCoords, indexs, destMesh);
 }
 
 objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth){

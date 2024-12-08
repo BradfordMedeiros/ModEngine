@@ -245,8 +245,8 @@ void createGeneratedMesh(World& world, std::vector<glm::vec3>& face, std::vector
   modelDataFromCacheFromData(world, destMesh, "testrootname", -1, modelDataCore);
 }
 
-void createGeneratedMeshRaw(World& world, std::vector<glm::vec3>& verts, std::vector<unsigned int>& indexs, std::string destMesh){
-  auto generatedMesh = generateMeshRaw(verts, indexs);
+void createGeneratedMeshRaw(World& world, std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indexs, std::string destMesh){
+  auto generatedMesh = generateMeshRaw(verts, uvCoords, indexs);
   ModelDataCore modelDataCore {
     .modelData = ModelData {
       .meshIdToMeshData = {{ 0, generatedMesh }},
