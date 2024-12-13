@@ -1556,8 +1556,10 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   }
 
   for (auto id : world.entitiesToUpdate){
-    auto absolutePosition = fullTransformation(world.sandbox, id).position;
-    updateObjectPositions(world.objectMapping, id, absolutePosition, viewTransform);
+    if (idExists(world.sandbox, id)){  // why do i need this check?
+      auto absolutePosition = fullTransformation(world.sandbox, id).position;
+      updateObjectPositions(world.objectMapping, id, absolutePosition, viewTransform);      
+    }
   }
 
   forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
