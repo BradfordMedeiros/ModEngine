@@ -200,7 +200,7 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   cBindings.onScrollCallback(yoffset);
 
   for (auto &selectedIndex : selectedIds(state.editor)){
-    if (idExists(world.sandbox, selectedIndex) && getLayerForId(selectedIndex).selectIndex != -2){
+    if (idExists(world.sandbox, selectedIndex) && getLayerForId(selectedIndex).selectIndex != -2){ 
       maybeChangeTexture(selectedIndex);
     }
   }
@@ -1152,18 +1152,6 @@ std::vector<InputDispatch> inputFns = {
         }
       }else if (state.manipulatorMode == ROTATE){
       }
-    }
-  },
-  InputDispatch{
-    .alwaysEnable = false,
-    .sourceKey = 'I', // i
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = []() -> void {
-      state.enableBloom = !state.enableBloom;
-      std::cout << "bloom: " << state.enableBloom << std::endl;
-      sendAlert(std::string("bloom: ") + (state.enableBloom ? "enabled" : "disabled"));
     }
   },
   InputDispatch{

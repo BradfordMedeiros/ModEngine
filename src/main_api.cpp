@@ -725,10 +725,12 @@ void setNavmeshTexture(unsigned int textureId){
   state.navmeshTextureId = textureId;
 }
 void setTexture(objid index, std::string textureName){
+  modlog("set texture", textureName);
   setTexture(world, index, textureName, setNavmeshTexture);
 }
 void maybeChangeTexture(int index){
   auto textureName = worldTextures(world).at(drawParams.activeTextureIndex).textureName;
+  modlog("maybe set texture", textureName);
   setTexture(world, index, textureName, setNavmeshTexture);
 }
 

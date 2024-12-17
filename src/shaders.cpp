@@ -140,6 +140,7 @@ std::optional<unsigned int> loadShader(std::string vertexShaderFilepath, std::st
 unsigned int* loadShaderIntoCache(std::string shaderString, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args){
   modassert(shaderstringToId.find(shaderString) == shaderstringToId.end(), "shader already loaded")
   auto shaderId = loadShader(vertexShaderFilepath, fragmentShaderFilepath, readFile, args).value();
+  modlog("shader loaded shader", shaderString);
   shaderstringToId[shaderString] = ShaderInformation {
     .programId = shaderId,
     .vertexShader = vertexShaderFilepath,
