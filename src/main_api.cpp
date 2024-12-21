@@ -295,9 +295,15 @@ std::vector<int32_t> getObjectsByAttr(std::string type, std::optional<AttributeV
   auto objIds = listObjInScene(world.sandbox, sceneId);
   std::vector<objid> idsWithAttrs;
   for (auto id : objIds){
-    auto attrValue = getObjectAttributePtr(world, id, type.c_str());
+    auto attrValue = getObjectAttribute(world, id, type.c_str());
     if (attrValue.has_value()){
-      idsWithAttrs.push_back(id);
+      if (value.has_value()){
+        if (aboutEqual(attrValue.value(), value.value())){
+          idsWithAttrs.push_back(id);
+        }
+      }else{
+        idsWithAttrs.push_back(id);
+      }
     }
   }
   return idsWithAttrs;
