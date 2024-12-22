@@ -149,7 +149,7 @@ void sendAlert(std::string message);
 double timeSeconds(bool realtime);
 double timeElapsed();
 
-void playRecording(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type);
+void playRecording(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type, bool resumeFromCurrent);
 void stopRecording(objid id);
 float recordingLength(std::string recordingPath);
 void tickRecording(float time, GameObject& gameobject);

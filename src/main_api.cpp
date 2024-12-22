@@ -652,15 +652,33 @@ struct PlayingRecording {
 
 
 std::map<objid, PlayingRecording> playingRecordings;
-void playRecording(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type){
+void playRecording(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type, bool resumeFromCurrent){
   auto recordingType = type.has_value() ? type.value() : RECORDING_PLAY_ONCE;
   auto isReverseRecording = recordingType == RECORDING_PLAY_ONCE_REVERSE;
 
+  std::optional<PlayingRecording> oldRecording;
+  if (playingRecordings.find(id) != playingRecordings.end()){
+    oldRecording = playingRecordings.at(id);
+  }
+
   stopRecording(id);
+
+  float startTime = getTotalTime();
+  if (oldRecording.has_value()){
+    bool reverseTime = false;
+    reverseTime = oldRecording.has_value() && oldRecording.value().playInReverse != isReverseRecording;
+    if (!reverseTime){
+      startTime = oldRecording.value().startTime;
+    }else{
+      float elapsedTime = getTotalTime() - oldRecording.value().startTime;
+      float remainingTime = recordingLength(recordingPath) - elapsedTime;
+      startTime = getTotalTime() - remainingTime;
+    }
+  }
 
   playingRecordings[id] = PlayingRecording {
     .recordingPath = recordingPath,
-    .startTime = getTotalTime(),
+    .startTime = startTime,
     .type = recordingType,
     .recording = loadRecording(recordingPath, parsePropertySuffix, interface.readFile),
     .playInReverse = isReverseRecording,
