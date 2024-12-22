@@ -89,7 +89,7 @@ struct CustomApiBindings {
   void (*disconnectServer)();
   void (*sendMessageTcp)(std::string data);
   void (*sendMessageUdp)(std::string data);
-  void (*playRecording)(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type, bool resumeFromCurrent);
+  void (*playRecording)(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type, std::optional<PlayRecordingOption> recordingOption);
   void (*stopRecording)(objid id);
   float (*recordingLength)(std::string recordingPath);
   objid (*createRecording)(objid id);

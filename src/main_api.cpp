@@ -650,14 +650,31 @@ struct PlayingRecording {
   bool playInReverse;
 };
 
+/*
+struct RecordingOptionResume{};
+struct RecordingOptionResumeAtTime{
+  float elapsedTime;
+};
+typedef std::variant<RecordingOptionResume, RecordingOptionResumeAtTime> PlayRecordingOption;*/
 
 std::map<objid, PlayingRecording> playingRecordings;
-void playRecording(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type, bool resumeFromCurrent){
+void playRecording(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type,  std::optional<PlayRecordingOption> recordingOption){
+  bool resumeFromCurrent = false;
+  std::optional<float> elapsedTime;
+  if (recordingOption.has_value()){
+    resumeFromCurrent = std::get_if<RecordingOptionResume>(&recordingOption.value()) != NULL;
+ 
+    RecordingOptionResumeAtTime* resumeAtTime = std::get_if<RecordingOptionResumeAtTime>(&recordingOption.value());
+    if (resumeAtTime){
+      elapsedTime = resumeAtTime -> elapsedTime;
+    }
+  }
+
   auto recordingType = type.has_value() ? type.value() : RECORDING_PLAY_ONCE;
   auto isReverseRecording = recordingType == RECORDING_PLAY_ONCE_REVERSE;
 
   std::optional<PlayingRecording> oldRecording;
-  if (playingRecordings.find(id) != playingRecordings.end()){
+  if (playingRecordings.find(id) != playingRecordings.end() && resumeFromCurrent){
     oldRecording = playingRecordings.at(id);
   }
 
@@ -674,6 +691,9 @@ void playRecording(objid id, std::string recordingPath, std::optional<RecordingP
       float remainingTime = recordingLength(recordingPath) - elapsedTime;
       startTime = getTotalTime() - remainingTime;
     }
+  }
+  if (elapsedTime.has_value()){
+    startTime -= elapsedTime.value();
   }
 
   playingRecordings[id] = PlayingRecording {
@@ -704,7 +724,7 @@ void tickRecordings(float time){
   for (auto &[id, recording] : playingRecordings){
     bool isComplete = false;
     auto interpolatedProperties = recordingPropertiesInterpolated(recording.recording, time, interpolateAttribute, recording.startTime, recording.type, recording.playInReverse, &isComplete);
-    if (isComplete){
+    if (isComplete || recording.type == RECORDING_SETONLY){
       modassert(recording.type != RECORDING_PLAY_LOOP, "recording playback - got complete loop type");
       modassert(recording.type != RECORDING_PLAY_LOOP_REVERSE, "recording playback - got complete loop type");
       recordingsToRemove.push_back(id);
