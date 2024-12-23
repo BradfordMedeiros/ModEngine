@@ -372,6 +372,11 @@ struct RecordingOptionResumeAtTime{
 };
 typedef std::variant<RecordingOptionResume, RecordingOptionResumeAtTime> PlayRecordingOption;
 
+struct RecordingState {
+  float timeElapsed;
+  float length;
+};
+
 struct ModAABB {
   glm::vec3 position;
   glm::vec3 min;

@@ -710,10 +710,13 @@ void stopRecording(objid id){
   }
 }
 
-std::optional<float> recordingState(objid id){
+std::optional<RecordingState> recordingState(objid id){
   if (playingRecordings.find(id) != playingRecordings.end()){
     float timeElapsed = getTotalTime() - playingRecordings.at(id).startTime;
-    return timeElapsed;
+    return RecordingState {
+      .timeElapsed = timeElapsed,
+      .length = maxTimeForRecording(playingRecordings.at(id).recording),
+    };
   }
   return std::nullopt;
 }
