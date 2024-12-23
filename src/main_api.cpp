@@ -709,6 +709,15 @@ void stopRecording(objid id){
     playingRecordings.erase(id);
   }
 }
+
+std::optional<float> recordingState(objid id){
+  if (playingRecordings.find(id) != playingRecordings.end()){
+    float timeElapsed = getTotalTime() - playingRecordings.at(id).startTime;
+    return timeElapsed;
+  }
+  return std::nullopt;
+}
+
 float recordingLength(std::string recordingPath){
   auto recording = loadRecording(recordingPath, parsePropertySuffix, interface.readFile);
   return maxTimeForRecording(recording);

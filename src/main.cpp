@@ -1489,6 +1489,7 @@ int main(int argc, char* argv[]){
     .playRecording = playRecording,
     .stopRecording = stopRecording,
     .recordingLength = recordingLength,
+    .recordingState = recordingState,
     .createRecording = createRecording,
     .saveRecording = saveRecording,
     .makeObjectAttr = makeObjectAttr,
