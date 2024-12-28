@@ -69,7 +69,7 @@ struct CustomApiBindings {
   void (*applyForce)(int32_t index, glm::vec3 force);
   void (*applyTorque)(int32_t index, glm::vec3 torque);
   std::optional<ModAABB> (*getModAABB)(int32_t index); 
-  std::vector<std::string> (*listAnimations)(int32_t id);
+  std::set<std::string> (*listAnimations)(int32_t id);
   void (*playAnimation)(int32_t id, std::string animationToPlay, AnimationType animationType);
   void (*stopAnimation)(int32_t id);
   void (*setAnimationPose)(int32_t id, std::string animationToPlay, float time);

@@ -487,15 +487,15 @@ void drawLine2D(glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<gl
   });
 }
 
-std::vector<std::string> listAnimations(int32_t id){
-  std::vector<std::string> animationNames;
+std::set<std::string> listAnimations(int32_t id){
+  std::set<std::string> animationNames;
   auto groupId = getGroupId(world.sandbox, id);
   if (world.animations.find(groupId) == world.animations.end()){
     return animationNames;
   }
   auto animations = world.animations.at(groupId);
   for (auto animation : animations){
-    animationNames.push_back(animation.name);
+    animationNames.insert(animation.name);
   }
   return animationNames;
 }

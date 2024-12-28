@@ -132,7 +132,7 @@ int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontS
 void drawRect(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId);
 void drawLine2D(glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId);
 
-std::vector<std::string> listAnimations(int32_t id);
+std::set<std::string> listAnimations(int32_t id);
 void playAnimation(int32_t id, std::string animationToPlay, AnimationType animationType);
 void stopAnimation(int32_t id);
 void setAnimationPose(int32_t id, std::string animationToPlay, float time);
