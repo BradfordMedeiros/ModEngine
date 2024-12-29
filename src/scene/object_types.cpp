@@ -224,8 +224,7 @@ int renderDefaultNode(GLint shaderProgram, bool isSelectionShader, Mesh& mesh){
   return mesh.numTriangles;
 }
 
-glm::vec4 getAlternatingColor(){
-  static int index = 0;
+glm::vec4 getAlternatingColor(int index){
   static std::vector<glm::vec4> colors = { 
     glm::vec4(1.f, 0.f, 0.f, 1.f), 
     glm::vec4(0.f, 1.f, 0.f, 1.f), 
@@ -283,12 +282,13 @@ int renderObject(
   if (drawBones && api.isBone(id)){
     auto transform = getTransformationFromMatrix(model);
     auto parentId = api.getParentId(id);
+    auto boneTransform = api.getTransform(id);
     if (parentId.has_value()){
-      auto boneTransform = api.getTransform(id);
       auto parentTransform = api.getTransform(parentId.value());
-      api.drawLine(boneTransform.position, parentTransform.position, getAlternatingColor());
-      api.drawSphere(boneTransform.position);
+      api.drawLine(boneTransform.position, parentTransform.position, getAlternatingColor(0));
     }
+    api.drawSphere(boneTransform.position);
+
   }
   if (meshObj != NULL && (meshObj -> meshesToRender.size() > 0) && (showDebugMask & 0b1)) {
     //api.drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 100.f, 0.f), glm::vec4(1.f, 0.f, 0.f, 1.f));
