@@ -74,12 +74,13 @@ std::function<void(std::string name, Transformation pose)> scopeSetPose(World& w
 
 bool resetInitialPose = true;
 bool enableBlending = true;
+float blendingWindow = 0.25f;  // this should be able to be specified by the animation most likely
 
 void tickAnimation(World& world, AnimationData& playback, float currentTime){
   auto meshNameToMeshes = getMeshesForGameobj(world, playback.groupId);
   if (enableBlending && playback.blendData.has_value()){
     float timeElapsedBlendStart = currentTime - playback.blendData.value().blendStartTime;
-    float aFactor = glm::min(1.f, timeElapsedBlendStart / 3.5f);
+    float aFactor = glm::min(1.f, timeElapsedBlendStart / blendingWindow);
     // if afactor > 1.f or something like that, could get rid of the old animation value
     //modassert(false, "blend not yet supported");
     playbackAnimationBlend(
