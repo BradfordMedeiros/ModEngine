@@ -297,6 +297,8 @@ int renderObject(
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
   if (cameraObj != NULL && (showDebugMask & 0b10)){
+    auto transform = getTransformationFromMatrix(model).position;
+    shaderSetUniform(shaderProgram, "model", glm::translate(glm::mat4(1.f), transform));
     return renderDefaultNode(shaderProgram, isSelectionShader, *defaultMeshes.cameraMesh);
   }
 

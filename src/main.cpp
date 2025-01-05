@@ -682,6 +682,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
           return fullTransformation(world.sandbox, id);
         },
       };
+
       auto trianglesDrawn = renderObject(
         newShader, 
         newShader == *renderStages.selection.shader,
@@ -1908,16 +1909,18 @@ int main(int argc, char* argv[]){
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
 
-    if (!state.disableInput && state.visualizeNormals){
+    if (state.visualizeNormals){
       forEveryGameobj(world.sandbox, [](objid id, GameObject& gameobj) -> void {
-        auto transform = fullTransformation(world.sandbox, id);
-        auto toPosition = transform.position + (transform.rotation * glm::vec3(0.f, 0.f, -1.f));
-        auto leftArrow = transform.position + (transform.rotation * glm::vec3(-0.2f, 0.f, -0.8f));
-        auto rightArrow = transform.position + (transform.rotation * glm::vec3(0.2f, 0.f, -0.8f));
+        if (id == getGroupId(world.sandbox, id)){
+          auto transform = fullTransformation(world.sandbox, id);
+          auto toPosition = transform.position + (transform.rotation * glm::vec3(0.f, 0.f, -1.f));
+          auto leftArrow = transform.position + (transform.rotation * glm::vec3(-0.2f, 0.f, -0.8f));
+          auto rightArrow = transform.position + (transform.rotation * glm::vec3(0.2f, 0.f, -0.8f));
 
-        interface.drawLine(transform.position, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
-        interface.drawLine(leftArrow, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
-        interface.drawLine(rightArrow, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
+          interface.drawLine(transform.position, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
+          interface.drawLine(leftArrow, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
+          interface.drawLine(rightArrow, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
+        }
       });
     }
 
