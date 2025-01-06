@@ -98,6 +98,7 @@ std::string print(std::vector<bool>& values);
 std::string print(std::set<std::string>& values);
 std::string print(std::set<unsigned int>& values);
 std::string print(std::optional<objid> id);
+std::string print(std::optional<bool> value);
 std::string print(void*);
 
 glm::vec3 parseVec(std::string positionRaw);

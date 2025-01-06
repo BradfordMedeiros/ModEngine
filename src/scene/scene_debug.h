@@ -17,6 +17,7 @@ struct DotInfo {
   glm::quat rotation;
   bool isBone;
   std::vector<std::string> meshes;
+  std::optional<bool> isDisabled;
 };
 struct DotInfos {
   DotInfo child;

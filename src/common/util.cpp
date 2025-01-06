@@ -355,6 +355,13 @@ std::string print(std::optional<objid> id){
   return std::to_string(id.value());
 }
 
+std::string print(std::optional<bool> value){
+  if (!value.has_value()){
+    return "[no value]";
+  }
+  return value.value() ? "true" : "false";
+}
+
 std::string print(void* data){
   std::ostringstream oss;
   oss << data;
