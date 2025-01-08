@@ -134,6 +134,16 @@ bool stringContains(std::string& str, char character){
   }
   return false;
 }
+bool stringContains(std::string& str, const char* value){
+  return str.find(value) != std::string::npos;
+}
+bool stringEndsWith(std::string& str, const char* value){
+  std::string suffix(value);
+  if (str.length() < suffix.length()) {
+    return false;
+  }
+  return str.compare(str.length() - suffix.length(), suffix.length(), suffix) == 0;
+}
 std::string trim(const std::string& str){
   size_t first = str.find_first_not_of(' ');
   if (std::string::npos == first){
