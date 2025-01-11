@@ -287,8 +287,9 @@ int renderObject(
       auto parentTransform = api.getTransform(parentId.value());
       api.drawLine(boneTransform.position, parentTransform.position, getAlternatingColor(0));
     }
-    api.drawSphere(boneTransform.position);
-
+    //api.drawSphere(boneTransform.position);
+    shaderSetUniform(shaderProgram, "model", glm::translate(glm::mat4(1.f), transform.position));
+    renderDefaultNode(shaderProgram, isSelectionShader, *defaultMeshes.nodeMesh);
   }
   if (meshObj != NULL && (meshObj -> meshesToRender.size() > 0) && (showDebugMask & 0b1)) {
     //api.drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 100.f, 0.f), glm::vec4(1.f, 0.f, 0.f, 1.f));
