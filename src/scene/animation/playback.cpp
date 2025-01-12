@@ -1,30 +1,16 @@
 #include "./playback.h"
 
-// https://gamedev.net/forums/topic/484984-skeletal-animation-non-uniform-scale/4172731/
-void updateBonePoses(std::vector<NameAndMeshObjName> meshNameToMeshes, std::function<glm::mat4(std::string, std::string)> getModelMatrix, std::string rootname){
-  for (int i = 0; i <  meshNameToMeshes.size(); i++){
-    Mesh* mesh = meshNameToMeshes.at(i).mesh;
-    std::string meshname = meshNameToMeshes.at(i).objname;
-    for (Bone& bone : mesh -> bones){
-      bone.offsetMatrix = getModelMatrix(bone.name, rootname) * glm::inverse(bone.initialBonePose);
-    }
-  }
-}
 
 void playbackAnimation(
   Animation& animation,  
   float currentTime, 
-  std::vector<NameAndMeshObjName> meshNameToMeshes,  
-  std::function<glm::mat4(std::string, std::string)> getModelMatrix,
-  std::function<void(std::string, Transformation)> setPose,
-  std::string rootname
+  std::function<void(std::string, Transformation)> setPose
 ){  
   auto posesForTick = animationPosesAtTime(animation, currentTime);
   for (auto pose : posesForTick){
     //printMatrixInformation(pose.pose, std::string("SET_CHANNEL:") + pose.channelName);
     setPose(pose.channelName, pose.pose);
   }
-  updateBonePoses(meshNameToMeshes, getModelMatrix, rootname);
 }
 
 struct ChannelWithTwoPoses {
@@ -98,10 +84,7 @@ void playbackAnimationBlend(
   float currentTime,
   float currentTimeAnimation2,
   float blendFactor,
-  std::vector<NameAndMeshObjName> meshNameToMeshes,  
-  std::function<glm::mat4(std::string, std::string)> getModelMatrix,
-  std::function<void(std::string, Transformation)> setPose,
-  std::string rootname
+  std::function<void(std::string, Transformation)> setPose
 ){ 
   std::cout << "blend: a factor is: " << currentTime << ", " << blendFactor << std::endl;
   auto posesForTick = animationPosesAtTime(animation, currentTime);
@@ -112,6 +95,5 @@ void playbackAnimationBlend(
     //printMatrixInformation(pose.pose, std::string("SET_CHANNEL:") + pose.channelName);
     setPose(pose.channelName, pose.pose);
   }
-  updateBonePoses(meshNameToMeshes, getModelMatrix, rootname);
 }
 

@@ -10,10 +10,7 @@
 void playbackAnimation(
   Animation& animation, 
   float currentTime, 
-  std::vector<NameAndMeshObjName> meshNameToMeshes, 
-  std::function<glm::mat4(std::string, std::string)> getModelMatrix,
-  std::function<void(std::string, Transformation)> setPose,
-  std::string rootname
+  std::function<void(std::string, Transformation)> setPose
 );
 
 void playbackAnimationBlend(
@@ -22,13 +19,7 @@ void playbackAnimationBlend(
   float currentTime,
   float currentTimeAnimation2,
   float blendFactor,
-  std::vector<NameAndMeshObjName> meshNameToMeshes, 
-  std::function<glm::mat4(std::string, std::string)> getModelMatrix,
-  std::function<void(std::string, Transformation)> setPose,
-  std::string rootname
+  std::function<void(std::string, Transformation)> setPose
 );
-
-
-void updateBonePoses(std::vector<NameAndMeshObjName> meshNameToMeshes, std::function<glm::mat4(std::string, std::string)> getModelMatrix, std::string rootname);
 
 #endif

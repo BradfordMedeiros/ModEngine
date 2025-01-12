@@ -1475,6 +1475,28 @@ void enforceLookAt(World& world){
 
 extern bool useTransform2;
 
+glm::mat4 armatureTransform2(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
+  auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId, false);
+  assert(gameobj.has_value());
+ 
+  auto groupTransform = fullModelTransform(sandbox, gameobj.value() -> id);
+  auto modelTransform = fullModelTransform(sandbox, id);
+  // group * something = model (aka aX = b, so X = inv(A) * B)
+  // inverse(group) * model
+  //auto groupToModel =  modelTransform * glm::inverse(groupTransform); 
+  auto groupToModel =  glm::inverse(groupTransform) * modelTransform; 
+
+  auto resultCheck = groupTransform * groupToModel;
+  if (false && resultCheck != modelTransform){
+    std::cout << "group_to_model = " << print(groupToModel) << std::endl;
+    std::cout << "result_check = " << print(resultCheck) << std::endl;
+    std::cout << "model_transform = " << print(modelTransform) << std::endl;
+    assert(false);
+  }
+  return groupToModel;
+}
+
+
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool paused, Transformation& viewTransform, bool showVisualizations){
   if (!paused){
     updateEmitters(
@@ -1567,6 +1589,29 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       world.onObjectUpdate(gameobj);
     }
   });
+
+
+  // // https://gamedev.net/forums/topic/484984-skeletal-animation-non-uniform-scale/4172731/
+  for (auto &[id, obj] : world.objectMapping){
+    GameObjectMesh* gameobjMesh = std::get_if<GameObjectMesh>(&obj);
+    if (gameobjMesh){
+      for (int i = 0; i < gameobjMesh -> meshesToRender.size(); i++){
+        Mesh& mesh = gameobjMesh -> meshesToRender.at(i);
+        for (Bone& bone : mesh.bones){
+          std::string rootname = getGameObject(world.sandbox, getGroupId(world.sandbox, id)).name;
+          auto boneId = maybeGetGameObjectByName(world.sandbox, bone.name, sceneId(world.sandbox, id), false).value() -> id;
+          auto matrix = armatureTransform2(world.sandbox, boneId, rootname, sceneId(world.sandbox, id));
+          bone.offsetMatrix = matrix * glm::inverse(bone.initialBonePose);
+        }
+      }
+    }
+  }
+
+  for (auto id : world.entitiesToUpdate){
+    if (getGameObject(world.sandbox, id).isBone){
+      std::cout << "want to update a bone: " << getGameObject(world.sandbox, id).name << std::endl;
+    }
+  }
 
   world.entitiesToUpdate.clear();
 

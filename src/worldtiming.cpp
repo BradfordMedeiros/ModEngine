@@ -22,44 +22,6 @@ void resetMeshBones(World& world, objid groupId){
   }
 }
 
-glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
-  auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId, false);
-  assert(gameobj.has_value());
- 
-  auto groupTransform = fullModelTransform(sandbox, gameobj.value() -> id);
-  auto modelTransform = fullModelTransform(sandbox, id);
-  // group * something = model (aka aX = b, so X = inv(A) * B)
-  // inverse(group) * model
-  //auto groupToModel =  modelTransform * glm::inverse(groupTransform); 
-  auto groupToModel =  glm::inverse(groupTransform) * modelTransform; 
-
-  auto resultCheck = groupTransform * groupToModel;
-  if (false && resultCheck != modelTransform){
-    std::cout << "group_to_model = " << print(groupToModel) << std::endl;
-    std::cout << "result_check = " << print(resultCheck) << std::endl;
-    std::cout << "model_transform = " << print(modelTransform) << std::endl;
-    assert(false);
-  }
-  return groupToModel;
-}
-
-
-glm::mat4 getModelMatrix(World& world, objid idScene, std::string name, std::string skeletonRoot){
-  auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene, false);
-  if (gameobj.has_value()){
-    return armatureTransform(world.sandbox, gameobj.value() -> id, skeletonRoot, idScene);
-  }
-  std::cout << "no value: " << name << std::endl;
-  assert(false);
-  return glm::mat4(1.f);   
-}
-
-std::function<glm::mat4(std::string, std::string)> scopeGetModelMatrix(World& world, objid idScene){
-  return [&world, idScene](std::string name, std::string skeletonRoot) -> glm::mat4 {
-    return getModelMatrix(world, idScene, name, skeletonRoot);
-  };
-}
-
 std::function<void(std::string name, Transformation pose)> scopeSetPose(World& world, objid idScene){
   return [&world, idScene](std::string name, Transformation pose) -> void {
     auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene, false);
@@ -89,23 +51,16 @@ void tickAnimation(World& world, AnimationData& playback, float currentTime){
       currentTime - playback.initTime,
       currentTime - playback.blendData.value().oldAnimationInit, 
       aFactor,
-      meshNameToMeshes, 
-      scopeGetModelMatrix(world, playback.idScene), 
-      scopeSetPose(world, playback.idScene), 
-      playback.rootname
+      scopeSetPose(world, playback.idScene)
     );
   }else{
     playbackAnimation(
       playback.animation, 
       currentTime - playback.initTime, 
-      meshNameToMeshes, 
-      scopeGetModelMatrix(world, playback.idScene), 
-      scopeSetPose(world, playback.idScene), 
-      playback.rootname
+      scopeSetPose(world, playback.idScene)
     );
   }
 }
-
 
 void tickAnimations(World& world, WorldTiming& timings, float currentTime){
   //std::cout << "animations num active playbacks: " << timings.animations.playbacks.size() << std::endl;
@@ -170,15 +125,6 @@ std::optional<Animation> getAnimation(World& world, int32_t groupId, std::string
   return  std::nullopt;  // @todo probably use optional here.
 }
 
-
-void updateBonePose(World& world, objid id){
-  auto groupId = getGroupId(world.sandbox, id);
-  auto idScene = sceneId(world.sandbox, groupId);
-  auto rootname = getGameObject(world, groupId).name;
-  auto meshNameToMeshes = getMeshesForGameobj(world, groupId);  
-  updateBonePoses(meshNameToMeshes, scopeGetModelMatrix(world, idScene), rootname); 
-}
-
 void invalidatePlaybackToRemove(WorldTiming& timing, objid groupId){
   std::vector<int32_t> playbacksToRemoveNew;
   for (auto id : timing.playbacksToRemove){
@@ -239,18 +185,12 @@ void removeAnimation(World& world, WorldTiming& timings, objid id){
 
 void setAnimationPose(World& world, objid id, std::string animationToPlay, float time){
   auto groupId = getGroupId(world.sandbox, id);
-  auto rootname = getGameObject(world, groupId).name;
   auto animation = getAnimation(world, groupId, animationToPlay).value();
-
-  auto meshNameToMeshes = getMeshesForGameobj(world, groupId);
   auto idScene = sceneId(world.sandbox, groupId);
 
   playbackAnimation(
     animation, 
     time,
-    meshNameToMeshes, 
-    scopeGetModelMatrix(world, idScene), 
-    scopeSetPose(world, idScene), 
-    rootname
+    scopeSetPose(world, idScene)
   );
 }

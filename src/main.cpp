@@ -1766,7 +1766,7 @@ int main(int argc, char* argv[]){
     idCoordsToGet = {};
 
     if (!state.worldpaused){
-      timePlayback.setElapsedTime(statistics.deltaTime);
+      timePlayback.setElapsedTime(statistics.deltaTime);  // tick animations here
     }
 
     onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, state.enablePhysics, state.worldpaused, viewTransform, !state.disableInput);
