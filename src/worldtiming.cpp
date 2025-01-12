@@ -22,10 +22,15 @@ void resetMeshBones(World& world, objid groupId){
   }
 }
 
-std::function<void(std::string name, Transformation pose)> scopeSetPose(World& world, objid idScene){
-  return [&world, idScene](std::string name, Transformation pose) -> void {
+std::function<void(std::string name, Transformation pose)> scopeSetPose(World& world, std::vector<objid>& disableIds, objid idScene){
+  return [&world, &disableIds, idScene](std::string name, Transformation pose) -> void {
     auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene, false);
     if (gameobj.has_value()){
+      for (auto &id : disableIds){
+        if (gameobj.value() -> id == id){
+          return;
+        }
+      }
       physicsLocalTransformSet(world, gameobj.value() -> id, pose);
     }else{
       std::cout << "warning no bone node named: " << name << std::endl;
@@ -51,13 +56,13 @@ void tickAnimation(World& world, AnimationData& playback, float currentTime){
       currentTime - playback.initTime,
       currentTime - playback.blendData.value().oldAnimationInit, 
       aFactor,
-      scopeSetPose(world, playback.idScene)
+      scopeSetPose(world, playback.disableAnimationIds, playback.idScene)
     );
   }else{
     playbackAnimation(
       playback.animation, 
       currentTime - playback.initTime, 
-      scopeSetPose(world, playback.idScene)
+      scopeSetPose(world, playback.disableAnimationIds, playback.idScene)
     );
   }
 }
@@ -173,6 +178,8 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
     .animationType = animationType,
     .initTime = initialTime,
 
+    .disableAnimationIds = {},
+
     .blendData = blendData,
   };
 }
@@ -183,6 +190,12 @@ void removeAnimation(World& world, WorldTiming& timings, objid id){
   timings.playbacksToRemove.push_back(groupId);
 }
 
+void disableAnimationIds(World& world, WorldTiming& timings, objid id, std::vector<objid> ids){
+  auto groupId = getGroupId(world.sandbox, id);
+  timings.animations.playbacks.at(groupId).disableAnimationIds = ids;
+}
+
+std::vector<objid> emptyVector;
 void setAnimationPose(World& world, objid id, std::string animationToPlay, float time){
   auto groupId = getGroupId(world.sandbox, id);
   auto animation = getAnimation(world, groupId, animationToPlay).value();
@@ -191,6 +204,6 @@ void setAnimationPose(World& world, objid id, std::string animationToPlay, float
   playbackAnimation(
     animation, 
     time,
-    scopeSetPose(world, idScene)
+    scopeSetPose(world, emptyVector, idScene)
   );
 }

@@ -514,6 +514,10 @@ void stopAnimation(int32_t id){
   removeAnimation(world, timings, id);
 }
 
+void disableAnimationIds(int32_t id, std::vector<objid> ids){
+  disableAnimationIds(world, timings, id, ids);
+}
+
 void setAnimationPose(int32_t id, std::string animationToPlay, float time){
   setAnimationPose(world, id, animationToPlay, time);
 }
