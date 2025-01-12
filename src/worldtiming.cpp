@@ -12,16 +12,6 @@ WorldTiming createWorldTiming(float initialTime){
   return timing;
 }
 
-void resetMeshBones(World& world, objid groupId){
-  auto meshNameToMeshes = getMeshesForGameobj(world, groupId);  
-  for (int i = 0; i <  meshNameToMeshes.size(); i++){
-    Mesh* mesh = meshNameToMeshes.at(i).mesh;
-    for (Bone& bone : mesh -> bones){
-      bone.offsetMatrix = glm::mat4(1.f);
-    }
-  }
-}
-
 std::function<void(std::string name, Transformation pose)> scopeSetPose(World& world, std::vector<objid>& disableIds, objid idScene){
   return [&world, &disableIds, idScene](std::string name, Transformation pose) -> void {
     auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene, false);
@@ -39,7 +29,6 @@ std::function<void(std::string name, Transformation pose)> scopeSetPose(World& w
   };
 }
 
-bool resetInitialPose = true;
 bool enableBlending = true;
 float blendingWindow = 0.25f;  // this should be able to be specified by the animation most likely
 
@@ -103,9 +92,6 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
   }
   //std::cout << "num playbacks: " << timings.animations.playbacks.size() << std::endl;
   for (auto groupId : timings.playbacksToRemove){
-    if (resetInitialPose && idExists(world.sandbox, groupId)){
-      resetMeshBones(world, groupId);
-    }
     timings.animations.playbacks.erase(groupId);
     //modlog("animation", std::string("playbacks to remove, removing: ") + std::to_string(groupId));
   }
