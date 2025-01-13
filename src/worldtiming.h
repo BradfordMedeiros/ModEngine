@@ -22,8 +22,6 @@ struct AnimationData {
   AnimationType animationType;
   float initTime;
 
-  std::vector<objid> disableAnimationIds;
-
   std::optional<BlendAnimationData> blendData;
 };
 
@@ -33,6 +31,7 @@ struct AnimationState {
 
 struct WorldTiming {
   AnimationState animations;
+  std::set<objid> disableAnimationIds;
   std::vector<int32_t> playbacksToRemove;
   float initialTime;
 };
@@ -42,7 +41,7 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime);
 
 void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay, float initialTime, AnimationType animationType);
 void removeAnimation(World& world, WorldTiming& timings, objid id);
-void disableAnimationIds(World& world, WorldTiming& timings, objid id, std::vector<objid> ids);
+void disableAnimationIds(World& world, WorldTiming& timings, std::set<objid>& ids);
 void setAnimationPose(World& world, objid id, std::string animationToPlay, float time);
 
 #endif
