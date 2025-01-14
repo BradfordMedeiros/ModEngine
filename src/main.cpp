@@ -554,8 +554,7 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
   if (shader != *renderStages.selection.shader){
     auto lightUpdates = getLightUpdates();
     for (auto &lightUpdate : lightUpdates){
-      std::cout << "voxel lighting : " << lightUpdate.index << std::endl;
-      
+      //std::cout << "voxel lighting : " << lightUpdate.index << std::endl;
       int lightArrayIndex = getLightsArrayIndex(lights, lightUpdate.lightIndex);
       modassert(lightUpdate.index < 512, "lightUpdate.index too large");
       updateBufferData(renderingResources.voxelLighting , sizeof(glm::vec4) * lightUpdate.index, sizeof(int), &lightArrayIndex);

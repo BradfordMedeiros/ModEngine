@@ -439,13 +439,14 @@ ModelData loadModelPath(World& world, std::string rootname, std::string modelPat
 
 void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ownerId){
   if (world.meshes.find(meshPath) != world.meshes.end()){
+    modlog("mesh", std::string("mesh cache adding ref mesh: ") + meshPath + ", ref = " + std::to_string(ownerId));
     world.meshes.at(meshPath).owners.insert(ownerId);
     for (auto &textureRef : world.meshes.at(meshPath).textureRefs){
       world.textures.at(textureRef).owners.insert(ownerId);
     }
   }else{
     std::set<std::string> textureRefs = {};
-    modlog("mesh", std::string("adding mesh to cache: ") + meshPath);
+    modlog("mesh", std::string("mesh cache not found in cache adding mesh to cache: ") + meshPath + ", ref = " + std::to_string(ownerId));
     world.meshes[meshPath] = MeshRef {
       .owners = { ownerId },
       .mesh = loadMesh("./res/textures/default.jpg", meshData, [&world, &textureRefs, &meshPath, ownerId](std::string texture) -> Texture {
@@ -549,11 +550,13 @@ void freeModelDataRefsByOwner(World& world, int ownerId){
 
 void freeMeshRef(World& world, std::string meshname){
   std::cout << "INFO: freeing mesh: " << meshname  << std::endl;
+  modlog("mesh", std::string("mesh cache free mesh") + meshname);
   freeMesh(world.meshes.at(meshname).mesh);
   world.meshes.erase(meshname);
 }
 void freeMeshRefsByOwner(World& world, int ownerId){
   for (auto &[name, mesh] : world.meshes){
+    modlog("mesh", std::string("mesh cache free mesh ref") + std::to_string(ownerId));
     mesh.owners.erase(ownerId);
   }
   std::vector<std::string> meshesToFree;
@@ -1607,11 +1610,11 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     }
   }
 
-  for (auto id : world.entitiesToUpdate){
-    if (getGameObject(world.sandbox, id).isBone){
-      std::cout << "want to update a bone: " << getGameObject(world.sandbox, id).name << std::endl;
-    }
-  }
+  //for (auto id : world.entitiesToUpdate){
+  //  if (getGameObject(world.sandbox, id).isBone){
+  //    std::cout << "want to update a bone: " << getGameObject(world.sandbox, id).name << std::endl;
+  //  }
+  //}
 
   world.entitiesToUpdate.clear();
 

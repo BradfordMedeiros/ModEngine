@@ -86,14 +86,14 @@ std::optional<int> lightingPositionToIndex(glm::vec3 position, glm::ivec3 offset
 		return std::nullopt;
 	}
 	auto index = xyzToIndex(x, y, z);
-	modlog("voxel lighting lightingPositionToIndex", std::to_string(index) + " " + print(glm::vec3(x, y, z)));
+	//modlog("voxel lighting lightingPositionToIndex", std::to_string(index) + " " + print(glm::vec3(x, y, z)));
 	return index;
 }
 
 void addVoxelLight(objid lightIndex, glm::vec3 position, int radius){
 	glm::vec3 color(1.f, 1.f, 1.f);
 
-	modlog("voxel lighting add: ", std::to_string(lightIndex));
+	//modlog("voxel lighting add: ", std::to_string(lightIndex));
 	for (int x = (-radius + 1); x < radius; x++){
 		for (int y = (-radius + 1); y < radius; y++){ 
 			for (int z = (-radius + 1); z < radius; z++){
@@ -110,7 +110,7 @@ void addVoxelLight(objid lightIndex, glm::vec3 position, int radius){
 			}
 		}
 	}
-	std::cout << "voxel lighting lighting data: " << print(printDebugVoxelLighting()) << std::endl;
+	//std::cout << "voxel lighting lighting data: " << print(printDebugVoxelLighting()) << std::endl;
 }
 void removeVoxelLight(objid lightIndex){
 	modlog("voxel lighting remove: ", std::to_string(lightIndex));
@@ -125,7 +125,7 @@ void removeVoxelLight(objid lightIndex){
 // obviously this could be more efficient
 // eg could keep a mapping of cell ids to shortcut to them
 void updateVoxelLightPosition(objid lightIndex, glm::vec3 position, int radius){
-	modlog("update voxel light position", print(position));
+	//modlog("update voxel light position", print(position));
 	removeVoxelLight(lightIndex);
 	addVoxelLight(lightIndex, position, radius);
 }
@@ -137,7 +137,7 @@ int getLightingCellWidth(){
 
 // should make not update all lights every frame only those that change
 std::vector<LightingUpdate> getLightUpdates(){
-	modlog("voxel lighting updates size = : ", std::to_string(lightingData.cells.size()));
+	//modlog("voxel lighting updates size = : ", std::to_string(lightingData.cells.size()));
 
   std::vector<LightingUpdate> lightUpdates;
   for (int i = 0; i < lightingData.cells.size(); i++){
