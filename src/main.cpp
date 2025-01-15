@@ -1769,6 +1769,25 @@ int main(int argc, char* argv[]){
       timePlayback.setElapsedTime(statistics.deltaTime);  // tick animations here
     }
 
+    tickRecordings(getTotalTime());
+    tickScheduledTasks();
+
+
+    handleInput(window);
+    glfwPollEvents();
+    cBindings.onFrame();
+    onNetCode(world, netcode, onClientMessage, bootStrapperMode);
+    { 
+      auto forward = calculateRelativeOffset(viewTransform.rotation, {0, 0, -1 }, false);
+      auto up  = calculateRelativeOffset(viewTransform.rotation, {0, 1, 0 }, false);
+      setListenerPosition(
+        viewTransform.position.x, viewTransform.position.y, viewTransform.position.z,
+        { forward.x, forward.y, forward.z},
+        { up.x, up.y, up.z }
+      );
+      setVolume(state.muteSound ? 0.f : state.volume);
+    }
+
     onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, state.enablePhysics, state.worldpaused, viewTransform, !state.disableInput);
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
     if (useChunkingSystem){
@@ -1783,23 +1802,6 @@ int main(int argc, char* argv[]){
       );
     }
 
-    tickRecordings(getTotalTime());
-    tickScheduledTasks();
-
-    onNetCode(world, netcode, onClientMessage, bootStrapperMode);
-    { 
-      auto forward = calculateRelativeOffset(viewTransform.rotation, {0, 0, -1 }, false);
-      auto up  = calculateRelativeOffset(viewTransform.rotation, {0, 1, 0 }, false);
-      setListenerPosition(
-        viewTransform.position.x, viewTransform.position.y, viewTransform.position.z,
-        { forward.x, forward.y, forward.z},
-        { up.x, up.y, up.z }
-      );
-      setVolume(state.muteSound ? 0.f : state.volume);
-    }
-
-    handleInput(window);
-    glfwPollEvents();
 
     if (shouldRunIntegrationTests){
       static TestRunInformation integrationTests = createIntegrationTest();
@@ -1810,8 +1812,6 @@ int main(int argc, char* argv[]){
         shouldQuitControl = true;
       }
     }
-
-    cBindings.onFrame();
 
     auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
 
