@@ -170,6 +170,7 @@ struct CScriptBinding {
 
   // Other callbacks
   id_func_data onFrame;
+  id_func_data onFrameAfterUpdate;
   id_colposfun onCollisionEnter;
   id_colfun onCollisionExit;
   id_mousecallback onMouseCallback;

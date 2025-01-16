@@ -10,6 +10,7 @@ CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBinding
     .remove = [](std::string scriptname, objid id, void*) -> void { },
 
     .onFrame = [](objid scriptId, void* data) -> void { },
+    .onFrameAfterUpdate = [](objid scriptId, void* data) -> void { },
     .onCollisionEnter = [](objid scriptId, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force) -> void {},
     .onCollisionExit = [](objid scriptId, void* data, int32_t obj1, int32_t obj2) -> void { },
     .onMouseCallback = [](objid scriptId, void* data, int button, int action, int mods) -> void { },
