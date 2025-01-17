@@ -36,7 +36,7 @@ void saveTextureData(std::string filepath, char* data, int width, int height);
 void freeTexture(Texture& texture);
 
 int calculateAtlasImageDimension(int numTextures);
-Texture loadTextureAtlas(std::vector<std::string> textureFilePaths);
+Texture loadTextureAtlas(std::vector<std::string> textureFilePaths, std::optional<std::string> cacheFileName);
 
 struct TextureSizeInfo {
   int width;

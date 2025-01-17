@@ -217,7 +217,8 @@ int calculateAtlasImageDimension(int numTextures){
   return roundedUp;
 }
 
-Texture loadTextureAtlas(std::vector<std::string> textureFilePaths){
+
+Texture loadTextureAtlasMaybeWriteCache(std::vector<std::string> textureFilePaths, std::optional<std::string> cacheFileName){
   int imageWidth = 500;
   int imageHeight = 500;
   int numImagesWide = calculateAtlasImageDimension(textureFilePaths.size());
@@ -248,11 +249,20 @@ Texture loadTextureAtlas(std::vector<std::string> textureFilePaths){
     stbi_image_free(data);
   }
 
-  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureAtlasData);
-
-  stbi_flip_vertically_on_write(1);
-  stbi_write_png("/home/brad/Desktop/test_atlas.png", newWidth, newHeight, 4, textureAtlasData, 0); 
+  if (cacheFileName.has_value()){
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureAtlasData);
+    stbi_flip_vertically_on_write(1);
+    stbi_write_png(cacheFileName.value().c_str(), newWidth, newHeight, 4, textureAtlasData, 0);     
+  }
 
   free(textureAtlasData);
   return atlasTexture;
+}
+
+Texture loadTextureAtlas(std::vector<std::string> textureFilePaths, std::optional<std::string> cacheFileName){
+  // check if the file exists, if it does just load it, assemble it and then load
+  if (cacheFileName.has_value() && fileExists(cacheFileName.value())){
+    return loadTexture(cacheFileName.value());
+  }
+  return loadTextureAtlasMaybeWriteCache(textureFilePaths, cacheFileName);
 }

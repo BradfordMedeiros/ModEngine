@@ -367,8 +367,8 @@ void loadAllTextures(std::string& textureFolderPath){
 
   PROFILE("TEXTURES-LOAD-OCTREEATLAS",
     auto start = std::chrono::steady_clock::now();
-    loadTextureAtlasWorld(world, "octree-atlas:normal", normalTextures, -1);
-    loadTextureAtlasWorld(world, "octree-atlas:main",   octreeTextures, -1);
+    loadTextureAtlasWorld(world, "octree-atlas:normal", normalTextures, "/home/brad/Desktop/test_atlas_normal.png", -1);
+    loadTextureAtlasWorld(world, "octree-atlas:main",   octreeTextures, "/home/brad/Desktop/test_atlas.png", -1);
     setAtlasDimensions(AtlasDimensions {
       .textureNames = octreeTextures,
     });
