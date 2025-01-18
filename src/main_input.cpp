@@ -76,7 +76,7 @@ void onMouse(engineState& state, double xpos, double ypos, void(*rotateCamera)(f
     cBindings.onMouseMoveCallback(state.offsetX, state.offsetY, coords.x, coords.y);
     
     if (state.isRotateSelection){
-      if (!state.disableInput){
+      if (state.inputMode == ENABLED || state.inputMode == CAMERA_ONLY){
         float rotateSensitivity = 0.05;
         rotateCamera(xoffset * rotateSensitivity, -yoffset * rotateSensitivity);   // -y offset because mouse move forward is negative, which is ok, but inverted        
       }
@@ -147,10 +147,10 @@ void moveMouse(glm::vec2 ndi){
 }
 
 void mouse_button_callback(engineState& state, int button, int action, int mods, void (*handleSerialization) (void)){
-  if (state.disableInput){
+  if (state.inputMode != ENABLED && state.inputMode != CAMERA_ONLY){
     return;
   }
-  if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
+  if (state.inputMode == ENABLED && button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
     handleSerialization();
     onSelectNullItem();
   }
@@ -162,7 +162,9 @@ void mouse_button_callback(engineState& state, int button, int action, int mods,
       state.isRotateSelection = false;
     }
 
-    moveCursor(state.currentScreenWidth / 2, state.currentScreenHeight / 2);
+    if (state.inputMode == ENABLED){
+      moveCursor(state.currentScreenWidth / 2, state.currentScreenHeight / 2);
+    }
   }
 }
 
@@ -258,7 +260,7 @@ void handleSnapEasy(objid id, bool left){
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   cBindings.onKeyCallback(getKeyRemapping(keyMapper, key), scancode, action, mods);
 
-  if (state.disableInput){
+  if (state.inputMode != ENABLED){
     return;
   }
   if (state.printKeyStrokes){
@@ -492,7 +494,7 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
 void processKeyBindings(GLFWwindow *window, KeyRemapper& remapper){
   std::map<int, bool> lastFrameDown = {};
   for (auto inputFn : remapper.inputFns){
-    if (state.disableInput && !inputFn.alwaysEnable){
+    if (state.inputMode == DISABLED && !inputFn.alwaysEnable){
       continue;
     }
     auto mainKeyPressed = glfwGetKey(window, inputFn.sourceKey);
@@ -738,7 +740,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      if (state.disableInput){
+      if (state.inputMode != ENABLED && state.inputMode != CAMERA_ONLY){
         return;
       }
       auto speed = cameraSpeed * -40.0f * statistics.deltaTime;
@@ -753,7 +755,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      if (state.disableInput){
+      if (state.inputMode != ENABLED && state.inputMode != CAMERA_ONLY){
         return;
       }
       moveCamera(glm::vec3(cameraSpeed * -40.0 * statistics.deltaTime, 0.0, 0.0));
@@ -766,7 +768,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      if (state.disableInput){
+      if (state.inputMode != ENABLED && state.inputMode != CAMERA_ONLY){
         return;
       }
       auto speed = cameraSpeed * 40.0f * statistics.deltaTime;
@@ -781,7 +783,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      if (state.disableInput){
+      if (state.inputMode != ENABLED && state.inputMode != CAMERA_ONLY){
         return;
       }
       moveCamera(glm::vec3(cameraSpeed * 40.0f * statistics.deltaTime, 0.0, 0.0f));

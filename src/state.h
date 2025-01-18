@@ -21,6 +21,7 @@ struct CamInterpolation {
 
 enum ANTIALIASING_TYPE { ANTIALIASING_NONE, ANTIALIASING_MSAA };
 enum CURSOR_TYPE { CURSOR_NORMAL, CURSOR_CAPTURE, CURSOR_HIDDEN, CURSOR_DEFAULT };
+enum INPUT_MODE { DISABLED, ENABLED, CAMERA_ONLY };
 
 struct engineState {
   bool enablePhysics;
@@ -158,7 +159,7 @@ struct engineState {
   float volume;
   bool muteSound;
   
-  bool disableInput;
+  INPUT_MODE inputMode;
   bool escapeQuits;
 
   std::optional<unsigned int> navmeshTextureId;

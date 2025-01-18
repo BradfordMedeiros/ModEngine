@@ -259,14 +259,14 @@ bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCu
   auto selectedSubObj = getGameObject(world, selectedId);
   auto selectedObject =  getGameObject(world, idToUse);
 
-  if (layerSelectIndex >= 0 && !state.disableInput){
+  if (layerSelectIndex >= 0 && state.inputMode == ENABLED){
     onManipulatorSelectItem(state.manipulatorState, idToUse, selectedSubObj.name);
   }
   if (idToUse == getManipulatorId(state.manipulatorState)){
     return shouldCallBindingOnObjectSelected;
   }
 
-  if (state.disableInput){
+  if (state.inputMode != ENABLED){
     return shouldCallBindingOnObjectSelected;
   }
   textureToPaint = textureForId(world, selectedId);
@@ -754,7 +754,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
     drawGrid3D(4, getLightingCellWidth(), 0.f, 0.f, 0.f);
   }
 
-  if (state.manipulatorMode == TRANSLATE && state.showGrid && !state.disableInput){
+  if (state.manipulatorMode == TRANSLATE && state.showGrid && (state.inputMode == ENABLED)){
     for (auto id : selectedIds(state.editor)){
       auto selectedObj = id;
       if (selectedObj != -1){
@@ -1788,7 +1788,7 @@ int main(int argc, char* argv[]){
       setVolume(state.muteSound ? 0.f : state.volume);
     }
 
-    onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, state.enablePhysics, state.worldpaused, viewTransform, !state.disableInput);
+    onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, state.enablePhysics, state.worldpaused, viewTransform, state.inputMode == ENABLED);
 
     cBindings.onFrameAfterUpdate();
 
@@ -1884,7 +1884,7 @@ int main(int argc, char* argv[]){
          .preserveRelativeScale = state.preserveRelativeScale,
       },
       tools,
-      state.disableInput
+      !(state.inputMode == ENABLED)
     );      
     
 

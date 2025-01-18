@@ -398,7 +398,9 @@ std::vector<ObjectStateMapping> mapping = {
   simpleBoolSerializer("editor", "groupselection", offsetof(engineState, groupSelection)),
   simpleFloatSerializer("sound", "volume", offsetof(engineState, volume)),
   simpleBoolSerializer("sound", "mute", offsetof(engineState, muteSound)),
-  simpleBoolSerializer("editor", "disableinput", offsetof(engineState, disableInput)),
+  simpleEnumSerializer("editor", "disableinput", { DISABLED, ENABLED, CAMERA_ONLY }, { "true", "false", "camera" }, offsetof(engineState, inputMode)),
+
+
 };  
 
 void setState(engineState& state, ObjectValue& value, float now){
@@ -531,7 +533,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .forceSelectIndex = 0,
     .volume = 1.f,
     .muteSound = false,
-    .disableInput = false,
+    .inputMode = ENABLED,
     .escapeQuits = false,
     .navmeshTextureId = std::nullopt,
     .rampDirection = RAMP_LEFT,
@@ -540,7 +542,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 }
 
 void setInitialState(engineState& state, std::string file, float now, std::function<std::string(std::string)> readFile, bool disableInput){
-  state.disableInput = disableInput;
+  state.inputMode = disableInput ? DISABLED : ENABLED;
 
   auto tokens = parseFormat(readFile(file));
   for (auto &token : tokens){
