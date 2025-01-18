@@ -360,7 +360,7 @@ void doOctreeRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPos)
   }
 }
 
-bool enableSelectionVisualization = true;
+bool enableSelectionVisualization = false;
 void onMouseButton(){ 
   glm::vec3 fromPos = defaultResources.defaultCamera.transformation.position;
   auto rayPosition = getMousePositionWorld();

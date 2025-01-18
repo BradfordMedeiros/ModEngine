@@ -2128,6 +2128,7 @@ void drawPhysicsShapes(PhysicsShapes& physicsShapes, std::function<void(glm::vec
 }
 
 bool drawAllSelectedBlocks = false;
+bool drawRaycastLine = false;
 void drawOctreeSelectionGrid(Octree& octree, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine2, glm::mat4 modelMatrix){
   std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLineModel = [drawLine2, &modelMatrix](glm::vec3 fromPos, glm::vec3 toPos, glm::vec4 color) -> void {
     glm::vec4 fromPosVec4(fromPos.x, fromPos.y, fromPos.z, 1.f);
