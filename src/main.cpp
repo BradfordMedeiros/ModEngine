@@ -2231,6 +2231,8 @@ int main(int argc, char* argv[]){
 
     if (state.takeScreenshot){
       state.takeScreenshot = false;
+
+      glBindTexture(GL_TEXTURE_2D, renderStages.main.colorAttachment0);
       saveScreenshot(state.screenshotPath);
     }
     glfwSwapBuffers(window);
