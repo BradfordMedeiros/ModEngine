@@ -75,7 +75,7 @@ void onMouse(engineState& state, double xpos, double ypos, void(*rotateCamera)(f
     auto coords = ndiCoord();
     cBindings.onMouseMoveCallback(state.offsetX, state.offsetY, coords.x, coords.y);
     
-    if (state.isRotateSelection){
+    if (state.isRotateSelection || state.inputMode == CAMERA_ONLY){
       if (state.inputMode == ENABLED || state.inputMode == CAMERA_ONLY){
         float rotateSensitivity = 0.05;
         rotateCamera(xoffset * rotateSensitivity, -yoffset * rotateSensitivity);   // -y offset because mouse move forward is negative, which is ok, but inverted        
