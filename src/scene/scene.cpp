@@ -109,16 +109,20 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
   return info;
 }
 
-std::vector<glm::vec3> vertsForId(World& world, objid id){
+// this is embarrassingly inefficient and should not generally be used
+// use broader shapes, or/and create algorithm to combine these shapes 
+std::vector<glm::vec3> vertsForId(World& world, objid id){  
   auto meshes = getMeshesForId(world.objectMapping, id).meshes;
   if (meshes.size() == 0){
     std::cout << "no meshes for: " << getGameObject(world, id).name << std::endl;
     return {};
   }
   std::vector<glm::vec3> vertPositions;
-  auto vertices = readVertsFromMeshVao(*meshes.at(0));
-  for (auto &vertex : vertices){
-    vertPositions.push_back(vertex.position);
+  for (auto mesh : meshes){
+    auto vertices = readVertsFromMeshVao(*mesh);
+    for (auto &vertex : vertices){
+      vertPositions.push_back(vertex.position);
+    }    
   }
   return vertPositions;
 }
@@ -254,6 +258,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
     if (verts.size() == 0){
        return PhysicsValue { .body = NULL, .offset = std::nullopt };
     }
+    modlog("2 physics", std::string("num verts: ") + std::to_string(verts.size()));
     assert(initialLoad);
     std::cout << "INFO: PHYSICS: ADDING SHAPE_EXACT RIGID BODY" << std::endl;
     rigidBody = addRigidBodyExact(
