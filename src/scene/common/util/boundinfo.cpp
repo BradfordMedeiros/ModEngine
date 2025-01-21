@@ -84,7 +84,7 @@ BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> infos){
     if (currInfo.yMin < info.yMin){
       info.yMin = currInfo.yMin;
     }
-    if (currInfo.zMin < info.zMax){
+    if (currInfo.zMin < info.zMin){
       info.zMin = currInfo.zMin;
     }
     if (currInfo.xMax > info.xMax){
