@@ -1361,7 +1361,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 'L', 
     .hasPreq = true,
     .fn = []() -> void {
-      offlineDeleteScene("./build/testscene.rawscene");
+      //offlineDeleteScene("./build/testscene.rawscene");
     }
   },
   InputDispatch{
@@ -1371,7 +1371,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 'L', 
     .hasPreq = true,
     .fn = []() -> void {
-      offlineCopyScene("./build/testscene.rawscene", "./build/testscene2.rawscene", interface.readFile);
+      //offlineCopyScene("./build/testscene.rawscene", "./build/testscene2.rawscene", interface.readFile);
     }
   },
   InputDispatch{
@@ -1381,7 +1381,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 'L', 
     .hasPreq = true,
     .fn = []() -> void {
-      offlineRemoveElement("./build/testscene.rawscene", "someitem", interface.readFile);
+      //offlineRemoveElement("./build/testscene.rawscene", "someitem", interface.readFile);
     }
   },
   InputDispatch{
@@ -1391,7 +1391,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 'L', 
     .hasPreq = true,
     .fn = []() -> void {
-      offlineSetElementAttributes("./build/testscene.rawscene", "someitem", { {"one", "1" }, {"two", "2" }, {"3", "three"}}, interface.readFile);
+     // offlineSetElementAttributes("./build/testscene.rawscene", "someitem", { {"one", "1" }, {"two", "2" }, {"3", "three"}}, interface.readFile);
     }
   },
   InputDispatch{

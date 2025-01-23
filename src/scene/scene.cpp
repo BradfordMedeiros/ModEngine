@@ -184,6 +184,9 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
     );
   }else if (physicsOptions.shape == SPHERE){
     std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
+
+    physicsInfo.offset = glm::vec3(0.f, 0.f, 0.f);  
+
     rigidBody = addRigidBodySphere(
       world.physicsEnvironment, 
       calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
@@ -193,7 +196,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
           (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin), 
           (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)
         )
-      ) / 2.f,                             
+      ),                             
       physicsInfo.transformation.rotation,
       physicsOptions.isStatic,
       physicsOptions.hasCollisions,
@@ -1309,6 +1312,7 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
   GameObject& gameobj = getGameObject(world, id);
   bool physicsEnableInitial = gameobj.physicsOptions.enabled;
   bool physicsStaticInitial = gameobj.physicsOptions.isStatic;
+  bool physicsHasCollisionsInitial = gameobj.physicsOptions.hasCollisions;
 
   auto loadMeshObject = [&world, id](MeshData& meshdata) -> Mesh {
     return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {
@@ -1334,7 +1338,7 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
 
   setCoreAttr = setAttribute(gameobj, field, value, util);
   bool physicsObjectNeedsRebuild = gameobj.physicsOptions.enabled != physicsEnableInitial;
-  physicsObjectNeedsRebuild = physicsObjectNeedsRebuild || (gameobj.physicsOptions.isStatic != physicsStaticInitial);
+  physicsObjectNeedsRebuild = physicsObjectNeedsRebuild || (gameobj.physicsOptions.isStatic != physicsStaticInitial) || (gameobj.physicsOptions.hasCollisions != physicsHasCollisionsInitial);
 
 
   if (!setCoreAttr){
