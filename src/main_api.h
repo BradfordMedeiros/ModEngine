@@ -44,13 +44,12 @@ objid listSceneId(int32_t id);
 Transformation getCameraTransform();
 void maybeResetCamera(int32_t id);
 void setActiveCamera(std::optional<int32_t> cameraId, float interpolationTime);
-void setActiveCamera(std::string name, objid sceneId);
 std::optional<objid> getActiveCamera();
 Transformation getView();
 
 void nextCamera();
-void moveCamera(glm::vec3 offset, std::optional<bool> relative);  
 void moveCamera(glm::vec3 offset);
+void moveCameraTo(glm::vec3 position, std::optional<float> duration);
 void rotateCamera(float xoffset, float yoffset);
 void setCameraRotation(glm::quat orientation);
 

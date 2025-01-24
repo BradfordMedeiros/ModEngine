@@ -967,14 +967,6 @@ void setActiveCamera(std::optional<int32_t> cameraIdOpt, float interpolationTime
   std::cout << "set active camera to id: " << cameraId << std::endl;
   std::cout << "camera data: " << state.activeCameraData -> enableDof << ", " << state.activeCameraData -> minBlurDistance << ", " << state.activeCameraData -> maxBlurDistance << std::endl;
 }
-void setActiveCamera(std::string name, objid sceneId){
-  auto object = getGameObjectByName(name, sceneId, false);
-  if (!object.has_value()){
-    std::cout << "ERROR SETTING CAMERA: does the camera: " << name << " exist?" << std::endl;
-    assert(false);
-  }
-  setActiveCamera(object.value(), -1);
-}
 
 std::optional<objid> getActiveCamera(){
   if (state.activeCameraObj == NULL){
@@ -999,26 +991,21 @@ void nextCamera(){
   int32_t activeCameraId = cameraIndexs.at(state.activeCamera);
   setActiveCamera(activeCameraId, -1);
 }
-void moveCamera(glm::vec3 offset, std::optional<bool> relative){
-  bool isRelative = !relative.has_value() || relative.value() == true;
-  if (isRelative){
-    if (state.activeCameraObj == NULL){
-      defaultResources.defaultCamera.transformation.position = moveRelative(defaultResources.defaultCamera.transformation.position, defaultResources.defaultCamera.transformation.rotation, glm::vec3(offset), false);
-    }else{
-      auto cameraLocalTransform = gameobjectTransformation(world, state.activeCameraObj -> id, false);
-      setGameObjectPosition(state.activeCameraObj ->id, moveRelative(cameraLocalTransform.position, cameraLocalTransform.rotation, glm::vec3(offset), false), true);
-    }
+
+void moveCamera(glm::vec3 offset){
+  if (state.activeCameraObj == NULL){
+    defaultResources.defaultCamera.transformation.position = moveRelative(defaultResources.defaultCamera.transformation.position, defaultResources.defaultCamera.transformation.rotation, glm::vec3(offset), false);
   }else{
-    if (state.activeCameraObj == NULL){
-      defaultResources.defaultCamera.transformation.position = offset;
-    }else{
-      setGameObjectPosition(state.activeCameraObj ->id, offset, true);
-    }
+    auto cameraLocalTransform = gameobjectTransformation(world, state.activeCameraObj -> id, false);
+    setGameObjectPosition(state.activeCameraObj ->id, moveRelative(cameraLocalTransform.position, cameraLocalTransform.rotation, glm::vec3(offset), false), true);
   }
 }
-void moveCamera(glm::vec3 offset){
-  moveCamera(offset, std::nullopt);
+
+void moveCameraTo(glm::vec3 position, std::optional<float> duration){
+  modassert(false, "moveCameraTo not implemented");
 }
+
+
 void rotateCamera(float xoffset, float yoffset){
   if (state.activeCameraObj == NULL){
     defaultResources.defaultCamera.transformation.rotation = setFrontDelta(defaultResources.defaultCamera.transformation.rotation, xoffset, yoffset, 0, 0.1);

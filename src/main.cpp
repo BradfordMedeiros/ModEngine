@@ -1156,7 +1156,6 @@ int main(int argc, char* argv[]){
    ("t,texture", "Additional textures folder to use", cxxopts::value<std::string>()->default_value("./res"))
    ("x,scriptpath", "Script file to use", cxxopts::value<std::vector<std::string>>()->default_value(""))
    ("u,uishader", "Shader to use for ui", cxxopts::value<std::string>()->default_value("./res/shaders/ui"))
-   ("c,camera", "Camera to use after initial load", cxxopts::value<std::string>()->default_value(""))
    ("fps", "Framerate limit", cxxopts::value<int>()->default_value("0"))
    ("fps-fixed", "Whether to guarantee the framerate, which means values do not occur in realtime", cxxopts::value<bool>()->default_value("false"))
    ("fps-lag", "Extra lag to induce in each frame in ms", cxxopts::value<int>()->default_value("-1"))
@@ -1427,8 +1426,7 @@ int main(int argc, char* argv[]){
     .createScene = createScene,
     .deleteScene = deleteScene,
     .getCameraTransform = getCameraTransform,
-    .moveCamera = moveCamera,
-    .rotateCamera = rotateCamera,
+    .moveCameraTo = moveCameraTo,
     .idsInGroupById = idsInGroupById,
     .groupId = groupId,
     .removeObjectById = removeObjectById,
@@ -1675,11 +1673,6 @@ int main(int argc, char* argv[]){
   std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
   for (auto parsedScene : parseSceneArgs(rawScenes)){
     loadScene(parsedScene.sceneToLoad, {}, parsedScene.sceneFileName, parsedScene.tags);
-  }
-
-  auto defaultCameraName = result["camera"].as<std::string>();
-  if (defaultCameraName != ""){
-    setActiveCamera(defaultCameraName, sceneId(world.sandbox, getByName(world.sandbox, defaultCameraName).at(0)));
   }
 
   GLFWimage images[1]; 

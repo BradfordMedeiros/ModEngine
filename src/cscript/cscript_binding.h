@@ -28,8 +28,7 @@ struct CustomApiBindings {
   void (*createScene)(std::string scenename);
   void (*deleteScene)(std::string scenename);
   Transformation (*getCameraTransform)();
-  void (*moveCamera)(glm::vec3, std::optional<bool> relative);  // this should be deleted - move through normal methods instead
-  void (*rotateCamera)(float xoffset, float yoffset);           // should be deleted - move a camera instead
+  void (*moveCameraTo)(glm::vec3 pos, std::optional<float> duration);  // this should be deleted - move through normal methods instead
   std::vector<objid> (*idsInGroupById)(int32_t);
   objid (*groupId)(int32_t);
   void (*removeObjectById)(int32_t id);
