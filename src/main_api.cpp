@@ -1001,11 +1001,6 @@ void moveCamera(glm::vec3 offset){
   }
 }
 
-void moveCameraTo(glm::vec3 position, std::optional<float> duration){
-  modassert(false, "moveCameraTo not implemented");
-}
-
-
 void rotateCamera(float xoffset, float yoffset){
   if (state.activeCameraObj == NULL){
     defaultResources.defaultCamera.transformation.rotation = setFrontDelta(defaultResources.defaultCamera.transformation.rotation, xoffset, yoffset, 0, 0.1);

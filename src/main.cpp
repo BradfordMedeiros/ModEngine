@@ -669,6 +669,8 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
             // can use addShaepData next cycle with selection id if we want to be able to drag these around
             interface.drawLine(line.fromPos * sphereScale + pos, line.toPos * sphereScale + pos, glm::vec4(0.f, 0.f, 1.f, 1.f));
           }
+          modassert(false, "did not return id");
+          return 0;
         },
         .drawWord = drawWord,
         .isBone = [&world](objid id) -> bool {
@@ -1126,6 +1128,45 @@ void setSelected(std::optional<std::set<objid>> ids){
     setSelectedIndex(state.editor, id, !state.multiselect);
   }
 }
+
+struct RequestMovingObject {
+  glm::vec3 initialPos;
+  glm::vec3 finalPos;
+  float initialTime;
+  float duration;
+};
+std::unordered_map<objid, RequestMovingObject> requestMovingObjects;
+void moveCameraTo(objid cameraId, glm::vec3 position, std::optional<float> duration){
+  if (!duration.has_value()){
+    setGameObjectPosition(cameraId, position, true);
+    return;
+  }
+  requestMovingObjects[cameraId] = RequestMovingObject {
+    .initialPos = getGameObjectPosition(cameraId, true),
+    .finalPos = position,
+    .initialTime = timePlayback.currentTime,
+    .duration = duration.value(),
+  };
+}
+void handleMovingObjects(float currTime){
+  std::vector<objid> idsToRemove;
+  for (auto &[id, movingObject] : requestMovingObjects){
+    float elapsedTime = currTime - movingObject.initialTime;
+    float percentage = elapsedTime / movingObject.duration;
+    bool finished = percentage >= 1.f;
+    percentage = percentage > 1.f ? 1.f : percentage;
+    auto distance = percentage * (movingObject.finalPos - movingObject.initialPos);
+    auto newPosition = movingObject.initialPos + distance;
+    setGameObjectPosition(id, newPosition, true);
+    if (finished){
+      idsToRemove.push_back(id);
+    }
+  }
+  for (auto id : idsToRemove){
+    requestMovingObjects.erase(id);
+  }
+}
+
 
 std::optional<unsigned int> shaderByName(std::string name){
   if (shaderstringToId.find(name) == shaderstringToId.end()){
@@ -1782,6 +1823,7 @@ int main(int argc, char* argv[]){
     }
 
     onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, state.enablePhysics, state.worldpaused, viewTransform, state.inputMode == ENABLED);
+    handleMovingObjects(timePlayback.currentTime);
 
     cBindings.onFrameAfterUpdate();
 

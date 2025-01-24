@@ -49,7 +49,6 @@ Transformation getView();
 
 void nextCamera();
 void moveCamera(glm::vec3 offset);
-void moveCameraTo(glm::vec3 position, std::optional<float> duration);
 void rotateCamera(float xoffset, float yoffset);
 void setCameraRotation(glm::quat orientation);
 
