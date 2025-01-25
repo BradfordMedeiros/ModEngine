@@ -12,13 +12,6 @@
 enum RENDER_MODE { RENDER_FINAL, RENDER_PORTAL, RENDER_PAINT, RENDER_DEPTH, RENDER_BLOOM, RENDER_GRAPHS, RENDER_SELECTION, RENDER_TEXTURE };
 std::string renderModeAsStr(RENDER_MODE mode);
 
-struct CamInterpolation {
-  bool shouldInterpolate;
-  float startingTime;
-  float length;
-  objid targetCam;
-};
-
 enum ANTIALIASING_TYPE { ANTIALIASING_NONE, ANTIALIASING_MSAA };
 enum CURSOR_TYPE { CURSOR_NORMAL, CURSOR_CAPTURE, CURSOR_HIDDEN, CURSOR_DEFAULT };
 enum INPUT_MODE { DISABLED, ENABLED, CAMERA_ONLY };
@@ -46,7 +39,6 @@ struct engineState {
   std::optional<float> currentCursorDepth;
 
   unsigned int activeCamera;
-  CamInterpolation cameraInterp;
 
   std::string additionalText;
  

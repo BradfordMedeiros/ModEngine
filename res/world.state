@@ -12,7 +12,8 @@ editor:debug:false
 #editor:debugmask:126  # this & the above number determines if the debug object should show
 
 editor:debugmask:8
-editor:showbones:true
+#editor:showbones:true
+
 
 physics:enabled:true
 physics:debug:false
@@ -27,14 +28,16 @@ bloom:threshold:2
 bloomblur:amount:10
 #exposure:amount:0.8
 pbr:enabled:false
-shadows:enabled:true
+shadows:enabled:false
 shadows:intensity:0.4
-attenuation:enabled:false
+attenuation:enabled:true
+voxellighting:enabled:true
+#voxellighting:visualize:true
 
 exposure:enabled:false
 gamma:enabled:false
 
-light:amount:0.6 0.6 0.6
+light:amount:0.5 0.5 0.5
 
 ###############################
 
@@ -99,7 +102,9 @@ editor:snaptranslate:1.7
 
 debug:textoffset:0 -1.0
 
+
 editor:groupselection:true
+#editor:groupselection:false
 
 sound:volume:0.2
 sound:mute:false

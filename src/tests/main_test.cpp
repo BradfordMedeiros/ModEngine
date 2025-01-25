@@ -298,11 +298,6 @@ std::map<std::string, FeatureScene> featureScenes = {
     .sceneFile = "./res/scenes/features/objtypes/camera-dof.p.rawscene",
     .createBinding = std::nullopt,
   }},
-  { "camera-interp", FeatureScene {
-    .sceneFile = "./res/scenes/features/objtypes/camera-interp.p.rawscene",
-    .createBinding = cscriptCreateInterpBinding,
-  }},
-
   { "emitter-subelement", FeatureScene {
     .sceneFile = "./res/scenes/features/objtypes/emitter-subelement.p.rawscene",
     .createBinding = std::nullopt,

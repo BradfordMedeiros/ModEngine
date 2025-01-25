@@ -908,18 +908,6 @@ Transformation getCameraTransform(){
   if (state.useDefaultCamera || state.activeCameraObj == NULL){
     return defaultResources.defaultCamera.transformation;
   }
-  if (state.cameraInterp.shouldInterpolate){
-    auto lerpAmount = (statistics.now - state.cameraInterp.startingTime) / state.cameraInterp.length;
-    if (lerpAmount >= 1){
-      state.cameraInterp.shouldInterpolate = false;
-      state.activeCameraObj = &getGameObject(world, state.cameraInterp.targetCam);
-      state.activeCameraData = &getCamera(world, state.activeCameraObj -> id);
-      cBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
-    }
-    auto oldCameraPosition = gameobjectTransformation(world, state.activeCameraObj -> id, true);
-    auto newCameraPosition = gameobjectTransformation(world, state.cameraInterp.targetCam, true);
-    return interpolate(oldCameraPosition, newCameraPosition, lerpAmount, lerpAmount, lerpAmount);
-  }
   return gameobjectTransformation(world, state.activeCameraObj -> id, true);
 }
 void maybeResetCamera(int32_t id){
@@ -928,11 +916,8 @@ void maybeResetCamera(int32_t id){
     state.activeCameraData = NULL;
     std::cout << "active camera reset" << std::endl;
   }
-  if (state.cameraInterp.targetCam == id){
-    state.cameraInterp.shouldInterpolate = false;
-  }
 }
-void setActiveCamera(std::optional<int32_t> cameraIdOpt, float interpolationTime){
+void setActiveCamera(std::optional<int32_t> cameraIdOpt){
   if (!cameraIdOpt.has_value()){
     if (state.activeCameraObj){
       auto currCameraId = state.activeCameraObj -> id;
@@ -948,16 +933,6 @@ void setActiveCamera(std::optional<int32_t> cameraIdOpt, float interpolationTime
     return;
   }
 
-
-  if (interpolationTime > 0){
-    state.cameraInterp = CamInterpolation {
-      .shouldInterpolate = true,
-      .startingTime = statistics.now,
-      .length = interpolationTime,
-      .targetCam = cameraId,
-    };
-    return;
-  }
 
   state.useDefaultCamera = false;
   state.activeCameraObj = &getGameObject(world, cameraId);
@@ -989,7 +964,7 @@ void nextCamera(){
 
   state.activeCamera = (state.activeCamera + 1) % cameraIndexs.size();
   int32_t activeCameraId = cameraIndexs.at(state.activeCamera);
-  setActiveCamera(activeCameraId, -1);
+  setActiveCamera(activeCameraId);
 }
 
 void moveCamera(glm::vec3 offset){

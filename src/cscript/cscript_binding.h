@@ -35,7 +35,7 @@ struct CustomApiBindings {
   void (*removeByGroupId)(int32_t id);
   std::vector<int32_t> (*getObjectsByType)(std::string);
   std::vector<int32_t> (*getObjectsByAttr)(std::string, std::optional<AttributeValue>, std::optional<int32_t>);
-  void (*setActiveCamera)(std::optional<int32_t> cameraId, float interpolationTime);
+  void (*setActiveCamera)(std::optional<int32_t> cameraId);
   std::optional<objid> (*getActiveCamera)();
   Transformation (*getView)();
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId, std::optional<float> maxWidthNdi, std::optional<ShapeOptions> shaderId);

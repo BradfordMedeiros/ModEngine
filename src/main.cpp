@@ -821,6 +821,10 @@ void renderUI(Color pixelColor){
       .textureUnitId = 0,
     },
   });
+  uniformData.push_back(UniformData {
+    .name = "time",
+    .value = getTotalTime(),
+  });
   setUniformData(*renderingResources.uiShaderProgram, uniformData, { "model", "encodedid", "tint", "time" });
   glEnable(GL_BLEND);
   glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

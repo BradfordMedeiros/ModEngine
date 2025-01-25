@@ -243,6 +243,10 @@ PROFILE("drawShapeData",
                 .textureUnitId = 0,
               },
             });
+            uniformData.push_back(UniformData {
+              .name = "time",
+              .value = getTotalTime(),
+            });
             setUniformData(shaderToUse, uniformData, { "model", "encodedid", "tint", "time" });
             lastShaderId = shapeOptionsShader;
         }

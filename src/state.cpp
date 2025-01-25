@@ -444,7 +444,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .hoveredColor = std::nullopt,
     .currentCursorDepth = std::nullopt,
 		.activeCamera = 0,
-    .cameraInterp = CamInterpolation { .shouldInterpolate = false },
 		.additionalText = "",
     .manipulatorState = createManipulatorData(),
 		.manipulatorMode = NONE,
