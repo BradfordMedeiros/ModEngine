@@ -929,7 +929,13 @@ void setActiveCamera(std::optional<int32_t> cameraIdOpt){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
   if (! (std::find(cameraIndexs.begin(), cameraIndexs.end(), cameraId) != cameraIndexs.end())){
     std::cout << "index: " << cameraId << " is not a valid index" << std::endl;
-    modassert(false, "invalid camera");
+    auto objectExists  = idExists(world.sandbox, cameraId);
+    if (!objectExists){
+      modassert(false, "invalid camera - id does not exist");
+    }
+    if (objectExists){
+      modassert(false, std::string("invalid camera - id does not exist: ") + getGameObject(world.sandbox, cameraId).name);
+    }
     return;
   }
 
