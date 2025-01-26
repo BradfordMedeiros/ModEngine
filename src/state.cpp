@@ -230,6 +230,7 @@ ObjectStateMapping simpleEnumSerializer(std::string object, std::string attribut
 }
 
 std::vector<ObjectStateMapping> mapping = {
+  simpleFloatSerializer("game", "speed", offsetof(engineState, engineSpeed)),
   simpleBoolSerializer("physics", "enabled", offsetof(engineState, enablePhysics)),
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void {
@@ -423,6 +424,7 @@ void setState(engineState& state, std::vector<ObjectValue>& values, float now){
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight){
 	engineState state = {
+    .engineSpeed = 1.f,
     .enablePhysics = true,
     .enablePhysicsDebug = false,
 		.visualizeNormals = false,

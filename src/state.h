@@ -17,6 +17,7 @@ enum CURSOR_TYPE { CURSOR_NORMAL, CURSOR_CAPTURE, CURSOR_HIDDEN, CURSOR_DEFAULT 
 enum INPUT_MODE { DISABLED, ENABLED, CAMERA_ONLY };
 
 struct engineState {
+  float engineSpeed;
   bool enablePhysics;
   bool enablePhysicsDebug;
   bool visualizeNormals;

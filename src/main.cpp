@@ -1204,7 +1204,6 @@ int main(int argc, char* argv[]){
    ("fps", "Framerate limit", cxxopts::value<int>()->default_value("0"))
    ("fps-fixed", "Whether to guarantee the framerate, which means values do not occur in realtime", cxxopts::value<bool>()->default_value("false"))
    ("fps-lag", "Extra lag to induce in each frame in ms", cxxopts::value<int>()->default_value("-1"))
-   ("fps-speed", "Fps speed multiplier", cxxopts::value<int>()->default_value("1000"))
    ("f,fullscreen", "Enable fullscreen mode", cxxopts::value<bool>()->default_value("false"))
    ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
    ("crashinfo", "On crash show info", cxxopts::value<bool>()->default_value("false"))
@@ -1747,7 +1746,7 @@ int main(int argc, char* argv[]){
   float fixedFps = 60.f;
   float fixedDelta = 1.f / fixedFps;
   float fpsLag = (result["fps-lag"].as<int>()) / 1000.f;
-  float speedMultiplier = result["fps-speed"].as<int>() / 1000.f;
+  float speedMultiplier = state.engineSpeed;
   std::cout << "speed multiplier: "  << speedMultiplier << std::endl;
 
   assert(!hasFramelimit || !fpsFixed);

@@ -1,4 +1,8 @@
 
+
+
+#game:speed:2
+
 # camera  =  0b      10
 # sound   =  0b     100
 # light   =  0b    1000
