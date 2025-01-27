@@ -108,7 +108,7 @@ bool updateTime(bool fpsFixed, float fixedDelta, float speedMultiplier, int time
   statistics.totalFrames++;
 
   fpscountstart:
-  statistics.now = fpsFixed ? (fixedDelta * (statistics.totalFrames - 1)) :  (speedMultiplier * glfwGetTime());
+  statistics.now = fpsFixed ? (fixedDelta * (statistics.totalFrames - 1)) :  (speedMultiplier * glfwGetTime()); // this is weird, time starts so much larger? 
   statistics.deltaTime = statistics.now - statistics.previous;   
 
   if (timetoexit != 0){
@@ -118,12 +118,12 @@ bool updateTime(bool fpsFixed, float fixedDelta, float speedMultiplier, int time
       return true;
     }
   }
-  if (hasFramelimit &&  (statistics.deltaTime < minDeltaTime)){
-    goto fpscountstart;
-  }
-  if (statistics.deltaTime < fpsLag){
-    goto fpscountstart; 
-  }
+ //if (hasFramelimit &&  (statistics.deltaTime < minDeltaTime)){
+  //  goto fpscountstart;
+  //}
+  //if (statistics.deltaTime < fpsLag){
+  //  goto fpscountstart; 
+  //}
 
   statistics.previous = statistics.now;
 
@@ -1746,13 +1746,12 @@ int main(int argc, char* argv[]){
   float fixedFps = 60.f;
   float fixedDelta = 1.f / fixedFps;
   float fpsLag = (result["fps-lag"].as<int>()) / 1000.f;
-  float speedMultiplier = state.engineSpeed;
-  std::cout << "speed multiplier: "  << speedMultiplier << std::endl;
+  std::cout << "speed multiplier: "  << state.engineSpeed << std::endl;
 
   assert(!hasFramelimit || !fpsFixed);
   assert(fpsLag < 0 || !fpsFixed);
-  assert(!hasFramelimit || speedMultiplier == 1000);
-  assert(fpsLag < 0 || speedMultiplier == 1000);
+  assert(!hasFramelimit || aboutEqual(state.engineSpeed, 1.f));
+  assert(fpsLag < 0 || aboutEqual(state.engineSpeed, 1.f));
 
   const char* vendor = (const char*)(glGetString(GL_VENDOR)); // Returns the vendor
   const char* renderer = (const char*)(glGetString(GL_RENDERER)); // Returns a hint to the mode
@@ -1783,7 +1782,7 @@ int main(int argc, char* argv[]){
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
   PROFILE("FRAME",
-    auto shouldExit = updateTime(fpsFixed, fixedDelta, speedMultiplier, timetoexit, hasFramelimit, minDeltaTime, fpsLag);
+    auto shouldExit = updateTime(fpsFixed, fixedDelta, state.engineSpeed, timetoexit, hasFramelimit, minDeltaTime, fpsLag);
     if (shouldExit || shouldQuitControl){
       goto cleanup;
     }
