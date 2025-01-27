@@ -1234,17 +1234,19 @@ std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query, bool
 struct ScheduledTask {
   objid ownerId;
   std::function<void(void*)> fn;
+  bool realtime;
   float time;  // delay time + now 
   void* data;
 };
 
 std::vector<ScheduledTask> scheduledTasks;
 std::vector<ScheduledTask> tasksToSchedule; // taks to schedule is sepearate since want enqueue only in the tick, since task.fn can modify 
-void schedule(objid id, float delayTimeMs, void* data, std::function<void(void*)> fn) {
+void schedule(objid id, bool realtime, float delayTimeMs, void* data, std::function<void(void*)> fn) {
   tasksToSchedule.push_back(ScheduledTask { 
     .ownerId = id,
     .fn = fn,
-    .time = statistics.now * 1000 + delayTimeMs,
+    .realtime = realtime,
+    .time = (realtime ? (statistics.now * 1000 + delayTimeMs) : (timePlayback.currentTime * 1000 + delayTimeMs)),
     .data = data,
   });
 }
@@ -1281,7 +1283,7 @@ void tickScheduledTasks(){
   for (int i = 0; i < scheduledTasks.size(); i++){
     ScheduledTask& task = scheduledTasks.at(i);
     //std::cout << "task time: " << task.time << ", currTime = " << currTime << std::endl;
-    auto shouldExecuteTask = currTime > task.time;
+    auto shouldExecuteTask = task.realtime ? (currTime > task.time) : ((timePlayback.currentTime * 1000) > task.time);
     if (!shouldExecuteTask){
       continue;
     }

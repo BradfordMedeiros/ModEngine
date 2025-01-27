@@ -138,7 +138,7 @@ struct CustomApiBindings {
 
   void (*click)(int button, int action);
   void (*moveMouse)(glm::vec2 ndi);
-  void (*schedule)(objid id, float delayTimeMs, void* data, std::function<void(void*)> fn);
+  void (*schedule)(objid id, bool realtime, float delayTimeMs, void* data, std::function<void(void*)> fn);
   FrameInfo (*getFrameInfo)();
   RotationDirection (*getCursorInfoWorld)(float ndix, float ndiy);
   void (*idAtCoordAsync)(float ndix, float ndiy, bool onlyGameObjId, std::optional<objid> textureId, std::function<void(std::optional<objid>, glm::vec2)> afterFrame);
