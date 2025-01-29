@@ -31,6 +31,7 @@ struct DefaultResources {
   DefaultMeshes defaultMeshes;
 };
 
+float getTotalTimeGame();
 float getTotalTime();
 
 NetworkPacket toNetworkPacket(UdpPacket& packet);

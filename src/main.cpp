@@ -520,6 +520,10 @@ std::vector<UniformData> getDefaultShaderUniforms(std::optional<glm::mat4> projv
   });
   uniformData.push_back(UniformData {
     .name = "time",
+    .value = getTotalTimeGame(),
+  });
+  uniformData.push_back(UniformData {
+    .name = "realtime",
     .value = getTotalTime(),
   });
   return uniformData;  
@@ -823,6 +827,10 @@ void renderUI(Color pixelColor){
   });
   uniformData.push_back(UniformData {
     .name = "time",
+    .value = getTotalTimeGame(),
+  });
+  uniformData.push_back(UniformData {
+    .name = "realtime",
     .value = getTotalTime(),
   });
   setUniformData(*renderingResources.uiShaderProgram, uniformData, { "model", "encodedid", "tint", "time" });
@@ -1805,7 +1813,7 @@ int main(int argc, char* argv[]){
       timePlayback.setElapsedTime(statistics.deltaTime);  // tick animations here
     }
 
-    tickRecordings(getTotalTime());
+    tickRecordings(getTotalTimeGame());
     tickScheduledTasks();
 
 

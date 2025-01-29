@@ -31,6 +31,10 @@ float getTotalTime(){
   return statistics.now - statistics.initialTime;
 }
 
+float getTotalTimeGame(){
+  return timePlayback.currentTime - statistics.initialTime;
+}
+
 std::vector<objid> objectsQueuedForRemoval = {};
 std::vector<objid> groupsQueuedForRemoval = {};
 bool gameobjExists(objid id){

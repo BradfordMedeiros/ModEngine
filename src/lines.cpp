@@ -180,6 +180,7 @@ bool shaderIsDifferent(std::optional<unsigned int> shader1, std::optional<unsign
   return false;
 }
 
+float getTotalTimeGame();
 float getTotalTime();
 
 std::vector<int> uniqueZIndexs(LineData& lineData){
@@ -245,6 +246,10 @@ PROFILE("drawShapeData",
             });
             uniformData.push_back(UniformData {
               .name = "time",
+              .value = getTotalTimeGame(),
+            });
+            uniformData.push_back(UniformData {
+              .name = "realtime",
               .value = getTotalTime(),
             });
             setUniformData(shaderToUse, uniformData, { "model", "encodedid", "tint", "time" });
