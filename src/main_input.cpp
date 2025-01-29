@@ -94,10 +94,22 @@ glm::vec2 ndiCoord(){
   return glm::vec2(xNdc, yNdc);
 }
 
+bool hasMouseEvent = false;
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
-  //std::cout << "mouse events: " << xpos << ", " << ypos << std::endl;
-  onMouse(state, xpos, ypos, rotateCamera); 
+  hasMouseEvent = true;
 }
+
+void handleMouseEvents(){
+  double xpos = 0;
+  double ypos = 0;
+  glfwGetCursorPos(window, &xpos, &ypos);
+
+  onMouse(state, xpos, ypos, rotateCamera); 
+  std::cout << "frame xpos = " << xpos << ", ypos = " << ypos << std::endl;
+
+  hasMouseEvent = false;
+}
+
 
 void onMouse(int button, int action, int mods){
   if (button == 0 && action == 1){

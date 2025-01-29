@@ -1734,7 +1734,12 @@ int main(int argc, char* argv[]){
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
-  glfwSetScrollCallback(window, onScrollCallback);
+
+  if (glfwRawMouseMotionSupported()){
+    // glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+  }else{
+    modassert(false, "raw mouse not supported");
+  }
   glfwSetKeyCallback(window, keyCallback);
   glfwSetCharCallback(window, keyCharCallback);
   glfwSetDropCallback(window, drop_callback);
@@ -1816,10 +1821,12 @@ int main(int argc, char* argv[]){
     tickRecordings(getTotalTimeGame());
     tickScheduledTasks();
 
-
-    handleInput(window);
     glfwPollEvents();
+    handleInput(window);
+    handleMouseEvents();
+
     cBindings.onFrame();
+
     onNetCode(world, netcode, onClientMessage, bootStrapperMode);
     { 
       auto forward = calculateRelativeOffset(viewTransform.rotation, {0, 0, -1 }, false);
