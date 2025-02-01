@@ -1740,6 +1740,8 @@ int main(int argc, char* argv[]){
   }else{
     modassert(false, "raw mouse not supported");
   }
+
+  glfwSetScrollCallback(window, onScrollCallback);
   glfwSetKeyCallback(window, keyCallback);
   glfwSetCharCallback(window, keyCharCallback);
   glfwSetDropCallback(window, drop_callback);
