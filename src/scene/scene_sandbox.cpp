@@ -311,7 +311,7 @@ void traverseSandboxByLayer(SceneSandbox& sandbox, std::function<void(objid, glm
   }
   for (auto layer : sandbox.layers){      // @TODO could organize this before to not require pass on each frame
     for (auto data : datum){
-      auto gameobject = sandbox.mainScene.idToGameObjects.at(data.id);
+      GameObject& gameobject = sandbox.mainScene.idToGameObjects.at(data.id);
       if (gameobject.layer == layer.name){
         onObject(data.id, data.modelMatrix, layer, gameobject.shader);
       }
