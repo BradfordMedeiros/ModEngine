@@ -37,6 +37,7 @@ struct Stats {
   unsigned int frameCount;
   long long totalFrames;
 	int numTriangles;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
+  int numDrawCalls;
 
   unsigned int numObjectsStat;
   unsigned int rigidBodiesStat;

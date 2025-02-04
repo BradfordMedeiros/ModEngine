@@ -142,6 +142,9 @@ bool updateTime(bool fpsFixed, float fixedDelta, float speedMultiplier, int time
 
 
 void registerStatistics(){
+  statistics.numDrawCalls = numberOfDrawCallsThisFrame;
+  numberOfDrawCallsThisFrame = 0;
+
   int numObjects = getNumberOfObjects(world.sandbox);
   registerStat(statistics.numObjectsStat, numObjects);
 
@@ -152,6 +155,7 @@ void registerStatistics(){
   logBenchmarkTick(benchmark, statistics.deltaTime, numObjects, statistics.numTriangles);
 
   registerStat(statistics.fpsStat, statistics.currentFps);
+
 }
 
 
@@ -909,12 +913,13 @@ void renderUI(Color pixelColor){
   drawTextNdi("using object id: -1" , uiXOffset, uiYOffset + offsetPerLine * 14, state.fontsize);
 
   drawTextNdi(std::string("triangles: ") + std::to_string(statistics.numTriangles), uiXOffset, uiYOffset + offsetPerLine * 15, state.fontsize);
-  drawTextNdi(std::string("num gameobjects: ") + std::to_string(unwrapStat<int>(statValue(statistics.numObjectsStat))), uiXOffset, uiYOffset + offsetPerLine * 16, state.fontsize);
-  drawTextNdi(std::string("num rigidbodys: ") + std::to_string(unwrapStat<int>(statValue(statistics.rigidBodiesStat))), uiXOffset, uiYOffset + offsetPerLine * 17, state.fontsize);
-  drawTextNdi(std::string("num scenes loaded: ") + std::to_string(unwrapStat<int>(statValue(statistics.scenesLoadedStat))), uiXOffset, uiYOffset + offsetPerLine * 18, state.fontsize);
-  drawTextNdi(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + offsetPerLine * 19, state.fontsize);
-  drawTextNdi(std::string("time: ") + std::to_string(timeSeconds(false)), uiXOffset, uiYOffset + offsetPerLine * 20, state.fontsize);
-  drawTextNdi(std::string("realtime: ") + std::to_string(timeSeconds(true)), uiXOffset, uiYOffset + offsetPerLine * 21, state.fontsize);
+  drawTextNdi(std::string("draw calls: ") + std::to_string(statistics.numDrawCalls), uiXOffset, uiYOffset + offsetPerLine * 16, state.fontsize);
+  drawTextNdi(std::string("num gameobjects: ") + std::to_string(unwrapStat<int>(statValue(statistics.numObjectsStat))), uiXOffset, uiYOffset + offsetPerLine * 17, state.fontsize);
+  drawTextNdi(std::string("num rigidbodys: ") + std::to_string(unwrapStat<int>(statValue(statistics.rigidBodiesStat))), uiXOffset, uiYOffset + offsetPerLine * 18, state.fontsize);
+  drawTextNdi(std::string("num scenes loaded: ") + std::to_string(unwrapStat<int>(statValue(statistics.scenesLoadedStat))), uiXOffset, uiYOffset + offsetPerLine * 19, state.fontsize);
+  drawTextNdi(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + offsetPerLine * 20, state.fontsize);
+  drawTextNdi(std::string("time: ") + std::to_string(timeSeconds(false)), uiXOffset, uiYOffset + offsetPerLine * 21, state.fontsize);
+  drawTextNdi(std::string("realtime: ") + std::to_string(timeSeconds(true)), uiXOffset, uiYOffset + offsetPerLine * 22, state.fontsize);
 }
 
 
@@ -2295,7 +2300,6 @@ int main(int argc, char* argv[]){
     std::cout << "frame time: " << (glfwGetTime() - statistics.now) << std::endl;
     std::cout << "frame draw calls: " << numberOfDrawCallsThisFrame << std::endl;
     glfwSwapBuffers(window);
-    numberOfDrawCallsThisFrame = 0;
   )})
 
   modlog("lifecycle", "program exiting");

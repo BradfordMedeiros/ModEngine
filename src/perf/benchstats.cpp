@@ -10,6 +10,7 @@ Stats statistics {
   .frameCount = 0,
   .totalFrames = 0,
   .numTriangles = 0,
+  .numDrawCalls = 0,
   .numObjectsStat = 0,
   .rigidBodiesStat = 0,
   .scenesLoadedStat = 0,
