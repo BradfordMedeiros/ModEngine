@@ -681,7 +681,7 @@ glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
   return element.matrix;
 }
 Transformation fullTransformation(SceneSandbox& sandbox, objid id){
-  return getTransformationFromMatrix(fullModelTransform(sandbox, id));
+  return sandbox.mainScene.absoluteTransforms.at(id).transform;
 }
 
 void removeScene(SceneSandbox& sandbox, objid sceneId){

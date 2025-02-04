@@ -2,6 +2,8 @@
 
 extern Stats statistics;
 
+int numberOfDrawCallsThisFrame = 0;
+
 void setVertexPosition(Mesh& mesh, unsigned int vertexIndex, glm::vec3 pos, glm::vec3 normal){
   glBindBuffer(GL_ARRAY_BUFFER, mesh.VBOPointer);
   glBufferSubData(GL_ARRAY_BUFFER, (sizeof(Vertex) * vertexIndex) + offsetof(Vertex, position), sizeof(pos), &pos);
@@ -224,9 +226,11 @@ void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsi
   glActiveTexture(GL_TEXTURE0); 
 
   glDrawElements(GL_TRIANGLES, mesh.numElements, GL_UNSIGNED_INT, 0);
+  numberOfDrawCallsThisFrame++;
 
   if (drawPoints){
-    glDrawElements(GL_POINTS, mesh.numElements, GL_UNSIGNED_INT, 0);   
+    glDrawElements(GL_POINTS, mesh.numElements, GL_UNSIGNED_INT, 0);
+    numberOfDrawCallsThisFrame++;
   }
 }
 
@@ -278,6 +282,7 @@ int drawLines(std::vector<Line> allLines, int linewidth){
   auto lineData = createLineRenderData(allLines);
   glLineWidth(linewidth);
   glDrawElements(GL_LINES, lineData.numIndices , GL_UNSIGNED_INT, 0);
+  numberOfDrawCallsThisFrame++;
   freeLineRenderData(lineData);
   return lineData.numIndices;
 }

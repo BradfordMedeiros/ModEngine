@@ -121,7 +121,7 @@ struct engineState {
   bool enableDof;
 
   // Rendering options 
-  int swapInterval;
+  int swapInterval; // this is vsync
   bool fullscreen;
   bool nativeViewport;
   bool nativeResolution;

@@ -18,6 +18,8 @@
 #endif
 CustomApiBindings* mainApi;
 
+extern int numberOfDrawCallsThisFrame;
+
 // application rendering stuff
 struct RenderingResources { 
   unsigned int* framebufferProgram;
@@ -2289,7 +2291,11 @@ int main(int argc, char* argv[]){
       glBindTexture(GL_TEXTURE_2D, renderStages.main.colorAttachment0);
       saveScreenshot(state.screenshotPath);
     }
+
+    std::cout << "frame time: " << (glfwGetTime() - statistics.now) << std::endl;
+    std::cout << "frame draw calls: " << numberOfDrawCallsThisFrame << std::endl;
     glfwSwapBuffers(window);
+    numberOfDrawCallsThisFrame = 0;
   )})
 
   modlog("lifecycle", "program exiting");
