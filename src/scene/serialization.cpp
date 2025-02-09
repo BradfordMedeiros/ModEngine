@@ -156,10 +156,10 @@ std::vector<AutoSerialize> gameobjSerializer {
     .field = "physics_avelocity",
     .defaultValue = glm::vec3(0.f, 0.f, 0.f),
   },
-  AutoSerializeString {
+  AutoSerializeInt {
     .structOffset = offsetof(GameObject, lookat),
     .field = "lookat",
-    .defaultValue = "",
+    .defaultValue = -1,
   },
   AutoSerializeString {
     .structOffset = offsetof(GameObject, script),

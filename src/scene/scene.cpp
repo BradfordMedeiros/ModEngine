@@ -21,7 +21,7 @@ std::vector<NameAndMeshObjName> getMeshesForGameobj(World& world, objid gameobjI
   std::vector<NameAndMeshObjName> nameAndMeshObjNames;
   auto groupId = getGroupId(world.sandbox, gameobjId);
   auto allIds = groupId == gameobjId ? getIdsInGroupByObjId(world.sandbox, groupId) : std::vector<objid>({ gameobjId });
-  std::cout << "1 physics : , groupId: " << groupId << ", ids " << print(allIds) << std::endl;
+  //std::cout << "1 physics : , groupId: " << groupId << ", ids " << print(allIds) << std::endl;
   for (auto id : allIds){
     auto meshesForId = getMeshesForId(world.objectMapping, id);
     auto gameobjname = getGameObject(world, id).name;
@@ -1464,27 +1464,16 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, Physic
 }
 
 void enforceLookAt(World& world){
-  bool extractSceneIdFromName(std::string& name, objid* _id, std::string* _searchName);
-
   forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
-    std::string lookAt = gameobj.lookat;                      
-    if (lookAt == "" || lookAt == gameobj.name){
+    if (gameobj.lookat == -1){
       return;
-    }
-    auto sceneId = getGameObjectH(world.sandbox, id).sceneId;
-
-    auto parsedSceneId = 0;
-    std::string parsedSearchName = "";
-    auto hasParsedName = extractSceneIdFromName(lookAt, &parsedSceneId, &parsedSearchName);
-    if (hasParsedName){
-      sceneId = parsedSceneId;
-      lookAt = parsedSearchName;
-    }
-
-    if(idExists(world.sandbox, lookAt, sceneId)){
+    }             
+    if(idExists(world.sandbox, gameobj.lookat)){
       glm::vec3 fromPos = fullTransformation(world.sandbox, id).position;
-      glm::vec3 targetPosition = fullTransformation(world.sandbox, getGameObject(world.sandbox, lookAt, sceneId).id).position;
+      glm::vec3 targetPosition = fullTransformation(world.sandbox, gameobj.lookat).position;
       physicsRotateSet(world, id, orientationFromPos(fromPos, targetPosition), false);
+    }else{
+      modassert(false, std::string("id does not exist for lookat: ") + std::to_string(gameobj.lookat));
     }
   });  
 }

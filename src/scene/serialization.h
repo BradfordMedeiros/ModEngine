@@ -37,7 +37,7 @@ struct GameObject {
   std::string name;
   Transformation transformation;
   physicsOpts physicsOptions;  // Should remove this and just get it from the physics system (probably)
-  std::string lookat;
+  objid lookat;
   std::string layer;
   std::string script;
   std::string shader;
