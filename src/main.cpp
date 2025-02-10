@@ -229,6 +229,7 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
   glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glBlendFunci(1, GL_ONE, GL_ZERO);
 
+
   drawShapeData(lineData, *renderingResources.uiShaderProgram, ndiOrtho, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
 
 
@@ -1505,6 +1506,7 @@ int main(int argc, char* argv[]){
     .loadShader = [](std::string name, std::string path) -> unsigned int* {
       return loadShaderIntoCache(name, path + "/vertex.glsl", path + "/fragment.glsl", interface.readFile, getTemplateValues());
     },
+    .setShaderUniform = setUniformData,
     .getGameObjNameForId = getGameObjectName,
     .setGameObjectAttr = setGameObjectAttr,
     .setSingleGameObjectAttr = setSingleGameObjectAttr,

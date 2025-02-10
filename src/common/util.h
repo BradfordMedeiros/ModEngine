@@ -441,4 +441,16 @@ struct EnvSubstResult {
 };
 EnvSubstResult envSubst(std::string content, std::unordered_map<std::string, std::string> values);
 
+struct Sampler2D { 
+  int textureUnitId; 
+};
+struct SamplerCube {
+  int textureUnitId;
+};
+typedef std::variant<bool, float, glm::vec2, glm::vec3, glm::vec4, Sampler2D, SamplerCube, glm::mat4, int> UniformValue;
+struct UniformData {
+  std::string name;
+  UniformValue value;
+};
+
 #endif

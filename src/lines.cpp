@@ -229,6 +229,7 @@ PROFILE("drawShapeData",
         auto shaderToUse = shapeOptionsShader.has_value() ? shapeOptionsShader.value() : uiShaderProgram;
         if (shaderIsDifferent(shaderToUse, lastShaderId) && allowShaderOverride){
             glUseProgram(shaderToUse);
+
             std::vector<UniformData> uniformData;
             uniformData.push_back(UniformData {
               .name = "projection",
@@ -252,7 +253,7 @@ PROFILE("drawShapeData",
               .name = "realtime",
               .value = getTotalTime(),
             });
-            setUniformData(shaderToUse, uniformData, { "model", "encodedid", "tint", "time" });
+            setUniformData(shaderToUse, uniformData, { "model", "encodedid", "tint", "time" }, false);
             lastShaderId = shapeOptionsShader;
         }
         if (!selectionProgram){

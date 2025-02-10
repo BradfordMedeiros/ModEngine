@@ -45,8 +45,11 @@ struct CustomApiBindings {
   void (*drawLine2D)(glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId);
   int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth);
   void (*freeLine)(int32_t lineid);
+
   std::optional<unsigned int> (*shaderByName)(std::string shaderName);
   unsigned int* (*loadShader)(std::string name, std::string path);
+  void (*setShaderUniform)(unsigned int program, UniformData& uniformData);
+
 
   std::optional<std::string> (*getGameObjNameForId)(int32_t id);
   void (*setGameObjectAttr)(int32_t id, std::vector<GameobjAttribute> attrs);

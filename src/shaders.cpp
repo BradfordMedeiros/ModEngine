@@ -371,63 +371,69 @@ void assertAllUniformsSet(unsigned int program, std::vector<UniformData>& unifor
 
 #define ASSERT_UNIFORMS_SET
 
-void setUniformData(unsigned int program, std::vector<UniformData>& uniformData, std::vector<const char*>&& excludedNames){
-  #ifdef ASSERT_UNIFORMS_SET
-  assertAllUniformsSet(program, uniformData, excludedNames);
-  #endif
-  for (auto &uniform : uniformData){
+void setUniformData(unsigned int program, UniformData& uniform){
     auto boolType = std::get_if<bool>(&uniform.value);
     if (boolType){
-      glUniform1i(glGetUniformLocation(program, uniform.name.c_str()), *boolType);
-      continue;
+      glProgramUniform1i(program, glGetUniformLocation(program, uniform.name.c_str()), *boolType);
+      return;
     }
     auto floatType = std::get_if<float>(&uniform.value);
     if (floatType){
-      glUniform1f(glGetUniformLocation(program, uniform.name.c_str()), *floatType);
-      continue;
+      glProgramUniform1f(program, glGetUniformLocation(program, uniform.name.c_str()), *floatType);
+      return;
     }
     auto vec2Type = std::get_if<glm::vec2>(&uniform.value);
     if (vec2Type){
-      glUniform2fv(glGetUniformLocation(program, uniform.name.c_str()), 1, glm::value_ptr(*vec2Type));
-      continue;
+      glProgramUniform2fv(program, glGetUniformLocation(program, uniform.name.c_str()), 1, glm::value_ptr(*vec2Type));
+      return;
     }    
     auto vec3Type = std::get_if<glm::vec3>(&uniform.value);
     if (vec3Type){
-      glUniform3fv(glGetUniformLocation(program, uniform.name.c_str()), 1, glm::value_ptr(*vec3Type));
-      continue;
+      glProgramUniform3fv(program, glGetUniformLocation(program, uniform.name.c_str()), 1, glm::value_ptr(*vec3Type));
+      return;
     }
     auto vec4Type = std::get_if<glm::vec4>(&uniform.value);
     if (vec4Type){
-      glUniform4fv(glGetUniformLocation(program, uniform.name.c_str()), 1, glm::value_ptr(*vec4Type));
-      continue;
+      glProgramUniform4fv(program, glGetUniformLocation(program, uniform.name.c_str()), 1, glm::value_ptr(*vec4Type));
+      return;
     }
 
     auto sampler2DType = std::get_if<Sampler2D>(&uniform.value);
     if (sampler2DType){
-      glUniform1i(glGetUniformLocation(program, uniform.name.c_str()), sampler2DType -> textureUnitId);
-      continue;
+      glProgramUniform1i(program, glGetUniformLocation(program, uniform.name.c_str()), sampler2DType -> textureUnitId);
+      return;
     }
 
     auto sampleCubeType = std::get_if<SamplerCube>(&uniform.value);
     if (sampleCubeType){
-      glUniform1i(glGetUniformLocation(program, uniform.name.c_str()), sampleCubeType -> textureUnitId);
-      continue;
+      glProgramUniform1i(program, glGetUniformLocation(program, uniform.name.c_str()), sampleCubeType -> textureUnitId);
+      return;
     }
 
 
     auto mat4Type = std::get_if<glm::mat4>(&uniform.value);
     if (mat4Type){
-      glUniformMatrix4fv(glGetUniformLocation(program, uniform.name.c_str()), 1, GL_FALSE, glm::value_ptr(*mat4Type));
-      continue;
+      glProgramUniformMatrix4fv(program, glGetUniformLocation(program, uniform.name.c_str()), 1, GL_FALSE, glm::value_ptr(*mat4Type));
+      return;
     }
 
     auto intType = std::get_if<int>(&uniform.value);
     if (intType){
-      glUniform1i(glGetUniformLocation(program, uniform.name.c_str()), *intType);
-      continue;
+      glProgramUniform1i(program, glGetUniformLocation(program, uniform.name.c_str()), *intType);
+      return;
     }
 
     modassert(false, "setUniformData invalid type");
+}
+
+void setUniformData(unsigned int program, std::vector<UniformData>& uniformData, std::vector<const char*>&& excludedNames, bool validateUniforms){
+  #ifdef ASSERT_UNIFORMS_SET
+  if (validateUniforms){
+    assertAllUniformsSet(program, uniformData, excludedNames);
+  }
+  #endif
+  for (auto &uniform : uniformData){
+    setUniformData(program, uniform);
   }
 }
 
