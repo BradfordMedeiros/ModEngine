@@ -49,7 +49,7 @@ struct CustomApiBindings {
   std::optional<unsigned int> (*shaderByName)(std::string shaderName);
   unsigned int* (*loadShader)(std::string name, std::string path);
   void (*setShaderUniform)(unsigned int program, UniformData& uniformData);
-
+  std::optional<unsigned int> (*getTextureSamplerId)(std::string& name);
 
   std::optional<std::string> (*getGameObjNameForId)(int32_t id);
   void (*setGameObjectAttr)(int32_t id, std::vector<GameobjAttribute> attrs);

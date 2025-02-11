@@ -126,7 +126,7 @@ ObjectStateMapping simpleIVec2Serializer(std::string object, std::string attribu
     },
     .getAttr = [structOffset](engineState& state) -> AttributeValue {
       glm::ivec2* vecValue = (glm::ivec2*)(((char*)&state) + structOffset);
-      return serializeVec(*vecValue);
+      return glm::vec2(vecValue -> x, vecValue -> y);
     },
     .object = object,
     .attribute = attribute,

@@ -986,6 +986,8 @@ std::optional<AttributeValue> getAttr(GameobjAttributes& objAttr, std::string ke
     return vec4Attr;
   }
 
+  modassert(false, "getAttr invalid type");
+
   return std::nullopt;
 }
 

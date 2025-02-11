@@ -1195,6 +1195,10 @@ std::optional<unsigned int> shaderByName(std::string name){
   return shaderstringToId.at(name); 
 }
 
+std::optional<unsigned int> getTextureSamplerId(std::string& texturepath){
+  return world.textures.at(texturepath).texture.textureId;
+}
+
 
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
@@ -1507,6 +1511,8 @@ int main(int argc, char* argv[]){
       return loadShaderIntoCache(name, path + "/vertex.glsl", path + "/fragment.glsl", interface.readFile, getTemplateValues());
     },
     .setShaderUniform = setUniformData,
+    .getTextureSamplerId = getTextureSamplerId,
+
     .getGameObjNameForId = getGameObjectName,
     .setGameObjectAttr = setGameObjectAttr,
     .setSingleGameObjectAttr = setSingleGameObjectAttr,
