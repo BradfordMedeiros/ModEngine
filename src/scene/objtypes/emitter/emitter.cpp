@@ -179,29 +179,53 @@ void updateEmitters(
         .velocity = std::nullopt,
         .angularVelocity = std::nullopt,
       };
-      if (forceSpawn){
-        newParticleOpts = emitter.forceParticles.front();
-        emitter.forceParticles.pop_front();
-      }
 
-      for (int i = 0; i < emitter.numParticlesPerFrame; i++){
-        auto particleFrameIndex = emitter.particleFrameIndex;
-        modlog("emitter add particle", std::to_string(particleFrameIndex));
-        auto particleId = addParticle(getParticleAttr(emitter, particleFrameIndex), getSubmodelAttr(emitter, particleFrameIndex), emitter.emitterNodeId, newParticleOpts);
-        emitter.particleFrameIndex++;
-        if(emitter.particleFrameIndex >= getNumberParticleFrames(emitter)){
-          emitter.particleFrameIndex = 0;
+      if (forceSpawn){
+        for (int x = 0; x < emitter.forceParticles.size(); x++){
+          if (forceSpawn){
+            newParticleOpts = emitter.forceParticles.at(x);
+          }
+          for (int i = 0; i < emitter.numParticlesPerFrame; i++){
+            auto particleFrameIndex = emitter.particleFrameIndex;
+            modlog("emitter add particle", std::to_string(particleFrameIndex));
+            auto particleId = addParticle(getParticleAttr(emitter, particleFrameIndex), getSubmodelAttr(emitter, particleFrameIndex), emitter.emitterNodeId, newParticleOpts);
+            emitter.particleFrameIndex++;
+            if(emitter.particleFrameIndex >= getNumberParticleFrames(emitter)){
+              emitter.particleFrameIndex = 0;
+            }
+            if (particleId.has_value()){
+              emitter.particles.push_back(ActiveParticle {
+                .id = particleId.value(),
+                .frameIndex = particleFrameIndex,
+                .spawntime = currentTime,
+              });
+            }
+            emitter.currentParticles+= 1; 
+            emitter.lastSpawnTime = currentTime;
+            std::cout << "INFO: particles: adding particle" << std::endl;        
+          }
         }
-        if (particleId.has_value()){
-          emitter.particles.push_back(ActiveParticle {
-            .id = particleId.value(),
-            .frameIndex = particleFrameIndex,
-            .spawntime = currentTime,
-          });
+        emitter.forceParticles = {};        
+      }else{
+        for (int i = 0; i < emitter.numParticlesPerFrame; i++){
+          auto particleFrameIndex = emitter.particleFrameIndex;
+          modlog("emitter add particle", std::to_string(particleFrameIndex));
+          auto particleId = addParticle(getParticleAttr(emitter, particleFrameIndex), getSubmodelAttr(emitter, particleFrameIndex), emitter.emitterNodeId, newParticleOpts);
+          emitter.particleFrameIndex++;
+          if(emitter.particleFrameIndex >= getNumberParticleFrames(emitter)){
+            emitter.particleFrameIndex = 0;
+          }
+          if (particleId.has_value()){
+            emitter.particles.push_back(ActiveParticle {
+              .id = particleId.value(),
+              .frameIndex = particleFrameIndex,
+              .spawntime = currentTime,
+            });
+          }
+          emitter.currentParticles+= 1; 
+          emitter.lastSpawnTime = currentTime;
+          std::cout << "INFO: particles: adding particle" << std::endl;        
         }
-        emitter.currentParticles+= 1; 
-        emitter.lastSpawnTime = currentTime;
-        std::cout << "INFO: particles: adding particle" << std::endl;        
       }
     }
   }
