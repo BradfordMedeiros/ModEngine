@@ -579,7 +579,11 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
       glm::vec3 position = lights.at(i).transform.position;
       auto& light = lights.at(i); 
       shaderSetUniform(shader, ("lights[" + std::to_string(i) + "]").c_str(), position);
-      shaderSetUniform(shader, ("lightscolor[" + std::to_string(i) + "]").c_str(), light.light.color);
+      if (!light.light.disabled){
+        shaderSetUniform(shader, ("lightscolor[" + std::to_string(i) + "]").c_str(), light.light.color);
+      }else{
+        shaderSetUniform(shader, ("lightscolor[" + std::to_string(i) + "]").c_str(), glm::vec3(0.f, 0.f, 0.f));
+      }
       shaderSetUniform(shader, ("lightsdir[" + std::to_string(i) + "]").c_str(), directionFromQuat(light.transform.rotation));
       shaderSetUniform(shader, ("lightsatten[" + std::to_string(i) + "]").c_str(), light.light.attenuation);
       shaderSetUniform(shader,  ("lightsmaxangle[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_SPOTLIGHT ? light.light.maxangle : -10.f);

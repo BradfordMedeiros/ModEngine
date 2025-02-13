@@ -60,6 +60,13 @@ std::vector<AutoSerialize> lightAutoserializer {
     .field = "voxelsize",
     .defaultValue = 1,
   },
+  AutoSerializeBool {
+    .structOffset = offsetof(GameObjectLight, disabled),
+    .field = "disabled",
+    .onString = "true",
+    .offString = "false",
+    .defaultValue = false,
+  },  
 };
 
 GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){
