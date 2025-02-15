@@ -327,10 +327,6 @@ bool isPrefab(World& world, objid id){
 
 // Prefab is original is the parent element that is a prefab, that first is in a different scene
 std::optional<objid> prefabId(World& world, objid id){
-  std::function<bool(objid)> isPrefabObj = [&world](objid id) -> bool {
-    return isPrefab(world, id);
-  };
-
   if (isPrefab(world, id)){
     return id;
   }
@@ -339,16 +335,13 @@ std::optional<objid> prefabId(World& world, objid id){
   auto lastSceneId = sceneId(world.sandbox, id);
   bool hasSceneNewId = false;
   while(currentId.has_value()){
-    auto currSceneId = sceneId(world.sandbox, id);
+    auto currSceneId = sceneId(world.sandbox, currentId.value());
     if (currSceneId != lastSceneId){
-      if (hasSceneNewId){
-        return std::nullopt;
-      }
       lastSceneId = currSceneId;
       hasSceneNewId = true;
     }
 
-    if (hasSceneNewId && isPrefabObj(currentId.value())){
+    if (hasSceneNewId && isPrefab(world, currentId.value())){
       return currentId.value();
     }
     currentId = getParent(world.sandbox, currentId.value());
