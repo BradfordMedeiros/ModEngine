@@ -29,7 +29,7 @@ struct physicsOpts {
   float restitution;
   float mass;
   float maxspeed;
-  float layer;
+  int layer;
 };
 
 struct GameObject {

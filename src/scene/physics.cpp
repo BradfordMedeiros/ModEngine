@@ -64,6 +64,8 @@ btRigidBody* createRigidBodyRect(glm::vec3 pos, float width, float height, float
 }
 btRigidBody* createRigidBodySphere(glm::vec3 pos, float radius, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
   btCollisionShape* shape = new btSphereShape(radius); 
+    shape -> setMargin(0.1); // TODO check if this margin makes sense
+
   return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling, opts);
 }
 btRigidBody* createRigidBodyCapsule(physicsEnv& env, float radius, float height, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
@@ -82,7 +84,7 @@ btRigidBody* createRigidBodyHull(physicsEnv& env, std::vector<glm::vec3>& verts,
     trimesh -> addTriangle(glmToBt(verts.at(i)), glmToBt(verts.at(i + 1)), glmToBt(verts.at(i + 2)));
   }
   btConvexTriangleMeshShape* shape = new btConvexTriangleMeshShape(trimesh);
-  shape -> setMargin(0);
+  shape -> setMargin(0.1); // TODO check if this margin makes sense
   btShapeHull hullBuilder(shape);
   hullBuilder.buildHull(0);
 
@@ -97,11 +99,14 @@ btRigidBody* createRigidBodyExact(physicsEnv& env, std::vector<glm::vec3>& verts
   modlog("ridig body exact, added verts number", std::to_string((int)verts.size()));
 
   btTriangleMesh*  trimesh = new btTriangleMesh();
+
   for (int i = 0; i < verts.size(); i+=3){
     modlog("physics rigid body exact-  adding vert", print(verts.at(i)) + " ");
     trimesh -> addTriangle(glmToBt(verts.at(i)), glmToBt(verts.at(i + 1)), glmToBt(verts.at(i + 2)));
   }
   btTriangleMeshShape* shape = new btBvhTriangleMeshShape(trimesh, true);  
+  shape -> setMargin(0.4); // TODO check if this margin makes sense
+
   return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling, opts);
 }
 
@@ -460,6 +465,7 @@ std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, PhysicsValue>& r
     hitobjects.push_back(
       HitObject {
         .id = id,
+        .mask = obj -> getBroadphaseHandle() -> m_collisionFilterMask,
         .point = btToGlm(hitPoint),  
         .normal = quatFromDirection(btToGlm(hitNormal)),
       }
@@ -521,6 +527,7 @@ std::vector<HitObject> contactTest(physicsEnv& env, std::map<objid, PhysicsValue
     modassert(id != originalId, "id and original id are the same");
     hitobjects.push_back(HitObject {
       .id = id,
+      .mask = obj -> getBroadphaseHandle() -> m_collisionFilterMask,
       .point = pos,
       .normal = normal,
     });
@@ -544,7 +551,7 @@ std::vector<HitObject> contactTestShape(physicsEnv& env, std::map<objid, Physics
     .friction = 1.f,
     .restitution = 1.f,
     .mass = 1.f,
-    .layer = 1.f,
+    .layer = 1,
     .velocity = glm::vec3(1.f, 1.f, 1.f),
     .angularVelocity = glm::vec3(1.f, 1.f, 1.f),
     .linearDamping = 0.f,
@@ -565,6 +572,7 @@ std::vector<HitObject> contactTestShape(physicsEnv& env, std::map<objid, Physics
     auto id = getIdForRigidBody(rigidbodys, obj);
     hitobjects.push_back(HitObject {
       .id = id.value(),
+      .mask = obj -> getBroadphaseHandle() -> m_collisionFilterMask,
       .point = pos,
       .normal = normal,
     });
@@ -579,5 +587,5 @@ std::vector<HitObject> contactTestShape(physicsEnv& env, std::map<objid, Physics
 }
 
 float calculateRadiusForScale(glm::vec3 scale){
-  return (maxvalue(scale.x, scale.y, scale.z) / 2.f);
+  return (maxvalue(scale.y, scale.y, scale.y) / 2.f);
 }

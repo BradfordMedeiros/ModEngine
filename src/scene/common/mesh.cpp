@@ -2,7 +2,7 @@
 
 extern Stats statistics;
 
-int numberOfDrawCallsThisFrame = 0;
+int numberOfDrawCallsThisFrame = 0;  // static-state
 
 void setVertexPosition(Mesh& mesh, unsigned int vertexIndex, glm::vec3 pos, glm::vec3 normal){
   glBindBuffer(GL_ARRAY_BUFFER, mesh.VBOPointer);

@@ -48,7 +48,7 @@ struct rigidBodyOpts {
   float friction;
   float restitution;
   float mass;
-  float layer;
+  int layer;
   std::optional<glm::vec3> velocity;
   std::optional<glm::vec3> angularVelocity;
   float linearDamping;

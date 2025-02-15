@@ -1,6 +1,6 @@
 #include "./renderstages.h"
 
-extern engineState state;  // should  remove 
+extern engineState state;  // static-state extern
 
 enum RenderStageUniformType { RENDER_UNSPECIFIED, RENDER_BOOL, RENDER_FLOAT, RENDER_ARR_FLOAT, RENDER_INT, RENDER_VEC3 };
 struct RenderStageUniformTypeValue {

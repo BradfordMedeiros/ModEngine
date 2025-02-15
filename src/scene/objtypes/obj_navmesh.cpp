@@ -341,7 +341,7 @@ std::vector<std::vector<glm::vec3>> meshPointsVec {
 std::vector<AutoSerialize> navmeshAutoserializer {
 };
 
-int navmeshId = 0;
+int navmeshId = 0;  // static-state
 GameObjectNavmesh createNavmesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto points = meshPointsVec.at(navmeshId);
   navmeshId++;

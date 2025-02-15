@@ -4,7 +4,7 @@
    Should port the scheme scripting to C++, and then these just become ordinary api methods
 */
 
-std::vector<CScriptBinding> bindings = {};
+std::vector<CScriptBinding> bindings = {};  // static-state
 
 
 void registerAllBindings(std::vector<CScriptBinding> pluginBindings){

@@ -7,7 +7,7 @@ struct ShaderInformation {
   std::string vertexShader;
   std::string fragmentShader;
 };
-std::map<std::string, ShaderInformation> shaderstringToId;
+std::map<std::string, ShaderInformation> shaderstringToId; // static-state
 
 struct shaderError {
   bool isError;

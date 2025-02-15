@@ -7,7 +7,7 @@ struct udpSetup {
   sockaddr_in servaddr; 
 };
 
-static bool isConnected = false;
+static bool isConnected = false;  // static-state
 static std::string currentServerIp = "";
 
 static std::string bootstrapperServer = "127.0.0.1";

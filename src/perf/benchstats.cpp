@@ -27,7 +27,7 @@ struct StatInfo {
   StatValue amount;
 };
 
-std::vector<StatInfo> stats = {};
+std::vector<StatInfo> stats = {};  // static-state
 
 unsigned int statName(std::string name){
 	for (int i = 0; i < stats.size(); i++){

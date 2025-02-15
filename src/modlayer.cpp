@@ -1,6 +1,6 @@
 #include "./modlayer.h"
 
-std::vector<std::string> installedMods = {};
+std::vector<std::string> installedMods = {};  // static-state 
 void installMod(std::string layer){
 	assert(std::count(installedMods.begin(), installedMods.end(), layer) == 0);
 	installedMods.push_back(layer);

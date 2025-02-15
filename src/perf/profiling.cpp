@@ -6,7 +6,7 @@ struct LogProfile {
   const char* description;
 };
 
-std::vector<LogProfile> profiles;
+std::vector<LogProfile> profiles;  // static-state
 
 bool shouldProfile = false;
 

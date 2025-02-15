@@ -207,14 +207,12 @@ std::vector<AutoSerialize> gameobjSerializer {
     .field = "physics_restitution",
     .defaultValue = 0.f,
   }, 
-  AutoSerializeFloat {
+  AutoSerializeInt {
     .structOffset = offsetof(GameObject, physicsOptions.layer),
-    .structOffsetFiller = std::nullopt,
     .field = "physics_layer",
-    .defaultValue = 0.f,
+    .defaultValue = 0,
   }, 
 };
-
 
 void assertCoreType(AttributeValueType type, std::string& fieldname, std::string& payload){
   auto autoserializer = getAutoserializeByField(gameobjSerializer, fieldname.c_str());

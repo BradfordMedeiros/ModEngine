@@ -204,6 +204,7 @@ struct StringAttribute {
 
 struct HitObject {
   objid id;
+  int mask;
   glm::vec3 point;
   glm::quat normal;
 };
