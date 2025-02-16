@@ -62,13 +62,11 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
     // remove animation when del object, but for now!
     if (!idExists(world.sandbox, playback.groupId)){  // why are we doing this check here?
       timings.playbacksToRemove.push_back(playback.groupId);
-      modlog("animation", "removed playbacks because of internal group id");
-      return;
+      modlog("animation", std::string("removed playbacks because of internal group id: ") + std::to_string(playback.groupId));
+    }else{
+      tickAnimation(world, timings.disableAnimationIds, playback, currentTime);
     }
-
-    tickAnimation(world, timings.disableAnimationIds, playback, currentTime);
     //modlog("animation", "ticking animation for groupid: " + std::to_string(playback.groupId));
-
   }
 
 
@@ -152,7 +150,7 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
 
   std::string animationname = animation.name;
   float animLength = animationLengthSeconds(animation);
-  modlog("animation", std::string("adding animation: ") + animationname + ", length = " + std::to_string(animLength) + ", numticks = " + std::to_string(animation.duration) + ", ticks/s = " + std::to_string(animation.ticksPerSecond));
+  modlog("animation", std::string("adding animation: ") + animationname + ", length = " + std::to_string(animLength) + ", numticks = " + std::to_string(animation.duration) + ", ticks/s = " + std::to_string(animation.ticksPerSecond) + ", groupId = " + std::to_string(groupId));
 
   timings.animations.playbacks[groupId] = AnimationData {
     .groupId = groupId,
@@ -168,8 +166,14 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
 }
 
 void removeAnimation(World& world, WorldTiming& timings, objid id){
-  modlog("animation", std::string("removing animation for obj: ") + std::to_string(id));
   auto groupId = getGroupId(world.sandbox, id);
+  if (!idExists(world.sandbox, groupId)){
+    return;
+  }
+  if (timings.animations.playbacks.find(groupId) == timings.animations.playbacks.end()){
+    return;
+  }
+  modlog("animation", std::string("removing animation for obj: ") + std::to_string(id));
   timings.playbacksToRemove.push_back(groupId);
 }
 

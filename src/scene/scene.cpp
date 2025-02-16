@@ -441,7 +441,6 @@ void freeTextureRefsByOwner(World& world, int ownerId){
 }
 
 void freeAnimationsForOwner(World& world, objid id){
-  std::cout << "INFO: removing animations for: " << id << std::endl;
   world.animations.erase(id);
 }
 

@@ -1124,6 +1124,18 @@ std::optional<AttributeValue> getAttributeValue(GameobjAttributes& attributes, c
   return std::nullopt;
 }
 
+std::string print(AnimationType type){
+  if (type == ONESHOT){
+    return "ONESHOT";
+  }else if (type == LOOP){
+    return "LOOP";
+  }else if (type == FORWARDS){
+    return "FORWARDS";
+  }
+  modassert(false, "unknown AnimationType");
+  return "unknown type";
+}
+
 std::vector<SubstMatch> envSubstMatches(std::string& content){
   std::vector<SubstMatch> matches;
   for (int i = 0; i < content.size(); i++){

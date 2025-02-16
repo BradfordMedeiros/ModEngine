@@ -4,16 +4,19 @@
 
 platform:mesh:./res/models/box/box.obj
 platform:scale:100 1 100
-platform:position:0 -5 0 # 000 default mask
+platform:position:0 -20 0 # 000 default mask
+platform:physics:enabled
 
 box1:mesh:./res/models/box/box.obj
-box1:position:0 5 0
+box1:position:0 125 0
+box1:physics:enabled
 box1:physics_type:dynamic
 box1:physics_layer:1 # 001
 
 
 box2:mesh:./res/models/box/box.obj
-box2:position:2 5 0
+box2:position:2 125 0
+box2:physics:enabled
 box2:physics_type:dynamic
 box2:physics_layer:3 # 011
 

@@ -412,6 +412,7 @@ struct Transformation {
 };
 
 enum AnimationType { ONESHOT, LOOP, FORWARDS };
+std::string print(AnimationType type);
 
 struct PositionAndScale {
   glm::vec3 position;

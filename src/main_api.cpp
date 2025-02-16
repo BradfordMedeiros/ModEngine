@@ -514,7 +514,6 @@ void playAnimation(int32_t id, std::string animationToPlay, AnimationType animat
 }
 
 void stopAnimation(int32_t id){
-  modlog("animation", std::string("stop animation: for id = ") + std::to_string(id));
   removeAnimation(world, timings, id);
 }
 
