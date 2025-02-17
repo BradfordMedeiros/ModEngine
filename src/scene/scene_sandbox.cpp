@@ -450,7 +450,7 @@ bool extractSceneIdFromName(std::string& name, objid* _id, std::string* _searchN
 std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string name, objid sceneId, bool enablePrefixMatch){
   auto sceneToSearchIn = sceneId;
   auto effectiveName = name;
-  if (enablePrefixMatch){
+  if (enablePrefixMatch){ // TODO - can i get rid of this
     objid prefixSceneId = 0;
     std::string restString = "";
     auto validPrefix = extractSceneIdFromName(name, &prefixSceneId, &restString);

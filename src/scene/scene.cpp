@@ -1462,21 +1462,6 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, Physic
   }
 }
 
-void enforceLookAt(World& world){
-  forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
-    if (gameobj.lookat == -1){
-      return;
-    }             
-    if(idExists(world.sandbox, gameobj.lookat)){
-      glm::vec3 fromPos = fullTransformation(world.sandbox, id).position;
-      glm::vec3 targetPosition = fullTransformation(world.sandbox, gameobj.lookat).position;
-      physicsRotateSet(world, id, orientationFromPos(fromPos, targetPosition), false);
-    }else{
-      modassert(false, std::string("id does not exist for lookat: ") + std::to_string(gameobj.lookat));
-    }
-  });  
-}
-
 extern bool useTransform2;
 
 glm::mat4 armatureTransform2(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
@@ -1575,7 +1560,15 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   stepPhysicsSimulation(world.physicsEnvironment, timestep, paused, enablePhysics);
   updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);  
 
-  enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
+  forEveryGameobj(world.sandbox, [&world, &viewTransform](objid id, GameObject& gameobj) -> void {
+    if (!gameobj.lookat){
+      return;
+    }             
+    glm::vec3 fromPos = fullTransformation(world.sandbox, id).position;
+    physicsRotateSet(world, id, orientationFromPos(fromPos, viewTransform.position), false);
+  }); 
+
+
   auto updatedIds = updatePhysicsFromSandbox(world);
   for (auto updatedId : updatedIds){
     world.entitiesToUpdate.insert(updatedId);
@@ -1603,8 +1596,9 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
         Mesh& mesh = gameobjMesh -> meshesToRender.at(i);
         for (Bone& bone : mesh.bones){
           std::string rootname = getGameObject(world.sandbox, getGroupId(world.sandbox, id)).name;
-          auto boneId = maybeGetGameObjectByName(world.sandbox, bone.name, sceneId(world.sandbox, id), false).value() -> id;
-          auto matrix = armatureTransform2(world.sandbox, boneId, rootname, sceneId(world.sandbox, id));
+          auto boneId = maybeGetGameObjectByName(world.sandbox, bone.name, sceneId(world.sandbox, id), false);
+          modassert(boneId.has_value(), std::string("no bone names: ") + bone.name);
+          auto matrix = armatureTransform2(world.sandbox, boneId.value() -> id, rootname, sceneId(world.sandbox, id));
           bone.offsetMatrix = matrix * glm::inverse(bone.initialBonePose);
         }
       }
