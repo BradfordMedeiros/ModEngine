@@ -1,4 +1,4 @@
-#include "./selection_binding.h"
+#include "./feature_bindings.h"
 
 CScriptBinding cscriptCreateSelectionBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("test/test-selection", api);
@@ -75,5 +75,52 @@ CScriptBinding cscriptCreateEmissionBinding(CustomApiBindings& api){
     glm::vec3 emissionAmount(0.f, remainingTime / duration, 0.f);
     api.setSingleGameObjectAttr(cubeId, "emission", emissionAmount);
   };
+  return binding; 
+}
+
+
+void addNObjects(CustomApiBindings& gameapi, objid sceneId, int width, int height, int depth){
+  for (int x = 0; x < width; x++){
+    for (int z = 0; z < depth; z++){
+      for (int y = 0; y < height; y++){
+        float xoffset = 2.5f * x;
+        float yoffset = 2.5f * y;
+        float zoffset = 2.5f * z;
+        GameobjAttributes attr {
+          .attr = {
+            { "mesh", "../gameresources/build/primitives/walls/1-0.2-1.gltf" },
+            { "position", glm::vec3(xoffset, yoffset, zoffset) },
+            { "texture", "./res/textures/hexglow.png" },
+          },
+        };
+        std::map<std::string, GameobjAttributes> submodelAttributes;
+        auto name = std::string("debug-obj-") + std::to_string(getUniqueObjId());
+        gameapi.makeObjectAttr(sceneId, name, attr, submodelAttributes);   
+      }
+    }
+  }
+}
+
+CScriptBinding cscriptCreateNObjectsBinding(CustomApiBindings& api){
+  auto binding = createCScriptBinding("test/nobjects", api);
+  binding.create = [&api](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
+    auto args = api.getArgs();
+
+    int x = 1;
+    if (args.find("x") != args.end()){
+      x = std::atoi(args.at("x").c_str());
+    }
+    int y = 1;
+    if (args.find("y") != args.end()){
+      y = std::atoi(args.at("y").c_str());
+    }
+    int z = 1;
+    if (args.find("z") != args.end()){
+      z = std::atoi(args.at("z").c_str());
+    }
+
+    addNObjects(api, sceneId, x, y, z);
+  };
+
   return binding; 
 }

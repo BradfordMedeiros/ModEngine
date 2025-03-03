@@ -388,6 +388,12 @@ std::map<std::string, FeatureScene> featureScenes = {
     .createBinding = cscriptCreateTimeBinding,
     .scriptAuto = true,
   }},
+  {
+    "nobjects", FeatureScene {
+      .sceneFile = std::nullopt,
+      .createBinding = cscriptCreateNObjectsBinding,
+      .scriptAuto = true,
+  }}
 };
 
 

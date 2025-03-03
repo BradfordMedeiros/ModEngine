@@ -11,7 +11,7 @@
 #include "../cscript/cscript_binding.h"
 #include "./integration/common.h"
 #include "./integration/makeobject.h"
-#include "./features/selection_binding.h"
+#include "./features/feature_bindings.h"
 
 int runTests();
 
