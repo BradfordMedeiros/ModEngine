@@ -12,7 +12,11 @@ struct Color {
   GLfloat a;
 };
 
-Color getPixelColor(GLint x, GLint y);
+Color getPixelColorAttachment0(GLint x, GLint y);
+Color getPixelColorAttachment1(GLint x, GLint y);
+Color getPixelColorAttachment2(GLint x, GLint y);
+Color getPixelColorAttachment3(GLint x, GLint y);
+
 objid getIdFromColor(Color color);
 objid getIdFromPixelCoord(GLint x, GLint y);
 objid getIdFromPixelCoordAttachment1(GLint x, GLint y);

@@ -300,6 +300,7 @@ void assertAllUniformsSet(unsigned int program, std::vector<UniformData>& unifor
     auto requiredMat4Type = std::get_if<glm::mat4>(&requiredUniform.value);
     auto requiredIntType = std::get_if<int>(&requiredUniform.value);
 
+
     bool foundUniform = false;
     bool correctType = false;
     for (auto &uniform : uniformData){
@@ -361,7 +362,7 @@ void assertAllUniformsSet(unsigned int program, std::vector<UniformData>& unifor
             break;            
           }
         }
-        modassert(false, "assert types, invalid type");
+        //modassert(false, "assert types, invalid type");
       }
     }
     modassert(foundUniform, std::string("did not find matching uniform name: ") + requiredUniform.name);

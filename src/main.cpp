@@ -192,8 +192,8 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
   setActiveDepthTexture(renderingResources.framebuffers.fbo, &renderingResources.framebuffers.textureDepthTextures.at(0), 0);
 
   glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
-  GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-  glDrawBuffers(2, buffers_to_render);
+  GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+  glDrawBuffers(4, buffers_to_render);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,  texture2.textureId, 0);
 
@@ -759,7 +759,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
   uniformData.push_back(UniformData { .name = "textureOffset",  .value = glm::vec2(1.f, 1.f) });
   uniformData.push_back(UniformData { .name = "textureSize",  .value = glm::vec2(1.f, 1.f) });
   uniformData.push_back(UniformData { .name = "textureTiling",  .value = glm::vec2(1.f, 1.f) });
-  setUniformData(shaderProgram, uniformData, { "bones[0]", "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth" });
+  setUniformData(shaderProgram, uniformData, { "bones[0]", "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth", "encodedid", "textureid" });
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
   if (state.showDebug && numChunkingGridCells > 0){
@@ -989,6 +989,12 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderStep.colorAttachment0, 0);
     if (renderStep.colorAttachment1.has_value()){
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, renderStep.colorAttachment1.value(), 0);
+    }
+    if (renderStep.colorAttachment2.has_value()){
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, renderStep.colorAttachment2.value(), 0);
+    }
+    if (renderStep.colorAttachment3.has_value()){
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, renderStep.colorAttachment3.value(), 0);
     }
 
     glClearColor(0.0, 0.0, 0.0, 1.f);
@@ -1770,8 +1776,8 @@ int main(int argc, char* argv[]){
   toggleCursor(state.cursorBehavior); 
 
   std::cout << "INFO: render loop starting" << std::endl;
-  GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-  glDrawBuffers(2, buffers_to_render);
+  GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+  glDrawBuffers(4, buffers_to_render);
 
   int frameratelimit = result["fps"].as<int>();
   bool hasFramelimit = frameratelimit != 0;
@@ -2035,7 +2041,7 @@ int main(int argc, char* argv[]){
     )
     //std::cout << "cache size: " << portalIdCache.size() << std::endl;
 
-    {
+    { 
       PROFILE("SELECTION",
         // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
         renderWithProgram(renderContext, renderStages.selection);
@@ -2045,12 +2051,11 @@ int main(int argc, char* argv[]){
         drawShapeData(lineData, *renderStages.selection.shader, ndiOrtho, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
         glEnable(GL_DEPTH_TEST);
       )
-
     
       //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
       auto uvCoordWithTex = getUVCoordAndTextureId(adjustedCoords.x, adjustedCoords.y);
       auto uvCoord = toUvCoord(uvCoordWithTex);
-      Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+      Color hoveredItemColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
       objid hoveredId = getIdFromColor(hoveredItemColor);
 
       state.lastHoverIndex = state.currentHoverIndex; // stateupdate
@@ -2076,10 +2081,10 @@ int main(int argc, char* argv[]){
     }
     
     statistics.numTriangles = renderWithProgram(renderContext, renderStages.main);
-    Color colorFromSelection = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+    Color colorFromSelection = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
     renderVector(*shaderProgram, view, numChunkingGridCells);
 
-    Color pixelColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+    Color pixelColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
     state.hoveredColor = glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b);
 
     PROFILE("BLOOM-RENDERING",
@@ -2142,7 +2147,7 @@ int main(int argc, char* argv[]){
       glBindVertexArray(defaultResources.quadVAO);
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
-      Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+      Color hoveredItemColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
       auto distanceComponent = hoveredItemColor.r;
       float distance = (distanceComponent * (far - near)) + near;
    

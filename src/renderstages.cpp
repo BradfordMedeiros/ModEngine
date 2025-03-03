@@ -313,6 +313,9 @@ RenderStages loadRenderStages(
     .fbo = fbo,
     .colorAttachment0 = framebufferTexture,
     .colorAttachment1 = framebufferTexture2,
+    .colorAttachment2 = framebufferTexture3,
+    .colorAttachment3 = framebufferTexture4,  // this stores UV coord
+
     .depthTextureIndex = 0,
     .shader = shaders.shaderProgram,
     .quadTexture = 0,

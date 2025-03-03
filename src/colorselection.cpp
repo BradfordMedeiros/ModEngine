@@ -1,6 +1,6 @@
 #include "./colorselection.h"
 
-Color getPixelColor(GLint x, GLint y) {
+Color getPixelColorAttachment0(GLint x, GLint y) {
   glReadBuffer(GL_COLOR_ATTACHMENT0);
   Color color;
   glReadPixels(x, y, 1, 1, GL_RGBA, GL_FLOAT, &color); 
@@ -8,6 +8,18 @@ Color getPixelColor(GLint x, GLint y) {
 }
 Color getPixelColorAttachment1(GLint x, GLint y) {
   glReadBuffer(GL_COLOR_ATTACHMENT1);
+  Color color;
+  glReadPixels(x, y, 1, 1, GL_RGBA, GL_FLOAT, &color); 
+  return color;
+}
+Color getPixelColorAttachment2(GLint x, GLint y) {
+  glReadBuffer(GL_COLOR_ATTACHMENT2);
+  Color color;
+  glReadPixels(x, y, 1, 1, GL_RGBA, GL_FLOAT, &color); 
+  return color;
+}
+Color getPixelColorAttachment3(GLint x, GLint y) {
+  glReadBuffer(GL_COLOR_ATTACHMENT3);
   Color color;
   glReadPixels(x, y, 1, 1, GL_RGBA, GL_FLOAT, &color); 
   return color;
@@ -23,7 +35,7 @@ objid getIdFromColor(Color color){
 }
 
 objid getIdFromPixelCoord(GLint x, GLint y){
-  Color hoveredItemColor = getPixelColor(x, y);
+  Color hoveredItemColor = getPixelColorAttachment0(x, y);
   auto hoveredId = getIdFromColor(hoveredItemColor);
   return hoveredId;
 }
