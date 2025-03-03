@@ -103,23 +103,28 @@ void addNObjects(CustomApiBindings& gameapi, objid sceneId, int width, int heigh
 
 CScriptBinding cscriptCreateNObjectsBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("test/nobjects", api);
-  binding.create = [&api](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
-    auto args = api.getArgs();
+  binding.onFrame = [&api](int32_t id, void* data) -> void {
+    static bool didAddObjects = false;
+    if (!didAddObjects){
+      didAddObjects = true;
 
-    int x = 1;
-    if (args.find("x") != args.end()){
-      x = std::atoi(args.at("x").c_str());
-    }
-    int y = 1;
-    if (args.find("y") != args.end()){
-      y = std::atoi(args.at("y").c_str());
-    }
-    int z = 1;
-    if (args.find("z") != args.end()){
-      z = std::atoi(args.at("z").c_str());
+      auto args = api.getArgs();
+      int x = 1;
+      if (args.find("x") != args.end()){
+        x = std::atoi(args.at("x").c_str());
+      }
+      int y = 1;
+      if (args.find("y") != args.end()){
+        y = std::atoi(args.at("y").c_str());
+      }
+      int z = 1;
+      if (args.find("z") != args.end()){
+        z = std::atoi(args.at("z").c_str());
+      }
+
+      addNObjects(api, 0, x, y, z);
     }
 
-    addNObjects(api, sceneId, x, y, z);
   };
 
   return binding; 
