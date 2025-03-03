@@ -605,9 +605,8 @@ void setShaderDataObject(GLint shader, glm::vec3 color, objid id, glm::mat4 proj
   if (shader != *renderStages.selection.shader){
     shaderSetUniform(shader, "tint", glm::vec4(color.x, color.y, color.z, 1.f));
   }
-  if (shader == *renderStages.selection.shader){
-    shaderSetUniform(shader, "encodedid", getColorFromGameobject(id));
-  }
+  
+  shaderSetUniform(shader, "encodedid", getColorFromGameobject(id));
   shaderSetUniform(shader, "projview", projview);
 }
 void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
@@ -2041,7 +2040,12 @@ int main(int argc, char* argv[]){
     )
     //std::cout << "cache size: " << portalIdCache.size() << std::endl;
 
-    { 
+
+      //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
+    auto uvCoordWithTex = getUVCoordAndTextureId(adjustedCoords.x, adjustedCoords.y);
+    auto uvCoord = toUvCoord(uvCoordWithTex);
+
+    { /*
       PROFILE("SELECTION",
         // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
         renderWithProgram(renderContext, renderStages.selection);
@@ -2052,15 +2056,6 @@ int main(int argc, char* argv[]){
         glEnable(GL_DEPTH_TEST);
       )
     
-      //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
-      auto uvCoordWithTex = getUVCoordAndTextureId(adjustedCoords.x, adjustedCoords.y);
-      auto uvCoord = toUvCoord(uvCoordWithTex);
-      Color hoveredItemColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
-      objid hoveredId = getIdFromColor(hoveredItemColor);
-
-      state.lastHoverIndex = state.currentHoverIndex; // stateupdate
-      state.currentHoverIndex = hoveredId; // stateupdate
-      state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate
 
       for (auto &idCoordToGet : idCoordsToGet){
         if (idCoordToGet.textureId.has_value()){
@@ -2077,10 +2072,38 @@ int main(int argc, char* argv[]){
         auto uvCoordWithTex = getUVCoordAndTextureId(pixelCoord.x, pixelCoord.y);
         auto uvCoord = toUvCoord(uvCoordWithTex);
         idCoordToGet.resultUv = glm::vec2(uvCoord.x, uvCoord.y);
-      }
+      }*/
     }
     
     statistics.numTriangles = renderWithProgram(renderContext, renderStages.main);
+    Color hoveredItemColor = getPixelColorAttachment2(adjustedCoords.x, adjustedCoords.y);
+    objid hoveredId = getIdFromColor(hoveredItemColor);
+
+    state.lastHoverIndex = state.currentHoverIndex; // stateupdate
+    state.currentHoverIndex = hoveredId; // stateupdate
+    state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate
+
+
+    for (auto &idCoordToGet : idCoordsToGet){
+      if (idCoordToGet.textureId.has_value()){
+        continue;
+      }
+      auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.ndix, idCoordToGet.ndiy), state.resolution);
+      auto id = getIdFromPixelCoordAttachment2(pixelCoord.x, pixelCoord.y);
+      if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
+      }else if (idCoordToGet.onlyGameObjId && !idExists(world.sandbox, id)){
+        //modassert(false, std::string("id does not exist: ") + std::to_string(id));
+      }else{
+        idCoordToGet.result = id;
+      }
+      auto uvCoordWithTex = getUVCoordAndTextureId(pixelCoord.x, pixelCoord.y);
+      auto uvCoord = toUvCoord(uvCoordWithTex);
+      idCoordToGet.resultUv = glm::vec2(uvCoord.x, uvCoord.y);
+    }
+
+
+
+
     Color colorFromSelection = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
     renderVector(*shaderProgram, view, numChunkingGridCells);
 

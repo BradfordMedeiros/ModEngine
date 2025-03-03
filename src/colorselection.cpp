@@ -44,6 +44,17 @@ objid getIdFromPixelCoordAttachment1(GLint x, GLint y){
   auto hoveredId = getIdFromColor(hoveredItemColor);
   return hoveredId;
 }
+objid getIdFromPixelCoordAttachment2(GLint x, GLint y){
+  Color hoveredItemColor = getPixelColorAttachment2(x, y);
+  auto hoveredId = getIdFromColor(hoveredItemColor);
+  return hoveredId;
+}
+objid getIdFromPixelCoordAttachment3(GLint x, GLint y){
+  Color hoveredItemColor = getPixelColorAttachment3(x, y);
+  auto hoveredId = getIdFromColor(hoveredItemColor);
+  return hoveredId;
+}
+
 
 
 glm::vec4 getColorFromGameobject(objid id){
