@@ -1161,7 +1161,6 @@ int main(int argc, char* argv[]){
    ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))
    ("t,texture", "Additional textures folder to use", cxxopts::value<std::string>()->default_value("./res"))
    ("x,scriptpath", "Script file to use", cxxopts::value<std::vector<std::string>>()->default_value(""))
-   ("u,uishader", "Shader to use for ui", cxxopts::value<std::string>()->default_value("./res/shaders/ui"))
    ("fps", "Framerate limit", cxxopts::value<int>()->default_value("0"))
    ("fps-fixed", "Whether to guarantee the framerate, which means values do not occur in realtime", cxxopts::value<bool>()->default_value("false"))
    ("fps-lag", "Extra lag to induce in each frame in ms", cxxopts::value<int>()->default_value("-1"))
@@ -1285,8 +1284,6 @@ int main(int argc, char* argv[]){
 
   shaderFolderPath = result["shader"].as<std::string>();
   auto textureFolderPath = result["texture"].as<std::string>();
-  const std::string framebufferShaderPath = "./res/shaders/framebuffer";
-  const std::string uiShaderPath = result["uishader"].as<std::string>();
 
   auto timetoexit = result["timetoexit"].as<int>();
 
@@ -1380,6 +1377,7 @@ int main(int argc, char* argv[]){
   modlog("shaders", std::string("shader file path is ") + shaderFolderPath);
   unsigned int* shaderProgram = loadShaderIntoCache("default", shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
   
+  std::string framebufferShaderPath = "./res/shaders/framebuffer";
   modlog("shaders", std::string("framebuffer file path is ") + framebufferShaderPath);
   renderingResources.framebufferProgram = loadShaderIntoCache("framebuffer", framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
 
@@ -1387,6 +1385,7 @@ int main(int argc, char* argv[]){
   modlog("shaders", std::string("depth file path is ") + depthShaderPath);
   unsigned int* depthProgram = loadShaderIntoCache("depth", depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
 
+  std::string uiShaderPath = "./res/shaders/ui";
   modlog("shaders", std::string("ui shader file path is ") + uiShaderPath);
   renderingResources.uiShaderProgram = loadShaderIntoCache("ui", uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
 
