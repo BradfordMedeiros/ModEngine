@@ -1,6 +1,6 @@
 #include "./colorselection.h"
 
-Color getPixelColor(GLint x, GLint y) {
+Color getPixelColorAttachment0(GLint x, GLint y) {
   glReadBuffer(GL_COLOR_ATTACHMENT0);
   Color color;
   glReadPixels(x, y, 1, 1, GL_RGBA, GL_FLOAT, &color); 
@@ -8,6 +8,18 @@ Color getPixelColor(GLint x, GLint y) {
 }
 Color getPixelColorAttachment1(GLint x, GLint y) {
   glReadBuffer(GL_COLOR_ATTACHMENT1);
+  Color color;
+  glReadPixels(x, y, 1, 1, GL_RGBA, GL_FLOAT, &color); 
+  return color;
+}
+Color getPixelColorAttachment2(GLint x, GLint y) {
+  glReadBuffer(GL_COLOR_ATTACHMENT2);
+  Color color;
+  glReadPixels(x, y, 1, 1, GL_RGBA, GL_FLOAT, &color); 
+  return color;
+}
+Color getPixelColorAttachment3(GLint x, GLint y) {
+  glReadBuffer(GL_COLOR_ATTACHMENT3);
   Color color;
   glReadPixels(x, y, 1, 1, GL_RGBA, GL_FLOAT, &color); 
   return color;
@@ -21,18 +33,6 @@ objid getIdFromColor(Color color){
   int objectId = redBack + greenBack + blueBack + alphaBack ;
   return objectId;
 }
-
-objid getIdFromPixelCoord(GLint x, GLint y){
-  Color hoveredItemColor = getPixelColor(x, y);
-  auto hoveredId = getIdFromColor(hoveredItemColor);
-  return hoveredId;
-}
-objid getIdFromPixelCoordAttachment1(GLint x, GLint y){
-  Color hoveredItemColor = getPixelColorAttachment1(x, y);
-  auto hoveredId = getIdFromColor(hoveredItemColor);
-  return hoveredId;
-}
-
 
 glm::vec4 getColorFromGameobject(objid id){
   int redChannel =   (id & 0x000000FF);

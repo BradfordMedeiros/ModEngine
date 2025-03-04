@@ -86,6 +86,18 @@ TimePlayback timePlayback(
   []() -> void {}
 ); 
 
+struct IdAtCoords {
+  float ndix;
+  float ndiy;
+  bool onlyGameObjId;
+  std::optional<objid> result;
+  glm::vec2 resultUv;
+  std::optional<objid> textureId;
+  std::function<void(std::optional<objid>, glm::vec2)> afterFrame;
+};
+
+std::vector<IdAtCoords> idCoordsToGet;
+
 
 std::unordered_map<std::string, std::string>& getTemplateValues(){
   static std::unordered_map<std::string, std::string> templateValues {
@@ -140,7 +152,6 @@ bool updateTime(bool fpsFixed, float fixedDelta, float speedMultiplier, int time
   return false;
 }
 
-
 void registerStatistics(){
   statistics.numDrawCalls = numberOfDrawCallsThisFrame;
   numberOfDrawCallsThisFrame = 0;
@@ -155,21 +166,8 @@ void registerStatistics(){
   logBenchmarkTick(benchmark, statistics.deltaTime, numObjects, statistics.numTriangles);
 
   registerStat(statistics.fpsStat, statistics.currentFps);
-
 }
 
-
-struct IdAtCoords {
-  float ndix;
-  float ndiy;
-  bool onlyGameObjId;
-  std::optional<objid> result;
-  glm::vec2 resultUv;
-  std::optional<objid> textureId;
-  std::function<void(std::optional<objid>, glm::vec2)> afterFrame;
-};
-
-std::vector<IdAtCoords> idCoordsToGet;
 void idAtCoordAsync(float ndix, float ndiy, bool onlyGameObjId, std::optional<objid> textureId, std::function<void(std::optional<objid>, glm::vec2)> afterFrame){
   idCoordsToGet.push_back(IdAtCoords {
     .ndix = ndix,
@@ -242,7 +240,7 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
     }
 
     auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.ndix, idCoordToGet.ndiy), glm::vec2(texSize.width, texSize.height));
-    auto id = getIdFromPixelCoordAttachment1(pixelCoord.x, pixelCoord.y);
+    auto id = getIdFromColor(getPixelColorAttachment0(pixelCoord.x, pixelCoord.y));
     if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
     }else if (idCoordToGet.onlyGameObjId && !idExists(world.sandbox, id)){
       //modassert(false, std::string("id does not exist: ") + std::to_string(id));
@@ -615,8 +613,6 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   setShaderWorld(shader, lights, lightProjview, cameraPosition, uniforms);
   setShaderDataObject(shader, color, id, projview);
 }
-
-
 
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, bool textBoundingOnly){
   glUseProgram(shaderProgram);
@@ -2032,7 +2028,7 @@ int main(int argc, char* argv[]){
     //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
     auto uvCoordWithTex = getUVCoordAndTextureId(adjustedCoords.x, adjustedCoords.y);
     auto uvCoord = toUvCoord(uvCoordWithTex);
-    Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+    Color hoveredItemColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
     objid hoveredId = getIdFromColor(hoveredItemColor);
 
     state.lastHoverIndex = state.currentHoverIndex; // stateupdate
@@ -2045,7 +2041,7 @@ int main(int argc, char* argv[]){
       }
       auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.ndix, idCoordToGet.ndiy), state.resolution);
 
-      auto id = getIdFromPixelCoord(pixelCoord.x, pixelCoord.y);
+      auto id = getIdFromColor(getPixelColorAttachment0(pixelCoord.x, pixelCoord.y));
       if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
       }else if (idCoordToGet.onlyGameObjId && !idExists(world.sandbox, id)){
         //modassert(false, std::string("id does not exist: ") + std::to_string(id));
@@ -2076,10 +2072,10 @@ int main(int argc, char* argv[]){
     //std::cout << "cache size: " << portalIdCache.size() << std::endl;
 
     statistics.numTriangles = renderWithProgram(renderContext, renderStages.main);
-    Color colorFromSelection = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+    Color colorFromSelection = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
     renderVector(*shaderProgram, view, numChunkingGridCells);
 
-    Color pixelColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+    Color pixelColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
     state.hoveredColor = glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b);
 
     PROFILE("BLOOM-RENDERING",
@@ -2142,7 +2138,7 @@ int main(int argc, char* argv[]){
       glBindVertexArray(defaultResources.quadVAO);
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
-      Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+      Color hoveredItemColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
       auto distanceComponent = hoveredItemColor.r;
       float distance = (distanceComponent * (far - near)) + near;
    
