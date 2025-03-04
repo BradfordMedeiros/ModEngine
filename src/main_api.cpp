@@ -1242,8 +1242,8 @@ struct ScheduledTask {
   void* data;
 };
 
-std::vector<ScheduledTask> scheduledTasks;
-std::vector<ScheduledTask> tasksToSchedule; // taks to schedule is sepearate since want enqueue only in the tick, since task.fn can modify 
+std::vector<ScheduledTask> scheduledTasks; // TODO STATIC
+std::vector<ScheduledTask> tasksToSchedule; // // TODO STATIC taks to schedule is sepearate since want enqueue only in the tick, since task.fn can modify 
 void schedule(objid id, bool realtime, float delayTimeMs, void* data, std::function<void(void*)> fn) {
   tasksToSchedule.push_back(ScheduledTask { 
     .ownerId = id,
@@ -1332,4 +1332,18 @@ bool saveState(std::string){
 bool loadState(std::string){
   modassert(false, "load state not yet implemented");
   return false;
+}
+
+void setSelected(std::optional<std::set<objid>> ids){
+  clearSelectedIndexs(state.editor);
+  for (auto id : ids.value()){
+    if (getManipulatorId(state.manipulatorState) == id){
+      continue;
+    }
+    setSelectedIndex(state.editor, id, !state.multiselect);
+  }
+}
+
+std::optional<unsigned int> getTextureSamplerId(std::string& texturepath){
+  return world.textures.at(texturepath).texture.textureId;
 }

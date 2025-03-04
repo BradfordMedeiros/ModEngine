@@ -253,4 +253,8 @@ void sendManipulatorEvent(MANIPULATOR_EVENT event);
 bool saveState(std::string);
 bool loadState(std::string);
 
+void setSelected(std::optional<std::set<objid>> ids);
+std::optional<unsigned int> getTextureSamplerId(std::string& texturepath);
+
+
 #endif

@@ -1,3 +1,6 @@
+// TODO
+// TODO STATIC
+
 #include <csignal>
 #include <cxxopts.hpp>
 
@@ -39,7 +42,7 @@ bool bootStrapperMode = false;
 std::map<std::string, std::string> args;
 DrawingParams drawParams = getDefaultDrawingParams();
 extern std::vector<InputDispatch> inputFns;     
-extern std::map<std::string, GLint> shaderstringToId;
+extern std::map<std::string, ShaderInformation> shaderstringToId;
 
 // per frame variable data 
 bool selectItemCalled = false;
@@ -75,7 +78,6 @@ DynamicLoading dynamicLoading;
 WorldTiming timings;
 
 bool showCrashInfo = false;
-bool shouldReloadShaders = false;
 float lastReloadTime = 0.f;
 
 TimePlayback timePlayback(
@@ -1139,23 +1141,13 @@ void onGLFWEerror(int error, const char* description){
   std::cerr << "Error: " << description << std::endl;
 }
 
-void setSelected(std::optional<std::set<objid>> ids){
-  clearSelectedIndexs(state.editor);
-  for (auto id : ids.value()){
-    if (getManipulatorId(state.manipulatorState) == id){
-      continue;
-    }
-    setSelectedIndex(state.editor, id, !state.multiselect);
-  }
-}
-
 struct RequestMovingObject {
   glm::vec3 initialPos;
   glm::vec3 finalPos;
   float initialTime;
   float duration;
 };
-std::unordered_map<objid, RequestMovingObject> requestMovingObjects;
+std::unordered_map<objid, RequestMovingObject> requestMovingObjects; // TODO STATIC
 void moveCameraTo(objid cameraId, glm::vec3 position, std::optional<float> duration){
   if (!duration.has_value()){
     setGameObjectPosition(cameraId, position, true);
@@ -1185,18 +1177,6 @@ void handleMovingObjects(float currTime){
   for (auto id : idsToRemove){
     requestMovingObjects.erase(id);
   }
-}
-
-
-std::optional<unsigned int> shaderByName(std::string name){
-  if (shaderstringToId.find(name) == shaderstringToId.end()){
-    return std::nullopt;
-  }
-  return shaderstringToId.at(name); 
-}
-
-std::optional<unsigned int> getTextureSamplerId(std::string& texturepath){
-  return world.textures.at(texturepath).texture.textureId;
 }
 
 
@@ -1281,7 +1261,7 @@ int main(int argc, char* argv[]){
   int numChunkingGridCells = result["grid"].as<int>();
 
   showCrashInfo = result["crashinfo"].as<bool>();
-  shouldReloadShaders = result["reload"].as<bool>();
+  bool shouldReloadShaders = result["reload"].as<bool>();
 
   std::string worldfile = result["world"].as<std::string>();
   bool useChunkingSystem = worldfile != "";

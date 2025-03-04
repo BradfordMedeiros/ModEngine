@@ -8,8 +8,15 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "./common/util.h"
 
+struct ShaderInformation {
+  unsigned int programId;
+  std::string vertexShader;
+  std::string fragmentShader;
+};
+
 unsigned int* loadShaderIntoCache(std::string shaderString, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args);
 unsigned int getShaderByShaderString(std::string shaderString, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile, std::function<std::unordered_map<std::string, std::string>&()> getArgs);
+std::optional<unsigned int> shaderByName(std::string name);
 void reloadShaders(std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args);
 
 void setUniformData(unsigned int program, UniformData& uniform);

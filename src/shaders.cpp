@@ -2,12 +2,7 @@
 
 #define SHADER_INFO_LOG_LENGTH 512
 
-struct ShaderInformation {
-  unsigned int programId;
-  std::string vertexShader;
-  std::string fragmentShader;
-};
-std::map<std::string, ShaderInformation> shaderstringToId; // static-state
+std::map<std::string, ShaderInformation> shaderstringToId; // TODO STATIC
 
 struct shaderError {
   bool isError;
@@ -186,6 +181,13 @@ unsigned int getShaderByShaderString(std::string shaderString, std::string& shad
     loadShaderIntoCache(shaderString, vertexShaderPath, fragmentShaderPath, readFile, args);
   }
   return shaderstringToId.at(shaderString).programId;
+}
+
+std::optional<unsigned int> shaderByName(std::string name){
+  if (shaderstringToId.find(name) == shaderstringToId.end()){
+    return std::nullopt;
+  }
+  return shaderstringToId.at(name).programId; 
 }
 
 std::vector<UniformData> queryUniforms(unsigned int program){
