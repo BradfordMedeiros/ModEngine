@@ -54,7 +54,6 @@ std::queue<StringAttribute> channelMessages;
 std::map<std::string, objid> activeLocks;
 
 std::map<objid, unsigned int> portalIdCache;
-std::optional<Texture> textureToPaint = std::optional<Texture>(std::nullopt);
 
 Transformation viewTransform {
   .position = glm::vec3(0.f, 0.f, 0.f),
@@ -277,7 +276,6 @@ bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCu
   if (state.inputMode != ENABLED){
     return shouldCallBindingOnObjectSelected;
   }
-  textureToPaint = textureForId(world, selectedId);
   shouldCallBindingOnObjectSelected = true;
 
   if (layerSelectIndex >= 0){
@@ -1873,6 +1871,7 @@ int main(int argc, char* argv[]){
       }
     }
     
+    // utilities 
     static auto manipulatorLayer = layerByName("");
     onManipulatorUpdate(
       state.manipulatorState, 
@@ -1896,7 +1895,21 @@ int main(int argc, char* argv[]){
       tools,
       !(state.inputMode == ENABLED)
     );      
-    
+    if (state.visualizeNormals){
+      forEveryGameobj(world.sandbox, [](objid id, GameObject& gameobj) -> void {
+        if (id == getGroupId(world.sandbox, id)){
+          auto transform = fullTransformation(world.sandbox, id);
+          auto toPosition = transform.position + (transform.rotation * glm::vec3(0.f, 0.f, -1.f));
+          auto leftArrow = transform.position + (transform.rotation * glm::vec3(-0.2f, 0.f, -0.8f));
+          auto rightArrow = transform.position + (transform.rotation * glm::vec3(0.2f, 0.f, -0.8f));
+
+          interface.drawLine(transform.position, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
+          interface.drawLine(leftArrow, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
+          interface.drawLine(rightArrow, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
+        }
+      });
+    }
+    ///////////////////
 
     if (state.shouldToggleCursor){
       modlog("toggle cursor", std::to_string(state.cursorBehavior));
@@ -1921,21 +1934,6 @@ int main(int argc, char* argv[]){
     std::vector<LightInfo> lights = getLightInfo(world);
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
-
-    if (state.visualizeNormals){
-      forEveryGameobj(world.sandbox, [](objid id, GameObject& gameobj) -> void {
-        if (id == getGroupId(world.sandbox, id)){
-          auto transform = fullTransformation(world.sandbox, id);
-          auto toPosition = transform.position + (transform.rotation * glm::vec3(0.f, 0.f, -1.f));
-          auto leftArrow = transform.position + (transform.rotation * glm::vec3(-0.2f, 0.f, -0.8f));
-          auto rightArrow = transform.position + (transform.rotation * glm::vec3(0.2f, 0.f, -0.8f));
-
-          interface.drawLine(transform.position, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
-          interface.drawLine(leftArrow, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
-          interface.drawLine(rightArrow, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
-        }
-      });
-    }
 
     //////////////////////// rendering code below ///////////////////////
     
