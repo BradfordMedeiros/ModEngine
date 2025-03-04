@@ -1802,8 +1802,6 @@ int main(int argc, char* argv[]){
 
     onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, state.enablePhysics, state.worldpaused, viewTransform, state.inputMode == ENABLED);
 
-    cBindings.onFrameAfterUpdate();
-
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
     if (useChunkingSystem){
       handleChunkLoading(

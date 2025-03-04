@@ -165,17 +165,6 @@ void onCFrameAllScripts(){
   }
 }
 
-void onCFrameAfterUpdateAllScripts(){
-  for (auto &objInstance : customObjInstances){
-    if (objInstance.shouldRemove){
-      continue;
-    }
-    auto binding = objInstance.cScriptBinding;
-    assert(binding != NULL);
-    binding -> onFrameAfterUpdate(objInstance.instanceId, objInstance.data);
-  }
-}
-
 void onCCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal, float force){
   for (auto &objInstance : customObjInstances){
     if (objInstance.shouldRemove){
@@ -364,7 +353,6 @@ void onCObjectRemovedAllScripts(objid idRemoved){
 CScriptBindingCallbacks getCScriptBindingCallbacks(){
   return CScriptBindingCallbacks {
     .onFrame = onCFrameAllScripts,
-    .onFrameAfterUpdate = onCFrameAfterUpdateAllScripts,
     .onCollisionEnter = onCCollisionEnterAllScripts,
     .onCollisionExit = onCCollisionExitAllScripts,
     .onMouseCallback = onCMouseCallbackAllScripts,
