@@ -43,7 +43,6 @@ bool bootStrapperMode = false;
 std::map<std::string, std::string> args;
 DrawingParams drawParams = getDefaultDrawingParams();
 extern std::vector<InputDispatch> inputFns;     
-extern std::map<std::string, ShaderInformation> shaderstringToId;
 
 // per frame variable data 
 bool selectItemCalled = false;
