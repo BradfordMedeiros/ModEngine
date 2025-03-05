@@ -455,4 +455,12 @@ struct UniformData {
   UniformValue value;
 };
 
+struct RenderStagesDofInfo {
+  int blurAmount;
+  float minBlurDistance;
+  float maxBlurDistance;
+  float nearplane;
+  float farplane;
+};
+
 #endif

@@ -5,6 +5,7 @@
 #include "./shaders.h"
 #include "./scene/serialization.h"
 #include "./state.h"
+#include "./common/util.h"
 
 struct RenderShaders {
   unsigned int* blurProgram;
@@ -73,13 +74,6 @@ RenderStages loadRenderStages(
   std::unordered_map<std::string, std::string>& args
 );
 
-struct RenderStagesDofInfo {
-  int blurAmount;
-  float minBlurDistance;
-  float maxBlurDistance;
-  float nearplane;
-  float farplane;
-};
 void updateRenderStages(RenderStages& stages, RenderStagesDofInfo& dofInfo);
 void renderStagesSetPortal(RenderStages& stages, unsigned int portalNumber);
 void renderStagesSetShadowmap(RenderStages& stages, unsigned int shadowmapNumber);

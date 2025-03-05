@@ -337,7 +337,7 @@ glm::vec3 getMouseDirectionWorld(){
 
   auto id = state.currentHoverIndex;
   bool objExists = idExists(world.sandbox, id);
-  auto layer = objExists ? layerByName(getGameObject(world, id).layer) : layerByName(""); // "" default layer
+  auto layer = objExists ? layerByName(world, getGameObject(world, id).layer) : layerByName(world, ""); // "" default layer
   modlog("layer is", layer.name);
   auto proj = projectionFromLayer(layer);
   auto rayDirection = getCursorInfoWorld(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight, depth).direction;
@@ -349,7 +349,7 @@ glm::vec3 getMousePositionWorld(){
 
   auto id = state.currentHoverIndex;
   bool objExists = idExists(world.sandbox, id);
-  auto layer = objExists ? layerByName(getGameObject(world, id).layer) : layerByName(""); // "" default layer
+  auto layer = objExists ? layerByName(world, getGameObject(world, id).layer) : layerByName(world, ""); // "" default layer
   modlog("layer is", layer.name);
   auto proj = projectionFromLayer(layer);
   auto rayDirection = getCursorInfoWorld(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight, depth).projectedPosition;

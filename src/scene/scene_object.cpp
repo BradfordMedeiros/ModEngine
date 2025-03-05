@@ -323,3 +323,60 @@ std::optional<objid> prefabId(World& world, objid id){
   }
   return std::nullopt;
 }
+
+
+float getViewspaceDepth(World& world, glm::mat4& transView, objid elementId){
+  auto viewPosition = transView * fullModelTransform(world.sandbox, elementId);
+  return getTransformationFromMatrix(viewPosition).position.z;
+}
+
+LayerInfo& layerByName(World& world, std::string layername){
+  for (auto &layer : world.sandbox.layers){
+    if (layer.name == layername){
+      return layer;
+    }
+  }
+  modassert(false, std::string("layer does not exist: " + layername));
+  return world.sandbox.layers.at(0);
+}
+
+RenderStagesDofInfo getDofInfo(World& world, bool* _shouldRender, GameObjectCamera* activeCameraData, glm::mat4 view){
+  bool depthEnabled = false;
+  float minBlurDistance = 0.f;
+  float maxBlurDistance = 0.f;
+  float targetDepth = 0.f;
+  float nearplane = 0.1f;
+  float farplane = 100.f;
+  unsigned int blurAmount = 1;
+
+  if (activeCameraData != NULL){
+    depthEnabled = activeCameraData -> enableDof;
+    minBlurDistance = activeCameraData -> minBlurDistance;
+    maxBlurDistance = activeCameraData -> maxBlurDistance;
+    blurAmount = activeCameraData -> blurAmount;
+
+    if (activeCameraData -> target != ""){
+      auto elements = getByName(world.sandbox, activeCameraData -> target); // TODO PEROBJECT
+      modassert(elements.size() == 1, std::string("elements size = ") + std::to_string(elements.size()));
+      auto elementId = elements.at(0);
+      auto halfBlurDistance = (maxBlurDistance - minBlurDistance) * 0.5f;
+      targetDepth = -1 * getViewspaceDepth(world, view, elementId);
+      minBlurDistance = targetDepth - halfBlurDistance;
+      maxBlurDistance = targetDepth + halfBlurDistance;
+      //std::cout << "dof info: (" << minBlurDistance << " " << maxBlurDistance << " " << targetDepth << ")" << std::endl;
+      auto layerName = getGameObject(world, elementId).layer;
+      auto targetObjLayer = layerByName(world, layerName);
+      nearplane = targetObjLayer.nearplane;
+      farplane = targetObjLayer.farplane;
+    }
+  }
+  *_shouldRender = depthEnabled;
+  RenderStagesDofInfo info {
+    .blurAmount = blurAmount,
+    .minBlurDistance = minBlurDistance,
+    .maxBlurDistance = maxBlurDistance,
+    .nearplane = nearplane,
+    .farplane = farplane,
+  };  
+  return info;
+}

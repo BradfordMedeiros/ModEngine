@@ -54,4 +54,8 @@ std::optional<std::string> lookupNormalTexture(World& world, std::string texture
 bool isPrefab(World& world, objid id);
 std::optional<objid> prefabId(World& world, objid id);
 
+
+LayerInfo& layerByName(World& world, std::string layername);
+RenderStagesDofInfo getDofInfo(World& world, bool* _shouldRender, GameObjectCamera* activeCameraData, glm::mat4 view);
+
 #endif

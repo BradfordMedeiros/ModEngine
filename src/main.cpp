@@ -1,5 +1,6 @@
 // TODO
 // TODO STATIC
+// TODO PEROBJECT
 
 #include <csignal>
 #include <cxxopts.hpp>
@@ -1085,53 +1086,6 @@ std::vector<glm::mat4> renderShadowMaps(RenderContext& context){
   return lightMatrixs;
 }
 
-float getViewspaceDepth(glm::mat4& transView, objid elementId){
-  auto viewPosition = transView * fullModelTransform(world.sandbox, elementId);
-  return getTransformationFromMatrix(viewPosition).position.z;
-}
-
-RenderStagesDofInfo getDofInfo(bool* _shouldRender){
-  bool depthEnabled = false;
-  float minBlurDistance = 0.f;
-  float maxBlurDistance = 0.f;
-  float targetDepth = 0.f;
-  float nearplane = 0.1f;
-  float farplane = 100.f;
-  unsigned int blurAmount = 1;
-
-  if (state.activeCameraData != NULL){
-    depthEnabled = state.activeCameraData -> enableDof;
-    minBlurDistance = state.activeCameraData -> minBlurDistance;
-    maxBlurDistance = state.activeCameraData -> maxBlurDistance;
-    blurAmount = state.activeCameraData -> blurAmount;
-
-    if (state.activeCameraData -> target != ""){
-      auto elements = getByName(world.sandbox, state.activeCameraData -> target);
-      modassert(elements.size() == 1, std::string("elements size = ") + std::to_string(elements.size()));
-      auto elementId = elements.at(0);
-      auto halfBlurDistance = (maxBlurDistance - minBlurDistance) * 0.5f;
-      targetDepth = -1 * getViewspaceDepth(view, elementId);
-      minBlurDistance = targetDepth - halfBlurDistance;
-      maxBlurDistance = targetDepth + halfBlurDistance;
-      //std::cout << "dof info: (" << minBlurDistance << " " << maxBlurDistance << " " << targetDepth << ")" << std::endl;
-      auto layerName = getGameObject(world, elementId).layer;
-      auto targetObjLayer = layerByName(layerName);
-      nearplane = targetObjLayer.nearplane;
-      farplane = targetObjLayer.farplane;
-    }
-  }
-  *_shouldRender = depthEnabled;
-  RenderStagesDofInfo info {
-    .blurAmount = blurAmount,
-    .minBlurDistance = minBlurDistance,
-    .maxBlurDistance = maxBlurDistance,
-    .nearplane = nearplane,
-    .farplane = farplane,
-  };  
-  return info;
-}
-
-
 void onGLFWEerror(int error, const char* description){
   std::cerr << "Error: " << description << std::endl;
 }
@@ -1864,7 +1818,7 @@ int main(int argc, char* argv[]){
     }
     
     // utilities 
-    static auto manipulatorLayer = layerByName("");
+    static auto manipulatorLayer = layerByName(world, "");
     onManipulatorUpdate(
       state.manipulatorState, 
       projectionFromLayer(manipulatorLayer),
@@ -1940,7 +1894,7 @@ int main(int argc, char* argv[]){
     };
 
     bool depthEnabled = false;
-    auto dofInfo = getDofInfo(&depthEnabled);
+    auto dofInfo = getDofInfo(world, &depthEnabled, state.activeCameraData, view);
     updateRenderStages(renderStages, dofInfo);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
@@ -2037,7 +1991,7 @@ int main(int argc, char* argv[]){
       markUserTexturesCleared();  // not really rendering, should pull this out
     )
 
-    LayerInfo& layerInfo = layerByName("");
+    LayerInfo& layerInfo = layerByName(world, "");
     float near = layerInfo.nearplane;
     float far = layerInfo.farplane;
     // depth buffer pass 
