@@ -21,7 +21,6 @@ std::optional<PortalInfo> getPortalInfo(World& world, objid id);
 std::vector<PortalInfo> getPortalInfo(World& world);
 bool isPortal(World& world, objid id);
 glm::mat4 renderPortalView(PortalInfo info, Transformation transform);
-void maybeTeleportObjects(World& world, objid obj1Id, objid obj2Id);
 
 bool isOctree(World& world, objid id);
 

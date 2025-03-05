@@ -71,32 +71,6 @@ glm::mat4 renderPortalView(PortalInfo info, Transformation transform){
   return glm::inverse(renderView(glm::vec3(0.f, 0.f, 0.f), info.portalRotation) *  glm::inverse(renderView(cameraToPortalOffset, transform.rotation))) * renderView(info.cameraTransform.position, info.cameraTransform.rotation);
 }
 
-// TODO - needs to be done relative to parent, not local space
-void teleportObject(World& world, objid objectId, objid portalId){
-  std::cout << "teleporting object: " << objectId << std::endl;
-  assert(false);  // needs to use absolute positions
-  GameObject& gameobject = getGameObject(world, objectId);
-  auto portalInfo = getPortalInfo(world, portalId);
-  if (!portalInfo.has_value()){
-    return;
-  }
-
-  auto transformation = gameobjectTransformation(world, gameobject.id, false);
-  auto portalView = glm::inverse(renderPortalView(portalInfo.value(), transformation));
-  auto newTransform = getTransformationFromMatrix(portalView);
-  auto newPosition = newTransform.position;
-  physicsTranslateSet(world, objectId, newPosition, false);
-}
-void maybeTeleportObjects(World& world, objid obj1Id, objid obj2Id){
-  auto obj1IsPortal = isPortal(world, obj1Id);
-  auto obj2IsPortal = isPortal(world, obj2Id);
-  if (obj1IsPortal && !obj2IsPortal){
-    teleportObject(world, obj2Id, obj1Id);
-  }else if (!obj1IsPortal && obj2IsPortal){
-    teleportObject(world, obj1Id, obj2Id);
-  } 
-}
-
 bool isOctree(World& world, objid id){
   GameObjectObj& obj = world.objectMapping.at(id);
   return std::get_if<GameObjectOctree>(&obj) != NULL;  

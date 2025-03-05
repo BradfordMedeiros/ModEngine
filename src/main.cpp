@@ -292,7 +292,6 @@ void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2,
   }
   modassert(gameobjExists(obj1Id.value()), std::string("on object enter, obj1Id does not exist - rigidbody") + print((void*)obj1));
   modassert(gameobjExists(obj2Id.value()), std::string("on object enter, obj2Id does not exist - rigidbody") + print((void*)obj2));
-  maybeTeleportObjects(world, obj1Id.value(), obj2Id.value());
   cBindings.onCollisionEnter(obj1Id.value(), obj2Id.value(), contactPos, normal, normal * glm::vec3(-1.f, -1.f, -1.f), force); 
 }
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
@@ -305,7 +304,6 @@ void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2)
   modassert(gameobjExists(obj2Id.value()), std::string("on object enter, obj2Id does not exist - rigidbody") + print((void*)obj2));
   cBindings.onCollisionExit(obj1Id.value(), obj2Id.value());
 }
-
 
 std::vector<std::string> listOctreeTextures(){
   std::vector<std::string> octreeTextures { 
