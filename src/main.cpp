@@ -1250,7 +1250,6 @@ int main(int argc, char* argv[]){
     },
     .unloadCScript = [](std::string scriptpath, objid id) -> void {
       unloadCScript(id);
-      removeLocks(id);
       removeLinesByOwner(lineData, id);
     },
     .stopAnimation = stopAnimation,

@@ -209,10 +209,6 @@ objid addLineNextCyclePhysicsDebug(glm::vec3 fromPos, glm::vec3 toPos, bool perm
 
 glm::vec3 navPosition(objid id, glm::vec3 target);
 
-bool lock(std::string key, objid owner);
-bool unlock(std::string key, objid owner);
-void removeLocks(objid owner);
-
 void takeScreenshot(std::string filepath);
 
 struct UserTexture {
