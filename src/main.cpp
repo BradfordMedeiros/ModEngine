@@ -50,7 +50,6 @@ extern Stats statistics;
 extern ManipulatorTools tools;
 LineData lineData = createLines();
 std::queue<StringAttribute> channelMessages;
-std::map<std::string, objid> activeLocks;
 
 std::map<objid, unsigned int> portalIdCache;
 
@@ -1514,8 +1513,6 @@ int main(int argc, char* argv[]){
     .generateMesh = createGeneratedMesh,
     .generateMeshRaw = createGeneratedMeshRaw,
     .getArgs = getArgs,
-    .lock = lock,
-    .unlock = unlock,
     .debugInfo = debugInfo,
     .setWorldState = setWorldState,
     .getWorldState = getWorldState,

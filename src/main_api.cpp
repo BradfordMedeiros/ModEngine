@@ -14,7 +14,6 @@ extern bool bootStrapperMode;
 extern NetCode netcode;
 extern DrawingParams drawParams;
 extern DynamicLoading dynamicLoading;
-extern std::map<std::string, objid> activeLocks;
 extern CScriptBindingCallbacks cBindings;
 extern LineData lineData;
 extern Transformation viewTransform;
@@ -1080,44 +1079,6 @@ void drawLine(glm::vec3 point1, glm::vec3 point2){
 }
 glm::vec3 navPosition(objid id, glm::vec3 target){
   return aiNavigate(world, id, target, drawLine).value();
-}
-
-bool lock(std::string key, objid owner){
-  //std::cout << "lock: (" << key << ", " << owner << ")" << std::endl;
-  auto canLock = activeLocks.find(key) == activeLocks.end();
-  if (!canLock){
-    return false;
-  }
-  activeLocks[key] = owner;
-  //std::cout << "lock: " << key << std::endl;
-  return true;
-}
-bool unlock(std::string key, objid owner){
-  //std::cout << "unlock: (" << key << ", " << owner << ")" << std::endl;
-  auto lockExists = activeLocks.find(key) != activeLocks.end();
-  auto ownerOwnsKey = lockExists && activeLocks.at(key) == owner;
-  if (!lockExists){
-    return true;
-  }  
-  if (ownerOwnsKey){
-    activeLocks.erase(key);
-    //std::cout << "unlock: " << key << std::endl;
-    return true;
-  }
-  std::cout << "ERROR: tried to unlock a key that did not own (" << key << "," << owner << ")" << std::endl;
-  return false;
-}
-
-void removeLocks(objid owner){
-  std::vector<std::string> locksOwnedByOwner;
-  for (auto &[lockname, id] : activeLocks){
-    if (id == owner){
-      locksOwnedByOwner.push_back(lockname);
-    }
-  }
-  for (auto lockname : locksOwnedByOwner){
-    activeLocks.erase(lockname);
-  }
 }
 
 void takeScreenshot(std::string filepath){
