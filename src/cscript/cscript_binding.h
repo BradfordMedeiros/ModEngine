@@ -157,6 +157,7 @@ struct CustomApiBindings {
 
   VoxelLightingData& (*getVoxelLightingData)();
 
+  std::set<objid>(*allObjIds)();
   std::string (*dumpDebugInfo)(bool);
   //std::vector<func_t> registerGuileFns
 };

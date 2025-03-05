@@ -1502,6 +1502,7 @@ int main(int argc, char* argv[]){
     .loadState = loadState,
 
     .getVoxelLightingData = getVoxelLightingData,
+    .allObjIds = allObjIds,
     .dumpDebugInfo = dumpDebugInfo,
   };
 
@@ -1843,20 +1844,7 @@ int main(int argc, char* argv[]){
       tools,
       !(state.inputMode == ENABLED)
     );      
-    if (state.visualizeNormals){
-      forEveryGameobj(world.sandbox, [](objid id, GameObject& gameobj) -> void {
-        if (id == getGroupId(world.sandbox, id)){
-          auto transform = fullTransformation(world.sandbox, id);
-          auto toPosition = transform.position + (transform.rotation * glm::vec3(0.f, 0.f, -1.f));
-          auto leftArrow = transform.position + (transform.rotation * glm::vec3(-0.2f, 0.f, -0.8f));
-          auto rightArrow = transform.position + (transform.rotation * glm::vec3(0.2f, 0.f, -0.8f));
 
-          interface.drawLine(transform.position, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
-          interface.drawLine(leftArrow, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
-          interface.drawLine(rightArrow, toPosition, glm::vec4(1.f, 0.f, 0.f, 1.f));
-        }
-      });
-    }
     ///////////////////
 
     if (state.shouldToggleCursor){

@@ -20,7 +20,6 @@ struct engineState {
   float engineSpeed;  // updating this during runtime is flawed and requires wholistic changes and causes crashes, but is useful enough to keep in...
   bool enablePhysics;
   bool enablePhysicsDebug;
-  bool visualizeNormals;
   bool showDebug;
   bool showBones;
   int showDebugMask;

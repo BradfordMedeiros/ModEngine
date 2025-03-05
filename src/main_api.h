@@ -251,6 +251,6 @@ bool loadState(std::string);
 
 void setSelected(std::optional<std::set<objid>> ids);
 std::optional<unsigned int> getTextureSamplerId(std::string& texturepath);
-
+std::set<objid> allObjIds();
 
 #endif

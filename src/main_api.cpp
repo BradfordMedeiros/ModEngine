@@ -1308,3 +1308,12 @@ void setSelected(std::optional<std::set<objid>> ids){
 std::optional<unsigned int> getTextureSamplerId(std::string& texturepath){
   return world.textures.at(texturepath).texture.textureId;
 }
+
+std::set<objid> allObjIds(){
+  std::set<objid> ids;
+  forEveryGameobj(world.sandbox, [&ids](objid id, GameObject& gameobj) -> void {
+    ids.insert(id);
+  });
+
+  return ids;
+}
