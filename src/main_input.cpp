@@ -426,12 +426,7 @@ void handleInput(GLFWwindow* window){
     glfwSetWindowShouldClose(window, true);
   }
   processControllerInput(keyMapper, moveCamera, statistics.deltaTime, keyCharCallback, onJoystick);
-
-  bool lockSuccess = lock("input", 0);
-  if (lockSuccess){
-    processKeyBindings(window, keyMapper);
-    unlock("input", 0);
-  }
+  processKeyBindings(window, keyMapper);
 }
 
 void printControllerDebug(const unsigned char* buttons, int buttonCount){
