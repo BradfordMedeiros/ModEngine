@@ -12,7 +12,6 @@ extern std::queue<StringAttribute> channelMessages;
 
 extern bool bootStrapperMode;
 extern NetCode netcode;
-extern DrawingParams drawParams;
 extern DynamicLoading dynamicLoading;
 extern CScriptBindingCallbacks cBindings;
 extern LineData lineData;
@@ -776,13 +775,6 @@ glm::vec3 moveRelative(glm::vec3 posFrom, glm::quat orientation, glm::vec3 vec){
   return moveRelative(posFrom, orientation, vec, false);
 }
 
-void nextTexture(){
-  nextTexture(drawParams, world.textures.size());
-}
-void previousTexture(){
-  previousTexture(drawParams);
-}
-
 void setNavmeshTexture(unsigned int textureId){
   state.navmeshTextureId = textureId;
 }
@@ -791,7 +783,7 @@ void setTexture(objid index, std::string textureName){
   setTexture(world, index, textureName, setNavmeshTexture);
 }
 void maybeChangeTexture(int index){
-  auto textureName = worldTextures(world).at(drawParams.activeTextureIndex).textureName;
+  auto textureName = worldTextures(world).at(state.activeTextureIndex).textureName;
   modlog("maybe set texture", textureName);
   setTexture(world, index, textureName, setNavmeshTexture);
 }
@@ -804,9 +796,12 @@ void setState(std::string stateName){
   }else if (stateName == "rotate"){
     state.manipulatorMode = ROTATE;  
   }else if (stateName == "next_texture"){
-    nextTexture();
+    state.activeTextureIndex = (state.activeTextureIndex + 1) % world.textures.size();
   }else if (stateName == "prev_texture"){
-    previousTexture();
+    state.activeTextureIndex = state.activeTextureIndex -1;
+    if (state.activeTextureIndex < 0){
+      state.activeTextureIndex = (world.textures.size() - 1);
+    }
   }
 }
 
@@ -875,31 +870,6 @@ std::vector<ObjectValue> getWorldState(){
 
 void setLayerState(std::vector<StrValues> values){
   setLayerOptions(world.sandbox.layers, values);
-}
-
-void setFloatState(std::string stateName, float value){
-  if (stateName == "opacity"){
-    drawParams.opacity = value;
-  }
-  else if (stateName == "drawsize"){
-    drawParams.scale = glm::vec3(1.f, 1.f, 1.f) * value;
-  }
-  else if (stateName == "drawcolor-r"){
-    drawParams.tint.x = value;
-  }
-  else if (stateName == "drawcolor-g"){
-    drawParams.tint.y = value;
-  }
-  else if (stateName == "drawcolor-b"){
-    drawParams.tint.z = value;
-  }
-}
-
-void setIntState(std::string stateName, int value){
-  if (stateName == "set_texture"){
-    std::cout << "value is: " << value << std::endl;
-    maybeChangeTexture(value);
-  }  
 }
 
 objid listSceneId(int32_t id){
@@ -1027,8 +997,20 @@ void stopSoundState(std::string source, objid sceneId){
   }
 }
 
+std::string activeTextureName(int activeTextureIndex, std::map<std::string, TextureRef> worldTextures){
+  int currentTextureIndex = 0;
+  for (auto [name, _] : worldTextures){
+    if (currentTextureIndex >= activeTextureIndex){
+        std::cout << "active texture name: " << name << std::endl;
+      return name;
+    }
+    currentTextureIndex++;
+  }
+  assert(false);
+}
+
 unsigned int activeTextureId(){
-  return world.textures.at(activeTextureName(drawParams, world.textures)).texture.textureId;
+  return world.textures.at(activeTextureName(state.activeTextureIndex, world.textures)).texture.textureId;
 }
 
 void emit(objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity, std::optional<glm::vec3> initAvelocity, std::optional<objid> parentId){

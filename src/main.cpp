@@ -43,7 +43,6 @@ std::string shaderFolderPath;
 std::string sqlDirectory = "./res/data/sql/";
 bool bootStrapperMode = false;
 std::map<std::string, std::string> args;
-DrawingParams drawParams = getDefaultDrawingParams();
 extern std::vector<InputDispatch> inputFns;     
 
 // per frame variable data 
@@ -1456,8 +1455,6 @@ int main(int argc, char* argv[]){
     .contactTestShape = contactTestShape,
     .saveScreenshot = takeScreenshot,
     .setState = setState,
-    .setFloatState = setFloatState,
-    .setIntState = setIntState,
     .navPosition = navPosition,
     .emit = emit,
     .loadAround = addLoadingAround,

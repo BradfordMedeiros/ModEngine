@@ -5,7 +5,6 @@ extern RenderStages renderStages;
 extern engineState state;
 extern CScriptBindingCallbacks cBindings;
 extern KeyRemapper keyMapper;
-extern DrawingParams drawParams;
 extern glm::mat4 view;
 extern DefaultResources defaultResources;
 extern Stats statistics;
@@ -199,11 +198,11 @@ void onJoystick(std::vector<JoyStickInfo> infos){
 void onArrowKey(int key){
   if (key == 262){ // right
     std::cout << "next texture" << std::endl;
-    nextTexture();
+    setState("next_texture");
   }
   if (key == 263){ // left
     std::cout << "previous texture" << std::endl;
-    previousTexture();
+    setState("prev_texture");
   }
 
   std::cout << "key: " << key << std::endl;

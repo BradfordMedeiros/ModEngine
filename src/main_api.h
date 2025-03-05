@@ -11,7 +11,6 @@
 #include "./network/servers.h"
 #include "./network/activemanager.h"
 #include "./scene/sysinterface.h"
-#include "./drawing.h"
 #include "./worldloader.h"
 #include "./netscene.h"
 #include "./worldtiming.h"
@@ -168,7 +167,6 @@ std::vector<HitObject> contactTestShape(glm::vec3 pos, glm::quat orientation, gl
 glm::vec3 moveRelative(glm::vec3, glm::quat orientation, float distance);
 glm::vec3 moveRelative(glm::vec3 posFrom, glm::quat orientation, glm::vec3 vec);
 
-void nextTexture();
 void previousTexture();
 void maybeChangeTexture(int index);
 
@@ -185,8 +183,6 @@ void setCulling(bool cullEnabled);
 void setWorldState(std::vector<ObjectValue> values);
 std::vector<ObjectValue> getWorldState();
 void setLayerState(std::vector<StrValues> values);
-void setFloatState(std::string stateName, float value);
-void setIntState(std::string stateName, int value);
 
 void playSoundState(std::string source, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
 void playSoundState(objid id, std::optional<float> volume, std::optional<glm::vec3> position);

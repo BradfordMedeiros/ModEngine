@@ -158,6 +158,7 @@ struct engineState {
 
   RampDirection rampDirection;
 
+  int activeTextureIndex;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

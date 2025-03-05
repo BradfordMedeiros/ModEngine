@@ -537,6 +537,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .escapeQuits = false,
     .navmeshTextureId = std::nullopt,
     .rampDirection = RAMP_LEFT,
+    .activeTextureIndex = 0,
 	};
 	return state;
 }

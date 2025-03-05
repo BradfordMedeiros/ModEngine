@@ -7,7 +7,6 @@
 #include "./easyuse/easy_use.h"
 #include "./easyuse/editor.h"
 #include "./keymapper.h"
-#include "./drawing.h"
 #include "./colorselection.h"
 #include "./perf/benchmark.h"
 #include "./perf/profiling.h"

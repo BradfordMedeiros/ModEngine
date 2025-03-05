@@ -107,8 +107,6 @@ struct CustomApiBindings {
   std::vector<HitObject> (*contactTestShape)(glm::vec3 pos, glm::quat orientation, glm::vec3 scale);
   void (*saveScreenshot)(std::string);
   void (*setState)(std::string);
-  void (*setFloatState)(std::string stateName, float value);
-  void (*setIntState)(std::string stateName, int value);
   glm::vec3 (*navPosition)(objid, glm::vec3 pos);
   void (*emit)(objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity, std::optional<glm::vec3> initAvelocity, std::optional<objid> parentId);
   objid (*loadAround)(objid);
