@@ -1502,7 +1502,6 @@ int main(int argc, char* argv[]){
     .loadState = loadState,
 
     .getVoxelLightingData = getVoxelLightingData,
-    .allObjIds = allObjIds,
     .dumpDebugInfo = dumpDebugInfo,
   };
 

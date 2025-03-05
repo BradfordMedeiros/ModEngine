@@ -6,11 +6,12 @@ extern CustomApiBindings* mainApi;
 CScriptBinding cscriptCreateToolsBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("native/tools", api);
   binding.onFrame = [](int32_t id, void* data) -> void {
-  	auto allIds = mainApi -> allObjIds();
-  	for (auto idInScene : allIds){
+    auto selectedIds = mainApi -> selected();
+  	for (auto idInScene : selectedIds){
   		auto groupId = mainApi -> groupId(idInScene);
 
-      if (true){
+
+      if (true ){
       	auto name = mainApi -> getGameObjNameForId(idInScene).value();
         auto position = mainApi -> getGameObjectPos(idInScene, true);
         auto rotation = mainApi -> getGameObjectRotation(idInScene, true);
