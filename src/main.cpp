@@ -12,6 +12,7 @@
 #include "./main_util.h"
 #include "./cscript/cscripts/plugins/perf-visualize.h"
 #include "./cscript/cscripts/plugins/performance_graph.h"
+#include "./cscript/cscripts/plugins/tools.h"
 #include "./scene/common/textures_gen.h"
 #include "./sql/shell.h"
 #include "./common/watch_file.h"
@@ -1510,6 +1511,7 @@ int main(int argc, char* argv[]){
   std::vector<CScriptBinding> pluginBindings = { 
     cscriptCreatePerformanceGraphBinding(pluginApi),
     cscriptCreatePerfVisualizeBinding(pluginApi),
+    cscriptCreateToolsBinding(pluginApi),
   };
 
 
