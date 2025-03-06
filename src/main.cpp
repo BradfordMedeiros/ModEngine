@@ -253,18 +253,6 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
   }
 }
 
-void selectItem(objid selectedId, int layerSelectIndex, int groupId){
-  std::cout << "SELECT ITEM CALLED!" << std::endl;
-  modlog("selection", (std::string("select item called") + ", selectedId = " + std::to_string(selectedId) + ", layerSelectIndex = " + std::to_string(layerSelectIndex)).c_str());
-
-  auto idToUse = state.groupSelection ? groupId : selectedId;
-  if (layerSelectIndex >= 0){
-    setSelectedIndex(state.editor, idToUse, !state.multiselect);
-  }
-
-  setActiveObj(state.editor, idToUse);
-}
-
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::vec3 normal, float force){
   auto obj1Id = getIdForCollisionObject(world, obj1);
   auto obj2Id = getIdForCollisionObject(world, obj2);
@@ -1735,7 +1723,13 @@ int main(int argc, char* argv[]){
         auto layerSelectIndex = getLayerForId(selectTargetId).selectIndex;
         auto layerSelectNegOne = layerSelectIndex == -1;
         if (!(layerSelectNegOne) && !state.selectionDisabled){
-          selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId));
+          modlog("selection", (std::string("select item called") + ", selectedId = " + std::to_string(selectTargetId) + ", layerSelectIndex = " + std::to_string(layerSelectIndex)).c_str());
+          auto groupId = getGroupId(world.sandbox, selectTargetId);
+          auto idToUse = state.groupSelection ? groupId : selectTargetId;
+          if (layerSelectIndex >= 0){
+            setSelectedIndex(state.editor, idToUse, !state.multiselect);
+          }
+          setActiveObj(state.editor, idToUse);
         }
       }else if (isReservedObjId(selectTargetId)){
         onObjectSelected(selectTargetId);

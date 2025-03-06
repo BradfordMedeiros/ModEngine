@@ -11,3 +11,8 @@
 :axis-deadzone:5:-0.8:0.8
 :axis-deadzone:1:-0.8:0.8
 :axis-trigger:5:0.5 > 68
+
+:button:0: > 32
+:button:1: > 32
+:button:2: > 32
+:button:3: > 32
