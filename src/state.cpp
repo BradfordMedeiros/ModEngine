@@ -537,6 +537,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .navmeshTextureId = std::nullopt,
     .rampDirection = RAMP_LEFT,
     .activeTextureIndex = 0,
+    .adjustedCoords = glm::ivec2(0, 0),
 	};
 	return state;
 }

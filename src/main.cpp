@@ -256,33 +256,34 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
 
 bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCursor){
   std::cout << "SELECT ITEM CALLED!" << std::endl;
-  bool shouldCallBindingOnObjectSelected = false;
   modlog("selection", (std::string("select item called") + ", selectedId = " + std::to_string(selectedId) + ", layerSelectIndex = " + std::to_string(layerSelectIndex)).c_str());
   if (!showCursor){
-    return shouldCallBindingOnObjectSelected;
+    return false;
   }
+
   auto idToUse = state.groupSelection ? groupId : selectedId;
   auto selectedSubObj = getGameObject(world, selectedId);
   auto selectedObject =  getGameObject(world, idToUse);
 
-  if (layerSelectIndex >= 0 && state.inputMode == ENABLED){
+  if (layerSelectIndex >= 0){
     onManipulatorSelectItem(state.manipulatorState, idToUse, selectedSubObj.name);
   }
+
+  // If this was allowed, the manipulator would be set to move itself!
   if (idToUse == getManipulatorId(state.manipulatorState)){
-    return shouldCallBindingOnObjectSelected;
+    return false;
   }
 
   if (state.inputMode != ENABLED){
-    return shouldCallBindingOnObjectSelected;
+    return false;
   }
-  shouldCallBindingOnObjectSelected = true;
 
   if (layerSelectIndex >= 0){
     setSelectedIndex(state.editor, idToUse, !state.multiselect);
     state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";  
   }
   setActiveObj(state.editor, idToUse);
-  return shouldCallBindingOnObjectSelected;
+  return true;
 }
 
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::vec3 normal, float force){
@@ -1761,6 +1762,7 @@ int main(int argc, char* argv[]){
     }
 
     auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
+    state.adjustedCoords = adjustedCoords;
 
     bool selectItemCalledThisFrame = selectItemCalled;
     selectItemCalled = false;  // reset the state
@@ -1769,7 +1771,7 @@ int main(int argc, char* argv[]){
     state.forceSelectIndex = 0; // stateupdate
 
     bool shouldCallBindingOnObjectSelected = false;
-    if ((selectTargetId != getManipulatorId(state.manipulatorState)) && shouldSelectItem){
+    if (shouldSelectItem){
       std::cout << "INFO: select item called" << std::endl;
 
       std::cout << "select target id: " << selectTargetId << std::endl;
@@ -1807,33 +1809,6 @@ int main(int argc, char* argv[]){
       }
     }
     
-    // utilities 
-    static auto manipulatorLayer = layerByName(world, "");
-    onManipulatorUpdate(
-      state.manipulatorState, 
-      projectionFromLayer(manipulatorLayer),
-      view, 
-      state.manipulatorMode, 
-      state.manipulatorAxis,
-      state.offsetX, 
-      state.offsetY,
-      glm::vec2(adjustedCoords.x, adjustedCoords.y),
-      glm::vec2(state.resolution.x, state.resolution.y),
-      ManipulatorOptions {
-         .manipulatorPositionMode = state.manipulatorPositionMode,
-         .relativePositionMode = state.relativePositionMode,
-         .translateMirror = state.translateMirror,
-         .rotateMode = state.rotateMode,
-         .scalingGroup = state.scalingGroup,
-         .snapManipulatorScales = state.snapManipulatorScales,
-         .preserveRelativeScale = state.preserveRelativeScale,
-      },
-      tools,
-      !(state.inputMode == ENABLED)
-    );      
-
-    ///////////////////
-
     if (state.shouldToggleCursor){
       modlog("toggle cursor", std::to_string(state.cursorBehavior));
       toggleCursor(state.cursorBehavior);

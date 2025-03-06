@@ -3,29 +3,65 @@
 extern CustomApiBindings* mainApi;
 
 
+void drawNormals(){
+  auto selectedIds = mainApi -> selected();
+  for (auto idInScene : selectedIds){
+    auto groupId = mainApi -> groupId(idInScene);
+    auto name = mainApi -> getGameObjNameForId(idInScene).value();
+    auto position = mainApi -> getGameObjectPos(idInScene, true);
+    auto rotation = mainApi -> getGameObjectRotation(idInScene, true);
+    auto toPosition = position + (rotation * glm::vec3(0.f, 0.f, -1.f));
+    auto leftArrow = position + (rotation * glm::vec3(-0.2f, 0.f, -0.8f));
+    auto rightArrow = position + (rotation * glm::vec3(0.2f, 0.f, -0.8f));
+
+    mainApi -> drawLine(position, toPosition, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    mainApi -> drawLine(leftArrow, toPosition, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    mainApi -> drawLine(rightArrow, toPosition, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    modlog("tools", print(position) + " " + print(toPosition));
+    modlog("tools name", name);
+  }
+}
+
+
+#include "../../../state.h"
+
+struct World;
+LayerInfo& layerByName(World& world, std::string layername);
+extern World world;
+extern glm::mat4 view;
+extern ManipulatorTools tools;
+extern engineState state;
+glm::mat4 projectionFromLayer(LayerInfo& layer);
+
 CScriptBinding cscriptCreateToolsBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("native/tools", api);
   binding.onFrame = [](int32_t id, void* data) -> void {
-    auto selectedIds = mainApi -> selected();
-  	for (auto idInScene : selectedIds){
-  		auto groupId = mainApi -> groupId(idInScene);
+    //drawNormals();
 
-
-      if (true ){
-      	auto name = mainApi -> getGameObjNameForId(idInScene).value();
-        auto position = mainApi -> getGameObjectPos(idInScene, true);
-        auto rotation = mainApi -> getGameObjectRotation(idInScene, true);
-        auto toPosition = position + (rotation * glm::vec3(0.f, 0.f, -1.f));
-        auto leftArrow = position + (rotation * glm::vec3(-0.2f, 0.f, -0.8f));
-        auto rightArrow = position + (rotation * glm::vec3(0.2f, 0.f, -0.8f));
-
-				mainApi -> drawLine(position, toPosition, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-				mainApi -> drawLine(leftArrow, toPosition, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-				mainApi -> drawLine(rightArrow, toPosition, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-      	modlog("tools", print(position) + " " + print(toPosition));
-      	modlog("tools name", name);
-      }
-  	}
+    // utilities 
+    static auto manipulatorLayer = layerByName(world, "");
+    onManipulatorUpdate(
+      state.manipulatorState, 
+      projectionFromLayer(manipulatorLayer),
+      view, 
+      state.manipulatorMode, 
+      state.manipulatorAxis,
+      state.offsetX, 
+      state.offsetY,
+      glm::vec2(state.adjustedCoords.x, state.adjustedCoords.y),
+      glm::vec2(state.resolution.x, state.resolution.y),
+      ManipulatorOptions {
+         .manipulatorPositionMode = state.manipulatorPositionMode,
+         .relativePositionMode = state.relativePositionMode,
+         .translateMirror = state.translateMirror,
+         .rotateMode = state.rotateMode,
+         .scalingGroup = state.scalingGroup,
+         .snapManipulatorScales = state.snapManipulatorScales,
+         .preserveRelativeScale = state.preserveRelativeScale,
+      },
+      tools,
+      !(state.inputMode == ENABLED)
+    );
   };
 
   return binding;

@@ -157,6 +157,7 @@ struct engineState {
   RampDirection rampDirection;
 
   int activeTextureIndex;
+  glm::ivec2 adjustedCoords;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
