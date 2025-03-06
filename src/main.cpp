@@ -48,7 +48,6 @@ extern std::vector<InputDispatch> inputFns;
 // per frame variable data 
 bool selectItemCalled = false;
 extern Stats statistics;
-extern ManipulatorTools tools;
 LineData lineData = createLines();
 std::queue<StringAttribute> channelMessages;
 
@@ -260,6 +259,9 @@ bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCu
   if (!showCursor){
     return false;
   }
+  if (state.inputMode != ENABLED){  // is this check not 
+    return false;
+  }
 
   auto idToUse = state.groupSelection ? groupId : selectedId;
   auto selectedSubObj = getGameObject(world, selectedId);
@@ -271,10 +273,6 @@ bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCu
 
   // If this was allowed, the manipulator would be set to move itself!
   if (idToUse == getManipulatorId(state.manipulatorState)){
-    return false;
-  }
-
-  if (state.inputMode != ENABLED){
     return false;
   }
 
@@ -382,7 +380,7 @@ void loadAllTextures(std::string& textureFolderPath){
   )
 }
 
-// Kind of crappy since the uniforms don't unset their values after rendering, but order should be deterministic so ... ok
+// make this better, set more consistently
 void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
   for (auto &uniform : uniforms.intUniforms){
     shaderSetUniformInt(shader, uniform.uniformName.c_str(), uniform.value);
