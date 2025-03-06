@@ -1721,21 +1721,12 @@ int main(int argc, char* argv[]){
     auto shouldSelectItem = selectItemCalledThisFrame || (state.forceSelectIndex != 0);
     state.forceSelectIndex = 0; // stateupdate
 
-    bool showCursor = state.cursorBehavior != CURSOR_HIDDEN || state.showCursor;
-    bool callOnSelect = showCursor && state.inputMode == ENABLED;
 
     if (shouldSelectItem){
-      std::cout << "INFO: select item called" << std::endl;
-
-      std::cout << "select target id: " << selectTargetId << std::endl;
-
       auto objExists = idExists(world.sandbox, selectTargetId); 
       if (objExists){
-        std::cout << "INFO: select item called -> id in scene!" << std::endl;
         auto layerSelectIndex = getLayerForId(selectTargetId).selectIndex;
-
         auto layerSelectNegOne = layerSelectIndex == -1;
-        std::cout << "cond1 = " << (layerSelectNegOne ? "true" : "false") << ", condtwo = " << ", selectindex " << layerSelectIndex <<  std::endl;
         if (!(layerSelectNegOne) && !state.selectionDisabled){
           selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId));
         }
@@ -1747,6 +1738,7 @@ int main(int argc, char* argv[]){
         cBindings.onObjectUnselected();
       }
 
+      bool callOnSelect = (state.cursorBehavior != CURSOR_HIDDEN || state.showCursor) && state.inputMode == ENABLED;
       if(callOnSelect && idExists(world.sandbox, selectTargetId)){
         auto layerSelectIndex = getLayerForId(selectTargetId).selectIndex;
         cBindings.onObjectSelected(selectTargetId, state.hoveredColor.value(), layerSelectIndex);        
