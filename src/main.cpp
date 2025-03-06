@@ -1721,8 +1721,7 @@ int main(int argc, char* argv[]){
       auto objExists = idExists(world.sandbox, selectTargetId); 
       if (objExists){
         auto layerSelectIndex = getLayerForId(selectTargetId).selectIndex;
-        auto layerSelectNegOne = layerSelectIndex == -1;
-        if (!(layerSelectNegOne) && !state.selectionDisabled){
+        if (!(layerSelectIndex == -1) && !state.selectionDisabled){
           modlog("selection", (std::string("select item called") + ", selectedId = " + std::to_string(selectTargetId) + ", layerSelectIndex = " + std::to_string(layerSelectIndex)).c_str());
           auto groupId = getGroupId(world.sandbox, selectTargetId);
           auto idToUse = state.groupSelection ? groupId : selectTargetId;
@@ -1730,6 +1729,9 @@ int main(int argc, char* argv[]){
             setSelectedIndex(state.editor, idToUse, !state.multiselect);
           }
           setActiveObj(state.editor, idToUse);
+        }
+        if((state.cursorBehavior != CURSOR_HIDDEN || state.showCursor) && state.inputMode == ENABLED){
+          cBindings.onObjectSelected(selectTargetId, state.hoveredColor.value(), layerSelectIndex);        
         }
       }else if (isReservedObjId(selectTargetId)){
         onObjectSelected(selectTargetId);
@@ -1739,11 +1741,6 @@ int main(int argc, char* argv[]){
         cBindings.onObjectUnselected();
       }
 
-      bool callOnSelect = (state.cursorBehavior != CURSOR_HIDDEN || state.showCursor) && state.inputMode == ENABLED;
-      if(callOnSelect && idExists(world.sandbox, selectTargetId)){
-        auto layerSelectIndex = getLayerForId(selectTargetId).selectIndex;
-        cBindings.onObjectSelected(selectTargetId, state.hoveredColor.value(), layerSelectIndex);        
-      }
     }
 
     if (state.lastHoverIndex != state.currentHoverIndex){  
