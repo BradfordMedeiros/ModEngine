@@ -221,3 +221,12 @@ void tickRecordings(float time){
     stopRecording(id);
   }
 }
+
+
+void handleChangedResourceFiles(std::set<std::string> changedFiles){
+  for (auto &file : changedFiles){
+    if (getFileType(file) == IMAGE_EXTENSION){
+      maybeReloadTextureWorld(world, file);
+    }
+  }
+}

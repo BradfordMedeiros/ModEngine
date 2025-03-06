@@ -54,4 +54,6 @@ void tickRecordings(float time);
 objid createRecording(objid id);
 void saveRecording(objid recordingId, std::string filepath);
 
+void handleChangedResourceFiles(std::set<std::string> changedFiles);
+
 #endif

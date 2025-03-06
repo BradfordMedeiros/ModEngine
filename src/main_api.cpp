@@ -2,11 +2,9 @@
 
 extern World world;
 extern RenderStages renderStages;
-extern SysInterface interface;
 extern WorldTiming timings;
 extern engineState state;
 extern DefaultResources defaultResources;
-extern unsigned int uiShaderProgram;
 extern Stats statistics;
 extern std::queue<StringAttribute> channelMessages;
 
@@ -1043,13 +1041,6 @@ std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query, bool
   return result;
 }
 
-void handleChangedResourceFiles(std::set<std::string> changedFiles){
-  for (auto &file : changedFiles){
-    if (getFileType(file) == IMAGE_EXTENSION){
-      maybeReloadTextureWorld(world, file);
-    }
-  }
-}
 
 void setLogEndpoint(std::optional<std::function<void(std::string&)>> fn){
   modlogSetLogEndpoint(fn);
