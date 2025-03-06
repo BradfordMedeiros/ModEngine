@@ -4,8 +4,6 @@ extern World world;
 extern engineState state;
 extern glm::mat4 view;
 extern Stats statistics;
-extern LineData lineData;
-
 
 glm::mat4 projectionFromLayer(LayerInfo& layer){
   // this means that as the window is dragged wider (say 2560x1980) you simply see more
