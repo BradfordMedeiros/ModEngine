@@ -736,28 +736,6 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
     drawGrid3D(4, getLightingCellWidth(), 0.f, 0.f, 0.f);
   }
 
-  if (state.manipulatorMode == TRANSLATE && state.showGrid && (state.inputMode == ENABLED)){
-    for (auto id : selectedIds(state.editor)){
-      auto selectedObj = id;
-      if (selectedObj != -1){
-        auto snapCoord = getSnapTranslateSize(state.easyUse);
-        float snapGridSize = snapCoord.size;
-        if (snapGridSize > 0){
-          auto position = getGameObjectPosition(selectedObj, false);
-          if (state.manipulatorAxis == XAXIS){
-            drawGridXY(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z, snapCoord.orientation);  
-          }else if (state.manipulatorAxis == YAXIS){
-            drawGridXZ(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z, snapCoord.orientation);  
-          }else if (state.manipulatorAxis == ZAXIS){
-            drawGridYZ(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z, snapCoord.orientation);  
-          }else{
-            drawGrid3D(state.gridSize, snapGridSize, position.x, position.y, position.z);  
-          }
-        }
-      }
-    }    
-  }
-
   shaderSetUniform(shaderProgram, "tint", glm::vec4(0.f, 0.f, 1.f, 1.f));     
   if (state.showDebug){
     drawCoordinateSystem(100.f);
