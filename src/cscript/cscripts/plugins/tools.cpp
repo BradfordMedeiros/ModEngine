@@ -7,8 +7,8 @@ extern CustomApiBindings* mainApi;
 #include "../../../state.h"
 extern World world;
 extern glm::mat4 view;
-extern ManipulatorTools tools;
 extern engineState state;
+
 glm::mat4 projectionFromLayer(LayerInfo& layer);
 LayerInfo& layerByName(World& world, std::string layername);
 
@@ -31,6 +31,84 @@ void drawNormals(){
   }
 }
 
+struct LineData;
+extern LineData lineData;
+
+std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes);
+LayerInfo getLayerForId(objid id);
+glm::vec3 getGameObjectPosition(int32_t index, bool isWorld);
+void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld);
+glm::quat getGameObjectRotation(int32_t index, bool isWorld);
+void setGameObjectScale(int32_t index, glm::vec3 scale, bool isWorld);
+glm::vec3 getGameObjectScale(int32_t index);
+void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld);
+void removeObjectById(objid id);
+void removeLinesByOwner(LineData& lineData, objid owner);
+objid addLineToNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, LineColor color, std::optional<unsigned int> textureId);
+
+objid createManipulator(){
+  GameobjAttributes manipulatorAttr {
+      .attr = {
+        {"mesh", "./res/models/ui/manipulator.gltf" }, 
+        {"layer", "scale" },
+        { "scale", glm::vec3(10.f, 10.f, 10.f) },
+      },
+  };
+  std::map<std::string, GameobjAttributes> submodelAttributes = {
+    {"manipulator/xaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(1.f, 1.f, 0.f, 0.8f) }} }}},
+    {"manipulator/yaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(1.f, 0.f, 1.f, 0.8f) }} }}},
+    {"manipulator/zaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(0.f, 0.f, 1.f, 0.8f) }} }}},
+  };
+  return makeObjectAttr(0, "manipulator", manipulatorAttr, submodelAttributes).value();
+}
+
+ManipulatorSelection onManipulatorSelected(){
+  std::vector<objid> ids;
+  for (auto &id : selectedIds(state.editor)){
+    if (getLayerForId(id).selectIndex != -2){
+      ids.push_back(id);
+    }
+  }
+  return ManipulatorSelection {
+    .mainObj = ids.size() > 0 ? std::optional<objid>(ids.at(ids.size() - 1)) : std::optional<objid>(std::nullopt),
+    .selectedIds = ids,
+  }; 
+}
+
+ManipulatorTools tools {
+  .getPosition = [](objid id) -> glm::vec3 { return getGameObjectPosition(id, true); },
+  .setPosition = setGameObjectPosition,
+  .getScale = getGameObjectScale,
+  .setScale = [](int32_t index, glm::vec3 scale) -> void { setGameObjectScale(index, scale, true); },
+  .getRotation = [](objid id) -> glm::quat { return getGameObjectRotation(id, false); },
+  .setRotation = [](objid id, glm::quat rot) -> void { setGameObjectRotation(id, rot, true); },
+  .snapPosition = [](glm::vec3 pos) -> glm::vec3 {
+    return snapTranslate(state.easyUse, pos);
+  },
+  .snapScale = [](glm::vec3 scale) -> glm::vec3 {
+    return snapScale(state.easyUse, scale);
+  },
+  .snapRotate = [](glm::quat rot, Axis snapAxis, float extraRadians) -> glm::quat {
+    return snapRotate(state.easyUse, rot, snapAxis, extraRadians);
+  },
+  .drawLine = [](glm::vec3 frompos, glm::vec3 topos, LineColor color) -> void {
+    if (state.manipulatorLineId == 0){
+      state.manipulatorLineId = getUniqueObjId();
+    }
+    addLineToNextCycle(lineData, frompos, topos, true, state.manipulatorLineId, color, std::nullopt);
+  },
+  .getSnapRotation = []() -> std::optional<glm::quat> { 
+    return getSnapTranslateSize(state.easyUse).orientation; 
+  },
+  .clearLines = []() -> void {
+    if (state.manipulatorLineId != 0){
+      removeLinesByOwner(lineData, state.manipulatorLineId);
+    }
+  },
+  .removeObjectById = removeObjectById,
+  .makeManipulator = createManipulator,
+  .getSelectedIds = onManipulatorSelected,
+};
 
 CScriptBinding cscriptCreateToolsBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("native/tools", api);
