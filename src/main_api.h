@@ -233,4 +233,15 @@ bool loadState(std::string);
 void setSelected(std::optional<std::set<objid>> ids);
 std::optional<unsigned int> getTextureSamplerId(std::string& texturepath);
 
+struct IdAtCoords {
+  float ndix;
+  float ndiy;
+  bool onlyGameObjId;
+  std::optional<objid> result;
+  glm::vec2 resultUv;
+  std::optional<objid> textureId;
+  std::function<void(std::optional<objid>, glm::vec2)> afterFrame;
+};
+void idAtCoordAsync(float ndix, float ndiy, bool onlyGameObjId, std::optional<objid> textureId, std::function<void(std::optional<objid>, glm::vec2)> afterFrame);
+
 #endif

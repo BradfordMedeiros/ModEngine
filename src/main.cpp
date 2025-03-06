@@ -74,6 +74,7 @@ btIDebugDraw* debuggerDrawer = NULL;
 Benchmark benchmark;
 DynamicLoading dynamicLoading;
 WorldTiming timings;
+std::vector<IdAtCoords> idCoordsToGet;
 
 bool showCrashInfo = false;
 float lastReloadTime = 0.f;
@@ -85,18 +86,6 @@ TimePlayback timePlayback(
   }, 
   []() -> void {}
 ); 
-
-struct IdAtCoords {
-  float ndix;
-  float ndiy;
-  bool onlyGameObjId;
-  std::optional<objid> result;
-  glm::vec2 resultUv;
-  std::optional<objid> textureId;
-  std::function<void(std::optional<objid>, glm::vec2)> afterFrame;
-};
-
-std::vector<IdAtCoords> idCoordsToGet;
 
 
 std::unordered_map<std::string, std::string>& getTemplateValues(){
@@ -166,18 +155,6 @@ void registerStatistics(){
   logBenchmarkTick(benchmark, statistics.deltaTime, numObjects, statistics.numTriangles);
 
   registerStat(statistics.fpsStat, statistics.currentFps);
-}
-
-void idAtCoordAsync(float ndix, float ndiy, bool onlyGameObjId, std::optional<objid> textureId, std::function<void(std::optional<objid>, glm::vec2)> afterFrame){
-  idCoordsToGet.push_back(IdAtCoords {
-    .ndix = ndix,
-    .ndiy = ndiy,
-    .onlyGameObjId = onlyGameObjId,
-    .result = std::nullopt,
-    .resultUv = glm::vec2(0.f, 0.f),
-    .textureId = textureId,
-    .afterFrame = afterFrame,
-  });
 }
 
 void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId){
@@ -1740,7 +1717,6 @@ int main(int argc, char* argv[]){
         onObjectUnselected();
         cBindings.onObjectUnselected();
       }
-
     }
 
     if (state.lastHoverIndex != state.currentHoverIndex){  

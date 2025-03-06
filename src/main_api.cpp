@@ -19,6 +19,7 @@ extern const GLFWvidmode* mode;
 extern TimePlayback timePlayback;
 extern ManipulatorTools tools;
 extern std::string sqlDirectory;
+extern std::vector<IdAtCoords> idCoordsToGet;
 
 float getTotalTime(){
   return statistics.now - statistics.initialTime;
@@ -1059,4 +1060,16 @@ void setSelected(std::optional<std::set<objid>> ids){
 
 std::optional<unsigned int> getTextureSamplerId(std::string& texturepath){
   return world.textures.at(texturepath).texture.textureId;
+}
+
+void idAtCoordAsync(float ndix, float ndiy, bool onlyGameObjId, std::optional<objid> textureId, std::function<void(std::optional<objid>, glm::vec2)> afterFrame){
+  idCoordsToGet.push_back(IdAtCoords {
+    .ndix = ndix,
+    .ndiy = ndiy,
+    .onlyGameObjId = onlyGameObjId,
+    .result = std::nullopt,
+    .resultUv = glm::vec2(0.f, 0.f),
+    .textureId = textureId,
+    .afterFrame = afterFrame,
+  });
 }
