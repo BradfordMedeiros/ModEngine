@@ -149,7 +149,6 @@ std::vector<LightingUpdate> getLightUpdates(){
   return lightUpdates;
 }
 
-
 VoxelLightingData& getVoxelLightingData(){
 	return lightingData;
 }

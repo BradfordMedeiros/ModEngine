@@ -532,18 +532,6 @@ std::vector<UniformData> getDefaultShaderUniforms(std::optional<glm::mat4> projv
   return uniformData;  
 }
 
-int getLightsArrayIndex(std::vector<LightInfo>& lights, objid lightId){
-  for (int i = 0; i < lights.size(); i++){
-    if (lights.at(i).id == lightId){
-      return i;
-    }
-  }
-  if (lightId == -2){
-    return -2;
-  }
-  return -1;
-}
-
 void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
   //std::cout << "set shader data world" << std::endl; 
   glUseProgram(shader);

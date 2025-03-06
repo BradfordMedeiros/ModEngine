@@ -19,6 +19,20 @@ std::vector<LightInfo> getLightInfo(World& world){
   return lights;
 }
 
+// These values are tied to whats in the shader
+int getLightsArrayIndex(std::vector<LightInfo>& lights, objid lightId){
+  for (int i = 0; i < lights.size(); i++){
+    if (lights.at(i).id == lightId){
+      return i;
+    }
+  }
+  if (lightId == -2){
+    return -2;
+  }
+  return -1;
+}
+
+
 std::optional<PortalInfo> getPortalInfo(World& world, objid id){
   GameObjectObj& objectPortal = world.objectMapping.at(id);
   auto portalObject = std::get_if<GameObjectPortal>(&objectPortal);

@@ -9,6 +9,7 @@ struct LightInfo {
   objid id;
 };
 std::vector<LightInfo> getLightInfo(World& world);
+int getLightsArrayIndex(std::vector<LightInfo>& lights, objid lightId);
 
 struct PortalInfo {
   Transformation cameraTransform;
