@@ -260,9 +260,6 @@ void selectItem(objid selectedId, int layerSelectIndex, int groupId){
   auto idToUse = state.groupSelection ? groupId : selectedId;
   if (layerSelectIndex >= 0){
     setSelectedIndex(state.editor, idToUse, !state.multiselect);
-  
-    auto selectedObject =  getGameObject(world, idToUse);
-    state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";  
   }
 
   setActiveObj(state.editor, idToUse);
@@ -809,7 +806,17 @@ void renderUI(Color pixelColor){
 
   auto currentFramerate = static_cast<int>(unwrapStat<float>(statValue(statistics.fpsStat)));
   //std::cout << "offsets: " << uiXOffset << " " << uiYOffset << std::endl;
-  std::string additionalText =  "     <" + std::to_string((int)(255 * state.hoveredItemColor.r)) + ","  + std::to_string((int)(255 * state.hoveredItemColor.g)) + " , " + std::to_string((int)(255 * state.hoveredItemColor.b)) + ">  " + " --- " + state.selectedName;
+
+
+  auto ids = selectedIds(state.editor);
+  std::string selectedName = "no object selected";
+  if (ids.size() > 0 && gameobjExists(ids.at(0))){
+    auto selectedObject = getGameObject(world, ids.at(0));
+    selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";  
+  }
+
+
+  std::string additionalText =  "     <" + std::to_string((int)(255 * state.hoveredItemColor.r)) + ","  + std::to_string((int)(255 * state.hoveredItemColor.g)) + " , " + std::to_string((int)(255 * state.hoveredItemColor.b)) + ">  " + " --- " + selectedName;
   drawTextNdi(std::to_string(currentFramerate) + additionalText, uiXOffset, uiYOffset + offsetPerLine, state.fontsize + 1);
 
   drawTextNdi("position: " + print(defaultResources.defaultCamera.transformation.position), uiXOffset, uiYOffset + offsetPerLine * 3, state.fontsize);

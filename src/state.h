@@ -25,7 +25,6 @@ struct engineState {
   int showDebugMask;
   bool isRotateSelection;
   bool selectionDisabled;
-  std::string selectedName;
   bool useDefaultCamera;
   bool moveRelativeEnabled;
   unsigned int currentScreenWidth;
