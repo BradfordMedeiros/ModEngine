@@ -16,4 +16,18 @@ void moveCameraTo(objid cameraId, glm::vec3 position, std::optional<float> durat
 void handleMovingObjects(float currTime);
 
 
+//////////////////////////
+struct ScheduledTask {
+  objid ownerId;
+  std::function<void(void*)> fn;
+  bool realtime;
+  float time;  // delay time + now 
+  void* data;
+};
+
+void schedule(objid id, bool realtime, float delayTimeMs, void* data, std::function<void(void*)> fn);
+void removeScheduledTask(std::set<objid> ids);
+void removeScheduledTaskByOwner(std::set<objid> ids);
+void tickScheduledTasks();
+
 #endif
