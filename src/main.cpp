@@ -1857,10 +1857,6 @@ int main(int argc, char* argv[]){
     while (!channelMessages.empty()){
       auto message = channelMessages.front();
       channelMessages.pop();
-      if (message.strTopic == "copy-object"){  // should we have any built in messages supported like this?
-        handleClipboardSelect();
-        handleCopy();
-      }
       cBindings.onMessage(message.strTopic, message.strValue);
     }
 
