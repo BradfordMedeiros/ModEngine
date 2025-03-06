@@ -6,34 +6,6 @@ extern glm::mat4 view;
 extern Stats statistics;
 extern LineData lineData;
 
-objid createManipulator(){
-  GameobjAttributes manipulatorAttr {
-      .attr = {
-        {"mesh", "./res/models/ui/manipulator.gltf" }, 
-        {"layer", "scale" },
-        { "scale", glm::vec3(10.f, 10.f, 10.f) },
-      },
-  };
-  std::map<std::string, GameobjAttributes> submodelAttributes = {
-    {"manipulator/xaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(1.f, 1.f, 0.f, 0.8f) }} }}},
-    {"manipulator/yaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(1.f, 0.f, 1.f, 0.8f) }} }}},
-    {"manipulator/zaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(0.f, 0.f, 1.f, 0.8f) }} }}},
-  };
-  return makeObjectAttr(0, "manipulator", manipulatorAttr, submodelAttributes).value();
-}
-
-ManipulatorSelection onManipulatorSelected(){
-  std::vector<objid> ids;
-  for (auto &id : selectedIds(state.editor)){
-    if (getLayerForId(id).selectIndex != -2){
-      ids.push_back(id);
-    }
-  }
-  return ManipulatorSelection {
-    .mainObj = ids.size() > 0 ? std::optional<objid>(ids.at(ids.size() - 1)) : std::optional<objid>(std::nullopt),
-    .selectedIds = ids,
-  }; 
-}
 
 glm::mat4 projectionFromLayer(LayerInfo& layer){
   // this means that as the window is dragged wider (say 2560x1980) you simply see more
@@ -115,6 +87,36 @@ float exposureAmount(){
   float exposureA = glm::clamp(amount, 0.f, 1.f);
   float effectiveExposure = glm::mix(state.oldExposure, state.targetExposure, exposureA);
   return effectiveExposure;
+}
+
+
+objid createManipulator(){
+  GameobjAttributes manipulatorAttr {
+      .attr = {
+        {"mesh", "./res/models/ui/manipulator.gltf" }, 
+        {"layer", "scale" },
+        { "scale", glm::vec3(10.f, 10.f, 10.f) },
+      },
+  };
+  std::map<std::string, GameobjAttributes> submodelAttributes = {
+    {"manipulator/xaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(1.f, 1.f, 0.f, 0.8f) }} }}},
+    {"manipulator/yaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(1.f, 0.f, 1.f, 0.8f) }} }}},
+    {"manipulator/zaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(0.f, 0.f, 1.f, 0.8f) }} }}},
+  };
+  return makeObjectAttr(0, "manipulator", manipulatorAttr, submodelAttributes).value();
+}
+
+ManipulatorSelection onManipulatorSelected(){
+  std::vector<objid> ids;
+  for (auto &id : selectedIds(state.editor)){
+    if (getLayerForId(id).selectIndex != -2){
+      ids.push_back(id);
+    }
+  }
+  return ManipulatorSelection {
+    .mainObj = ids.size() > 0 ? std::optional<objid>(ids.at(ids.size() - 1)) : std::optional<objid>(std::nullopt),
+    .selectedIds = ids,
+  }; 
 }
 
 ManipulatorTools tools {

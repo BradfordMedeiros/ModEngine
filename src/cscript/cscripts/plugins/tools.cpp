@@ -3,6 +3,15 @@
 extern CustomApiBindings* mainApi;
 
 
+// shouldn't really depend on this stuff
+#include "../../../state.h"
+extern World world;
+extern glm::mat4 view;
+extern ManipulatorTools tools;
+extern engineState state;
+glm::mat4 projectionFromLayer(LayerInfo& layer);
+LayerInfo& layerByName(World& world, std::string layername);
+
 void drawNormals(){
   auto selectedIds = mainApi -> selected();
   for (auto idInScene : selectedIds){
@@ -22,16 +31,6 @@ void drawNormals(){
   }
 }
 
-
-#include "../../../state.h"
-
-struct World;
-LayerInfo& layerByName(World& world, std::string layername);
-extern World world;
-extern glm::mat4 view;
-extern ManipulatorTools tools;
-extern engineState state;
-glm::mat4 projectionFromLayer(LayerInfo& layer);
 
 CScriptBinding cscriptCreateToolsBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("native/tools", api);
