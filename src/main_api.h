@@ -148,18 +148,6 @@ void sendAlert(std::string message);
 double timeSeconds(bool realtime);
 double timeElapsed();
 
-void playRecording(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type, std::optional<PlayRecordingOption> recordingOption);
-void stopRecording(objid id);
-
-std::optional<RecordingState> recordingState(objid id);
-
-
-float recordingLength(std::string recordingPath);
-void tickRecording(float time, GameObject& gameobject);
-void tickRecordings(float time);
-
-objid createRecording(objid id);
-void saveRecording(objid recordingId, std::string filepath);
 
 std::vector<HitObject> raycastW(glm::vec3 pos, glm::quat direction, float maxDistance);
 std::vector<HitObject> contactTest(objid id);

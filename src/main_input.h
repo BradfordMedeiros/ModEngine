@@ -18,6 +18,7 @@
 #include "./main_util.h"
 #include "./scene/animation/timeplayback.h"
 #include "./modlayer.h"
+#include "./world_tasks.h"
 
 struct JoyStickInfo {
   int index;
