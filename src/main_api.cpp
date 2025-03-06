@@ -7,20 +7,17 @@ extern engineState state;
 extern DefaultResources defaultResources;
 extern Stats statistics;
 extern std::queue<StringAttribute> channelMessages;
-
 extern bool bootStrapperMode;
 extern NetCode netcode;
 extern DynamicLoading dynamicLoading;
 extern CScriptBindingCallbacks cBindings;
 extern LineData lineData;
 extern Transformation viewTransform;
-
 extern GLFWwindow* window;
 extern GLFWmonitor* monitor;
 extern const GLFWvidmode* mode;
 extern TimePlayback timePlayback;
 extern ManipulatorTools tools;
-
 extern std::string sqlDirectory;
 
 float getTotalTime(){
@@ -31,8 +28,8 @@ float getTotalTimeGame(){
   return timePlayback.currentTime - statistics.initialTime;
 }
 
-std::vector<objid> objectsQueuedForRemoval = {};
-std::vector<objid> groupsQueuedForRemoval = {};
+std::vector<objid> objectsQueuedForRemoval = {};  // TODO STATIC
+std::vector<objid> groupsQueuedForRemoval = {};   // TODO STATIC
 bool gameobjExists(objid id){
   if (!idExists(world.sandbox, id)){
     return false;
@@ -102,7 +99,6 @@ std::optional<ModAABB> getModAABB(int32_t index){
   return getModAABB(rigidBody);
 }
 
-
 std::vector<std::string> listSceneFiles(std::optional<objid> sceneId){
   if (sceneId.has_value()){
     if (!sceneExists(world.sandbox, sceneId.value())){
@@ -128,25 +124,6 @@ int32_t loadSceneWithId(std::string sceneFile, std::vector<std::vector<std::stri
 
 int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags){
   return loadSceneWithId(sceneFile, additionalTokens, name, tags, std::nullopt);
-}
-
-
-int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName){
-  modassert(false, "loadSceneParentOffset not implemented");
-  return 0;
-  //auto name = std::to_string(getUniqueObjId()) + parentNodeName;
-  //GameobjAttributes attr {
-  //  .attr = {
-  //    {"position", offset}
-  //  }, 
-  //};
-  //std::map<std::string, GameobjAttributes> submodelAttributes = {};
-  //auto nodeOffsetId = makeObjectAttr(world.sandbox.mainScene.rootId, name, attr, submodelAttributes).value();
-  //std::cout << "load scene offset: " << print(offset) << std::endl;
-  //auto sceneId = loadScene(sceneFile, {}, std::nullopt, std::nullopt);
-  //auto rootId = rootIdForScene(world.sandbox, sceneId);
-  //makeParent(world.sandbox, rootId, nodeOffsetId);
-  //return nodeOffsetId;
 }
 
 std::optional<objid> sceneIdByName(std::string name){

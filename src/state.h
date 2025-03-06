@@ -144,8 +144,6 @@ struct engineState {
 
   glm::vec2 infoTextOffset;
 
-  bool useYAxis;
-
   objid forceSelectIndex;
 
   float volume;

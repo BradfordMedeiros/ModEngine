@@ -1299,7 +1299,6 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      state.useYAxis = !state.useYAxis;
       if (timePlayback.isPaused()){
         timePlayback.play();
       }else{

@@ -1752,7 +1752,10 @@ int main(int argc, char* argv[]){
         [](objid id) -> glm::vec3 { 
           return getGameObjectPosition(id, true);
         }, 
-        loadSceneParentOffset, 
+        [](std::string sceneFile, glm::vec3 offset, std::string parentNodeName) -> objid {
+          modassert(false, "not implemented");
+          return 0;
+        }, 
         removeObjectById,
         state.useDefaultCamera ? &viewTransform.position : NULL
       );
