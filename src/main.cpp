@@ -1557,9 +1557,11 @@ int main(int argc, char* argv[]){
     return 0;
   }
 
+  loadCScript(getUniqueObjId(), "native/tools", -1, bootStrapperMode, true);
   for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
     loadCScript(getUniqueObjId(), script.c_str(), -1, bootStrapperMode, true);
   }
+
   
   std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
   for (auto parsedScene : parseSceneArgs(rawScenes)){

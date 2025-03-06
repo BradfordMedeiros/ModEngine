@@ -10,6 +10,7 @@
 # 	-1 = cannot be selected
 #		-2 = can be selected, but built in (eg manipulator) operations will not apply
 #   -3 = only allow selection if no mapping id applies
+#   -4 = manipulator
 
 # pass in additional uniforms to shader (same as postprocessing for uniforms)
 # layer:!<uniform name>:<uniformvalue>
@@ -17,8 +18,8 @@
 
 ### default name override the default view layer.
 
-transparency:zindex:1
-transparency:depth:0
+transparency:zindex:3
+transparency:depth:1
 
 no_depth:zindex:2
 no_depth:depth:1
@@ -31,6 +32,7 @@ scale:depth:2
 scale:scale:false
 scale:!enableLighting:false
 scale:?enableLighting:bool
+scale:selection:-4  # tied to manipulator lol
 
 basicui:zindex:3
 basicui:view:false
