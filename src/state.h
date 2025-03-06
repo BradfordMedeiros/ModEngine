@@ -25,7 +25,6 @@ struct engineState {
   int showDebugMask;
   bool isRotateSelection;
   bool selectionDisabled;
-  std::string selectedName;
   bool useDefaultCamera;
   bool moveRelativeEnabled;
   unsigned int currentScreenWidth;
@@ -157,6 +156,7 @@ struct engineState {
   RampDirection rampDirection;
 
   int activeTextureIndex;
+  glm::ivec2 adjustedCoords;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

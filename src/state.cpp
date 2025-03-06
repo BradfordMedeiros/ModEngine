@@ -432,7 +432,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .showDebugMask = 0,
 		.isRotateSelection = false,
     .selectionDisabled = false,
-		.selectedName = "no object selected",
 		.useDefaultCamera = true,
 		.moveRelativeEnabled = false,
 	  .currentScreenWidth = initialScreenWidth,
@@ -537,6 +536,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .navmeshTextureId = std::nullopt,
     .rampDirection = RAMP_LEFT,
     .activeTextureIndex = 0,
+    .adjustedCoords = glm::ivec2(0, 0),
 	};
 	return state;
 }

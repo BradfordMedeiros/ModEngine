@@ -4,36 +4,6 @@ extern World world;
 extern engineState state;
 extern glm::mat4 view;
 extern Stats statistics;
-extern LineData lineData;
-
-objid createManipulator(){
-  GameobjAttributes manipulatorAttr {
-      .attr = {
-        {"mesh", "./res/models/ui/manipulator.gltf" }, 
-        {"layer", "scale" },
-        { "scale", glm::vec3(10.f, 10.f, 10.f) },
-      },
-  };
-  std::map<std::string, GameobjAttributes> submodelAttributes = {
-    {"manipulator/xaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(1.f, 1.f, 0.f, 0.8f) }} }}},
-    {"manipulator/yaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(1.f, 0.f, 1.f, 0.8f) }} }}},
-    {"manipulator/zaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(0.f, 0.f, 1.f, 0.8f) }} }}},
-  };
-  return makeObjectAttr(0, "manipulator", manipulatorAttr, submodelAttributes).value();
-}
-
-ManipulatorSelection onManipulatorSelected(){
-  std::vector<objid> ids;
-  for (auto &id : selectedIds(state.editor)){
-    if (getLayerForId(id).selectIndex != -2){
-      ids.push_back(id);
-    }
-  }
-  return ManipulatorSelection {
-    .mainObj = ids.size() > 0 ? std::optional<objid>(ids.at(ids.size() - 1)) : std::optional<objid>(std::nullopt),
-    .selectedIds = ids,
-  }; 
-}
 
 glm::mat4 projectionFromLayer(LayerInfo& layer){
   // this means that as the window is dragged wider (say 2560x1980) you simply see more
@@ -116,42 +86,6 @@ float exposureAmount(){
   float effectiveExposure = glm::mix(state.oldExposure, state.targetExposure, exposureA);
   return effectiveExposure;
 }
-
-ManipulatorTools tools {
-  .getPosition = [](objid id) -> glm::vec3 { return getGameObjectPosition(id, true); },
-  .setPosition = setGameObjectPosition,
-  .getScale = getGameObjectScale,
-  .setScale = [](int32_t index, glm::vec3 scale) -> void { setGameObjectScale(index, scale, true); },
-  .getRotation = [](objid id) -> glm::quat { return getGameObjectRotation(id, false); },
-  .setRotation = [](objid id, glm::quat rot) -> void { setGameObjectRotation(id, rot, true); },
-  .snapPosition = [](glm::vec3 pos) -> glm::vec3 {
-    return snapTranslate(state.easyUse, pos);
-  },
-  .snapScale = [](glm::vec3 scale) -> glm::vec3 {
-    return snapScale(state.easyUse, scale);
-  },
-  .snapRotate = [](glm::quat rot, Axis snapAxis, float extraRadians) -> glm::quat {
-    return snapRotate(state.easyUse, rot, snapAxis, extraRadians);
-  },
-  .drawLine = [](glm::vec3 frompos, glm::vec3 topos, LineColor color) -> void {
-    if (state.manipulatorLineId == 0){
-      state.manipulatorLineId = getUniqueObjId();
-    }
-    addLineToNextCycle(lineData, frompos, topos, true, state.manipulatorLineId, color, std::nullopt);
-  },
-  .getSnapRotation = []() -> std::optional<glm::quat> { 
-    return getSnapTranslateSize(state.easyUse).orientation; 
-  },
-  .clearLines = []() -> void {
-    if (state.manipulatorLineId != 0){
-      removeLinesByOwner(lineData, state.manipulatorLineId);
-    }
-  },
-  .removeObjectById = removeObjectById,
-  .makeManipulator = createManipulator,
-  .getSelectedIds = onManipulatorSelected,
-};
-
 
 
 glm::vec3 positionToNdi(glm::vec3 position){

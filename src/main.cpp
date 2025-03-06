@@ -48,7 +48,6 @@ extern std::vector<InputDispatch> inputFns;
 // per frame variable data 
 bool selectItemCalled = false;
 extern Stats statistics;
-extern ManipulatorTools tools;
 LineData lineData = createLines();
 std::queue<StringAttribute> channelMessages;
 
@@ -254,35 +253,16 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
   }
 }
 
-bool selectItem(objid selectedId, int layerSelectIndex, int groupId, bool showCursor){
+void selectItem(objid selectedId, int layerSelectIndex, int groupId){
   std::cout << "SELECT ITEM CALLED!" << std::endl;
-  bool shouldCallBindingOnObjectSelected = false;
   modlog("selection", (std::string("select item called") + ", selectedId = " + std::to_string(selectedId) + ", layerSelectIndex = " + std::to_string(layerSelectIndex)).c_str());
-  if (!showCursor){
-    return shouldCallBindingOnObjectSelected;
-  }
+
   auto idToUse = state.groupSelection ? groupId : selectedId;
-  auto selectedSubObj = getGameObject(world, selectedId);
-  auto selectedObject =  getGameObject(world, idToUse);
-
-  if (layerSelectIndex >= 0 && state.inputMode == ENABLED){
-    onManipulatorSelectItem(state.manipulatorState, idToUse, selectedSubObj.name);
-  }
-  if (idToUse == getManipulatorId(state.manipulatorState)){
-    return shouldCallBindingOnObjectSelected;
-  }
-
-  if (state.inputMode != ENABLED){
-    return shouldCallBindingOnObjectSelected;
-  }
-  shouldCallBindingOnObjectSelected = true;
-
   if (layerSelectIndex >= 0){
     setSelectedIndex(state.editor, idToUse, !state.multiselect);
-    state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";  
   }
+
   setActiveObj(state.editor, idToUse);
-  return shouldCallBindingOnObjectSelected;
 }
 
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::vec3 normal, float force){
@@ -381,7 +361,7 @@ void loadAllTextures(std::string& textureFolderPath){
   )
 }
 
-// Kind of crappy since the uniforms don't unset their values after rendering, but order should be deterministic so ... ok
+// make this better, set more consistently
 void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
   for (auto &uniform : uniforms.intUniforms){
     shaderSetUniformInt(shader, uniform.uniformName.c_str(), uniform.value);
@@ -753,28 +733,6 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
     drawGrid3D(4, getLightingCellWidth(), 0.f, 0.f, 0.f);
   }
 
-  if (state.manipulatorMode == TRANSLATE && state.showGrid && (state.inputMode == ENABLED)){
-    for (auto id : selectedIds(state.editor)){
-      auto selectedObj = id;
-      if (selectedObj != -1){
-        auto snapCoord = getSnapTranslateSize(state.easyUse);
-        float snapGridSize = snapCoord.size;
-        if (snapGridSize > 0){
-          auto position = getGameObjectPosition(selectedObj, false);
-          if (state.manipulatorAxis == XAXIS){
-            drawGridXY(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z, snapCoord.orientation);  
-          }else if (state.manipulatorAxis == YAXIS){
-            drawGridXZ(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z, snapCoord.orientation);  
-          }else if (state.manipulatorAxis == ZAXIS){
-            drawGridYZ(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z, snapCoord.orientation);  
-          }else{
-            drawGrid3D(state.gridSize, snapGridSize, position.x, position.y, position.z);  
-          }
-        }
-      }
-    }    
-  }
-
   shaderSetUniform(shaderProgram, "tint", glm::vec4(0.f, 0.f, 1.f, 1.f));     
   if (state.showDebug){
     drawCoordinateSystem(100.f);
@@ -848,20 +806,19 @@ void renderUI(Color pixelColor){
 
   auto currentFramerate = static_cast<int>(unwrapStat<float>(statValue(statistics.fpsStat)));
   //std::cout << "offsets: " << uiXOffset << " " << uiYOffset << std::endl;
-  std::string additionalText =  "     <" + std::to_string((int)(255 * state.hoveredItemColor.r)) + ","  + std::to_string((int)(255 * state.hoveredItemColor.g)) + " , " + std::to_string((int)(255 * state.hoveredItemColor.b)) + ">  " + " --- " + state.selectedName;
+
+
+  auto ids = selectedIds(state.editor);
+  std::string selectedName = "no object selected";
+  if (ids.size() > 0 && gameobjExists(ids.at(0))){
+    auto selectedObject = getGameObject(world, ids.at(0));
+    selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";  
+  }
+
+
+  std::string additionalText =  "     <" + std::to_string((int)(255 * state.hoveredItemColor.r)) + ","  + std::to_string((int)(255 * state.hoveredItemColor.g)) + " , " + std::to_string((int)(255 * state.hoveredItemColor.b)) + ">  " + " --- " + selectedName;
   drawTextNdi(std::to_string(currentFramerate) + additionalText, uiXOffset, uiYOffset + offsetPerLine, state.fontsize + 1);
 
-  std::string manipulatorAxisString;
-  if (state.manipulatorAxis == XAXIS){
-    manipulatorAxisString = "xaxis";
-  }else if (state.manipulatorAxis == YAXIS){
-    manipulatorAxisString = "yaxis";
-  }else if (state.manipulatorAxis == ZAXIS){
-    manipulatorAxisString = "zaxis";
-  }else{
-    manipulatorAxisString = "noaxis";
-  }
-  drawTextNdi("manipulator axis: " + manipulatorAxisString, uiXOffset, uiYOffset + offsetPerLine * 2, state.fontsize);
   drawTextNdi("position: " + print(defaultResources.defaultCamera.transformation.position), uiXOffset, uiYOffset + offsetPerLine * 3, state.fontsize);
   drawTextNdi("rotation: " + print(defaultResources.defaultCamera.transformation.rotation), uiXOffset, uiYOffset + offsetPerLine * 4, state.fontsize);
 
@@ -1607,9 +1564,11 @@ int main(int argc, char* argv[]){
     return 0;
   }
 
+  loadCScript(getUniqueObjId(), "native/tools", -1, bootStrapperMode, true);
   for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
     loadCScript(getUniqueObjId(), script.c_str(), -1, bootStrapperMode, true);
   }
+
   
   std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
   for (auto parsedScene : parseSceneArgs(rawScenes)){
@@ -1761,6 +1720,7 @@ int main(int argc, char* argv[]){
     }
 
     auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
+    state.adjustedCoords = adjustedCoords;
 
     bool selectItemCalledThisFrame = selectItemCalled;
     selectItemCalled = false;  // reset the state
@@ -1768,19 +1728,14 @@ int main(int argc, char* argv[]){
     auto shouldSelectItem = selectItemCalledThisFrame || (state.forceSelectIndex != 0);
     state.forceSelectIndex = 0; // stateupdate
 
-    bool shouldCallBindingOnObjectSelected = false;
-    if ((selectTargetId != getManipulatorId(state.manipulatorState)) && shouldSelectItem){
-      std::cout << "INFO: select item called" << std::endl;
 
-      std::cout << "select target id: " << selectTargetId << std::endl;
-      if (idExists(world.sandbox, selectTargetId)){
-        std::cout << "INFO: select item called -> id in scene!" << std::endl;
+    if (shouldSelectItem){
+      auto objExists = idExists(world.sandbox, selectTargetId); 
+      if (objExists){
         auto layerSelectIndex = getLayerForId(selectTargetId).selectIndex;
-
         auto layerSelectNegOne = layerSelectIndex == -1;
-        std::cout << "cond1 = " << (layerSelectNegOne ? "true" : "false") << ", condtwo = " << ", selectindex " << layerSelectIndex <<  std::endl;
         if (!(layerSelectNegOne) && !state.selectionDisabled){
-          shouldCallBindingOnObjectSelected = selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId), state.cursorBehavior != CURSOR_HIDDEN || state.showCursor );
+          selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId));
         }
       }else if (isReservedObjId(selectTargetId)){
         onObjectSelected(selectTargetId);
@@ -1789,13 +1744,12 @@ int main(int argc, char* argv[]){
         onObjectUnselected();
         cBindings.onObjectUnselected();
       }
-    }
 
-
-    if (shouldCallBindingOnObjectSelected){
-      auto id = state.groupSelection ? getGroupId(world.sandbox, selectTargetId) : selectTargetId;
-      modassert(idExists(world.sandbox, id), "id does not exist for objectSelected");
-      cBindings.onObjectSelected(id, state.hoveredColor.value());
+      bool callOnSelect = (state.cursorBehavior != CURSOR_HIDDEN || state.showCursor) && state.inputMode == ENABLED;
+      if(callOnSelect && idExists(world.sandbox, selectTargetId)){
+        auto layerSelectIndex = getLayerForId(selectTargetId).selectIndex;
+        cBindings.onObjectSelected(selectTargetId, state.hoveredColor.value(), layerSelectIndex);        
+      }
     }
 
     if (state.lastHoverIndex != state.currentHoverIndex){  
@@ -1807,33 +1761,6 @@ int main(int argc, char* argv[]){
       }
     }
     
-    // utilities 
-    static auto manipulatorLayer = layerByName(world, "");
-    onManipulatorUpdate(
-      state.manipulatorState, 
-      projectionFromLayer(manipulatorLayer),
-      view, 
-      state.manipulatorMode, 
-      state.manipulatorAxis,
-      state.offsetX, 
-      state.offsetY,
-      glm::vec2(adjustedCoords.x, adjustedCoords.y),
-      glm::vec2(state.resolution.x, state.resolution.y),
-      ManipulatorOptions {
-         .manipulatorPositionMode = state.manipulatorPositionMode,
-         .relativePositionMode = state.relativePositionMode,
-         .translateMirror = state.translateMirror,
-         .rotateMode = state.rotateMode,
-         .scalingGroup = state.scalingGroup,
-         .snapManipulatorScales = state.snapManipulatorScales,
-         .preserveRelativeScale = state.preserveRelativeScale,
-      },
-      tools,
-      !(state.inputMode == ENABLED)
-    );      
-
-    ///////////////////
-
     if (state.shouldToggleCursor){
       modlog("toggle cursor", std::to_string(state.cursorBehavior));
       toggleCursor(state.cursorBehavior);
