@@ -334,8 +334,8 @@ typedef void(*mousemovecallback)(double xPos, double yPos, float xNdc, float yNd
 typedef std::function<void(int32_t id, void* data, double xPos, double yPos, float xNdc, float yNdc)> id_mousemovecallback;
 typedef void(*scrollcallback)(double amount);
 typedef std::function<void(int32_t id, void* data, double amount)> id_scrollcallback;
-typedef void(*onobjectSelectedFunc)(int32_t index, glm::vec3 color);
-typedef std::function<void(int32_t id, void* data, int32_t index, glm::vec3 color)> id_onobjectSelectedFunc;
+typedef void(*onobjectSelectedFunc)(int32_t index, glm::vec3 color, int selectIndex);
+typedef std::function<void(int32_t id, void* data, int32_t index, glm::vec3 color, int selectIndex)> id_onobjectSelectedFunc;
 typedef void(*onobjectHoverFunc)(int32_t index, bool hoverOn);
 typedef std::function<void(int32_t id, void* data, int32_t index, bool hoverOn)> id_onobjectHoverFunc;
 typedef void(*funcMappingFunc)(int32_t index);

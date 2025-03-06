@@ -64,5 +64,15 @@ CScriptBinding cscriptCreateToolsBinding(CustomApiBindings& api){
     );
   };
 
+  binding.onObjectSelected = [](objid scriptId, void* data, int32_t id, glm::vec3 color, int selectIndex) -> void {
+    modlog("tools", std::to_string(selectIndex));
+    if (selectIndex == -4){ // just make this unique to the manipulator
+      auto idToUse = state.groupSelection ? mainApi -> groupId(id) : id;
+      auto selectedSubObj = mainApi -> getGameObjNameForId(id).value();
+      modlog("tools", selectedSubObj);
+      onManipulatorSelectItem(state.manipulatorState, idToUse, selectedSubObj);
+    }
+  };
+
   return binding;
 }

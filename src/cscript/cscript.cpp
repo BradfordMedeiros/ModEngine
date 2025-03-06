@@ -215,14 +215,14 @@ void onCScrollCallbackAllScripts(double amount){
     binding -> onScrollCallback(objInstance.instanceId, objInstance.data, amount);
   }
 }
-void onCObjectSelectedAllScripts(int32_t index, glm::vec3 color){
+void onCObjectSelectedAllScripts(int32_t index, glm::vec3 color, int selectIndex){
   for (auto &objInstance : customObjInstances){
     if (objInstance.shouldRemove){
       continue;
     }
     auto binding = objInstance.cScriptBinding;
     assert(binding != NULL);
-    binding -> onObjectSelected(objInstance.instanceId, objInstance.data, index, color);
+    binding -> onObjectSelected(objInstance.instanceId, objInstance.data, index, color, selectIndex);
   }
 }
 void onCObjectUnselectedAllScripts(){
