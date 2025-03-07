@@ -79,13 +79,7 @@ std::vector<IdAtCoords> idCoordsToGet;
 bool showCrashInfo = false;
 float lastReloadTime = 0.f;
 
-TimePlayback timePlayback(
-  statistics.initialTime, 
-  [](float currentTime, float _, float elapsedTime) -> void {
-    tickAnimations(world, timings, currentTime);
-  }, 
-  []() -> void {}
-); 
+TimePlayback timePlayback(statistics.initialTime); 
 
 
 std::unordered_map<std::string, std::string>& getTemplateValues(){
@@ -1630,7 +1624,8 @@ int main(int argc, char* argv[]){
     idCoordsToGet = {};
 
     if (!state.worldpaused){
-      timePlayback.setElapsedTime(statistics.deltaTime);  // tick animations here
+      timePlayback.setTime(statistics.now);  // tick animations here
+      tickAnimations(world, timings, timePlayback.currentTime);
     }
 
     tickRecordings(getTotalTimeGame());
@@ -1644,6 +1639,7 @@ int main(int argc, char* argv[]){
     cBindings.onFrame();
 
     onNetCode(world, netcode, onClientMessage, bootStrapperMode);
+
     { 
       auto forward = calculateRelativeOffset(viewTransform.rotation, {0, 0, -1 }, false);
       auto up  = calculateRelativeOffset(viewTransform.rotation, {0, 1, 0 }, false);
@@ -1742,14 +1738,14 @@ int main(int argc, char* argv[]){
       cBindings.onMessage(message.strTopic, message.strValue);
     }
 
+    //////////////////////// rendering code below ///////////////////////
+
     viewTransform = getCameraTransform();
     view = renderView(viewTransform.position, viewTransform.rotation);
     std::vector<LightInfo> lights = getLightInfo(world);
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
 
-    //////////////////////// rendering code below ///////////////////////
-    
     RenderContext renderContext {
       .world = world,
       .view = view,
