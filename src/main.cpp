@@ -592,18 +592,8 @@ void renderUI(Color pixelColor){
   glUseProgram(*renderingResources.uiShaderProgram);
   std::vector<UniformData> uniformData;
   uniformData.push_back(UniformData {
-    .name = "projection",
-    .value = ndiOrtho,
-  });
-  uniformData.push_back(UniformData {
     .name = "forceTint",
     .value = false,
-  });
-  uniformData.push_back(UniformData {
-    .name = "textureData",
-    .value = Sampler2D {
-      .textureUnitId = 0,
-    },
   });
   uniformData.push_back(UniformData {
     .name = "time",
@@ -613,7 +603,7 @@ void renderUI(Color pixelColor){
     .name = "realtime",
     .value = getTotalTime(),
   });
-  setUniformData(*renderingResources.uiShaderProgram, uniformData, { "model", "encodedid", "tint", "time" });
+  setUniformData(*renderingResources.uiShaderProgram, uniformData, { "model", "encodedid", "tint", "time", "textureData", "projection" });
   glEnable(GL_BLEND);
   glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glBlendFunci(1, GL_ONE, GL_ZERO);
