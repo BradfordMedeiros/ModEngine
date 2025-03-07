@@ -4,6 +4,7 @@
 float getTotalTimeGame();
 float getTotalTime();
 extern engineState state;
+extern glm::mat4 ndiOrtho;
 
 std::vector<UniformData> getDefaultShaderUniforms(std::optional<glm::mat4> projview, glm::vec3 cameraPosition, int numLights, bool enableLighting){
   std::vector<UniformData> uniformData;
@@ -272,8 +273,20 @@ void initDepthShader(unsigned int shader){
 
 }
 void initUiShader(unsigned int shader){
-
+  std::vector<UniformData> uniformData;
+  uniformData.push_back(UniformData {
+    .name = "projection",
+    .value = ndiOrtho,
+  });
+  uniformData.push_back(UniformData {
+    .name = "textureData",
+    .value = Sampler2D {
+      .textureUnitId = 0,
+    },
+  });
+  setUniformData(shader, uniformData, { "model", "encodedid", "tint", "forceTint" });
 }
+
 void initFramebufferShader(unsigned int shader){
   std::vector<UniformData> uniformData;
   uniformData.push_back(UniformData {
@@ -358,3 +371,4 @@ void updateFramebufferShaderFrame(unsigned int shader, float near, float far){
 
   setUniformData(shader, uniformData, { "framebufferTexture", "bloomTexture", "depthTexture" });
 }
+

@@ -180,7 +180,6 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
   }
 
-  shaderSetUniform(*renderingResources.uiShaderProgram, "projection", ndiOrtho);
   shaderSetUniform(*renderingResources.uiShaderProgram, "encodedid", getColorFromGameobject(0));
 
   if (shouldClear && clearTextureId.has_value()){
@@ -200,8 +199,7 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
   glBlendFunci(1, GL_ONE, GL_ZERO);
 
 
-  drawShapeData(lineData, *renderingResources.uiShaderProgram, ndiOrtho, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
-
+  drawShapeData(lineData, *renderingResources.uiShaderProgram, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
 
   for (auto &idCoordToGet : idCoordsToGet){
     if (!idCoordToGet.textureId.has_value()){
@@ -1648,7 +1646,7 @@ int main(int argc, char* argv[]){
 
       shaderSetUniform(*renderStages.selection.shader, "projview", ndiOrtho);
       glDisable(GL_DEPTH_TEST);
-      drawShapeData(lineData, *renderStages.selection.shader, ndiOrtho, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
+      drawShapeData(lineData, *renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
       glEnable(GL_DEPTH_TEST);
 
     )
@@ -1841,24 +1839,14 @@ int main(int argc, char* argv[]){
       glUseProgram(shader);
       std::vector<UniformData> uniformData;
       uniformData.push_back(UniformData {
-        .name = "projection",
-        .value = ndiOrtho,
-      });
-      uniformData.push_back(UniformData {
         .name = "forceTint",
         .value = false,
       });
-      uniformData.push_back(UniformData {
-        .name = "textureData",
-        .value = Sampler2D {
-          .textureUnitId = 0,
-        },
-      });
-      setUniformData(shader, uniformData, { "model", "encodedid", "tint", "time" });
+      setUniformData(shader, uniformData, { "model", "encodedid", "tint", "time", "projection", "textureData" });
       glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glBlendFunci(1, GL_ONE, GL_ZERO);
       
-      drawShapeData(lineData, shader /*renderingResources.uiShaderProgram*/, ndiOrtho, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
+      drawShapeData(lineData, shader /*renderingResources.uiShaderProgram*/, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
     }
     glEnable(GL_DEPTH_TEST);
 

@@ -201,7 +201,7 @@ std::vector<int> uniqueZIndexs(LineData& lineData){
 }
 // This could sort the line data in some fashion to minimize context switches
 // eg add different shader types to different queues
-void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, glm::mat4 ndiOrtho, std::function<FontFamily&(std::optional<std::string>)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram){
+void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::optional<std::string>)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram){
   //std::cout << "text number: " << lineData.text.size() << std::endl;
 PROFILE("drawShapeData",
   bool allowShaderOverride = !selectionProgram; // which means that shaders use the geometry of the selection program
@@ -232,18 +232,8 @@ PROFILE("drawShapeData",
 
             std::vector<UniformData> uniformData;
             uniformData.push_back(UniformData {
-              .name = "projection",
-              .value = ndiOrtho,
-            });
-            uniformData.push_back(UniformData {
               .name = "forceTint",
               .value = false,
-            });
-            uniformData.push_back(UniformData {
-              .name = "textureData",
-              .value = Sampler2D {
-                .textureUnitId = 0,
-              },
             });
             uniformData.push_back(UniformData {
               .name = "time",
@@ -253,7 +243,7 @@ PROFILE("drawShapeData",
               .name = "realtime",
               .value = getTotalTime(),
             });
-            setUniformData(shaderToUse, uniformData, { "model", "encodedid", "tint", "time" }, false);
+            setUniformData(shaderToUse, uniformData, { "model", "encodedid", "tint", "time", "textureData", "projection" }, false);
             lastShaderId = shapeOptionsShader;
         }
         if (!selectionProgram){
