@@ -18,6 +18,7 @@
 #include "./common/watch_file.h"
 #include "./tests/main_test.h"
 #include "./world_tasks.h"
+#include "./shaderstate.h"
 
 #ifdef ADDITIONAL_SRC_HEADER
   #include STR(ADDITIONAL_SRC_HEADER)
@@ -338,135 +339,10 @@ void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
   }
 }
 
-std::vector<UniformData> getDefaultShaderUniforms(std::optional<glm::mat4> projview, glm::vec3 cameraPosition, std::vector<LightInfo>& lights, bool enableLighting){
-  std::vector<UniformData> uniformData;
-  uniformData.push_back(UniformData {
-    .name = "maintexture",
-    .value = Sampler2D {
-      .textureUnitId = 0,
-    },
-  });
-  /* obviously texture id an maintexture shouldn't be same here */
-  uniformData.push_back(UniformData { 
-    .name = "textureid",
-    .value = Sampler2D {
-      .textureUnitId = 0,
-    },
-  });
-
-  uniformData.push_back(UniformData {
-    .name = "emissionTexture",
-    .value = Sampler2D {
-      .textureUnitId = 1,
-    },
-  });
-  uniformData.push_back(UniformData {
-    .name = "opacityTexture",
-    .value = Sampler2D {
-      .textureUnitId = 2,
-    },
-  });
-  uniformData.push_back(UniformData {
-    .name = "lightDepthTexture",
-    .value = Sampler2D {
-      .textureUnitId = 3,
-    },
-  });
-  uniformData.push_back(UniformData {
-    .name = "cubemapTexture",
-    .value = SamplerCube {
-      .textureUnitId = 4,
-    },
-  });
-  uniformData.push_back(UniformData {
-    .name = "roughnessTexture",
-    .value = Sampler2D {
-      .textureUnitId = 5,
-    },
-  });
-  uniformData.push_back(UniformData {
-    .name = "normalTexture",
-    .value = Sampler2D {
-      .textureUnitId = 6,
-    },
-  });
-  if (projview.has_value()){
-    uniformData.push_back(UniformData {
-      .name = "projview",
-      .value = projview.value(),
-    });
-  }
-  uniformData.push_back(UniformData {
-    .name = "showBoneWeight",
-    .value = state.showBoneWeight,
-  });
-  uniformData.push_back(UniformData {
-    .name = "useBoneTransform",
-    .value = state.useBoneTransform,
-  });
-  uniformData.push_back(UniformData {
-    .name = "enableDiffuse",
-    .value = state.enableDiffuse,
-  });
-  uniformData.push_back(UniformData {
-    .name = "enableLighting",
-    .value = enableLighting,
-  });
-  uniformData.push_back(UniformData {
-    .name = "enablePBR",
-    .value = state.enablePBR,
-  });
-  uniformData.push_back(UniformData {
-    .name = "enableSpecular",
-    .value = state.enableSpecular,
-  });
-  uniformData.push_back(UniformData {
-    .name = "enableVoxelLighting",
-    .value = state.enableVoxelLighting,
-  });
-  uniformData.push_back(UniformData {
-    .name = "ambientAmount",
-    .value = glm::vec3(state.ambient),
-  });
-  uniformData.push_back(UniformData {
-    .name = "bloomThreshold",
-    .value = state.bloomThreshold,
-  });
-  uniformData.push_back(UniformData {
-    .name = "enableAttenutation",
-    .value = state.enableAttenuation,
-  });
-  uniformData.push_back(UniformData {
-    .name = "cameraPosition",
-    .value = cameraPosition,
-  });
-  uniformData.push_back(UniformData {
-    .name = "shadowIntensity",
-    .value = state.shadowIntensity,
-  });
-  uniformData.push_back(UniformData {
-    .name = "enableShadows",
-    .value = state.enableShadows,
-  });
-  uniformData.push_back(UniformData {
-    .name = "numlights",
-    .value = static_cast<int>(lights.size()),
-  });
-  uniformData.push_back(UniformData {
-    .name = "time",
-    .value = getTotalTimeGame(),
-  });
-  uniformData.push_back(UniformData {
-    .name = "realtime",
-    .value = getTotalTime(),
-  });
-  return uniformData;  
-}
-
 void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
   //std::cout << "set shader data world" << std::endl; 
   glUseProgram(shader);
-  std::vector<UniformData> uniformData = getDefaultShaderUniforms(std::nullopt, cameraPosition, lights, true);
+  std::vector<UniformData> uniformData = getDefaultShaderUniforms(std::nullopt, cameraPosition, lights.size(), true);
   // notice this is kind of wrong, since it sets it for multiple shader types here
   setUniformData(shader, uniformData, { 
     "textureid", "bones[0]", "encodedid", "hasBones", "model", "discardTexAmount", 
@@ -548,7 +424,11 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       glClear(GL_DEPTH_BUFFER_BIT);
     }
 
-    auto newShader = (shader == "" || !allowShaderOverride) ? shaderProgram : getShaderByShaderString(shader, shaderFolderPath, interface.readFile, getTemplateValues);
+    bool loadedNewShader = false;
+    auto newShader = (shader == "" || !allowShaderOverride) ? shaderProgram : getShaderByShaderString(shader, shaderFolderPath, interface.readFile, getTemplateValues, &loadedNewShader);
+    if (loadedNewShader){
+      initDefaultShader(newShader);
+    }
     if (!lastShaderId.has_value() || newShader != lastShaderId.value()){
       lastShaderId = newShader;
       //sendAlert(std::string("loaded shader: ") + shader);
@@ -656,7 +536,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
 
   auto projection = projectionFromLayer(world.sandbox.layers.at(0));
   std::vector<LightInfo> lights;
-  std::vector<UniformData> uniformData = getDefaultShaderUniforms(projection * view, glm::vec3(0.f, 0.f, 0.f), lights, false);
+  std::vector<UniformData> uniformData = getDefaultShaderUniforms(projection * view, glm::vec3(0.f, 0.f, 0.f), lights.size(), false);
   uniformData.push_back(UniformData { .name = "tint",  .value = glm::vec4(0.05, 1.f, 0.f, 1.f) });
   uniformData.push_back(UniformData { .name = "hasBones",  .value = false });
   uniformData.push_back(UniformData { .name = "hasCubemapTexture",  .value = false });
@@ -1221,26 +1101,32 @@ int main(int argc, char* argv[]){
 
   modlog("shaders", std::string("shader file path is ") + shaderFolderPath);
   unsigned int* shaderProgram = loadShaderIntoCache("default", shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
-  
+  initDefaultShader(*shaderProgram);
+
   std::string framebufferShaderPath = "./res/shaders/framebuffer";
   modlog("shaders", std::string("framebuffer file path is ") + framebufferShaderPath);
   renderingResources.framebufferProgram = loadShaderIntoCache("framebuffer", framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
+  initFramebufferShader(*renderingResources.framebufferProgram);
 
   std::string depthShaderPath = "./res/shaders/depth";
   modlog("shaders", std::string("depth file path is ") + depthShaderPath);
   unsigned int* depthProgram = loadShaderIntoCache("depth", depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
+  initDepthShader(*depthProgram);
 
   std::string uiShaderPath = "./res/shaders/ui";
   modlog("shaders", std::string("ui shader file path is ") + uiShaderPath);
   renderingResources.uiShaderProgram = loadShaderIntoCache("ui", uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
+  initUiShader(*renderingResources.uiShaderProgram);
 
   std::string selectionShaderPath = "./res/shaders/selection";
   modlog("shaders", std::string("selection shader path is ") + selectionShaderPath);
   unsigned int* selectionProgram = loadShaderIntoCache("selection", selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
+  initSelectionShader(*selectionProgram);
 
   std::string blurShaderPath = "./res/shaders/blur";
   modlog("shaders", std::string("blur shader path is: ") + blurShaderPath);
   unsigned int* blurProgram = loadShaderIntoCache("blur", blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile, getTemplateValues());
+  initBlurShader(*blurProgram);
 
   mainShaders = RenderShaders {
     .blurProgram = blurProgram,
@@ -1293,7 +1179,9 @@ int main(int argc, char* argv[]){
     .freeLine = [](objid lineId) -> void { freeLine(lineData, lineId); } ,
     .shaderByName = shaderByName,
     .loadShader = [](std::string name, std::string path) -> unsigned int* {
-      return loadShaderIntoCache(name, path + "/vertex.glsl", path + "/fragment.glsl", interface.readFile, getTemplateValues());
+      auto shader = loadShaderIntoCache(name, path + "/vertex.glsl", path + "/fragment.glsl", interface.readFile, getTemplateValues());
+      initDefaultShader(*shader);
+      return shader;
     },
     .setShaderUniform = setUniformData,
     .getTextureSamplerId = getTextureSamplerId,
@@ -1894,72 +1782,8 @@ int main(int argc, char* argv[]){
     glClearColor(0.f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    std::vector<UniformData> uniformData;
-    uniformData.push_back(UniformData {
-      .name = "bloomAmount",
-      .value = state.bloomAmount,
-    });
-    uniformData.push_back(UniformData {
-      .name = "enableBloom",
-      .value = state.enableBloom,
-    });
-    uniformData.push_back(UniformData {
-      .name = "enableExposure",
-      .value = state.enableExposure,
-    });
     state.exposure = exposureAmount();
-    uniformData.push_back(UniformData {
-      .name = "exposure",
-      .value = state.exposure,
-    });
-    uniformData.push_back(UniformData {
-      .name = "enableFog",
-      .value = state.enableFog,
-    });
-    uniformData.push_back(UniformData {
-      .name = "enableGammaCorrection",
-      .value = state.enableGammaCorrection,
-    });
-    uniformData.push_back(UniformData {
-      .name = "near",
-      .value = near,
-    });
-    uniformData.push_back(UniformData {
-      .name = "far",
-      .value = far,
-    });
-    uniformData.push_back(UniformData {
-      .name = "fogColor",
-      .value = state.fogColor,
-    });
-    uniformData.push_back(UniformData {
-      .name = "mincutoff",
-      .value = state.fogMinCutoff,
-    });
-    uniformData.push_back(UniformData {
-      .name = "maxcuttoff",
-      .value = state.fogMaxCutoff,
-    });
-    uniformData.push_back(UniformData {
-      .name = "bloomTexture",
-      .value = Sampler2D {
-        .textureUnitId = 1,
-      }
-    });
-    uniformData.push_back(UniformData {
-      .name = "depthTexture",
-      .value = Sampler2D {
-        .textureUnitId = 2,
-      }
-    });
-    uniformData.push_back(UniformData {
-      .name = "framebufferTexture",
-      .value = Sampler2D {
-        .textureUnitId = 0,
-      }
-    });
-
-    setUniformData(finalProgram, uniformData, {});
+    updateFramebufferShaderFrame(finalProgram, near, far);
 
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(0));
