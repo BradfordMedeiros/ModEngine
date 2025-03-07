@@ -14,7 +14,6 @@ std::map<std::string, RenderUniforms> allUniformsInfos(std::vector<Token>& unifo
       .floatUniforms = renderStageValue.floatUniforms,
       .floatArrUniforms = renderStageValue.floatArrUniforms,
       .vec3Uniforms = renderStageValue.vec3Uniforms,
-      .builtInUniforms = renderStageValue.builtInUniforms,
     };
   }
   return uniforms;
@@ -140,7 +139,6 @@ std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::strin
           .floatUniforms = {},
           .floatArrUniforms = {},
           .vec3Uniforms = {},
-          .builtInUniforms = {},
         },
       };
     }
@@ -172,7 +170,6 @@ std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::strin
         .floatUniforms = {},
         .floatArrUniforms = {},
         .vec3Uniforms = {},
-        .builtInUniforms = {},
       },
     });
   }else{

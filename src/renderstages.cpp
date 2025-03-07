@@ -55,7 +55,6 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::vector<Token>& token
 
     auto isUniform = token.attribute.at(0) == '!';
     auto isHint = token.attribute.at(0) == '?';
-    auto isBuiltInUniform = token.attribute.at(0) == '@';
     auto isTexture = token.attribute.at(0) == '&';
 
     if (token.attribute == "shader"){
@@ -115,12 +114,6 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::vector<Token>& token
           assert(false);
         }
       }
-    }else if (isBuiltInUniform){
-      auto attribute = token.attribute.substr(1, token.attribute.size());
-      additionalShaders.at(indexForStage).builtInUniforms.push_back(RenderDataBuiltIn{
-        .uniformName = attribute,
-        .builtin = token.payload,
-      });
     }else{
       std::cout << "parse render stages: " << token.target << " - attribute is not supported: " << token.attribute << std::endl;
       assert(false);
@@ -232,7 +225,6 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
         .floatUniforms = additionalShader.floatUniforms,
         .floatArrUniforms = additionalShader.floatArrUniforms,
         .vec3Uniforms = additionalShader.vec3Uniforms,
-        .builtInUniforms = additionalShader.builtInUniforms,
       },
       .textures = additionalShader.textures,
     };
@@ -279,7 +271,6 @@ RenderStages loadRenderStages(
       .floatUniforms = {},
       .floatArrUniforms = {},
       .vec3Uniforms = {},
-      .builtInUniforms = {},
     },
     .textures = {},
   };
@@ -306,7 +297,6 @@ RenderStages loadRenderStages(
         .floatUniforms = {},
         .floatArrUniforms = {},
         .vec3Uniforms = {},
-        .builtInUniforms = {},
       },
       .textures = {},
   };
@@ -334,7 +324,6 @@ RenderStages loadRenderStages(
       .floatUniforms = {},
       .floatArrUniforms = {},
       .vec3Uniforms = {},
-      .builtInUniforms = {},
     },
     .textures = {},
   };
@@ -361,7 +350,6 @@ RenderStages loadRenderStages(
         .floatUniforms = {},
         .floatArrUniforms = {},
         .vec3Uniforms = {},
-        .builtInUniforms = {},
       },
       .textures = {},
   };    
@@ -400,7 +388,6 @@ RenderStages loadRenderStages(
       .floatUniforms = {},
       .floatArrUniforms = {},
       .vec3Uniforms = {},
-      .builtInUniforms = {},
     },
     .textures = {},
   };
@@ -433,7 +420,6 @@ RenderStages loadRenderStages(
       .floatUniforms = {},
       .floatArrUniforms = {},
       .vec3Uniforms = {},
-      .builtInUniforms = {},
     },
     .textures = {},
   };
@@ -470,7 +456,6 @@ RenderStages loadRenderStages(
       },
       .floatArrUniforms = {},
       .vec3Uniforms = {},
-      .builtInUniforms = {},
     },
     .textures = {
       RenderTexture {
@@ -577,12 +562,6 @@ void setRenderStageState(RenderStages& stages, ObjectValue& value){
         assert(vec3Value != NULL);
         uniform.value = *vec3Value;
         return;
-      }     
-    }
-    for (auto &uniform : step -> uniforms.builtInUniforms){
-      if (value.attribute == uniform.uniformName){
-        std::cout << "uniform type not supported" << std::endl;
-        assert(false);
       }     
     }
     std::cout << "No uniform named: " << value.attribute << std::endl;

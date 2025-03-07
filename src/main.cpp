@@ -336,14 +336,6 @@ void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
       shaderSetUniform(shader,  (uniform.uniformName + "[" + std::to_string(i) + "]").c_str(), uniform.value.at(i));
     }
   }
-  for (auto &uniform : uniforms.builtInUniforms){  // todo -> avoid string comparisons
-    if (uniform.builtin == "resolution"){
-      shaderSetUniformIVec2(shader, uniform.uniformName.c_str(), state.resolution);
-    }else{
-      std::cout << "uniform not supported: " << uniform.builtin << std::endl;
-      assert(false);
-    }
-  }
 }
 
 std::vector<UniformData> getDefaultShaderUniforms(std::optional<glm::mat4> projview, glm::vec3 cameraPosition, std::vector<LightInfo>& lights, bool enableLighting){

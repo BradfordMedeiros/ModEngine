@@ -91,7 +91,6 @@ struct DeserializedRenderStage {
   std::vector<RenderDataFloat> floatUniforms;
   std::vector<RenderDataFloatArr> floatArrUniforms;
   std::vector<RenderDataVec3> vec3Uniforms;
-  std::vector<RenderDataBuiltIn> builtInUniforms;
   std::vector<RenderTexture> textures;
 };
 
