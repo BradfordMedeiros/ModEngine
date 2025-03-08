@@ -235,19 +235,10 @@ PROFILE("drawShapeData",
               .name = "forceTint",
               .value = false,
             });
-            uniformData.push_back(UniformData {
-              .name = "time",
-              .value = getTotalTimeGame(),
-            });
-            uniformData.push_back(UniformData {
-              .name = "realtime",
-              .value = getTotalTime(),
-            });
             setUniformData(shaderToUse, uniformData, { "model", "encodedid", "tint", "time", "textureData", "projection" }, false);
             lastShaderId = shapeOptionsShader;
         }
         if (!selectionProgram){
-          //shaderSetUniform(shaderToUse, "time", getTotalTime());
           shaderSetUniformBool(shaderToUse, "forceTint", false);
           shaderSetUniform(shaderToUse, "tint", shape.tint);
         }

@@ -62,6 +62,7 @@ Transformation viewTransform {
 glm::mat4 view;
 glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);  
 
+std::vector<unsigned int> extraShadersToUpdate; // TODO STATIC get rid of this, but useful given at render shader loading
 
 // core system 
 NetCode netcode { };
@@ -347,7 +348,12 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
     "emissionAmount", 
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture",
     "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth",
-    "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview"
+    "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview",
+
+    "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture",
+    "time", "realtime",
+    "showBoneWeight", "useBoneTransform", "enableDiffuse", "enablePBR", "enableSpecular", "enableVoxelLighting", "ambientAmount", "bloomThreshold", "enableAttenutation", "shadowIntensity", "enableShadows",
+
   });
  
 
@@ -425,6 +431,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     bool loadedNewShader = false;
     auto newShader = (shader == "" || !allowShaderOverride) ? shaderProgram : getShaderByShaderString(shader, shaderFolderPath, interface.readFile, getTemplateValues, &loadedNewShader);
     if (loadedNewShader){
+      extraShadersToUpdate.push_back(newShader);
       initDefaultShader(newShader);
     }
     if (!lastShaderId.has_value() || newShader != lastShaderId.value()){
@@ -528,8 +535,8 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   return numTriangles;
 }
 
-void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells){
-  glUseProgram(shaderProgram);
+void renderVector(glm::mat4 view,  int numChunkingGridCells){
+  glUseProgram(*mainShaders.shaderProgram);
   glDisable(GL_DEPTH_TEST);
 
   auto projection = projectionFromLayer(world.sandbox.layers.at(0));
@@ -550,7 +557,13 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
   uniformData.push_back(UniformData { .name = "textureOffset",  .value = glm::vec2(1.f, 1.f) });
   uniformData.push_back(UniformData { .name = "textureSize",  .value = glm::vec2(1.f, 1.f) });
   uniformData.push_back(UniformData { .name = "textureTiling",  .value = glm::vec2(1.f, 1.f) });
-  setUniformData(shaderProgram, uniformData, { "bones[0]", "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth" });
+  setUniformData(*mainShaders.shaderProgram , uniformData, 
+    { "bones[0]", "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth",
+      "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture",
+      "time", "realtime",
+      "showBoneWeight", "useBoneTransform", "enableDiffuse", "enablePBR", "enableSpecular", "enableVoxelLighting", "ambientAmount", "bloomThreshold", "enableAttenutation", "shadowIntensity", "enableShadows",
+
+    });
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
   if (state.showDebug && numChunkingGridCells > 0){
@@ -562,11 +575,11 @@ void renderVector(GLint shaderProgram, glm::mat4 view,  int numChunkingGridCells
     drawGrid3D(4, getLightingCellWidth(), 0.f, 0.f, 0.f);
   }
 
-  shaderSetUniform(shaderProgram, "tint", glm::vec4(0.f, 0.f, 1.f, 1.f));     
+  shaderSetUniform(*mainShaders.shaderProgram , "tint", glm::vec4(0.f, 0.f, 1.f, 1.f));     
   if (state.showDebug){
     drawCoordinateSystem(100.f);
   }
-  drawAllLines(lineData, shaderProgram, std::nullopt);
+  drawAllLines(lineData, *mainShaders.shaderProgram , std::nullopt);
 
 }
 
@@ -594,14 +607,6 @@ void renderUI(Color pixelColor){
   uniformData.push_back(UniformData {
     .name = "forceTint",
     .value = false,
-  });
-  uniformData.push_back(UniformData {
-    .name = "time",
-    .value = getTotalTimeGame(),
-  });
-  uniformData.push_back(UniformData {
-    .name = "realtime",
-    .value = getTotalTime(),
   });
   setUniformData(*renderingResources.uiShaderProgram, uniformData, { "model", "encodedid", "tint", "time", "textureData", "projection" });
   glEnable(GL_BLEND);
@@ -1169,6 +1174,7 @@ int main(int argc, char* argv[]){
     .loadShader = [](std::string name, std::string path) -> unsigned int* {
       auto shader = loadShaderIntoCache(name, path + "/vertex.glsl", path + "/fragment.glsl", interface.readFile, getTemplateValues());
       initDefaultShader(*shader);
+      extraShadersToUpdate.push_back(*shader);
       return shader;
     },
     .setShaderUniform = setUniformData,
@@ -1608,6 +1614,13 @@ int main(int argc, char* argv[]){
 
     //////////////////////// rendering code below ///////////////////////
 
+    updateDefaultShaderPerFrame(*mainShaders.shaderProgram);
+    updateSelectionShaderPerFrame(*mainShaders.selectionProgram);
+    for (auto shaderId : extraShadersToUpdate){
+      updateDefaultShaderPerFrame(shaderId);
+    }
+    updateUiShaderPerFrame(*renderingResources.uiShaderProgram);
+
     viewTransform = getCameraTransform();
     view = renderView(viewTransform.position, viewTransform.rotation);
     std::vector<LightInfo> lights = getLightInfo(world);
@@ -1689,7 +1702,7 @@ int main(int argc, char* argv[]){
 
     statistics.numTriangles = renderWithProgram(renderContext, renderStages.main);
     Color colorFromSelection = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
-    renderVector(*shaderProgram, view, numChunkingGridCells);
+    renderVector(view, numChunkingGridCells);
 
     Color pixelColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
     state.hoveredColor = glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b);
@@ -1728,26 +1741,12 @@ int main(int argc, char* argv[]){
     // depth buffer pass 
     {
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
-      auto finalProgram = *depthProgram;
-      glUseProgram(finalProgram); 
+      glUseProgram(*depthProgram); 
       glClearColor(0.f, 0.0f, 0.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      std::vector<UniformData> uniformData;
-      uniformData.push_back(UniformData {
-        .name = "near",
-        .value = near,
-      });
-      uniformData.push_back(UniformData {
-        .name = "far",
-        .value = far,
-      });
-      uniformData.push_back(UniformData {
-        .name = "depthTexture",
-        .value = Sampler2D {
-          .textureUnitId = 2,
-        }
-      });
-      setUniformData(finalProgram, uniformData, {});
+      
+      updateDepthShaderPerFrame(*depthProgram, near, far);
+
       glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(0));
       glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
@@ -1755,10 +1754,8 @@ int main(int argc, char* argv[]){
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
       Color hoveredItemColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
-      auto distanceComponent = hoveredItemColor.r;
-      float distance = (distanceComponent * (far - near)) + near;
-   
-      //std::cout << "depth: " << distance << ", near = " << near << ", far = " << far << std::endl;
+      float distance = (hoveredItemColor.r * (far - near)) + near;
+      std::cout << "depth: " << distance << ", near = " << near << ", far = " << far << std::endl;
       state.currentCursorDepth = distance;
 
     }
@@ -1823,20 +1820,18 @@ int main(int argc, char* argv[]){
     if (state.renderMode == RENDER_FINAL){
       renderUI(pixelColor);
 
-      auto shader = *renderingResources.uiShaderProgram;
-
       // below and render screepspace lines can probably be consoliated
-      glUseProgram(shader);
+      glUseProgram(*renderingResources.uiShaderProgram);
       std::vector<UniformData> uniformData;
       uniformData.push_back(UniformData {
         .name = "forceTint",
         .value = false,
       });
-      setUniformData(shader, uniformData, { "model", "encodedid", "tint", "time", "projection", "textureData" });
+      setUniformData(*renderingResources.uiShaderProgram, uniformData, { "model", "encodedid", "tint", "time", "projection", "textureData" });
       glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glBlendFunci(1, GL_ONE, GL_ZERO);
       
-      drawShapeData(lineData, shader /*renderingResources.uiShaderProgram*/, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
+      drawShapeData(lineData, *renderingResources.uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
     }
     glEnable(GL_DEPTH_TEST);
 
