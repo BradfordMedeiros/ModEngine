@@ -3,8 +3,6 @@
 
 #include "./state.h"
 
-std::vector<UniformData> getDefaultShaderUniforms(std::optional<glm::mat4> projview, glm::vec3 cameraPosition, int numLights, bool enableLighting);
-
 void initDefaultShader(unsigned int shader);
 void updateDefaultShaderPerFrame(unsigned int shader);
 

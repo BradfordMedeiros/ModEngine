@@ -341,8 +341,13 @@ void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
 void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
   //std::cout << "set shader data world" << std::endl; 
   glUseProgram(shader);
-  std::vector<UniformData> uniformData = getDefaultShaderUniforms(std::nullopt, cameraPosition, lights.size(), true);
+  std::vector<UniformData> uniformData;
   // notice this is kind of wrong, since it sets it for multiple shader types here
+
+  // why isn't projview set here?
+  uniformData.push_back(UniformData { .name = "numlights", .value = static_cast<int>(lights.size()) });
+  uniformData.push_back(UniformData { .name = "cameraPosition", .value = cameraPosition });
+
   setUniformData(shader, uniformData, { 
     "textureid", "bones[0]", "encodedid", "hasBones", "model", "discardTexAmount", 
     "emissionAmount", 
@@ -353,7 +358,7 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
     "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture",
     "time", "realtime",
     "showBoneWeight", "useBoneTransform", "enableDiffuse", "enablePBR", "enableSpecular", "enableVoxelLighting", "ambientAmount", "bloomThreshold", "enableAttenutation", "shadowIntensity", "enableShadows",
-
+    "enableLighting",
   });
  
 
@@ -541,7 +546,11 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
 
   auto projection = projectionFromLayer(world.sandbox.layers.at(0));
   std::vector<LightInfo> lights;
-  std::vector<UniformData> uniformData = getDefaultShaderUniforms(projection * view, glm::vec3(0.f, 0.f, 0.f), lights.size(), false);
+  std::vector<UniformData> uniformData;
+
+  uniformData.push_back(UniformData { .name = "projview", .value = (projection * view) });
+  uniformData.push_back(UniformData { .name = "numlights", .value = static_cast<int>(lights.size()) });
+  uniformData.push_back(UniformData { .name = "cameraPosition", .value =  glm::vec3(0.f, 0.f, 0.f) });
   uniformData.push_back(UniformData { .name = "tint",  .value = glm::vec4(0.05, 1.f, 0.f, 1.f) });
   uniformData.push_back(UniformData { .name = "hasBones",  .value = false });
   uniformData.push_back(UniformData { .name = "hasCubemapTexture",  .value = false });
@@ -562,7 +571,7 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
       "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture",
       "time", "realtime",
       "showBoneWeight", "useBoneTransform", "enableDiffuse", "enablePBR", "enableSpecular", "enableVoxelLighting", "ambientAmount", "bloomThreshold", "enableAttenutation", "shadowIntensity", "enableShadows",
-
+      "enableLighting",
     });
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations

@@ -6,29 +6,6 @@ float getTotalTime();
 extern engineState state;
 extern glm::mat4 ndiOrtho;
 
-// this applies to the main shader, selection shader
-std::vector<UniformData> getDefaultShaderUniforms(std::optional<glm::mat4> projview, glm::vec3 cameraPosition, int numLights, bool enableLighting){
-  std::vector<UniformData> uniformData;
-  if (projview.has_value()){
-    uniformData.push_back(UniformData {
-      .name = "projview",
-      .value = projview.value(),
-    });
-  }
-  uniformData.push_back(UniformData {
-    .name = "cameraPosition",
-    .value = cameraPosition,
-  });
-  uniformData.push_back(UniformData {
-    .name = "numlights",
-    .value = numLights,
-  });
-  uniformData.push_back(UniformData {
-    .name = "enableLighting",
-    .value = enableLighting,
-  });
-  return uniformData;  
-}
 
 void initDefaultShader(unsigned int shader){
   std::vector<UniformData> uniformData;
@@ -73,6 +50,10 @@ void initDefaultShader(unsigned int shader){
     .value = Sampler2D {
       .textureUnitId = 6,
     },
+  });
+  uniformData.push_back(UniformData {
+    .name = "enableLighting",
+    .value = true,
   });
 
   setUniformData(shader, uniformData, { 
