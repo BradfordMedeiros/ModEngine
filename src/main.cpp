@@ -647,11 +647,9 @@ void signalHandler(int signum) {
 
 
 struct RenderContext {
-  World& world;
   glm::mat4 view;
   std::vector<PortalInfo> portals;
   std::vector<glm::mat4> lightProjview;
-  Transformation cameraTransform;
   std::optional<glm::mat4> projection;
 };
 
@@ -723,7 +721,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     if (renderStep.renderWorld){
       // important - redundant call to glUseProgram
       glm::mat4* projection = context.projection.has_value() ? &context.projection.value() : NULL;
-      auto worldTriangles = renderWorld(context.world, *renderStep.shader, renderStep.allowShaderOverride, projection, context.view, glm::mat4(1.0f), context.portals, context.lightProjview, renderStep.textBoundingOnly);
+      auto worldTriangles = renderWorld(world, *renderStep.shader, renderStep.allowShaderOverride, projection, context.view, glm::mat4(1.0f), context.portals, context.lightProjview, renderStep.textBoundingOnly);
       triangles += worldTriangles;
     }
 
@@ -739,18 +737,16 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   return triangles;
 }
 
-std::map<objid, unsigned int> renderPortals(RenderContext& context){
+std::map<objid, unsigned int> renderPortals(RenderContext& context, Transformation cameraTransform){
   std::map<objid, unsigned int> nextPortalCache;
   for (int i = 0; i < context.portals.size(); i++){
     auto portal = context.portals.at(i);
-    auto portalViewMatrix = renderPortalView(portal, context.cameraTransform);
+    auto portalViewMatrix = renderPortalView(portal, cameraTransform);
     renderStagesSetPortal(renderStages, i);
     RenderContext portalRenderContext {
-      .world = context.world,
       .view = portalViewMatrix,
       .portals = context.portals,
       .lightProjview = context.lightProjview,
-      .cameraTransform = portal.cameraTransform,
       .projection = context.projection,
     };
     //std::cout << "portal transform:  " << i << " " << print(portal.cameraTransform.position) << std::endl;
@@ -771,11 +767,9 @@ std::vector<glm::mat4> renderShadowMaps(RenderContext& context, std::vector<Ligh
     lightMatrixs.push_back(lightProjview);
 
     RenderContext lightRenderContext {
-      .world = context.world,
       .view = lightView,
       .portals = context.portals,
       .lightProjview = context.lightProjview,
-      .cameraTransform = light.transform,
       .projection = lightProjection,
     };
     renderStagesSetShadowmap(renderStages, i);
@@ -1557,11 +1551,9 @@ int main(int argc, char* argv[]){
 
 
     RenderContext renderContext {
-      .world = world,
       .view = view,
       .portals = portals,
       .lightProjview = {},
-      .cameraTransform = viewTransform,
       .projection = std::nullopt,
     };
 
@@ -1624,7 +1616,7 @@ int main(int argc, char* argv[]){
 
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
     PROFILE("PORTAL_RENDERING", 
-      portalIdCache = renderPortals(renderContext);
+      portalIdCache = renderPortals(renderContext, viewTransform);
     )
     //std::cout << "cache size: " << portalIdCache.size() << std::endl;
 
