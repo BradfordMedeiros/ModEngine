@@ -374,6 +374,30 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   setShaderDataObject(shader, color, id, projview);
 }
 
+RenderObjApi api {
+  .drawLine = interface.drawLine,
+  .drawSphere = [](glm::vec3 pos) -> int {
+    auto sphereLines = drawSphere();
+    const float sphereScale = 0.05f;
+    for (auto &line : sphereLines){
+      // can use addShaepData next cycle with selection id if we want to be able to drag these around
+      interface.drawLine(line.fromPos * sphereScale + pos, line.toPos * sphereScale + pos, glm::vec4(0.f, 0.f, 1.f, 1.f));
+    }
+    modassert(false, "did not return id");
+    return 0;
+  },
+  .drawWord = drawWord,
+  .isBone = [](objid id) -> bool {
+    return getGameObject(world.sandbox, id).isBone;
+  },
+  .getParentId = [](objid id) -> std::optional<objid> {
+    return getGameObjectH(world.sandbox, id).parentId;
+  },
+  .getTransform = [](objid id) -> Transformation {
+    return fullTransformation(world.sandbox, id);
+  },
+};
+
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, bool textBoundingOnly){
   glUseProgram(shaderProgram);
   int numTriangles = 0;
@@ -408,13 +432,16 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     setShaderDataObject(newShader, getTintIfSelected(objectSelected), id, (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view));
 
     // bounding code //////////////////////
-    auto meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id)); 
-    if (meshObj != NULL && meshObj -> meshesToRender.size() > 0){
-      // @TODO i use first mesh to get sizing for bounding box, obviously that's questionable
-      auto bounding = getBoundRatio(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh.boundInfo, meshObj -> meshesToRender.at(0).boundInfo);
-      shaderSetUniform(newShader, "model", glm::scale(getMatrixForBoundRatio(bounding, modelMatrix), glm::vec3(1.01f, 1.01f, 1.01f)));
-      if (objectSelected){
-        drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh, newShader);
+    {
+      // pull this into a tool obviously 
+      auto meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id)); 
+      if (meshObj != NULL && meshObj -> meshesToRender.size() > 0){
+        // @TODO i use first mesh to get sizing for bounding box, obviously that's wrong
+        auto bounding = getBoundRatio(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh.boundInfo, meshObj -> meshesToRender.at(0).boundInfo);
+        shaderSetUniform(newShader, "model", glm::scale(getMatrixForBoundRatio(bounding, modelMatrix), glm::vec3(1.01f, 1.01f, 1.01f)));
+        if (objectSelected){
+          drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh, newShader);
+        }
       }
     }
 
@@ -436,29 +463,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 
     if (layer.visible && id != 0){
       //std::cout << "render object: " << getGameObject(world, id).name << std::endl;
-      RenderObjApi api {
-        .drawLine = interface.drawLine,
-        .drawSphere = [&modelMatrix, &newShader](glm::vec3 pos) -> int {
-          auto sphereLines = drawSphere();
-          const float sphereScale = 0.05f;
-          for (auto &line : sphereLines){
-            // can use addShaepData next cycle with selection id if we want to be able to drag these around
-            interface.drawLine(line.fromPos * sphereScale + pos, line.toPos * sphereScale + pos, glm::vec4(0.f, 0.f, 1.f, 1.f));
-          }
-          modassert(false, "did not return id");
-          return 0;
-        },
-        .drawWord = drawWord,
-        .isBone = [&world](objid id) -> bool {
-          return getGameObject(world.sandbox, id).isBone;
-        },
-        .getParentId = [&world](objid id) -> std::optional<objid> {
-          return getGameObjectH(world.sandbox, id).parentId;
-        },
-        .getTransform = [&world](objid id) -> Transformation {
-          return fullTransformation(world.sandbox, id);
-        },
-      };
+
 
       auto trianglesDrawn = renderObject(
         newShader, 
