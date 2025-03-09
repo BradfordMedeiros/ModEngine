@@ -330,7 +330,7 @@ void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
   }
 }
 
-void setShaderWorld(GLint shader, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
+void setShaderWorld(GLint shader, std::vector<glm::mat4> lightProjview, RenderUniforms& uniforms){
   glUseProgram(shader);
   if (lightProjview.size() > 0){
     shaderSetUniform(shader, "lightsprojview", lightProjview.at(0)); // TODO we only use one of the light depth textures in the shader right now 
@@ -346,9 +346,9 @@ void setShaderDataObject(GLint shader, glm::vec3 color, objid id, glm::mat4 proj
   }
   shaderSetUniform(shader, "projview", projview);
 }
-void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
+void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview, RenderUniforms& uniforms){
   auto projview = (orthographic ? glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) : proj) * view;
-  setShaderWorld(shader, lightProjview, cameraPosition, uniforms);
+  setShaderWorld(shader, lightProjview, uniforms);
   setShaderDataObject(shader, color, id, projview);
 }
 
@@ -377,12 +377,12 @@ RenderObjApi api {
 };
 
 
-int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, bool textBoundingOnly){
+int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, bool textBoundingOnly){
   glUseProgram(shaderProgram);
   int numTriangles = 0;
 
   std::optional<GLint> lastShaderId = std::nullopt;
-  traverseSandboxByLayer(world.sandbox, [&world, shaderProgram, allowShaderOverride, projection, view, &portals, &lightProjview, &numTriangles, &cameraPosition, textBoundingOnly, &lastShaderId](int32_t id, glm::mat4 modelMatrix, LayerInfo& layer, std::string shader) -> void {
+  traverseSandboxByLayer(world.sandbox, [&world, shaderProgram, allowShaderOverride, projection, view, &portals, &lightProjview, &numTriangles, textBoundingOnly, &lastShaderId](int32_t id, glm::mat4 modelMatrix, LayerInfo& layer, std::string shader) -> void {
     modassert(id >= 0, "unexpected id render world");
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
@@ -403,7 +403,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     if (!lastShaderId.has_value() || newShader != lastShaderId.value()){
       lastShaderId = newShader;
       //sendAlert(std::string("loaded shader: ") + shader);
-      setShaderWorld(newShader, lightProjview, cameraPosition, layer.uniforms);
+      setShaderWorld(newShader, lightProjview, layer.uniforms);
     }
     
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
@@ -516,7 +516,7 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
 
 }
 
-void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition){
+void renderSkybox(GLint shaderProgram, glm::mat4 view){
   auto projection = projectionFromLayer(world.sandbox.layers.at(0));
   std::vector<glm::mat4> lightProjView = {};
 
@@ -528,7 +528,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
     .vec3Uniforms = {},
     .builtInUniforms = {},
   };
-  setShaderData(shaderProgram, projection, value, false, glm::vec3(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z), 0, lightProjView, cameraPosition, noUniforms);
+  setShaderData(shaderProgram, projection, value, false, glm::vec3(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z), 0, lightProjView, noUniforms);
   shaderSetUniform(shaderProgram, "model", glm::mat4(1.f));
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
@@ -690,7 +690,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
 
     if (state.showSkybox && renderStep.renderSkybox){
       glDepthMask(GL_FALSE);
-      renderSkybox(*renderStep.shader, context.view, context.cameraTransform.position);  // Probably better to render this at the end 
+      renderSkybox(*renderStep.shader, context.view);  // Probably better to render this at the end 
       glDepthMask(GL_TRUE);    
     }
     glEnable(GL_DEPTH_TEST);
@@ -706,7 +706,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
       std::vector<LightInfo> lights = {};
       std::vector<glm::mat4> lightProjview = {};
       RenderUniforms uniforms { };
-      setShaderData(*renderStep.shader, ndiOrtho, glm::mat4(1.f), false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjview, glm::vec3(0.f, 0.f, 0.f), uniforms);
+      setShaderData(*renderStep.shader, ndiOrtho, glm::mat4(1.f), false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjview, uniforms);
       glActiveTexture(GL_TEXTURE0); 
       glBindTexture(GL_TEXTURE_2D, renderStep.quadTexture);
       glBindVertexArray(defaultResources.quadVAO3D);
@@ -723,7 +723,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     if (renderStep.renderWorld){
       // important - redundant call to glUseProgram
       glm::mat4* projection = context.projection.has_value() ? &context.projection.value() : NULL;
-      auto worldTriangles = renderWorld(context.world, *renderStep.shader, renderStep.allowShaderOverride, projection, context.view, glm::mat4(1.0f), context.portals, context.lightProjview, context.cameraTransform.position, renderStep.textBoundingOnly);
+      auto worldTriangles = renderWorld(context.world, *renderStep.shader, renderStep.allowShaderOverride, projection, context.view, glm::mat4(1.0f), context.portals, context.lightProjview, renderStep.textBoundingOnly);
       triangles += worldTriangles;
     }
 
