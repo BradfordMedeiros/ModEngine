@@ -332,9 +332,6 @@ void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
 
 void setShaderWorld(GLint shader, std::vector<glm::mat4> lightProjview, RenderUniforms& uniforms){
   glUseProgram(shader);
-  if (lightProjview.size() > 0){
-    shaderSetUniform(shader, "lightsprojview", lightProjview.at(0)); // TODO we only use one of the light depth textures in the shader right now 
-  }
   setRenderUniformData(shader, uniforms);
 }
 void setShaderDataObject(GLint shader, glm::vec3 color, objid id, glm::mat4 projview){
@@ -486,7 +483,6 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
   uniformData.push_back(UniformData { .name = "discardTexAmount",  .value = 0.f });
   uniformData.push_back(UniformData { .name = "emissionAmount",  .value = glm::vec3(0.f, 0.f, 0.f) });
   uniformData.push_back(UniformData { .name = "model",  .value = glm::mat4(1.f) });
-  uniformData.push_back(UniformData { .name = "lightsprojview",  .value = glm::mat4(1.f) });
   uniformData.push_back(UniformData { .name = "textureOffset",  .value = glm::vec2(1.f, 1.f) });
   uniformData.push_back(UniformData { .name = "textureSize",  .value = glm::vec2(1.f, 1.f) });
   uniformData.push_back(UniformData { .name = "textureTiling",  .value = glm::vec2(1.f, 1.f) });
@@ -495,7 +491,7 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
       "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture",
       "time", "realtime",
       "showBoneWeight", "useBoneTransform", "enableDiffuse", "enablePBR", "enableSpecular", "enableVoxelLighting", "ambientAmount", "bloomThreshold", "enableAttenutation", "shadowIntensity", "enableShadows",
-      "enableLighting", "numlights", "cameraPosition",
+      "enableLighting", "numlights", "cameraPosition", "lightsprojview",
     });
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
@@ -757,7 +753,7 @@ std::map<objid, unsigned int> renderPortals(RenderContext& context, Transformati
   return nextPortalCache;
 }
 
-std::vector<glm::mat4> renderShadowMaps(RenderContext& context, std::vector<LightInfo>& lights){
+std::vector<glm::mat4> calcShadowMapViews(std::vector<LightInfo>& lights){
   std::vector<glm::mat4> lightMatrixs;
   for (int i = 0; i < lights.size(); i++){
     auto light = lights.at(i);
@@ -765,6 +761,17 @@ std::vector<glm::mat4> renderShadowMaps(RenderContext& context, std::vector<Ligh
     glm::mat4 lightProjection = glm::ortho<float>(-2000, 2000,-2000, 2000, 1.f, 3000);  // need to choose these values better
     auto lightProjview = lightProjection * lightView;
     lightMatrixs.push_back(lightProjview);
+  }
+  return lightMatrixs;
+}
+
+
+void renderShadowMaps(RenderContext& context, std::vector<LightInfo>& lights){
+  for (int i = 0; i < lights.size(); i++){
+    auto light = lights.at(i);
+    auto lightView = renderView(light.transform.position, light.transform.rotation);
+    glm::mat4 lightProjection = glm::ortho<float>(-2000, 2000,-2000, 2000, 1.f, 3000);  // need to choose these values better
+    auto lightProjview = lightProjection * lightView;
 
     RenderContext lightRenderContext {
       .view = lightView,
@@ -775,7 +782,6 @@ std::vector<glm::mat4> renderShadowMaps(RenderContext& context, std::vector<Ligh
     renderStagesSetShadowmap(renderStages, i);
     renderWithProgram(lightRenderContext, renderStages.shadowmap);
   }
-  return lightMatrixs;
 }
 
 void onGLFWEerror(int error, const char* description){
@@ -1540,11 +1546,18 @@ int main(int argc, char* argv[]){
     view = renderView(viewTransform.position, viewTransform.rotation);
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
-
+    std::vector<glm::mat4> lightMatrixs = calcShadowMapViews(lights);
 
     updateDefaultShaderPerFrame(*mainShaders.shaderProgram, lights, false, viewTransform.position);
+    if (lightMatrixs.size() > 0){
+      shaderSetUniform(*mainShaders.shaderProgram, "lightsprojview", lightMatrixs.at(0)); // TODO we only use one of the light depth textures in the shader right now 
+    }
+
     for (auto shaderId : extraShadersToUpdate){
       updateDefaultShaderPerFrame(shaderId, lights, false, viewTransform.position);
+      if (lightMatrixs.size() > 0){
+        shaderSetUniform(shaderId, "lightsprojview", lightMatrixs.at(0)); // TODO we only use one of the light depth textures in the shader right now 
+      }
     }
     updateSelectionShaderPerFrame(*mainShaders.selectionProgram, lights, viewTransform.position);
     updateUiShaderPerFrame(*renderingResources.uiShaderProgram);
@@ -1604,11 +1617,10 @@ int main(int argc, char* argv[]){
     }
 
     // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
-    std::vector<glm::mat4> lightMatrixs;
     if (state.enableShadows){
       PROFILE(
         "RENDERING-SHADOWMAPS",
-        lightMatrixs = renderShadowMaps(renderContext, lights);
+        renderShadowMaps(renderContext, lights);
       )
     }
 
