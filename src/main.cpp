@@ -397,6 +397,7 @@ RenderObjApi api {
   },
 };
 
+
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, bool textBoundingOnly){
   glUseProgram(shaderProgram);
   int numTriangles = 0;
@@ -427,23 +428,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     }
     
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
-
     setShaderDataObject(newShader, getTintIfSelected(objectSelected), id, (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view));
-
-    // bounding code //////////////////////
-    {
-      // pull this into a tool obviously 
-      auto meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id)); 
-      if (meshObj != NULL && meshObj -> meshesToRender.size() > 0){
-        // @TODO i use first mesh to get sizing for bounding box, obviously that's wrong
-        auto bounding = getBoundRatio(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh.boundInfo, meshObj -> meshesToRender.at(0).boundInfo);
-        shaderSetUniform(newShader, "model", glm::scale(getMatrixForBoundRatio(bounding, modelMatrix), glm::vec3(1.01f, 1.01f, 1.01f)));
-        if (objectSelected){
-          drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh, newShader);
-        }
-      }
-    }
-
     shaderSetUniform(newShader, "model", (layer.scale ? calculateScaledMatrix(view, modelMatrix, layer.fov) : modelMatrix));
 
     bool isPortal = false;
