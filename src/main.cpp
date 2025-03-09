@@ -370,7 +370,6 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
       modassert(lightUpdate.index < 512, "lightUpdate.index too large");
       updateBufferData(renderingResources.voxelLighting , sizeof(glm::vec4) * lightUpdate.index, sizeof(int), &lightArrayIndex);
     }
-    shaderSetUniformInt(shader, "voxelcellwidth", getLightingCellWidth());
   }
 
 

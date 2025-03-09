@@ -90,6 +90,13 @@ void updateDefaultShaderPerFrame(unsigned int shader){
   });
 */
 
+  shaderSetUniformInt(shader, "voxelcellwidth", getLightingCellWidth());
+
+ // uniformData.push_back(UniformData {
+ //   .name = "voxelcellwidth",
+ //   .value = 8,
+ // });
+
   uniformData.push_back(UniformData {
     .name = "showBoneWeight",
     .value = state.showBoneWeight,
@@ -155,6 +162,9 @@ void updateDefaultShaderPerFrame(unsigned int shader){
     
     "cameraPosition", "projview", "numlights", "enableLighting"
   });
+
+
+
 }
 
 

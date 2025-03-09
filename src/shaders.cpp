@@ -513,51 +513,51 @@ int shaderGetUniform(unsigned int shaderProgram, const char* name){
 }
 
 void shaderSetUniformIVec2(unsigned int shaderProgram, const char* name, glm::ivec2& value){
-  glUniform2iv(shaderGetUniform(shaderProgram, name), 1, glm::value_ptr(value));
+  glProgramUniform2iv(shaderProgram, shaderGetUniform(shaderProgram, name), 1, glm::value_ptr(value));
 }
 void shaderSetUniform(unsigned int shaderProgram, const char* name, glm::vec2& value){
-  glUniform2fv(shaderGetUniform(shaderProgram, name), 1, glm::value_ptr(value));
+  glProgramUniform2fv(shaderProgram, shaderGetUniform(shaderProgram, name), 1, glm::value_ptr(value));
 }
 void shaderSetUniform(unsigned int shaderProgram, const char* name, glm::vec2&& value){
   shaderSetUniform(shaderProgram, name, value);
 }
 void shaderSetUniform(unsigned int shaderProgram, const char* name, glm::vec3& value){
-  glUniform3fv(shaderGetUniform(shaderProgram, name), 1, glm::value_ptr(value));
+  glProgramUniform3fv(shaderProgram, shaderGetUniform(shaderProgram, name), 1, glm::value_ptr(value));
 }
 void shaderSetUniform(unsigned int shaderProgram, const char* name, glm::vec3&& value){
   shaderSetUniform(shaderProgram, name, value);
 }
 
 void shaderSetUniform(unsigned int shaderProgram, const char* name, glm::vec4& value){
-  glUniform4fv(shaderGetUniform(shaderProgram, name), 1, glm::value_ptr(value));
+  glProgramUniform4fv(shaderProgram, shaderGetUniform(shaderProgram, name), 1, glm::value_ptr(value));
 }
 void shaderSetUniform(unsigned int shaderProgram, const char* name, glm::vec4&& value){
   shaderSetUniform(shaderProgram, name, value);
 }
 
 void shaderSetUniform(unsigned int shaderToUse, const char* name, float& value){
-  glUniform1f(shaderGetUniform(shaderToUse, name), value);
+  glProgramUniform1f(shaderToUse, shaderGetUniform(shaderToUse, name), value);
 }
 void shaderSetUniform(unsigned int shaderToUse, const char* name, float&& value){
   shaderSetUniform(shaderToUse, name, value);
 }
 
 void shaderSetUniformInt(unsigned int shaderToUse, const char* name, int& value){
-   glUniform1i(shaderGetUniform(shaderToUse, name), value);
+   glProgramUniform1i(shaderToUse, shaderGetUniform(shaderToUse, name), value);
 }
 void shaderSetUniformInt(unsigned int shaderToUse, const char* name, int&& value){
   shaderSetUniformInt(shaderToUse, name, value);
 }
 
 void shaderSetUniformBool(unsigned int shaderToUse, const char* name, bool& value){
-  glUniform1i(shaderGetUniform(shaderToUse, name), value ? 1 : 0);
+  glProgramUniform1i(shaderToUse, shaderGetUniform(shaderToUse, name), value ? 1 : 0);
 }
 void shaderSetUniformBool(unsigned int shaderToUse, const char* name, bool&& value){
   shaderSetUniformBool(shaderToUse, name, value);
 }
 
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4& value){
-  glUniformMatrix4fv(shaderGetUniform(shaderToUse, name), 1, GL_FALSE, glm::value_ptr(value));
+  glProgramUniformMatrix4fv(shaderToUse, shaderGetUniform(shaderToUse, name), 1, GL_FALSE, glm::value_ptr(value));
 }
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4&& value){
   shaderSetUniform(shaderToUse, name, value);

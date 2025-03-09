@@ -2,6 +2,7 @@
 #define MOD_SHADERSTATE
 
 #include "./state.h"
+#include "./scene/scene_object.h"
 
 void initDefaultShader(unsigned int shader);
 void updateDefaultShaderPerFrame(unsigned int shader);
