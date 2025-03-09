@@ -13,7 +13,7 @@ struct RenderingResources {
 };
 
 void initDefaultShader(unsigned int shader);
-void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights);
+void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights, bool isSelection);
 
 void initSelectionShader(unsigned int shader);
 void updateSelectionShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights);

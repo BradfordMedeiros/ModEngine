@@ -337,7 +337,6 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
   // notice this is kind of wrong, since it sets it for multiple shader types here
 
   // why isn't projview set here?
-  uniformData.push_back(UniformData { .name = "numlights", .value = static_cast<int>(lights.size()) });
   uniformData.push_back(UniformData { .name = "cameraPosition", .value = cameraPosition });
 
   setUniformData(shader, uniformData, { 
@@ -350,7 +349,7 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
     "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture",
     "time", "realtime",
     "showBoneWeight", "useBoneTransform", "enableDiffuse", "enablePBR", "enableSpecular", "enableVoxelLighting", "ambientAmount", "bloomThreshold", "enableAttenutation", "shadowIntensity", "enableShadows",
-    "enableLighting", "lights[0]", "lightscolor[0]", "lightsdir[0]", "lightsatten[0]", "lightsmaxangle[0]", "lightsangledelta[0]", "lightsisdir[0]",
+    "enableLighting", "lights[0]", "lightscolor[0]", "lightsdir[0]", "lightsatten[0]", "lightsmaxangle[0]", "lightsangledelta[0]", "lightsisdir[0]", "numlights",
   });
  
   if (lightProjview.size() > 0){
@@ -508,7 +507,6 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
   std::vector<UniformData> uniformData;
 
   uniformData.push_back(UniformData { .name = "projview", .value = (projection * view) });
-  uniformData.push_back(UniformData { .name = "numlights", .value = static_cast<int>(lights.size()) });
   uniformData.push_back(UniformData { .name = "cameraPosition", .value =  glm::vec3(0.f, 0.f, 0.f) });
   uniformData.push_back(UniformData { .name = "tint",  .value = glm::vec4(0.05, 1.f, 0.f, 1.f) });
   uniformData.push_back(UniformData { .name = "hasBones",  .value = false });
@@ -530,7 +528,7 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
       "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture",
       "time", "realtime",
       "showBoneWeight", "useBoneTransform", "enableDiffuse", "enablePBR", "enableSpecular", "enableVoxelLighting", "ambientAmount", "bloomThreshold", "enableAttenutation", "shadowIntensity", "enableShadows",
-      "enableLighting",
+      "enableLighting", "numlights",
     });
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
@@ -1583,9 +1581,9 @@ int main(int argc, char* argv[]){
     //////////////////////// rendering code below ///////////////////////
     std::vector<LightInfo> lights = getLightInfo(world);
 
-    updateDefaultShaderPerFrame(*mainShaders.shaderProgram, lights);
+    updateDefaultShaderPerFrame(*mainShaders.shaderProgram, lights, false);
     for (auto shaderId : extraShadersToUpdate){
-      updateDefaultShaderPerFrame(shaderId, lights);
+      updateDefaultShaderPerFrame(shaderId, lights, false);
     }
     updateSelectionShaderPerFrame(*mainShaders.selectionProgram, lights);
     updateUiShaderPerFrame(*renderingResources.uiShaderProgram);
