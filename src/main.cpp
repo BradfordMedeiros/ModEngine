@@ -330,10 +330,6 @@ void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
   }
 }
 
-void setShaderWorld(GLint shader, std::vector<glm::mat4> lightProjview, RenderUniforms& uniforms){
-  glUseProgram(shader);
-  setRenderUniformData(shader, uniforms);
-}
 void setShaderDataObject(GLint shader, glm::vec3 color, objid id, glm::mat4 projview){
   //std::cout << "set shader data object" << std::endl; 
   shaderSetUniform(shader, "tint", glm::vec4(color.x, color.y, color.z, 1.f));
@@ -345,7 +341,8 @@ void setShaderDataObject(GLint shader, glm::vec3 color, objid id, glm::mat4 proj
 }
 void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview, RenderUniforms& uniforms){
   auto projview = (orthographic ? glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) : proj) * view;
-  setShaderWorld(shader, lightProjview, uniforms);
+  glUseProgram(shader);
+  setRenderUniformData(shader, uniforms);
   setShaderDataObject(shader, color, id, projview);
 }
 
@@ -400,7 +397,9 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     if (!lastShaderId.has_value() || newShader != lastShaderId.value()){
       lastShaderId = newShader;
       //sendAlert(std::string("loaded shader: ") + shader);
-      setShaderWorld(newShader, lightProjview, layer.uniforms);
+
+      glUseProgram(newShader);
+      setRenderUniformData(newShader, layer.uniforms);
     }
     
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
