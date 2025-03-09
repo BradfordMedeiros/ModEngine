@@ -1266,7 +1266,6 @@ int main(int argc, char* argv[]){
   std::vector<std::string> defaultMeshesToLoad {
     "./res/models/ui/node.obj",
     "./res/models/unit_rect/unit_rect.obj",
-    "./res/models/cone/cone.obj",
     "../gameresources/build/objtypes/camera.gltf",
     "./res/models/box/plane.dae",
     "./res/models/controls/unitxy.obj",  
