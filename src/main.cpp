@@ -331,31 +331,10 @@ void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
 }
 
 void setShaderWorld(GLint shader, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
-  //std::cout << "set shader data world" << std::endl; 
   glUseProgram(shader);
-  std::vector<UniformData> uniformData;
-  // notice this is kind of wrong, since it sets it for multiple shader types here
-
-  // why isn't projview set here?
-  uniformData.push_back(UniformData { .name = "cameraPosition", .value = cameraPosition });
-
-  setUniformData(shader, uniformData, { 
-    "textureid", "bones[0]", "encodedid", "hasBones", "model", "discardTexAmount", 
-    "emissionAmount", 
-    "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture",
-    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth",
-    "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview",
-
-    "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture",
-    "time", "realtime",
-    "showBoneWeight", "useBoneTransform", "enableDiffuse", "enablePBR", "enableSpecular", "enableVoxelLighting", "ambientAmount", "bloomThreshold", "enableAttenutation", "shadowIntensity", "enableShadows",
-    "enableLighting", "lights[0]", "lightscolor[0]", "lightsdir[0]", "lightsatten[0]", "lightsmaxangle[0]", "lightsangledelta[0]", "lightsisdir[0]", "numlights",
-  });
- 
   if (lightProjview.size() > 0){
     shaderSetUniform(shader, "lightsprojview", lightProjview.at(0)); // TODO we only use one of the light depth textures in the shader right now 
   }
-
   setRenderUniformData(shader, uniforms);
 }
 void setShaderDataObject(GLint shader, glm::vec3 color, objid id, glm::mat4 projview){
@@ -496,7 +475,6 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
   std::vector<UniformData> uniformData;
 
   uniformData.push_back(UniformData { .name = "projview", .value = (projection * view) });
-  uniformData.push_back(UniformData { .name = "cameraPosition", .value =  glm::vec3(0.f, 0.f, 0.f) });
   uniformData.push_back(UniformData { .name = "tint",  .value = glm::vec4(0.05, 1.f, 0.f, 1.f) });
   uniformData.push_back(UniformData { .name = "hasBones",  .value = false });
   uniformData.push_back(UniformData { .name = "hasCubemapTexture",  .value = false });
@@ -517,7 +495,7 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
       "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture",
       "time", "realtime",
       "showBoneWeight", "useBoneTransform", "enableDiffuse", "enablePBR", "enableSpecular", "enableVoxelLighting", "ambientAmount", "bloomThreshold", "enableAttenutation", "shadowIntensity", "enableShadows",
-      "enableLighting", "numlights",
+      "enableLighting", "numlights", "cameraPosition",
     });
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
@@ -1564,18 +1542,19 @@ int main(int argc, char* argv[]){
 
     //////////////////////// rendering code below ///////////////////////
     std::vector<LightInfo> lights = getLightInfo(world);
-
-    updateDefaultShaderPerFrame(*mainShaders.shaderProgram, lights, false);
-    for (auto shaderId : extraShadersToUpdate){
-      updateDefaultShaderPerFrame(shaderId, lights, false);
-    }
-    updateSelectionShaderPerFrame(*mainShaders.selectionProgram, lights);
-    updateUiShaderPerFrame(*renderingResources.uiShaderProgram);
-
     viewTransform = getCameraTransform();
     view = renderView(viewTransform.position, viewTransform.rotation);
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
+
+
+    updateDefaultShaderPerFrame(*mainShaders.shaderProgram, lights, false, viewTransform.position);
+    for (auto shaderId : extraShadersToUpdate){
+      updateDefaultShaderPerFrame(shaderId, lights, false, viewTransform.position);
+    }
+    updateSelectionShaderPerFrame(*mainShaders.selectionProgram, lights, viewTransform.position);
+    updateUiShaderPerFrame(*renderingResources.uiShaderProgram);
+
 
     RenderContext renderContext {
       .world = world,

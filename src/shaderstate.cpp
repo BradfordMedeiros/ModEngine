@@ -69,7 +69,7 @@ void initDefaultShader(unsigned int shader){
     "encodedid", "textureid",
   });
 }
-void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights, bool isSelection){
+void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights, bool isSelection, glm::vec3 cameraPosition){
   std::vector<UniformData> uniformData;
   /*if (projview.has_value()){
     uniformData.push_back(UniformData {
@@ -90,6 +90,7 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
     .value = enableLighting,
   });
 */
+  shaderSetUniform(shader, "cameraPosition", cameraPosition);
 
   if (!isSelection){
     auto lightUpdates = getLightUpdates();
@@ -205,8 +206,8 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
 void initSelectionShader(unsigned int shader){
   initDefaultShader(shader);
 }
-void updateSelectionShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights){
-  updateDefaultShaderPerFrame(shader, lights, true);
+void updateSelectionShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights, glm::vec3 cameraPosition){
+  updateDefaultShaderPerFrame(shader, lights, true, cameraPosition);
 }
 
 
