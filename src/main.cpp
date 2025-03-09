@@ -391,13 +391,12 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
       shaderSetUniformBool(shader,  ("lightsisdir[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_DIRECTIONAL);
     }
 
-    if (lightProjview.size() > i){
-      glActiveTexture(GL_TEXTURE3);
-      glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(1));
-      shaderSetUniform(shader, "lightsprojview", lightProjview.at(i));
-    }
   }
-  glActiveTexture(GL_TEXTURE0); 
+
+  if (lightProjview.size() > 0){
+    shaderSetUniform(shader, "lightsprojview", lightProjview.at(0)); // TODO we only use one of the light depth textures in the shader right now 
+  }
+
   setRenderUniformData(shader, uniforms);
 }
 void setShaderDataObject(GLint shader, glm::vec3 color, objid id, glm::mat4 projview){
