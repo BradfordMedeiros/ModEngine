@@ -5,6 +5,7 @@ float getTotalTimeGame();
 float getTotalTime();
 extern engineState state;
 extern glm::mat4 ndiOrtho;
+extern RenderingResources renderingResources;
 
 
 void initDefaultShader(unsigned int shader){
@@ -68,7 +69,7 @@ void initDefaultShader(unsigned int shader){
     "encodedid", "textureid",
   });
 }
-void updateDefaultShaderPerFrame(unsigned int shader){
+void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights){
   std::vector<UniformData> uniformData;
   /*if (projview.has_value()){
     uniformData.push_back(UniformData {
@@ -90,11 +91,35 @@ void updateDefaultShaderPerFrame(unsigned int shader){
   });
 */
 
+  auto lightUpdates = getLightUpdates();
+  for (auto &lightUpdate : lightUpdates){
+    //std::cout << "voxel lighting : " << lightUpdate.index << std::endl;
+    int lightArrayIndex = getLightsArrayIndex(lights, lightUpdate.lightIndex);
+    modassert(lightUpdate.index < 512, "lightUpdate.index too large");
+    updateBufferData(renderingResources.voxelLighting , sizeof(glm::vec4) * lightUpdate.index, sizeof(int), &lightArrayIndex);
+  }
+  
   shaderSetUniformInt(shader, "voxelcellwidth", getLightingCellWidth());
+
+  for (int i = 0; i < lights.size(); i++){
+    glm::vec3 position = lights.at(i).transform.position;
+    auto& light = lights.at(i); 
+    shaderSetUniform(shader, ("lights[" + std::to_string(i) + "]").c_str(), position);
+    if (!light.light.disabled){
+      shaderSetUniform(shader, ("lightscolor[" + std::to_string(i) + "]").c_str(), light.light.color);
+    }else{
+      shaderSetUniform(shader, ("lightscolor[" + std::to_string(i) + "]").c_str(), glm::vec3(0.f, 0.f, 0.f));
+    }
+    shaderSetUniform(shader, ("lightsdir[" + std::to_string(i) + "]").c_str(), directionFromQuat(light.transform.rotation));
+    shaderSetUniform(shader, ("lightsatten[" + std::to_string(i) + "]").c_str(), light.light.attenuation);
+    shaderSetUniform(shader,  ("lightsmaxangle[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_SPOTLIGHT ? light.light.maxangle : -10.f);
+    shaderSetUniform(shader,  ("lightsangledelta[" + std::to_string(i) + "]").c_str(), light.light.angledelta);
+    shaderSetUniformBool(shader,  ("lightsisdir[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_DIRECTIONAL);
+  }
 
  // uniformData.push_back(UniformData {
  //   .name = "voxelcellwidth",
- //   .value = 8,
+ //   .value = getLightingCellWidth(),
  // });
 
   uniformData.push_back(UniformData {
@@ -171,8 +196,8 @@ void updateDefaultShaderPerFrame(unsigned int shader){
 void initSelectionShader(unsigned int shader){
   initDefaultShader(shader);
 }
-void updateSelectionShaderPerFrame(unsigned int shader){
-  updateDefaultShaderPerFrame(shader);
+void updateSelectionShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights){
+  updateDefaultShaderPerFrame(shader, lights);
 }
 
 

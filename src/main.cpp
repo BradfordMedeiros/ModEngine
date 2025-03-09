@@ -27,14 +27,6 @@ CustomApiBindings* mainApi;
 
 extern int numberOfDrawCallsThisFrame;
 
-// application rendering stuff
-struct RenderingResources { 
-  unsigned int* framebufferProgram;
-  unsigned int* uiShaderProgram;
-  Framebuffers framebuffers;
-  UniformBuffer voxelLighting;
-};
-
 RenderingResources renderingResources { };
 RenderShaders mainShaders {};
 
@@ -358,40 +350,9 @@ void setShaderWorld(GLint shader, std::vector<LightInfo>& lights, std::vector<gl
     "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture",
     "time", "realtime",
     "showBoneWeight", "useBoneTransform", "enableDiffuse", "enablePBR", "enableSpecular", "enableVoxelLighting", "ambientAmount", "bloomThreshold", "enableAttenutation", "shadowIntensity", "enableShadows",
-    "enableLighting",
+    "enableLighting", "lights[0]", "lightscolor[0]", "lightsdir[0]", "lightsatten[0]", "lightsmaxangle[0]", "lightsangledelta[0]", "lightsisdir[0]",
   });
  
-
-  if (shader != *renderStages.selection.shader){
-    auto lightUpdates = getLightUpdates();
-    for (auto &lightUpdate : lightUpdates){
-      //std::cout << "voxel lighting : " << lightUpdate.index << std::endl;
-      int lightArrayIndex = getLightsArrayIndex(lights, lightUpdate.lightIndex);
-      modassert(lightUpdate.index < 512, "lightUpdate.index too large");
-      updateBufferData(renderingResources.voxelLighting , sizeof(glm::vec4) * lightUpdate.index, sizeof(int), &lightArrayIndex);
-    }
-  }
-
-
-  for (int i = 0; i < lights.size(); i++){
-    if (shader != *renderStages.selection.shader){
-      glm::vec3 position = lights.at(i).transform.position;
-      auto& light = lights.at(i); 
-      shaderSetUniform(shader, ("lights[" + std::to_string(i) + "]").c_str(), position);
-      if (!light.light.disabled){
-        shaderSetUniform(shader, ("lightscolor[" + std::to_string(i) + "]").c_str(), light.light.color);
-      }else{
-        shaderSetUniform(shader, ("lightscolor[" + std::to_string(i) + "]").c_str(), glm::vec3(0.f, 0.f, 0.f));
-      }
-      shaderSetUniform(shader, ("lightsdir[" + std::to_string(i) + "]").c_str(), directionFromQuat(light.transform.rotation));
-      shaderSetUniform(shader, ("lightsatten[" + std::to_string(i) + "]").c_str(), light.light.attenuation);
-      shaderSetUniform(shader,  ("lightsmaxangle[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_SPOTLIGHT ? light.light.maxangle : -10.f);
-      shaderSetUniform(shader,  ("lightsangledelta[" + std::to_string(i) + "]").c_str(), light.light.angledelta);
-      shaderSetUniformBool(shader,  ("lightsisdir[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_DIRECTIONAL);
-    }
-
-  }
-
   if (lightProjview.size() > 0){
     shaderSetUniform(shader, "lightsprojview", lightProjview.at(0)); // TODO we only use one of the light depth textures in the shader right now 
   }
@@ -1620,17 +1581,17 @@ int main(int argc, char* argv[]){
     }
 
     //////////////////////// rendering code below ///////////////////////
+    std::vector<LightInfo> lights = getLightInfo(world);
 
-    updateDefaultShaderPerFrame(*mainShaders.shaderProgram);
-    updateSelectionShaderPerFrame(*mainShaders.selectionProgram);
+    updateDefaultShaderPerFrame(*mainShaders.shaderProgram, lights);
     for (auto shaderId : extraShadersToUpdate){
-      updateDefaultShaderPerFrame(shaderId);
+      updateDefaultShaderPerFrame(shaderId, lights);
     }
+    updateSelectionShaderPerFrame(*mainShaders.selectionProgram, lights);
     updateUiShaderPerFrame(*renderingResources.uiShaderProgram);
 
     viewTransform = getCameraTransform();
     view = renderView(viewTransform.position, viewTransform.rotation);
-    std::vector<LightInfo> lights = getLightInfo(world);
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
 

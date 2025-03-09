@@ -4,11 +4,19 @@
 #include "./state.h"
 #include "./scene/scene_object.h"
 
+// application rendering stuff
+struct RenderingResources { 
+  unsigned int* framebufferProgram;
+  unsigned int* uiShaderProgram;
+  Framebuffers framebuffers;
+  UniformBuffer voxelLighting;
+};
+
 void initDefaultShader(unsigned int shader);
-void updateDefaultShaderPerFrame(unsigned int shader);
+void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights);
 
 void initSelectionShader(unsigned int shader);
-void updateSelectionShaderPerFrame(unsigned int shader);
+void updateSelectionShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights);
 
 void initBlurShader(unsigned int shader);
 
