@@ -100,6 +100,11 @@ std::optional<ModAABB> getModAABB(int32_t index){
   return getModAABB(rigidBody);
 }
 
+std::optional<PhysicsInfo> getPhysicsInfo(int32_t index){
+  return getPhysicsInfoForGameObject(world, index);
+}
+
+
 std::vector<std::string> listSceneFiles(std::optional<objid> sceneId){
   if (sceneId.has_value()){
     if (!sceneExists(world.sandbox, sceneId.value())){

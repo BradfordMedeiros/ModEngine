@@ -10,6 +10,7 @@
 #include "../perf/profiling.h"
 #include "../perf/benchstats.h"
 #include "../scene/objtypes/lighting/scene_lighting.h"
+#include "../scene/common/util/types.h"
 
 struct CustomApiBindings {
   int32_t (*listSceneId)(int32_t objid);
@@ -71,6 +72,7 @@ struct CustomApiBindings {
   void (*applyForce)(int32_t index, glm::vec3 force);
   void (*applyTorque)(int32_t index, glm::vec3 torque);
   std::optional<ModAABB> (*getModAABB)(int32_t index); 
+  std::optional<PhysicsInfo> (*getPhysicsInfo)(int32_t index);
   std::set<std::string> (*listAnimations)(int32_t id);
   void (*playAnimation)(int32_t id, std::string animationToPlay, AnimationType animationType);
   void (*stopAnimation)(int32_t id);

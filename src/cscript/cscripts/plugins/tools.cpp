@@ -45,6 +45,7 @@ void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld);
 void removeObjectById(objid id);
 void removeLinesByOwner(LineData& lineData, objid owner);
 objid addLineToNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, LineColor color, std::optional<unsigned int> textureId);
+bool idInGroup(World& world, objid id, std::vector<objid> groupIds);
 
 objid createManipulator(){
   GameobjAttributes manipulatorAttr {
@@ -114,6 +115,35 @@ CScriptBinding cscriptCreateToolsBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("native/tools", api);
   binding.onFrame = [](int32_t id, void* data) -> void {
     //drawNormals();
+
+
+    // draw bounding box
+
+   //auto selectedId =
+
+    auto selectedIds = mainApi -> selected();
+    if (selectedIds.size() > 0){
+      auto groupId = mainApi -> groupId(selectedIds.at(0));
+      auto physicsInfo = mainApi -> getPhysicsInfo(groupId);
+      if (physicsInfo.has_value()){
+        mainApi -> drawLine(physicsInfo.value().transformation.position, physicsInfo.value().transformation.position + glm::vec3(0.f, 10.f, 0.f), false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+      }
+    }
+    /*
+      BoundInfo boundInfo;
+  Transformation transformation;
+  std::optional<glm::vec3> offset;*/
+
+    //    auto meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id)); 
+    //  if (meshObj != NULL && meshObj -> meshesToRender.size() > 0){
+    //    // @TODO i use first mesh to get sizing for bounding box, obviously that's wrong
+    //    auto bounding = getBoundRatio(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh.boundInfo, meshObj -> meshesToRender.at(0).boundInfo);
+    //    shaderSetUniform(newShader, "model", glm::scale(getMatrixForBoundRatio(bounding, modelMatrix), glm::vec3(1.01f, 1.01f, 1.01f)));
+    //    if (objectSelected){
+    //      drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh, newShader);
+    //    }
+    //  }
+
 
     // utilities 
     static auto manipulatorLayer = layerByName(world, "");
