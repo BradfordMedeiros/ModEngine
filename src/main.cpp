@@ -331,19 +331,11 @@ void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
 }
 
 void setShaderDataObject(GLint shader, glm::vec3 color, objid id, glm::mat4 projview){
-  //std::cout << "set shader data object" << std::endl; 
-  shaderSetUniform(shader, "tint", glm::vec4(color.x, color.y, color.z, 1.f));
-  
+  shaderSetUniform(shader, "tint", glm::vec4(color.x, color.y, color.z, 1.f));  
   if (shader == *renderStages.selection.shader){
     shaderSetUniform(shader, "encodedid", getColorFromGameobject(id));
   }
   shaderSetUniform(shader, "projview", projview);
-}
-void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, bool orthographic, glm::vec3 color, objid id, RenderUniforms& uniforms){
-  auto projview = (orthographic ? glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) : proj) * view;
-  glUseProgram(shader);
-  setRenderUniformData(shader, uniforms);
-  setShaderDataObject(shader, color, id, projview);
 }
 
 RenderObjApi api {
@@ -514,14 +506,10 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view){
   auto projection = projectionFromLayer(world.sandbox.layers.at(0));
 
   auto value = glm::mat3(view);  // Removes last column aka translational component --> thats why when you move skybox no move!
-  RenderUniforms noUniforms = { 
-    .intUniforms = {},
-    .floatUniforms = {},
-    .floatArrUniforms = {},
-    .vec3Uniforms = {},
-    .builtInUniforms = {},
-  };
-  setShaderData(shaderProgram, projection, value, false, glm::vec3(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z), 0, noUniforms);
+  auto projview = projection * glm::mat4(value);
+
+  glUseProgram(shaderProgram);
+  setShaderDataObject(shaderProgram, glm::vec3(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z), 0, projview);
   shaderSetUniform(shaderProgram, "model", glm::mat4(1.f));
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
@@ -694,8 +682,8 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
 
     if (renderStep.renderQuad3D){
       std::vector<LightInfo> lights = {};
-      RenderUniforms uniforms { };
-      setShaderData(*renderStep.shader, ndiOrtho, glm::mat4(1.f), false, glm::vec3(1.f, 1.f, 1.f), 0, uniforms);
+      glUseProgram(*renderStep.shader);
+      setShaderDataObject(*renderStep.shader, glm::vec3(1.f, 1.f, 1.f), 0, ndiOrtho);
       glActiveTexture(GL_TEXTURE0); 
       glBindTexture(GL_TEXTURE_2D, renderStep.quadTexture);
       glBindVertexArray(defaultResources.quadVAO3D);
