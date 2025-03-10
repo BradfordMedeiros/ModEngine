@@ -71,7 +71,7 @@ void initDefaultShader(unsigned int shader){
 
   });
 }
-void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights, bool isSelection, glm::vec3 cameraPosition){
+void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights, bool isSelection, glm::vec3 cameraPosition, std::vector<glm::mat4>& lightMatrixs){
   std::vector<UniformData> uniformData;
   /*if (projview.has_value()){
     uniformData.push_back(UniformData {
@@ -92,9 +92,14 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
     .value = enableLighting,
   });
 */
+
   shaderSetUniform(shader, "cameraPosition", cameraPosition);
 
   if (!isSelection){
+    if (lightMatrixs.size() > 0){
+      shaderSetUniform(shader, "lightsprojview", lightMatrixs.at(0)); // TODO we only use one of the light depth textures in the shader right now 
+    }
+
     auto lightUpdates = getLightUpdates();
     for (auto &lightUpdate : lightUpdates){
       //std::cout << "voxel lighting : " << lightUpdate.index << std::endl;
@@ -209,8 +214,8 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
 void initSelectionShader(unsigned int shader){
   initDefaultShader(shader);
 }
-void updateSelectionShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights, glm::vec3 cameraPosition){
-  updateDefaultShaderPerFrame(shader, lights, true, cameraPosition);
+void updateSelectionShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights, glm::vec3 cameraPosition, std::vector<glm::mat4>& lightMatrixs){
+  updateDefaultShaderPerFrame(shader, lights, true, cameraPosition, lightMatrixs);
 }
 
 

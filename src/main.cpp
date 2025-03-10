@@ -398,7 +398,6 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     setShaderObjectDefault(newShader, getTintIfSelected(objectSelected), id, (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view));
     
     auto finalModelMatrix = (layer.scale ? calculateScaledMatrix(view, modelMatrix, layer.fov) : modelMatrix);
-    shaderSetUniform(newShader, "model", finalModelMatrix);
 
     bool isPortal = false;
     bool isPerspectivePortal = false;
@@ -1532,18 +1531,11 @@ int main(int argc, char* argv[]){
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
     std::vector<glm::mat4> lightMatrixs = calcShadowMapViews(lights);
 
-    updateDefaultShaderPerFrame(*mainShaders.shaderProgram, lights, false, viewTransform.position);
-    if (lightMatrixs.size() > 0){
-      shaderSetUniform(*mainShaders.shaderProgram, "lightsprojview", lightMatrixs.at(0)); // TODO we only use one of the light depth textures in the shader right now 
-    }
-
+    updateDefaultShaderPerFrame(*mainShaders.shaderProgram, lights, false, viewTransform.position, lightMatrixs);
     for (auto shaderId : extraShadersToUpdate){
-      updateDefaultShaderPerFrame(shaderId, lights, false, viewTransform.position);
-      if (lightMatrixs.size() > 0){
-        shaderSetUniform(shaderId, "lightsprojview", lightMatrixs.at(0)); // TODO we only use one of the light depth textures in the shader right now 
-      }
+      updateDefaultShaderPerFrame(shaderId, lights, false, viewTransform.position, lightMatrixs);
     }
-    updateSelectionShaderPerFrame(*mainShaders.selectionProgram, lights, viewTransform.position);
+    updateSelectionShaderPerFrame(*mainShaders.selectionProgram, lights, viewTransform.position, lightMatrixs);
     updateUiShaderPerFrame(*renderingResources.uiShaderProgram);
 
 

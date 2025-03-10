@@ -249,6 +249,8 @@ int renderObject(
   RenderObjApi api,
   glm::mat4& finalModelMatrix
 ){
+  shaderSetUniform(shaderProgram, "model", finalModelMatrix);
+
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
 

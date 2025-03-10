@@ -13,10 +13,10 @@ struct RenderingResources {
 };
 
 void initDefaultShader(unsigned int shader);
-void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights, bool isSelection, glm::vec3 cameraPosition);
+void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights, bool isSelection, glm::vec3 cameraPosition, std::vector<glm::mat4>& lightMatrixs);
 
 void initSelectionShader(unsigned int shader);
-void updateSelectionShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights, glm::vec3 cameraPosition);
+void updateSelectionShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights, glm::vec3 cameraPosition, std::vector<glm::mat4>& lightMatrixs);
 
 void initBlurShader(unsigned int shader);
 
