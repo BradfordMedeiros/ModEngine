@@ -390,7 +390,7 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
     numTriangles += boundingMesh.numTriangles;
     auto width = boundInfo.xMax - boundInfo.xMin;
     auto height = boundInfo.yMax - boundInfo.yMin;
-    drawSprite(shaderProgram, boundingMesh, offset.x, offset.y, width / 2.f, height / 2.f, model);
+    drawSprite(shaderProgram, boundingMesh, offset.x, offset.y, width / 2.f, height / 2.f, model); // TODO this could batched
     return numTriangles;
   }
 

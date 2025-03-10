@@ -67,6 +67,8 @@ void initDefaultShader(unsigned int shader){
     "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview", "realtime", "time",
 
     "encodedid", "textureid",
+    "forceTint", // selection shader only
+
   });
 }
 void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights, bool isSelection, glm::vec3 cameraPosition){
@@ -195,7 +197,8 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
 
     "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture",
     
-    "cameraPosition", "projview", "numlights", "enableLighting"
+    "cameraPosition", "projview", "numlights", "enableLighting",
+    "forceTint", // selection shader only
   });
 
 

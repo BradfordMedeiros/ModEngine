@@ -330,7 +330,7 @@ void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
   }
 }
 
-void setShaderDataObject(GLint shader, glm::vec3 color, objid id, glm::mat4 projview){
+void setShaderObjectDefault(GLint shader, glm::vec3 color, objid id, glm::mat4 projview){
   shaderSetUniform(shader, "tint", glm::vec4(color.x, color.y, color.z, 1.f));  
   if (shader == *renderStages.selection.shader){
     shaderSetUniform(shader, "encodedid", getColorFromGameobject(id));
@@ -395,7 +395,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     }
     
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
-    setShaderDataObject(newShader, getTintIfSelected(objectSelected), id, (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view));
+    setShaderObjectDefault(newShader, getTintIfSelected(objectSelected), id, (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view));
     shaderSetUniform(newShader, "model", (layer.scale ? calculateScaledMatrix(view, modelMatrix, layer.fov) : modelMatrix));
 
     bool isPortal = false;
@@ -509,7 +509,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view){
   auto projview = projection * glm::mat4(value);
 
   glUseProgram(shaderProgram);
-  setShaderDataObject(shaderProgram, glm::vec3(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z), 0, projview);
+  setShaderObjectDefault(shaderProgram, glm::vec3(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z), 0, projview);
   shaderSetUniform(shaderProgram, "model", glm::mat4(1.f));
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
@@ -683,7 +683,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     if (renderStep.renderQuad3D){
       std::vector<LightInfo> lights = {};
       glUseProgram(*renderStep.shader);
-      setShaderDataObject(*renderStep.shader, glm::vec3(1.f, 1.f, 1.f), 0, ndiOrtho);
+      setShaderObjectDefault(*renderStep.shader, glm::vec3(1.f, 1.f, 1.f), 0, ndiOrtho);
       glActiveTexture(GL_TEXTURE0); 
       glBindTexture(GL_TEXTURE_2D, renderStep.quadTexture);
       glBindVertexArray(defaultResources.quadVAO3D);
