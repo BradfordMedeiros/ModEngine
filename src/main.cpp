@@ -371,7 +371,7 @@ RenderObjApi api {
 };
 
 
-int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<PortalInfo> portals, bool textBoundingOnly){
+int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
   glUseProgram(shaderProgram);
   int numTriangles = 0;
 
@@ -422,7 +422,6 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 
     if (layer.visible && id != 0){
       //std::cout << "render object: " << getGameObject(world, id).name << std::endl;
-
 
       auto trianglesDrawn = renderObject(
         newShader, 
@@ -713,7 +712,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     if (renderStep.renderWorld){
       // important - redundant call to glUseProgram
       glm::mat4* projection = context.projection.has_value() ? &context.projection.value() : NULL;
-      auto worldTriangles = renderWorld(world, *renderStep.shader, renderStep.allowShaderOverride, projection, context.view, glm::mat4(1.0f), context.portals, renderStep.textBoundingOnly);
+      auto worldTriangles = renderWorld(world, *renderStep.shader, renderStep.allowShaderOverride, projection, context.view, context.portals, renderStep.textBoundingOnly);
       triangles += worldTriangles;
     }
 
