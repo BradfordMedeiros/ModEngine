@@ -174,7 +174,8 @@ int renderObject(
   DefaultMeshes& defaultMeshes,
   bool selectionMode,
   bool drawBones,
-  RenderObjApi api
+  RenderObjApi api,
+  glm::mat4& finalModelMatrix
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);

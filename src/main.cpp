@@ -396,7 +396,9 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
     setShaderObjectDefault(newShader, getTintIfSelected(objectSelected), id, (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view));
-    shaderSetUniform(newShader, "model", (layer.scale ? calculateScaledMatrix(view, modelMatrix, layer.fov) : modelMatrix));
+    
+    auto finalModelMatrix = (layer.scale ? calculateScaledMatrix(view, modelMatrix, layer.fov) : modelMatrix);
+    shaderSetUniform(newShader, "model", finalModelMatrix);
 
     bool isPortal = false;
     bool isPerspectivePortal = false;
@@ -428,7 +430,8 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
         defaultResources.defaultMeshes,
         textBoundingOnly,
         state.showBones,
-        api
+        api,
+        finalModelMatrix
       );
       numTriangles = numTriangles + trianglesDrawn;
     }

@@ -205,21 +205,19 @@ void removeObject(
   assert(false);
 }
 
-void setShaderObjectData(GLint shaderProgram, bool isSelectionShader, bool hasBones, glm::vec4 tint, glm::vec2 textureOffset, glm::vec2 textureTiling, glm::vec2 textureSize, glm::vec3 emissionAmount = glm::vec3(0.f, 0.f, 0.f)){
+void setShaderObjectData(GLint shaderProgram, bool hasBones, glm::vec4 tint, glm::vec2 textureOffset, glm::vec2 textureTiling, glm::vec2 textureSize, glm::vec3 emissionAmount){
   shaderSetUniformBool(shaderProgram, "hasBones", hasBones);    
-  if (!isSelectionShader){
-    shaderSetUniform(shaderProgram, "tint", tint);
-    shaderSetUniform(shaderProgram, "textureOffset", textureOffset);
-    shaderSetUniform(shaderProgram, "textureTiling", textureTiling);
-    shaderSetUniform(shaderProgram, "textureSize", textureSize);
-    shaderSetUniform(shaderProgram, "emissionAmount", emissionAmount);
-  }
+  shaderSetUniform(shaderProgram, "tint", tint);
+  shaderSetUniform(shaderProgram, "textureOffset", textureOffset);
+  shaderSetUniform(shaderProgram, "textureTiling", textureTiling);
+  shaderSetUniform(shaderProgram, "textureSize", textureSize);
+  shaderSetUniform(shaderProgram, "emissionAmount", emissionAmount);
 }
 
 int renderDefaultNode(GLint shaderProgram, bool isSelectionShader, Mesh& mesh){
   // Transformation getTransformationFromMatrix(glm::mat4 matrix){
   // unscale this model matrix
-  setShaderObjectData(shaderProgram, isSelectionShader, mesh.bones.size() > 0, glm::vec4(1.f, 1.f, 0.f, 1.f), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f));
+  setShaderObjectData(shaderProgram, mesh.bones.size() > 0, glm::vec4(1.f, 1.f, 0.f, 1.f), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f), glm::vec3(0.f, 0.f, 0.f));
   drawMesh(mesh, shaderProgram);
   return mesh.numTriangles;
 }
@@ -248,7 +246,8 @@ int renderObject(
   DefaultMeshes& defaultMeshes,
   bool selectionMode,
   bool drawBones,
-  RenderObjApi api
+  RenderObjApi api,
+  glm::mat4& finalModelMatrix
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -270,7 +269,7 @@ int renderObject(
         hasBones = true;
       }
 
-      setShaderObjectData(shaderProgram, isSelectionShader, hasBones, meshObj -> tint, meshObj -> texture.textureoffset, meshObj -> texture.texturetiling, meshObj -> texture.texturesize, meshObj -> emissionAmount);
+      setShaderObjectData(shaderProgram, hasBones, meshObj -> tint, meshObj -> texture.textureoffset, meshObj -> texture.texturetiling, meshObj -> texture.texturesize, meshObj -> emissionAmount);
       shaderLogDebug((std::string("draw mesh: ") + meshObj -> meshNames.at(x)).c_str());
       drawMesh(meshToRender, shaderProgram, meshObj -> texture.loadingInfo.textureId, -1, drawPoints, meshObj -> normalTexture.textureId);   
       numTriangles = numTriangles + meshToRender.numTriangles; 
@@ -311,7 +310,7 @@ int renderObject(
 
   auto portalObj = std::get_if<GameObjectPortal>(&toRender);
   if (portalObj != NULL){
-    setShaderObjectData(shaderProgram, isSelectionShader, defaultMeshes.nodeMesh -> bones.size() > 0, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f));
+    setShaderObjectData(shaderProgram, defaultMeshes.nodeMesh -> bones.size() > 0, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f), glm::vec3(0.f, 0.f, 0.f));
     drawMesh(*defaultMeshes.portalMesh, shaderProgram, portalTexture);
     return defaultMeshes.portalMesh -> numTriangles;
   }
@@ -323,7 +322,7 @@ int renderObject(
 
   auto octreeObj = std::get_if<GameObjectOctree>(&toRender);
   if (octreeObj != NULL){
-    setShaderObjectData(shaderProgram, isSelectionShader, false, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f));
+    setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f), glm::vec3(0.f, 0.f, 0.f));
     Mesh* octreeMesh = getOctreeMesh(*octreeObj);
     modassert(octreeMesh, "no octree mesh available");
     drawMesh(*octreeMesh, shaderProgram);
@@ -337,7 +336,7 @@ int renderObject(
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&toRender);
   if (navmeshObj != NULL){
-    setShaderObjectData(shaderProgram, isSelectionShader, false, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f));
+    setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f), glm::vec3(0.f, 0.f, 0.f));
     drawMesh(navmeshObj -> mesh, shaderProgram, navmeshTexture);    
 
 
@@ -386,7 +385,7 @@ int renderObject(
 
   auto textObj = std::get_if<GameObjectUIText>(&toRender);
   if (textObj != NULL){
-    setShaderObjectData(shaderProgram, isSelectionShader, false, textObj -> tint, glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f));   
+    setShaderObjectData(shaderProgram, false, textObj -> tint, glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f), glm::vec3(0.f, 0.f, 0.f));   
     return api.drawWord(shaderProgram, id, textObj -> value, 1000.f /* 1000.f => -1,1 range for each quad */, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor, textObj -> fontFamily, selectionMode);
   }
 

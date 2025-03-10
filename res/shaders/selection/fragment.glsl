@@ -10,12 +10,18 @@ uniform vec4 tint;
 uniform vec3 cameraPosition;
 uniform bool forceTint;
 
+uniform vec2 textureOffset;
+uniform vec2 textureTiling;
+uniform vec2 textureSize;
+uniform vec3 emissionAmount;
+
+
 in vec2 TexCoord;
 
 
 
 void main(){
-  if (voxelcellwidth > 100 || tint.x > 100 || cameraPosition.x == 10000 || forceTint){  // removing selection shader anyway so 
+  if (voxelcellwidth > 100 && tint.x > 100 && cameraPosition.x == 10000 && forceTint && ((textureOffset.x + textureTiling.x + textureSize.x + emissionAmount.x) > 100000)){  // removing selection shader anyway so 
     discard;
   }
 
