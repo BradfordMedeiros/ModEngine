@@ -214,7 +214,7 @@ void setShaderObjectData(GLint shaderProgram, bool hasBones, glm::vec4 tint, glm
   shaderSetUniform(shaderProgram, "emissionAmount", emissionAmount);
 }
 
-int renderDefaultNode(GLint shaderProgram, bool isSelectionShader, Mesh& mesh){
+int renderDefaultNode(GLint shaderProgram, Mesh& mesh){
   // Transformation getTransformationFromMatrix(glm::mat4 matrix){
   // unscale this model matrix
   setShaderObjectData(shaderProgram, mesh.bones.size() > 0, glm::vec4(1.f, 1.f, 0.f, 1.f), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f), glm::vec2(1.f, 1.f), glm::vec3(0.f, 0.f, 0.f));
@@ -288,23 +288,23 @@ int renderObject(
     }
     //api.drawSphere(boneTransform.position);
     shaderSetUniform(shaderProgram, "model", glm::translate(glm::mat4(1.f), transform.position));
-    renderDefaultNode(shaderProgram, isSelectionShader, *defaultMeshes.nodeMesh);
+    renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
   }
   if (meshObj != NULL && (meshObj -> meshesToRender.size() > 0) && (showDebugMask & 0b1)) {
     //api.drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 100.f, 0.f), glm::vec4(1.f, 0.f, 0.f, 1.f));
-    return renderDefaultNode(shaderProgram, isSelectionShader, *defaultMeshes.nodeMesh);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
   }
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
   if (cameraObj != NULL && (showDebugMask & 0b10)){
     auto transform = getTransformationFromMatrix(model).position;
     shaderSetUniform(shaderProgram, "model", glm::translate(glm::mat4(1.f), transform));
-    return renderDefaultNode(shaderProgram, isSelectionShader, *defaultMeshes.cameraMesh);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.cameraMesh);
   }
 
   auto soundObject = std::get_if<GameObjectSound>(&toRender);
   if (soundObject != NULL && (showDebugMask & 0b100)){
-    return renderDefaultNode(shaderProgram, isSelectionShader, *defaultMeshes.soundMesh);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.soundMesh);
   }
 
 
@@ -317,7 +317,7 @@ int renderObject(
 
   auto lightObj = std::get_if<GameObjectLight>(&toRender);
   if (lightObj != NULL && (showDebugMask & 0b1000)){   
-    return renderDefaultNode(shaderProgram, isSelectionShader, *defaultMeshes.lightMesh);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.lightMesh);
   }
 
   auto octreeObj = std::get_if<GameObjectOctree>(&toRender);
@@ -331,7 +331,7 @@ int renderObject(
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
   if (emitterObj != NULL && (showDebugMask & 0b100000)){
-    return renderDefaultNode(shaderProgram, isSelectionShader, *defaultMeshes.emitter);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.emitter);
   }
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&toRender);
@@ -362,7 +362,6 @@ int renderObject(
       }
       pointIndex++;
 
-      shaderSetUniform(shaderProgram, "model", glm::translate(model, point));
 
       static glm::vec4 selectedColor  = glm::vec4(0.f, 0.f, 1.f, 0.5f);
       static glm::vec4 notSelectedColor  = glm::vec4(1.f, 0.f, 0.f, 0.5f);
@@ -371,10 +370,10 @@ int renderObject(
       glm::vec4 color = isSelected ? glm::vec4(0.f, 0.f, 1.f, 0.5f) : glm::vec4(1.f, 0.f, 0.f, 0.5f);
       //std::cout << "selected: " << selectedId << ", object id: " << objectId << ", isSelected = " << isSelected << ", color = " << print(color) << std::endl;
       shaderSetUniform(shaderProgram, "encodedid", getColorFromGameobject(objectId));
-      if (!isSelectionShader){
-        shaderSetUniform(shaderProgram, "tint", isSelected ? selectedColor : notSelectedColor);
-      }
-      renderDefaultNode(shaderProgram, isSelectionShader, *defaultMeshes.nodeMesh);
+      shaderSetUniform(shaderProgram, "tint", isSelected ? selectedColor : notSelectedColor);
+      shaderSetUniform(shaderProgram, "model", glm::translate(model, point));
+
+      renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     });
     if (!selectionMode){
       baseId = 0;
@@ -393,7 +392,7 @@ int renderObject(
   if (prefabObj != NULL){
     auto vertexCount = 0;
     if (showDebugMask & 0b10000000){
-      vertexCount += renderDefaultNode(shaderProgram, isSelectionShader, *defaultMeshes.nodeMesh);
+      vertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     }
     return vertexCount;
   }
