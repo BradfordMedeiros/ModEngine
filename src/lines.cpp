@@ -133,7 +133,9 @@ bool textureIdSame(std::optional<unsigned int> lineTexture, std::optional<unsign
 }
 
 
-void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigned int> textureId){
+void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigned int> textureId, glm::mat4& matrix){
+  shaderSetUniform(shaderProgram, "model", matrix);
+
   PROFILE("drawAllLines",
     for (auto &lineByColor : lineData.lineColors){
       std::vector<Line> lines;
@@ -203,6 +205,8 @@ std::vector<int> uniqueZIndexs(LineData& lineData){
 // eg add different shader types to different queues
 void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::optional<std::string>)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram){
   //std::cout << "text number: " << lineData.text.size() << std::endl;
+shaderSetUniformBool(uiShaderProgram, "forceTint", false);
+
 PROFILE("drawShapeData",
   bool allowShaderOverride = !selectionProgram; // which means that shaders use the geometry of the selection program
 
@@ -259,6 +263,8 @@ PROFILE("drawShapeData",
           auto coords = convertTextNDICoords(textShapeData -> left, textShapeData ->  top, height, width, shape.ndi);
           auto adjustedFontSize = convertTextNdiFontsize(height, width, textShapeData -> fontSize, shape.ndi);
           FontFamily& fontFamily = fontFamilyByName(textShapeData -> fontFamily);
+
+          shaderSetUniformBool(uiShaderProgram, "forceTint", false);
           drawWords(uiShaderProgram, fontFamily, textShapeData -> word, coords.x, coords.y, adjustedFontSize, textShapeData -> maxWidthNdi);          
         }else if (rectShapeData != NULL){
           modassert(shape.ndi, "non-ndi rect drawing not supported"); 
@@ -278,7 +284,7 @@ PROFILE("drawShapeData",
               textureId = texId.value();
             }
           }
-          drawMesh(unitXYRect, uiShaderProgram, textureId); // TODO this could batched
+          drawMesh(unitXYRect, uiShaderProgram, textureId, -1, false, -1, scaledAndTranslated); // TODO this could batched
         }else if (lineShapeData != NULL){
           modassert(shape.ndi, "non-ndi line drawing not supported"); 
           

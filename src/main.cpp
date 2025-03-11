@@ -176,16 +176,17 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
   shaderSetUniform(*renderingResources.uiShaderProgram, "encodedid", getColorFromGameobject(0));
 
   if (shouldClear && clearTextureId.has_value()){
-    shaderSetUniform(*renderingResources.uiShaderProgram, "model", glm::scale(glm::mat4(1.0f), glm::vec3(2.f, 2.f, 2.f)));
+    auto model = glm::scale(glm::mat4(1.0f), glm::vec3(2.f, 2.f, 2.f));
     shaderSetUniformBool(*renderingResources.uiShaderProgram, "forceTint", false);
     shaderSetUniform(*renderingResources.uiShaderProgram, "tint", clearColor);
-    drawMesh(*defaultResources.defaultMeshes.unitXYRect, *renderingResources.uiShaderProgram, clearTextureId.value());
+    drawMesh(*defaultResources.defaultMeshes.unitXYRect, *renderingResources.uiShaderProgram, clearTextureId.value(), -1, false, -1, model);
   }
 
-  shaderSetUniform(*renderingResources.uiShaderProgram, "model", glm::mat4(1.f));
+
+  auto lineModelMatrix = glm::mat4(1.f);
   shaderSetUniformBool(*renderingResources.uiShaderProgram, "forceTint", true);
   shaderSetUniform(*renderingResources.uiShaderProgram, "tint", glm::vec4(1.f, 1.f, 1.f, 1.f));
-  drawAllLines(lineData, *renderingResources.uiShaderProgram, texture.textureId);
+  drawAllLines(lineData, *renderingResources.uiShaderProgram, texture.textureId, lineModelMatrix);
 
   glEnable(GL_BLEND);
   glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -500,7 +501,9 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
   if (state.showDebug){
     drawCoordinateSystem(100.f);
   }
-  drawAllLines(lineData, *mainShaders.shaderProgram , std::nullopt);
+
+  auto lineModelMatrix = glm::mat4(1.f);
+  drawAllLines(lineData, *mainShaders.shaderProgram , std::nullopt, lineModelMatrix);
 
 }
 
@@ -512,8 +515,8 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view){
 
   glUseProgram(shaderProgram);
   setShaderObjectDefault(shaderProgram, glm::vec3(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z), 0, projview);
-  shaderSetUniform(shaderProgram, "model", glm::mat4(1.f));
-  drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
+  auto model = glm::mat4(1.f);
+  drawMesh(world.meshes.at("skybox").mesh, shaderProgram, -1, -1, false, -1, model); 
 }
 
 void renderUI(Color pixelColor){
@@ -1727,12 +1730,6 @@ int main(int argc, char* argv[]){
 
       // below and render screepspace lines can probably be consoliated
       glUseProgram(*renderingResources.uiShaderProgram);
-      std::vector<UniformData> uniformData;
-      uniformData.push_back(UniformData {
-        .name = "forceTint",
-        .value = false,
-      });
-      setUniformData(*renderingResources.uiShaderProgram, uniformData, { "model", "encodedid", "tint", "time", "projection", "textureData" });
       glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glBlendFunci(1, GL_ONE, GL_ZERO);
       

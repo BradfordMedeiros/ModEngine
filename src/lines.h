@@ -67,7 +67,7 @@ objid addLineToNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos,
 void freeLine(LineData& lineData, objid lineId);
 void removeLinesByOwner(LineData& lineData, objid owner);
 
-void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigned int> textureId);
+void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigned int> textureId, glm::mat4& matrix);
 
 void addShapeData(LineData& lineData, ShapeData text);
 void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::optional<std::string>)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram);

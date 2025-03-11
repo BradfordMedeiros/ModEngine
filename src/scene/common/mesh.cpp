@@ -1,6 +1,7 @@
 #include "./mesh.h"
 
 extern Stats statistics;
+void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4& value);
 
 int numberOfDrawCallsThisFrame = 0;  // static-state
 
@@ -191,7 +192,9 @@ Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> e
 // TODO This is intended for the default shader
 // in practice this gets called for other shaders too 
 // should just create another functon to handle the ui shader
-void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId,  bool drawPoints, unsigned int customNormalTextureId){
+void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId,  bool drawPoints, unsigned int customNormalTextureId, glm::mat4& model){
+  shaderSetUniform(shaderProgram, "model", model);
+
   glBindVertexArray(mesh.VAOPointer);
  
   glActiveTexture(GL_TEXTURE0); 
