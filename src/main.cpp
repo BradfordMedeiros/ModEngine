@@ -475,7 +475,6 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
   uniformData.push_back(UniformData { .name = "hasRoughnessTexture",  .value = false });
   uniformData.push_back(UniformData { .name = "discardTexAmount",  .value = 0.f });
   uniformData.push_back(UniformData { .name = "emissionAmount",  .value = glm::vec3(0.f, 0.f, 0.f) });
-  uniformData.push_back(UniformData { .name = "model",  .value = glm::mat4(1.f) });
   uniformData.push_back(UniformData { .name = "textureOffset",  .value = glm::vec2(1.f, 1.f) });
   uniformData.push_back(UniformData { .name = "textureSize",  .value = glm::vec2(1.f, 1.f) });
   uniformData.push_back(UniformData { .name = "textureTiling",  .value = glm::vec2(1.f, 1.f) });
@@ -484,7 +483,7 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
       "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture",
       "time", "realtime",
       "showBoneWeight", "useBoneTransform", "enableDiffuse", "enablePBR", "enableSpecular", "enableVoxelLighting", "ambientAmount", "bloomThreshold", "enableAttenutation", "shadowIntensity", "enableShadows",
-      "enableLighting", "numlights", "cameraPosition", "lightsprojview",
+      "enableLighting", "numlights", "cameraPosition", "lightsprojview", "model", 
     });
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
@@ -519,18 +518,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view){
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram, -1, -1, false, -1, model); 
 }
 
-void renderUI(Color pixelColor){
-  glUseProgram(*renderingResources.uiShaderProgram);
-  std::vector<UniformData> uniformData;
-  uniformData.push_back(UniformData {
-    .name = "forceTint",
-    .value = false,
-  });
-  setUniformData(*renderingResources.uiShaderProgram, uniformData, { "model", "encodedid", "tint", "time", "textureData", "projection" });
-  glEnable(GL_BLEND);
-  glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glBlendFunci(1, GL_ONE, GL_ZERO);
-  
+void renderUI(Color pixelColor){  
   const float offsetPerLineMargin = 0.02f;
   float offsetPerLine = -1 * (state.fontsize / 500.f + offsetPerLineMargin);
   float uiYOffset = (1.f + 3 * offsetPerLine) + state.infoTextOffset.y;
@@ -1730,6 +1718,7 @@ int main(int argc, char* argv[]){
 
       // below and render screepspace lines can probably be consoliated
       glUseProgram(*renderingResources.uiShaderProgram);
+      glEnable(GL_BLEND);
       glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glBlendFunci(1, GL_ONE, GL_ZERO);
       
