@@ -490,16 +490,16 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
   if (state.showDebug && numChunkingGridCells > 0){
     float offset = ((numChunkingGridCells % 2) == 0) ? (dynamicLoading.mappingInfo.chunkSize / 2) : 0;
-    drawGrid3D(numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
+    drawGrid3D(*mainShaders.shaderProgram, numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
   }
 
   if (state.visualizeVoxelLightingCells){
-    drawGrid3D(4, getLightingCellWidth(), 0.f, 0.f, 0.f);
+    drawGrid3D(*mainShaders.shaderProgram, 4, getLightingCellWidth(), 0.f, 0.f, 0.f);
   }
 
   shaderSetUniform(*mainShaders.shaderProgram , "tint", glm::vec4(0.f, 0.f, 1.f, 1.f));     
   if (state.showDebug){
-    drawCoordinateSystem(100.f);
+    drawCoordinateSystem(*mainShaders.shaderProgram, 100.f);
   }
 
   auto lineModelMatrix = glm::mat4(1.f);

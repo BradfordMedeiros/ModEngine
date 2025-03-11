@@ -134,8 +134,6 @@ bool textureIdSame(std::optional<unsigned int> lineTexture, std::optional<unsign
 
 
 void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigned int> textureId, glm::mat4& matrix){
-  shaderSetUniform(shaderProgram, "model", matrix);
-
   PROFILE("drawAllLines",
     for (auto &lineByColor : lineData.lineColors){
       std::vector<Line> lines;
@@ -146,7 +144,7 @@ void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigne
       }
       if (lines.size() > 0){
         shaderSetUniform(shaderProgram, "tint", lineByColor.tint);
-        drawLines(lines, lineByColor.linewidth); 
+        drawLines(shaderProgram, lines, lineByColor.linewidth, matrix); 
       }
     }
   )
@@ -203,6 +201,7 @@ std::vector<int> uniqueZIndexs(LineData& lineData){
 }
 // This could sort the line data in some fashion to minimize context switches
 // eg add different shader types to different queues
+static glm::mat4 modelMatrix2(1.f);
 void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::optional<std::string>)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram){
   //std::cout << "text number: " << lineData.text.size() << std::endl;
 shaderSetUniformBool(uiShaderProgram, "forceTint", false);
@@ -274,7 +273,6 @@ PROFILE("drawShapeData",
           float heightNdi = rectShapeData -> height;
           glm::mat4 scaledAndTranslated = glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(centerXNdi, centerYNdi, 0.f)), glm::vec3(widthNdi, heightNdi, 1.f));
           
-          shaderSetUniform(uiShaderProgram, "model", scaledAndTranslated);
           shaderSetUniformBool(uiShaderProgram, "forceTint", false);
           
           unsigned int textureId = -1;
@@ -288,7 +286,6 @@ PROFILE("drawShapeData",
         }else if (lineShapeData != NULL){
           modassert(shape.ndi, "non-ndi line drawing not supported"); 
           
-          shaderSetUniform(uiShaderProgram, "model", glm::mat4(1.f));
           shaderSetUniformBool(uiShaderProgram, "forceTint", true);
           
           std::vector<Line> lines;
@@ -297,7 +294,7 @@ PROFILE("drawShapeData",
             .toPos = lineShapeData -> toPos,
           });
           //glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(lineByColor.tint));
-          drawLines(lines, 1);   // TODO this could batched
+          drawLines(shaderToUse, lines, 1, modelMatrix2);   // TODO this could batched
         }
         else {
           modassert(false, "draw shape data type not yet implemented");

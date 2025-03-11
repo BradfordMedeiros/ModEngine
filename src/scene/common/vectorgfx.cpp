@@ -1,6 +1,8 @@
 #include "./vectorgfx.h"
 
-void drawCube(float width, float height, float depth){
+
+static glm::mat4 modelMatrix(1.f);
+void drawCube(GLint shaderProgram, float width, float height, float depth){
   std::vector<Line> allLines;                    
   allLines.push_back(Line { .fromPos = glm::vec3(0, 0, 0),           .toPos = glm::vec3(width, 0, 0)          });
   allLines.push_back(Line { .fromPos = glm::vec3(0,  height, 0),     .toPos = glm::vec3(width, height, 0)     });
@@ -14,7 +16,7 @@ void drawCube(float width, float height, float depth){
   allLines.push_back(Line { .fromPos = glm::vec3(0, height, 0),      .toPos = glm::vec3(0, height, depth)     });
   allLines.push_back(Line { .fromPos = glm::vec3(width, 0, 0),       .toPos = glm::vec3(width, 0, depth)      });
   allLines.push_back(Line { .fromPos = glm::vec3(width, height, 0),  .toPos = glm::vec3(width, height, depth) });
-  drawLines(allLines);
+  drawLines(shaderProgram, allLines, 5, modelMatrix);
 }
 
 void applyOrientationToLines(std::vector<Line>& allLines, std::optional<glm::quat> orientation){
@@ -27,7 +29,7 @@ void applyOrientationToLines(std::vector<Line>& allLines, std::optional<glm::qua
   }
 }
 
-void drawGridXY(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ, std::optional<glm::quat> orientation){   
+void drawGridXY(GLint shaderProgram, int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ, std::optional<glm::quat> orientation){   
   float centeringOffsetX = -1.f * (cellSize * numCellsWidth) / 2.f;
   float centeringOffsetY = -1.f * (cellSize * numCellsHeight) / 2.f;
 
@@ -53,10 +55,10 @@ void drawGridXY(int numCellsWidth, int numCellsHeight, float cellSize, float off
     line.toPos.y += offsetY;
     line.toPos.z += offsetZ;
   }
-  drawLines(allLines);
+  drawLines(shaderProgram, allLines, 5, modelMatrix);
 }
 
-void drawGridXZ(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ, std::optional<glm::quat> orientation){
+void drawGridXZ(GLint shaderProgram, int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ, std::optional<glm::quat> orientation){
   float centeringOffsetX = -1.f * (cellSize * numCellsWidth) / 2.f;
   float centeringOffsetZ = -1.f * (cellSize * numCellsHeight) / 2.f;
 
@@ -83,10 +85,10 @@ void drawGridXZ(int numCellsWidth, int numCellsHeight, float cellSize, float off
     line.toPos.y += offsetY;
     line.toPos.z += offsetZ;
   }
-  drawLines(allLines);
+  drawLines(shaderProgram, allLines, 5, modelMatrix);
 }
 
-void drawGridYZ(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ, std::optional<glm::quat> orientation){
+void drawGridYZ(GLint shaderProgram, int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ, std::optional<glm::quat> orientation){
   float centeringOffsetY = -1.f * (cellSize * numCellsWidth) / 2.f;
   float centeringOffsetZ = -1.f * (cellSize * numCellsHeight) / 2.f;
 
@@ -112,31 +114,31 @@ void drawGridYZ(int numCellsWidth, int numCellsHeight, float cellSize, float off
     line.toPos.y += offsetY;
     line.toPos.z += offsetZ;
   }
-  drawLines(allLines);
+  drawLines(shaderProgram, allLines, 5, modelMatrix);
 }
 
-void drawGrid3D(int numCellsWidth, float cellSize, float offsetX, float offsetY, float offsetZ){
+void drawGrid3D(GLint shaderProgram, int numCellsWidth, float cellSize, float offsetX, float offsetY, float offsetZ){
   for (int i = 0; i <= numCellsWidth; i++){
     float centeredOffsetY = -1.f * (numCellsWidth * cellSize) / 2.f;
-    drawGridXZ(numCellsWidth, numCellsWidth, cellSize, offsetX, centeredOffsetY + i * cellSize + offsetY, offsetZ, std::nullopt);
+    drawGridXZ(shaderProgram, numCellsWidth, numCellsWidth, cellSize, offsetX, centeredOffsetY + i * cellSize + offsetY, offsetZ, std::nullopt);
   }
   for (int i = 0; i <= numCellsWidth; i++){
     float centeredOffsetZ = -1.f * (numCellsWidth * cellSize) / 2.f;
-    drawGridXY(numCellsWidth, numCellsWidth, cellSize, offsetX, offsetY, centeredOffsetZ + i * cellSize + offsetZ, std::nullopt);
+    drawGridXY(shaderProgram, numCellsWidth, numCellsWidth, cellSize, offsetX, offsetY, centeredOffsetZ + i * cellSize + offsetZ, std::nullopt);
   }
 }
 
-void drawGrid3DCentered(int numCellsWidth, float cellSize, float offsetX, float offsetY, float offsetZ){
+void drawGrid3DCentered(GLint shaderProgram, int numCellsWidth, float cellSize, float offsetX, float offsetY, float offsetZ){
   float offset = numCellsWidth * cellSize / 2.f;
-  drawGrid3D(numCellsWidth, cellSize, -offset + offsetX, -offset + offsetY, -offset + offsetZ);
+  drawGrid3D(shaderProgram, numCellsWidth, cellSize, -offset + offsetX, -offset + offsetY, -offset + offsetZ);
 }
 
-void drawCoordinateSystem(float size){
+void drawCoordinateSystem(GLint shaderProgram, float size){
   std::vector<Line> allLines;
   allLines.push_back(Line { .fromPos = glm::vec3(-1.f * size, 0.f, 0.f), .toPos = glm::vec3(1.f * size, 0.f, 0.f) });
   allLines.push_back(Line { .fromPos = glm::vec3(0.f, -1.f * size, 0.f), .toPos = glm::vec3(0.f, 1.f * size, 0.f) });
   allLines.push_back(Line { .fromPos = glm::vec3(0.f, 0.f, -1.f * size), .toPos = glm::vec3(0.f, 0.f, 1.f * size) });
-  drawLines(allLines);
+  drawLines(shaderProgram, allLines, 5, modelMatrix);
 }
 
 std::vector<Line> drawSphere(){

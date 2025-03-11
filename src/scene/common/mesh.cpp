@@ -284,7 +284,9 @@ void freeLineRenderData(LineRenderData& lineData){
 }
 
 // returns # of verts drawn
-int drawLines(std::vector<Line> allLines, int linewidth){
+int drawLines(GLint shaderProgram, std::vector<Line> allLines, int linewidth, glm::mat4& model){
+  shaderSetUniform(shaderProgram, "model", model);
+
   modassert(allLines.size() > 0, "draw lines - all lines must be non-zero size");
   auto lineData = createLineRenderData(allLines);
   glLineWidth(linewidth);
