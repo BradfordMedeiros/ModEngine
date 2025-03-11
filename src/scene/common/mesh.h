@@ -55,7 +55,10 @@ Mesh loadMesh(std::string defaultTexture, MeshData modelData, std::function<Text
 Mesh loadSpriteMeshSubimage(std::string imagePath, float offsetx, float offsety, float width, float height, std::function<Texture(std::string)> ensureLoadTexture, bool flipVerticalTexCoords); // 2DMesh with subimage selection
 Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> ensureLoadTexture);  // loads a 2d mesh with vertex centered around 0 to 1 x/y
 
-void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId, bool drawPoints, unsigned int customNormalTextureId, glm::mat4& model);
+struct MeshUniforms {
+  glm::mat4 model;
+};
+void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId, bool drawPoints, unsigned int customNormalTextureId, MeshUniforms meshUniforms);
 
 struct LineRenderData {
   unsigned int VAO;

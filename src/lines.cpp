@@ -282,7 +282,11 @@ PROFILE("drawShapeData",
               textureId = texId.value();
             }
           }
-          drawMesh(unitXYRect, uiShaderProgram, textureId, -1, false, -1, scaledAndTranslated); // TODO this could batched
+
+          MeshUniforms meshUniforms {
+            .model = scaledAndTranslated,
+          };
+          drawMesh(unitXYRect, uiShaderProgram, textureId, -1, false, -1, meshUniforms); // TODO this could batched
         }else if (lineShapeData != NULL){
           modassert(shape.ndi, "non-ndi line drawing not supported"); 
           

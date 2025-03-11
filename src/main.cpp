@@ -179,7 +179,11 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
     auto model = glm::scale(glm::mat4(1.0f), glm::vec3(2.f, 2.f, 2.f));
     shaderSetUniformBool(*renderingResources.uiShaderProgram, "forceTint", false);
     shaderSetUniform(*renderingResources.uiShaderProgram, "tint", clearColor);
-    drawMesh(*defaultResources.defaultMeshes.unitXYRect, *renderingResources.uiShaderProgram, clearTextureId.value(), -1, false, -1, model);
+
+    MeshUniforms meshUniforms {
+      .model = model,
+    };
+    drawMesh(*defaultResources.defaultMeshes.unitXYRect, *renderingResources.uiShaderProgram, clearTextureId.value(), -1, false, -1, meshUniforms);
   }
 
 
@@ -515,7 +519,10 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view){
   glUseProgram(shaderProgram);
   setShaderObjectDefault(shaderProgram, glm::vec3(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z), 0, projview);
   auto model = glm::mat4(1.f);
-  drawMesh(world.meshes.at("skybox").mesh, shaderProgram, -1, -1, false, -1, model); 
+  MeshUniforms meshUniforms {
+    .model = model,
+  };
+  drawMesh(world.meshes.at("skybox").mesh, shaderProgram, -1, -1, false, -1, meshUniforms); 
 }
 
 void renderUI(Color pixelColor){  

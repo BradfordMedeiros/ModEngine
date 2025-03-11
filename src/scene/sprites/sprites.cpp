@@ -133,8 +133,12 @@ void drawSpriteZBias(GLint shaderProgram, Mesh mesh, float left, float top, floa
   auto scaleMatrix = glm::scale(glm::mat4(1.f), glm::vec3(width * 1.0f, height * 1.0f, 1.0f));
   auto translateMatrix = glm::translate(glm::mat4(1.f), glm::vec3(left, top, zbias));
   glm::mat4 modelMatrix = model * translateMatrix * scaleMatrix; 
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-  drawMesh(mesh, shaderProgram, -1, -1, false, -1, modelMatrix);
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix)); // get rid of this already in draw mesh
+
+  MeshUniforms meshUniforms {
+    .model = modelMatrix,
+  };
+  drawMesh(mesh, shaderProgram, -1, -1, false, -1, meshUniforms);
 }
 
 /// these two functions are now equivalent since drawing things non-centered has not been useful

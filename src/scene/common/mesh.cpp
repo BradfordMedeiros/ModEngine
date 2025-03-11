@@ -192,8 +192,8 @@ Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> e
 // TODO This is intended for the default shader
 // in practice this gets called for other shaders too 
 // should just create another functon to handle the ui shader
-void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId,  bool drawPoints, unsigned int customNormalTextureId, glm::mat4& model){
-  shaderSetUniform(shaderProgram, "model", model);
+void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId,  bool drawPoints, unsigned int customNormalTextureId, MeshUniforms meshUniforms){
+  shaderSetUniform(shaderProgram, "model", meshUniforms.model);
 
   glBindVertexArray(mesh.VAOPointer);
  
