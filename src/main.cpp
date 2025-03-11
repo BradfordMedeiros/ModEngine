@@ -54,7 +54,11 @@ Transformation viewTransform {
 glm::mat4 view;
 glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);  
 
-std::vector<unsigned int> extraShadersToUpdate; // TODO STATIC get rid of this, but useful given at render shader loading
+struct ShaderToUpdate {
+  unsigned int shader; // shouldnt this be a pointer if reload? 
+  bool isUiShader;
+};
+std::vector<ShaderToUpdate> extraShadersToUpdate; // TODO STATIC get rid of this, but useful given at render shader loading
 
 // core system 
 NetCode netcode { };
@@ -367,7 +371,18 @@ RenderObjApi api {
   },
 };
 
-
+ // very gross and coupled to game code, and just generally horrible
+// but simple enough until have a better fix eg extended file syntax, naming convention, or templated shaders
+bool checkIfUiShader(std::string& value){ 
+  std::cout << "is ui shader: " << value << std::endl;
+  if (value == "storyboard"){
+    return true;
+  }
+  if (value == "arcade"){
+    return true;
+  }
+  return false;
+}
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
   glUseProgram(shaderProgram);
   int numTriangles = 0;
@@ -388,8 +403,16 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     bool loadedNewShader = false;
     auto newShader = (shader == "" || !allowShaderOverride) ? shaderProgram : getShaderByShaderString(shader, shaderFolderPath, interface.readFile, getTemplateValues, &loadedNewShader);
     if (loadedNewShader){
-      extraShadersToUpdate.push_back(newShader);
-      initDefaultShader(newShader);
+      auto isUiShader = checkIfUiShader(shader);
+      extraShadersToUpdate.push_back(ShaderToUpdate {
+        .shader = newShader,
+        .isUiShader = checkIfUiShader(shader),
+      });
+      if(isUiShader){
+        initUiShader(newShader);
+      }else{
+        initDefaultShader(newShader);
+      }
     }
     if (!lastShaderId.has_value() || newShader != lastShaderId.value()){
       lastShaderId = newShader;
@@ -1083,8 +1106,18 @@ int main(int argc, char* argv[]){
     .shaderByName = shaderByName,
     .loadShader = [](std::string name, std::string path) -> unsigned int* {
       auto shader = loadShaderIntoCache(name, path + "/vertex.glsl", path + "/fragment.glsl", interface.readFile, getTemplateValues());
-      initDefaultShader(*shader);
-      extraShadersToUpdate.push_back(*shader);
+
+      auto isUiShader = checkIfUiShader(name);
+      extraShadersToUpdate.push_back(ShaderToUpdate {
+        .shader = *shader,
+        .isUiShader = isUiShader,
+      });
+      if (isUiShader){
+        initUiShader(*shader);
+      }else{
+        initDefaultShader(*shader);
+      }
+
       return shader;
     },
     .setShaderUniform = setUniformData,
@@ -1530,8 +1563,12 @@ int main(int argc, char* argv[]){
     std::vector<glm::mat4> lightMatrixs = calcShadowMapViews(lights);
 
     updateDefaultShaderPerFrame(*mainShaders.shaderProgram, lights, false, viewTransform.position, lightMatrixs);
-    for (auto shaderId : extraShadersToUpdate){
-      updateDefaultShaderPerFrame(shaderId, lights, false, viewTransform.position, lightMatrixs);
+    for (auto shader : extraShadersToUpdate){
+      if (shader.isUiShader){
+        updateUiShaderPerFrame(shader.shader);
+      }else{
+        updateDefaultShaderPerFrame(shader.shader, lights, false, viewTransform.position, lightMatrixs);
+      }
     }
     updateSelectionShaderPerFrame(*mainShaders.selectionProgram, lights, viewTransform.position, lightMatrixs);
     updateUiShaderPerFrame(*renderingResources.uiShaderProgram);

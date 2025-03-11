@@ -250,9 +250,9 @@ PROFILE("drawShapeData",
             .a = color.w,
           };
           auto restoredId = getIdFromColor(colorTypeColor);
-          shaderSetUniform(uiShaderProgram, "encodedid", glm::vec4(color.x, color.y, color.z, color.w));
+          shaderSetUniform(shaderToUse, "encodedid", glm::vec4(color.x, color.y, color.z, color.w));
         }else{
-          shaderSetUniform(uiShaderProgram, "encodedid", getColorFromGameobject(0));
+          shaderSetUniform(shaderToUse, "encodedid", getColorFromGameobject(0));
         }
         auto textShapeData = std::get_if<TextShapeData>(&shape.shapeData);
         auto rectShapeData = std::get_if<RectShapeData>(&shape.shapeData);
@@ -263,8 +263,8 @@ PROFILE("drawShapeData",
           auto adjustedFontSize = convertTextNdiFontsize(height, width, textShapeData -> fontSize, shape.ndi);
           FontFamily& fontFamily = fontFamilyByName(textShapeData -> fontFamily);
 
-          shaderSetUniformBool(uiShaderProgram, "forceTint", false);
-          drawWords(uiShaderProgram, fontFamily, textShapeData -> word, coords.x, coords.y, adjustedFontSize, textShapeData -> maxWidthNdi);          
+          shaderSetUniformBool(shaderToUse, "forceTint", false);
+          drawWords(shaderToUse, fontFamily, textShapeData -> word, coords.x, coords.y, adjustedFontSize, textShapeData -> maxWidthNdi);          
         }else if (rectShapeData != NULL){
           modassert(shape.ndi, "non-ndi rect drawing not supported"); 
           float centerXNdi = rectShapeData -> centerX;
@@ -273,7 +273,7 @@ PROFILE("drawShapeData",
           float heightNdi = rectShapeData -> height;
           glm::mat4 scaledAndTranslated = glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(centerXNdi, centerYNdi, 0.f)), glm::vec3(widthNdi, heightNdi, 1.f));
           
-          shaderSetUniformBool(uiShaderProgram, "forceTint", false);
+          shaderSetUniformBool(shaderToUse, "forceTint", false);
           
           unsigned int textureId = -1;
           if (rectShapeData -> texture.has_value()){
@@ -286,11 +286,11 @@ PROFILE("drawShapeData",
           MeshUniforms meshUniforms {
             .model = scaledAndTranslated,
           };
-          drawMesh(unitXYRect, uiShaderProgram, textureId, -1, false, -1, meshUniforms); // TODO this could batched
+          drawMesh(unitXYRect, shaderToUse, textureId, -1, false, -1, meshUniforms); // TODO this could batched
         }else if (lineShapeData != NULL){
           modassert(shape.ndi, "non-ndi line drawing not supported"); 
           
-          shaderSetUniformBool(uiShaderProgram, "forceTint", true);
+          shaderSetUniformBool(shaderToUse, "forceTint", true);
           
           std::vector<Line> lines;
           lines.push_back(Line {

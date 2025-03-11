@@ -289,7 +289,7 @@ void assertAllUniformsSet(unsigned int program, std::vector<UniformData>& unifor
   for (auto &requiredUniform : allRequiredUniforms){
     bool isExcludedName = false;
     for (auto &name : excludedNames){
-      if (requiredUniform.name == name){
+      if (requiredUniform.name == name || requiredUniform.name.at(0) == '_'){
         isExcludedName = true;
         break;
       }
