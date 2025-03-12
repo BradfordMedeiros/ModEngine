@@ -205,16 +205,15 @@ void removeObject(
   assert(false);
 }
 
-void setShaderObjectData(GLint shaderProgram, bool hasBones, glm::vec4 tint, glm::vec2 textureOffset){
+void setShaderObjectData(GLint shaderProgram, bool hasBones, glm::vec4 tint){
   shaderSetUniformBool(shaderProgram, "hasBones", hasBones);    
   shaderSetUniform(shaderProgram, "tint", tint);
-  shaderSetUniform(shaderProgram, "textureOffset", textureOffset);
 }
 
 int renderDefaultNode(GLint shaderProgram, Mesh& mesh, glm::mat4& matrix){
   // Transformation getTransformationFromMatrix(glm::mat4 matrix){
   // unscale this model matrix
-  setShaderObjectData(shaderProgram, mesh.bones.size() > 0, glm::vec4(1.f, 1.f, 0.f, 1.f), glm::vec2(0.f, 0.f));
+  setShaderObjectData(shaderProgram, mesh.bones.size() > 0, glm::vec4(1.f, 1.f, 0.f, 1.f));
 
   MeshUniforms meshUniforms {
     .model = matrix,
@@ -271,7 +270,7 @@ int renderObject(
         hasBones = true;
       }
 
-      setShaderObjectData(shaderProgram, hasBones, meshObj -> tint, meshObj -> texture.textureoffset);
+      setShaderObjectData(shaderProgram, hasBones, meshObj -> tint);
       shaderLogDebug((std::string("draw mesh: ") + meshObj -> meshNames.at(x)).c_str());
 
       MeshUniforms meshUniforms {
@@ -279,6 +278,7 @@ int renderObject(
         .emissionAmount = meshObj -> emissionAmount,
         .textureSize = meshObj -> texture.texturesize,
         .textureTiling = meshObj -> texture.texturetiling,
+        .textureOffset = meshObj -> texture.textureoffset,
       };
       drawMesh(meshToRender, shaderProgram, meshObj -> texture.loadingInfo.textureId, -1, drawPoints, meshObj -> normalTexture.textureId, meshUniforms);   
       numTriangles = numTriangles + meshToRender.numTriangles; 
@@ -319,7 +319,7 @@ int renderObject(
 
   auto portalObj = std::get_if<GameObjectPortal>(&toRender);
   if (portalObj != NULL){
-    setShaderObjectData(shaderProgram, defaultMeshes.nodeMesh -> bones.size() > 0, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0.f, 0.f));
+    setShaderObjectData(shaderProgram, defaultMeshes.nodeMesh -> bones.size() > 0, glm::vec4(1.f, 1.f, 1.f, 1.f));
 
     MeshUniforms meshUniforms {
       .model = finalModelMatrix,
@@ -335,7 +335,7 @@ int renderObject(
 
   auto octreeObj = std::get_if<GameObjectOctree>(&toRender);
   if (octreeObj != NULL){
-    setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0.f, 0.f));
+    setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f));
     Mesh* octreeMesh = getOctreeMesh(*octreeObj);
     modassert(octreeMesh, "no octree mesh available");
 
@@ -353,7 +353,7 @@ int renderObject(
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&toRender);
   if (navmeshObj != NULL){
-    setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0.f, 0.f));
+    setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f));
 
     MeshUniforms meshUniforms {
       .model = finalModelMatrix,
@@ -405,7 +405,7 @@ int renderObject(
 
   auto textObj = std::get_if<GameObjectUIText>(&toRender);
   if (textObj != NULL){
-    setShaderObjectData(shaderProgram, false, textObj -> tint, glm::vec2(0.f, 0.f));   
+    setShaderObjectData(shaderProgram, false, textObj -> tint);   
     return api.drawWord(shaderProgram, id, textObj -> value, 1000.f /* 1000.f => -1,1 range for each quad */, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor, textObj -> fontFamily, selectionMode);
   }
 
