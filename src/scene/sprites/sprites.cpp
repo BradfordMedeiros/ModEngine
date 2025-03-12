@@ -423,5 +423,5 @@ void drawWords(GLint shaderProgram, FontFamily& fontFamily, std::string word, fl
       .wrapamount = maxWidthNdi.value(),
     };
   }
-  drawWordsRelative(shaderProgram, fontFamily, glm::mat4(1.f), word, left, top, fontSize, POSITIVE_ALIGN, textWrap, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 }, -1);
+  drawWordsRelative(shaderProgram, fontFamily, glm::mat4(1.f), word, left, top, fontSize, POSITIVE_ALIGN, textWrap, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 }, -1, true, 0, false);
 }
