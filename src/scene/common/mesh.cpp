@@ -198,7 +198,7 @@ void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsi
   shaderSetUniform(shaderProgram, "model", meshUniforms.model);
   glProgramUniform3fv(shaderProgram, glGetUniformLocation(shaderProgram, "emissionAmount"), 1, glm::value_ptr(meshUniforms.emissionAmount));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(meshUniforms.textureSize));
-
+  glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshUniforms.textureTiling));
 
 
   glBindVertexArray(mesh.VAOPointer);
