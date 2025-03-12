@@ -2,6 +2,8 @@
 
 extern Stats statistics;
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4& value);
+void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::vec3& value);
+void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::vec2& value);
 
 int numberOfDrawCallsThisFrame = 0;  // static-state
 
@@ -194,6 +196,10 @@ Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> e
 // should just create another functon to handle the ui shader
 void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId,  bool drawPoints, unsigned int customNormalTextureId, MeshUniforms meshUniforms){
   shaderSetUniform(shaderProgram, "model", meshUniforms.model);
+  glProgramUniform3fv(shaderProgram, glGetUniformLocation(shaderProgram, "emissionAmount"), 1, glm::value_ptr(meshUniforms.emissionAmount));
+  glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(meshUniforms.textureSize));
+
+
 
   glBindVertexArray(mesh.VAOPointer);
  

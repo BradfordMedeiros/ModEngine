@@ -57,6 +57,8 @@ Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> e
 
 struct MeshUniforms {
   glm::mat4 model;
+  glm::vec3 emissionAmount = glm::vec3(0.f, 0.f, 0.f);
+  glm::vec2 textureSize = glm::vec2(1.f, 1.f);
 };
 void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId, bool drawPoints, unsigned int customNormalTextureId, MeshUniforms meshUniforms);
 
