@@ -10,35 +10,30 @@ in vec3 ambientVoxelColor;
 layout (location = 0) out vec4 FragColor;
 layout (location = 1) out vec4 BloomColor;
 
+// per object
 uniform sampler2D maintexture;
 uniform sampler2D emissionTexture;
-uniform sampler2D opacityTexture;
+uniform sampler2D opacityTexture;  // todo remove this and make this a special shader to accomplish this instead
 uniform sampler2D lightDepthTexture;
 uniform samplerCube cubemapTexture;
 uniform sampler2D roughnessTexture;
 uniform sampler2D normalTexture;
-
 uniform vec4 tint;
-uniform vec3 cameraPosition;
 
-uniform bool enableLighting;
-uniform bool enableAttenutation;
-uniform bool enableShadows;
-uniform bool enableDiffuse;
-uniform bool enableSpecular;
-uniform bool enablePBR;
 uniform bool hasDiffuseTexture;
 uniform bool hasEmissionTexture;
 uniform bool hasOpacityTexture;
 uniform bool hasCubemapTexture;
 uniform bool hasRoughnessTexture;
 uniform bool hasNormalTexture;
-uniform float shadowIntensity;
 
 uniform vec2 textureOffset;
 uniform vec2 textureTiling;
 uniform vec2 textureSize;
+uniform float discardTexAmount;  // this is rare and should just be done as a special shader if i need this
 
+// per frame
+uniform vec3 cameraPosition;
 uniform int numlights;
 uniform vec3 lights[ $LIGHT_BUFFER_SIZE ];
 uniform vec3 lightscolor[ $LIGHT_BUFFER_SIZE ];
@@ -48,9 +43,19 @@ uniform float lightsmaxangle[ $LIGHT_BUFFER_SIZE ];
 uniform float lightsangledelta[ $LIGHT_BUFFER_SIZE ];
 uniform bool lightsisdir[ $LIGHT_BUFFER_SIZE ];
 
+
+
+// globalish settings
+uniform bool enableLighting;
+uniform bool enableAttenutation;
+uniform bool enableShadows;
+uniform bool enableDiffuse;
+uniform bool enableSpecular;
+uniform bool enablePBR;
+uniform float shadowIntensity;
+
 uniform vec3 ambientAmount;
 uniform vec3 emissionAmount;
-uniform float discardTexAmount;
 uniform float bloomThreshold;
 
 

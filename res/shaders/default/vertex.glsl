@@ -7,12 +7,19 @@ layout (location = 3) in vec3 aTangent;
 layout (location = 4) in int aBoneIndex[4];
 layout (location = 8) in float aBoneWeight[4];
 
+// per object
 uniform mat4 model;
-uniform mat4 projview;
 uniform mat4 bones[ $BONES_BUFFER ];
 uniform bool hasBones;
 
+// per frame
+uniform mat4 projview;
 uniform mat4 lightsprojview;
+
+// global 
+uniform bool showBoneWeight;
+uniform bool useBoneTransform;
+
 
 out vec2 TexCoord;
 out vec3 Normal;
@@ -23,8 +30,8 @@ out vec4 sshadowCoord;
 
 out vec4 glFragPos;
 flat out vec4 overcolor;
-uniform bool showBoneWeight;
-uniform bool useBoneTransform;
+
+
 
 void main(){
   vec3 tangent = normalize(vec3(model * vec4(aTangent, 0.0)));
