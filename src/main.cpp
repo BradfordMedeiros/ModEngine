@@ -186,8 +186,9 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
 
     MeshUniforms meshUniforms {
       .model = model,
+      .customTextureId = clearTextureId.value(),
     };
-    drawMesh(*defaultResources.defaultMeshes.unitXYRect, *renderingResources.uiShaderProgram, clearTextureId.value(), -1, false, -1, meshUniforms);
+    drawMesh(*defaultResources.defaultMeshes.unitXYRect, *renderingResources.uiShaderProgram, false, meshUniforms);
   }
 
 
@@ -545,7 +546,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view){
   MeshUniforms meshUniforms {
     .model = model,
   };
-  drawMesh(world.meshes.at("skybox").mesh, shaderProgram, -1, -1, false, -1, meshUniforms); 
+  drawMesh(world.meshes.at("skybox").mesh, shaderProgram, false, meshUniforms); 
 }
 
 void renderUI(Color pixelColor){  

@@ -285,8 +285,9 @@ PROFILE("drawShapeData",
 
           MeshUniforms meshUniforms {
             .model = scaledAndTranslated,
+            .customTextureId = textureId,
           };
-          drawMesh(unitXYRect, shaderToUse, textureId, -1, false, -1, meshUniforms); // TODO this could batched
+          drawMesh(unitXYRect, shaderToUse, false, meshUniforms); // TODO this could batched
         }else if (lineShapeData != NULL){
           modassert(shape.ndi, "non-ndi line drawing not supported"); 
           

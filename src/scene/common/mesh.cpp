@@ -194,7 +194,7 @@ Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> e
 // TODO This is intended for the default shader
 // in practice this gets called for other shaders too 
 // should just create another functon to handle the ui shader
-void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId,  bool drawPoints, unsigned int customNormalTextureId, MeshUniforms meshUniforms){
+void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms){
   shaderSetUniform(shaderProgram, "model", meshUniforms.model);
   glProgramUniform3fv(shaderProgram, glGetUniformLocation(shaderProgram, "emissionAmount"), 1, glm::value_ptr(meshUniforms.emissionAmount));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(meshUniforms.textureSize));
@@ -206,8 +206,8 @@ void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsi
  
   glActiveTexture(GL_TEXTURE0); 
 
-  auto diffuseTextureId = customTextureId == -1 ? mesh.texture.textureId : customTextureId;
-  auto hasDiffuseTexture = customTextureId != -1 || mesh.hasDiffuseTexture; 
+  auto diffuseTextureId = meshUniforms.customTextureId == -1 ? mesh.texture.textureId : meshUniforms.customTextureId;
+  auto hasDiffuseTexture = meshUniforms.customTextureId != -1 || mesh.hasDiffuseTexture; 
   glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasDiffuseTexture"), hasDiffuseTexture);
   glBindTexture(GL_TEXTURE_2D, diffuseTextureId);
  
@@ -217,8 +217,8 @@ void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsi
   glActiveTexture(GL_TEXTURE0 + 1);
   glBindTexture(GL_TEXTURE_2D, mesh.emissionTexture.textureId);
 
-  auto opacityTextureId = customOpacityTextureId == -1 ? mesh.opacityTexture.textureId : customOpacityTextureId;
-  bool hasOpacityTexture = mesh.hasOpacityTexture || (customOpacityTextureId != -1);
+  auto opacityTextureId = meshUniforms.customOpacityTextureId == -1 ? mesh.opacityTexture.textureId : meshUniforms.customOpacityTextureId;
+  bool hasOpacityTexture = mesh.hasOpacityTexture || (meshUniforms.customOpacityTextureId != -1);
   glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasOpacityTexture"), hasOpacityTexture);
   glActiveTexture(GL_TEXTURE0 + 2);
   glBindTexture(GL_TEXTURE_2D, opacityTextureId);
@@ -231,8 +231,8 @@ void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsi
   glActiveTexture(GL_TEXTURE0 + 5);
   glBindTexture(GL_TEXTURE_2D, mesh.roughnessTexture.textureId);
 
-  auto normalTextureId = customNormalTextureId == -1 ? mesh.normalTexture.textureId : customNormalTextureId;
-  bool hasNormalTexture = mesh.hasNormalTexture || (customNormalTextureId != -1);
+  auto normalTextureId = meshUniforms.customNormalTextureId == -1 ? mesh.normalTexture.textureId : meshUniforms.customNormalTextureId;
+  bool hasNormalTexture = mesh.hasNormalTexture || (meshUniforms.customNormalTextureId != -1);
   glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasNormalTexture"), hasNormalTexture);
   glActiveTexture(GL_TEXTURE0 + 6);
   glBindTexture(GL_TEXTURE_2D, normalTextureId);

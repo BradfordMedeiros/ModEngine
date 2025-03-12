@@ -218,7 +218,7 @@ int renderDefaultNode(GLint shaderProgram, Mesh& mesh, glm::mat4& matrix){
   MeshUniforms meshUniforms {
     .model = matrix,
   };
-  drawMesh(mesh, shaderProgram, -1, -1, false, -1, meshUniforms);
+  drawMesh(mesh, shaderProgram, false, meshUniforms);
   return mesh.numTriangles;
 }
 
@@ -279,8 +279,10 @@ int renderObject(
         .textureSize = meshObj -> texture.texturesize,
         .textureTiling = meshObj -> texture.texturetiling,
         .textureOffset = meshObj -> texture.textureoffset,
+        .customTextureId = meshObj -> texture.loadingInfo.textureId,
+        .customNormalTextureId = meshObj -> normalTexture.textureId,
       };
-      drawMesh(meshToRender, shaderProgram, meshObj -> texture.loadingInfo.textureId, -1, drawPoints, meshObj -> normalTexture.textureId, meshUniforms);   
+      drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms);   
       numTriangles = numTriangles + meshToRender.numTriangles; 
     }
     return numTriangles;
@@ -323,8 +325,9 @@ int renderObject(
 
     MeshUniforms meshUniforms {
       .model = finalModelMatrix,
+      .customTextureId = portalTexture,
     };
-    drawMesh(*defaultMeshes.portalMesh, shaderProgram, portalTexture, -1, false, -1, meshUniforms);
+    drawMesh(*defaultMeshes.portalMesh, shaderProgram, false, meshUniforms);
     return defaultMeshes.portalMesh -> numTriangles;
   }
 
@@ -342,7 +345,7 @@ int renderObject(
     MeshUniforms meshUniforms {
       .model = finalModelMatrix,
     };
-    drawMesh(*octreeMesh, shaderProgram, -1, -1, false, -1, meshUniforms);
+    drawMesh(*octreeMesh, shaderProgram, false, meshUniforms);
     return octreeMesh -> numTriangles;
   }
 
@@ -357,8 +360,9 @@ int renderObject(
 
     MeshUniforms meshUniforms {
       .model = finalModelMatrix,
+      .customTextureId = navmeshTexture,
     };
-    drawMesh(navmeshObj -> mesh, shaderProgram, navmeshTexture, -1, false, -1, meshUniforms);    
+    drawMesh(navmeshObj -> mesh, shaderProgram, false, meshUniforms);    
 
 
     // this base id point index stuff is pretty hackey bullshit

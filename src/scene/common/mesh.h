@@ -61,8 +61,11 @@ struct MeshUniforms {
   glm::vec2 textureSize = glm::vec2(1.f, 1.f);
   glm::vec2 textureTiling = glm::vec2(1.f, 1.f);
   glm::vec2 textureOffset = glm::vec2(0.f, 0.f);
+  unsigned int customTextureId = -1;
+  unsigned int customNormalTextureId = -1;
+  unsigned int customOpacityTextureId = -1;
 };
-void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId, bool drawPoints, unsigned int customNormalTextureId, MeshUniforms meshUniforms);
+void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms);
 
 struct LineRenderData {
   unsigned int VAO;
