@@ -64,8 +64,11 @@ struct MeshUniforms {
   unsigned int customTextureId = -1;
   unsigned int customNormalTextureId = -1;
   unsigned int customOpacityTextureId = -1;
+  glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f, 1.f);
 };
-void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms, glm::vec4 tint);
+
+
+void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms, std::vector<Bone>* bones = NULL);
 
 struct LineRenderData {
   unsigned int VAO;

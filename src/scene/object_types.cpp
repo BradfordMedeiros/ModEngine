@@ -205,19 +205,13 @@ void removeObject(
   assert(false);
 }
 
-void setShaderObjectData(GLint shaderProgram, bool hasBones, glm::vec4 tint){
-  shaderSetUniformBool(shaderProgram, "hasBones", hasBones);    
-}
 
 int renderDefaultNode(GLint shaderProgram, Mesh& mesh, glm::mat4& matrix){
-  // Transformation getTransformationFromMatrix(glm::mat4 matrix){
-  // unscale this model matrix
-  setShaderObjectData(shaderProgram, mesh.bones.size() > 0, glm::vec4(1.f, 1.f, 0.f, 1.f));
-
   MeshUniforms meshUniforms {
     .model = matrix,
+    .tint = glm::vec4(1.f, 1.f, 0.f, 1.f),
   };
-  drawMesh(mesh, shaderProgram, false, meshUniforms, glm::vec4(1.f, 1.f, 0.f, 1.f));
+  drawMesh(mesh, shaderProgram, false, meshUniforms, &mesh.bones);
   return mesh.numTriangles;
 }
 
@@ -256,20 +250,6 @@ int renderObject(
     int numTriangles = 0;
     for (int x = 0; x < meshObj -> meshesToRender.size(); x++){
       Mesh& meshToRender = meshObj -> meshesToRender.at(x);
-      bool hasBones = false;
-      if (meshToRender.bones.size() > 0){
-        for (int i = 0; i < 100; i++){
-          auto boneUniformLocation = glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str());
-          if (i >= meshToRender.bones.size()){
-            shaderSetUniform(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str(), glm::mat4(1.f));
-          }else{
-            shaderSetUniform(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str(), meshToRender.bones.at(i).offsetMatrix);
-          }
-        }
-        hasBones = true;
-      }
-
-      setShaderObjectData(shaderProgram, hasBones, meshObj -> tint);
       shaderLogDebug((std::string("draw mesh: ") + meshObj -> meshNames.at(x)).c_str());
 
       MeshUniforms meshUniforms {
@@ -280,8 +260,9 @@ int renderObject(
         .textureOffset = meshObj -> texture.textureoffset,
         .customTextureId = meshObj -> texture.loadingInfo.textureId,
         .customNormalTextureId = meshObj -> normalTexture.textureId,
+        .tint = meshObj -> tint,
       };
-      drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms, meshObj -> tint);   
+      drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms, &meshToRender.bones);   
       numTriangles = numTriangles + meshToRender.numTriangles; 
     }
     return numTriangles;
@@ -320,13 +301,11 @@ int renderObject(
 
   auto portalObj = std::get_if<GameObjectPortal>(&toRender);
   if (portalObj != NULL){
-    setShaderObjectData(shaderProgram, defaultMeshes.nodeMesh -> bones.size() > 0, glm::vec4(1.f, 1.f, 1.f, 1.f));
-
     MeshUniforms meshUniforms {
       .model = finalModelMatrix,
       .customTextureId = portalTexture,
     };
-    drawMesh(*defaultMeshes.portalMesh, shaderProgram, false, meshUniforms, glm::vec4(1.f, 1.f, 1.f, 1.f));
+    drawMesh(*defaultMeshes.portalMesh, shaderProgram, false, meshUniforms, &defaultMeshes.nodeMesh -> bones);
     return defaultMeshes.portalMesh -> numTriangles;
   }
 
@@ -337,14 +316,13 @@ int renderObject(
 
   auto octreeObj = std::get_if<GameObjectOctree>(&toRender);
   if (octreeObj != NULL){
-    setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f));
     Mesh* octreeMesh = getOctreeMesh(*octreeObj);
     modassert(octreeMesh, "no octree mesh available");
 
     MeshUniforms meshUniforms {
       .model = finalModelMatrix,
     };
-    drawMesh(*octreeMesh, shaderProgram, false, meshUniforms, glm::vec4(1.f, 1.f, 1.f, 1.f));
+    drawMesh(*octreeMesh, shaderProgram, false, meshUniforms, NULL);
     return octreeMesh -> numTriangles;
   }
 
@@ -355,13 +333,11 @@ int renderObject(
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&toRender);
   if (navmeshObj != NULL){
-    setShaderObjectData(shaderProgram, false, glm::vec4(1.f, 1.f, 1.f, 1.f));
-
     MeshUniforms meshUniforms {
       .model = finalModelMatrix,
       .customTextureId = navmeshTexture,
     };
-    drawMesh(navmeshObj -> mesh, shaderProgram, false, meshUniforms, glm::vec4(1.f, 1.f, 1.f, 1.f));    
+    drawMesh(navmeshObj -> mesh, shaderProgram, false, meshUniforms, NULL);    
 
 
     // this base id point index stuff is pretty hackey bullshit
@@ -408,7 +384,7 @@ int renderObject(
 
   auto textObj = std::get_if<GameObjectUIText>(&toRender);
   if (textObj != NULL){
-    setShaderObjectData(shaderProgram, false, textObj -> tint);   
+    shaderSetUniform(shaderProgram, "tint", textObj -> tint);
     return api.drawWord(shaderProgram, id, textObj -> value, 1000.f /* 1000.f => -1,1 range for each quad */, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor, textObj -> fontFamily, selectionMode);
   }
 

@@ -1,10 +1,12 @@
 #include "./mesh.h"
 
 extern Stats statistics;
+void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4&& value);
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4& value);
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::vec3& value);
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::vec2& value);
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::vec4& value);
+void shaderSetUniform(unsigned int shaderToUse, const char* name, bool value);
 
 int numberOfDrawCallsThisFrame = 0;  // static-state
 
@@ -195,13 +197,29 @@ Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> e
 // TODO This is intended for the default shader
 // in practice this gets called for other shaders too 
 // should just create another functon to handle the ui shader
-void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms, glm::vec4 tint){
+void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms, std::vector<Bone>* bones){
   shaderSetUniform(shaderProgram, "model", meshUniforms.model);
   glProgramUniform3fv(shaderProgram, glGetUniformLocation(shaderProgram, "emissionAmount"), 1, glm::value_ptr(meshUniforms.emissionAmount));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(meshUniforms.textureSize));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshUniforms.textureTiling));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshUniforms.textureOffset));
-  shaderSetUniform(shaderProgram, "tint", tint);
+  shaderSetUniform(shaderProgram, "tint", meshUniforms.tint);
+
+  bool hasBones = !((bones == NULL) || (bones -> size() == 0));
+  glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasBones"), hasBones);
+
+  if (hasBones){
+    for (int i = 0; i < 100; i++){
+      auto boneUniformLocation = glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str());
+      if (i >= bones -> size()){
+        shaderSetUniform(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str(), glm::mat4(1.f));
+      }else{
+        shaderSetUniform(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str(), bones -> at(i).offsetMatrix);
+      }
+    }
+  }
+
+
 
 
   glBindVertexArray(mesh.VAOPointer);
