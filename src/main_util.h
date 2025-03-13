@@ -17,7 +17,6 @@ LayerInfo getLayerForId(objid id);
 RotationDirection getCursorInfoWorld(float ndix, float ndiy);
 std::vector<ParsedLoadScene> parseSceneArgs(std::vector<std::string>& rawScenes);
 std::optional<unsigned int> getTextureId(std::string& texture);
-glm::vec3 getTintIfSelected(bool isSelected);
 float exposureAmount();
 glm::vec3 positionToNdi(glm::vec3 position);
 

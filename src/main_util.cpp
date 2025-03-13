@@ -72,13 +72,6 @@ std::optional<unsigned int> getTextureId(std::string& texture){
 }
 
 
-glm::vec3 getTintIfSelected(bool isSelected){
-  if (isSelected){
-    return glm::vec3(1.0f, 0.0f, 0.0f);
-  }
-  return glm::vec3(0.f, 1.f, 1.f);
-}
-
 float exposureAmount(){
   float elapsed = statistics.now - state.exposureStart;
   float amount = elapsed / 1.f;   
