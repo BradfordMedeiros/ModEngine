@@ -138,8 +138,9 @@ void drawSpriteZBias(GLint shaderProgram, Mesh mesh, float left, float top, floa
   MeshUniforms meshUniforms {
     .model = modelMatrix,
     .tint = tint,
+    .id = id,
   };
-  drawMesh(mesh, shaderProgram, false, meshUniforms, id);
+  drawMesh(mesh, shaderProgram, false, meshUniforms);
 }
 
 /// these two functions are now equivalent since drawing things non-centered has not been useful

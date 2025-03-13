@@ -200,7 +200,7 @@ Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> e
 // in practice this gets called for other shaders too 
 // should just create another functon to handle the ui shader
 
-void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms, objid id){
+void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms){
   shaderSetUniform(shaderProgram, "model", meshUniforms.model);
   glProgramUniform3fv(shaderProgram, glGetUniformLocation(shaderProgram, "emissionAmount"), 1, glm::value_ptr(meshUniforms.emissionAmount));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(meshUniforms.textureSize));
@@ -208,7 +208,7 @@ void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms mesh
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshUniforms.textureOffset));
   shaderSetUniform(shaderProgram, "tint", meshUniforms.tint);
 
-  glProgramUniform4fv(shaderProgram, glGetUniformLocation(shaderProgram, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
+  glProgramUniform4fv(shaderProgram, glGetUniformLocation(shaderProgram, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(meshUniforms.id)));
   /*
             auto color = getColorFromGameobject(selectionId);
           Color colorTypeColor {

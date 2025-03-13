@@ -211,8 +211,9 @@ int renderDefaultNode(GLint shaderProgram, Mesh& mesh, glm::mat4& matrix, objid 
     .model = matrix,
     .tint = glm::vec4(1.f, 1.f, 0.f, 1.f),
     .bones = &mesh.bones,
+    .id = id,
   };
-  drawMesh(mesh, shaderProgram, false, meshUniforms, id);
+  drawMesh(mesh, shaderProgram, false, meshUniforms);
   return mesh.numTriangles;
 }
 
@@ -263,8 +264,9 @@ int renderObject(
         .customNormalTextureId = meshObj -> normalTexture.textureId,
         .tint = meshObj -> tint,
         .bones = &meshToRender.bones,
+        .id = id,
       };
-      drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms, id);   
+      drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms);   
       numTriangles = numTriangles + meshToRender.numTriangles; 
     }
     return numTriangles;
@@ -307,8 +309,9 @@ int renderObject(
       .model = finalModelMatrix,
       .customTextureId = portalTexture,
       .bones = &defaultMeshes.nodeMesh -> bones,
+      .id = id,
     };
-    drawMesh(*defaultMeshes.portalMesh, shaderProgram, false, meshUniforms, id);
+    drawMesh(*defaultMeshes.portalMesh, shaderProgram, false, meshUniforms);
     return defaultMeshes.portalMesh -> numTriangles;
   }
 
@@ -324,8 +327,9 @@ int renderObject(
 
     MeshUniforms meshUniforms {
       .model = finalModelMatrix,
+      .id = id,
     };
-    drawMesh(*octreeMesh, shaderProgram, false, meshUniforms, id);
+    drawMesh(*octreeMesh, shaderProgram, false, meshUniforms);
     return octreeMesh -> numTriangles;
   }
 
@@ -339,8 +343,9 @@ int renderObject(
     MeshUniforms meshUniforms {
       .model = finalModelMatrix,
       .customTextureId = navmeshTexture,
+      .id = id,
     };
-    drawMesh(navmeshObj -> mesh, shaderProgram, false, meshUniforms, id);    
+    drawMesh(navmeshObj -> mesh, shaderProgram, false, meshUniforms);    
 
 
     // this base id point index stuff is pretty hackey bullshit

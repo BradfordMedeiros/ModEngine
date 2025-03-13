@@ -186,7 +186,7 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
       .customTextureId = clearTextureId.value(),
       .tint = clearColor,
     };
-    drawMesh(*defaultResources.defaultMeshes.unitXYRect, *renderingResources.uiShaderProgram, false, meshUniforms, 0);
+    drawMesh(*defaultResources.defaultMeshes.unitXYRect, *renderingResources.uiShaderProgram, false, meshUniforms);
   }
 
 
@@ -539,7 +539,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view){
     .model = model,
     .tint = glm::vec4(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z, 1.f),
   };
-  drawMesh(world.meshes.at("skybox").mesh, shaderProgram, false, meshUniforms, 0); 
+  drawMesh(world.meshes.at("skybox").mesh, shaderProgram, false, meshUniforms); 
 }
 
 void renderUI(Color pixelColor){  
@@ -1673,7 +1673,10 @@ int main(int argc, char* argv[]){
     LayerInfo& layerInfo = layerByName(world, "");
     float near = layerInfo.nearplane;
     float far = layerInfo.farplane;
+    
+
     // depth buffer pass 
+    // why does this require drawing this?  Couldn't I just read it from the attachment directly? Does it matter?
     {
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
       glUseProgram(*depthProgram); 
