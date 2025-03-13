@@ -238,21 +238,7 @@ PROFILE("drawShapeData",
             lastShaderId = shapeOptionsShader;
         }
  
-        if (shape.selectionId.has_value()){
-          //std::cout << "selection id value: " << text.selectionId.value() << std::endl;
-          auto id = shape.selectionId.value();
-          auto color = getColorFromGameobject(id);
-          Color colorTypeColor {
-            .r = color.x,
-            .g = color.y, 
-            .b = color.z,
-            .a = color.w,
-          };
-          auto restoredId = getIdFromColor(colorTypeColor);
-          shaderSetUniform(shaderToUse, "encodedid", glm::vec4(color.x, color.y, color.z, color.w));
-        }else{
-          shaderSetUniform(shaderToUse, "encodedid", getColorFromGameobject(0));
-        }
+        objid selectionId = shape.selectionId.has_value() ? shape.selectionId.value() : 0;
         auto textShapeData = std::get_if<TextShapeData>(&shape.shapeData);
         auto rectShapeData = std::get_if<RectShapeData>(&shape.shapeData);
         auto lineShapeData = std::get_if<LineShapeData>(&shape.shapeData);
@@ -263,7 +249,7 @@ PROFILE("drawShapeData",
           FontFamily& fontFamily = fontFamilyByName(textShapeData -> fontFamily);
 
           shaderSetUniformBool(shaderToUse, "forceTint", false);
-          drawWords(shaderToUse, fontFamily, textShapeData -> word, coords.x, coords.y, adjustedFontSize, textShapeData -> maxWidthNdi, shape.tint);          
+          drawWords(shaderToUse, fontFamily, textShapeData -> word, coords.x, coords.y, adjustedFontSize, textShapeData -> maxWidthNdi, shape.tint, selectionId);          
         }else if (rectShapeData != NULL){
           modassert(shape.ndi, "non-ndi rect drawing not supported"); 
           float centerXNdi = rectShapeData -> centerX;
@@ -288,7 +274,7 @@ PROFILE("drawShapeData",
             .customTextureId = textureId,
             .tint = shape.tint,
           };
-          drawMesh(unitXYRect, shaderToUse, false, meshUniforms); // TODO this could batched
+          drawMesh(unitXYRect, shaderToUse, false, meshUniforms, selectionId); // TODO this could batched
         }else if (lineShapeData != NULL){
           modassert(shape.ndi, "non-ndi line drawing not supported"); 
           

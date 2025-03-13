@@ -433,7 +433,7 @@ FontFamily& fontFamilyByName(std::optional<std::string> name){
   return defaultResources.fontFamily.at(0);
 }
 int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, UiTextCursor cursor, std::string fontFamilyName, bool drawBoundingOnly){
-  return drawWordsRelative(shaderProgram, fontFamilyByName(fontFamilyName), fullModelTransform(world.sandbox, id), word, 0, 0, fontSize, align, wrap, virtualization, cursor.cursorIndex, cursor.cursorIndexLeft, cursor.highlightLength, drawBoundingOnly, glm::vec4(1.f, 1.f, 1.f, 1.f));
+  return drawWordsRelative(shaderProgram, fontFamilyByName(fontFamilyName), fullModelTransform(world.sandbox, id), word, 0, 0, fontSize, align, wrap, virtualization, cursor.cursorIndex, cursor.cursorIndexLeft, cursor.highlightLength, drawBoundingOnly, glm::vec4(1.f, 1.f, 1.f, 1.f), id);
 }
 
 void drawRect(float centerX, float centerY, float width, float height, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId){

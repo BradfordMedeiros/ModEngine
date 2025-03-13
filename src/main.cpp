@@ -177,8 +177,6 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
   }
 
-  shaderSetUniform(*renderingResources.uiShaderProgram, "encodedid", getColorFromGameobject(0));
-
   if (shouldClear && clearTextureId.has_value()){
     auto model = glm::scale(glm::mat4(1.0f), glm::vec3(2.f, 2.f, 2.f));
     shaderSetUniformBool(*renderingResources.uiShaderProgram, "forceTint", false);
@@ -188,7 +186,7 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
       .customTextureId = clearTextureId.value(),
       .tint = clearColor,
     };
-    drawMesh(*defaultResources.defaultMeshes.unitXYRect, *renderingResources.uiShaderProgram, false, meshUniforms);
+    drawMesh(*defaultResources.defaultMeshes.unitXYRect, *renderingResources.uiShaderProgram, false, meshUniforms, 0);
   }
 
 
@@ -342,9 +340,6 @@ void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
 
 void setShaderObjectDefault(GLint shader, glm::vec3 color, objid id, glm::mat4 projview){
   shaderSetUniform(shader, "tint", glm::vec4(color.x, color.y, color.z, 1.f));  
-  if (shader == *renderStages.selection.shader){
-    shaderSetUniform(shader, "encodedid", getColorFromGameobject(id));
-  }
   shaderSetUniform(shader, "projview", projview);
 }
 
@@ -547,7 +542,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view){
     .model = model,
     .tint = glm::vec4(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z, 1.f),
   };
-  drawMesh(world.meshes.at("skybox").mesh, shaderProgram, false, meshUniforms); 
+  drawMesh(world.meshes.at("skybox").mesh, shaderProgram, false, meshUniforms, 0); 
 }
 
 void renderUI(Color pixelColor){  

@@ -69,7 +69,7 @@ struct MeshUniforms {
 };
 
 
-void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms);
+void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms, objid id);
 
 struct LineRenderData {
   unsigned int VAO;

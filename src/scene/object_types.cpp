@@ -206,13 +206,13 @@ void removeObject(
 }
 
 
-int renderDefaultNode(GLint shaderProgram, Mesh& mesh, glm::mat4& matrix){
+int renderDefaultNode(GLint shaderProgram, Mesh& mesh, glm::mat4& matrix, objid id){
   MeshUniforms meshUniforms {
     .model = matrix,
     .tint = glm::vec4(1.f, 1.f, 0.f, 1.f),
     .bones = &mesh.bones,
   };
-  drawMesh(mesh, shaderProgram, false, meshUniforms);
+  drawMesh(mesh, shaderProgram, false, meshUniforms, id);
   return mesh.numTriangles;
 }
 
@@ -264,7 +264,7 @@ int renderObject(
         .tint = meshObj -> tint,
         .bones = &meshToRender.bones,
       };
-      drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms);   
+      drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms, id);   
       numTriangles = numTriangles + meshToRender.numTriangles; 
     }
     return numTriangles;
@@ -281,23 +281,23 @@ int renderObject(
     }
     //api.drawSphere(boneTransform.position);
     auto model = glm::translate(glm::mat4(1.f), transform.position);
-    renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, model);
+    renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, model, id);
   }
   if (meshObj != NULL && (meshObj -> meshesToRender.size() > 0) && (showDebugMask & 0b1)) {
     //api.drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 100.f, 0.f), glm::vec4(1.f, 0.f, 0.f, 1.f));
-    return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, finalModelMatrix);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, finalModelMatrix, id);
   }
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
   if (cameraObj != NULL && (showDebugMask & 0b10)){
     auto transform = getTransformationFromMatrix(model).position;
     auto model = glm::translate(glm::mat4(1.f), transform);
-    return renderDefaultNode(shaderProgram, *defaultMeshes.cameraMesh, model);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.cameraMesh, model, id);
   }
 
   auto soundObject = std::get_if<GameObjectSound>(&toRender);
   if (soundObject != NULL && (showDebugMask & 0b100)){
-    return renderDefaultNode(shaderProgram, *defaultMeshes.soundMesh, finalModelMatrix);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.soundMesh, finalModelMatrix, id);
   }
 
 
@@ -308,13 +308,13 @@ int renderObject(
       .customTextureId = portalTexture,
       .bones = &defaultMeshes.nodeMesh -> bones,
     };
-    drawMesh(*defaultMeshes.portalMesh, shaderProgram, false, meshUniforms);
+    drawMesh(*defaultMeshes.portalMesh, shaderProgram, false, meshUniforms, id);
     return defaultMeshes.portalMesh -> numTriangles;
   }
 
   auto lightObj = std::get_if<GameObjectLight>(&toRender);
   if (lightObj != NULL && (showDebugMask & 0b1000)){   
-    return renderDefaultNode(shaderProgram, *defaultMeshes.lightMesh, finalModelMatrix);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.lightMesh, finalModelMatrix, id);
   }
 
   auto octreeObj = std::get_if<GameObjectOctree>(&toRender);
@@ -325,13 +325,13 @@ int renderObject(
     MeshUniforms meshUniforms {
       .model = finalModelMatrix,
     };
-    drawMesh(*octreeMesh, shaderProgram, false, meshUniforms);
+    drawMesh(*octreeMesh, shaderProgram, false, meshUniforms, id);
     return octreeMesh -> numTriangles;
   }
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
   if (emitterObj != NULL && (showDebugMask & 0b100000)){
-    return renderDefaultNode(shaderProgram, *defaultMeshes.emitter, finalModelMatrix);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.emitter, finalModelMatrix, id);
   }
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&toRender);
@@ -340,7 +340,7 @@ int renderObject(
       .model = finalModelMatrix,
       .customTextureId = navmeshTexture,
     };
-    drawMesh(navmeshObj -> mesh, shaderProgram, false, meshUniforms);    
+    drawMesh(navmeshObj -> mesh, shaderProgram, false, meshUniforms, id);    
 
 
     // this base id point index stuff is pretty hackey bullshit
@@ -349,7 +349,7 @@ int renderObject(
     int pointIndex = 0;
     static objid baseId = 0;
 
-    drawControlPoints(id, [selectionMode, shaderProgram, &model, &defaultMeshes, &pointIndex, isSelectionShader](glm::vec3 point) -> void {
+    drawControlPoints(id, [selectionMode, shaderProgram, &model, &defaultMeshes, &pointIndex, isSelectionShader, id](glm::vec3 point) -> void {
       //modassert(false, "drawControlPoints not yet implemented");
 
       objid objectId = 0;
@@ -372,11 +372,10 @@ int renderObject(
       auto isSelected = selectedId == objectId;
       glm::vec4 color = isSelected ? glm::vec4(0.f, 0.f, 1.f, 0.5f) : glm::vec4(1.f, 0.f, 0.f, 0.5f);
       //std::cout << "selected: " << selectedId << ", object id: " << objectId << ", isSelected = " << isSelected << ", color = " << print(color) << std::endl;
-      shaderSetUniform(shaderProgram, "encodedid", getColorFromGameobject(objectId));
       shaderSetUniform(shaderProgram, "tint", isSelected ? selectedColor : notSelectedColor);
 
       auto newModel = glm::translate(model, point);
-      renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, newModel);
+      renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, newModel, id);
     });
     if (!selectionMode){
       baseId = 0;
@@ -395,7 +394,7 @@ int renderObject(
   if (prefabObj != NULL){
     auto vertexCount = 0;
     if (showDebugMask & 0b10000000){
-      vertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, finalModelMatrix);
+      vertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, finalModelMatrix, id);
     }
     return vertexCount;
   }

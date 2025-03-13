@@ -7,6 +7,8 @@ void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::vec3& val
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::vec2& value);
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::vec4& value);
 void shaderSetUniform(unsigned int shaderToUse, const char* name, bool value);
+glm::vec4 getColorFromGameobject(objid id);
+
 
 int numberOfDrawCallsThisFrame = 0;  // static-state
 
@@ -197,13 +199,26 @@ Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> e
 // TODO This is intended for the default shader
 // in practice this gets called for other shaders too 
 // should just create another functon to handle the ui shader
-void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms){
+
+void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms, objid id){
   shaderSetUniform(shaderProgram, "model", meshUniforms.model);
   glProgramUniform3fv(shaderProgram, glGetUniformLocation(shaderProgram, "emissionAmount"), 1, glm::value_ptr(meshUniforms.emissionAmount));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(meshUniforms.textureSize));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshUniforms.textureTiling));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshUniforms.textureOffset));
   shaderSetUniform(shaderProgram, "tint", meshUniforms.tint);
+
+  glProgramUniform4fv(shaderProgram, glGetUniformLocation(shaderProgram, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
+  /*
+            auto color = getColorFromGameobject(selectionId);
+          Color colorTypeColor {
+            .r = color.x,
+            .g = color.y, 
+            .b = color.z,
+            .a = color.w,
+          };
+          auto restoredId = getIdFromColor(colorTypeColor);
+          */
 
   bool hasBones = !((meshUniforms.bones == NULL) || (meshUniforms.bones -> size() == 0));
   glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasBones"), hasBones);
@@ -218,8 +233,6 @@ void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms mesh
       }
     }
   }
-
-
 
 
   glBindVertexArray(mesh.VAOPointer);
