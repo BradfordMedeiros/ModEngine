@@ -232,7 +232,6 @@ PROFILE("drawShapeData",
         auto shaderToUse = shapeOptionsShader.has_value() ? shapeOptionsShader.value() : uiShaderProgram;
         
         shaderSetUniformBool(shaderToUse, "forceTint", false);
-        shaderSetUniform(shaderToUse, "tint", shape.tint);
 
         if (shaderIsDifferent(shaderToUse, lastShaderId) && allowShaderOverride){
             glUseProgram(shaderToUse);
@@ -264,7 +263,7 @@ PROFILE("drawShapeData",
           FontFamily& fontFamily = fontFamilyByName(textShapeData -> fontFamily);
 
           shaderSetUniformBool(shaderToUse, "forceTint", false);
-          drawWords(shaderToUse, fontFamily, textShapeData -> word, coords.x, coords.y, adjustedFontSize, textShapeData -> maxWidthNdi);          
+          drawWords(shaderToUse, fontFamily, textShapeData -> word, coords.x, coords.y, adjustedFontSize, textShapeData -> maxWidthNdi, shape.tint);          
         }else if (rectShapeData != NULL){
           modassert(shape.ndi, "non-ndi rect drawing not supported"); 
           float centerXNdi = rectShapeData -> centerX;
@@ -274,7 +273,8 @@ PROFILE("drawShapeData",
           glm::mat4 scaledAndTranslated = glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(centerXNdi, centerYNdi, 0.f)), glm::vec3(widthNdi, heightNdi, 1.f));
           
           shaderSetUniformBool(shaderToUse, "forceTint", false);
-          
+          shaderSetUniform(shaderToUse, "tint", shape.tint);
+
           unsigned int textureId = -1;
           if (rectShapeData -> texture.has_value()){
             auto texId = getTextureId(rectShapeData -> texture.value());
@@ -287,17 +287,19 @@ PROFILE("drawShapeData",
             .model = scaledAndTranslated,
             .customTextureId = textureId,
           };
-          drawMesh(unitXYRect, shaderToUse, false, meshUniforms); // TODO this could batched
+          drawMesh(unitXYRect, shaderToUse, false, meshUniforms, shape.tint); // TODO this could batched
         }else if (lineShapeData != NULL){
           modassert(shape.ndi, "non-ndi line drawing not supported"); 
           
           shaderSetUniformBool(shaderToUse, "forceTint", true);
-          
+          shaderSetUniform(shaderToUse, "tint", shape.tint);
+      
           std::vector<Line> lines;
           lines.push_back(Line {
             .fromPos = lineShapeData -> fromPos,
             .toPos = lineShapeData -> toPos,
           });
+
           //glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(lineByColor.tint));
           drawLines(shaderToUse, lines, 1, modelMatrix2);   // TODO this could batched
         }

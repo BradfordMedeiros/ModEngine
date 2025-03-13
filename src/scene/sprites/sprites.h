@@ -24,9 +24,9 @@ struct FontFamily {
 
 std::vector<FontFamily> loadFontMeshes(std::vector<FontToLoad> fontInfos, Texture& nullTexture);
 
-void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float centerY, float width, float height);
-int drawWordsRelative(GLint shaderProgram, FontFamily& fontfamily, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength, bool drawBoundingOnly);
-void drawWords(GLint shaderProgram, FontFamily& fontfamily, std::string word, float left, float top, unsigned int fontSize, std::optional<float> maxWidth);
+void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float centerY, float width, float height, glm::vec4 tint);
+int drawWordsRelative(GLint shaderProgram, FontFamily& fontfamily, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength, bool drawBoundingOnly, glm::vec4 tint);
+void drawWords(GLint shaderProgram, FontFamily& fontfamily, std::string word, float left, float top, unsigned int fontSize, std::optional<float> maxWidth, glm::vec4 tint);
 BoundInfo boundInfoForCenteredText(FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength, glm::vec3* _offset);
 
 #endif

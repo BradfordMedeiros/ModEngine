@@ -207,7 +207,6 @@ void removeObject(
 
 void setShaderObjectData(GLint shaderProgram, bool hasBones, glm::vec4 tint){
   shaderSetUniformBool(shaderProgram, "hasBones", hasBones);    
-  shaderSetUniform(shaderProgram, "tint", tint);
 }
 
 int renderDefaultNode(GLint shaderProgram, Mesh& mesh, glm::mat4& matrix){
@@ -218,7 +217,7 @@ int renderDefaultNode(GLint shaderProgram, Mesh& mesh, glm::mat4& matrix){
   MeshUniforms meshUniforms {
     .model = matrix,
   };
-  drawMesh(mesh, shaderProgram, false, meshUniforms);
+  drawMesh(mesh, shaderProgram, false, meshUniforms, glm::vec4(1.f, 1.f, 0.f, 1.f));
   return mesh.numTriangles;
 }
 
@@ -282,7 +281,7 @@ int renderObject(
         .customTextureId = meshObj -> texture.loadingInfo.textureId,
         .customNormalTextureId = meshObj -> normalTexture.textureId,
       };
-      drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms);   
+      drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms, meshObj -> tint);   
       numTriangles = numTriangles + meshToRender.numTriangles; 
     }
     return numTriangles;
@@ -327,7 +326,7 @@ int renderObject(
       .model = finalModelMatrix,
       .customTextureId = portalTexture,
     };
-    drawMesh(*defaultMeshes.portalMesh, shaderProgram, false, meshUniforms);
+    drawMesh(*defaultMeshes.portalMesh, shaderProgram, false, meshUniforms, glm::vec4(1.f, 1.f, 1.f, 1.f));
     return defaultMeshes.portalMesh -> numTriangles;
   }
 
@@ -345,7 +344,7 @@ int renderObject(
     MeshUniforms meshUniforms {
       .model = finalModelMatrix,
     };
-    drawMesh(*octreeMesh, shaderProgram, false, meshUniforms);
+    drawMesh(*octreeMesh, shaderProgram, false, meshUniforms, glm::vec4(1.f, 1.f, 1.f, 1.f));
     return octreeMesh -> numTriangles;
   }
 
@@ -362,7 +361,7 @@ int renderObject(
       .model = finalModelMatrix,
       .customTextureId = navmeshTexture,
     };
-    drawMesh(navmeshObj -> mesh, shaderProgram, false, meshUniforms);    
+    drawMesh(navmeshObj -> mesh, shaderProgram, false, meshUniforms, glm::vec4(1.f, 1.f, 1.f, 1.f));    
 
 
     // this base id point index stuff is pretty hackey bullshit

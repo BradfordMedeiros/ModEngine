@@ -4,6 +4,7 @@ extern Stats statistics;
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4& value);
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::vec3& value);
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::vec2& value);
+void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::vec4& value);
 
 int numberOfDrawCallsThisFrame = 0;  // static-state
 
@@ -194,12 +195,13 @@ Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> e
 // TODO This is intended for the default shader
 // in practice this gets called for other shaders too 
 // should just create another functon to handle the ui shader
-void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms){
+void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms, glm::vec4 tint){
   shaderSetUniform(shaderProgram, "model", meshUniforms.model);
   glProgramUniform3fv(shaderProgram, glGetUniformLocation(shaderProgram, "emissionAmount"), 1, glm::value_ptr(meshUniforms.emissionAmount));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(meshUniforms.textureSize));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshUniforms.textureTiling));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshUniforms.textureOffset));
+  shaderSetUniform(shaderProgram, "tint", tint);
 
 
   glBindVertexArray(mesh.VAOPointer);

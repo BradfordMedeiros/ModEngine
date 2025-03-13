@@ -129,7 +129,7 @@ std::vector<FontFamily> loadFontMeshes(std::vector<FontToLoad> fontInfos, Textur
 }
 
 
-void drawSpriteZBias(GLint shaderProgram, Mesh mesh, float left, float top, float width, float height, glm::mat4 model, float zbias){
+void drawSpriteZBias(GLint shaderProgram, Mesh mesh, float left, float top, float width, float height, glm::mat4 model, float zbias, glm::vec4 tint){
   auto scaleMatrix = glm::scale(glm::mat4(1.f), glm::vec3(width * 1.0f, height * 1.0f, 1.0f));
   auto translateMatrix = glm::translate(glm::mat4(1.f), glm::vec3(left, top, zbias));
   glm::mat4 modelMatrix = model * translateMatrix * scaleMatrix; 
@@ -138,15 +138,15 @@ void drawSpriteZBias(GLint shaderProgram, Mesh mesh, float left, float top, floa
   MeshUniforms meshUniforms {
     .model = modelMatrix,
   };
-  drawMesh(mesh, shaderProgram, false, meshUniforms);
+  drawMesh(mesh, shaderProgram, false, meshUniforms, tint);
 }
 
 /// these two functions are now equivalent since drawing things non-centered has not been useful
-void drawSprite(GLint shaderProgram, Mesh mesh, float left, float top, float width, float height, glm::mat4 model){
-  drawSpriteZBias(shaderProgram, mesh, left, top, width, height, model, 0.f);
+void drawSprite(GLint shaderProgram, Mesh mesh, float left, float top, float width, float height, glm::mat4 model, glm::vec4 tint){
+  drawSpriteZBias(shaderProgram, mesh, left, top, width, height, model, 0.f, tint);
 }
-void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float centerY, float width, float height){
-  drawSprite(shaderProgram, mesh, centerX, centerY, width, height, glm::mat4(1.f));
+void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float centerY, float width, float height, glm::vec4 tint){
+  drawSprite(shaderProgram, mesh, centerX, centerY, width, height, glm::mat4(1.f), tint);
 }
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -385,7 +385,7 @@ BoundInfo boundInfoForCenteredText(FontFamily& fontFamily, std::string word, flo
   return info;
 }
 
-int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength, bool drawBoundingOnly){
+int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength, bool drawBoundingOnly, glm::vec4 tint){
   int numTriangles = 0;
   if (drawBoundingOnly){
     glm::vec3 offset(0.f, 0.f, 0.f);
@@ -394,7 +394,7 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
     numTriangles += boundingMesh.numTriangles;
     auto width = boundInfo.xMax - boundInfo.xMin;
     auto height = boundInfo.yMax - boundInfo.yMin;
-    drawSprite(shaderProgram, boundingMesh, offset.x, offset.y, width / 2.f, height / 2.f, model); // TODO this could batched
+    drawSprite(shaderProgram, boundingMesh, offset.x, offset.y, width / 2.f, height / 2.f, model, tint); // TODO this could batched
     return numTriangles;
   }
 
@@ -405,17 +405,17 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
   for (auto &info : drawingData.drawingInfo){
       //std::cout << "offset center: " << print(offsetToCenter) << std::endl;
       //std::cout << "info.pos.x = " << info.pos.x << ", info.size.x = " << info.size.x << std::endl;
-      drawSprite(shaderProgram, *info.mesh, info.pos.x + offsetToCenter.x, info.pos.y + offsetToCenter.y, info.size.x, info.size.y, model);
+      drawSprite(shaderProgram, *info.mesh, info.pos.x + offsetToCenter.x, info.pos.y + offsetToCenter.y, info.size.x, info.size.y, model, tint);
       numTriangles += info.mesh -> numTriangles;
   }
   for (auto &cursor : drawingData.cursors){
-    drawSpriteZBias(shaderProgram, *cursor.mesh, cursor.pos.x + offsetToCenter.x, cursor.pos.y + offsetToCenter.y, cursor.size.x, cursor.size.y, model, -0.1f);
+    drawSpriteZBias(shaderProgram, *cursor.mesh, cursor.pos.x + offsetToCenter.x, cursor.pos.y + offsetToCenter.y, cursor.size.x, cursor.size.y, model, -0.1f, tint);
     numTriangles += cursor.mesh -> numTriangles; 
   }
   return numTriangles;
 }
 
-void drawWords(GLint shaderProgram, FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize, std::optional<float> maxWidthNdi){
+void drawWords(GLint shaderProgram, FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize, std::optional<float> maxWidthNdi, glm::vec4 tint){
   TextWrap textWrap { .type = WRAP_NONE, .wrapamount = 0.f };
   if (maxWidthNdi.has_value()){
     textWrap = TextWrap {
@@ -423,5 +423,5 @@ void drawWords(GLint shaderProgram, FontFamily& fontFamily, std::string word, fl
       .wrapamount = maxWidthNdi.value(),
     };
   }
-  drawWordsRelative(shaderProgram, fontFamily, glm::mat4(1.f), word, left, top, fontSize, POSITIVE_ALIGN, textWrap, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 }, -1, true, 0, false);
+  drawWordsRelative(shaderProgram, fontFamily, glm::mat4(1.f), word, left, top, fontSize, POSITIVE_ALIGN, textWrap, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 }, -1, true, 0, false, tint);
 }
