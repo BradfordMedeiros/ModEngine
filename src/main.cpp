@@ -506,22 +506,27 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
       "enableLighting", "numlights", "cameraPosition", "lightsprojview", "model", 
     });
 
+  auto lineModelMatrix = glm::mat4(1.f);
+
+
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
   if (state.showDebug && numChunkingGridCells > 0){
     float offset = ((numChunkingGridCells % 2) == 0) ? (dynamicLoading.mappingInfo.chunkSize / 2) : 0;
-    drawGrid3D(*mainShaders.shaderProgram, numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
+    drawGrid3D(numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
   }
 
   if (state.visualizeVoxelLightingCells){
-    drawGrid3D(*mainShaders.shaderProgram, 4, getLightingCellWidth(), 0.f, 0.f, 0.f);
+    auto lines = drawGrid3D(4, getLightingCellWidth(), 0.f, 0.f, 0.f);
+    drawLines(*mainShaders.shaderProgram, lines, 5, lineModelMatrix);
   }
 
-  shaderSetUniform(*mainShaders.shaderProgram , "tint", glm::vec4(0.f, 0.f, 1.f, 1.f));     
+  shaderSetUniform(*mainShaders.shaderProgram , "tint", glm::vec4(0.f, 0.f, 1.f, 1.f));   
   if (state.showDebug){
-    drawCoordinateSystem(*mainShaders.shaderProgram, 100.f);
+    auto lines = drawCoordinateSystem(100.f);
+    drawLines(*mainShaders.shaderProgram, lines, 5, lineModelMatrix);
+
   }
 
-  auto lineModelMatrix = glm::mat4(1.f);
   drawAllLines(lineData, *mainShaders.shaderProgram , std::nullopt, lineModelMatrix);
 
 }

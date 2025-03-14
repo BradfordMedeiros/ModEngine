@@ -37,7 +37,7 @@ shaderError checkProgramLinkError(unsigned int program){
   return error;
 }
 
-unsigned int (std::string shaderContent, unsigned int shaderType){
+unsigned int compileShader(std::string shaderContent, unsigned int shaderType){
    unsigned int shader = glCreateShader(shaderType); 
    const char* shaderPointer = shaderContent.c_str();
    glShaderSource(shader, 1, &shaderPointer, NULL);
