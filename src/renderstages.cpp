@@ -207,11 +207,10 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
       .enable = additionalShader.enable,
       .fbo = fbo,
       .colorAttachment0 = isEvenIndex ? framebufferTexture2 : framebufferTexture,
-      .colorAttachment1 = 0,
+      .colorAttachment1 = std::nullopt,
       .depthTextureIndex = 0,
       .shader = shaderProgram,
       .quadTexture = isEvenIndex ? framebufferTexture : framebufferTexture2,
-      .hasColorAttachment1 = false,
       .renderWorld = false,
       .renderSkybox = false,
       .renderQuad = true,
@@ -257,7 +256,6 @@ RenderStages loadRenderStages(
     .depthTextureIndex = 0,
     .shader = shaders.selectionProgram,
     .quadTexture = 0,
-    .hasColorAttachment1 = true,
     .renderWorld = true,
     .renderSkybox = false,
     .renderQuad = false,
@@ -283,7 +281,6 @@ RenderStages loadRenderStages(
       .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
       .shader = shaders.selectionProgram,
       .quadTexture = 0,
-      .hasColorAttachment1 = true,
       .renderWorld = true,
       .renderSkybox = false,
       .renderQuad = false,
@@ -310,7 +307,6 @@ RenderStages loadRenderStages(
     .depthTextureIndex = 0,
     .shader = shaders.shaderProgram,
     .quadTexture = 0,
-    .hasColorAttachment1 = true,
     .renderWorld = true,
     .renderSkybox = true,
     .renderQuad = false,
@@ -332,11 +328,10 @@ RenderStages loadRenderStages(
       .enable = true,
       .fbo = fbo,
       .colorAttachment0 = portalTextures[0], // this gets updated
-      .colorAttachment1 = 0,
+      .colorAttachment1 = std::nullopt,
       .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
       .shader = shaders.shaderProgram,
       .quadTexture = framebufferTexture,
-      .hasColorAttachment1 = false,
       .renderWorld = true,
       .renderSkybox = true,
       .renderQuad = false,
@@ -370,7 +365,6 @@ RenderStages loadRenderStages(
     .depthTextureIndex = 1,
     .shader = shaders.blurProgram,
     .quadTexture = framebufferTexture2,
-    .hasColorAttachment1 = true,
     .renderWorld = false,
     .renderSkybox = false,
     .renderQuad = true,
@@ -401,7 +395,6 @@ RenderStages loadRenderStages(
     .depthTextureIndex = 1,
     .shader = shaders.blurProgram,
     .quadTexture = framebufferTexture3,
-    .hasColorAttachment1 = true,
     .renderWorld = false,
     .renderSkybox = false,
     .renderQuad = true,
@@ -429,11 +422,10 @@ RenderStages loadRenderStages(
     .enable = true,
     .fbo = fbo,
     .colorAttachment0 = framebufferTexture3,
-    .colorAttachment1 = 0,
+    .colorAttachment1 = std::nullopt,
     .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
     .shader = shaders.blurProgram,
     .quadTexture = framebufferTexture,
-    .hasColorAttachment1 = false,
     .renderWorld = false,
     .renderSkybox = false,
     .renderQuad = true,
@@ -574,7 +566,7 @@ void setRenderStageState(RenderStages& stages, ObjectValue& value){
 
 unsigned int finalRenderingTexture(RenderStages& stages){   // additional render steps ping pong result between framebufferTexture and framebufferTexture2
   if (stages.additionalRenderSteps.size() % 2 == 1){
-    return stages.main.colorAttachment1;  
+    return stages.main.colorAttachment1.value();  
   }
   return stages.main.colorAttachment0;   
 }
@@ -584,7 +576,7 @@ std::string renderStageToString(RenderStep& step){
   text = text + "shader: " + std::to_string(*step.shader) + "\n";
   text = text + "enable: " + (step.enable ?  "true" : "false") + "\n";
   text = text + "colorAttachment0: " + std::to_string(step.colorAttachment0) + "\n";
-  text = text + "colorAttachment1: " + std::to_string(step.colorAttachment1) + " (has attachment = " + (step.hasColorAttachment1 ? "true" : "false") + ")\n";
+  //text = text + "colorAttachment1: " + std::to_string(step.colorAttachment1) + " (has attachment = " + (step.hasColorAttachment1 ? "true" : "false") + ")\n";
   text = text + "renderWorld: " + (step.renderWorld ? "true" : "false") + "\n";
   text = text + "renderSkybox: " + (step.renderSkybox ? "true" : "false") + "\n";
   text = text + "renderQuad: " + (step.renderQuad ? "true" : "false") + "\n";
