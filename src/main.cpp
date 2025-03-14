@@ -506,29 +506,34 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
       "enableLighting", "numlights", "cameraPosition", "lightsprojview", "model", 
     });
 
-  auto lineModelMatrix = glm::mat4(1.f);
 
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
   if (state.showDebug && numChunkingGridCells > 0){
     float offset = ((numChunkingGridCells % 2) == 0) ? (dynamicLoading.mappingInfo.chunkSize / 2) : 0;
-    drawGrid3D(numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
+    auto lines = drawGrid3D(numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
+    for (auto &line : lines){
+      addLineNextCycle(line.fromPos, line.toPos, false, -1, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, std::nullopt);
+    }
   }
 
   if (state.visualizeVoxelLightingCells){
     auto lines = drawGrid3D(4, getLightingCellWidth(), 0.f, 0.f, 0.f);
-    drawLines(*mainShaders.shaderProgram, lines, 5, lineModelMatrix);
+    for (auto &line : lines){
+      addLineNextCycle(line.fromPos, line.toPos, false, -1, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, std::nullopt);
+    }
   }
 
   shaderSetUniform(*mainShaders.shaderProgram , "tint", glm::vec4(0.f, 0.f, 1.f, 1.f));   
   if (state.showDebug){
     auto lines = drawCoordinateSystem(100.f);
-    drawLines(*mainShaders.shaderProgram, lines, 5, lineModelMatrix);
-
+    for (auto &line : lines){
+      addLineNextCycle(line.fromPos, line.toPos, false, -1, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, std::nullopt);
+    }
   }
 
+  auto lineModelMatrix = glm::mat4(1.f);
   drawAllLines(lineData, *mainShaders.shaderProgram , std::nullopt, lineModelMatrix);
-
 }
 
 void renderSkybox(GLint shaderProgram, glm::mat4 view){
