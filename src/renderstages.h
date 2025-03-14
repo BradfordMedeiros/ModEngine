@@ -28,6 +28,7 @@ struct RenderStep {
   unsigned int fbo;
   unsigned int colorAttachment0;
   std::optional<unsigned int> colorAttachment1;
+  std::optional<unsigned int> colorAttachment2;
   unsigned int depthTextureIndex;
   unsigned int* shader;
   unsigned int quadTexture;

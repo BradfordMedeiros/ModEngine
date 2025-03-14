@@ -208,6 +208,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
       .fbo = fbo,
       .colorAttachment0 = isEvenIndex ? framebufferTexture2 : framebufferTexture,
       .colorAttachment1 = std::nullopt,
+      .colorAttachment2 = std::nullopt,
       .depthTextureIndex = 0,
       .shader = shaderProgram,
       .quadTexture = isEvenIndex ? framebufferTexture : framebufferTexture2,
@@ -253,6 +254,7 @@ RenderStages loadRenderStages(
     .fbo = fbo,
     .colorAttachment0 = framebufferTexture4,
     .colorAttachment1 = framebufferTexture2,  // this stores UV coord
+    .colorAttachment2 = std::nullopt,
     .depthTextureIndex = 0,
     .shader = shaders.selectionProgram,
     .quadTexture = 0,
@@ -278,6 +280,7 @@ RenderStages loadRenderStages(
       .fbo = fbo,
       .colorAttachment0 = framebufferTexture, 
       .colorAttachment1 = framebufferTexture2,
+      .colorAttachment2 = std::nullopt,
       .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
       .shader = shaders.selectionProgram,
       .quadTexture = 0,
@@ -304,6 +307,7 @@ RenderStages loadRenderStages(
     .fbo = fbo,
     .colorAttachment0 = framebufferTexture,
     .colorAttachment1 = framebufferTexture2,
+    .colorAttachment2 = framebufferTexture4,
     .depthTextureIndex = 0,
     .shader = shaders.shaderProgram,
     .quadTexture = 0,
@@ -329,6 +333,7 @@ RenderStages loadRenderStages(
       .fbo = fbo,
       .colorAttachment0 = portalTextures[0], // this gets updated
       .colorAttachment1 = std::nullopt,
+      .colorAttachment2 = std::nullopt,
       .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
       .shader = shaders.shaderProgram,
       .quadTexture = framebufferTexture,
@@ -362,6 +367,7 @@ RenderStages loadRenderStages(
     .fbo = fbo,
     .colorAttachment0 = framebufferTexture3,
     .colorAttachment1 = 0,
+    .colorAttachment2 = std::nullopt,
     .depthTextureIndex = 1,
     .shader = shaders.blurProgram,
     .quadTexture = framebufferTexture2,
@@ -392,6 +398,7 @@ RenderStages loadRenderStages(
     .fbo = fbo,
     .colorAttachment0 = framebufferTexture2,
     .colorAttachment1 = 0,
+    .colorAttachment2 = std::nullopt,
     .depthTextureIndex = 1,
     .shader = shaders.blurProgram,
     .quadTexture = framebufferTexture3,
@@ -423,6 +430,7 @@ RenderStages loadRenderStages(
     .fbo = fbo,
     .colorAttachment0 = framebufferTexture3,
     .colorAttachment1 = std::nullopt,
+    .colorAttachment2 = std::nullopt,
     .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
     .shader = shaders.blurProgram,
     .quadTexture = framebufferTexture,
