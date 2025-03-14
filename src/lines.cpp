@@ -143,8 +143,7 @@ void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigne
         }
       }
       if (lines.size() > 0){
-        shaderSetUniform(shaderProgram, "tint", lineByColor.tint);
-        drawLines(shaderProgram, lines, lineByColor.linewidth, matrix); 
+        drawLines(shaderProgram, lines, lineByColor.linewidth, matrix, lineByColor.tint); 
       }
     }
   )
@@ -204,7 +203,6 @@ std::vector<int> uniqueZIndexs(LineData& lineData){
 static glm::mat4 modelMatrix2(1.f);
 void drawShapeData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::optional<std::string>)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width, Mesh& unitXYRect, std::function<std::optional<unsigned int>(std::string&)> getTextureId, bool selectionProgram){
   //std::cout << "text number: " << lineData.text.size() << std::endl;
-shaderSetUniformBool(uiShaderProgram, "forceTint", false);
 
 PROFILE("drawShapeData",
   bool allowShaderOverride = !selectionProgram; // which means that shaders use the geometry of the selection program
@@ -231,8 +229,6 @@ PROFILE("drawShapeData",
         auto shapeOptionsShader = shape.shader.has_value() ? shape.shader.value().shaderId : std::optional<unsigned int>(std::nullopt);
         auto shaderToUse = shapeOptionsShader.has_value() ? shapeOptionsShader.value() : uiShaderProgram;
         
-        shaderSetUniformBool(shaderToUse, "forceTint", false);
-
         if (shaderIsDifferent(shaderToUse, lastShaderId) && allowShaderOverride){
             glUseProgram(shaderToUse);
             lastShaderId = shapeOptionsShader;
@@ -247,8 +243,6 @@ PROFILE("drawShapeData",
           auto coords = convertTextNDICoords(textShapeData -> left, textShapeData ->  top, height, width, shape.ndi);
           auto adjustedFontSize = convertTextNdiFontsize(height, width, textShapeData -> fontSize, shape.ndi);
           FontFamily& fontFamily = fontFamilyByName(textShapeData -> fontFamily);
-
-          shaderSetUniformBool(shaderToUse, "forceTint", false);
           drawWords(shaderToUse, fontFamily, textShapeData -> word, coords.x, coords.y, adjustedFontSize, textShapeData -> maxWidthNdi, shape.tint, selectionId);          
         }else if (rectShapeData != NULL){
           modassert(shape.ndi, "non-ndi rect drawing not supported"); 
@@ -258,9 +252,6 @@ PROFILE("drawShapeData",
           float heightNdi = rectShapeData -> height;
           glm::mat4 scaledAndTranslated = glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(centerXNdi, centerYNdi, 0.f)), glm::vec3(widthNdi, heightNdi, 1.f));
           
-          shaderSetUniformBool(shaderToUse, "forceTint", false);
-          shaderSetUniform(shaderToUse, "tint", shape.tint);
-
           unsigned int textureId = -1;
           if (rectShapeData -> texture.has_value()){
             auto texId = getTextureId(rectShapeData -> texture.value());
@@ -278,9 +269,6 @@ PROFILE("drawShapeData",
           drawMesh(unitXYRect, shaderToUse, false, meshUniforms); // TODO this could batched
         }else if (lineShapeData != NULL){
           modassert(shape.ndi, "non-ndi line drawing not supported"); 
-          
-          shaderSetUniformBool(shaderToUse, "forceTint", true);
-          shaderSetUniform(shaderToUse, "tint", shape.tint);
       
           std::vector<Line> lines;
           lines.push_back(Line {
@@ -288,8 +276,7 @@ PROFILE("drawShapeData",
             .toPos = lineShapeData -> toPos,
           });
 
-          //glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(lineByColor.tint));
-          drawLines(shaderToUse, lines, 1, modelMatrix2);   // TODO this could batched
+          drawLines(shaderToUse, lines, 1, modelMatrix2, shape.tint);   // TODO this could batched
         }
         else {
           modassert(false, "draw shape data type not yet implemented");

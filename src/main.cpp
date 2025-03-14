@@ -180,7 +180,6 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
 
   if (shouldClear && clearTextureId.has_value()){
     auto model = glm::scale(glm::mat4(1.0f), glm::vec3(2.f, 2.f, 2.f));
-    shaderSetUniformBool(*renderingResources.uiShaderProgram, "forceTint", false);
 
     MeshUniforms meshUniforms {
       .model = model,
@@ -192,8 +191,6 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
 
 
   auto lineModelMatrix = glm::mat4(1.f);
-  shaderSetUniformBool(*renderingResources.uiShaderProgram, "forceTint", true);
-  shaderSetUniform(*renderingResources.uiShaderProgram, "tint", glm::vec4(1.f, 1.f, 1.f, 1.f));
   drawAllLines(lineData, *renderingResources.uiShaderProgram, texture.textureId, lineModelMatrix);
 
   glEnable(GL_BLEND);
@@ -524,7 +521,6 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
     }
   }
 
-  shaderSetUniform(*mainShaders.shaderProgram , "tint", glm::vec4(0.f, 0.f, 1.f, 1.f));   
   if (state.showDebug){
     auto lines = drawCoordinateSystem(100.f);
     for (auto &line : lines){

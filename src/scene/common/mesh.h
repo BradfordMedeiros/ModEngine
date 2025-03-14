@@ -83,7 +83,7 @@ struct LineRenderData {
   unsigned int numIndices;
 };
 LineRenderData createLineRenderData(std::vector<Line>& allLines);
-int drawLines(GLint shaderProgram, std::vector<Line> allLines, int linewidth, glm::mat4& model); // returns # of verts drawn
+int drawLines(GLint shaderProgram, std::vector<Line> allLines, int linewidth, glm::mat4& model, glm::vec4 tint); // returns # of verts drawn
 void freeLineRenderData(LineRenderData& lineData);
 
 Mesh loadSkybox(std::string defaultTexture, std::string skyboxPath, std::string skyboxTexture, std::function<Texture(std::string)> ensureLoadTexture,  std::function<Texture(std::string)> ensureLoadCubemapTexture);

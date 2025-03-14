@@ -209,6 +209,8 @@ void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms mesh
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshUniforms.textureTiling));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshUniforms.textureOffset));
   shaderSetUniform(shaderProgram, "tint", meshUniforms.tint);
+  glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "forceTint"), false);
+
 
   glProgramUniform4fv(shaderProgram, glGetUniformLocation(shaderProgram, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(meshUniforms.id)));
   /*
@@ -335,8 +337,10 @@ void freeLineRenderData(LineRenderData& lineData){
 }
 
 // returns # of verts drawn
-int drawLines(GLint shaderProgram, std::vector<Line> allLines, int linewidth, glm::mat4& model){
+int drawLines(GLint shaderProgram, std::vector<Line> allLines, int linewidth, glm::mat4& model, glm::vec4 tint){
   shaderSetUniform(shaderProgram, "model", model);
+  shaderSetUniform(shaderProgram, "tint", tint);
+  glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "forceTint"), true);
 
   modassert(allLines.size() > 0, "draw lines - all lines must be non-zero size");
   auto lineData = createLineRenderData(allLines);
