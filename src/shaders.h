@@ -18,6 +18,7 @@ unsigned int* loadShaderIntoCache(std::string shaderString, std::string vertexSh
 unsigned int getShaderByShaderString(std::string shaderString, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile, std::function<std::unordered_map<std::string, std::string>&()> getArgs, bool* loadedNewShader);
 std::optional<unsigned int> shaderByName(std::string name);
 void reloadShaders(std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args);
+void unloadShader(objid shaderId);
 
 void setUniformData(unsigned int program, UniformData& uniform);
 void setUniformData(unsigned int program, std::vector<UniformData>& uniformData, std::vector<const char*>&& excludedNames, bool validateUniforms = true);

@@ -37,7 +37,7 @@ shaderError checkProgramLinkError(unsigned int program){
   return error;
 }
 
-unsigned int compileShader(std::string shaderContent, unsigned int shaderType){
+unsigned int (std::string shaderContent, unsigned int shaderType){
    unsigned int shader = glCreateShader(shaderType); 
    const char* shaderPointer = shaderContent.c_str();
    glShaderSource(shader, 1, &shaderPointer, NULL);
@@ -153,6 +153,20 @@ void reloadShaders(std::function<std::string(std::string)> readFile, std::unorde
       glDeleteProgram(shaderInfo.programId);
       shaderInfo.programId = shaderId.value();
     }
+  }
+}
+
+void unloadShader(objid shaderId){
+  std::optional<std::string> shaderStringToDelete;
+  for (auto &[shaderString, shaderInfo] : shaderstringToId){
+    if (shaderInfo.programId == shaderId){
+      shaderStringToDelete = shaderString;
+    } 
+  }
+
+  if (shaderStringToDelete.has_value()){
+    glDeleteProgram(shaderId);
+    shaderstringToId.erase(shaderStringToDelete.value());
   }
 }
 

@@ -1,6 +1,8 @@
 #include "./mesh.h"
 
 extern Stats statistics;
+extern std::unordered_map<unsigned int, std::vector<ShaderTextureBinding>> textureBindings; 
+
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4&& value);
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4& value);
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::vec3& value);
@@ -271,6 +273,15 @@ void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms mesh
   glBindTexture(GL_TEXTURE_2D, normalTextureId);
 
   glActiveTexture(GL_TEXTURE0); 
+
+  if (textureBindings.find(shaderProgram) != textureBindings.end()){
+    auto& texInfo = textureBindings.at(shaderProgram);
+    for (auto &texBinding : texInfo){
+      glActiveTexture(GL_TEXTURE0 + texBinding.textureUnit);
+      glBindTexture(GL_TEXTURE_2D, texBinding.textureId);
+    }
+  }
+
 
   glDrawElements(GL_TRIANGLES, mesh.numElements, GL_UNSIGNED_INT, 0);
   numberOfDrawCallsThisFrame++;

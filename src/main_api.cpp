@@ -20,6 +20,7 @@ extern TimePlayback timePlayback;
 extern ManipulatorTools tools;
 extern std::string sqlDirectory;
 extern std::vector<IdAtCoords> idCoordsToGet;
+extern std::unordered_map<unsigned int, std::vector<ShaderTextureBinding>> textureBindings; 
 
 float getTotalTime(){
   return statistics.now - statistics.initialTime;
@@ -1066,6 +1067,29 @@ void setSelected(std::optional<std::set<objid>> ids){
 std::optional<unsigned int> getTextureSamplerId(std::string& texturepath){
   return world.textures.at(texturepath).texture.textureId;
 }
+
+
+
+void bindTexture(unsigned int program, unsigned int textureUnit, unsigned int textureId){
+  if (textureBindings.find(program) == textureBindings.end()){
+    textureBindings[program] = {};
+  }
+  textureBindings.at(program).push_back(ShaderTextureBinding {
+    .textureUnit = textureUnit,
+    .textureId = textureId,
+  });
+}
+void unbindTexture(unsigned int program, unsigned int textureUnit){
+  std::vector<ShaderTextureBinding> remaining;
+  for (auto &textureBinding : textureBindings.at(program)){
+    if (textureBinding.textureUnit == textureUnit){
+      continue;
+    }
+    remaining.push_back(textureBinding);
+  }
+  textureBindings.at(program) = remaining;
+}
+
 
 void idAtCoordAsync(float ndix, float ndiy, bool onlyGameObjId, std::optional<objid> textureId, std::function<void(std::optional<objid>, glm::vec2)> afterFrame){
   idCoordsToGet.push_back(IdAtCoords {

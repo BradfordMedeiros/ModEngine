@@ -59,6 +59,7 @@ struct ShaderToUpdate {
   bool isUiShader;
 };
 std::vector<ShaderToUpdate> extraShadersToUpdate; // TODO STATIC get rid of this, but useful given at render shader loading
+std::unordered_map<unsigned int, std::vector<ShaderTextureBinding>> textureBindings; 
 
 // core system 
 NetCode netcode { };
@@ -1115,9 +1116,22 @@ int main(int argc, char* argv[]){
 
       return shader;
     },
+    .unloadShader = [](unsigned int shader){
+      std::vector<ShaderToUpdate> remainingsShaders;
+      for (auto &shaderToUpdate : extraShadersToUpdate){
+        if (shaderToUpdate.shader == shader){
+          continue;
+        }
+        remainingsShaders.push_back(shaderToUpdate);
+      }
+      extraShadersToUpdate = remainingsShaders;
+      textureBindings.erase(shader);
+      unloadShader(shader);
+    },
     .setShaderUniform = setUniformData,
     .getTextureSamplerId = getTextureSamplerId,
-
+    .bindTexture = bindTexture,
+    .unbindTexture = unbindTexture,
     .getGameObjNameForId = getGameObjectName,
     .setGameObjectAttr = setGameObjectAttr,
     .setSingleGameObjectAttr = setSingleGameObjectAttr,
@@ -1558,6 +1572,7 @@ int main(int argc, char* argv[]){
     std::vector<glm::mat4> lightMatrixs = calcShadowMapViews(lights);
 
     updateDefaultShaderPerFrame(*mainShaders.shaderProgram, lights, false, viewTransform.position, lightMatrixs);
+    modlog("shader to update size", std::to_string(extraShadersToUpdate.size()));
     for (auto shader : extraShadersToUpdate){
       if (shader.isUiShader){
         updateUiShaderPerFrame(shader.shader);
