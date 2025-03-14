@@ -478,32 +478,7 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
   glDisable(GL_DEPTH_TEST);
 
   auto projection = projectionFromLayer(world.sandbox.layers.at(0));
-  std::vector<LightInfo> lights;
-  std::vector<UniformData> uniformData;
-
-  uniformData.push_back(UniformData { .name = "projview", .value = (projection * view) });
-  uniformData.push_back(UniformData { .name = "tint",  .value = glm::vec4(0.05, 1.f, 0.f, 1.f) });
-  uniformData.push_back(UniformData { .name = "hasBones",  .value = false });
-  uniformData.push_back(UniformData { .name = "hasCubemapTexture",  .value = false });
-  uniformData.push_back(UniformData { .name = "hasDiffuseTexture",  .value = false });
-  uniformData.push_back(UniformData { .name = "hasEmissionTexture",  .value = false });
-  uniformData.push_back(UniformData { .name = "hasNormalTexture",  .value = false });
-  uniformData.push_back(UniformData { .name = "hasOpacityTexture",  .value = false });
-  uniformData.push_back(UniformData { .name = "hasRoughnessTexture",  .value = false });
-  uniformData.push_back(UniformData { .name = "discardTexAmount",  .value = 0.f });
-  uniformData.push_back(UniformData { .name = "emissionAmount",  .value = glm::vec3(0.f, 0.f, 0.f) });
-  uniformData.push_back(UniformData { .name = "textureOffset",  .value = glm::vec2(1.f, 1.f) });
-  uniformData.push_back(UniformData { .name = "textureSize",  .value = glm::vec2(1.f, 1.f) });
-  uniformData.push_back(UniformData { .name = "textureTiling",  .value = glm::vec2(1.f, 1.f) });
-  setUniformData(*mainShaders.shaderProgram , uniformData, 
-    { "bones[0]", "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth",
-      "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture",
-      "time", "realtime",
-      "showBoneWeight", "useBoneTransform", "enableDiffuse", "enablePBR", "enableSpecular", "enableVoxelLighting", "ambientAmount", "bloomThreshold", "enableAttenutation", "shadowIntensity", "enableShadows",
-      "enableLighting", "numlights", "cameraPosition", "lightsprojview", "model", 
-    });
-
-
+  shaderSetUniform(*mainShaders.shaderProgram, "projview", (projection * view));
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
   if (state.showDebug && numChunkingGridCells > 0){

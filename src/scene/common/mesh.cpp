@@ -341,6 +341,18 @@ int drawLines(GLint shaderProgram, std::vector<Line> allLines, int linewidth, gl
   shaderSetUniform(shaderProgram, "model", model);
   shaderSetUniform(shaderProgram, "tint", tint);
   glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "forceTint"), true);
+  glProgramUniform4fv(shaderProgram, glGetUniformLocation(shaderProgram, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(0)));
+  glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasBones"), false);
+  glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasCubemapTexture"), false);
+  glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasDiffuseTexture"), false);
+  glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasEmissionTexture"), false);
+  glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasNormalTexture"), false);
+  glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasRoughnessTexture"), false);
+  glProgramUniform3fv(shaderProgram, glGetUniformLocation(shaderProgram, "emissionAmount"), 1, glm::value_ptr(glm::vec3(0.f, 0.f, 0.f)));
+  glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+  glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+  glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+
 
   modassert(allLines.size() > 0, "draw lines - all lines must be non-zero size");
   auto lineData = createLineRenderData(allLines);
