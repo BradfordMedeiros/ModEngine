@@ -771,6 +771,63 @@ void renderShadowMaps(RenderContext& context, std::vector<LightInfo>& lights){
   }
 }
 
+struct IdAndUv {
+  objid result;
+  glm::vec2 resultUv;
+};
+struct SelectionResult {
+  std::optional<objid> id;
+  std::optional<glm::vec3> color;
+  std::vector<std::optional<IdAndUv>> uvResults;
+};
+
+SelectionResult readSelectionFromBuffer(bool readSelectionShader, glm::vec2 adjustedCoords){
+  SelectionResult selectionResult{};
+      
+  std::vector<std::optional<IdAndUv>> uvResults;
+  Color hoveredItemColor = readSelectionShader ? getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y) : getPixelColorAttachment2(adjustedCoords.x, adjustedCoords.y);
+  objid hoveredId = getIdFromColor(hoveredItemColor);
+  if (hoveredId != 0 && hoveredId != -16777216){
+    selectionResult.id = hoveredId;
+    selectionResult.color = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b);
+  }
+
+  for (auto &idCoordToGet : idCoordsToGet){
+    if (idCoordToGet.textureId.has_value()){
+      uvResults.push_back(std::nullopt);
+      continue;
+    }
+
+    std::optional<objid> result;
+    glm::vec2 resultUv(0.f, 0.f);
+
+    auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.ndix, idCoordToGet.ndiy), state.resolution);
+    auto id = getIdFromColor(readSelectionShader ? getPixelColorAttachment0(pixelCoord.x, pixelCoord.y) : getPixelColorAttachment2(pixelCoord.x, pixelCoord.y));
+    if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
+    }else if (idCoordToGet.onlyGameObjId && !idExists(world.sandbox, id)){
+      //modassert(false, std::string("id does not exist: ") + std::to_string(id));
+    }else{
+      result = id;
+    }
+
+    auto uvCoordWithTex = getUVCoordAndTextureId(pixelCoord.x, pixelCoord.y); //     auto uvCoordWithTex = getUVCoordAndTextureId(adjustedCoords.x, adjustedCoords.y);
+    auto uvCoord = toUvCoord(uvCoordWithTex);
+    resultUv = glm::vec2(uvCoord.x, uvCoord.y);
+
+    if (!result.has_value()){
+      uvResults.push_back(std::nullopt);
+    }else{
+      uvResults.push_back(IdAndUv {
+        .result = result.value(),
+        .resultUv = resultUv,
+      });            
+    }
+  }
+
+  selectionResult.uvResults = uvResults;
+  return selectionResult;
+}
+
 void onGLFWEerror(int error, const char* description){
   std::cerr << "Error: " << description << std::endl;
 }
@@ -1583,48 +1640,20 @@ int main(int argc, char* argv[]){
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
 
-    bool useOldSelection = true;
-    if (useOldSelection){
-      PROFILE("SELECTION",
-      // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
-        renderWithProgram(renderContext, renderStages.selection);
 
-        shaderSetUniform(*renderStages.selection.shader, "projview", ndiOrtho);
-        glDisable(GL_DEPTH_TEST);
-        drawShapeData(lineData, *renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
-        glEnable(GL_DEPTH_TEST);
+    SelectionResult uiSelectionResult{};
+    PROFILE("SELECTION",
+    // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
+      renderWithProgram(renderContext, renderStages.selection);
 
-      )
+      shaderSetUniform(*renderStages.selection.shader, "projview", ndiOrtho);
+      glDisable(GL_DEPTH_TEST);
+      drawShapeData(lineData, *renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
+      glEnable(GL_DEPTH_TEST);
 
-      {
-        Color hoveredItemColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
-        objid hoveredId = getIdFromColor(hoveredItemColor);
-
-        state.lastHoverIndex = state.currentHoverIndex; // stateupdate
-        state.currentHoverIndex = hoveredId; // stateupdate
-        state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate
-
-        for (auto &idCoordToGet : idCoordsToGet){
-          if (idCoordToGet.textureId.has_value()){
-            continue;
-          }
-          auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.ndix, idCoordToGet.ndiy), state.resolution);
-
-          auto id = getIdFromColor(getPixelColorAttachment0(pixelCoord.x, pixelCoord.y));
-          if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
-          }else if (idCoordToGet.onlyGameObjId && !idExists(world.sandbox, id)){
-            //modassert(false, std::string("id does not exist: ") + std::to_string(id));
-          }else{
-            idCoordToGet.result = id;
-          }
-
-          auto uvCoordWithTex = getUVCoordAndTextureId(pixelCoord.x, pixelCoord.y); //     auto uvCoordWithTex = getUVCoordAndTextureId(adjustedCoords.x, adjustedCoords.y);
-          auto uvCoord = toUvCoord(uvCoordWithTex);
-          idCoordToGet.resultUv = glm::vec2(uvCoord.x, uvCoord.y);
-        }
-      }
-    }
-
+      uiSelectionResult = readSelectionFromBuffer(true, adjustedCoords);
+    )
+    
 
     // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
     if (state.enableShadows){
@@ -1641,44 +1670,33 @@ int main(int argc, char* argv[]){
     //std::cout << "cache size: " << portalIdCache.size() << std::endl;
 
     statistics.numTriangles = renderWithProgram(renderContext, renderStages.main);
-    Color colorFromSelection = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
 
-    if (!useOldSelection){
-      /*Color hoveredItemColor = getPixelColorAttachment2(adjustedCoords.x, adjustedCoords.y);
-      objid hoveredId = getIdFromColor(hoveredItemColor);
-      if (idExists(world.sandbox, hoveredId)){
-        std::cout << "hovered id main: " << getGameObject(world.sandbox, hoveredId).name << std::endl;
-      }*/
-      ///////////////
-      {
-        Color hoveredItemColor = getPixelColorAttachment2(adjustedCoords.x, adjustedCoords.y);
-        objid hoveredId = getIdFromColor(hoveredItemColor);
-
-        state.lastHoverIndex = state.currentHoverIndex; // stateupdate
-        state.currentHoverIndex = hoveredId; // stateupdate
-        state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate
-
-        for (auto &idCoordToGet : idCoordsToGet){
-          if (idCoordToGet.textureId.has_value()){
-            continue;
-          }
-          auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.ndix, idCoordToGet.ndiy), state.resolution);
-          auto id = getIdFromColor(getPixelColorAttachment2(pixelCoord.x, pixelCoord.y));
-          if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
-          }else if (idCoordToGet.onlyGameObjId && !idExists(world.sandbox, id)){
-            //modassert(false, std::string("id does not exist: ") + std::to_string(id));
-          }else{
-            idCoordToGet.result = id;
-          }
-
-          // this is wrong since wrong attachment
-          auto uvCoordWithTex = getUVCoordAndTextureId(pixelCoord.x, pixelCoord.y); //     auto uvCoordWithTex = getUVCoordAndTextureId(adjustedCoords.x, adjustedCoords.y);
-          auto uvCoord = toUvCoord(uvCoordWithTex);
-          idCoordToGet.resultUv = glm::vec2(uvCoord.x, uvCoord.y);
-        }
+    auto selectionResult = readSelectionFromBuffer(false, adjustedCoords);
+    if (uiSelectionResult.id.has_value()){
+      selectionResult.id = uiSelectionResult.id;
+      selectionResult.color = uiSelectionResult.color;
+      std::cout << "selection result: " << uiSelectionResult.id.value() << std::endl;
+    }
+    for (int i = 0; i < selectionResult.uvResults.size(); i++){
+      if (uiSelectionResult.uvResults.at(i).has_value()){
+        selectionResult.uvResults.at(i) = uiSelectionResult.uvResults.at(i);
       }
     }
-    
+
+    if (selectionResult.id.has_value()){
+      state.lastHoverIndex = state.currentHoverIndex; // stateupdate
+      state.currentHoverIndex = selectionResult.id.value(); // 
+      auto hoveredItemColor = selectionResult.color.value();
+      state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate     
+    }
+    for (int i = 0; i < selectionResult.uvResults.size(); i++){
+      if (!selectionResult.uvResults.at(i).has_value()){
+        continue;
+      }
+      idCoordsToGet.at(i).result = selectionResult.uvResults.at(i).value().result;
+      idCoordsToGet.at(i).resultUv = selectionResult.uvResults.at(i).value().resultUv;
+    }
+
 
 
     renderVector(view, numChunkingGridCells);
