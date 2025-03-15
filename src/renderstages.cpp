@@ -258,7 +258,7 @@ RenderStages loadRenderStages(
     .depthTextureIndex = 0,
     .shader = shaders.selectionProgram,
     .quadTexture = 0,
-    .renderWorld = true,
+    .renderWorld = false,
     .renderSkybox = false,
     .renderQuad = false,
     .renderQuad3D = false,

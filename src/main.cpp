@@ -787,7 +787,7 @@ SelectionResult readSelectionFromBuffer(bool readSelectionShader, glm::vec2 adju
   std::vector<std::optional<IdAndUv>> uvResults;
   Color hoveredItemColor = readSelectionShader ? getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y) : getPixelColorAttachment2(adjustedCoords.x, adjustedCoords.y);
   objid hoveredId = getIdFromColor(hoveredItemColor);
-  if (hoveredId != 0){
+  if (hoveredId != 0 && hoveredId != -16777216){
     selectionResult.id = hoveredId;
     selectionResult.color = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b);
   }
@@ -1640,23 +1640,20 @@ int main(int argc, char* argv[]){
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
 
-    bool useOldSelection = false;
 
-    SelectionResult selectionResult{};
-    if (useOldSelection){
-      PROFILE("SELECTION",
-      // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
-        renderWithProgram(renderContext, renderStages.selection);
+    SelectionResult uiSelectionResult{};
+    PROFILE("SELECTION",
+    // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
+      renderWithProgram(renderContext, renderStages.selection);
 
-        shaderSetUniform(*renderStages.selection.shader, "projview", ndiOrtho);
-        glDisable(GL_DEPTH_TEST);
-        drawShapeData(lineData, *renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
-        glEnable(GL_DEPTH_TEST);
+      shaderSetUniform(*renderStages.selection.shader, "projview", ndiOrtho);
+      glDisable(GL_DEPTH_TEST);
+      drawShapeData(lineData, *renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
+      glEnable(GL_DEPTH_TEST);
 
-      )
-
-      selectionResult = readSelectionFromBuffer(true, adjustedCoords);
-    }
+      uiSelectionResult = readSelectionFromBuffer(true, adjustedCoords);
+    )
+    
 
     // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
     if (state.enableShadows){
@@ -1673,12 +1670,18 @@ int main(int argc, char* argv[]){
     //std::cout << "cache size: " << portalIdCache.size() << std::endl;
 
     statistics.numTriangles = renderWithProgram(renderContext, renderStages.main);
-    Color colorFromSelection = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
 
-    if (!useOldSelection){
-      selectionResult = readSelectionFromBuffer(false, adjustedCoords);
+    auto selectionResult = readSelectionFromBuffer(false, adjustedCoords);
+    if (uiSelectionResult.id.has_value()){
+      selectionResult.id = uiSelectionResult.id;
+      selectionResult.color = uiSelectionResult.color;
+      std::cout << "selection result: " << uiSelectionResult.id.value() << std::endl;
     }
-    
+    for (int i = 0; i < selectionResult.uvResults.size(); i++){
+      if (uiSelectionResult.uvResults.at(i).has_value()){
+        selectionResult.uvResults.at(i) = uiSelectionResult.uvResults.at(i);
+      }
+    }
 
     if (selectionResult.id.has_value()){
       state.lastHoverIndex = state.currentHoverIndex; // stateupdate
