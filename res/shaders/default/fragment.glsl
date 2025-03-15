@@ -9,6 +9,9 @@ in vec3 ambientVoxelColor;
 
 layout (location = 0) out vec4 FragColor;
 layout (location = 1) out vec4 BloomColor;
+layout (location = 2) out vec4 EncodeId;
+layout (location = 3) out vec4 UVCoords;
+
 
 // per object
 uniform sampler2D maintexture;
@@ -31,6 +34,10 @@ uniform vec2 textureOffset;
 uniform vec2 textureTiling;
 uniform vec2 textureSize;
 uniform float discardTexAmount;  // this is rare and should just be done as a special shader if i need this
+
+uniform vec4 encodedid;
+uniform int textureid;
+
 
 // per frame
 uniform vec3 cameraPosition;
@@ -138,6 +145,9 @@ float calcAttenutation(int lightNumber){
 
 
 void main(){
+    EncodeId = vec4(encodedid.x, encodedid.y, encodedid.z, encodedid.w);
+    UVCoords = vec4(TexCoord.x, TexCoord.y, textureid, 0);
+
     if (hasCubemapTexture){
       FragColor = tint * texture(cubemapTexture, FragPos);
       return;
@@ -159,7 +169,7 @@ void main(){
 
     vec3 finalEmission = vec3(0, 0, 0);
     if (discardTexture){
-        discard;
+      discard;
     }else{
         texColor = diffuseColor;
         finalEmission = (hasEmissionTexture ? vec3(emissionAmount.r * emissionColor.r, emissionAmount.g * emissionColor.g, emissionAmount.b * emissionColor.b) : vec3(0, 0, 0));

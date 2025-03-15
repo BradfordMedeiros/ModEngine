@@ -305,9 +305,10 @@ RenderStages loadRenderStages(
     .name = "MAIN_RENDERING",
     .enable = true,
     .fbo = fbo,
-    .colorAttachment0 = framebufferTexture,
-    .colorAttachment1 = framebufferTexture2,
-    .colorAttachment2 = framebufferTexture4,
+    .colorAttachment0 = framebufferTexture,   // normal rgb
+    .colorAttachment1 = framebufferTexture2,  // filtered values to pass to bloom (can I just do this filtering in the bloom filter?)
+    .colorAttachment2 = framebufferTexture3,  // selection id
+    .colorAttachment3 = framebufferTexture4,   // uvcoords
     .depthTextureIndex = 0,
     .shader = shaders.shaderProgram,
     .quadTexture = 0,

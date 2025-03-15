@@ -160,8 +160,8 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
   setActiveDepthTexture(renderingResources.framebuffers.fbo, &renderingResources.framebuffers.textureDepthTextures.at(0), 0);
 
   glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
-  GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-  glDrawBuffers(2, buffers_to_render);
+  GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+  glDrawBuffers(4, buffers_to_render);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,  texture2.textureId, 0);
 
@@ -524,7 +524,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view){
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram, false, meshUniforms); 
 }
 
-void renderUI(Color pixelColor){  
+void renderDebugUi(Color pixelColor){  
   const float offsetPerLineMargin = 0.02f;
   float offsetPerLine = -1 * (state.fontsize / 500.f + offsetPerLineMargin);
   float uiYOffset = (1.f + 3 * offsetPerLine) + state.infoTextOffset.y;
@@ -660,6 +660,12 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderStep.colorAttachment0, 0);
     if (renderStep.colorAttachment1.has_value()){
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, renderStep.colorAttachment1.value(), 0);
+    }
+    if (renderStep.colorAttachment2.has_value()){
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, renderStep.colorAttachment2.value(), 0);
+    }
+    if (renderStep.colorAttachment3.has_value()){
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, renderStep.colorAttachment3.value(), 0);
     }
 
     glClearColor(0.0, 0.0, 0.0, 1.f);
@@ -1364,8 +1370,8 @@ int main(int argc, char* argv[]){
   toggleCursor(state.cursorBehavior); 
 
   std::cout << "INFO: render loop starting" << std::endl;
-  GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-  glDrawBuffers(2, buffers_to_render);
+  GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+  glDrawBuffers(4, buffers_to_render);
 
   int frameratelimit = result["fps"].as<int>();
   bool hasFramelimit = frameratelimit != 0;
@@ -1577,45 +1583,48 @@ int main(int argc, char* argv[]){
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
 
-    PROFILE("SELECTION",
+    bool useOldSelection = true;
+    if (useOldSelection){
+      PROFILE("SELECTION",
       // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
-      renderWithProgram(renderContext, renderStages.selection);
+        renderWithProgram(renderContext, renderStages.selection);
 
-      shaderSetUniform(*renderStages.selection.shader, "projview", ndiOrtho);
-      glDisable(GL_DEPTH_TEST);
-      drawShapeData(lineData, *renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
-      glEnable(GL_DEPTH_TEST);
+        shaderSetUniform(*renderStages.selection.shader, "projview", ndiOrtho);
+        glDisable(GL_DEPTH_TEST);
+        drawShapeData(lineData, *renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
+        glEnable(GL_DEPTH_TEST);
 
-    )
+      )
 
-    //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
-    auto uvCoordWithTex = getUVCoordAndTextureId(adjustedCoords.x, adjustedCoords.y);
-    auto uvCoord = toUvCoord(uvCoordWithTex);
-    Color hoveredItemColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
-    objid hoveredId = getIdFromColor(hoveredItemColor);
+      {
+        Color hoveredItemColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
+        objid hoveredId = getIdFromColor(hoveredItemColor);
 
-    state.lastHoverIndex = state.currentHoverIndex; // stateupdate
-    state.currentHoverIndex = hoveredId; // stateupdate
-    state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate
+        state.lastHoverIndex = state.currentHoverIndex; // stateupdate
+        state.currentHoverIndex = hoveredId; // stateupdate
+        state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate
 
-    for (auto &idCoordToGet : idCoordsToGet){
-      if (idCoordToGet.textureId.has_value()){
-        continue;
+        for (auto &idCoordToGet : idCoordsToGet){
+          if (idCoordToGet.textureId.has_value()){
+            continue;
+          }
+          auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.ndix, idCoordToGet.ndiy), state.resolution);
+
+          auto id = getIdFromColor(getPixelColorAttachment0(pixelCoord.x, pixelCoord.y));
+          if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
+          }else if (idCoordToGet.onlyGameObjId && !idExists(world.sandbox, id)){
+            //modassert(false, std::string("id does not exist: ") + std::to_string(id));
+          }else{
+            idCoordToGet.result = id;
+          }
+
+          auto uvCoordWithTex = getUVCoordAndTextureId(pixelCoord.x, pixelCoord.y); //     auto uvCoordWithTex = getUVCoordAndTextureId(adjustedCoords.x, adjustedCoords.y);
+          auto uvCoord = toUvCoord(uvCoordWithTex);
+          idCoordToGet.resultUv = glm::vec2(uvCoord.x, uvCoord.y);
+        }
       }
-      auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.ndix, idCoordToGet.ndiy), state.resolution);
-
-      auto id = getIdFromColor(getPixelColorAttachment0(pixelCoord.x, pixelCoord.y));
-      if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
-      }else if (idCoordToGet.onlyGameObjId && !idExists(world.sandbox, id)){
-        //modassert(false, std::string("id does not exist: ") + std::to_string(id));
-      }else{
-        idCoordToGet.result = id;
-      }
-
-      auto uvCoordWithTex = getUVCoordAndTextureId(pixelCoord.x, pixelCoord.y);
-      auto uvCoord = toUvCoord(uvCoordWithTex);
-      idCoordToGet.resultUv = glm::vec2(uvCoord.x, uvCoord.y);
     }
+
 
     // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
     if (state.enableShadows){
@@ -1633,10 +1642,52 @@ int main(int argc, char* argv[]){
 
     statistics.numTriangles = renderWithProgram(renderContext, renderStages.main);
     Color colorFromSelection = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
+
+    if (!useOldSelection){
+      /*Color hoveredItemColor = getPixelColorAttachment2(adjustedCoords.x, adjustedCoords.y);
+      objid hoveredId = getIdFromColor(hoveredItemColor);
+      if (idExists(world.sandbox, hoveredId)){
+        std::cout << "hovered id main: " << getGameObject(world.sandbox, hoveredId).name << std::endl;
+      }*/
+      ///////////////
+      {
+        Color hoveredItemColor = getPixelColorAttachment2(adjustedCoords.x, adjustedCoords.y);
+        objid hoveredId = getIdFromColor(hoveredItemColor);
+
+        state.lastHoverIndex = state.currentHoverIndex; // stateupdate
+        state.currentHoverIndex = hoveredId; // stateupdate
+        state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate
+
+        for (auto &idCoordToGet : idCoordsToGet){
+          if (idCoordToGet.textureId.has_value()){
+            continue;
+          }
+          auto pixelCoord = ndiToPixelCoord(glm::vec2(idCoordToGet.ndix, idCoordToGet.ndiy), state.resolution);
+          auto id = getIdFromColor(getPixelColorAttachment2(pixelCoord.x, pixelCoord.y));
+          if (id == -16777216){  // this is kind of shitty, this is black so represents no object.  However, theoretically could be an id, should make this invalid id
+          }else if (idCoordToGet.onlyGameObjId && !idExists(world.sandbox, id)){
+            //modassert(false, std::string("id does not exist: ") + std::to_string(id));
+          }else{
+            idCoordToGet.result = id;
+          }
+
+          // this is wrong since wrong attachment
+          auto uvCoordWithTex = getUVCoordAndTextureId(pixelCoord.x, pixelCoord.y); //     auto uvCoordWithTex = getUVCoordAndTextureId(adjustedCoords.x, adjustedCoords.y);
+          auto uvCoord = toUvCoord(uvCoordWithTex);
+          idCoordToGet.resultUv = glm::vec2(uvCoord.x, uvCoord.y);
+        }
+      }
+    }
+    
+
+
     renderVector(view, numChunkingGridCells);
 
     Color pixelColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
     state.hoveredColor = glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b);
+
+
+
 
     PROFILE("BLOOM-RENDERING",
       renderWithProgram(renderContext, renderStages.bloom1);
@@ -1652,6 +1703,9 @@ int main(int argc, char* argv[]){
       renderWithProgram(renderContext, renderStep);
     }
 
+
+    // TODO this should be moved before the main render otherwise there's a frame of lag 
+
     auto screenspaceTextureIds = textureIdsToRender();
     PROFILE("USER-TEXTURES",
       for (auto userTexture : screenspaceTextureIds){
@@ -1665,6 +1719,8 @@ int main(int argc, char* argv[]){
       }
       markUserTexturesCleared();  // not really rendering, should pull this out
     )
+    ///////////////////////
+
 
     LayerInfo& layerInfo = layerByName(world, "");
     float near = layerInfo.nearplane;
@@ -1752,7 +1808,7 @@ int main(int argc, char* argv[]){
 
   
     if (state.renderMode == RENDER_FINAL){
-      renderUI(pixelColor);
+      renderDebugUi(pixelColor);
 
       // below and render screepspace lines can probably be consoliated
       glUseProgram(*renderingResources.uiShaderProgram);
