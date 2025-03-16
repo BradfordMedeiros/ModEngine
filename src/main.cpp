@@ -372,6 +372,17 @@ bool checkIfUiShader(std::string& value){
   }
   return false;
 }
+
+bool passesFrustumCulling(Transformation& transform, objid id){
+  if (!state.enableFrustumCulling){
+    return true;
+  }
+  auto elementPosition = fullTransformation(world.sandbox, id);
+  glm::vec3 towardObject = elementPosition.position - transform.position;
+  auto forward = transform.rotation * glm::vec3(0.f, 0.f, -1.f);
+  return glm::dot(forward, towardObject) >= 0;
+}
+
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
   glUseProgram(shaderProgram);
   int numTriangles = 0;
@@ -434,23 +445,26 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     if (layer.visible && id != 0){
       //std::cout << "render object: " << getGameObject(world, id).name << std::endl;
 
-      auto trianglesDrawn = renderObject(
-        newShader, 
-        newShader == *renderStages.selection.shader,
-        id, 
-        world.objectMapping, 
-        state.showDebug ? state.showDebugMask : 0,
-        (isPortal && portalTextureInCache &&  !isPerspectivePortal) ? portalIdCache.at(id) : -1,
-        state.navmeshTextureId.has_value() ? state.navmeshTextureId.value() : -1,
-        modelMatrix,
-        state.drawPoints,
-        defaultResources.defaultMeshes,
-        textBoundingOnly,
-        state.showBones,
-        api,
-        finalModelMatrix
-      );
-      numTriangles = numTriangles + trianglesDrawn;
+      bool shouldDraw = passesFrustumCulling(viewTransform, id);
+      if (shouldDraw){
+        auto trianglesDrawn = renderObject(
+          newShader, 
+          newShader == *renderStages.selection.shader,
+          id, 
+          world.objectMapping, 
+          state.showDebug ? state.showDebugMask : 0,
+          (isPortal && portalTextureInCache &&  !isPerspectivePortal) ? portalIdCache.at(id) : -1,
+          state.navmeshTextureId.has_value() ? state.navmeshTextureId.value() : -1,
+          modelMatrix,
+          state.drawPoints,
+          defaultResources.defaultMeshes,
+          textBoundingOnly,
+          state.showBones,
+          api,
+          finalModelMatrix
+        );
+        numTriangles = numTriangles + trianglesDrawn;
+      }
     }
   
     glStencilFunc(GL_EQUAL, 1, 0xFF);

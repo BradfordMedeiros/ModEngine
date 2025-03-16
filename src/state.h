@@ -157,6 +157,7 @@ struct engineState {
 
   int activeTextureIndex;
   glm::ivec2 adjustedCoords;
+  bool enableFrustumCulling;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

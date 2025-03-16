@@ -314,6 +314,8 @@ std::vector<ObjectStateMapping> mapping = {
   simpleBoolSerializer("rendering", "fullscreen", offsetof(engineState, fullscreen)),
   simpleEnumSerializer("rendering", "antialiasing", { ANTIALIASING_NONE, ANTIALIASING_MSAA }, { "none", "msaa" }, offsetof(engineState, antialiasingMode)),
   simpleBoolSerializer("rendering", "cull", "enabled", "disabled", offsetof(engineState, cullEnabled)),
+  simpleBoolSerializer("rendering", "frustumcull", "enabled", "disabled", offsetof(engineState, enableFrustumCulling)),
+
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto strValue = std::get_if<std::string>(&value);
@@ -537,6 +539,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .rampDirection = RAMP_LEFT,
     .activeTextureIndex = 0,
     .adjustedCoords = glm::ivec2(0, 0),
+    .enableFrustumCulling = false,
 	};
 	return state;
 }
