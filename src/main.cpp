@@ -392,6 +392,7 @@ ViewFrustum cameraToViewFrustum(float fov){
   float zNear = 0.2f;
   float zFar = 3.f;
 
+  
   return ViewFrustum {
     .left = FrustumPlane {
       .point = glm::vec3(0.f, 0.f, 0.f),
@@ -504,7 +505,6 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
 
 }
 
-
 // the point here should be in camera / frustum) space
 bool isInFrontOfPlane(FrustumPlane& plane, glm::vec3 point){
   auto vecToPoint = point - plane.point;
@@ -521,7 +521,7 @@ bool passesFrustumCulling(ViewFrustum& viewFrustum, Transformation& camera, obji
   //auto inFrontOfTopPlane = isInFrontOfPlane(viewFrustum.top, elementPosition);
   //auto inFrontOfBottomPlane = isInFrontOfPlane(viewFrustum.bottom, elementPosition);
 
-  auto point = glm::inverse(camera.rotation) * glm::vec3(0.f, 0.f, -1.f); // this gives us the world space point of 0,0,-1 in camera space
+  auto point = glm::inverse(camera.rotation) * (glm::vec3(0.f, 0.f, -2.f) - camera.position) ; // this gives us the world space point of 0,0,-1 in camera space
   auto inFrontOfNearPlane = isInFrontOfPlane(viewFrustum.near, point);
   std::cout << "inFrontOfNearPlane: " << inFrontOfNearPlane << std::endl;
   auto inFrontOfFarPlane = isInFrontOfPlane(viewFrustum.far, point);
