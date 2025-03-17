@@ -386,22 +386,39 @@ struct ViewFrustum {
   FrustumPlane near;
   FrustumPlane far;
 };
+
+struct FovAngles {
+  float x;
+  float y;
+  float zNear;
+  float zFar;
+};
+
+FovAngles calcFovAngles(){
+  auto layer = world.sandbox.layers.at(0);
+  auto fieldOfView = 0.5f * (layer.fov);
+
+  auto aspect = ((float)state.viewportSize.x) / ((float)state.viewportSize.y);
+  return FovAngles {
+    .x = glm::radians(fieldOfView * aspect),
+    .y = glm::radians(fieldOfView),
+    .zNear = layer.nearplane,
+    .zFar = layer.farplane,
+  };
+}
+
 ViewFrustum cameraToViewFrustum(float fov){
   // All planes have the camera locations as a point if you extend them 
   // except for the near and far plane
-  float zNear = 0.2f;
-  float zFar = 3.f;
+  auto angles = calcFovAngles();
 
-  float angleX = glm::radians(45.f);
-  float angleY = glm::radians(45.f);
+  float widthXNear = angles.zNear * glm::tan(angles.x);
+  float widthYNear = angles.zNear * glm::tan(angles.y);
 
-  float widthXNear = zNear * glm::tan(angleX);
-  float widthYNear = zNear * glm::tan(angleY);
-
-  auto topLeft = glm::normalize(glm::vec3(-widthXNear, widthYNear, -zNear));
-  auto topRight = glm::normalize(glm::vec3(widthXNear, widthYNear, -zNear));
-  auto bottomLeft = glm::normalize(glm::vec3(-widthXNear, -widthYNear, -zNear));
-  auto bottomRight = glm::normalize(glm::vec3(widthXNear, -widthYNear, -zNear));
+  auto topLeft = glm::normalize(glm::vec3(-widthXNear, widthYNear, -angles.zNear));
+  auto topRight = glm::normalize(glm::vec3(widthXNear, widthYNear, -angles.zNear));
+  auto bottomLeft = glm::normalize(glm::vec3(-widthXNear, -widthYNear, -angles.zNear));
+  auto bottomRight = glm::normalize(glm::vec3(widthXNear, -widthYNear, -angles.zNear));
 
   // think right hand rule for direction, should be pointing inwards
   auto topNormal = glm::cross(topLeft, topRight);
@@ -427,11 +444,11 @@ ViewFrustum cameraToViewFrustum(float fov){
       .normal = bottomNormal,
     },
     .near = FrustumPlane {
-      .point = glm::vec3(0.f, 0.f, -1 * zNear),
+      .point = glm::vec3(0.f, 0.f, -1 * angles.zNear),
       .normal = glm::vec3(0.f, 0.f, -1.f),
     },
     .far = FrustumPlane {
-      .point = glm::vec3(0.f, 0.f, -1 * zFar),
+      .point = glm::vec3(0.f, 0.f, -1 * angles.zFar),
       .normal = glm::vec3(0.f, 0.f, 1.f),
     },
   };
@@ -456,12 +473,11 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
   };
 
 
-  float angleX = glm::radians(45.f);
-  float angleY = glm::radians(45.f);
+  auto angles = calcFovAngles();
   auto position = glm::vec3(0.f, 0.f, 0.f);  // viewFrustum
   {
-    float widthXNear = glm::length(viewFrustum.near.point) * glm::tan(angleX);
-    float widthYNear = glm::length(viewFrustum.near.point) * glm::tan(angleY);
+    float widthXNear = glm::length(viewFrustum.near.point) * glm::tan(angles.x);
+    float widthYNear = glm::length(viewFrustum.near.point) * glm::tan(angles.y);
     auto nearLeft = position + viewFrustum.near.point + glm::vec3(widthXNear, 0.f, 0.f);
     auto nearRight = position + viewFrustum.near.point + glm::vec3(-widthXNear, 0.f, 0.f);
     auto nearUp =  position + viewFrustum.near.point + glm::vec3(0.f, widthYNear, 0.f);
@@ -477,8 +493,8 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
   }
 
   {
-    float widthXNear = glm::length(viewFrustum.far.point) * glm::tan(angleX);
-    float widthYNear = glm::length(viewFrustum.far.point) * glm::tan(angleY);
+    float widthXNear = glm::length(viewFrustum.far.point) * glm::tan(angles.x);
+    float widthYNear = glm::length(viewFrustum.far.point) * glm::tan(angles.y);
     auto nearLeft = position + viewFrustum.far.point + glm::vec3(widthXNear, 0.f, 0.f);
     auto nearRight = position + viewFrustum.far.point + glm::vec3(-widthXNear, 0.f, 0.f);
     auto nearUp =  position + viewFrustum.far.point + glm::vec3(0.f, widthYNear, 0.f);
@@ -533,7 +549,10 @@ bool passesFrustumCulling(ViewFrustum& viewFrustum, Transformation& camera, obji
   }
   auto elementPosition = fullTransformation(world.sandbox, id).position;
 
-  auto point = glm::inverse(camera.rotation) * (glm::vec3(0.f, 0.f, -2.f) - camera.position) ; // this gives us the world space point of 0,0,-1 in camera space
+  // this needs to check the AABB and if all the points are not in is then can cull
+  auto point = glm::inverse(camera.rotation) * (elementPosition - camera.position) ; // this gives us the world space point of 0,0,-1 in camera space
+
+
   auto inFrontOfNearPlane = isInFrontOfPlane(viewFrustum.near, point);
   auto inFrontOfFarPlane = isInFrontOfPlane(viewFrustum.far, point);
   auto inFrontOfLeftPlane = isInFrontOfPlane(viewFrustum.left, point);
