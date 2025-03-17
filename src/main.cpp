@@ -392,23 +392,39 @@ ViewFrustum cameraToViewFrustum(float fov){
   float zNear = 0.2f;
   float zFar = 3.f;
 
-  
+  float angleX = glm::radians(45.f);
+  float angleY = glm::radians(45.f);
+
+  float widthXNear = zNear * glm::tan(angleX);
+  float widthYNear = zNear * glm::tan(angleY);
+
+  auto topLeft = glm::normalize(glm::vec3(-widthXNear, widthYNear, -zNear));
+  auto topRight = glm::normalize(glm::vec3(widthXNear, widthYNear, -zNear));
+  auto bottomLeft = glm::normalize(glm::vec3(-widthXNear, -widthYNear, -zNear));
+  auto bottomRight = glm::normalize(glm::vec3(widthXNear, -widthYNear, -zNear));
+
+  // think right hand rule for direction, should be pointing inwards
+  auto topNormal = glm::cross(topLeft, topRight);
+  auto bottomNormal = glm::cross(bottomRight, bottomLeft);
+  auto leftNormal = glm::cross(bottomLeft, topLeft);
+  auto rightNormal = glm::cross(topRight, bottomRight);
+
   return ViewFrustum {
     .left = FrustumPlane {
       .point = glm::vec3(0.f, 0.f, 0.f),
-      .normal = glm::vec3(1.f, 0.f, 0.f),
+      .normal = leftNormal,
     },
     .right = FrustumPlane {
       .point = glm::vec3(0.f, 0.f, 0.f),
-      .normal = glm::vec3(-1.f, 0.f, 0.f),
+      .normal = rightNormal,
     },
     .top = FrustumPlane {
       .point = glm::vec3(0.f, 0.f, 0.f),
-      .normal = glm::vec3(0.f, -1.f, 0.f),
+      .normal = topNormal,
     },
     .bottom = FrustumPlane {
       .point = glm::vec3(0.f, 0.f, 0.f),
-      .normal = glm::vec3(0.f, 1.f, 0.f),
+      .normal = bottomNormal,
     },
     .near = FrustumPlane {
       .point = glm::vec3(0.f, 0.f, -1 * zNear),
@@ -516,19 +532,24 @@ bool passesFrustumCulling(ViewFrustum& viewFrustum, Transformation& camera, obji
     return true;
   }
   auto elementPosition = fullTransformation(world.sandbox, id).position;
-  //auto inFrontOfLeftPlane = isInFrontOfPlane(viewFrustum.left, elementPosition);
-  //auto inFrontOfRightPlane = isInFrontOfPlane(viewFrustum.right, elementPosition);
-  //auto inFrontOfTopPlane = isInFrontOfPlane(viewFrustum.top, elementPosition);
-  //auto inFrontOfBottomPlane = isInFrontOfPlane(viewFrustum.bottom, elementPosition);
 
   auto point = glm::inverse(camera.rotation) * (glm::vec3(0.f, 0.f, -2.f) - camera.position) ; // this gives us the world space point of 0,0,-1 in camera space
   auto inFrontOfNearPlane = isInFrontOfPlane(viewFrustum.near, point);
-  std::cout << "inFrontOfNearPlane: " << inFrontOfNearPlane << std::endl;
   auto inFrontOfFarPlane = isInFrontOfPlane(viewFrustum.far, point);
-  std::cout << "inFrontOfFarPlane: " << inFrontOfFarPlane << std::endl;
+  auto inFrontOfLeftPlane = isInFrontOfPlane(viewFrustum.left, point);
+  auto inFrontOfRightPlane = isInFrontOfPlane(viewFrustum.right, point);
+  auto inFrontOfTopPlane = isInFrontOfPlane(viewFrustum.top, point);
+  auto inFrontOfBottomPlane = isInFrontOfPlane(viewFrustum.bottom, point);
 
-  //return inFrontOfLeftPlane && inFrontOfRightPlane && inFrontOfTopPlane && inFrontOfBottomPlane && inFrontOfNearPlane && inFrontOfFarPlane;
-  return true;
+  std::cout << "inFrontOfNearPlane: " << inFrontOfNearPlane << std::endl;
+  std::cout << "inFrontOfFarPlane: " << inFrontOfFarPlane << std::endl;
+  std::cout << "inFrontOfLeftPlane: " << inFrontOfLeftPlane << std::endl;
+  std::cout << "inFrontOfRightPlane: " << inFrontOfRightPlane << std::endl;
+  std::cout << "inFrontOfTopPlane: " << inFrontOfTopPlane << std::endl;
+  std::cout << "inFrontOfBottomPlane: " << inFrontOfBottomPlane << std::endl;
+
+
+  return inFrontOfLeftPlane && inFrontOfRightPlane && inFrontOfTopPlane && inFrontOfBottomPlane && inFrontOfNearPlane && inFrontOfFarPlane;
 }
 
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
