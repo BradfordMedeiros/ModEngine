@@ -373,22 +373,180 @@ bool checkIfUiShader(std::string& value){
   return false;
 }
 
-bool passesFrustumCulling(Transformation& transform, objid id){
+
+struct FrustumPlane {
+  glm::vec3 point;
+  glm::vec3 normal;
+};
+struct ViewFrustum {
+  FrustumPlane left;
+  FrustumPlane right;
+  FrustumPlane top;
+  FrustumPlane bottom;
+  FrustumPlane near;
+  FrustumPlane far;
+};
+ViewFrustum cameraToViewFrustum(float fov){
+  // All planes have the camera locations as a point if you extend them 
+  // except for the near and far plane
+  float zNear = 0.2f;
+  float zFar = 3.f;
+
+  return ViewFrustum {
+    .left = FrustumPlane {
+      .point = glm::vec3(0.f, 0.f, 0.f),
+      .normal = glm::vec3(1.f, 0.f, 0.f),
+    },
+    .right = FrustumPlane {
+      .point = glm::vec3(0.f, 0.f, 0.f),
+      .normal = glm::vec3(-1.f, 0.f, 0.f),
+    },
+    .top = FrustumPlane {
+      .point = glm::vec3(0.f, 0.f, 0.f),
+      .normal = glm::vec3(0.f, -1.f, 0.f),
+    },
+    .bottom = FrustumPlane {
+      .point = glm::vec3(0.f, 0.f, 0.f),
+      .normal = glm::vec3(0.f, 1.f, 0.f),
+    },
+    .near = FrustumPlane {
+      .point = glm::vec3(0.f, 0.f, -1 * zNear),
+      .normal = glm::vec3(0.f, 0.f, -1.f),
+    },
+    .far = FrustumPlane {
+      .point = glm::vec3(0.f, 0.f, -1 * zFar),
+      .normal = glm::vec3(0.f, 0.f, 1.f),
+    },
+  };
+}
+
+void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
+  auto nearPlanePoint = viewTransform.position + viewFrustum.near.point;
+  auto farPlanePoint = viewTransform.position + viewFrustum.far.point;
+
+  std::vector<glm::vec3> points {
+    nearPlanePoint,
+    farPlanePoint,
+  };
+
+  std::vector<FrustumPlane> planes {
+    viewFrustum.near,
+    viewFrustum.far,
+    viewFrustum.top,
+    viewFrustum.bottom,
+    viewFrustum.left,
+    viewFrustum.right,
+  };
+
+
+  float angleX = glm::radians(45.f);
+  float angleY = glm::radians(45.f);
+  auto position = glm::vec3(0.f, 0.f, 0.f);  // viewFrustum
+  {
+    float widthXNear = glm::length(viewFrustum.near.point) * glm::tan(angleX);
+    float widthYNear = glm::length(viewFrustum.near.point) * glm::tan(angleY);
+    auto nearLeft = position + viewFrustum.near.point + glm::vec3(widthXNear, 0.f, 0.f);
+    auto nearRight = position + viewFrustum.near.point + glm::vec3(-widthXNear, 0.f, 0.f);
+    auto nearUp =  position + viewFrustum.near.point + glm::vec3(0.f, widthYNear, 0.f);
+    auto nearDown = position + viewFrustum.near.point + glm::vec3(0.f, -widthYNear, 0.f);
+    //addLineToNextCycleTint(lineData, position, nearLeft, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    //addLineToNextCycleTint(lineData, position, nearRight, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    //addLineToNextCycleTint(lineData, position, nearUp, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    //addLineToNextCycleTint(lineData, position, nearDown, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, nearLeft, nearUp, false, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, nearUp, nearRight, false, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, nearRight, nearDown, false, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, nearDown, nearLeft, false, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  }
+
+  {
+    float widthXNear = glm::length(viewFrustum.far.point) * glm::tan(angleX);
+    float widthYNear = glm::length(viewFrustum.far.point) * glm::tan(angleY);
+    auto nearLeft = position + viewFrustum.far.point + glm::vec3(widthXNear, 0.f, 0.f);
+    auto nearRight = position + viewFrustum.far.point + glm::vec3(-widthXNear, 0.f, 0.f);
+    auto nearUp =  position + viewFrustum.far.point + glm::vec3(0.f, widthYNear, 0.f);
+    auto nearDown = position + viewFrustum.far.point + glm::vec3(0.f, -widthYNear, 0.f);
+    addLineToNextCycleTint(lineData, position, nearLeft, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, position, nearRight, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, position, nearUp, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, position, nearDown, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, nearLeft, nearUp, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, nearUp, nearRight, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, nearRight, nearDown, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, nearDown, nearLeft, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  }
+
+  //float widthXFar = glm::length(viewFrustum.far.point) * glm::tan(angleX);
+  //addLineToNextCycleTint(lineData, position, position + viewFrustum.far.point + glm::vec3(widthXFar, 0.f, 0.f), false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  //addLineToNextCycleTint(lineData, position, position + viewFrustum.far.point + glm::vec3(-widthXFar, 0.f, 0.f), false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+
+  float length = 0.1f;
+  for (auto &plane : planes){
+    break;
+    auto normalVec = glm::normalize(quatFromDirection(plane.normal) * glm::vec3(0.f, 0.f, -1.f));
+    //auto dirOnPlane = glm::cross(point.normal, normalVec);
+    addLineToNextCycleTint(lineData, plane.point, plane.point + (length * normalVec), false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  
+    auto perpendicularVector = glm::normalize(glm::cross(normalVec, normalVec + glm::vec3(1.f, 0.f, 0.f)));  // cross product and two vectors is perp
+    addLineToNextCycleTint(lineData, plane.point, plane.point + (length * perpendicularVector), false, -1, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+
+    auto basisVector = glm::normalize(glm::cross(normalVec, perpendicularVector));
+    addLineToNextCycleTint(lineData, plane.point, plane.point + (length * basisVector), false, -1, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, std::nullopt);
+  }
+
+ // for (auto &point : points){
+ //   auto normalVec = quatFromDirection(point.normal) * glm::vec3(0.f, 0.f, -1.f);
+ //   auto dirOnPlane = glm::cross(point.normal, normalVec);
+ //   addLineToNextCycleTint(lineData, point, point + normalVec, false, -1, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, std::nullopt);
+ //   addLineToNextCycleTint(lineData, point, point + dirOnPlane, false, -1, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, std::nullopt);
+ // }
+
+
+}
+
+
+// the point here should be in camera / frustum) space
+bool isInFrontOfPlane(FrustumPlane& plane, glm::vec3 point){
+  auto vecToPoint = point - plane.point;
+  return glm::dot(vecToPoint, plane.normal) >= 0;
+}
+
+bool passesFrustumCulling(ViewFrustum& viewFrustum, Transformation& camera, objid id){
   if (!state.enableFrustumCulling){
     return true;
   }
-  auto elementPosition = fullTransformation(world.sandbox, id);
-  glm::vec3 towardObject = elementPosition.position - transform.position;
-  auto forward = transform.rotation * glm::vec3(0.f, 0.f, -1.f);
-  return glm::dot(forward, towardObject) >= 0;
+  auto elementPosition = fullTransformation(world.sandbox, id).position;
+  //auto inFrontOfLeftPlane = isInFrontOfPlane(viewFrustum.left, elementPosition);
+  //auto inFrontOfRightPlane = isInFrontOfPlane(viewFrustum.right, elementPosition);
+  //auto inFrontOfTopPlane = isInFrontOfPlane(viewFrustum.top, elementPosition);
+  //auto inFrontOfBottomPlane = isInFrontOfPlane(viewFrustum.bottom, elementPosition);
+
+  auto point = glm::inverse(camera.rotation) * glm::vec3(0.f, 0.f, -1.f); // this gives us the world space point of 0,0,-1 in camera space
+  auto inFrontOfNearPlane = isInFrontOfPlane(viewFrustum.near, point);
+  std::cout << "inFrontOfNearPlane: " << inFrontOfNearPlane << std::endl;
+  auto inFrontOfFarPlane = isInFrontOfPlane(viewFrustum.far, point);
+  std::cout << "inFrontOfFarPlane: " << inFrontOfFarPlane << std::endl;
+
+  //return inFrontOfLeftPlane && inFrontOfRightPlane && inFrontOfTopPlane && inFrontOfBottomPlane && inFrontOfNearPlane && inFrontOfFarPlane;
+  return true;
 }
 
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
   glUseProgram(shaderProgram);
   int numTriangles = 0;
 
+  auto viewFrustum = cameraToViewFrustum(45.f);
+
+  Transformation transform {
+    .position = glm::vec3(0.f, 0.f, 0.f),
+    .scale = glm::vec3(1.f, 1.f, 1.f),
+    .rotation = MOD_ORIENTATION_FORWARD,
+  };
+  visualizeFrustum(viewFrustum, transform);
+
+
   std::optional<GLint> lastShaderId = std::nullopt;
-  traverseSandboxByLayer(world.sandbox, [&world, shaderProgram, allowShaderOverride, projection, view, &portals, &numTriangles, textBoundingOnly, &lastShaderId](int32_t id, glm::mat4 modelMatrix, LayerInfo& layer, std::string shader) -> void {
+  traverseSandboxByLayer(world.sandbox, [&world, shaderProgram, allowShaderOverride, projection, view, &portals, &numTriangles, textBoundingOnly, &lastShaderId, &viewFrustum](int32_t id, glm::mat4 modelMatrix, LayerInfo& layer, std::string shader) -> void {
     modassert(id >= 0, "unexpected id render world");
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
@@ -445,7 +603,9 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     if (layer.visible && id != 0){
       //std::cout << "render object: " << getGameObject(world, id).name << std::endl;
 
-      bool shouldDraw = passesFrustumCulling(viewTransform, id);
+      std::cout << "viewFrustum.near: " << print(viewFrustum.near.normal) << std::endl;
+
+      bool shouldDraw = passesFrustumCulling(viewFrustum, viewTransform, id);
       if (shouldDraw){
         auto trianglesDrawn = renderObject(
           newShader, 
