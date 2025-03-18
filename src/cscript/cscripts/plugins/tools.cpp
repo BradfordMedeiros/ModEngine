@@ -125,6 +125,9 @@ CScriptBinding cscriptCreateToolsBinding(CustomApiBindings& api){
       }
       alreadyDrawn.insert(id);
 
+
+      auto aabb = mainApi -> getModAABBModel(id);
+
       auto physicsInfo = mainApi -> getPhysicsInfo(id);
 
       auto position = mainApi -> getGameObjectPos(id, true);

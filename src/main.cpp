@@ -1410,6 +1410,7 @@ int main(int argc, char* argv[]){
     .applyForce = applyForce,
     .applyTorque = applyTorque,
     .getModAABB = getModAABB,
+    .getModAABBModel = getModAABBModel,
     .getPhysicsInfo = getPhysicsInfo,
     .listAnimations = listAnimations,
     .playAnimation = playAnimation,

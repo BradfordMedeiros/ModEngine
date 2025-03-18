@@ -411,6 +411,7 @@ ModAABB getModAABB(btRigidBody* body){
   shape  -> getAabb(transform, vec1, vec2);
   return ModAABB {
     .position = btToGlm(transform.getOrigin()),
+    .rotation = btToGlm(transform.getRotation()),
     .min = btToGlm(vec1),
     .max = btToGlm(vec2),
   };

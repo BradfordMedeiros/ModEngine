@@ -101,6 +101,13 @@ std::optional<ModAABB> getModAABB(int32_t index){
   return getModAABB(rigidBody);
 }
 
+std::optional<ModAABB2> getModAABBModel(int32_t index){
+  return ModAABB2 {
+    .position = getGameObjectPosition(index, true),
+    .size = glm::vec3(5.f, 5.f, 5.f), // obviously not correct but just for right now
+  };
+}
+
 std::optional<PhysicsInfo> getPhysicsInfo(int32_t index){
   return getPhysicsInfoForGameObject(world, index);
 }

@@ -383,9 +383,28 @@ struct RecordingState {
 
 struct ModAABB {
   glm::vec3 position;
+  glm::quat rotation;
   glm::vec3 min;
   glm::vec3 max;
 };
+
+struct ModAABB2 {
+  glm::vec3 position;
+  glm::vec3 size;
+};
+
+struct Bounds {
+  glm::vec3 topLeftFront;
+  glm::vec3 topRightFront;
+  glm::vec3 bottomLeftFront;
+  glm::vec3 bottomRightFront;
+  glm::vec3 topLeftBack;
+  glm::vec3 topRightBack;
+  glm::vec3 bottomLeftBack;
+  glm::vec3 bottomRightBack;
+};
+
+Bounds toBounds(ModAABB2& aabb);
 
 template <typename T>
 T* anycast(std::any& anyValue){

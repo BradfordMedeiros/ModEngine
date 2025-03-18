@@ -1212,3 +1212,21 @@ EnvSubstResult envSubst(std::string content, std::unordered_map<std::string, std
 returnEnvSubstData:
   return EnvSubstResult { .result = finalValue, .valid = true };
 }
+
+
+Bounds toBounds(ModAABB2& aabb){
+  modassert(false, "not yet implemented");
+  float halfWidth = aabb.size.x * 0.5f;
+  float halfHeight = aabb.size.y * 0.5f;
+  float halfDepth = aabb.size.z * 0.5f;
+  return Bounds {
+    .topLeftFront = glm::vec3(aabb.position.x - halfWidth, aabb.position.y + halfHeight, aabb.position.z + halfDepth),
+    .topRightFront = glm::vec3(aabb.position.x + halfWidth, aabb.position.y + halfHeight, aabb.position.z + halfDepth),
+    .bottomLeftFront = glm::vec3(aabb.position.x - halfWidth, aabb.position.y - halfHeight, aabb.position.z + halfDepth),
+    .bottomRightFront = glm::vec3(aabb.position.x + halfWidth, aabb.position.y - halfHeight, aabb.position.z + halfDepth),
+    .topLeftBack = glm::vec3(aabb.position.x - halfWidth, aabb.position.y + halfHeight, aabb.position.z - halfDepth),
+    .topRightBack = glm::vec3(aabb.position.x + halfWidth, aabb.position.y + halfHeight, aabb.position.z - halfDepth),
+    .bottomLeftBack = glm::vec3(aabb.position.x - halfWidth, aabb.position.y - halfHeight, aabb.position.z - halfDepth),
+    .bottomRightBack = glm::vec3(aabb.position.x + halfWidth, aabb.position.y - halfHeight, aabb.position.z - halfDepth),
+  };
+}
