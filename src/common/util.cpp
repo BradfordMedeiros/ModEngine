@@ -1215,7 +1215,6 @@ returnEnvSubstData:
 
 
 Bounds toBounds(ModAABB2& aabb){
-  modassert(false, "not yet implemented");
   float halfWidth = aabb.size.x * 0.5f;
   float halfHeight = aabb.size.y * 0.5f;
   float halfDepth = aabb.size.z * 0.5f;
