@@ -217,7 +217,8 @@ CScriptBinding cscriptCreateToolsBinding(CustomApiBindings& api){
       }
       alreadyDrawn.insert(id);
 
-      drawBounding(id);
+      drawAABB(id);
+      //drawBounding(id);
     }
 
     // utilities 

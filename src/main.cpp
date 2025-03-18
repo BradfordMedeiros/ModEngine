@@ -547,28 +547,42 @@ bool passesFrustumCulling(ViewFrustum& viewFrustum, Transformation& camera, obji
   if (!state.enableFrustumCulling){
     return true;
   }
-  auto elementPosition = fullTransformation(world.sandbox, id).position;
 
-  // this needs to check the AABB and if all the points are not in is then can cull
-  auto point = glm::inverse(camera.rotation) * (elementPosition - camera.position) ; // this gives us the world space point of 0,0,-1 in camera space
+  auto aabb = getModAABBModel(id);
+  if (!aabb.has_value()){
+    return true;
+  }
+  modassert(aabb.has_value(), "aabb does not have a value");
+  auto bounds = toBounds(aabb.value());
 
+  std::vector<glm::vec3> points {
+    bounds.topLeftFront,
+    bounds.topRightFront,
+    bounds.bottomLeftFront,
+    bounds.bottomRightFront,
+    bounds.topLeftBack,
+    bounds.topRightBack,
+    bounds.bottomLeftBack,
+    bounds.bottomRightBack,
+  };
 
-  auto inFrontOfNearPlane = isInFrontOfPlane(viewFrustum.near, point);
-  auto inFrontOfFarPlane = isInFrontOfPlane(viewFrustum.far, point);
-  auto inFrontOfLeftPlane = isInFrontOfPlane(viewFrustum.left, point);
-  auto inFrontOfRightPlane = isInFrontOfPlane(viewFrustum.right, point);
-  auto inFrontOfTopPlane = isInFrontOfPlane(viewFrustum.top, point);
-  auto inFrontOfBottomPlane = isInFrontOfPlane(viewFrustum.bottom, point);
+  for (auto &boundingPoint : points){
+    // this needs to check the AABB and if all the points are not in is then can cull
+    auto point = glm::inverse(camera.rotation) * (boundingPoint - camera.position) ; // this gives us the world space point of 0,0,-1 in camera space
+    auto inFrontOfNearPlane = isInFrontOfPlane(viewFrustum.near, point);
+    auto inFrontOfFarPlane = isInFrontOfPlane(viewFrustum.far, point);
+    auto inFrontOfLeftPlane = isInFrontOfPlane(viewFrustum.left, point);
+    auto inFrontOfRightPlane = isInFrontOfPlane(viewFrustum.right, point);
+    auto inFrontOfTopPlane = isInFrontOfPlane(viewFrustum.top, point);
+    auto inFrontOfBottomPlane = isInFrontOfPlane(viewFrustum.bottom, point);
+    auto passesCulling = inFrontOfLeftPlane && inFrontOfRightPlane && inFrontOfTopPlane && inFrontOfBottomPlane && inFrontOfNearPlane && inFrontOfFarPlane;
+    if (passesCulling){
+      std::cout << "frustum passes: " << getGameObjectName(id).value() << std::endl;
 
-  std::cout << "inFrontOfNearPlane: " << inFrontOfNearPlane << std::endl;
-  std::cout << "inFrontOfFarPlane: " << inFrontOfFarPlane << std::endl;
-  std::cout << "inFrontOfLeftPlane: " << inFrontOfLeftPlane << std::endl;
-  std::cout << "inFrontOfRightPlane: " << inFrontOfRightPlane << std::endl;
-  std::cout << "inFrontOfTopPlane: " << inFrontOfTopPlane << std::endl;
-  std::cout << "inFrontOfBottomPlane: " << inFrontOfBottomPlane << std::endl;
-
-
-  return inFrontOfLeftPlane && inFrontOfRightPlane && inFrontOfTopPlane && inFrontOfBottomPlane && inFrontOfNearPlane && inFrontOfFarPlane;
+      return true;
+    }
+  }
+  return false;
 }
 
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){

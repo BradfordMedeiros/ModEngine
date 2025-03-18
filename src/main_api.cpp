@@ -101,10 +101,26 @@ std::optional<ModAABB> getModAABB(int32_t index){
   return getModAABB(rigidBody);
 }
 
-std::optional<ModAABB2> getModAABBModel(int32_t index){
+// this is incorrect
+std::optional<ModAABB2> getModAABBModel(int32_t id){
+  auto physicsInfo = getPhysicsInfo(id);
+  if (!physicsInfo.has_value()){
+    return std::nullopt;
+  }
+
+  auto boundInfo = physicsInfo.value().boundInfo;
+  float width = boundInfo.xMax - boundInfo.xMin;
+  float height = boundInfo.yMax - boundInfo.yMin;
+  float depth = boundInfo.zMax - boundInfo.zMin;
+
+  auto scale = getGameObjectScale2(id, true);
+  auto rotation = getGameObjectRotation(id, true);
+  auto size = glm::vec3(width * scale.x, height * scale.y, depth * scale.z);
+  size = rotation * size;
+
   return ModAABB2 {
-    .position = getGameObjectPosition(index, true),
-    .size = glm::vec3(5.f, 5.f, 5.f), // obviously not correct but just for right now
+    .position = getGameObjectPosition(id, true),
+    .size = size, 
   };
 }
 
