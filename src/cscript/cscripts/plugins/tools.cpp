@@ -111,6 +111,98 @@ ManipulatorTools tools {
   .getSelectedIds = onManipulatorSelected,
 };
 
+
+void drawAABB(objid id){
+  auto aabb = mainApi -> getModAABBModel(id);
+  auto bounds = toBounds(aabb.value());
+  mainApi -> drawLine(bounds.topLeftFront, bounds.topRightFront, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  mainApi -> drawLine(bounds.bottomLeftFront, bounds.bottomRightFront, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  mainApi -> drawLine(bounds.topLeftFront, bounds.topLeftBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  mainApi -> drawLine(bounds.topRightFront, bounds.topRightBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  mainApi -> drawLine(bounds.topLeftBack, bounds.topRightBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  mainApi -> drawLine(bounds.bottomLeftBack, bounds.bottomRightBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  mainApi -> drawLine(bounds.bottomLeftFront, bounds.bottomLeftBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  mainApi -> drawLine(bounds.bottomRightFront, bounds.bottomRightBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  mainApi -> drawLine(bounds.topLeftFront, bounds.bottomLeftFront, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  mainApi -> drawLine(bounds.topRightFront, bounds.bottomRightFront, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  mainApi -> drawLine(bounds.topLeftBack, bounds.bottomLeftBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  mainApi -> drawLine(bounds.topRightBack, bounds.bottomRightBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+}
+
+void drawBounding(objid id){
+  auto physicsInfo = mainApi -> getPhysicsInfo(id);
+  auto position = mainApi -> getGameObjectPos(id, true);
+  if (physicsInfo.has_value()){
+    if (physicsInfo.value().offset.has_value()){
+      position += physicsInfo.value().offset.value();
+    }
+          
+    auto boundInfo = physicsInfo.value().boundInfo;
+    float width = boundInfo.xMax - boundInfo.xMin;
+    float height = boundInfo.yMax - boundInfo.yMin;
+    float depth = boundInfo.zMax - boundInfo.zMin;
+
+    glm::vec3 bottomLeft(-0.5f * width, -0.5f * height, -0.5f * depth);
+    glm::vec3 bottomRight(0.5f * width, -0.5f * height, -0.5f * depth);
+    glm::vec3 topLeft(-0.5f * width, 0.5f * height, -0.5f * depth);
+    glm::vec3 topRight(0.5f * width, 0.5f * height, -0.5f * depth);
+
+    glm::vec3 bottomLeftBack(-0.5f * width, -0.5f * height, 0.5f * depth);
+    glm::vec3 bottomRightBack(0.5f * width, -0.5f * height, 0.5f * depth);
+    glm::vec3 topLeftBack(-0.5f * width, 0.5f * height, 0.5f * depth);
+    glm::vec3 topRightBack(0.5f * width, 0.5f * height, 0.5f * depth);        
+
+    auto rotation = mainApi -> getGameObjectRotation(id, true);
+    auto scale = mainApi -> getGameObjectScale(id, true);
+
+    bottomLeft *= scale;
+    bottomRight *= scale;
+    topLeft *= scale;
+    topRight *= scale;
+
+    bottomLeftBack *= scale;
+    bottomRightBack *= scale;
+    topLeftBack *= scale;
+    topRightBack *= scale;
+
+    bottomLeft = rotation * bottomLeft;
+    bottomRight = rotation * bottomRight;
+    topLeft = rotation * topLeft;
+    topRight = rotation * topRight;
+
+    bottomLeftBack = rotation * bottomLeftBack;
+    bottomRightBack = rotation * bottomRightBack;
+    topLeftBack = rotation * topLeftBack;
+    topRightBack = rotation * topRightBack;
+
+    bottomLeft += position;
+    bottomRight += position;
+    topLeft += position;
+    topRight += position;
+
+    bottomLeftBack += position;
+    bottomRightBack += position;
+    topLeftBack += position;
+    topRightBack += position;
+
+    mainApi -> drawLine(bottomLeft, bottomRight, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    mainApi -> drawLine(topLeft,    topRight, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    mainApi -> drawLine(topLeft,    bottomLeft, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    mainApi -> drawLine(topRight,   bottomRight, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+
+    mainApi -> drawLine(bottomLeftBack, bottomRightBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    mainApi -> drawLine(topLeftBack,    topRightBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    mainApi -> drawLine(topLeftBack,    bottomLeftBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    mainApi -> drawLine(topRightBack,   bottomRightBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+
+    mainApi -> drawLine(bottomLeft, bottomLeftBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    mainApi -> drawLine(topLeft,    topLeftBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    mainApi -> drawLine(topRight,    topRightBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    mainApi -> drawLine(bottomRight,   bottomRightBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  }
+}
+
+
 CScriptBinding cscriptCreateToolsBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("native/tools", api);
   binding.onFrame = [](int32_t id, void* data) -> void {
@@ -125,83 +217,7 @@ CScriptBinding cscriptCreateToolsBinding(CustomApiBindings& api){
       }
       alreadyDrawn.insert(id);
 
-
-      auto aabb = mainApi -> getModAABBModel(id);
-
-      auto physicsInfo = mainApi -> getPhysicsInfo(id);
-
-      auto position = mainApi -> getGameObjectPos(id, true);
-      if (physicsInfo.has_value()){
-        if (physicsInfo.value().offset.has_value()){
-          position += physicsInfo.value().offset.value();
-        }
-          
-        auto boundInfo = physicsInfo.value().boundInfo;
-
-        float width = boundInfo.xMax - boundInfo.xMin;
-        float height = boundInfo.yMax - boundInfo.yMin;
-        float depth = boundInfo.zMax - boundInfo.zMin;
-
-        glm::vec3 bottomLeft(-0.5f * width, -0.5f * height, -0.5f * depth);
-        glm::vec3 bottomRight(0.5f * width, -0.5f * height, -0.5f * depth);
-        glm::vec3 topLeft(-0.5f * width, 0.5f * height, -0.5f * depth);
-        glm::vec3 topRight(0.5f * width, 0.5f * height, -0.5f * depth);
-
-        glm::vec3 bottomLeftBack(-0.5f * width, -0.5f * height, 0.5f * depth);
-        glm::vec3 bottomRightBack(0.5f * width, -0.5f * height, 0.5f * depth);
-        glm::vec3 topLeftBack(-0.5f * width, 0.5f * height, 0.5f * depth);
-        glm::vec3 topRightBack(0.5f * width, 0.5f * height, 0.5f * depth);        
-
-        auto rotation = mainApi -> getGameObjectRotation(id, true);
-        auto scale = mainApi -> getGameObjectScale(id, true);
-
-        bottomLeft *= scale;
-        bottomRight *= scale;
-        topLeft *= scale;
-        topRight *= scale;
-
-        bottomLeftBack *= scale;
-        bottomRightBack *= scale;
-        topLeftBack *= scale;
-        topRightBack *= scale;
-
-        bottomLeft = rotation * bottomLeft;
-        bottomRight = rotation * bottomRight;
-        topLeft = rotation * topLeft;
-        topRight = rotation * topRight;
-
-        bottomLeftBack = rotation * bottomLeftBack;
-        bottomRightBack = rotation * bottomRightBack;
-        topLeftBack = rotation * topLeftBack;
-        topRightBack = rotation * topRightBack;
-
-        bottomLeft += position;
-        bottomRight += position;
-        topLeft += position;
-        topRight += position;
-
-        bottomLeftBack += position;
-        bottomRightBack += position;
-        topLeftBack += position;
-        topRightBack += position;
-
-        mainApi -> drawLine(bottomLeft, bottomRight, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-        mainApi -> drawLine(topLeft,    topRight, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-        mainApi -> drawLine(topLeft,    bottomLeft, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-        mainApi -> drawLine(topRight,   bottomRight, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-
-        mainApi -> drawLine(bottomLeftBack, bottomRightBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-        mainApi -> drawLine(topLeftBack,    topRightBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-        mainApi -> drawLine(topLeftBack,    bottomLeftBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-        mainApi -> drawLine(topRightBack,   bottomRightBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-
-
-        mainApi -> drawLine(bottomLeft, bottomLeftBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-        mainApi -> drawLine(topLeft,    topLeftBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-        mainApi -> drawLine(topRight,    topRightBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-        mainApi -> drawLine(bottomRight,   bottomRightBack, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-
-      }
+      drawBounding(id);
     }
 
     // utilities 
