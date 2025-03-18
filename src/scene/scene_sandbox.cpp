@@ -319,6 +319,7 @@ void traverseSandboxByLayer(SceneSandbox& sandbox, std::function<void(objid, glm
   }
 }
 
+// TODO PEROBJECT
 std::vector<objid> getIdsInGroup(Scene& scene, objid groupId){
   std::vector<objid> ids;
   for (auto [_, gameobj] : scene.idToGameObjectsH){
