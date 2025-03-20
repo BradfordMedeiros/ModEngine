@@ -301,7 +301,7 @@ struct traversalData {
   objid id;
   glm::mat4 modelMatrix;
 };
-void traverseSandboxByLayer(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, LayerInfo&, std::string)> onObject){
+void traverseSandboxByLayer(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, LayerInfo&, std::string&)> onObject){
   std::vector<traversalData> datum;
   for (auto &[id, transformCacheElement] : sandbox.mainScene.absoluteTransforms){
     datum.push_back(traversalData{

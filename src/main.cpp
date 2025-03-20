@@ -652,7 +652,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 
 
   std::optional<GLint> lastShaderId = std::nullopt;
-  traverseSandboxByLayer(world.sandbox, [&world, shaderProgram, allowShaderOverride, projection, view, &portals, &numTriangles, textBoundingOnly, &lastShaderId, &viewFrustum](int32_t id, glm::mat4 modelMatrix, LayerInfo& layer, std::string shader) -> void {
+  traverseSandboxByLayer(world.sandbox, [&world, shaderProgram, allowShaderOverride, projection, view, &portals, &numTriangles, textBoundingOnly, &lastShaderId, &viewFrustum](int32_t id, glm::mat4 modelMatrix, LayerInfo& layer, std::string& shader) -> void {
     modassert(id >= 0, "unexpected id render world");
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
@@ -708,7 +708,6 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 
     if (layer.visible && id != 0){
       //std::cout << "render object: " << getGameObject(world, id).name << std::endl;
-      std::cout << "viewFrustum.near: " << print(viewFrustum.near.normal) << std::endl;
       bool shouldDraw = passesFrustumCulling(viewFrustum, viewTransform, id);
       // if (shouldDraw){
       //   static int counter = 0;

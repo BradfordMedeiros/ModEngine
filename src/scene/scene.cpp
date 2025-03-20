@@ -44,8 +44,8 @@ glm::vec3 getOffsetForBoundInfo(BoundInfo& boundInfo, glm::vec3 scale){
 }
 
 std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index, bool useGroup){  
-  GameObject obj = getGameObject(world.sandbox, index);
-  auto gameObjV = world.objectMapping.at(index); 
+  GameObject& obj = getGameObject(world.sandbox, index);
+  GameObjectObj& gameObjV = world.objectMapping.at(index); 
 
   BoundInfo boundInfo = { .xMin = -1,  .xMax = 1, .yMin = -1, .yMax = 1, .zMin = -1, .zMax = 1 };
   std::optional<glm::vec3> finalOffset = std::nullopt;
