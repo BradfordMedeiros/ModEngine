@@ -467,7 +467,7 @@ NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id){
   GameObjectObj& gameObj = mapping.at(id);
 
   {
-    auto meshObject = std::get_if<GameObjectMesh>(&gameObj);
+    GameObjectMesh* meshObject = std::get_if<GameObjectMesh>(&gameObj);
     if (meshObject != NULL){
       for (int i = 0; i < meshObject -> meshesToRender.size(); i++){
         meshNames.push_back(&meshObject -> meshNames.at(i));

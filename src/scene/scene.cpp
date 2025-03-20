@@ -24,7 +24,7 @@ std::vector<NameAndMeshObjName> getMeshesForGameobj(World& world, objid gameobjI
   //std::cout << "1 physics : , groupId: " << groupId << ", ids " << print(allIds) << std::endl;
   for (auto id : allIds){
     auto meshesForId = getMeshesForId(world.objectMapping, id);
-    auto gameobjname = getGameObject(world, id).name;
+    std::string& gameobjname = getGameObject(world, id).name;
     for (int i = 0; i < meshesForId.meshes.size(); i++){
       nameAndMeshObjNames.push_back(NameAndMeshObjName {
         .objname = gameobjname,
