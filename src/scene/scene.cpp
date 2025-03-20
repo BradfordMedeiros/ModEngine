@@ -62,7 +62,6 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
 
     for (Mesh* mesh : meshes){
       boundInfos.push_back(mesh -> boundInfo);
-      std::cout << "3 bound physics : " << obj.name << "  " << print(mesh -> boundInfo) << std::endl;
     }
     if (boundInfos.size() == 0){
       return std::nullopt;
@@ -71,9 +70,6 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
     auto fullTransform = fullTransformation(world.sandbox, index);
     boundInfo = getMaxUnionBoundingInfo(boundInfos);
     finalOffset = getOffsetForBoundInfo(boundInfo, fullTransform.scale);
-    std::cout << "2 bound physics : " << obj.name << ", index = " << index << ", group = " <<  getGameObjectH(world.sandbox, index).groupId << ", size = " << meshes.size() << ", offset: " << print(finalOffset.value()) << std::endl;
-    std::cout << "4 bound physics : " << obj.name << ", " << print(boundInfo) << std::endl;
-
   }
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&gameObjV);
