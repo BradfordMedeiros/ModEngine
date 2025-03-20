@@ -407,7 +407,7 @@ FovAngles calcFovAngles(){
   };
 }
 
-ViewFrustum cameraToViewFrustum(float fov){
+ViewFrustum cameraToViewFrustum(){
   // All planes have the camera locations as a point if you extend them 
   // except for the near and far plane
   auto angles = calcFovAngles();
@@ -641,7 +641,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   glUseProgram(shaderProgram);
   int numTriangles = 0;
 
-  auto viewFrustum = cameraToViewFrustum(45.f);
+  auto viewFrustum = cameraToViewFrustum();
 
   Transformation transform {
     .position = glm::vec3(0.f, 0.f, 0.f),
@@ -710,11 +710,11 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       //std::cout << "render object: " << getGameObject(world, id).name << std::endl;
       std::cout << "viewFrustum.near: " << print(viewFrustum.near.normal) << std::endl;
       bool shouldDraw = passesFrustumCulling(viewFrustum, viewTransform, id);
-      if (shouldDraw){
-        static int counter = 0;
-        std::cout << "passes culling name: " << getGameObject(world, id).name << " " << counter << std::endl;
-        counter++;
-      }
+      // if (shouldDraw){
+      //   static int counter = 0;
+      //   std::cout << "passes culling name: " << getGameObject(world, id).name << " " << counter << std::endl;
+      //   counter++;
+      // }
       if (shouldDraw){
         auto trianglesDrawn = renderObject(
           newShader, 
