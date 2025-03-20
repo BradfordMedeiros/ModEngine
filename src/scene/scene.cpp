@@ -17,10 +17,10 @@ GameObject& getGameObject(World& world, std::string name, objid sceneId){
   return *obj.value();
 }
 
-std::vector<NameAndMeshObjName> getMeshesForGameobj(World& world, objid gameobjId){
+std::vector<NameAndMeshObjName> getMeshesForGameobj(World& world, objid gameobjId, bool useGroup){
   std::vector<NameAndMeshObjName> nameAndMeshObjNames;
   auto groupId = getGroupId(world.sandbox, gameobjId);
-  auto allIds = groupId == gameobjId ? getIdsInGroupByObjId(world.sandbox, groupId) : std::vector<objid>({ gameobjId });
+  auto allIds = (useGroup && groupId == gameobjId) ? getIdsInGroupByObjId(world.sandbox, groupId) : std::vector<objid>({ gameobjId });
   //std::cout << "1 physics : , groupId: " << groupId << ", ids " << print(allIds) << std::endl;
   for (auto id : allIds){
     auto meshesForId = getMeshesForId(world.objectMapping, id);
@@ -43,7 +43,7 @@ glm::vec3 getOffsetForBoundInfo(BoundInfo& boundInfo, glm::vec3 scale){
   return glm::vec3(xoffset, yoffset, zoffset);
 }
 
-std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index){  
+std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index, bool useGroup){  
   GameObject obj = getGameObject(world.sandbox, index);
   auto gameObjV = world.objectMapping.at(index); 
 
@@ -53,7 +53,7 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
   if (meshObj != NULL){
     std::vector<BoundInfo> boundInfos;
-    auto meshObjDatas = getMeshesForGameobj(world, index);
+    auto meshObjDatas = getMeshesForGameobj(world, index, useGroup);
 
     std::vector<Mesh*> meshes;
     for (auto &meshObjData : meshObjDatas){
@@ -134,7 +134,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   if (!physicsOptions.enabled){
     return PhysicsValue { .body = NULL, .offset = std::nullopt };
   }
-  auto physicsInfoOpt = getPhysicsInfoForGameObject(world, id);
+  auto physicsInfoOpt = getPhysicsInfoForGameObject(world, id, true);
   if (!physicsInfoOpt.has_value()){
     return PhysicsValue { .body = NULL, .offset = std::nullopt };
   }

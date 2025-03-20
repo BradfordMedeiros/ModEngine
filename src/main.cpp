@@ -571,67 +571,70 @@ bool passesFrustumCulling(ViewFrustum& viewFrustum, Transformation& camera, obji
   };
 
 
-  auto onLeftSide = false;
-  auto onRightSide = false;
-  auto onTopSide = false;
-  auto onBottomSide = false;
-  auto closeEnough = false;
-  auto farEnough = false;
-
-  auto inVertical = false;
-  auto inHorizontal = false;
+  int numPointsOnLeft = 0;
+  int numPointsOnRight = 0;
+  int numPointsOnFar = 0;
+  int numPointsOnNear = 0;
+  int numPointsOnTop = 0;
+  int numPointsOnBottom = 0;
 
   for (auto &boundingPoint : points){
     // this needs to check the AABB and if all the points are not in is then can cull
     auto point = glm::inverse(camera.rotation) * (boundingPoint - camera.position) ; // this gives us the world space point of 0,0,-1 in camera space
     auto inFrontOfNearPlane = isInFrontOfPlane(viewFrustum.near, point);
-    auto inFrontOfFarPlane = isInFrontOfPlane(viewFrustum.far, point);
-    closeEnough = closeEnough || inFrontOfFarPlane;
-    farEnough = farEnough || inFrontOfNearPlane;
-    
-    auto inFrontOfLeftPlane = isInFrontOfPlane(viewFrustum.left, point);
-    auto inBackOfLeftPlane = isInBackOfPlane(viewFrustum.left, point);
-    onLeftSide = onLeftSide || inBackOfLeftPlane;
-
-    auto inFrontOfRightPlane = isInFrontOfPlane(viewFrustum.right, point);
-    auto inBackOfRightPlane = isInBackOfPlane(viewFrustum.right, point);
-    onRightSide = onRightSide || inBackOfRightPlane;
-
-    auto inFrontOfTopPlane = isInFrontOfPlane(viewFrustum.top, point);
-    auto inBackOfTopPlane = isInBackOfPlane(viewFrustum.top, point);
-    onTopSide = onTopSide || inBackOfTopPlane;
-
-    auto inFrontOfBottomPlane = isInFrontOfPlane(viewFrustum.bottom, point);
-    auto inBackOfBottomPlane = isInBackOfPlane(viewFrustum.bottom, point);
-    onBottomSide = onBottomSide || inBackOfBottomPlane;
-
-    inVertical = inVertical || (inFrontOfBottomPlane && inFrontOfTopPlane);
-    inHorizontal = inHorizontal || (inFrontOfLeftPlane && inFrontOfRightPlane);
-
-    auto insideFrustum = inFrontOfLeftPlane && inFrontOfRightPlane && inFrontOfTopPlane && inFrontOfBottomPlane && inFrontOfNearPlane && inFrontOfFarPlane;
-    auto passesCulling = insideFrustum; 
-    if (passesCulling){
-      std::cout << "frustum passes 1: " << getGameObjectName(id).value() << std::endl;
-      return true;
+    if (!inFrontOfNearPlane){
+      numPointsOnNear++;
     }
+    auto inFrontOfFarPlane = isInFrontOfPlane(viewFrustum.far, point);
+    if (!inFrontOfFarPlane){
+      numPointsOnFar++;
+    }
+    auto inFrontOfLeftPlane = isInFrontOfPlane(viewFrustum.left, point);
+    if (!inFrontOfLeftPlane){
+      numPointsOnLeft++;
+    }
+    auto inFrontOfRightPlane = isInFrontOfPlane(viewFrustum.right, point);
+    if (!inFrontOfRightPlane){
+      numPointsOnRight++;
+    }
+    auto inFrontOfTopPlane = isInFrontOfPlane(viewFrustum.top, point);
+    if (!inFrontOfTopPlane){
+      numPointsOnTop++;
+    }
+    auto inFrontOfBottomPlane = isInFrontOfPlane(viewFrustum.bottom, point);
+    if (!inFrontOfBottomPlane){
+      numPointsOnBottom++;
+    }
+  
+    auto passesCulling = inFrontOfNearPlane && inFrontOfFarPlane && inFrontOfLeftPlane && inFrontOfRightPlane && inFrontOfTopPlane && inFrontOfBottomPlane;
+    if (passesCulling){
+      return true;
+    } 
   }
 
-  if (onLeftSide && onRightSide && inVertical &&  closeEnough && farEnough){
-    std::cout << "frustum passes 2: " << getGameObjectName(id).value() << std::endl;
-    return true;
+  if(numPointsOnLeft == 8){
+    return false;
   }
+  if(numPointsOnRight == 8){
+    return false;
 
-  if (onTopSide && onBottomSide &&  inHorizontal &&  closeEnough && farEnough){
-    std::cout << "frustum passes 3: " << getGameObjectName(id).value() << std::endl;
-    return true;
   }
+  if(numPointsOnFar == 8){
+    return false;
 
-  if (onTopSide && onBottomSide && onLeftSide && onRightSide &&  closeEnough && farEnough){
-    std::cout << "frustum passes 4: " << getGameObjectName(id).value() << std::endl;
-    return true;
   }
+  if(numPointsOnNear == 8){
+    return false;
 
-  return false;
+  }
+  if(numPointsOnTop == 8){
+    return false;
+
+  }
+  if(numPointsOnBottom == 8){
+    return false;
+  }
+  return true;
 }
 
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
@@ -705,10 +708,13 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 
     if (layer.visible && id != 0){
       //std::cout << "render object: " << getGameObject(world, id).name << std::endl;
-
       std::cout << "viewFrustum.near: " << print(viewFrustum.near.normal) << std::endl;
-
       bool shouldDraw = passesFrustumCulling(viewFrustum, viewTransform, id);
+      if (shouldDraw){
+        static int counter = 0;
+        std::cout << "passes culling name: " << getGameObject(world, id).name << " " << counter << std::endl;
+        counter++;
+      }
       if (shouldDraw){
         auto trianglesDrawn = renderObject(
           newShader, 

@@ -98,7 +98,7 @@ void updatePhysicsBody(World& world, objid id);
 void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool paused, Transformation& viewTransform, bool showVisualizations);
 
 
-std::vector<NameAndMeshObjName> getMeshesForGameobj(World& world, objid gameobjId);
+std::vector<NameAndMeshObjName> getMeshesForGameobj(World& world, objid gameobjId, bool useGroup);
 
 std::optional<objid> getGameObjectByNamePrefix(World& world, std::string name, objid sceneId, bool sceneIdExplicit);
 GameObject& getGameObject(World& world, objid id);
@@ -106,7 +106,7 @@ GameObject& getGameObject(World& world, std::string name, objid sceneId);
 
 int getNumberOfRigidBodies(World& world);
 
-std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index);
+std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index, bool useGroup);
 void loadMeshData(World& world, std::string meshPath, MeshData& meshData, objid ownerId);
 ModelData modelDataFromCacheFromData(World& world, std::string meshpath, std::string rootname, int ownerId, ModelDataCore& modelDataCore);
 

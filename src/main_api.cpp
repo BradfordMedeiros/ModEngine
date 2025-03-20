@@ -103,7 +103,8 @@ std::optional<ModAABB> getModAABB(int32_t index){
 
 // this is incorrect
 std::optional<ModAABB2> getModAABBModel(int32_t id){
-  auto physicsInfo = getPhysicsInfo(id);
+  auto physicsInfo = getPhysicsInfoForGameObject(world, id, false);
+
   if (!physicsInfo.has_value()){
     return std::nullopt;
   }
@@ -114,18 +115,62 @@ std::optional<ModAABB2> getModAABBModel(int32_t id){
   float depth = boundInfo.zMax - boundInfo.zMin;
 
   auto scale = getGameObjectScale2(id, true);
-  auto rotation = getGameObjectRotation(id, true);
   auto size = glm::vec3(width * scale.x, height * scale.y, depth * scale.z);
-  size = rotation * size;
 
-  return ModAABB2 {
-    .position = getGameObjectPosition(id, true),
+  ModAABB2 aabb {
+    .position = glm::vec3(0.f, 0.f, 0.f),
     .size = size, 
   };
+
+  auto bounds = toBounds(aabb);
+  auto rotation = getGameObjectRotation(id, true);
+  std::vector<glm::vec3> newBoundingBox {
+    rotation * bounds.topLeftFront,
+    rotation * bounds.topRightFront,
+    rotation * bounds.bottomLeftFront,
+    rotation * bounds.bottomRightFront,
+    rotation * bounds.topLeftBack,
+    rotation * bounds.topRightBack,
+    rotation * bounds.bottomLeftBack,
+    rotation * bounds.bottomRightBack,
+  };
+
+  float minX = newBoundingBox.at(0).x;
+  float maxX = newBoundingBox.at(0).x;
+  float minY = newBoundingBox.at(0).y;
+  float maxY = newBoundingBox.at(0).y;
+  float minZ = newBoundingBox.at(0).z;
+  float maxZ = newBoundingBox.at(0).z;
+  for (int i = 1; i < newBoundingBox.size(); i++){
+    auto& point = newBoundingBox.at(i);
+    if (point.x < minX){
+      minX = point.x;
+    }else if (point.x > maxX){
+      maxX = point.x;
+    }
+    if (point.y < minY){
+      minY = point.y;
+    }else if (point.y > maxY){
+      maxY = point.y;
+    }
+    if (point.z < minZ){
+      minZ = point.z;
+    }else if (point.z > maxZ){
+      maxZ = point.z;
+    }
+  }
+
+  aabb.position  = getGameObjectPosition(id, true);
+  if (physicsInfo.value().offset.has_value()){
+    aabb.position = aabb.position + physicsInfo.value().offset.value();
+  }
+  aabb.size = glm::vec3(maxX - minX, maxY - minY, maxZ - minZ);
+
+  return aabb;
 }
 
 std::optional<PhysicsInfo> getPhysicsInfo(int32_t index){
-  return getPhysicsInfoForGameObject(world, index);
+  return getPhysicsInfoForGameObject(world, index, true);
 }
 
 
