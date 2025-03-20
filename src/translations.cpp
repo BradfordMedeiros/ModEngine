@@ -415,3 +415,149 @@ glm::vec2 uvToNdi(glm::vec2 coord){
   float yCoord = convertBase(coord.y, 0, 1, -1, 1);
   return glm::vec2(xCoord, yCoord);
 }
+
+FovAngles calcFovAngles(LayerInfo& layer, glm::ivec2 viewportSize){
+  auto fieldOfView = 0.5f * (layer.fov);
+
+  auto aspect = ((float)viewportSize.x) / ((float)viewportSize.y);
+  return FovAngles {
+    .x = glm::radians(fieldOfView * aspect),
+    .y = glm::radians(fieldOfView),
+    .zNear = layer.nearplane,
+    .zFar = layer.farplane,
+  };
+}
+
+ViewFrustum cameraToViewFrustum(LayerInfo& layer, glm::ivec2 viewportSize){
+  // All planes have the camera locations as a point if you extend them 
+  // except for the near and far plane
+  auto angles = calcFovAngles(layer, viewportSize);
+
+  float widthXNear = angles.zNear * glm::tan(angles.x);
+  float widthYNear = angles.zNear * glm::tan(angles.y);
+
+  auto topLeft = glm::normalize(glm::vec3(-widthXNear, widthYNear, -angles.zNear));
+  auto topRight = glm::normalize(glm::vec3(widthXNear, widthYNear, -angles.zNear));
+  auto bottomLeft = glm::normalize(glm::vec3(-widthXNear, -widthYNear, -angles.zNear));
+  auto bottomRight = glm::normalize(glm::vec3(widthXNear, -widthYNear, -angles.zNear));
+
+  // think right hand rule for direction, should be pointing inwards
+  auto topNormal = glm::cross(topLeft, topRight);
+  auto bottomNormal = glm::cross(bottomRight, bottomLeft);
+  auto leftNormal = glm::cross(bottomLeft, topLeft);
+  auto rightNormal = glm::cross(topRight, bottomRight);
+
+  return ViewFrustum {
+    .left = FrustumPlane {
+      .point = glm::vec3(0.f, 0.f, 0.f),
+      .normal = leftNormal,
+    },
+    .right = FrustumPlane {
+      .point = glm::vec3(0.f, 0.f, 0.f),
+      .normal = rightNormal,
+    },
+    .top = FrustumPlane {
+      .point = glm::vec3(0.f, 0.f, 0.f),
+      .normal = topNormal,
+    },
+    .bottom = FrustumPlane {
+      .point = glm::vec3(0.f, 0.f, 0.f),
+      .normal = bottomNormal,
+    },
+    .near = FrustumPlane {
+      .point = glm::vec3(0.f, 0.f, -1 * angles.zNear),
+      .normal = glm::vec3(0.f, 0.f, -1.f),
+    },
+    .far = FrustumPlane {
+      .point = glm::vec3(0.f, 0.f, -1 * angles.zFar),
+      .normal = glm::vec3(0.f, 0.f, 1.f),
+    },
+  };
+}
+
+// the point here should be in camera / frustum) space
+bool isInFrontOfPlane(FrustumPlane& plane, glm::vec3 point){
+  auto vecToPoint = point - plane.point;
+  return glm::dot(vecToPoint, plane.normal) >= 0;
+}
+
+bool passesFrustumCulling(ViewFrustum& viewFrustum, Transformation& camera, ModAABB2& aabb){
+  auto bounds = toBounds(aabb);
+
+  std::vector<glm::vec3> points {
+    bounds.topLeftFront,
+    bounds.topRightFront,
+    bounds.bottomLeftFront,
+    bounds.bottomRightFront,
+    bounds.topLeftBack,
+    bounds.topRightBack,
+    bounds.bottomLeftBack,
+    bounds.bottomRightBack,
+  };
+
+
+  int numPointsOnLeft = 0;
+  int numPointsOnRight = 0;
+  int numPointsOnFar = 0;
+  int numPointsOnNear = 0;
+  int numPointsOnTop = 0;
+  int numPointsOnBottom = 0;
+
+  for (auto &boundingPoint : points){
+    // this needs to check the AABB and if all the points are not in is then can cull
+    auto point = glm::inverse(camera.rotation) * (boundingPoint - camera.position) ; // this gives us the world space point of 0,0,-1 in camera space
+    auto inFrontOfNearPlane = isInFrontOfPlane(viewFrustum.near, point);
+    if (!inFrontOfNearPlane){
+      numPointsOnNear++;
+    }
+    auto inFrontOfFarPlane = isInFrontOfPlane(viewFrustum.far, point);
+    if (!inFrontOfFarPlane){
+      numPointsOnFar++;
+    }
+    auto inFrontOfLeftPlane = isInFrontOfPlane(viewFrustum.left, point);
+    if (!inFrontOfLeftPlane){
+      numPointsOnLeft++;
+    }
+    auto inFrontOfRightPlane = isInFrontOfPlane(viewFrustum.right, point);
+    if (!inFrontOfRightPlane){
+      numPointsOnRight++;
+    }
+    auto inFrontOfTopPlane = isInFrontOfPlane(viewFrustum.top, point);
+    if (!inFrontOfTopPlane){
+      numPointsOnTop++;
+    }
+    auto inFrontOfBottomPlane = isInFrontOfPlane(viewFrustum.bottom, point);
+    if (!inFrontOfBottomPlane){
+      numPointsOnBottom++;
+    }
+  
+    auto passesCulling = inFrontOfNearPlane && inFrontOfFarPlane && inFrontOfLeftPlane && inFrontOfRightPlane && inFrontOfTopPlane && inFrontOfBottomPlane;
+    if (passesCulling){
+      return true;
+    } 
+  }
+
+  if(numPointsOnLeft == 8){
+    return false;
+  }
+  if(numPointsOnRight == 8){
+    return false;
+
+  }
+  if(numPointsOnFar == 8){
+    return false;
+
+  }
+  if(numPointsOnNear == 8){
+    return false;
+
+  }
+  if(numPointsOnTop == 8){
+    return false;
+
+  }
+  if(numPointsOnBottom == 8){
+    return false;
+  }
+  return true;
+}

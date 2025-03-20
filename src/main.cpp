@@ -374,86 +374,6 @@ bool checkIfUiShader(std::string& value){
 }
 
 
-struct FrustumPlane {
-  glm::vec3 point;
-  glm::vec3 normal;
-};
-struct ViewFrustum {
-  FrustumPlane left;
-  FrustumPlane right;
-  FrustumPlane top;
-  FrustumPlane bottom;
-  FrustumPlane near;
-  FrustumPlane far;
-};
-
-struct FovAngles {
-  float x;
-  float y;
-  float zNear;
-  float zFar;
-};
-
-FovAngles calcFovAngles(){
-  auto layer = world.sandbox.layers.at(0);
-  auto fieldOfView = 0.5f * (layer.fov);
-
-  auto aspect = ((float)state.viewportSize.x) / ((float)state.viewportSize.y);
-  return FovAngles {
-    .x = glm::radians(fieldOfView * aspect),
-    .y = glm::radians(fieldOfView),
-    .zNear = layer.nearplane,
-    .zFar = layer.farplane,
-  };
-}
-
-ViewFrustum cameraToViewFrustum(){
-  // All planes have the camera locations as a point if you extend them 
-  // except for the near and far plane
-  auto angles = calcFovAngles();
-
-  float widthXNear = angles.zNear * glm::tan(angles.x);
-  float widthYNear = angles.zNear * glm::tan(angles.y);
-
-  auto topLeft = glm::normalize(glm::vec3(-widthXNear, widthYNear, -angles.zNear));
-  auto topRight = glm::normalize(glm::vec3(widthXNear, widthYNear, -angles.zNear));
-  auto bottomLeft = glm::normalize(glm::vec3(-widthXNear, -widthYNear, -angles.zNear));
-  auto bottomRight = glm::normalize(glm::vec3(widthXNear, -widthYNear, -angles.zNear));
-
-  // think right hand rule for direction, should be pointing inwards
-  auto topNormal = glm::cross(topLeft, topRight);
-  auto bottomNormal = glm::cross(bottomRight, bottomLeft);
-  auto leftNormal = glm::cross(bottomLeft, topLeft);
-  auto rightNormal = glm::cross(topRight, bottomRight);
-
-  return ViewFrustum {
-    .left = FrustumPlane {
-      .point = glm::vec3(0.f, 0.f, 0.f),
-      .normal = leftNormal,
-    },
-    .right = FrustumPlane {
-      .point = glm::vec3(0.f, 0.f, 0.f),
-      .normal = rightNormal,
-    },
-    .top = FrustumPlane {
-      .point = glm::vec3(0.f, 0.f, 0.f),
-      .normal = topNormal,
-    },
-    .bottom = FrustumPlane {
-      .point = glm::vec3(0.f, 0.f, 0.f),
-      .normal = bottomNormal,
-    },
-    .near = FrustumPlane {
-      .point = glm::vec3(0.f, 0.f, -1 * angles.zNear),
-      .normal = glm::vec3(0.f, 0.f, -1.f),
-    },
-    .far = FrustumPlane {
-      .point = glm::vec3(0.f, 0.f, -1 * angles.zFar),
-      .normal = glm::vec3(0.f, 0.f, 1.f),
-    },
-  };
-}
-
 void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
   auto nearPlanePoint = viewTransform.position + viewFrustum.near.point;
   auto farPlanePoint = viewTransform.position + viewFrustum.far.point;
@@ -473,7 +393,7 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
   };
 
 
-  auto angles = calcFovAngles();
+  auto angles = calcFovAngles(world.sandbox.layers.at(0), state.viewportSize);
   auto position = glm::vec3(0.f, 0.f, 0.f);  // viewFrustum
   {
     float widthXNear = glm::length(viewFrustum.near.point) * glm::tan(angles.x);
@@ -533,115 +453,14 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
  //   addLineToNextCycleTint(lineData, point, point + normalVec, false, -1, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, std::nullopt);
  //   addLineToNextCycleTint(lineData, point, point + dirOnPlane, false, -1, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, std::nullopt);
  // }
-
-
 }
 
-// the point here should be in camera / frustum) space
-bool isInFrontOfPlane(FrustumPlane& plane, glm::vec3 point){
-  auto vecToPoint = point - plane.point;
-  return glm::dot(vecToPoint, plane.normal) >= 0;
-}
-bool isInBackOfPlane(FrustumPlane& plane, glm::vec3 point){
-  auto vecToPoint = point - plane.point;
-  return glm::dot(vecToPoint, plane.normal) < 0;
-}
-
-bool passesFrustumCulling(ViewFrustum& viewFrustum, Transformation& camera, objid id){
-  if (!state.enableFrustumCulling){
-    return true;
-  }
-
-  auto aabb = getModAABBModel(id);
-  if (!aabb.has_value()){
-    return true;
-  }
-  modassert(aabb.has_value(), "aabb does not have a value");
-  auto bounds = toBounds(aabb.value());
-
-  std::vector<glm::vec3> points {
-    bounds.topLeftFront,
-    bounds.topRightFront,
-    bounds.bottomLeftFront,
-    bounds.bottomRightFront,
-    bounds.topLeftBack,
-    bounds.topRightBack,
-    bounds.bottomLeftBack,
-    bounds.bottomRightBack,
-  };
-
-
-  int numPointsOnLeft = 0;
-  int numPointsOnRight = 0;
-  int numPointsOnFar = 0;
-  int numPointsOnNear = 0;
-  int numPointsOnTop = 0;
-  int numPointsOnBottom = 0;
-
-  for (auto &boundingPoint : points){
-    // this needs to check the AABB and if all the points are not in is then can cull
-    auto point = glm::inverse(camera.rotation) * (boundingPoint - camera.position) ; // this gives us the world space point of 0,0,-1 in camera space
-    auto inFrontOfNearPlane = isInFrontOfPlane(viewFrustum.near, point);
-    if (!inFrontOfNearPlane){
-      numPointsOnNear++;
-    }
-    auto inFrontOfFarPlane = isInFrontOfPlane(viewFrustum.far, point);
-    if (!inFrontOfFarPlane){
-      numPointsOnFar++;
-    }
-    auto inFrontOfLeftPlane = isInFrontOfPlane(viewFrustum.left, point);
-    if (!inFrontOfLeftPlane){
-      numPointsOnLeft++;
-    }
-    auto inFrontOfRightPlane = isInFrontOfPlane(viewFrustum.right, point);
-    if (!inFrontOfRightPlane){
-      numPointsOnRight++;
-    }
-    auto inFrontOfTopPlane = isInFrontOfPlane(viewFrustum.top, point);
-    if (!inFrontOfTopPlane){
-      numPointsOnTop++;
-    }
-    auto inFrontOfBottomPlane = isInFrontOfPlane(viewFrustum.bottom, point);
-    if (!inFrontOfBottomPlane){
-      numPointsOnBottom++;
-    }
-  
-    auto passesCulling = inFrontOfNearPlane && inFrontOfFarPlane && inFrontOfLeftPlane && inFrontOfRightPlane && inFrontOfTopPlane && inFrontOfBottomPlane;
-    if (passesCulling){
-      return true;
-    } 
-  }
-
-  if(numPointsOnLeft == 8){
-    return false;
-  }
-  if(numPointsOnRight == 8){
-    return false;
-
-  }
-  if(numPointsOnFar == 8){
-    return false;
-
-  }
-  if(numPointsOnNear == 8){
-    return false;
-
-  }
-  if(numPointsOnTop == 8){
-    return false;
-
-  }
-  if(numPointsOnBottom == 8){
-    return false;
-  }
-  return true;
-}
 
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
   glUseProgram(shaderProgram);
   int numTriangles = 0;
 
-  auto viewFrustum = cameraToViewFrustum();
+  auto viewFrustum = cameraToViewFrustum(world.sandbox.layers.at(0), state.viewportSize);
 
   Transformation transform {
     .position = glm::vec3(0.f, 0.f, 0.f),
@@ -708,7 +527,14 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 
     if (layer.visible && id != 0){
       //std::cout << "render object: " << getGameObject(world, id).name << std::endl;
-      bool shouldDraw = passesFrustumCulling(viewFrustum, viewTransform, id);
+
+      bool shouldDraw = true;
+      if (state.enableFrustumCulling){
+        auto aabb = getModAABBModel(id);
+        if (aabb.has_value()){
+          shouldDraw = passesFrustumCulling(viewFrustum, viewTransform, aabb.value());
+        }
+      }
       // if (shouldDraw){
       //   static int counter = 0;
       //   std::cout << "passes culling name: " << getGameObject(world, id).name << " " << counter << std::endl;

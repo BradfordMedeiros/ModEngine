@@ -75,4 +75,28 @@ bool testOnlyAboutEqual(Transformation& transform1, Transformation& transform2);
 
 glm::vec2 uvToNdi(glm::vec2);
 
+struct FrustumPlane {
+  glm::vec3 point;
+  glm::vec3 normal;
+};
+struct ViewFrustum {
+  FrustumPlane left;
+  FrustumPlane right;
+  FrustumPlane top;
+  FrustumPlane bottom;
+  FrustumPlane near;
+  FrustumPlane far;
+};
+
+struct FovAngles {
+  float x;
+  float y;
+  float zNear;
+  float zFar;
+};
+
+FovAngles calcFovAngles(LayerInfo& layer, glm::ivec2 viewportSize);
+ViewFrustum cameraToViewFrustum(LayerInfo& layer, glm::ivec2 viewportSize);
+bool passesFrustumCulling(ViewFrustum& viewFrustum, Transformation& camera, ModAABB2& aabb);
+
 #endif 
