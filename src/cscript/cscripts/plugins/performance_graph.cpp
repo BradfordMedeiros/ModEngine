@@ -17,7 +17,7 @@ void createObj(objid sceneId){
     	{ "position", glm::vec3(1.f, 1.f, 0.f) },
     },
   };
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  std::map<std::string, GameobjAttributes> submodelAttributes;
   auto objectId = mainApi -> makeObjectAttr(sceneId, "performance-test-obj", attr, submodelAttributes); 
   modassert(objectId.has_value(), "cannot create performance-test-obj, probably already exists");
 

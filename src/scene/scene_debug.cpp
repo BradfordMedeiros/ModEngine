@@ -6,7 +6,7 @@ std::string getDotInfoForNode(DotInfo& info){
   " meshes: [" + join(info.meshes, ' ') + "] disabled: " + print(info.isDisabled) +  "\"";
 }
 
-std::optional<bool> isMeshDisabled(std::unordered_map<objid, GameObjectObj>& objectMapping, objid id){
+std::optional<bool> isMeshDisabled(std::map<objid, GameObjectObj>& objectMapping, objid id){
   GameObjectObj& gameObjV = objectMapping.at(id); 
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
   if (!meshObj){
@@ -15,7 +15,7 @@ std::optional<bool> isMeshDisabled(std::unordered_map<objid, GameObjectObj>& obj
   return meshObj -> isDisabled;
 }
 
-std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::unordered_map<objid, GameObjectObj>& objectMapping){
+std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, GameObjectObj>& objectMapping){
   std::vector<DotInfos> dotRelations;
   forEveryGameobj(sandbox, [&sandbox, &objectMapping, &dotRelations](objid id, GameObject& childObj) -> void {
     auto childObjH = getGameObjectH(sandbox, id);
@@ -66,7 +66,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::unordered_map<
   return dotRelations;
 }
 
-std::string scenegraphAsDotFormat(SceneSandbox& sandbox, std::unordered_map<objid, GameObjectObj>& objectMapping){
+std::string scenegraphAsDotFormat(SceneSandbox& sandbox, std::map<objid, GameObjectObj>& objectMapping){
   std::vector<DotInfos> dotRelations = getDotRelations(sandbox, objectMapping);
   std::string graph = "";
   std::string prefix = "strict graph {\n";
@@ -107,7 +107,7 @@ std::string debugAllGameObjectsH(SceneSandbox& sandbox){
   return content;
 }
 
-std::string debugAllGameObjectObj(std::unordered_map<objid, GameObjectObj>& objectMapping){
+std::string debugAllGameObjectObj(std::map<objid, GameObjectObj>& objectMapping){
   std::string content = "";
   for (auto &[id, _] : objectMapping){
     content += std::to_string(id);
@@ -126,7 +126,7 @@ std::string debugTransformCache(SceneSandbox& sandbox){
   return content;  
 }
 
-std::string debugLoadedTextures(std::unordered_map<std::string, TextureRef>& textures){
+std::string debugLoadedTextures(std::map<std::string, TextureRef>& textures){
   std::string content = "";
   for (auto &[name, texture] : textures){
     content += name + " " + "[";
@@ -140,7 +140,7 @@ std::string debugLoadedTextures(std::unordered_map<std::string, TextureRef>& tex
   return content;
 }
 
-std::string debugLoadedMeshes(std::unordered_map<std::string, MeshRef>& meshes){
+std::string debugLoadedMeshes(std::map<std::string, MeshRef>& meshes){
   std::string content = "";
   for (auto &[name, mesh] : meshes){
     content += name + " " + "[";
@@ -153,7 +153,7 @@ std::string debugLoadedMeshes(std::unordered_map<std::string, MeshRef>& meshes){
   return content; 
 }
 
-std::string debugAnimations(std::unordered_map<objid, std::vector<Animation>>& animations){
+std::string debugAnimations(std::map<objid, std::vector<Animation>>& animations){
   std::string content = "";
   for (auto &[id, animVals] : animations){
     content += std::to_string(id) + " " + "[";
@@ -166,7 +166,7 @@ std::string debugAnimations(std::unordered_map<objid, std::vector<Animation>>& a
   return content; 
 }
 
-std::string debugPhysicsInfo(std::unordered_map<objid, PhysicsValue>& rigidbodys){
+std::string debugPhysicsInfo(std::map<objid, PhysicsValue>& rigidbodys){
   std::string content = "";
   for (auto [id, physicsBody]: rigidbodys){
     content += std::to_string(id) + "\n";

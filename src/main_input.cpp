@@ -406,13 +406,13 @@ void drop_callback(GLFWwindow* window, int count, const char** paths){
       GameobjAttributes attr {
         .attr = {{ "clip", std::string(paths[i]) }}, 
       };
-      std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+      std::map<std::string, GameobjAttributes> submodelAttributes;
       makeObjectAttr(sceneId, "&" + objectName, attr, submodelAttributes);
     }else if (fileType == MODEL_EXTENSION){
       GameobjAttributes attr {
         .attr = {{ "mesh", std::string(paths[i]) }}, 
       };
-      std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+      std::map<std::string, GameobjAttributes> submodelAttributes;
       makeObjectAttr(sceneId, objectName, attr, submodelAttributes);
     }else if (fileType == UNKNOWN_EXTENSION){
       std::cout << "UNKNOWN file format, so doing nothing: " << paths[i] << std::endl;
@@ -498,7 +498,7 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
 }
 
 void processKeyBindings(GLFWwindow *window, KeyRemapper& remapper){
-  std::unordered_map<int, bool> lastFrameDown = {};
+  std::map<int, bool> lastFrameDown = {};
   for (auto inputFn : remapper.inputFns){
     if (state.inputMode == DISABLED && !inputFn.alwaysEnable){
       continue;

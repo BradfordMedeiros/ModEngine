@@ -415,7 +415,7 @@ void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld){
 ///////////////////////
 
 
-std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes){
+std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes){
   AttrChildrenPair attrWithChildren {
     .attr = attributes,
     .children = {},
@@ -915,7 +915,7 @@ void stopSoundState(std::string source, objid sceneId){
   }
 }
 
-std::string activeTextureName(int activeTextureIndex, std::unordered_map<std::string, TextureRef> worldTextures){
+std::string activeTextureName(int activeTextureIndex, std::map<std::string, TextureRef> worldTextures){
   int currentTextureIndex = 0;
   for (auto [name, _] : worldTextures){
     if (currentTextureIndex >= activeTextureIndex){
@@ -1077,8 +1077,8 @@ void markUserTexturesCleared(){
   }
 }
 
-extern std::unordered_map<std::string, std::string> args;
-std::unordered_map<std::string, std::string> getArgs(){
+extern std::map<std::string, std::string> args;
+std::map<std::string, std::string> getArgs(){
   return args;
 }
 

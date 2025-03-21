@@ -378,7 +378,7 @@ void setTableName(SqlQuery& query, LexTokens* token){
   query.table = identifier -> content;
 }
 
-std::unordered_map<std::string, std::function<void(SqlQuery&, LexTokens* token)>> machineFns {
+std::map<std::string, std::function<void(SqlQuery&, LexTokens* token)>> machineFns {
   {"CREATE", [](SqlQuery& query, LexTokens* token) -> void {
       query.type = SQL_CREATE_TABLE;
       query.queryData = SqlCreate{};
@@ -563,7 +563,7 @@ std::unordered_map<std::string, std::function<void(SqlQuery&, LexTokens* token)>
 };
 
 template <typename T>
-int addWhereStateFns(std::string suffix, std::unordered_map<std::string, std::function<void(SqlQuery&, LexTokens* token)>>& machineFns){
+int addWhereStateFns(std::string suffix, std::map<std::string, std::function<void(SqlQuery&, LexTokens* token)>>& machineFns){
   machineFns[std::string("EQUAL:") + suffix] =  [](SqlQuery& query, LexTokens* token) -> void {
       T* queryWithFilter = std::get_if<T>(&query.queryData);
       assert(queryWithFilter != NULL);
@@ -600,8 +600,8 @@ auto _1 = addWhereStateFns<SqlDelete>("delete_where_val", machineFns);
 auto _2 = addWhereStateFns<SqlSelect>("whereselect", machineFns);
 auto _3 = addWhereStateFns<SqlUpdate>("tableupdate_where", machineFns);
 
-std::unordered_map<std::string, TokenState> createMachine(std::string transitionsStr, std::unordered_map<std::string, std::function<void(SqlQuery&, LexTokens* token)>>& fns){
-  std::unordered_map<std::string, TokenState> machine;
+std::map<std::string, TokenState> createMachine(std::string transitionsStr, std::map<std::string, std::function<void(SqlQuery&, LexTokens* token)>>& fns){
+  std::map<std::string, TokenState> machine;
   auto transitions = filterWhitespace(split(transitionsStr, '\n'));
   for (auto transition : transitions){
     auto allTransitions = split(transition, ' ');
@@ -621,7 +621,7 @@ std::unordered_map<std::string, TokenState> createMachine(std::string transition
   return machine;
 }
 
-std::unordered_map<std::string, TokenState> machine = createMachine(machineTransitions, machineFns);
+std::map<std::string, TokenState> machine = createMachine(machineTransitions, machineFns);
 
 
 SqlQuery parseTokens(std::vector<LexTokens> lexTokens){

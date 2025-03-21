@@ -93,7 +93,7 @@ void addNObjects(CustomApiBindings& gameapi, objid sceneId, int width, int heigh
             { "texture", "./res/textures/hexglow.png" },
           },
         };
-        std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+        std::map<std::string, GameobjAttributes> submodelAttributes;
         auto name = std::string("debug-obj-") + std::to_string(getUniqueObjId());
         gameapi.makeObjectAttr(sceneId, name, attr, submodelAttributes);   
       }

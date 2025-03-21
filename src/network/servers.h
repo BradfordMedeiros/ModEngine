@@ -9,19 +9,19 @@
 #include "./network.h"
 
 struct ServerBrowser {
-  std::unordered_map<std::string, std::string> serverNameToIp;
+  std::map<std::string, std::string> serverNameToIp;
 };  
 
 struct tcpServer {
   ServerBrowser browser;
   modsocket server;
-  std::unordered_map<std::string, ConnectionInfo> connections;
+  std::map<std::string, ConnectionInfo> connections;
 };
 
 struct NetCode {
   tcpServer tServer;
   udpmodsocket udpModsocket;
-  std::unordered_map<std::string, sockaddr_in> udpConnections;
+  std::map<std::string, sockaddr_in> udpConnections;
   std::function<void(std::string&)> onPlayerConnected;
   std::function<void(std::string&)> onPlayerDisconnected;
 };

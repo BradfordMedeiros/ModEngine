@@ -1,7 +1,7 @@
 #include "./servers.h"
 
-std::unordered_map<std::string, std::string> parseConfigData(std::string serverConfig){
-  std::unordered_map<std::string, std::string> serverNameToIp;
+std::map<std::string, std::string> parseConfigData(std::string serverConfig){
+  std::map<std::string, std::string> serverNameToIp;
   auto serverInfos = filterWhitespace(split(serverConfig, '\n'));
 
   for (auto serverInfo : serverInfos){
@@ -35,7 +35,7 @@ tcpServer initTcpServer(std::function<std::string(std::string)> readFile){
   std::cout << "INFO: create server start" << std::endl;
   auto server = createServer();
   std::cout << "INFO: create server end" << std::endl;
-  std::unordered_map<std::string, ConnectionInfo> connections;
+  std::map<std::string, ConnectionInfo> connections;
   tcpServer tserver {
     .browser = browser,
     .server = server,
@@ -47,7 +47,7 @@ tcpServer initTcpServer(std::function<std::string(std::string)> readFile){
 std::string getConnectionHash(std::string ipAddress, int port){
   return ipAddress + "\\" + std::to_string(port);
 }
-void processTcpServer(tcpServer& tserver, std::unordered_map<std::string, sockaddr_in>& udpConnections, std::function<void(std::string&)> onPlayerDisconnected){
+void processTcpServer(tcpServer& tserver, std::map<std::string, sockaddr_in>& udpConnections, std::function<void(std::string&)> onPlayerDisconnected){
   getDataFromSocket(tserver.server, [&tserver, &udpConnections, &onPlayerDisconnected](std::string request, int socketFd) -> socketResponse {      
     auto requestLines = split(request, '\n');
     auto requestHeader = requestLines.size() > 0 ? requestLines.at(0) : "";
@@ -106,7 +106,7 @@ void processTcpServer(tcpServer& tserver, std::unordered_map<std::string, sockad
   });
 }
 
-void sendNetworkPacketUpdateToAllExcept(int socket, NetworkPacket packet, std::unordered_map<std::string, sockaddr_in>& udpConnections, std::string& excludeConnectionHash){
+void sendNetworkPacketUpdateToAllExcept(int socket, NetworkPacket packet, std::map<std::string, sockaddr_in>& udpConnections, std::string& excludeConnectionHash){
   //std::cout << "INFO: NETWORK: sending data to all except: " << excludeConnectionHash << " num connections: " << udpConnections.size() << std::endl;
   for (auto [connectHash, addr] : udpConnections){
     //std::cout << "INFO: NETWORKING: sending udp datagram to " << connectHash << std::endl;
@@ -123,7 +123,7 @@ void sendNetworkPacketUpdateToAllExcept(int socket, NetworkPacket packet, std::u
 
 NetCode initNetCode(std::function<void(std::string&)> onPlayerConnected, std::function<void(std::string&)> onPlayerDisconnected, std::function<std::string(std::string)> readFile){
   std::cout << "INFO: running in server bootstrapper mode" << std::endl;
-  std::unordered_map<std::string, sockaddr_in> udpConnections;
+  std::map<std::string, sockaddr_in> udpConnections;
   NetCode netcode {
     .tServer = initTcpServer(readFile),
     .udpModsocket = createUdpServer(),

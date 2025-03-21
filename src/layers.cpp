@@ -1,7 +1,7 @@
 #include "./layers.h"
 
-std::unordered_map<std::string, RenderUniforms> allUniformsInfos(std::vector<Token>& uniformTokens){
-  std::unordered_map<std::string, RenderUniforms> uniforms;
+std::map<std::string, RenderUniforms> allUniformsInfos(std::vector<Token>& uniformTokens){
+  std::map<std::string, RenderUniforms> uniforms;
   auto renderStageValues = parseRenderStages(uniformTokens, 0, 0);  // kind of hackey, should make this common code less coupled to render stages
   
   std::cout << "num render stage values: " << renderStageValues.size() << " num tokens: " << uniformTokens.size() << std::endl;
@@ -113,7 +113,7 @@ std::set<std::string> allLayerNames(std::vector<Token>& tokens){
 
 std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::string(std::string)> readFile){
   std::cout << "parse layer info: " << file << std::endl;
-  std::unordered_map<std::string, LayerInfo> layers2; 
+  std::map<std::string, LayerInfo> layers2; 
   auto unsplitTokens = parseFormat(readFile(file));
   auto splitTokens = splitLayerTokens(unsplitTokens);
   auto allUniforms = allUniformsInfos(splitTokens.uniformTokens);

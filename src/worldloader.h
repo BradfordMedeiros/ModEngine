@@ -20,18 +20,18 @@ struct ChunkLoadingInfo {
 struct ChunkMappingInfo {
   int chunkSize;
   std::string defaultScene;
-  std::unordered_map<std::string, std::string> chunkHashToSceneFile;
+  std::map<std::string, std::string> chunkHashToSceneFile;
 };
 
 struct DynamicLoading {
   ChunkMappingInfo mappingInfo;
   float chunkRadius;  
 
-  std::unordered_map<std::string, objid> chunkHashToSceneId;
+  std::map<std::string, objid> chunkHashToSceneId;
   std::vector<ChunkAddress> loadedChunks;
 
-  std::unordered_map<objid, objid> loadingHandleToId;
-  std::unordered_map<objid, int> idsLoadAround;
+  std::map<objid, objid> loadingHandleToId;
+  std::map<objid, int> idsLoadAround;
 };
 
 DynamicLoading createDynamicLoading(std::string chunkfile, std::function<std::string(std::string)> readFile);

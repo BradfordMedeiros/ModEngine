@@ -19,7 +19,7 @@ struct fontInfo {
 
 struct font {
 	std::string image;
-	std::unordered_map<unsigned int, fontInfo> chars;
+	std::map<unsigned int, fontInfo> chars;
 };
 
 font readFont(std::string filepath);

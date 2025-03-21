@@ -43,10 +43,10 @@ double medianFrametime(std::vector<BenchmarkMeasurement> samples){
 
 enum BENCHMARKING_TYPE { BENCHMARK_AVERAGE, BENCHMARK_MEDIAN };
 
-std::unordered_map<int, double> sampleValueToFrametime(Benchmark& benchmark, std::function<int(BenchmarkMeasurement&)> getSample, BENCHMARKING_TYPE type){
-  std::unordered_map<int, double> sampleValueToFrametime;
+std::map<int, double> sampleValueToFrametime(Benchmark& benchmark, std::function<int(BenchmarkMeasurement&)> getSample, BENCHMARKING_TYPE type){
+  std::map<int, double> sampleValueToFrametime;
 
-  std::unordered_map<int, std::vector<BenchmarkMeasurement>> measurements;
+  std::map<int, std::vector<BenchmarkMeasurement>> measurements;
   for (auto sample : benchmark.samples){
     auto sampleValue = getSample(sample);
     if (measurements.find(sampleValue) == measurements.end()){
@@ -60,7 +60,7 @@ std::unordered_map<int, double> sampleValueToFrametime(Benchmark& benchmark, std
   return sampleValueToFrametime;
 }
 
-std::string writeBenchmarkResult(const char* label, std::unordered_map<int, double> sampleResults){
+std::string writeBenchmarkResult(const char* label, std::map<int, double> sampleResults){
   std::string result = std::string(label) + "\n";
   for (auto &[sampleValue, frametime] : sampleResults){
     result = result + std::to_string(sampleValue) + " " + std::to_string(frametime) + "\n";

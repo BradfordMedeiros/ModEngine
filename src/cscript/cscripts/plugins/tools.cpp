@@ -34,7 +34,7 @@ void drawNormals(){
 struct LineData;
 extern LineData lineData;
 
-std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes);
+std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes);
 LayerInfo getLayerForId(objid id);
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld);
 void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld);
@@ -55,7 +55,7 @@ objid createManipulator(){
         { "scale", glm::vec3(10.f, 10.f, 10.f) },
       },
   };
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {
+  std::map<std::string, GameobjAttributes> submodelAttributes = {
     {"manipulator/xaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(1.f, 1.f, 0.f, 0.8f) }} }}},
     {"manipulator/yaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(1.f, 0.f, 1.f, 0.8f) }} }}},
     {"manipulator/zaxis", { GameobjAttributes { .attr = {{ "tint", glm::vec4(0.f, 0.f, 1.f, 0.8f) }} }}},

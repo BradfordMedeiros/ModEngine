@@ -115,7 +115,7 @@ GameobjAttributes& getParticleAttr(Emitter& emitter, int frame){
   return emitter.particleConfig.particleAttributes.at(frame).attr;
 }
 
-std::unordered_map<std::string, GameobjAttributes>& getSubmodelAttr(Emitter& emitter, int frame){
+std::map<std::string, GameobjAttributes>& getSubmodelAttr(Emitter& emitter, int frame){
   return emitter.particleConfig.submodelAttributes.at(frame).attr;
 }
 
@@ -126,7 +126,7 @@ std::vector<EmitterDelta>& getDeltas(Emitter& emitter, int frame){
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<std::optional<objid>(GameobjAttributes attributes, std::unordered_map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions newParticleOpts)> addParticle, 
+  std::function<std::optional<objid>(GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions newParticleOpts)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 ){   

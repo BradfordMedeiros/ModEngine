@@ -53,8 +53,8 @@ std::string sendMessageNewConnection(std::string ip, int port, const char* netwo
   return buffer;
 }
 
-std::unordered_map<std::string, std::string> parseListServerRequest(std::string response){
-  std::unordered_map<std::string, std::string> serverNameToIp;
+std::map<std::string, std::string> parseListServerRequest(std::string response){
+  std::map<std::string, std::string> serverNameToIp;
   auto servers = split(response, '\n');
   for (auto server : servers){
     auto parts = split(server, ' ');
@@ -63,7 +63,7 @@ std::unordered_map<std::string, std::string> parseListServerRequest(std::string 
   return serverNameToIp;
 }
 
-std::unordered_map<std::string, std::string> listServers(){
+std::map<std::string, std::string> listServers(){
   return parseListServerRequest(sendMessageNewConnection(bootstrapperServer, bootstrapperPort, "list-servers"));
 }
 

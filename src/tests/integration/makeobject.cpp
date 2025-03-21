@@ -19,7 +19,7 @@ IntegrationTest basicMakeObjectTest {
     modassert(makeObjectData, "invalid type makeObjectData");
     if(!makeObjectData -> gameobjId.has_value()){
       GameobjAttributes attr { .attr = {} };
-      std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+      std::map<std::string, GameobjAttributes> submodelAttributes;
       makeObjectData -> gameobjId = mainApi -> makeObjectAttr(sceneId, "test-object-test", attr, submodelAttributes);
       if (!mainApi -> gameobjExists(makeObjectData -> gameobjId.value())){
         return IntegTestResult { .passed = false, .reason = "object does not exist on same frame" };
@@ -78,7 +78,7 @@ IntegrationTest checkUnloadSceneTest {
       objectsData -> sceneId = mainApi -> loadScene("./res/scenes/empty.p.rawscene",{}, std::nullopt, sceneTags);
       for (int i = 0; i < 15; i++){
         GameobjAttributes attr { .attr = {} };
-        std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+        std::map<std::string, GameobjAttributes> submodelAttributes;
         mainApi -> makeObjectAttr(objectsData -> sceneId.value(), std::string("test-object-test-") + std::to_string(getUniqueObjId()), attr, submodelAttributes);
       }
       return std::nullopt;  
@@ -139,7 +139,7 @@ IntegrationTest prefabParentingTest {
       objectsData -> sceneId = mainApi -> loadScene("./res/scenes/empty.p.rawscene",{}, std::nullopt, sceneTags);
 
       GameobjAttributes attr = { .attr = {} };
-      std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
+      std::map<std::string, GameobjAttributes> submodelAttributes = {};
       auto prefabId = mainApi -> makeObjectAttr(
           objectsData -> sceneId.value(), 
           std::string("test-child") + std::to_string(getUniqueObjId()), 
@@ -196,7 +196,7 @@ IntegrationTest prefabParentingTest2 {
       objectsData -> numObjectsStart = numberOfObjectsFrameStart();
       objectsData -> mainSceneId = mainApi -> loadScene("./res/scenes/empty.p.rawscene",{}, std::nullopt, sceneTags);
       GameobjAttributes attr = { .attr = {} };
-      std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
+      std::map<std::string, GameobjAttributes> submodelAttributes = {};
       auto testChildId = mainApi -> makeObjectAttr(
           objectsData -> mainSceneId.value(), 
           std::string("test-child") + std::to_string(getUniqueObjId()), 
@@ -210,7 +210,7 @@ IntegrationTest prefabParentingTest2 {
       objectsData -> numObjectsMainScene = numberOfObjectsFrameStart() ;
       auto orphanSceneId = mainApi -> loadScene("./res/scenes/empty.p.rawscene",{}, std::nullopt, sceneTags);
       GameobjAttributes attr = { .attr = {} };
-      std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
+      std::map<std::string, GameobjAttributes> submodelAttributes = {};
       auto testChildId2 = mainApi -> makeObjectAttr(
           orphanSceneId, 
           std::string("test-child2") + std::to_string(getUniqueObjId()), 

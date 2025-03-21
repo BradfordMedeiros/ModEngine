@@ -45,7 +45,7 @@ SceneDeserialization createSceneFromParsedContent(
   auto subelementAttrs = deserializeSceneTokens(dividedTokens.subelementTokens);
 
 
-  std::unordered_map<std::string, GameObject> gameobjs;
+  std::map<std::string, GameObject> gameobjs;
   for (auto [name, attrWithChildren] : serialGameAttrs){
     std::string value = name;
     auto idValue = objIdFromAttribute(attrWithChildren.attr);
@@ -60,7 +60,7 @@ SceneDeserialization createSceneFromParsedContent(
     sandboxAddToScene(scene, sceneId, std::nullopt, gameobjectObj);
   }
 
-  std::unordered_map<std::string, GameobjAttributes> additionalFields;
+  std::map<std::string, GameobjAttributes> additionalFields;
   for (auto [name, attrWithChildren] : serialGameAttrs){
     for (auto childName : attrWithChildren.children){
       auto parentId = scene.sceneToNameToId.at(sceneId).at(name);
@@ -69,7 +69,7 @@ SceneDeserialization createSceneFromParsedContent(
     additionalFields[name] = attrWithChildren.attr;
   }
 
-  std::unordered_map<std::string, GameobjAttributes> subelementAttributes;
+  std::map<std::string, GameobjAttributes> subelementAttributes;
   for (auto &[name, attrWithChildren] : subelementAttrs){
     subelementAttributes[name] = attrWithChildren.attr;
   }
@@ -135,7 +135,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
   }
 
 
-  std::unordered_map<std::string, GameobjAttributesWithId>  additionalFields;
+  std::map<std::string, GameobjAttributesWithId>  additionalFields;
   for (auto &[name, attr] : deserializedScene.additionalFields){
     additionalFields[name] = GameobjAttributesWithId{
       .id = sandbox.mainScene.sceneToNameToId.at(sceneId).at(name),
@@ -151,15 +151,15 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
   return data;
 }
 
-std::unordered_map<std::string, GameobjAttributesWithId> multiObjAdd(
+std::map<std::string, GameobjAttributesWithId> multiObjAdd(
   SceneSandbox& sandbox,
   objid sceneId,
   objid rootId, 
   objid rootIdNode, 
-  std::unordered_map<objid, objid> childToParent, 
-  std::unordered_map<objid, Transformation> gameobjTransforms, 
-  std::unordered_map<objid, std::string> names,
-  std::unordered_map<objid, GameobjAttributes> additionalFields,
+  std::map<objid, objid> childToParent, 
+  std::map<objid, Transformation> gameobjTransforms, 
+  std::map<objid, std::string> names,
+  std::map<objid, GameobjAttributes> additionalFields,
   std::function<objid()> getNewObjectId,
   std::function<std::set<std::string>(std::string&)> getObjautoserializerFields,
   std::set<objid> boneIds
@@ -167,8 +167,8 @@ std::unordered_map<std::string, GameobjAttributesWithId> multiObjAdd(
   Scene& scene = sandbox.mainScene; 
   std::vector<LayerInfo>& layers = sandbox.layers;
 
-  std::unordered_map<std::string,  GameobjAttributesWithId> nameToAdditionalFields;
-  std::unordered_map<objid, objid> nodeIdToRealId;
+  std::map<std::string,  GameobjAttributesWithId> nameToAdditionalFields;
+  std::map<objid, objid> nodeIdToRealId;
   auto rootObj = scene.idToGameObjects.at(rootId);
   std::vector<objid> addedIds;
 

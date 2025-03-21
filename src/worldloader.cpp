@@ -69,7 +69,7 @@ ChunkMappingInfo parseChunkMapping(std::string filepath, std::function<std::stri
     return ChunkMappingInfo {};
   }
   auto fileContent = readFile(filepath);
-  std::unordered_map<std::string, std::string> chunkHashToSceneFile;
+  std::map<std::string, std::string> chunkHashToSceneFile;
 
   std::vector<std::string> lines = filterWhitespace(split(fileContent, '\n'));
 

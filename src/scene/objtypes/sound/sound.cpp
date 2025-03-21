@@ -1,7 +1,7 @@
 #include "./sound.h"
 
-static std::unordered_map<std::string, ALuint> soundBuffers;  
-static std::unordered_map<std::string, int> soundUsages;
+static std::map<std::string, ALuint> soundBuffers;  
+static std::map<std::string, int> soundUsages;
 
 void startSoundSystem(){
   alutInit(NULL, NULL);

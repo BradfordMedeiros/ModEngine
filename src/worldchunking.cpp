@@ -73,7 +73,7 @@ std::vector<ChunkPositionAddress> chunkAddressForPosition(std::vector<glm::vec3>
 }
 
 
-void removeEmptyScenes(std::unordered_map<std::string, std::string>& chunkMapping, std::function<std::string(std::string)> readFile){
+void removeEmptyScenes(std::map<std::string, std::string>& chunkMapping, std::function<std::string(std::string)> readFile){
   std::vector<std::string> chunkHashToDelete;
   for (auto &[chunkHash, scenefile] : chunkMapping){
     auto hasNoElements = offlineGetElements(scenefile, readFile).size() == 0;
@@ -88,8 +88,8 @@ void removeEmptyScenes(std::unordered_map<std::string, std::string>& chunkMappin
   }
 }
 
-std::unordered_map<std::string, std::string> getHashesToConsolidateScenefiles(std::unordered_map<std::string, std::string>& chunkMapping, std::function<std::string(std::string)> readFile){
-  std::unordered_map<size_t, std::vector<std::string>> hashedSceneToChunkHashs;
+std::map<std::string, std::string> getHashesToConsolidateScenefiles(std::map<std::string, std::string>& chunkMapping, std::function<std::string(std::string)> readFile){
+  std::map<size_t, std::vector<std::string>> hashedSceneToChunkHashs;
   for (auto &[chunkHash, scenefile] : chunkMapping){
     auto hashedScene = offlineHashSceneContent(scenefile, readFile);
     if (hashedSceneToChunkHashs.find(hashedScene) == hashedSceneToChunkHashs.end()){
@@ -97,7 +97,7 @@ std::unordered_map<std::string, std::string> getHashesToConsolidateScenefiles(st
     }
     hashedSceneToChunkHashs.at(hashedScene).push_back(chunkHash);
   }
-  std::unordered_map<std::string, std::string> chunkHashToNewSceneFiles;
+  std::map<std::string, std::string> chunkHashToNewSceneFiles;
   for (auto &[_, chunkhashs] : hashedSceneToChunkHashs){
     auto firstHashSceneFile = chunkMapping.at(chunkhashs.at(0));
     for (int i = 1; i < chunkhashs.size(); i++){
@@ -107,7 +107,7 @@ std::unordered_map<std::string, std::string> getHashesToConsolidateScenefiles(st
   return chunkHashToNewSceneFiles;
 }
 
-void consolidateSameScenes(std::unordered_map<std::string, std::string>& chunkMapping, std::function<std::string(std::string)> readFile){
+void consolidateSameScenes(std::map<std::string, std::string>& chunkMapping, std::function<std::string(std::string)> readFile){
   std::cout << "consolidating same scenes" << std::endl;
   auto chunkHashToNewSceneFiles = getHashesToConsolidateScenefiles(chunkMapping, readFile);
   for (auto &[chunkhash, newSceneFile] : chunkHashToNewSceneFiles){
@@ -124,7 +124,7 @@ void consolidateSameScenes(std::unordered_map<std::string, std::string>& chunkMa
 void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksize){
   std::cout << "rechunk all objects from " << loadingInfo.mappingInfo.chunkSize << " to " << newchunksize << std::endl;
 
-  std::unordered_map<std::string, std::string> newChunksMapping;
+  std::map<std::string, std::string> newChunksMapping;
   for (auto &[chunkHash, scenefile] : loadingInfo.mappingInfo.chunkHashToSceneFile){
     bool valid = false;
     auto fileChunkAddress = decodeChunkHash(chunkHash, &valid);

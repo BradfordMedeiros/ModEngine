@@ -116,7 +116,7 @@ static std::vector fields = {
 
 std::string getType(std::string name);
 
-std::unordered_map<objid, GameObjectObj> getObjectMapping();
+std::map<objid, GameObjectObj> getObjectMapping();
 
 
 struct ObjectType {
@@ -130,10 +130,10 @@ struct ObjectType {
 };
 
 GameObjectObj createObjectType(std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util);
-void addObjectType(std::unordered_map<objid, GameObjectObj>& mapping, GameObjectObj& gameobj, objid id);
+void addObjectType(std::map<objid, GameObjectObj>& mapping, GameObjectObj& gameobj, objid id);
 
 void removeObject(
-  std::unordered_map<objid, GameObjectObj>& mapping, 
+  std::map<objid, GameObjectObj>& mapping, 
   objid id, 
   std::function<void(std::string)> unbindCamera,
   std::function<void(objid)> unloadScene
@@ -165,7 +165,7 @@ int renderObject(
   GLint shaderProgram,
   bool isSelectionShader,
   objid id, 
-  std::unordered_map<objid, GameObjectObj>& mapping,
+  std::map<objid, GameObjectObj>& mapping,
   int showDebugMask,
   unsigned int portalTexture,
   unsigned int navmeshTexture,
@@ -178,12 +178,12 @@ int renderObject(
   glm::mat4& finalModelMatrix
 );
 
-std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::unordered_map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);
+std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);
 std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& toRender, const char* field);
-bool setObjectAttribute(std::unordered_map<objid, GameObjectObj>& mapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&);
+bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&);
 
 template<typename T>
-std::vector<objid> getGameObjectsIndex(std::unordered_map<objid, GameObjectObj>& mapping){   // putting templates have to be in header?
+std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){   // putting templates have to be in header?
   std::vector<objid> indicies;
   for (auto [id, gameobject]: mapping){
     auto gameobjectP = std::get_if<T>(&gameobject);
@@ -194,17 +194,16 @@ std::vector<objid> getGameObjectsIndex(std::unordered_map<objid, GameObjectObj>&
   return indicies;
 }
 
-std::vector<objid> getGameObjectsIndex(std::unordered_map<objid, GameObjectObj>& mapping);
+std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping);
 
+std::vector<Mesh>& getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id);
 
-std::vector<Mesh>& getMeshesForId(std::unordered_map<objid, GameObjectObj>& mapping, objid id);
-
-std::vector<std::string> getMeshNames(std::unordered_map<objid, GameObjectObj>& mapping, objid id);
-bool isNavmesh(std::unordered_map<objid, GameObjectObj>& mapping, objid id);
-std::optional<Texture> textureForId(std::unordered_map<objid, GameObjectObj>& mapping, objid id);
-void updateObjectPositions(std::unordered_map<objid, GameObjectObj>& mapping, objid, glm::vec3 position, Transformation& viewTransform);
-void playSoundState(std::unordered_map<objid, GameObjectObj>& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position);
-void stopSoundState(std::unordered_map<objid, GameObjectObj>& mapping, objid id);
+std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, objid id);
+bool isNavmesh(std::map<objid, GameObjectObj>& mapping, objid id);
+std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id);
+void updateObjectPositions(std::map<objid, GameObjectObj>& mapping, objid, glm::vec3 position, Transformation& viewTransform);
+void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position);
+void stopSoundState(std::map<objid, GameObjectObj>& mapping, objid id);
 
 void onObjectSelected(objid id);
 void onObjectUnselected();

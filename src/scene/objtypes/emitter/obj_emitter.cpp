@@ -73,10 +73,10 @@ GameobjAttributes mainParticleFrame(std::vector<ParsedEmitterValue>& parsedValue
   return attr;
 }
 
-std::unordered_map<int, GameobjAttributes> getFrameToAttr(GameobjAttributes& attributes, char fieldIdentifier){
+std::map<int, GameobjAttributes> getFrameToAttr(GameobjAttributes& attributes, char fieldIdentifier){
   // todo - intentionally sort this at the end, 
   // dont like depending on the sorting of map, too inexplicit + will be bulk updating this
-  std::unordered_map<int, GameobjAttributes> frameToAttr;
+  std::map<int, GameobjAttributes> frameToAttr;
   auto parsedValues = parseEmitterValues(attributes);
   auto mainAttrs = mainParticleFrame(parsedValues, fieldIdentifier);
   frameToAttr[0] = mainAttrs;
@@ -214,7 +214,7 @@ std::optional<EmitterSpecialAttribute> extractSpecialAttribute(std::string key){
 }
 
 GameobjAttributes emitterExtractAttributes(GameobjAttributes& attributes, std::string name){
-  std::unordered_map<std::string, AttributeValue> attrs;
+  std::map<std::string, AttributeValue> attrs;
 
   for (auto &[key, value] : attributes.attr){
     auto extractedAttribute = extractSpecialAttribute(key);
@@ -232,7 +232,7 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
   
   auto allAttributes = allKeysAndAttributes(attributes);
   auto allSubmodelPaths = emitterSubmodelAttr(allAttributes);
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
+  std::map<std::string, GameobjAttributes> submodelAttributes = {};
   for (auto &submodel : allSubmodelPaths){
     submodelAttributes[submodel] = emitterExtractAttributes(attributes, submodel);
   }
