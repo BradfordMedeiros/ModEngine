@@ -45,8 +45,6 @@ struct MeshRef {
 };
 
 struct NameAndMeshObjName {
-  std::string objname;
-  std::string* meshname;
   Mesh* mesh;
 };
 

@@ -17,20 +17,16 @@ GameObject& getGameObject(World& world, std::string name, objid sceneId){
   return *obj.value();
 }
 
-std::vector<NameAndMeshObjName> getMeshesForGameobj(World& world, objid gameobjId, bool useGroup){
-  std::vector<NameAndMeshObjName> nameAndMeshObjNames;
+std::vector<Mesh*> getMeshesForGameobj(World& world, objid gameobjId, bool useGroup){
   auto groupId = getGroupId(world.sandbox, gameobjId);
   auto allIds = (useGroup && groupId == gameobjId) ? getIdsInGroupByObjId(world.sandbox, groupId) : std::vector<objid>({ gameobjId });
   //std::cout << "1 physics : , groupId: " << groupId << ", ids " << print(allIds) << std::endl;
+
+  std::vector<Mesh*> nameAndMeshObjNames;
   for (auto id : allIds){
     auto meshesForId = getMeshesForId(world.objectMapping, id);
-    std::string& gameobjname = getGameObject(world, id).name;
     for (int i = 0; i < meshesForId.meshes.size(); i++){
-      nameAndMeshObjNames.push_back(NameAndMeshObjName {
-        .objname = gameobjname,
-        .meshname = meshesForId.meshNames.at(i),
-        .mesh = meshesForId.meshes.at(i),
-      });
+      nameAndMeshObjNames.push_back(meshesForId.meshes.at(i));
     }    
   }
   return nameAndMeshObjNames;
@@ -53,12 +49,7 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
   if (meshObj != NULL){
     std::vector<BoundInfo> boundInfos;
-    auto meshObjDatas = getMeshesForGameobj(world, index, useGroup);
-
-    std::vector<Mesh*> meshes;
-    for (auto &meshObjData : meshObjDatas){
-      meshes.push_back(meshObjData.mesh);
-    }
+    std::vector<Mesh*> meshes = getMeshesForGameobj(world, index, useGroup);
 
     for (Mesh* mesh : meshes){
       boundInfos.push_back(mesh -> boundInfo);

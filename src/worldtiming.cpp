@@ -32,7 +32,6 @@ bool enableBlending = true;
 float blendingWindow = 0.25f;  // this should be able to be specified by the animation most likely
 
 void tickAnimation(World& world, std::set<objid>& disableAnimationIds, AnimationData& playback, float currentTime){
-  auto meshNameToMeshes = getMeshesForGameobj(world, playback.groupId, true);
   if (enableBlending && playback.blendData.has_value()){
     float timeElapsedBlendStart = currentTime - playback.blendData.value().blendStartTime;
     float aFactor = glm::min(1.f, timeElapsedBlendStart / blendingWindow);
