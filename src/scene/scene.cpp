@@ -25,8 +25,8 @@ std::vector<Mesh*> getMeshesForGameobj(World& world, objid gameobjId, bool useGr
   std::vector<Mesh*> nameAndMeshObjNames;
   for (auto id : allIds){
     auto meshesForId = getMeshesForId(world.objectMapping, id);
-    for (int i = 0; i < meshesForId.meshes.size(); i++){
-      nameAndMeshObjNames.push_back(meshesForId.meshes.at(i));
+    for (int i = 0; i < meshesForId.size(); i++){
+      nameAndMeshObjNames.push_back(&meshesForId.at(i));
     }    
   }
   return nameAndMeshObjNames;
@@ -65,7 +65,7 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&gameObjV);
   if (navmeshObj != NULL){
-    boundInfo = navmeshObj -> mesh.boundInfo;
+    boundInfo = navmeshObj -> meshes.at(0).boundInfo;
   }
 
   auto textObj = std::get_if<GameObjectUIText>(&gameObjV);
@@ -101,14 +101,14 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
 // this is embarrassingly inefficient and should not generally be used
 // use broader shapes, or/and create algorithm to combine these shapes 
 std::vector<glm::vec3> vertsForId(World& world, objid id){  
-  auto meshes = getMeshesForId(world.objectMapping, id).meshes;
+  auto meshes = getMeshesForId(world.objectMapping, id);
   if (meshes.size() == 0){
     std::cout << "no meshes for: " << getGameObject(world, id).name << std::endl;
     return {};
   }
   std::vector<glm::vec3> vertPositions;
-  for (auto mesh : meshes){
-    auto vertices = readVertsFromMeshVao(*mesh);
+  for (auto& mesh : meshes){
+    auto vertices = readVertsFromMeshVao(mesh);
     for (auto &vertex : vertices){
       vertPositions.push_back(vertex.position);
     }    

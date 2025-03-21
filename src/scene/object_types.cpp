@@ -345,7 +345,7 @@ int renderObject(
       .customTextureId = navmeshTexture,
       .id = id,
     };
-    drawMesh(navmeshObj -> mesh, shaderProgram, false, meshUniforms);    
+    drawMesh(navmeshObj -> meshes.at(0), shaderProgram, false, meshUniforms);    
 
 
     // this base id point index stuff is pretty hackey bullshit
@@ -386,7 +386,7 @@ int renderObject(
       baseId = 0;
     }
 
-    return navmeshObj -> mesh.numTriangles;
+    return navmeshObj -> meshes.at(0).numTriangles;
   }
 
   auto textObj = std::get_if<GameObjectUIText>(&toRender);
@@ -457,56 +457,37 @@ std::vector<objid> getGameObjectsIndex(std::unordered_map<objid, GameObjectObj>&
 }
 
 
-static std::string EMPTY_STR = "";
-NameAndMesh getMeshesForId(std::unordered_map<objid, GameObjectObj>& mapping, objid id){  
-  static std::string NULL_STR = "";
-
-  std::vector<std::string*> meshNames;
+std::vector<Mesh> noMeshes;
+std::vector<Mesh>& getMeshesForId(std::unordered_map<objid, GameObjectObj>& mapping, objid id){  
   std::vector<Mesh*> meshes;
-
   GameObjectObj& gameObj = mapping.at(id);
-
   {
     GameObjectMesh* meshObject = std::get_if<GameObjectMesh>(&gameObj);
     if (meshObject != NULL){
-      for (int i = 0; i < meshObject -> meshesToRender.size(); i++){
-        meshNames.push_back(&meshObject -> meshNames.at(i));
-        meshes.push_back(&meshObject -> meshesToRender.at(i));
-      }
-      goto returndata;
+      return meshObject -> meshesToRender;
     }
   }
 
   {
     auto navmeshObject = std::get_if<GameObjectNavmesh>(&gameObj);
     if (navmeshObject != NULL){
-      meshNames.push_back(&EMPTY_STR); // this should just be an optional array... need to clean up getmeshees in general
-      meshes.push_back(&navmeshObject -> mesh);
+      return navmeshObject -> meshes;
     }
-    goto returndata;
   }
-
-returndata:
-
-  NameAndMesh meshData {
-    .meshNames = meshNames,
-    .meshes = meshes
-  };
-
-  assert(meshNames.size() == meshes.size());
-  return meshData;
+  return noMeshes;
 }
 
 std::vector<std::string> getMeshNames(std::unordered_map<objid, GameObjectObj>& mapping, objid id){
-  std::vector<std::string> names;
   if (id == 0){
-    return names;
+    return {};
   }
-  for (auto name : getMeshesForId(mapping, id).meshNames){
-    names.push_back(*name);
+ 
+  GameObjectObj& gameObj = mapping.at(id);
+  GameObjectMesh* meshObject = std::get_if<GameObjectMesh>(&gameObj);
+  if (meshObject != NULL){
+    return meshObject -> meshNames;
   }
-
-  return names;
+  return {};
 }
 
 bool isNavmesh(std::unordered_map<objid, GameObjectObj>& mapping, objid id){

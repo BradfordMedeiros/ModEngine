@@ -196,11 +196,8 @@ std::vector<objid> getGameObjectsIndex(std::unordered_map<objid, GameObjectObj>&
 
 std::vector<objid> getGameObjectsIndex(std::unordered_map<objid, GameObjectObj>& mapping);
 
-struct NameAndMesh {
-  std::vector<std::string*> meshNames;
-  std::vector<Mesh*> meshes;
-};
-NameAndMesh getMeshesForId(std::unordered_map<objid, GameObjectObj>& mapping, objid id);
+
+std::vector<Mesh>& getMeshesForId(std::unordered_map<objid, GameObjectObj>& mapping, objid id);
 
 std::vector<std::string> getMeshNames(std::unordered_map<objid, GameObjectObj>& mapping, objid id);
 bool isNavmesh(std::unordered_map<objid, GameObjectObj>& mapping, objid id);
