@@ -4,6 +4,7 @@ project(modengine)
 
 # Autoserialization code uses this extensively.  Should look into it, but supress since floods
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   message("CMAKE - ModEngine Debug")
