@@ -247,7 +247,7 @@ std::string testResultsStr(TestResults& testResults){
 
 /////////////////////////////////////
 
-std::map<std::string, FeatureScene> featureScenes = {
+std::unordered_map<std::string, FeatureScene> featureScenes = {
   { "rotation", FeatureScene {
     .sceneFile = "./res/scenes/features/rotation.p.rawscene",
     .createBinding = std::nullopt,
@@ -426,7 +426,7 @@ void runFeatureScene(std::string name){
     mainApi -> loadScene("./res/scenes/example.p.rawscene", {}, std::nullopt, sceneTags);
   
 
-  std::map<std::string, GameobjAttributes> submodelAttributes = {};
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
   if (featureScene.scriptAuto && featureScene.createBinding.has_value()){
     auto bindingName = featureScene.createBinding.value()(*mainApi).bindingMatcher;
     GameobjAttributes attr = {

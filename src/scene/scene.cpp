@@ -615,7 +615,7 @@ extern std::vector<AutoSerialize> prefabAutoserializer;
 extern std::vector<AutoSerialize> gameobjSerializer;
 
 void assertFieldTypesUnique(){
-  std::map<std::string, AttributeValueType> fieldToType = {};
+  std::unordered_map<std::string, AttributeValueType> fieldToType = {};
   std::vector<std::vector<AutoSerialize>*> allSerializers = {
     &meshAutoserializer,
     &cameraAutoserializer,
@@ -726,7 +726,7 @@ World createWorld(
 
   // hackey, but createSceneSandbox adds root object with id 0 so this is needed
   std::vector<objid> idsAdded = { 0 };
-  std::map<std::string, GameobjAttributes> submodelAttributes;
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
 
   auto getId = createGetUniqueObjId(idsAdded);
   addSerialObjectsToWorld(world, 0, idsAdded, getId, {{ "root", GameobjAttributesWithId { .id = idsAdded.at(0), .attr = GameobjAttributes{}}}}, submodelAttributes);
@@ -742,8 +742,8 @@ World createWorld(
   return world;
 }
 
-std::map<objid, GameobjAttributes> applyFieldsToSubelements(std::string meshName, ModelData& data, std::map<std::string, GameobjAttributes>& overrideAttributes){
-  std::map<objid, GameobjAttributes> additionalFieldsMap;
+std::unordered_map<objid, GameobjAttributes> applyFieldsToSubelements(std::string meshName, ModelData& data, std::unordered_map<std::string, GameobjAttributes>& overrideAttributes){
+  std::unordered_map<objid, GameobjAttributes> additionalFieldsMap;
   for (auto [nodeId, _] : data.nodeTransform){
     additionalFieldsMap[nodeId] = GameobjAttributes { };
   }
@@ -848,7 +848,7 @@ void addObjectToWorld(
   std::string name,
   std::function<objid()> getId,
   GameobjAttributes& attr,
-  std::map<std::string, GameobjAttributes>& submodelAttributes
+  std::unordered_map<std::string, GameobjAttributes>& submodelAttributes
 ){
     auto loadMeshObject = createScopedLoadMesh(world, id);
     auto ensureTextureLoaded = [&world, id](std::string texturepath) -> Texture {
@@ -913,8 +913,8 @@ void addSerialObjectsToWorld(
   objid sceneId, 
   std::vector<objid>& idsAdded,
   std::function<objid()> getNewObjectId,
-  std::map<std::string, GameobjAttributesWithId> nameToAttr,
-  std::map<std::string, GameobjAttributes>& submodelAttributes
+  std::unordered_map<std::string, GameobjAttributesWithId> nameToAttr,
+  std::unordered_map<std::string, GameobjAttributes>& submodelAttributes
 ){
   for (auto &[name, objAttr] : nameToAttr){
     // Warning: getNewObjectId will mutate the idsAdded.  
@@ -1118,7 +1118,7 @@ bool copyObjectToScene(World& world, objid id){
   return true;
 }
 
-void createObjectForScene(World& world, objid sceneId, std::string& name, AttrChildrenPair& attrWithChildren, std::map<std::string, GameobjAttributes>& submodelAttributes){
+void createObjectForScene(World& world, objid sceneId, std::string& name, AttrChildrenPair& attrWithChildren, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes){
   GameobjAttributes& attributes = attrWithChildren.attr;
   auto idAttr = objIdFromAttribute(attributes);
   objid idToAdd = idAttr.has_value() ? idAttr.value() : getUniqueObjId();
@@ -1137,7 +1137,7 @@ std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serial
   auto dividedTokens = divideMainAndSubelementTokens(tokens);
   auto serialAttrs = deserializeSceneTokens(dividedTokens.mainTokens);
   auto subelementAttrs = deserializeSceneTokens(dividedTokens.subelementTokens);
-  std::map<std::string, GameobjAttributes> subelementAttributes;
+  std::unordered_map<std::string, GameobjAttributes> subelementAttributes;
   for (auto &[name, attrWithChildren] : subelementAttrs){
     subelementAttributes[name] = attrWithChildren.attr;
   }
@@ -1158,7 +1158,7 @@ std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serial
   };
 }
 
-objid addObjectToScene(World& world, objid sceneId, std::string name, AttrChildrenPair attrWithChildren, std::map<std::string, GameobjAttributes>& submodelAttributes){
+objid addObjectToScene(World& world, objid sceneId, std::string name, AttrChildrenPair attrWithChildren, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes){
   createObjectForScene(world, sceneId, name, attrWithChildren, submodelAttributes);
   return getIdForName(world.sandbox, name, sceneId);
 }
@@ -1432,7 +1432,7 @@ void physicsLocalTransformSet(World& world, objid index, Transformation transfor
   }
 }
 
-void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, PhysicsValue>& rigidbodys){
+void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<objid, PhysicsValue>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     GameObject& gameobj = getGameObject(world, i);
     if (!gameobj.physicsOptions.isStatic){
@@ -1478,7 +1478,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     updateEmitters(
       getEmitterSystem(), 
       timeElapsed,
-      [&world](GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions particleOpts) -> std::optional<objid> {     
+      [&world](GameobjAttributes attributes, std::unordered_map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions particleOpts) -> std::optional<objid> {     
         if (particleOpts.parentId.has_value() && !idExists(world.sandbox, particleOpts.parentId.value())){
           return std::nullopt;
         } 
@@ -1497,7 +1497,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
 
         // should get rid of this copying stuff, should make subelements just refer to suffix path
         auto newName =  getUniqueObjectName("emitter");
-        std::map<std::string, GameobjAttributes> submodelAttributesFixedPath;
+        std::unordered_map<std::string, GameobjAttributes> submodelAttributesFixedPath;
         for (auto &[name, attr] : submodelAttributes){
           submodelAttributesFixedPath[newName + "/" + name] = attr;
         }

@@ -28,11 +28,11 @@ struct TextureInformation {
 struct ObjectTypeUtil {
   objid id;
   std::function<Mesh(std::string)> createMeshCopy;
-  std::map<std::string, MeshRef>& meshes;
+  std::unordered_map<std::string, MeshRef>& meshes;
   std::function<Texture(std::string)> ensureTextureLoaded;
   std::function<void(int)> releaseTexture;
   std::function<Mesh(MeshData&)> loadMesh;
-  std::function<void(std::string, float, float, int, GameobjAttributes&, std::map<std::string, GameobjAttributes>&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter;
+  std::function<void(std::string, float, float, int, GameobjAttributes&, std::unordered_map<std::string, GameobjAttributes>&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter;
   std::function<void(std::string)> ensureMeshLoaded;
   std::function<std::string(std::string)> pathForModLayer;
   std::function<objid(std::string, std::vector<Token>&)> loadScene;

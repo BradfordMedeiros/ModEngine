@@ -1,12 +1,12 @@
 #include "./sprites.h"
 
 struct FontParamInfo {
-  std::map<unsigned int, FontParams> fontmeshes;
+  std::unordered_map<unsigned int, FontParams> fontmeshes;
   float lineSpacing;
 };
 
 FontParamInfo loadModFontMeshes(font& fontToLoad){
-  std::map<unsigned int, FontParams> fontmeshes;
+  std::unordered_map<unsigned int, FontParams> fontmeshes;
   for (const auto &[ascii, font]: fontToLoad.chars) {
     assert(fontmeshes.find(ascii) == fontmeshes.end());
     std::cout << "loaded font mesh: " << ascii << " (" << ((char)ascii) << ")" << std::endl;
@@ -39,7 +39,7 @@ FT_Library* initFreeType(){
 }
 
 FontParamInfo loadTtfFontMeshes(std::string filepath, ttfFont& fontToLoad, Texture& nullTexture){
-  std::map<unsigned int, FontParams> fontmeshes;
+  std::unordered_map<unsigned int, FontParams> fontmeshes;
   FT_Library* freeType = initFreeType();
   FT_Face face;
   if (FT_New_Face(*freeType, filepath.c_str(), 0, &face)){
@@ -242,7 +242,7 @@ struct DrawingInfoValues {
 
 
 DrawingInfoValues computeDrawingInfo(FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
-  std::map<unsigned int, FontParams>& fontMeshes = fontFamily.asciToMesh;
+  std::unordered_map<unsigned int, FontParams>& fontMeshes = fontFamily.asciToMesh;
   float fontSizeNdi = convertFontSizeToNdi(fontSize);
   float offsetDelta = 2.f * fontSizeNdi;
 

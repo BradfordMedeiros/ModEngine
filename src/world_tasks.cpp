@@ -10,8 +10,8 @@ std::unordered_map<objid, RequestMovingObject> requestMovingObjects; // TODO STA
 std::vector<ScheduledTask> scheduledTasks;  // TODO STATIC
 std::vector<ScheduledTask> tasksToSchedule; // // TODO STATIC taks to schedule is sepearate since want enqueue only in the tick, since task.fn can modify 
 
-std::map<objid, ActiveRecording> activeRecordings;
-std::map<objid, PlayingRecording> playingRecordings;
+std::unordered_map<objid, ActiveRecording> activeRecordings;
+std::unordered_map<objid, PlayingRecording> playingRecordings;
 
 
 

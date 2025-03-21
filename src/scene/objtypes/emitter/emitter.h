@@ -37,7 +37,7 @@ struct ParticleAttributeFrame {
 };
 struct SubmodelAttributeFrame {
   int frame;
-  std::map<std::string, GameobjAttributes> attr;
+  std::unordered_map<std::string, GameobjAttributes> attr;
 };
 struct EmitterDeltaFrame {
   int frame;
@@ -76,7 +76,7 @@ void removeEmitter(EmitterSystem& system, objid id);
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<std::optional<objid>(GameobjAttributes, std::map<std::string, GameobjAttributes>, objid, NewParticleOptions)> addParticle, 
+  std::function<std::optional<objid>(GameobjAttributes, std::unordered_map<std::string, GameobjAttributes>, objid, NewParticleOptions)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 );
@@ -91,7 +91,7 @@ struct EmitterUpdateOptions{
   std::optional<float> lifetime;
   std::optional<EmitterDeleteBehavior> deleteBehavior;
   std::optional<GameobjAttributes> particleAttributes;
-  std::optional<std::map<std::string, GameobjAttributes>> submodelAttributes;
+  std::optional<std::unordered_map<std::string, GameobjAttributes>> submodelAttributes;
   std::optional<EmitterDelta> delta;
   std::optional<bool> enabled;
 };

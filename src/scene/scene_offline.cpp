@@ -56,7 +56,7 @@ void offlineUpdateElementAttributes(std::string scenepath, std::string elementNa
   auto tokens = parseFormat(readFile(scenepath));
   std::vector<Token> newTokens;
 
-  std::map<std::string, std::string> elementTokens;
+  std::unordered_map<std::string, std::string> elementTokens;
   for (auto token : tokens){
     if (token.target == elementName){
       elementTokens[token.attribute] = token.payload;

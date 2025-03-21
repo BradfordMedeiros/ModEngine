@@ -106,7 +106,7 @@ void setGameObjectScale(int32_t index, glm::vec3 scale, bool isWorld);
 glm::quat getGameObjectRotation(int32_t index, bool isWorld);
 void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld);
 
-std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes);
+std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes);
 std::vector<objid> idsInGroupById(objid);
 objid groupId(objid);
 
@@ -213,7 +213,7 @@ void clearTexture(unsigned int textureId, std::optional<bool> autoclear, std::op
 void markUserTexturesCleared();
 
 std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query, bool* valid);
-std::map<std::string, std::string> getArgs();
+std::unordered_map<std::string, std::string> getArgs();
 
 void schedule(objid id, bool realtime, float delayTimeMs, void* data, std::function<void(void*)> fn);
 void tickScheduledTasks();

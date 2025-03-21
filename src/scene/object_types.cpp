@@ -2,8 +2,8 @@
 
 void shaderLogDebug(const char* str);
 
-std::map<objid, GameObjectObj> getObjectMapping() {
-	std::map<objid, GameObjectObj> objectMapping;
+std::unordered_map<objid, GameObjectObj> getObjectMapping() {
+	std::unordered_map<objid, GameObjectObj> objectMapping;
 	return objectMapping;
 }
 
@@ -171,14 +171,14 @@ GameObjectObj createObjectType(std::string objectType, GameobjAttributes& attr, 
   return GameObjectObj{};
 }
 
-void addObjectType(std::map<objid, GameObjectObj>& mapping, GameObjectObj& gameobj, objid id){
+void addObjectType(std::unordered_map<objid, GameObjectObj>& mapping, GameObjectObj& gameobj, objid id){
   assert(mapping.find(id) == mapping.end());
   modlog("objecttype - add", std::to_string(id));
   mapping[id] = gameobj;
 }
 
 void removeObject(
-  std::map<objid, GameObjectObj>& mapping, 
+  std::unordered_map<objid, GameObjectObj>& mapping, 
   objid id, 
   std::function<void(std::string)> unbindCamera,
   std::function<void(objid)> unloadScene
@@ -232,7 +232,7 @@ int renderObject(
   GLint shaderProgram,
   bool isSelectionShader,
   objid id, 
-  std::map<objid, GameObjectObj>& mapping, 
+  std::unordered_map<objid, GameObjectObj>& mapping, 
   int showDebugMask,
   unsigned int portalTexture,
   unsigned int navmeshTexture,
@@ -418,7 +418,7 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& toRender, 
   assert(false);
 }
 
-bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags& flags){
+bool setObjectAttribute(std::unordered_map<objid, GameObjectObj>& mapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags& flags){
   GameObjectObj& toRender = mapping.at(id);
   auto variantIndex = toRender.index();
   for (auto &objType : objTypes){
@@ -431,7 +431,7 @@ bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const
   return false;
 }
   
-std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName){
+std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::unordered_map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName){
   GameObjectObj objectToSerialize = mapping.at(id);
   auto variantIndex = objectToSerialize.index();
   for (auto &objType : objTypes){
@@ -448,7 +448,7 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
 }
 
 
-std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){
+std::vector<objid> getGameObjectsIndex(std::unordered_map<objid, GameObjectObj>& mapping){
   std::vector<objid> indicies;
   for (auto [id, _]: mapping){    
       indicies.push_back(id);
@@ -458,7 +458,7 @@ std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){
 
 
 static std::string EMPTY_STR = "";
-NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id){  
+NameAndMesh getMeshesForId(std::unordered_map<objid, GameObjectObj>& mapping, objid id){  
   static std::string NULL_STR = "";
 
   std::vector<std::string*> meshNames;
@@ -497,7 +497,7 @@ returndata:
   return meshData;
 }
 
-std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, objid id){
+std::vector<std::string> getMeshNames(std::unordered_map<objid, GameObjectObj>& mapping, objid id){
   std::vector<std::string> names;
   if (id == 0){
     return names;
@@ -509,13 +509,13 @@ std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, o
   return names;
 }
 
-bool isNavmesh(std::map<objid, GameObjectObj>& mapping, objid id){
+bool isNavmesh(std::unordered_map<objid, GameObjectObj>& mapping, objid id){
   auto object = mapping.at(id); 
   auto navmesh = std::get_if<GameObjectNavmesh>(&object);
   return navmesh != NULL;
 }
 
-std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id){
+std::optional<Texture> textureForId(std::unordered_map<objid, GameObjectObj>& mapping, objid id){
   auto Object = mapping.at(id); 
 
   auto meshObj = std::get_if<GameObjectMesh>(&Object);
@@ -530,7 +530,7 @@ std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, obj
   return std::nullopt;
 }
 
-void updateObjectPositions(std::map<objid, GameObjectObj>& mapping, objid id, glm::vec3 position, Transformation& viewTransform){
+void updateObjectPositions(std::unordered_map<objid, GameObjectObj>& mapping, objid id, glm::vec3 position, Transformation& viewTransform){
   auto object = mapping.at(id); 
   auto soundObj = std::get_if<GameObjectSound>(&object);
   if (soundObj != NULL){
@@ -547,7 +547,7 @@ void updateObjectPositions(std::map<objid, GameObjectObj>& mapping, objid id, gl
   }
 }
 
-void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position){
+void playSoundState(std::unordered_map<objid, GameObjectObj>& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position){
   if (mapping.find(id) == mapping.end()){
     return;
   }
@@ -560,7 +560,7 @@ void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id, std::opti
   }
 }
 
-void stopSoundState(std::map<objid, GameObjectObj>& mapping, objid id){
+void stopSoundState(std::unordered_map<objid, GameObjectObj>& mapping, objid id){
   if (mapping.find(id) == mapping.end()){
     return;
   }

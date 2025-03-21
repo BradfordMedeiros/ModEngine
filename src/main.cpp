@@ -35,7 +35,7 @@ DefaultResources defaultResources {};
 std::string shaderFolderPath;
 std::string sqlDirectory = "./res/data/sql/";
 bool bootStrapperMode = false;
-std::map<std::string, std::string> args;
+std::unordered_map<std::string, std::string> args;
 extern std::vector<InputDispatch> inputFns;     
 
 // per frame variable data 
@@ -44,7 +44,7 @@ extern Stats statistics;
 LineData lineData = createLines();
 std::queue<StringAttribute> channelMessages;
 
-std::map<objid, unsigned int> portalIdCache;
+std::unordered_map<objid, unsigned int> portalIdCache;
 
 Transformation viewTransform {
   .position = glm::vec3(0.f, 0.f, 0.f),
@@ -830,8 +830,8 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   return triangles;
 }
 
-std::map<objid, unsigned int> renderPortals(RenderContext& context, Transformation cameraTransform){
-  std::map<objid, unsigned int> nextPortalCache;
+std::unordered_map<objid, unsigned int> renderPortals(RenderContext& context, Transformation cameraTransform){
+  std::unordered_map<objid, unsigned int> nextPortalCache;
   for (int i = 0; i < context.portals.size(); i++){
     auto portal = context.portals.at(i);
     auto portalViewMatrix = renderPortalView(portal, cameraTransform);

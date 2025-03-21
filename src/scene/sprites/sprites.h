@@ -19,7 +19,7 @@ struct FontParams {
 struct FontFamily {
 	std::string name;
 	float lineSpacing;
-	std::map<unsigned int, FontParams> asciToMesh;
+	std::unordered_map<unsigned int, FontParams> asciToMesh;
 };
 
 std::vector<FontFamily> loadFontMeshes(std::vector<FontToLoad> fontInfos, Texture& nullTexture);
