@@ -457,11 +457,7 @@ std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){
 }
 
 
-static std::string EMPTY_STR = "";
-NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id){  
-  static std::string NULL_STR = "";
-
-  std::vector<std::string*> meshNames;
+std::vector<Mesh*> getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id){  
   std::vector<Mesh*> meshes;
 
   GameObjectObj& gameObj = mapping.at(id);
@@ -470,7 +466,6 @@ NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id){
     GameObjectMesh* meshObject = std::get_if<GameObjectMesh>(&gameObj);
     if (meshObject != NULL){
       for (int i = 0; i < meshObject -> meshesToRender.size(); i++){
-        meshNames.push_back(&meshObject -> meshNames.at(i));
         meshes.push_back(&meshObject -> meshesToRender.at(i));
       }
       goto returndata;
@@ -480,7 +475,6 @@ NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id){
   {
     auto navmeshObject = std::get_if<GameObjectNavmesh>(&gameObj);
     if (navmeshObject != NULL){
-      meshNames.push_back(&EMPTY_STR); // this should just be an optional array... need to clean up getmeshees in general
       meshes.push_back(&navmeshObject -> mesh);
     }
     goto returndata;
@@ -488,25 +482,17 @@ NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id){
 
 returndata:
 
-  NameAndMesh meshData {
-    .meshNames = meshNames,
-    .meshes = meshes
-  };
-
-  assert(meshNames.size() == meshes.size());
-  return meshData;
+  return meshes;
 }
 
-std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, objid id){
-  std::vector<std::string> names;
-  if (id == 0){
-    return names;
+std::vector<std::string> emptyNames;
+std::vector<std::string>& getMeshNames(std::map<objid, GameObjectObj>& mapping, objid id){
+  GameObjectObj& gameObj = mapping.at(id);
+  GameObjectMesh* meshObject = std::get_if<GameObjectMesh>(&gameObj);
+  if (meshObject != NULL){
+    return meshObject -> meshNames;
   }
-  for (auto name : getMeshesForId(mapping, id).meshNames){
-    names.push_back(*name);
-  }
-
-  return names;
+  return emptyNames;
 }
 
 bool isNavmesh(std::map<objid, GameObjectObj>& mapping, objid id){

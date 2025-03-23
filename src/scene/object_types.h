@@ -196,13 +196,9 @@ std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){
 
 std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping);
 
-struct NameAndMesh {
-  std::vector<std::string*> meshNames;
-  std::vector<Mesh*> meshes;
-};
-NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id);
+std::vector<Mesh*> getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id);
 
-std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, objid id);
+std::vector<std::string>& getMeshNames(std::map<objid, GameObjectObj>& mapping, objid id);
 bool isNavmesh(std::map<objid, GameObjectObj>& mapping, objid id);
 std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id);
 void updateObjectPositions(std::map<objid, GameObjectObj>& mapping, objid, glm::vec3 position, Transformation& viewTransform);

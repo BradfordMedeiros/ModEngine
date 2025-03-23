@@ -467,7 +467,10 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     .scale = glm::vec3(1.f, 1.f, 1.f),
     .rotation = MOD_ORIENTATION_FORWARD,
   };
-  visualizeFrustum(viewFrustum, transform);
+
+  if (state.visualizeFrustum){
+    visualizeFrustum(viewFrustum, transform);
+  }
 
 
   std::optional<GLint> lastShaderId = std::nullopt;

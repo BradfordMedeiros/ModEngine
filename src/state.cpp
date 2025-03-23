@@ -540,6 +540,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .activeTextureIndex = 0,
     .adjustedCoords = glm::ivec2(0, 0),
     .enableFrustumCulling = false,
+    .visualizeFrustum = false,
 	};
 	return state;
 }
