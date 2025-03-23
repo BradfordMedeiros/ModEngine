@@ -462,13 +462,12 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 
   auto viewFrustum = cameraToViewFrustum(world.sandbox.layers.at(0), state.viewportSize);
 
-  Transformation transform {
-    .position = glm::vec3(0.f, 0.f, 0.f),
-    .scale = glm::vec3(1.f, 1.f, 1.f),
-    .rotation = MOD_ORIENTATION_FORWARD,
-  };
-
   if (state.visualizeFrustum){
+    Transformation transform {
+      .position = glm::vec3(0.f, 0.f, 0.f),
+      .scale = glm::vec3(1.f, 1.f, 1.f),
+      .rotation = MOD_ORIENTATION_FORWARD,
+    };
     visualizeFrustum(viewFrustum, transform);
   }
 
@@ -502,14 +501,11 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     }
     if (!lastShaderId.has_value() || newShader != lastShaderId.value()){
       lastShaderId = newShader;
-      //sendAlert(std::string("loaded shader: ") + shader);
 
       glUseProgram(newShader);
       setRenderUniformData(newShader, layer.uniforms);
     }
     
-    bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
-
     shaderSetUniform(newShader, "projview", (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view));
     
     auto finalModelMatrix = (layer.scale ? calculateScaledMatrix(view, modelMatrix, layer.fov) : modelMatrix);
