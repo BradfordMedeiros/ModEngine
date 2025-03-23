@@ -455,6 +455,28 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
  // }
 }
 
+struct traversalData {
+  objid id;
+  glm::mat4 modelMatrix;
+};
+void traverseSandboxByLayer(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, LayerInfo&, std::string&)> onObject){
+  std::vector<traversalData> datum;
+  for (auto &[id, transformCacheElement] : sandbox.mainScene.absoluteTransforms){
+    datum.push_back(traversalData{
+      .id = id,
+      .modelMatrix = transformCacheElement.matrix,
+    });
+  }
+  for (auto layer : sandbox.layers){      // @TODO could organize this before to not require pass on each frame
+    for (auto data : datum){
+      GameObject& gameobject = sandbox.mainScene.idToGameObjects.at(data.id);
+      if (gameobject.layer == layer.name){
+        onObject(data.id, data.modelMatrix, layer, gameobject.shader);
+      }
+    }  
+  }
+}
+
 
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
   glUseProgram(shaderProgram);
