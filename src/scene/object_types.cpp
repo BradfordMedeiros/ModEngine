@@ -345,7 +345,7 @@ int renderObject(
       .customTextureId = navmeshTexture,
       .id = id,
     };
-    drawMesh(navmeshObj -> mesh, shaderProgram, false, meshUniforms);    
+    drawMesh(navmeshObj -> meshes.at(0), shaderProgram, false, meshUniforms);    
 
 
     // this base id point index stuff is pretty hackey bullshit
@@ -386,7 +386,7 @@ int renderObject(
       baseId = 0;
     }
 
-    return navmeshObj -> mesh.numTriangles;
+    return navmeshObj -> meshes.at(0).numTriangles;
   }
 
   auto textObj = std::get_if<GameObjectUIText>(&toRender);
@@ -475,7 +475,7 @@ std::vector<Mesh*> getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid
   {
     auto navmeshObject = std::get_if<GameObjectNavmesh>(&gameObj);
     if (navmeshObject != NULL){
-      meshes.push_back(&navmeshObject -> mesh);
+      meshes.push_back(&navmeshObject -> meshes.at(0));
     }
     goto returndata;
   }

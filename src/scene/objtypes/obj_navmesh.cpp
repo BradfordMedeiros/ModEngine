@@ -353,7 +353,7 @@ GameObjectNavmesh createNavmesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   calculateConnections();
   
   GameObjectNavmesh obj {
-    .mesh = createNavmeshFromPointList(points, util),
+    .meshes = { createNavmeshFromPointList(points, util) },
   };
   return obj;
 }

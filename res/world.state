@@ -84,7 +84,7 @@ mouse:show-cursor:false
 #skybox:color:0.1 0.1 0.1
 
 rendering:cull:disabled
-rendering:frustumcull:disabled
+rendering:frustumcull:enabled
 
 editor:showgrid:false
 editor:gridsize:40

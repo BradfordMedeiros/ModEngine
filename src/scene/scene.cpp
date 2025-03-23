@@ -65,7 +65,7 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&gameObjV);
   if (navmeshObj != NULL){
-    boundInfo = navmeshObj -> mesh.boundInfo;
+    boundInfo = navmeshObj -> meshes.at(0).boundInfo;
   }
 
   auto textObj = std::get_if<GameObjectUIText>(&gameObjV);

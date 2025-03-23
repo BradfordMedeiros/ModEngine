@@ -19,7 +19,7 @@ std::optional<std::vector<NavPathElement>> findNavplanePath(objid navplaneFrom, 
 void drawNavplanePath(std::vector<NavPathElement>& navElements, std::function<void(glm::vec3, glm::vec3)> drawLine);
 
 struct GameObjectNavmesh {
-  Mesh mesh;
+  std::vector<Mesh> meshes;
 };
 
 GameObjectNavmesh createNavmesh(GameobjAttributes& attr, ObjectTypeUtil& util);
