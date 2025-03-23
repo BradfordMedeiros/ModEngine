@@ -456,33 +456,25 @@ std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){
   return indicies;
 }
 
-
-std::vector<Mesh*> getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id){  
-  std::vector<Mesh*> meshes;
+std::vector<Mesh> noMeshes;
+std::vector<Mesh>& getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id){  
 
   GameObjectObj& gameObj = mapping.at(id);
 
   {
     GameObjectMesh* meshObject = std::get_if<GameObjectMesh>(&gameObj);
     if (meshObject != NULL){
-      for (int i = 0; i < meshObject -> meshesToRender.size(); i++){
-        meshes.push_back(&meshObject -> meshesToRender.at(i));
-      }
-      goto returndata;
+      return meshObject -> meshesToRender;
     }
   }
 
   {
-    auto navmeshObject = std::get_if<GameObjectNavmesh>(&gameObj);
+    GameObjectNavmesh* navmeshObject = std::get_if<GameObjectNavmesh>(&gameObj);
     if (navmeshObject != NULL){
-      meshes.push_back(&navmeshObject -> meshes.at(0));
+      return navmeshObject -> meshes;
     }
-    goto returndata;
   }
-
-returndata:
-
-  return meshes;
+  return noMeshes;
 }
 
 std::vector<std::string> emptyNames;

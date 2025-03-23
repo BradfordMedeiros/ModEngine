@@ -196,7 +196,7 @@ std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){
 
 std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping);
 
-std::vector<Mesh*> getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id);
+std::vector<Mesh>& getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id);
 
 std::vector<std::string>& getMeshNames(std::map<objid, GameObjectObj>& mapping, objid id);
 bool isNavmesh(std::map<objid, GameObjectObj>& mapping, objid id);
