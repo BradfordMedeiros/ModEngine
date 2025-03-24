@@ -455,6 +455,10 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
  // }
 }
 
+struct traversalData {
+  objid id;
+  glm::mat4* modelMatrix;
+};
 
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
   glUseProgram(shaderProgram);
@@ -473,106 +477,122 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 
 
   std::optional<GLint> lastShaderId = std::nullopt;
-  traverseSandboxByLayer(world.sandbox, [&world, shaderProgram, allowShaderOverride, projection, view, &portals, &numTriangles, textBoundingOnly, &lastShaderId, &viewFrustum](int32_t id, glm::mat4 modelMatrix, LayerInfo& layer, std::string& shader) -> void {
-    modassert(id >= 0, "unexpected id render world");
-    auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
-     // This could easily be moved to reduce opengl context switches since the onObject sorts on layers (so just have to pass down).  
-    if (state.depthBufferLayer != layer.depthBufferLayer){
-      state.depthBufferLayer = layer.depthBufferLayer;
-      modassert(state.depthBufferLayer < renderingResources.framebuffers.depthTextures.size(), std::string("invalid layer index: ") + std::to_string(state.depthBufferLayer) + std::string(" [") + layer.name + std::string("]"));
-      setActiveDepthTexture(renderingResources.framebuffers.fbo, &renderingResources.framebuffers.depthTextures.at(0), layer.depthBufferLayer);
-      glClear(GL_DEPTH_BUFFER_BIT);
-    }
+  std::vector<traversalData> datum;
+  for (auto &[id, transformCacheElement] : world.sandbox.mainScene.absoluteTransforms){
+    datum.push_back(traversalData{
+      .id = id,
+      .modelMatrix = &transformCacheElement.matrix,
+    });
+  }
+  for (auto& layer : world.sandbox.layers){      // @TODO could organize this before to not require pass on each frame
+    for (auto data : datum){
+      GameObject& gameobject = world.sandbox.mainScene.idToGameObjects.at(data.id);
+      if (gameobject.layer == layer.name){
+        //onObject(data.id, data.modelMatrix, layer, gameobject.shader);
+        int32_t id = data.id; 
+        glm::mat4& modelMatrix = *data.modelMatrix; 
+        std::string& shader = gameobject.shader;
+        modassert(id >= 0, "unexpected id render world");
+        auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
-    bool loadedNewShader = false;
-    auto newShader = (shader == "" || !allowShaderOverride) ? shaderProgram : getShaderByShaderString(shader, shaderFolderPath, interface.readFile, getTemplateValues, &loadedNewShader);
-    if (loadedNewShader){
-      auto isUiShader = checkIfUiShader(shader);
-      extraShadersToUpdate.push_back(ShaderToUpdate {
-        .shader = newShader,
-        .isUiShader = checkIfUiShader(shader),
-      });
-      if(isUiShader){
-        initUiShader(newShader);
-      }else{
-        initDefaultShader(newShader);
-      }
-    }
-    if (!lastShaderId.has_value() || newShader != lastShaderId.value()){
-      lastShaderId = newShader;
-
-      glUseProgram(newShader);
-      setRenderUniformData(newShader, layer.uniforms);
-    }
-    
-    shaderSetUniform(newShader, "projview", (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view));
-    
-    auto finalModelMatrix = (layer.scale ? calculateScaledMatrix(view, modelMatrix, layer.fov) : modelMatrix);
-
-    bool isPortal = false;
-    bool isPerspectivePortal = false;
-
-    for (auto portal : portals){
-      if (id == portal.id){
-        isPortal = true;
-        isPerspectivePortal = portal.perspective;
-        break;
-      }
-    }
-
-    bool portalTextureInCache = portalIdCache.find(id) != portalIdCache.end();
-    glStencilMask(isPortal ? 0xFF : 0x00);
-
-    if (layer.visible && id != 0){
-      //std::cout << "render object: " << getGameObject(world, id).name << std::endl;
-
-      bool shouldDraw = true;
-      if (state.enableFrustumCulling){
-        auto aabb = getModAABBModel(id);
-        if (aabb.has_value()){
-          shouldDraw = passesFrustumCulling(viewFrustum, viewTransform, aabb.value());
+        // This could easily be moved to reduce opengl context switches since the onObject sorts on layers (so just have to pass down).  
+        if (state.depthBufferLayer != layer.depthBufferLayer){
+          state.depthBufferLayer = layer.depthBufferLayer;
+          modassert(state.depthBufferLayer < renderingResources.framebuffers.depthTextures.size(), std::string("invalid layer index: ") + std::to_string(state.depthBufferLayer) + std::string(" [") + layer.name + std::string("]"));
+          setActiveDepthTexture(renderingResources.framebuffers.fbo, &renderingResources.framebuffers.depthTextures.at(0), layer.depthBufferLayer);
+          glClear(GL_DEPTH_BUFFER_BIT);
         }
-      }
-      // if (shouldDraw){
-      //   static int counter = 0;
-      //   std::cout << "passes culling name: " << getGameObject(world, id).name << " " << counter << std::endl;
-      //   counter++;
-      // }
-      if (shouldDraw){
-        auto trianglesDrawn = renderObject(
-          newShader, 
-          newShader == *renderStages.selection.shader,
-          id, 
-          world.objectMapping, 
-          state.showDebug ? state.showDebugMask : 0,
-          (isPortal && portalTextureInCache &&  !isPerspectivePortal) ? portalIdCache.at(id) : -1,
-          state.navmeshTextureId.has_value() ? state.navmeshTextureId.value() : -1,
-          modelMatrix,
-          state.drawPoints,
-          defaultResources.defaultMeshes,
-          textBoundingOnly,
-          state.showBones,
-          api,
-          finalModelMatrix
-        );
-        numTriangles = numTriangles + trianglesDrawn;
-      }
-    }
+
+        bool loadedNewShader = false;
+        auto newShader = (shader == "" || !allowShaderOverride) ? shaderProgram : getShaderByShaderString(shader, shaderFolderPath, interface.readFile, getTemplateValues, &loadedNewShader);
+        if (loadedNewShader){
+          auto isUiShader = checkIfUiShader(shader);
+          extraShadersToUpdate.push_back(ShaderToUpdate {
+            .shader = newShader,
+            .isUiShader = checkIfUiShader(shader),
+          });
+          if(isUiShader){
+            initUiShader(newShader);
+          }else{
+            initDefaultShader(newShader);
+          }
+        }
+        if (!lastShaderId.has_value() || newShader != lastShaderId.value()){
+          lastShaderId = newShader;
+          glUseProgram(newShader);
+          setRenderUniformData(newShader, layer.uniforms);
+        }
+    
+        shaderSetUniform(newShader, "projview", (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view));
+    
+        auto finalModelMatrix = (layer.scale ? calculateScaledMatrix(view, modelMatrix, layer.fov) : modelMatrix);
+        bool isPortal = false;
+        bool isPerspectivePortal = false;
+
+        for (auto portal : portals){
+          if (id == portal.id){
+            isPortal = true;
+            isPerspectivePortal = portal.perspective;
+            break;
+          }
+        }
+
+        bool portalTextureInCache = portalIdCache.find(id) != portalIdCache.end();
+        glStencilMask(isPortal ? 0xFF : 0x00);
+
+        if (layer.visible && id != 0){
+          //std::cout << "render object: " << getGameObject(world, id).name << std::endl;
+          bool shouldDraw = true;
+          if (state.enableFrustumCulling){
+            auto aabb = getModAABBModel(id);
+            if (aabb.has_value()){
+              shouldDraw = passesFrustumCulling(viewFrustum, viewTransform, aabb.value());
+            }
+          }
+          // if (shouldDraw){
+          //   static int counter = 0;
+          //   std::cout << "passes culling name: " << getGameObject(world, id).name << " " << counter << std::endl;
+          //   counter++;
+          // }
+          if (shouldDraw){
+            auto trianglesDrawn = renderObject(
+              newShader, 
+              newShader == *renderStages.selection.shader,
+              id, 
+              world.objectMapping, 
+              state.showDebug ? state.showDebugMask : 0,
+              (isPortal && portalTextureInCache &&  !isPerspectivePortal) ? portalIdCache.at(id) : -1,
+              state.navmeshTextureId.has_value() ? state.navmeshTextureId.value() : -1,
+              modelMatrix,
+              state.drawPoints,
+              defaultResources.defaultMeshes,
+              textBoundingOnly,
+              state.showBones,
+              api,
+              finalModelMatrix
+            );
+            numTriangles = numTriangles + trianglesDrawn;
+          }
+        }
   
-    glStencilFunc(GL_EQUAL, 1, 0xFF);
-    if (isPortal && portalTextureInCache && isPerspectivePortal){
-      glUseProgram(*renderingResources.framebufferProgram); 
-      glDisable(GL_DEPTH_TEST);
-      glBindVertexArray(defaultResources.quadVAO);
-      glBindTexture(GL_TEXTURE_2D,  portalIdCache.at(id));
-      glDrawArrays(GL_TRIANGLES, 0, 6);
-      glEnable(GL_DEPTH_TEST);
-      glUseProgram(newShader); 
-    }
-    glStencilFunc(GL_ALWAYS, 1, 0xFF);
-    glClear(GL_STENCIL_BUFFER_BIT);
-  });
+        glStencilFunc(GL_EQUAL, 1, 0xFF);
+        if (isPortal && portalTextureInCache && isPerspectivePortal){
+          glUseProgram(*renderingResources.framebufferProgram); 
+          glDisable(GL_DEPTH_TEST);
+          glBindVertexArray(defaultResources.quadVAO);
+          glBindTexture(GL_TEXTURE_2D,  portalIdCache.at(id));
+          glDrawArrays(GL_TRIANGLES, 0, 6);
+          glEnable(GL_DEPTH_TEST);
+          glUseProgram(newShader); 
+        }
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glClear(GL_STENCIL_BUFFER_BIT);
+      }
+    }  
+  }
+        
+ 
   
   auto maxExpectedClears = numUniqueDepthLayers(world.sandbox.layers);
   //modassert(numDepthClears <= maxExpectedClears, std::string("numDepthClears = ") + std::to_string(numDepthClears) + std::string(", expected = ") + std::to_string(maxExpectedClears));
