@@ -577,6 +577,21 @@ std::vector<InputDispatch> inputFns = {
   },
   InputDispatch{
     .alwaysEnable = false,
+    .sourceKey = 'M',  
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0,
+    .hasPreq = false,
+    .fn = []() -> void {
+      auto ids = selectedIds(state.editor);
+      if (ids.size() > 0){
+        state.cullingObject = ids.at(0);
+      }else{
+        state.cullingObject = std::nullopt;
+      }
+    }
+  },
+  InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = 'G',  // G 
     .sourceType = BUTTON_PRESS,
     //.prereqKey = 341,  // ctrl,

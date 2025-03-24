@@ -51,6 +51,7 @@ Transformation viewTransform {
   .scale = glm::vec3(1.f, 1.f, 1.f),
   .rotation = quatFromDirection(glm::vec3(0.f, 0.f, -1.f)),
 };
+Transformation cullingViewTransform = viewTransform;
 glm::mat4 view;
 glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);  
 
@@ -383,6 +384,48 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
     farPlanePoint,
   };
 
+
+  auto angles = calcFovAngles(world.sandbox.layers.at(0), state.viewportSize);
+
+
+  auto position = viewTransform.position;  // viewFrustum
+  {
+    float widthXNear = glm::length(viewFrustum.near.point) * glm::tan(angles.x);
+    float widthYNear = glm::length(viewFrustum.near.point) * glm::tan(angles.y);
+    auto nearLeft = viewTransform.position + (viewTransform.rotation * (viewFrustum.near.point + glm::vec3(widthXNear, 0.f, 0.f)));
+    auto nearRight = viewTransform.position + (viewTransform.rotation * (viewFrustum.near.point + glm::vec3(-widthXNear, 0.f, 0.f)));
+    auto nearUp = viewTransform.position + (viewTransform.rotation * (viewFrustum.near.point + glm::vec3(0.f, widthYNear, 0.f)));
+    auto nearDown = viewTransform.position + (viewTransform.rotation * (viewFrustum.near.point + glm::vec3(0.f, -widthYNear, 0.f)));
+
+    float widthXFar = glm::length(viewFrustum.far.point) * glm::tan(angles.x);
+    float widthYFar = glm::length(viewFrustum.far.point) * glm::tan(angles.y);
+    auto farLeft = viewTransform.position + (viewTransform.rotation * (viewFrustum.far.point + glm::vec3(widthXFar, 0.f, 0.f)));
+    auto farRight = viewTransform.position + (viewTransform.rotation * (viewFrustum.far.point + glm::vec3(-widthXFar, 0.f, 0.f)));
+    auto farUp = viewTransform.position + (viewTransform.rotation * (viewFrustum.far.point + glm::vec3(0.f, widthYFar, 0.f)));
+    auto farDown = viewTransform.position + (viewTransform.rotation * (viewFrustum.far.point + glm::vec3(0.f, -widthYFar, 0.f)));
+
+
+    addLineToNextCycleTint(lineData, position, nearLeft, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, position, nearRight, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, position, nearUp, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, position, nearDown, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, nearLeft, nearUp, false, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, nearUp, nearRight, false, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, nearRight, nearDown, false, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, nearDown, nearLeft, false, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+
+
+    addLineToNextCycleTint(lineData, position, farLeft, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, position, farRight, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, position, farUp, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, position, farDown, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, farLeft, farUp, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, farUp, farRight, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, farRight, farDown, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+    addLineToNextCycleTint(lineData, farDown, farLeft, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  }
+
+  /*
   std::vector<FrustumPlane> planes {
     viewFrustum.near,
     viewFrustum.far,
@@ -391,68 +434,31 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
     viewFrustum.left,
     viewFrustum.right,
   };
-
-
-  auto angles = calcFovAngles(world.sandbox.layers.at(0), state.viewportSize);
-  auto position = glm::vec3(0.f, 0.f, 0.f);  // viewFrustum
-  {
-    float widthXNear = glm::length(viewFrustum.near.point) * glm::tan(angles.x);
-    float widthYNear = glm::length(viewFrustum.near.point) * glm::tan(angles.y);
-    auto nearLeft = position + viewFrustum.near.point + glm::vec3(widthXNear, 0.f, 0.f);
-    auto nearRight = position + viewFrustum.near.point + glm::vec3(-widthXNear, 0.f, 0.f);
-    auto nearUp =  position + viewFrustum.near.point + glm::vec3(0.f, widthYNear, 0.f);
-    auto nearDown = position + viewFrustum.near.point + glm::vec3(0.f, -widthYNear, 0.f);
-    //addLineToNextCycleTint(lineData, position, nearLeft, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-    //addLineToNextCycleTint(lineData, position, nearRight, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-    //addLineToNextCycleTint(lineData, position, nearUp, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-    //addLineToNextCycleTint(lineData, position, nearDown, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-    addLineToNextCycleTint(lineData, nearLeft, nearUp, false, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
-    addLineToNextCycleTint(lineData, nearUp, nearRight, false, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
-    addLineToNextCycleTint(lineData, nearRight, nearDown, false, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
-    addLineToNextCycleTint(lineData, nearDown, nearLeft, false, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
-  }
-
-  {
-    float widthXNear = glm::length(viewFrustum.far.point) * glm::tan(angles.x);
-    float widthYNear = glm::length(viewFrustum.far.point) * glm::tan(angles.y);
-    auto nearLeft = position + viewFrustum.far.point + glm::vec3(widthXNear, 0.f, 0.f);
-    auto nearRight = position + viewFrustum.far.point + glm::vec3(-widthXNear, 0.f, 0.f);
-    auto nearUp =  position + viewFrustum.far.point + glm::vec3(0.f, widthYNear, 0.f);
-    auto nearDown = position + viewFrustum.far.point + glm::vec3(0.f, -widthYNear, 0.f);
-    addLineToNextCycleTint(lineData, position, nearLeft, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-    addLineToNextCycleTint(lineData, position, nearRight, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-    addLineToNextCycleTint(lineData, position, nearUp, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-    addLineToNextCycleTint(lineData, position, nearDown, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-    addLineToNextCycleTint(lineData, nearLeft, nearUp, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-    addLineToNextCycleTint(lineData, nearUp, nearRight, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-    addLineToNextCycleTint(lineData, nearRight, nearDown, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-    addLineToNextCycleTint(lineData, nearDown, nearLeft, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-  }
-
+  8?
   //float widthXFar = glm::length(viewFrustum.far.point) * glm::tan(angleX);
   //addLineToNextCycleTint(lineData, position, position + viewFrustum.far.point + glm::vec3(widthXFar, 0.f, 0.f), false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
   //addLineToNextCycleTint(lineData, position, position + viewFrustum.far.point + glm::vec3(-widthXFar, 0.f, 0.f), false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
 
-  float length = 0.1f;
-  for (auto &plane : planes){
-    break;
-    auto normalVec = glm::normalize(quatFromDirection(plane.normal) * glm::vec3(0.f, 0.f, -1.f));
-    //auto dirOnPlane = glm::cross(point.normal, normalVec);
-    addLineToNextCycleTint(lineData, plane.point, plane.point + (length * normalVec), false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
-  
-    auto perpendicularVector = glm::normalize(glm::cross(normalVec, normalVec + glm::vec3(1.f, 0.f, 0.f)));  // cross product and two vectors is perp
-    addLineToNextCycleTint(lineData, plane.point, plane.point + (length * perpendicularVector), false, -1, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
-
-    auto basisVector = glm::normalize(glm::cross(normalVec, perpendicularVector));
-    addLineToNextCycleTint(lineData, plane.point, plane.point + (length * basisVector), false, -1, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, std::nullopt);
-  }
+  //float length = 0.1f;
+  //for (auto &plane : planes){
+  //  break;
+  //  auto normalVec = glm::normalize(quatFromDirection(plane.normal) * glm::vec3(0.f, 0.f, -1.f));
+  //  //auto dirOnPlane = glm::cross(point.normal, normalVec);
+  //  addLineToNextCycleTint(lineData, plane.point, plane.point + (length * normalVec), false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
+  //
+  //  auto perpendicularVector = glm::normalize(glm::cross(normalVec, normalVec + glm::vec3(1.f, 0.f, 0.f)));  // cross product and two vectors is perp
+  //  addLineToNextCycleTint(lineData, plane.point, plane.point + (length * perpendicularVector), false, -1, glm::vec4(0.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
+//
+//  //  auto basisVector = glm::normalize(glm::cross(normalVec, perpendicularVector));
+//  //  addLineToNextCycleTint(lineData, plane.point, plane.point + (length * basisVector), false, -1, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, std::nullopt);
+  //}
 
  // for (auto &point : points){
  //   auto normalVec = quatFromDirection(point.normal) * glm::vec3(0.f, 0.f, -1.f);
  //   auto dirOnPlane = glm::cross(point.normal, normalVec);
  //   addLineToNextCycleTint(lineData, point, point + normalVec, false, -1, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, std::nullopt);
  //   addLineToNextCycleTint(lineData, point, point + dirOnPlane, false, -1, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, std::nullopt);
- // }
+ // }*/
 }
 
 struct traversalData {
@@ -466,15 +472,9 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 
   auto viewFrustum = cameraToViewFrustum(world.sandbox.layers.at(0), state.viewportSize);
 
-  if (state.visualizeFrustum){
-    Transformation transform {
-      .position = glm::vec3(0.f, 0.f, 0.f),
-      .scale = glm::vec3(1.f, 1.f, 1.f),
-      .rotation = MOD_ORIENTATION_FORWARD,
-    };
-    visualizeFrustum(viewFrustum, transform);
+  if (state.cullingObject.has_value() && state.visualizeFrustum){
+    visualizeFrustum(viewFrustum, cullingViewTransform);
   }
-
 
   std::optional<GLint> lastShaderId = std::nullopt;
 
@@ -547,7 +547,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
           if (state.enableFrustumCulling){
             auto aabb = getModAABBModel(id);
             if (aabb.has_value()){
-              shouldDraw = passesFrustumCulling(viewFrustum, viewTransform, aabb.value());
+              shouldDraw = passesFrustumCulling(viewFrustum, cullingViewTransform, aabb.value());
             }
           }
           // if (shouldDraw){
@@ -1738,6 +1738,7 @@ int main(int argc, char* argv[]){
     //////////////////////// rendering code below ///////////////////////
     std::vector<LightInfo> lights = getLightInfo(world);
     viewTransform = getCameraTransform();
+    cullingViewTransform = getCullingTransform();
     view = renderView(viewTransform.position, viewTransform.rotation);
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());

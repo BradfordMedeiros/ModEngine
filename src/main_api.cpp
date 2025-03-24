@@ -800,6 +800,14 @@ Transformation getCameraTransform(){
   }
   return gameobjectTransformation(world, state.activeCameraObj -> id, true);
 }
+
+Transformation getCullingTransform(){
+  if (state.cullingObject.has_value()){
+    return gameobjectTransformation(world, state.cullingObject.value(), true);
+  }
+  return getCameraTransform();
+}
+
 void maybeResetCamera(int32_t id){
   if (state.activeCameraObj != NULL &&  id == state.activeCameraObj -> id){
     state.activeCameraObj = NULL;

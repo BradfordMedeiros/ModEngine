@@ -159,6 +159,9 @@ struct engineState {
   glm::ivec2 adjustedCoords;
   bool enableFrustumCulling;
   bool visualizeFrustum;
+
+  std::optional<objid> cullingObject;
+  
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
