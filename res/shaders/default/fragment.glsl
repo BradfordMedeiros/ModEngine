@@ -6,6 +6,7 @@ in vec2 TexCoord;
 in mat3 TangentToWorld;
 in vec4 sshadowCoord;
 in vec3 ambientVoxelColor;
+flat in int instanceId;
 
 layout (location = 0) out vec4 FragColor;
 layout (location = 1) out vec4 BloomColor;
@@ -64,6 +65,9 @@ uniform float shadowIntensity;
 uniform vec3 ambientAmount;
 uniform vec3 emissionAmount;
 uniform float bloomThreshold;
+
+uniform bool useInstancing;
+uniform vec4 instanceColors[4];
 
 
 // numCellsDim ^ 3 = voxelLightSize
@@ -202,6 +206,10 @@ void main(){
     }else{
       FragColor = tint * texColor;
     }
+
+    //if (useInstancing && instanceId > 0){
+    //  FragColor.a = 0.2;
+    //}
 
     // TODO -> what would be a better thesholding function? 
     float brightness = FragColor.r + FragColor.g + FragColor.b;

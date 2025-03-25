@@ -65,6 +65,7 @@ struct MeshUniforms {
   glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f, 1.f);
   std::vector<Bone>* bones = NULL;
   objid id = 0;
+  bool useInstancing = false;
 };
 
 

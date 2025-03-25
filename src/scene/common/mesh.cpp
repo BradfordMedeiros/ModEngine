@@ -6,6 +6,7 @@ extern std::unordered_map<unsigned int, std::vector<ShaderTextureBinding>> textu
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4&& value);
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::mat4& value);
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::vec3& value);
+void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::vec3&& value);
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::vec2& value);
 void shaderSetUniform(unsigned int shaderToUse, const char* name, glm::vec4& value);
 void shaderSetUniform(unsigned int shaderToUse, const char* name, bool value);
@@ -203,6 +204,8 @@ Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> e
 // should just create another functon to handle the ui shader
 
 void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms){
+  //meshUniforms.useInstancing = true;
+
   shaderSetUniform(shaderProgram, "model", meshUniforms.model);
   glProgramUniform3fv(shaderProgram, glGetUniformLocation(shaderProgram, "emissionAmount"), 1, glm::value_ptr(meshUniforms.emissionAmount));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(meshUniforms.textureSize));
@@ -211,8 +214,12 @@ void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms mesh
   shaderSetUniform(shaderProgram, "tint", meshUniforms.tint);
   glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "forceTint"), false);
 
+  glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "useInstancing"), meshUniforms.useInstancing);
+
 
   glProgramUniform4fv(shaderProgram, glGetUniformLocation(shaderProgram, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(meshUniforms.id)));
+
+
   /*
             auto color = getColorFromGameobject(selectionId);
           Color colorTypeColor {
@@ -285,7 +292,16 @@ void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms mesh
   }
 
 
-  glDrawElements(GL_TRIANGLES, mesh.numElements, GL_UNSIGNED_INT, 0);
+  if (meshUniforms.useInstancing){
+    int numInstances = 5;
+    for (int i = 0; i < numInstances; i++){
+      glProgramUniform3fv(shaderProgram, glGetUniformLocation(shaderProgram, ("instanceOffsets[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(glm::vec3(i * 5.f, i * 5.f, i * 5.f)));
+    }    
+
+    glDrawElementsInstanced(GL_TRIANGLES, mesh.numElements, GL_UNSIGNED_INT, 0, 1000);
+  }else{
+    glDrawElements(GL_TRIANGLES, mesh.numElements, GL_UNSIGNED_INT, 0);
+  }
   numberOfDrawCallsThisFrame++;
 
   if (drawPoints){
@@ -353,11 +369,14 @@ int drawLines(GLint shaderProgram, std::vector<Line> allLines, int linewidth, gl
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
 
+  glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "useInstancing"), false);
 
   modassert(allLines.size() > 0, "draw lines - all lines must be non-zero size");
   auto lineData = createLineRenderData(allLines);
   glLineWidth(linewidth);
   glDrawElements(GL_LINES, lineData.numIndices , GL_UNSIGNED_INT, 0);
+
+
   numberOfDrawCallsThisFrame++;
   freeLineRenderData(lineData);
   return lineData.numIndices;

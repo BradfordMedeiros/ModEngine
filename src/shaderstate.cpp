@@ -68,6 +68,7 @@ void initDefaultShader(unsigned int shader){
 
     "encodedid", "textureid",
     "forceTint", // selection shader only
+    "useInstancing", "instanceOffsets[0]",
 
   });
 }
@@ -204,6 +205,7 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
     
     "cameraPosition", "projview", "numlights", "enableLighting",
     "forceTint", // selection shader only
+    "useInstancing", "instanceOffsets[0]",
   });
 
 

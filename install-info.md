@@ -30,5 +30,4 @@ sudo apt-get install libavformat57 libavformat-dev libavcodec57 libswscale-dev l
 ===============
 dev tools:
 cmake 
-php (building editor)
 standard gnu stuff (make, bash utils etc)

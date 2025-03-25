@@ -11,6 +11,7 @@ layout (location = 8) in float aBoneWeight[4];
 uniform mat4 model;
 uniform mat4 bones[ $BONES_BUFFER ];
 uniform bool hasBones;
+uniform float time;
 
 // per frame
 uniform mat4 projview;
@@ -27,13 +28,23 @@ out mat3 TangentToWorld;
 out vec3 FragPos;
 out vec4 FragLight;
 out vec4 sshadowCoord;
+flat out int instanceId;
 
 out vec4 glFragPos;
 flat out vec4 overcolor;
 
+uniform bool useInstancing;
+uniform vec3 instanceOffsets[100]; // for now...this would be nicer as an array buffer but code should all be the same besides making the buffer
 
+
+void calculateXYZ(in int index, out int x, out int y, out int z){
+  x = 0;
+  y = 0;
+  z = 0;
+}
 
 void main(){
+  instanceId = gl_InstanceID;
   vec3 tangent = normalize(vec3(model * vec4(aTangent, 0.0)));
   vec3 norm = normalize(vec3(model * vec4(aNormal, 0.0)));
   tangent = normalize(tangent - dot(tangent, norm) * norm);
@@ -82,6 +93,12 @@ void main(){
     glFragPos = gl_Position;
   }else{
     vec4 modelPosition = model * vec4(aPos.xyz, 1.0);
+
+    if (useInstancing){
+      vec3 offset = instanceOffsets[gl_InstanceID];
+      //vec3 offset = vec3(gl_InstanceID * 1.f, gl_InstanceID)
+      modelPosition = modelPosition + vec4(offset.xyz, 0);
+    }
 
     gl_Position = projview * modelPosition;
     TexCoord = aTexCoords;
