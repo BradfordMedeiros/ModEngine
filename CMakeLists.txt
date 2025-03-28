@@ -2,6 +2,10 @@
 cmake_minimum_required(VERSION 3.8)
 project(modengine)
 
+message(STATUS "CMake version: ${CMAKE_VERSION}")
+message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "C Compiler: ${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION}")
+
 # Autoserialization code uses this extensively.  Should look into it, but supress since floods
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
