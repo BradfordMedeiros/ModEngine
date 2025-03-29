@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <string>
 
 struct BenchmarkMeasurement {
   float frametime;

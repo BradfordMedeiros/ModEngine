@@ -344,7 +344,7 @@ std::vector<ObjectStateMapping> mapping = {
         return "capture";
       }
       modassert(false, "invalid value set state");
-      return 0;
+      return 0.f;
     },
     .object = "mouse",
     .attribute = "cursor",
@@ -523,7 +523,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .borderTexture = "",
     .antialiasingMode = ANTIALIASING_NONE,
     .windowname = "ModEngine",
-    .iconpath = "./misc/modengine.png",
+    .iconpath = "./docs/modengine.png",
     .fontsize = 3,
     .showGrid = false,
     .gridSize = 10,

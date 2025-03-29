@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <set>
+#include <optional>
 #include "./sqlparse.h"
 #include "./util.h"
 

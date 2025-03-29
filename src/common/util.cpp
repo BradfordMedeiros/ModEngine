@@ -719,7 +719,7 @@ AttributeValue addAttributes(AttributeValue one, AttributeValue two){
     return *fValueOne + *valueTwo;
   }
   modassert(false, "addAttributes value types not supported");
-  return 0;
+  return 0.f;
 }
 
 std::string print(AttributeValue& value){

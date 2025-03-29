@@ -1531,6 +1531,7 @@ int main(int argc, char* argv[]){
     loadScene(parsedScene.sceneToLoad, {}, parsedScene.sceneFileName, parsedScene.tags);
   }
 
+  modassert(modlayerFileExists(state.iconpath), std::string("icon file does not exist: ") + state.iconpath);
   GLFWimage images[1]; 
   images[0].pixels = stbi_load(state.iconpath.c_str(), &images[0].width, &images[0].height, 0, 4); //rgba channels 
   glfwSetWindowIcon(window, 1, images);
