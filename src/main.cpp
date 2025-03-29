@@ -1116,7 +1116,12 @@ int main(int argc, char* argv[]){
 
   setInitialState(state, "./res/world.state", statistics.now, interface.readFile, result["noinput"].as<bool>()); 
 
-  glfwInit();
+  auto glfwInitReturn = glfwInit();
+  if (glfwInitReturn != GLFW_TRUE){
+    modlog("glfw", "glfw did not initialize successfully");
+    return 1;
+  }
+  
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
