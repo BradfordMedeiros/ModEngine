@@ -1533,9 +1533,10 @@ int main(int argc, char* argv[]){
 
   modassert(modlayerFileExists(state.iconpath), std::string("icon file does not exist: ") + state.iconpath);
   GLFWimage images[1]; 
+
+  stbi_set_flip_vertically_on_load(false);
   images[0].pixels = stbi_load(state.iconpath.c_str(), &images[0].width, &images[0].height, 0, 4); //rgba channels 
   glfwSetWindowIcon(window, 1, images);
-  stbi_image_free(images[0].pixels); 
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
@@ -1989,6 +1990,8 @@ int main(int argc, char* argv[]){
     deinitPhysics(world.physicsEnvironment); 
     stopSoundSystem();
     glfwTerminate(); 
+    stbi_image_free(images[0].pixels);
+
 
   return 0;
 }
