@@ -1,7 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=ModEditor
-Comment=
-Icon={{APP_DIRECTORY}}/icon.png
-Exec={{APP_DIRECTORY}}/run.sh
-Terminal=false
