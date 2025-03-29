@@ -88,6 +88,7 @@ Texture loadTexture(std::string textureFilePath){
   int textureWidth, textureHeight, numChannels;
   int forcedChannels = 4;
   stbi_set_flip_vertically_on_load(true);
+  modlog("load file loadTexture", textureFilePath);
   unsigned char* data = stbi_load(textureFilePath.c_str(), &textureWidth, &textureHeight, &numChannels, forcedChannels); 
   if (!data){
     throw std::runtime_error("failed loading texture " + textureFilePath + ", reason: " + stbi_failure_reason());
@@ -101,6 +102,8 @@ void replaceTexture(Texture& texture, std::string& textureFilePath, bool allowFa
   int textureWidth, textureHeight, numChannels;
   int forcedChannels = 4;
   stbi_set_flip_vertically_on_load(true);
+
+  modlog("load file replaceTexture", textureFilePath);
   unsigned char* data = stbi_load(textureFilePath.c_str(), &textureWidth, &textureHeight, &numChannels, forcedChannels); 
   if (!data){
     if (!allowFail){
@@ -158,9 +161,10 @@ Texture loadCubemapTexture(std::string textureFilePathRoot){
   std::cout << "start loading raw jpg data" << std::endl;
   for (auto filepath : filepaths){
     int textureWidth, textureHeight, numChannels;
-    std::cout << "loading file: " << filepath << std::endl;
   
     stbi_set_flip_vertically_on_load(false);
+
+    modlog("load file loadCubemapTexture", textureFilePathRoot);
     unsigned char* data = stbi_load(filepath.c_str(), &textureWidth, &textureHeight, &numChannels, 0); 
     if (!data){
       throw std::runtime_error("failed loading texture " + textureFilePathRoot + ", reason: " + stbi_failure_reason());
@@ -237,6 +241,8 @@ Texture loadTextureAtlasMaybeWriteCache(std::vector<std::string> textureFilePath
 
     int textureWidth, textureHeight, numChannels;
     int forcedChannels = 4;
+
+    modlog("load file loadTextureAtlasMaybeWriteCache", textureFilePaths.at(i));
     unsigned char* data = stbi_load(textureFilePaths.at(i).c_str(), &textureWidth, &textureHeight, &numChannels, forcedChannels); 
     if (!data){
       throw std::runtime_error("failed loading texture " + textureFilePaths.at(i) + ", reason: " + stbi_failure_reason());

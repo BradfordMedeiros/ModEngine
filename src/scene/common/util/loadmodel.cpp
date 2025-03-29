@@ -534,6 +534,7 @@ void printDebugModelData(ModelData& data, std::string modelPath){
 
 ModelDataCore loadModelCore(std::string modelPath){
    Assimp::Importer import;
+   modlog("load file loadModelCore", modelPath);
    const aiScene* scene = import.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
    if (!scene || scene -> mFlags && AI_SCENE_FLAGS_INCOMPLETE || !scene -> mRootNode){
       std::cerr << "error loading model" << std::endl;

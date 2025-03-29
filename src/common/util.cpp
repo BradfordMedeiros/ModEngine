@@ -30,6 +30,7 @@ void assertTodo(std::string message){
 
 // Base IO fns ////////////////////////////////////
 std::string loadFile(std::string filepath){
+  modlog("load file", filepath);
    std::ifstream file(filepath.c_str());
    if (!file.good()){
      throw std::runtime_error("file not found" + filepath);
