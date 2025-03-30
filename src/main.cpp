@@ -287,10 +287,6 @@ void loadAllTextures(std::string& textureFolderPath){
     loadTextureWorld(world, texturePath, -1);
   }
 
-  /*for (auto texturePath : listFilesWithExtensions("/home/brad/automate/mosttrusted/gameresources/build/", { "png", "jpg" })){
-    loadTextureWorld(world, texturePath, -1);
-  }*/
-
   std::string flatSurfaceNormalTexture = "../gameresources/build/textures/clean/cherrybark.normal.jpg";
   /*std::vector<std::string> textures { 
     "./res/textures/grid.png", 
