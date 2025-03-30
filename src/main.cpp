@@ -1441,6 +1441,12 @@ int main(int argc, char* argv[]){
     netcode = initNetCode(cBindings.onPlayerJoined, cBindings.onPlayerLeave, interface.readFile);
   }
 
+  modassert(modlayerFileExists(state.iconpath), std::string("icon file does not exist: ") + state.iconpath);
+  GLFWimage images[1]; 
+  stbi_set_flip_vertically_on_load(false);
+  images[0].pixels = stbi_load(state.iconpath.c_str(), &images[0].width, &images[0].height, 0, 4); //rgba channels 
+  glfwSetWindowIcon(window, 1, images);
+
   std::vector<std::string> defaultMeshesToLoad {
     "./res/models/ui/node.obj",
     "./res/models/unit_rect/unit_rect.obj",
@@ -1535,13 +1541,6 @@ int main(int argc, char* argv[]){
   for (auto parsedScene : parseSceneArgs(rawScenes)){
     loadScene(parsedScene.sceneToLoad, {}, parsedScene.sceneFileName, parsedScene.tags);
   }
-
-  modassert(modlayerFileExists(state.iconpath), std::string("icon file does not exist: ") + state.iconpath);
-  GLFWimage images[1]; 
-
-  stbi_set_flip_vertically_on_load(false);
-  images[0].pixels = stbi_load(state.iconpath.c_str(), &images[0].width, &images[0].height, 0, 4); //rgba channels 
-  glfwSetWindowIcon(window, 1, images);
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
