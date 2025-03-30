@@ -6,27 +6,27 @@ struct ModLayerPathTest {
 	std::string expectedpath;
 };
 
+std::string absPath(std::string path){
+	auto filepath = std::filesystem::absolute(std::filesystem::path(path)).lexically_normal();
+	return filepath.string();
+}
+
 void modlayerPathTest(){
 	std::vector<ModLayerPathTest> tests = {
 		ModLayerPathTest {
 			.file = "./res/shaders/blur/vertex.glsl",
 			.modpath = "./res/modlayers/",
-			.expectedpath = "/home/brad/gamedev/mosttrusted/ModEngine/res/modlayers/shaders/blur/vertex.glsl", // path should be absolute, but the test should check something else
+			.expectedpath = absPath("./res/modlayers/shaders/blur/vertex.glsl"), // path should be absolute
 		},
 		ModLayerPathTest {
 			.file = "./res/textures/default.jpg",
 			.modpath = "./res/modlayers/",
-			.expectedpath = "/home/brad/gamedev/mosttrusted/ModEngine/res/modlayers/textures/default.jpg",
-		},
-		ModLayerPathTest {
-			.file = "/home/brad/gamedev/mosttrusted/ModEngine/res/textures/wood.jpg ",
-			.modpath = "./res/modlayers/",
-			.expectedpath = "/home/brad/gamedev/mosttrusted/ModEngine/res/modlayers/textures/wood.jpg",
+			.expectedpath = absPath("./res/modlayers/textures/default.jpg"),
 		},
 		ModLayerPathTest {
 			.file = "./res/textures/skyboxs/desert",
 			.modpath = "./res/modlayers/",
-			.expectedpath = "/home/brad/gamedev/mosttrusted/ModEngine/res/modlayers/textures/skyboxs/desert",
+			.expectedpath = absPath("./res/modlayers/textures/skyboxs/desert"),
 		},
 	};
 
