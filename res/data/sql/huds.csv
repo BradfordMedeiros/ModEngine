@@ -1,3 +1,0 @@
-name:STRING,image:STRING,position:STRING,scale:STRING,tint:STRING,shader:STRING
-default3,/home/brad/gamedev/mosttrusted/ModEngine/res/textures/crosshairs/crosshair029.png,0 0 0,0.02 0.02 0.02,,../afterworld/shaders/menu/fragment.glsl
-default2,/home/brad/gamedev/mosttrusted/ModEngine/res/textures/crosshairs/crosshair029.png,0 0 0,0.02 0.02 0.02,,
