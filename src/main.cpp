@@ -75,6 +75,7 @@ Benchmark benchmark;
 DynamicLoading dynamicLoading;
 WorldTiming timings;
 std::vector<IdAtCoords> idCoordsToGet;
+std::string dataPath;
 
 bool showCrashInfo = false;
 float lastReloadTime = 0.f;
@@ -244,6 +245,10 @@ void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2)
   cBindings.onCollisionExit(obj1Id.value(), obj2Id.value());
 }
 
+std::string getRuntimePath(std::string path){
+  return dataPath + path;
+}
+
 std::vector<std::string> listOctreeTextures(){
   std::vector<std::string> octreeTextures { 
     "./res/textures/grid.png", 
@@ -267,7 +272,7 @@ std::vector<std::string> listOctreeTextures(){
     "../gameresources/build/uncategorized/bluetransparent.png",
     "../gameresources/build/textures/const_fence.png",
 
-    "/home/brad/Desktop/test3.png",
+    "../gameresources/textures/backgrounds/test3.png",
 
   };
   return octreeTextures;
@@ -308,8 +313,8 @@ void loadAllTextures(std::string& textureFolderPath){
 
   PROFILE("TEXTURES-LOAD-OCTREEATLAS",
     auto start = std::chrono::steady_clock::now();
-    loadTextureAtlasWorld(world, "octree-atlas:normal", normalTextures, "/home/brad/Desktop/test_atlas_normal.png", -1);
-    loadTextureAtlasWorld(world, "octree-atlas:main",   octreeTextures, "/home/brad/Desktop/test_atlas.png", -1);
+    loadTextureAtlasWorld(world, "octree-atlas:normal", normalTextures, getRuntimePath("test_atlas_normal.png"), -1);
+    loadTextureAtlasWorld(world, "octree-atlas:main",   octreeTextures, getRuntimePath("test_atlas.png"), -1);
     setAtlasDimensions(AtlasDimensions {
       .textureNames = octreeTextures,
     });
@@ -1009,6 +1014,7 @@ int main(int argc, char* argv[]){
    ("sqlshell", "Launch into sql shell", cxxopts::value<bool>()->default_value("false"))
    ("watch", "Watch file system for resource changes", cxxopts::value<std::string>()->default_value(""))
    ("reload", "Reload shaders", cxxopts::value<bool>()->default_value("false"))
+   ("data", "Directory to store temporary data", cxxopts::value<std::string>()->default_value("./build/res/data/"))
    ("h,help", "Print help")
   ;        
 
@@ -1016,6 +1022,8 @@ int main(int argc, char* argv[]){
 
   auto levels = result["log"].as<std::vector<std::string>>();
   modlogSetEnabled(levels.size() > 0, static_cast<MODLOG_LEVEL>(result["loglevel"].as<int>()), levels);
+
+  dataPath = result["data"].as<std::string>();
 
   auto benchmarkFile = result["benchmark"].as<std::string>();
   auto shouldBenchmark = benchmarkFile != "";
