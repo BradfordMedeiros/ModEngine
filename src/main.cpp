@@ -272,7 +272,7 @@ std::vector<std::string> listOctreeTextures(){
     "../gameresources/build/uncategorized/bluetransparent.png",
     "../gameresources/build/textures/const_fence.png",
 
-    "../gameresources/textures/backgrounds/test3.png",
+    "./res/textures/wood.jpg",
 
   };
   return octreeTextures;
