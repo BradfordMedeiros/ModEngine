@@ -1011,7 +1011,7 @@ int main(int argc, char* argv[]){
    ("watch", "Watch file system for resource changes", cxxopts::value<std::string>()->default_value(""))
    ("reload", "Reload shaders", cxxopts::value<bool>()->default_value("false"))
    ("data", "Directory to store temporary data", cxxopts::value<std::string>()->default_value("./build/res/data/"))
-   ("validate", "Validate resource files instead of running the game", cxxopts::value<bool>()->default_value("false"))
+   ("validate", "Validate resource files instead of running the game", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("h,help", "Print help")
   ;        
 
@@ -1022,13 +1022,19 @@ int main(int argc, char* argv[]){
 
   dataPath = result["data"].as<std::string>();
 
-  auto validate = result["validate"].as<bool>();
-  if (validate){
+  auto pathsToValidate = result["validate"].as<std::vector<std::string>>();
+  if (pathsToValidate.size() > 0){
     // I could plugin to the actual data types here and do true validation, but this is pragmatic 
     // to find missing files 
     bool missingFiles = false;
-    auto allFiles = listFilesWithExtensions("../afterworld/scenes", { "rawscene" });
-    for (auto file : allFiles){
+    std::vector<std::string> allFiles;
+    for (auto &path : pathsToValidate){
+      auto files = listFilesWithExtensions(path, { "rawscene" });
+      for (auto &file : files){
+        allFiles.push_back(file);
+      }
+    }
+    for (auto &file : allFiles){
       std::cout << "file: " << file << std::endl;
       auto tokens = parseFormat(loadFile(file));
       for (auto &token : tokens){
