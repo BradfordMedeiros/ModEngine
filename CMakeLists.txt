@@ -9,6 +9,7 @@ message(STATUS "C Compiler: ${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION}")
 # Autoserialization code uses this extensively.  Should look into it, but supress since floods
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_FIND_LIBRARY_SUFFIXES .so .a)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   message("CMAKE - ModEngine Debug")
@@ -62,6 +63,11 @@ else()
     add_definitions(-DINCLUDE_GLAD)
   endif()
 
+  set(NO_INCLUDE_OPENAL TRUE)
+  if (NOT NO_INCLUDE_OPENAL)
+    add_definitions(-DINCLUDE_OPENAL)
+  endif()
+  
   set(NO_INCLUDE_GLM TRUE)
   if (NOT NO_INCLUDE_GLM)
     add_definitions(-DINCLUDE_GLM)
@@ -70,11 +76,6 @@ else()
   set(NO_INCLUDE_STB TRUE)
   if (NOT NO_INCLUDE_STB)
     add_definitions(-DINCLUDE_STB)
-  endif()
-  
-  set(NO_INCLUDE_OPENAL TRUE)
-  if (NOT NO_INCLUDE_OPENAL)
-    add_definitions(-DINCLUDE_OPENAL)
   endif()
 
   set(NO_INCLUDE_CXXOPTS TRUE)
@@ -129,6 +130,26 @@ else()
   message("MODBUILD - Not Including GLAD")
 endif()
 
+# OpenAl - sound
+# Alut I just statically link in b/c not widely available on systems
+if (NOT NO_INCLUDE_OPENAL)
+  # See http://distro.ibiblio.org/rootlinux/rootlinux-ports/more/freealut/freealut-1.1.0/doc/alut.html#CompilingLinking
+  # https://stackoverflow.com/questions/15452676/how-to-compile-openal-program-with-g-ubuntu/15452771
+  message("MODBUILD - Including OpenAl")
+  target_link_libraries(${PROJECT_NAME} "openal")
+
+  set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+  find_library(ALUT_LIBRARY NAMES alut PATHS /usr/lib /usr/local/lib)
+  target_link_libraries(${PROJECT_NAME}  ${ALUT_LIBRARY})
+  # In practice this is where it is on my PC 
+  # target_link_libraries(${PROJECT_NAME} /usr/lib/x86_64-linux-gnu/libalut.a)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES .so .a)
+
+else()
+  message("MODBUILD - Not Including OpenAl")
+endif()
+
+### Below are static libs only, so we dont have to worry about runtimes
 # GLM library - opengl compatible matrix library 
 if (NOT NO_INCLUDE_GLM)
   message("MODBUILD - Including GLM")
@@ -151,18 +172,6 @@ if (NOT NO_INCLUDE_STB)
   target_include_directories(${PROJECT_NAME} PRIVATE "${STB_DIR}")
 else()
   message("MODBUILD - Not Including STB")
-endif()
-
-# OpenAl - sound  @todo 
-if (NOT NO_INCLUDE_OPENAL)
-  # This was a pain in the ass, probaly doing it wrong. 
-  # See http://distro.ibiblio.org/rootlinux/rootlinux-ports/more/freealut/freealut-1.1.0/doc/alut.html#CompilingLinking
-  # https://stackoverflow.com/questions/15452676/how-to-compile-openal-program-with-g-ubuntu/15452771
-  message("MODBUILD - Including OpenAl")
-  target_link_libraries(${PROJECT_NAME} "openal")
-  target_link_libraries(${PROJECT_NAME} "alut")
-else()
-  message("MODBUILD - Not Including OpenAl")
 endif()
 
 
