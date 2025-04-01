@@ -3,6 +3,9 @@
 // format: <token>:<attribute>:<payload>
 std::optional<Token> parseToken(std::string content) {
   std::vector<std::string> rawTokens = split(content, ':');
+  if (rawTokens.size() < 2){
+    return std::nullopt;
+  }
 
   std::vector<std::string> validToken;
   validToken.push_back(rawTokens.at(0));

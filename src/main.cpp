@@ -1011,6 +1011,7 @@ int main(int argc, char* argv[]){
    ("watch", "Watch file system for resource changes", cxxopts::value<std::string>()->default_value(""))
    ("reload", "Reload shaders", cxxopts::value<bool>()->default_value("false"))
    ("data", "Directory to store temporary data", cxxopts::value<std::string>()->default_value("./build/res/data/"))
+   ("validate", "Validate resource files instead of running the game", cxxopts::value<bool>()->default_value("false"))
    ("h,help", "Print help")
   ;        
 
@@ -1020,6 +1021,38 @@ int main(int argc, char* argv[]){
   modlogSetEnabled(levels.size() > 0, static_cast<MODLOG_LEVEL>(result["loglevel"].as<int>()), levels);
 
   dataPath = result["data"].as<std::string>();
+
+  auto validate = result["validate"].as<bool>();
+  if (validate){
+    // I could plugin to the actual data types here and do true validation, but this is pragmatic 
+    // to find missing files 
+    bool missingFiles = false;
+    auto allFiles = listFilesWithExtensions("../afterworld/scenes", { "rawscene" });
+    for (auto file : allFiles){
+      std::cout << "file: " << file << std::endl;
+      auto tokens = parseFormat(loadFile(file));
+      for (auto &token : tokens){
+        if (token.attribute == "texture"){
+          std::cout << "texture: " << token.payload << std::endl;
+
+          if (!fileExists(token.payload)){
+            missingFiles = true;
+            std::cout << "\033[31mError:  " << token.payload << "\033[0m" << std::endl;
+          }
+        }
+        if (token.attribute == "mesh"){
+          std::cout << "mesh: " << token.payload << std::endl;
+          if (!fileExists(token.payload)){
+            missingFiles = true;
+            std::cout << "\033[31mError:  " << token.payload << "\033[0m" << std::endl;
+          }
+        }
+        
+
+      }
+    }
+    exit(missingFiles ? 1 : 0);
+  }
 
   auto benchmarkFile = result["benchmark"].as<std::string>();
   auto shouldBenchmark = benchmarkFile != "";
