@@ -14,6 +14,5 @@ struct EditorContent {
 void setSelectedIndex(EditorContent& editor, objid id, bool reset);
 void unsetSelectedIndex(EditorContent& editor, objid id, bool clearFromClipboard);
 std::optional<objid> latestSelected(EditorContent& content);
-std::vector<objid> selectedIds(EditorContent& editor);
 
 #endif

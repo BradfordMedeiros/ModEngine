@@ -674,7 +674,7 @@ void renderDebugUi(Color pixelColor){
   //std::cout << "offsets: " << uiXOffset << " " << uiYOffset << std::endl;
 
 
-  auto ids = selectedIds(state.editor);
+  auto ids = state.editor.selectedObjs;
   std::string selectedName = "no object selected";
   if (ids.size() > 0 && gameobjExists(ids.at(0))){
     auto selectedObject = getGameObject(world, ids.at(0));
@@ -1435,7 +1435,7 @@ int main(int argc, char* argv[]){
     .compileSqlQuery = sql::compileSqlQuery,
     .executeSqlQuery = executeSqlQuery,
     .selected = []() -> std::vector<objid> {
-      return selectedIds(state.editor);
+      return state.editor.selectedObjs;
     },
     .setSelected = setSelected,
     .click = dispatchClick,

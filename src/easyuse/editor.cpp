@@ -1,9 +1,7 @@
 #include "./editor.h"
 
-
 void setSelectedIndex(EditorContent& editor, objid id, bool reset){
   std::cout << "INFO: EDITOR: ADD SELECTED INDEX" << std::endl;
-
   bool inSelected = false;
   for (auto itemId : editor.selectedObjs){
     if (itemId == id){
@@ -28,7 +26,6 @@ void setSelectedIndex(EditorContent& editor, objid id, bool reset){
   }
 }
 
-
 void unsetSelectedIndex(EditorContent& editor, objid id, bool clearFromClipboard){
   std::vector<objid> selectedObjs;
   for (auto itemId : editor.selectedObjs){
@@ -46,15 +43,6 @@ void unsetSelectedIndex(EditorContent& editor, objid id, bool clearFromClipboard
   editor.clipboardObjs = clipboardObjs;
 }
 
-
 std::optional<objid> latestSelected(EditorContent& editor){
   return editor.selectedObjs.size() == 0 ? std::nullopt : std::optional<objid>(editor.selectedObjs.at(editor.selectedObjs.size() - 1));
-}
-
-std::vector<objid> selectedIds(EditorContent& editor){
-  std::vector<objid> ids;
-  for (auto item : editor.selectedObjs){
-    ids.push_back(item);
-  }
-  return ids;
 }

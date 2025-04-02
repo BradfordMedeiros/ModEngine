@@ -65,7 +65,7 @@ objid createManipulator(){
 
 ManipulatorSelection onManipulatorSelected(){
   std::vector<objid> ids;
-  for (auto &id : selectedIds(state.editor)){
+  for (auto &id : mainApi -> selected()){
     if (getLayerForId(id).selectIndex != -2){
       ids.push_back(id);
     }

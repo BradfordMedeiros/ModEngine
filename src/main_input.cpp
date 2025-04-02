@@ -211,7 +211,7 @@ void onArrowKey(int key){
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   cBindings.onScrollCallback(yoffset);
 
-  for (auto &selectedIndex : selectedIds(state.editor)){
+  for (auto &selectedIndex : state.editor.selectedObjs){
     if (idExists(world.sandbox, selectedIndex) && getLayerForId(selectedIndex).selectIndex != -2){ 
       maybeChangeTexture(selectedIndex);
     }
@@ -581,7 +581,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0,
     .hasPreq = false,
     .fn = []() -> void {
-      auto ids = selectedIds(state.editor);
+      auto ids = state.editor.selectedObjs;
       if (ids.size() > 0){
         state.cullingObject = ids.at(0);
       }else{
@@ -849,7 +849,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      for (auto id : selectedIds(state.editor)){
+      for (auto id : state.editor.selectedObjs){
         handleSnapEasy(id, true);
       }
     }
@@ -861,7 +861,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      for (auto id : selectedIds(state.editor)){
+      for (auto id : state.editor.selectedObjs){
         handleSnapEasy(id, false);
       }
     }
@@ -910,7 +910,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      for (auto id : selectedIds(state.editor)){
+      for (auto id : state.editor.selectedObjs){
         std::cout << "delete object id: " << id << std::endl;
         removeByGroupId(id);
       }
@@ -1586,7 +1586,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
-      for (auto &selectedIndex : selectedIds(state.editor)){
+      for (auto &selectedIndex : state.editor.selectedObjs){
         GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
         GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
         if (octreeObject != NULL){
@@ -1611,7 +1611,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
-      for (auto &selectedIndex : selectedIds(state.editor)){
+      for (auto &selectedIndex : state.editor.selectedObjs){
         GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
         GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
         writeOctreeTexture(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), isCtrlHeld, TEXTURE_UP);
@@ -1646,7 +1646,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      for (auto &selectedIndex : selectedIds(state.editor)){
+      for (auto &selectedIndex : state.editor.selectedObjs){
         GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
         GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
         loadOctree(
@@ -1668,7 +1668,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      for (auto &selectedIndex : selectedIds(state.editor)){
+      for (auto &selectedIndex : state.editor.selectedObjs){
         GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
         GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
         modassert(octreeObject, "octree object null");
@@ -1687,7 +1687,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      for (auto &selectedIndex : selectedIds(state.editor)){
+      for (auto &selectedIndex : state.editor.selectedObjs){
         GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
         GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
         makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
