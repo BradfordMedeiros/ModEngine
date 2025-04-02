@@ -124,7 +124,6 @@ void onMouse(int button, int action, int mods){
   }
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE){
     onManipulatorMouseRelease(state.manipulatorState);
-    setNoActiveObj(state.editor);
   }
 
   modlog("input", "mouse callback: " + std::to_string(button) + ", action: " + std::to_string(action) + ", mods: " + std::to_string(mods));
@@ -141,7 +140,7 @@ void dispatchClick(int button, int action){
 
 
 void onSelectNullItem(){
-  clearSelectedIndexs(state.editor); 
+  state.editor.selectedObjs = {};
 }
 
 void moveCursor(float x, float y){
@@ -319,7 +318,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 
   if (key == 260){
-    clearSelectedIndexs(state.editor);
+    state.editor.selectedObjs = {};
   }
 
   if (key == 340){
@@ -915,7 +914,7 @@ std::vector<InputDispatch> inputFns = {
         std::cout << "delete object id: " << id << std::endl;
         removeByGroupId(id);
       }
-      clearSelectedIndexs(state.editor);   
+      state.editor.selectedObjs = {};
     }
   },
   InputDispatch{

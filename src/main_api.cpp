@@ -447,7 +447,7 @@ void handleClipboardSelect(){
     sendAlert("copied objects to clipboard");
   }
   modlog("clipboard", "copied objects to clipboard");
-  setClipboardFromSelected(state.editor);
+  state.editor.clipboardObjs = state.editor.selectedObjs;
 }
 
 void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId, std::optional<float> maxWidthNdi, std::optional<ShapeOptions> shaderId){
@@ -1129,7 +1129,7 @@ bool loadState(std::string){
 }
 
 void setSelected(std::optional<std::set<objid>> ids){
-  clearSelectedIndexs(state.editor);
+  state.editor.selectedObjs = {};
   for (auto id : ids.value()){
     if (getManipulatorId(state.manipulatorState) == id){
       continue;

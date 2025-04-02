@@ -1758,7 +1758,6 @@ int main(int argc, char* argv[]){
           if (layerSelectIndex >= 0){
             setSelectedIndex(state.editor, idToUse, !state.multiselect);
           }
-          setActiveObj(state.editor, idToUse);
         }
         if((state.cursorBehavior != CURSOR_HIDDEN || state.showCursor) && state.inputMode == ENABLED){
           cBindings.onObjectSelected(selectTargetId, state.hoveredColor.value(), layerSelectIndex);        
