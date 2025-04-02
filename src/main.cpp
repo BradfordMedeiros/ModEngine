@@ -75,6 +75,7 @@ Benchmark benchmark;
 DynamicLoading dynamicLoading;
 WorldTiming timings;
 std::vector<IdAtCoords> idCoordsToGet;
+std::vector<DepthAtCoord> depthsAtCoords;
 std::string dataPath;
 
 bool showCrashInfo = false;
@@ -1439,6 +1440,7 @@ int main(int argc, char* argv[]){
     .getFrameInfo = getFrameInfo,
     .getCursorInfoWorld = getCursorInfoWorld,
     .idAtCoordAsync = idAtCoordAsync,
+    .depthAtCoordAsync = depthAtCoordAsync,
     .gameobjExists = gameobjExists,
     .prefabId = prefabId,
     .positionToNdi = positionToNdi,
@@ -1668,6 +1670,11 @@ int main(int argc, char* argv[]){
       idCoordToGet.afterFrame(idCoordToGet.result, idCoordToGet.resultUv);
     }
     idCoordsToGet = {};
+
+    for (auto &depthCoord : depthsAtCoords){
+      depthCoord.afterFrame(depthCoord.resultDepth.value());
+    }
+    depthsAtCoords = {};
 
     if (!state.worldpaused){
       timePlayback.setTime(statistics.now);  // tick animations here
@@ -1939,10 +1946,16 @@ int main(int argc, char* argv[]){
       glBindVertexArray(defaultResources.quadVAO);
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
+      // The depth here doesn't seem to have really tight resolution. 
       Color hoveredItemColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
       float distance = (hoveredItemColor.r * (far - near)) + near;
       std::cout << "depth: " << distance << ", near = " << near << ", far = " << far << std::endl;
       state.currentCursorDepth = distance;
+      for (auto &depthCoord : depthsAtCoords){
+        Color hoveredItemColor = getPixelColorAttachment0(depthCoord.ndix, depthCoord.ndiy);
+        float distance = (hoveredItemColor.r * (far - near)) + near;
+        depthCoord.resultDepth = distance;
+      }
 
     }
     /////////////////////////////////////

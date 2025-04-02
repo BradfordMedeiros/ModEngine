@@ -20,6 +20,7 @@ extern TimePlayback timePlayback;
 extern ManipulatorTools tools;
 extern std::string sqlDirectory;
 extern std::vector<IdAtCoords> idCoordsToGet;
+extern std::vector<DepthAtCoord> depthsAtCoords;
 extern std::unordered_map<unsigned int, std::vector<ShaderTextureBinding>> textureBindings; 
 
 float getTotalTime(){
@@ -1175,6 +1176,14 @@ void idAtCoordAsync(float ndix, float ndiy, bool onlyGameObjId, std::optional<ob
     .result = std::nullopt,
     .resultUv = glm::vec2(0.f, 0.f),
     .textureId = textureId,
+    .afterFrame = afterFrame,
+  });
+}
+
+void depthAtCoordAsync(float ndix, float ndiy, std::function<void(float)> afterFrame){
+  depthsAtCoords.push_back(DepthAtCoord {
+    .ndix = ndix,
+    .ndiy = ndiy,
     .afterFrame = afterFrame,
   });
 }

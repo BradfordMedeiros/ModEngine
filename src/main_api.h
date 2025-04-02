@@ -249,4 +249,12 @@ struct IdAtCoords {
 };
 void idAtCoordAsync(float ndix, float ndiy, bool onlyGameObjId, std::optional<objid> textureId, std::function<void(std::optional<objid>, glm::vec2)> afterFrame);
 
+struct DepthAtCoord {
+  float ndix;
+  float ndiy;
+  std::optional<float> resultDepth;
+  std::function<void(float depth)> afterFrame;
+};
+void depthAtCoordAsync(float ndix, float ndiy, std::function<void(float)> afterFrame);
+
 #endif

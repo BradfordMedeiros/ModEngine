@@ -147,6 +147,8 @@ struct CustomApiBindings {
   FrameInfo (*getFrameInfo)();
   RotationDirection (*getCursorInfoWorld)(float ndix, float ndiy);
   void (*idAtCoordAsync)(float ndix, float ndiy, bool onlyGameObjId, std::optional<objid> textureId, std::function<void(std::optional<objid>, glm::vec2)> afterFrame);
+  void (*depthAtCoordAsync)(float ndix, float ndiy, std::function<void(float)> afterFrame);
+
   bool (*gameobjExists)(objid id);
   std::optional<objid> (*prefabId)(objid id);
 
