@@ -1014,7 +1014,7 @@ int main(int argc, char* argv[]){
    ("reload", "Reload shaders", cxxopts::value<bool>()->default_value("false"))
    ("data", "Directory to store temporary data", cxxopts::value<std::string>()->default_value("./build/res/data/"))
    ("validate", "Validate resource files instead of running the game", cxxopts::value<std::vector<std::string>>() -> default_value(""))
-   ("strict", "Assert the existance of resources during runtime", cxxopts::value<bool>()->default_value("false"))
+   ("strict", "Assert the existance of resources during runtime", cxxopts::value<bool>()->default_value("true"))
    ("h,help", "Print help")
   ;        
 
