@@ -413,9 +413,6 @@ void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld){
 }
 
 
-///////////////////////
-
-
 std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes){
   AttrChildrenPair attrWithChildren {
     .attr = attributes,
@@ -429,15 +426,15 @@ std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttr
   return addObjectToScene(world, sceneId, name, attrWithChildren, submodelAttributes);
 }
 
-void copyObject(int32_t id){
-  bool success = copyObjectToScene(world, id);
-  if (!success){
-    sendAlert(std::string("failure copying object: ") + std::to_string(id));
-  }
-}
 void handleCopy(){
   modlog("clipboard", "pasting objects");
-  copyAllObjects(state.editor, copyObject);
+  modlog("editor", std::string("copying objects from clipboard, size = ") + std::to_string(state.editor.clipboardObjs.size()));
+  for (auto itemId : state.editor.clipboardObjs){
+    bool success = copyObjectToScene(world, itemId);
+    if (!success){
+      sendAlert(std::string("failure copying object: ") + std::to_string(itemId));
+    }
+  }
 }
 void handleClipboardSelect(){
   auto numObject = state.editor.selectedObjs.size();

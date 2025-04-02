@@ -117,7 +117,6 @@ void doRemoveQueuedRemovals();
 
 std::optional<objid> prefabId(objid id);
 
-void copyObject(int32_t id);
 void handleCopy();
 void handleClipboardSelect();
 

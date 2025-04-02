@@ -56,12 +56,7 @@ void clearSelectedIndexs(EditorContent& editor){
   std::cout << "INFO: EDITOR: CLEAR SELECTED INDEXES" << std::endl;
   editor.selectedObjs = {};
 }
-void copyAllObjects(EditorContent& editor, std::function<void(objid)> copyObject){
-  modlog("editor", std::string("copying objects from clipboard, size = ") + std::to_string(editor.clipboardObjs.size()));
-  for (auto itemId : editor.clipboardObjs){
-    copyObject(itemId);
-  }
-}
+
 void setClipboardFromSelected(EditorContent& editor){
   std::cout << "set clipboard size to: " << editor.selectedObjs.size() << std::endl;
   editor.clipboardObjs = editor.selectedObjs;

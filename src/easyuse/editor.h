@@ -17,7 +17,6 @@ void setNoActiveObj(EditorContent& editor);
 void setActiveObj(EditorContent& editor, objid id);
 void unsetSelectedIndex(EditorContent& editor, objid id, bool clearFromClipboard);
 void clearSelectedIndexs(EditorContent& editor);
-void copyAllObjects(EditorContent& editor, std::function<void(objid)> copyObject);
 void setClipboardFromSelected(EditorContent& editor);
 bool isSelected(EditorContent& editor, objid id);
 std::optional<objid> latestSelected(EditorContent& content);
