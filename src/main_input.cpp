@@ -716,7 +716,7 @@ std::vector<InputDispatch> inputFns = {
   }, 
   InputDispatch{
     .alwaysEnable = false,
-    .sourceKey = 67,  // 4
+    .sourceKey = 'C',  // 4
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,

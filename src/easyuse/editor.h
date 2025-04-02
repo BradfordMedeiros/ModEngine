@@ -6,14 +6,10 @@
 #include <functional>
 #include "../common/util.h"
 
-struct EditorItem {
-  objid id;
-};
-
 struct EditorContent {
   objid activeObj;
-  std::vector<EditorItem> selectedObjs;
-  std::vector<EditorItem> clipboardObjs;
+  std::vector<objid> selectedObjs;
+  std::vector<objid> clipboardObjs;
 };
 
 void setSelectedIndex(EditorContent& editor, objid id, bool reset);

@@ -1,8 +1,8 @@
 #include "./editor.h"
 
-bool isInSelectedItems(std::vector<EditorItem> items, objid id){
-  for (auto item : items){
-    if (item.id == id){
+bool isInSelectedItems(std::vector<objid> items, objid id){
+  for (auto itemId : items){
+    if (itemId == id){
       return true;
     }
   }
@@ -17,17 +17,13 @@ void setSelectedIndex(EditorContent& editor, objid id, bool reset){
       editor.selectedObjs = {};
     }else{
       editor.selectedObjs = {};
-      editor.selectedObjs.push_back(EditorItem {
-        .id = id,
-      });
+      editor.selectedObjs.push_back(id);
     }
   }else{
     if (inSelected){
       unsetSelectedIndex(editor, id, false);
     }else {
-      editor.selectedObjs.push_back(EditorItem {
-        .id = id,
-      });
+      editor.selectedObjs.push_back(id);
     }
   }
 
@@ -40,16 +36,16 @@ void setNoActiveObj(EditorContent& editor){
   editor.activeObj = 0;
 }
 void unsetSelectedIndex(EditorContent& editor, objid id, bool clearFromClipboard){
-  std::vector<EditorItem> selectedObjs;
-  for (auto item : editor.selectedObjs){
-    if (item.id != id){
-      selectedObjs.push_back(item);
+  std::vector<objid> selectedObjs;
+  for (auto itemId : editor.selectedObjs){
+    if (itemId != id){
+      selectedObjs.push_back(itemId);
     }
   }
-  std::vector<EditorItem> clipboardObjs;
-  for (auto item : editor.clipboardObjs){
-    if (item.id != id){
-      clipboardObjs.push_back(item);
+  std::vector<objid> clipboardObjs;
+  for (auto itemId : editor.clipboardObjs){
+    if (itemId != id){
+      clipboardObjs.push_back(itemId);
     }
   }
   editor.selectedObjs = selectedObjs;
@@ -62,8 +58,8 @@ void clearSelectedIndexs(EditorContent& editor){
 }
 void copyAllObjects(EditorContent& editor, std::function<void(objid)> copyObject){
   modlog("editor", std::string("copying objects from clipboard, size = ") + std::to_string(editor.clipboardObjs.size()));
-  for (auto item : editor.clipboardObjs){
-    copyObject(item.id);
+  for (auto itemId : editor.clipboardObjs){
+    copyObject(itemId);
   }
 }
 void setClipboardFromSelected(EditorContent& editor){
@@ -72,8 +68,8 @@ void setClipboardFromSelected(EditorContent& editor){
 }
 
 bool isSelected(EditorContent& editor, objid id){
-  for (auto item : editor.selectedObjs){
-    if (item.id == id){
+  for (auto itemId : editor.selectedObjs){
+    if (itemId == id){
       return true;
     }
   }
@@ -81,7 +77,7 @@ bool isSelected(EditorContent& editor, objid id){
 }
 
 std::optional<objid> latestSelected(EditorContent& editor){
-  return editor.selectedObjs.size() == 0 ? std::nullopt : std::optional<objid>(editor.selectedObjs.at(editor.selectedObjs.size() - 1).id);
+  return editor.selectedObjs.size() == 0 ? std::nullopt : std::optional<objid>(editor.selectedObjs.at(editor.selectedObjs.size() - 1));
 }
 
 objid activeSelected(EditorContent& editor){
@@ -91,7 +87,7 @@ objid activeSelected(EditorContent& editor){
 std::vector<objid> selectedIds(EditorContent& editor){
   std::vector<objid> ids;
   for (auto item : editor.selectedObjs){
-    ids.push_back(item.id);
+    ids.push_back(item);
   }
   return ids;
 }
