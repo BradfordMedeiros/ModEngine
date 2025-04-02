@@ -35,6 +35,7 @@ DefaultResources defaultResources {};
 std::string shaderFolderPath;
 std::string sqlDirectory = "./res/data/sql/";
 bool bootStrapperMode = false;
+bool strictResourceMode = false;
 std::map<std::string, std::string> args;
 extern std::vector<InputDispatch> inputFns;     
 
@@ -1013,6 +1014,7 @@ int main(int argc, char* argv[]){
    ("reload", "Reload shaders", cxxopts::value<bool>()->default_value("false"))
    ("data", "Directory to store temporary data", cxxopts::value<std::string>()->default_value("./build/res/data/"))
    ("validate", "Validate resource files instead of running the game", cxxopts::value<std::vector<std::string>>() -> default_value(""))
+   ("strict", "Assert the existance of resources during runtime", cxxopts::value<bool>()->default_value("false"))
    ("h,help", "Print help")
   ;        
 
@@ -1060,6 +1062,8 @@ int main(int argc, char* argv[]){
     }
     exit(missingFiles ? 1 : 0);
   }
+
+  strictResourceMode = result["strict"].as<bool>();
 
   auto benchmarkFile = result["benchmark"].as<std::string>();
   auto shouldBenchmark = benchmarkFile != "";

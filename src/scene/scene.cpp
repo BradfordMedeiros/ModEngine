@@ -1,5 +1,7 @@
 #include "./scene.h"
 
+extern bool strictResourceMode;
+
 GameObject& getGameObject(World& world, objid id){
   return getGameObject(world.sandbox, id);
 }
@@ -303,7 +305,12 @@ Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
     return world.textures.at(texturepath).texture;
   }
   auto texturePath = world.interface.modlayerPath(texturepath);
-  if (!fileExists(texturePath) && ownerId != -1){ // root owner for default models etc, should never use default texs
+
+  auto textureFileExists = fileExists(texturePath);
+  if (strictResourceMode && !textureFileExists){
+    modassert(false, std::string("texture does not exist: ") + texturepath);
+  }
+  if (!textureFileExists && ownerId != -1){ // root owner for default models etc, should never use default texs
     return loadTextureWorld(world, "./res/models/box/grid.png", ownerId);
   }
   Texture texture = loadTexture(texturePath);
@@ -491,9 +498,19 @@ void loadModelData(World& world, std::string meshpath, int ownerId){
   if (world.modelDatas.find(meshpath) != world.modelDatas.end()){
     world.modelDatas.at(meshpath).owners.insert(ownerId);
   }else{
+    auto pathExists = fileExists(meshpath);
+    if (!pathExists){
+      if (strictResourceMode){
+        modassert(false, std::string("model does not exist: ") + meshpath);
+      }else{
+        modlog("loadModelData", std::string("model does not exist: ") + meshpath);
+      }
+    }
+
+    auto realpathToLoad = pathExists ? meshpath : "./res/models/box/pbrsphere.gltf";
     world.modelDatas[meshpath] = ModelDataRef {
       .owners = { ownerId },
-      .modelData = loadModelCore(meshpath), 
+      .modelData = loadModelCore(realpathToLoad), 
     };
   }
 }
@@ -951,6 +968,10 @@ objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sce
 }
 
 objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> sceneId, std::optional<objid> parentId){
+  auto sceneFileExists = fileExists(sceneFile);
+  if (strictResourceMode && !sceneFileExists){
+    modassert(false, std::string("scene file does not exist: ") + sceneFile);
+  }
   auto sceneData = world.interface.readFile(sceneFile) + "\n" + serializeSceneTokens(addedTokens);  // maybe should clean this up to prevent string hackeyness
   return addSceneToWorldFromData(world, sceneFile, sceneId.has_value() ? sceneId.value() : getUniqueObjId(), sceneData, name, tags, parentId);
 }
