@@ -1,7 +1,1 @@
 
-#unitcube:scale:1 1 1
-#unitcube:mesh:../gameresources/build/nocheck/offsetcube.gltf
-#unitcube:physics:enabled
-#unitcube:physics_shape:shape_exact
-
-#>somecamera:position:0 0 0

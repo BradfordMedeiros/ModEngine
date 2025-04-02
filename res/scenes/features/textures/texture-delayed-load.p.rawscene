@@ -1,5 +1,0 @@
-1:mesh:./res/models/box/spriteplane.dae
-1:position:0 2 -10
-1:scale:1 1 1
-1:script:./res/scenes/features/textures/texture-delayed-load.scm
-1/Plane:texture:generated-texture

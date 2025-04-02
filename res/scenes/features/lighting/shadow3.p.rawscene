@@ -2,10 +2,6 @@
 >camtest:scale:1.000000 1.000000 1.000000
 >camtest:rotation:-2.152896 0.802106 -2.312180
 
-collisionobj:position:1.000000 1.000000 1.000000
-collisionobj:scale:1.000000 1.000000 1.000000
-collisionobj:rotation:0.000000 -0.000000 -6.283185
-collisionobj:mesh:./res/models/boundingbox/boundingbox.obj
 maincolumn:position:-0.199997 0.000000 0.699997
 maincolumn:scale:20.000000 1.000000 20.000000
 maincolumn:rotation:0.000000 -0.000000 -6.283185

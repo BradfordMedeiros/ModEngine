@@ -2,5 +2,4 @@ platform:position:0.000000 -5.000000 0.000000
 platform:scale:100.000000 100.000000 100.000000
 platform:rotation:0.000000 -0.000000 -3.141593
 platform:physics_shape:shape_box
-platform:mesh:./res/models/boundingbox/boundingbox.obj
 platform/Cube:tint:0 0 1 1
