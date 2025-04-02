@@ -1043,14 +1043,14 @@ int main(int argc, char* argv[]){
 
           if (!fileExists(token.payload)){
             missingFiles = true;
-            std::cout << "\033[31mError:  " << token.payload << "\033[0m" << std::endl;
+            std::cout << "\033[31mError:  " << token.payload << ", file = " << file << "\033[0m" << std::endl;
           }
         }
         if (token.attribute == "mesh"){
           std::cout << "mesh: " << token.payload << std::endl;
           if (!fileExists(token.payload)){
             missingFiles = true;
-            std::cout << "\033[31mError:  " << token.payload << "\033[0m" << std::endl;
+            std::cout << "\033[31mError:  " << token.payload << ", file = " << file << "\033[0m" << std::endl;
           }
         }
         
