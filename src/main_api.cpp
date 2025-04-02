@@ -839,7 +839,6 @@ void setActiveCamera(std::optional<int32_t> cameraIdOpt){
   state.useDefaultCamera = false;
   state.activeCameraObj = &getGameObject(world, cameraId);
   state.activeCameraData = &getCamera(world, cameraId);
-  setSelectedIndex(state.editor, cameraId, true);
   cBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
   std::cout << "set active camera to id: " << cameraId << std::endl;
   std::cout << "camera data: " << state.activeCameraData -> enableDof << ", " << state.activeCameraData -> minBlurDistance << ", " << state.activeCameraData -> maxBlurDistance << std::endl;
