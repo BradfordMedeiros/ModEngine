@@ -33,14 +33,8 @@ void unsetSelectedIndex(EditorContent& editor, objid id, bool clearFromClipboard
       selectedObjs.push_back(itemId);
     }
   }
-  std::vector<objid> clipboardObjs;
-  for (auto itemId : editor.clipboardObjs){
-    if (itemId != id){
-      clipboardObjs.push_back(itemId);
-    }
-  }
   editor.selectedObjs = selectedObjs;
-  editor.clipboardObjs = clipboardObjs;
+  editor.clipboardObjs.erase(id);
 }
 
 std::optional<objid> latestSelected(EditorContent& editor){

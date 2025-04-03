@@ -65,6 +65,14 @@ std::vector<std::string> listAllFiles(std::filesystem::path path) {
   return files;
 }
 
+std::vector<std::string> listFilesAndDir(std::filesystem::path path){
+  std::vector<std::string> files;
+  for (const auto& entry : std::filesystem::directory_iterator(path)) {
+    files.push_back(entry.path().filename());
+  }
+  return files;
+}
+
 ////////////////////////////////////////////////////////////////////////
 
 

@@ -447,7 +447,10 @@ void handleClipboardSelect(){
     sendAlert("copied objects to clipboard");
   }
   modlog("clipboard", "copied objects to clipboard");
-  state.editor.clipboardObjs = state.editor.selectedObjs;
+  state.editor.clipboardObjs = {};
+  for (auto id : state.editor.selectedObjs){
+    state.editor.clipboardObjs.insert(id);
+  }
 }
 
 void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId, std::optional<float> maxWidthNdi, std::optional<ShapeOptions> shaderId){

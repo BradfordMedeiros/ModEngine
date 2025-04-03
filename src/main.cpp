@@ -19,6 +19,7 @@
 #include "./tests/main_test.h"
 #include "./world_tasks.h"
 #include "./shaderstate.h"
+#include "./package.h"
 
 #ifdef ADDITIONAL_SRC_HEADER
   #include STR(ADDITIONAL_SRC_HEADER)
@@ -1015,6 +1016,7 @@ int main(int argc, char* argv[]){
    ("data", "Directory to store temporary data", cxxopts::value<std::string>()->default_value("./build/res/data/"))
    ("validate", "Validate resource files instead of running the game", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("strict", "Assert the existance of resources during runtime", cxxopts::value<bool>()->default_value("true"))
+   ("shell", "Packaging shell",  cxxopts::value<bool>()->default_value("true"))
    ("h,help", "Print help")
   ;        
 
@@ -1109,6 +1111,11 @@ int main(int argc, char* argv[]){
   }
   if (result["sqlshell"].as<bool>()){
     return loopSqlShell(sqlDirectory);
+  }
+
+  if (result["shell"].as<bool>()){
+    static Package package = loadPackage("./res/package/test");
+    loopPackageShell(package);
   }
 
   auto filewatch = watchFiles(result["watch"].as<std::string>(), 1.f);
@@ -1435,7 +1442,13 @@ int main(int argc, char* argv[]){
     .compileSqlQuery = sql::compileSqlQuery,
     .executeSqlQuery = executeSqlQuery,
     .selected = []() -> std::vector<objid> {
-      return state.editor.selectedObjs;
+      auto ids = state.editor.selectedObjs;
+      for (auto id : ids){
+        if (!idExists(world.sandbox, id)){
+          modassert(false, "id does not exist but is in selected objs");
+        }
+      }
+      return ids;
     },
     .setSelected = setSelected,
     .click = dispatchClick,
@@ -1755,7 +1768,9 @@ int main(int argc, char* argv[]){
           modlog("selection", (std::string("select item called") + ", selectedId = " + std::to_string(selectTargetId) + ", layerSelectIndex = " + std::to_string(layerSelectIndex)).c_str());
           auto groupId = getGroupId(world.sandbox, selectTargetId);
           auto idToUse = state.groupSelection ? groupId : selectTargetId;
+
           if (layerSelectIndex >= 0){
+            modassert(idExists(world.sandbox, idToUse), "id does not exist shouldSelectItem");
             setSelectedIndex(state.editor, idToUse, !state.multiselect);
           }
         }

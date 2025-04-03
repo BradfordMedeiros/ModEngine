@@ -8,7 +8,7 @@
 
 struct EditorContent {
   std::vector<objid> selectedObjs;
-  std::vector<objid> clipboardObjs;
+  std::set<objid> clipboardObjs;
 };
 
 void setSelectedIndex(EditorContent& editor, objid id, bool reset);
