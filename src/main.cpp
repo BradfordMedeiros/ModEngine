@@ -1114,8 +1114,7 @@ int main(int argc, char* argv[]){
   }
 
   if (result["shell"].as<bool>()){
-    static Package package = loadPackage("./res/package/test");
-    loopPackageShell(package);
+    loopPackageShell();
   }
 
   auto filewatch = watchFiles(result["watch"].as<std::string>(), 1.f);

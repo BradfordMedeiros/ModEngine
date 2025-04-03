@@ -12,17 +12,18 @@
 struct PackageHeader {
 	uint32_t packageIdentifier = 109111;
 	uint32_t version = 0;
-	uint32_t numberOfFiles;
+	uint32_t numberOfFiles = 0;
 };
 
 struct FileMetadata {
-	uint32_t offsetBytes;
-	uint32_t sizeBytes;
-	uint32_t hashname;
-	char name[256];
+	uint32_t offsetBytes = 0;
+	uint32_t sizeBytes = 0;
+	uint32_t hashname = 0;
+	char name[256] = {};
 };
 
 struct Package {
+    FILE* handle = NULL;
 	PackageHeader header;
 	std::vector<FileMetadata> fileMetadata;
 };
@@ -38,6 +39,6 @@ void readFile(Package& package, const char* _data, int* _sizeBytes);
 std::vector<std::string> ls(Package& package, const char* path);
 std::string cat(Package& package, const char* path);
 
-void loopPackageShell(Package& package);
+void loopPackageShell();
 
 #endif
