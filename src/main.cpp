@@ -1016,7 +1016,8 @@ int main(int argc, char* argv[]){
    ("data", "Directory to store temporary data", cxxopts::value<std::string>()->default_value("./build/res/data/"))
    ("validate", "Validate resource files instead of running the game", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("strict", "Assert the existance of resources during runtime", cxxopts::value<bool>()->default_value("true"))
-   ("shell", "Packaging shell",  cxxopts::value<bool>()->default_value("true"))
+   ("shell", "Packaging shell",  cxxopts::value<bool>()->default_value("false"))
+   ("mount", "Mod package to mount instead of using the file system", cxxopts::value<std::string>()->default_value(""))
    ("h,help", "Print help")
   ;        
 
@@ -1113,6 +1114,12 @@ int main(int argc, char* argv[]){
     return loopSqlShell(sqlDirectory);
   }
 
+
+  auto mount = result["mount"].as<std::string>();
+  if (mount != ""){
+    mountPackage(mount.c_str());
+  }
+  
   if (result["shell"].as<bool>()){
     loopPackageShell();
   }

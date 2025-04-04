@@ -1,5 +1,25 @@
 #include "./package.h"
 
+struct PackageHeader {
+   uint32_t packageIdentifier = 109111;
+   uint32_t version = 0;
+   uint32_t numberOfFiles = 0;
+};
+
+struct FileMetadata {
+   uint32_t offsetBytes = 0;
+   uint32_t sizeBytes = 0;
+   uint32_t hashname = 0;
+   char name[256] = {};
+};
+
+struct Package {
+    FILE* handle = NULL;
+   PackageHeader header;
+   std::vector<FileMetadata> fileMetadata;
+};
+
+
 void guard(size_t value){
 	if (value <= 0){
 		modassert(false, "guard failure");
@@ -75,7 +95,6 @@ void unpackageDirectory(const char* path, const char* output){
 
 }
 
-
 Package loadPackage(const char* path){
    FILE* handle = fopen(path, "rb");
    if (!handle){
@@ -112,86 +131,125 @@ void closePackage(Package& package){
 	fclose(package.handle);
 	package.handle = NULL;
 }
-void readFile(Package& package, const char* file){
+std::string readFile(Package& package, const char* file){
    std::string fileStr = std::string(file);
    for (auto &fileMetadata : package.fileMetadata){
       std::string name(fileMetadata.name);
       if (name == fileStr){
          std::cout << "found this file!" << std::endl;
-
          char* data = (char*)malloc(fileMetadata.sizeBytes); // give more thought about the size of this
          fseek(package.handle, fileMetadata.offsetBytes, SEEK_SET);
          fread(data, sizeof(char), fileMetadata.sizeBytes, package.handle);
 
          std::string readData(data, fileMetadata.sizeBytes);
-         std::string checkData = loadFile(fileStr);
-         std::cout << data << std::endl;
-
+         /*std::string checkData = loadFile(fileStr);
+         //std::cout << data << std::endl;
          if (readData == checkData){
             std::cout << "data is the same";
          }else{
             std::cout << "data is not the same" << readData.size() << ", vs " << checkData.size() << std::endl;
-         }
+         }*/
          free(data);
-         return;
+         return readData;
+      }
+   }
+   modassert(false, "did not find file");
+   return "";
+}
+
+std::optional<Package> mountedPackage;
+void mountPackage(const char* path){
+   if (mountedPackage.has_value()){
+      modassert(false, "package is already mounted");
+   }
+   mountedPackage = loadPackage(path);
+}
+void unmountPackage(){
+   if (mountedPackage.has_value()){
+      closePackage(mountedPackage.value());
+   }
+   mountedPackage = std::nullopt;
+}
+
+std::string readPackageFile(const char* file){
+   return readFile(mountedPackage.value(), file);
+}
+
+uint32_t getPackageFileSizeBytes(const char* fileStr){
+   modassert(mountedPackage.has_value(), "package is not mounted");
+   for (auto &fileMetadata : mountedPackage.value().fileMetadata){
+      std::string name(fileMetadata.name);
+      if (name == fileStr){
+         return fileMetadata.sizeBytes;
+      }
+   }
+   return 0;
+}
+
+void printFileInfo(Package& package, const char* file){
+   std::string fileStr = std::string(file);
+   for (auto &fileMetadata : package.fileMetadata){
+      std::string name(fileMetadata.name);
+      if (name == fileStr){
+         std::cout << "package file offsetBytes: " << fileMetadata.offsetBytes << std::endl;
+         std::cout << "package file sizeBytes: " << fileMetadata.sizeBytes << std::endl;
+         std::cout << "package file hashname: " << fileMetadata.hashname << std::endl;
+         std::cout << "package file name: " << fileMetadata.name << std::endl;
       }
    }
 }
 
-
-std::vector<std::string> ls(const char* path){
-    return listFilesAndDir(path);
-}
-std::string cat(const char* path){
-   return loadFile(path);	
-}
-
-bool mockShell = true;
-
 void loopPackageShell(){
-	if(mockShell){
-    	while(true){
-    	  std::string value;
-    	  std::getline(std::cin, value);
-    	  auto tokens = filterWhitespace(split(value.c_str(), ' '));
-    	  if (tokens.at(0) == "quit"){
-    	  	exit(0);
-    	  }else if (tokens.at(0) == "ls"){
-    	  	auto paths = ls(tokens.size() == 1 ? "." : tokens.at(1).c_str());
-    	    for (auto &file : paths){
-    	    	std::cout << file << " ";
-    	    }
-    	    std::cout << std::endl;
-    	  }else if (tokens.at(0) == "cat"){
-			std::cout << cat(tokens.at(1).c_str()) << std::endl;
-    	  }else if (tokens.at(0) == "package"){
-    	  	std::cout << "tokens: " << print(tokens) << ", size = " << tokens.size() << std::endl;
-    	  	packageDirectory(tokens.at(1).c_str(), tokens.at(2).c_str());
-    	  }else if (tokens.at(0) == "package-info"){
-    	  	auto package = loadPackage(tokens.at(1).c_str());
-    	  	std::cout << "package packageIdentifier: " << package.header.packageIdentifier << std::endl;
-    	  	std::cout << "package version: " << package.header.version << std::endl;
-    	  	std::cout << "package numberOfFiles: " << package.header.numberOfFiles << std::endl;
-
-    	  	if (tokens.size() >= 3){
-    	  		FileMetadata& fileMetadata = package.fileMetadata.at(std::atoi(tokens.at(2).c_str()));
-    	  		std::cout << "package file offsetBytes: " << fileMetadata.offsetBytes << std::endl;
-    	  		std::cout << "package file sizeBytes: " << fileMetadata.sizeBytes << std::endl;
-    	  		std::cout << "package file hashname: " << fileMetadata.hashname << std::endl;
-    	  		std::cout << "package file name: " << fileMetadata.name << std::endl;
-    	  	}
-
-    	  }else if (tokens.at(0) == "read"){
-            if (tokens.size() >= 3){
-               auto package = loadPackage(tokens.at(1).c_str());
-               readFile(package, tokens.at(2).c_str());
-            }
-        }else{
-    	  	std::cout << "invalid command got: " << value << std::endl;
-    	  	std::cout << "tokens: " << print(tokens) << ", size = " << tokens.size() << std::endl;
-    	  }
-    	}		
-	}else{
-		modassert(false, "shell not yet implemented");		
-	}
+   while(true){
+     std::string value;
+     std::getline(std::cin, value);
+     auto tokens = filterWhitespace(split(value.c_str(), ' '));
+     if (tokens.at(0) == "quit"){
+      	exit(0);
+     }else if (tokens.at(0) == "pack"){
+      	std::cout << "tokens: " << print(tokens) << ", size = " << tokens.size() << std::endl;
+      	packageDirectory(tokens.at(1).c_str(), tokens.at(2).c_str());
+     }else if (tokens.at(0) == "unpack"){
+         modassert(false, "unpack not yet implemented");
+     }else if (tokens.at(0) == "package-info"){
+      	auto package = loadPackage(tokens.at(1).c_str());
+      	std::cout << "package packageIdentifier: " << package.header.packageIdentifier << std::endl;
+      	std::cout << "package version: " << package.header.version << std::endl;
+      	std::cout << "package numberOfFiles: " << package.header.numberOfFiles << std::endl;
+      	if (tokens.size() >= 3){
+      		FileMetadata& fileMetadata = package.fileMetadata.at(std::atoi(tokens.at(2).c_str()));
+      		std::cout << "offsetBytes: " << fileMetadata.offsetBytes << std::endl;
+      		std::cout << "sizeBytes: " << fileMetadata.sizeBytes << std::endl;
+      		std::cout << "hashname: " << fileMetadata.hashname << std::endl;
+      		std::cout << "name: " << fileMetadata.name << std::endl;
+      	}
+     }else if (tokens.at(0) == "mount"){
+         mountPackage(tokens.at(1).c_str());
+         std::cout << "Mounted package: " << tokens.at(1) << std::endl;
+     }else if (tokens.at(0) == "unmount"){
+         unmountPackage();
+         std::cout << "Unmount success" << std::endl;
+     }else if (tokens.at(0) == "cat"){
+         if (!mountedPackage.has_value()){
+            std::cout << "No package mounted" << std::endl;
+            continue;
+         }
+         if (tokens.size() >= 2){
+            std::cout << readFile(mountedPackage.value(), tokens.at(1).c_str()) << std::endl;
+         }
+     }else if (tokens.at(0) == "file-info"){
+         if (!mountedPackage.has_value()){
+            std::cout << "No package mounted" << std::endl;
+            continue;
+         }
+         if (tokens.size() >= 2){
+            printFileInfo(mountedPackage.value(), tokens.at(1).c_str());
+         }
+     }else{
+      	std::cout << "invalid command got: " << value << std::endl;
+      	std::cout << "tokens: " << print(tokens) << ", size = " << tokens.size() << std::endl;
+     }
+   }		
+	
 }
+
