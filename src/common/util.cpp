@@ -29,7 +29,7 @@ void assertTodo(std::string message){
 
 
 // Base IO fns ////////////////////////////////////
-std::string loadFile(std::string filepath){
+std::string doLoadFile(std::string filepath){
   modlog("load file", filepath);
    std::ifstream file(filepath.c_str());
    if (!file.good()){

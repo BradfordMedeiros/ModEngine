@@ -17,6 +17,8 @@ extern LineData lineData;
 extern ManipulatorTools tools;
 extern TimePlayback timePlayback;
 
+std::string readFileOrPackage(std::string filepath);
+
 std::string dumpDebugInfo(bool fullInfo){
   // this line is commented out b/c was segfaulting, probably should be written in a way that assumes the structure might be invalid
   auto scenegraphInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
@@ -1653,7 +1655,7 @@ std::vector<InputDispatch> inputFns = {
           *octreeObject, 
           [](std::string filepath) -> std::string {
             auto modpath = modlayerPath(filepath);
-            return loadFile(modpath);
+            return readFileOrPackage(modpath);
           }, 
           createScopedLoadMesh(world, selectedIndex)
         );

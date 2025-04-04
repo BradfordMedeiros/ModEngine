@@ -1,5 +1,7 @@
 #include "./modlayer.h"
 
+std::string readFileOrPackage(std::string filepath);
+
 std::vector<std::string> installedMods = {};  // static-state 
 void installMod(std::string layer){
 	assert(std::count(installedMods.begin(), installedMods.end(), layer) == 0);
@@ -50,5 +52,5 @@ bool modlayerFileExists(std::string file){
 }
 
 std::string modlayerReadFile(std::string file){
-	return loadFile(modlayerPath(file));
+	return readFileOrPackage(modlayerPath(file));
 }

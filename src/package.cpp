@@ -26,14 +26,20 @@ void guard(size_t value){
 	}
 }
 
-void packageDirectory(const char* path, const char* output){
+void packageDirectory(const char* output, std::vector<std::string> dirs){
     FILE* handle = fopen(output, "wb+");
     if (!handle){
 	    perror("fopen failed");
     }
     modassert(handle != NULL,  "handle is NULL");
 
-   auto allFiles = listAllFiles(path);
+   std::vector<std::string> allFiles;
+   for (auto &dir : dirs){
+      auto files = listAllFiles(dir);
+      for (auto &file : files){
+         allFiles.push_back(file);
+      }
+   }
 
 	PackageHeader packageHeader {};
    packageHeader.numberOfFiles = allFiles.size();
@@ -55,7 +61,7 @@ void packageDirectory(const char* path, const char* output){
 
    // write file metadata 
    for (int i = 0; i < packageHeader.numberOfFiles; i++){
-      auto fileContent = loadFile(allFiles.at(i).c_str());
+      auto fileContent = doLoadFile(allFiles.at(i).c_str());
 
    	FileMetadata fileMetadata {
 		  .offsetBytes = totalOffset,
@@ -76,7 +82,7 @@ void packageDirectory(const char* path, const char* output){
 
    std::cout << "packing files: total = " << allFiles.size() << std::endl;
    for (int i = 0; i < packageHeader.numberOfFiles; i++){
- 		auto tempData = loadFile(allFiles.at(i));	
+ 		auto tempData = doLoadFile(allFiles.at(i));	
     	int32_t size = tempData.size();
     	if (size != 0){
     		const char* data = tempData.c_str();
@@ -88,7 +94,7 @@ void packageDirectory(const char* path, const char* output){
    // update the offsets in the header here
 
    fclose(handle);
-   std::cout << "packaged dir: " << path << " to " << output << std::endl; 
+   std::cout << "packaged dir: " << print(dirs) << " to " << output << std::endl; 
 
 }
 void unpackageDirectory(const char* path, const char* output){
@@ -136,7 +142,7 @@ std::string readFile(Package& package, const char* file){
    for (auto &fileMetadata : package.fileMetadata){
       std::string name(fileMetadata.name);
       if (name == fileStr){
-         std::cout << "found this file!" << std::endl;
+         std::cout << "found this file!" << name << std::endl;
          char* data = (char*)malloc(fileMetadata.sizeBytes); // give more thought about the size of this
          fseek(package.handle, fileMetadata.offsetBytes, SEEK_SET);
          fread(data, sizeof(char), fileMetadata.sizeBytes, package.handle);
@@ -153,7 +159,7 @@ std::string readFile(Package& package, const char* file){
          return readData;
       }
    }
-   modassert(false, "did not find file");
+   modassert(false, std::string("did not find file: ") + std::string(file));
    return "";
 }
 
@@ -207,8 +213,12 @@ void loopPackageShell(){
      if (tokens.at(0) == "quit"){
       	exit(0);
      }else if (tokens.at(0) == "pack"){
+         std::vector<std::string> dirs;
+         for (int i = 2; i < tokens.size(); i++){
+            dirs.push_back(tokens.at(i));
+         }
       	std::cout << "tokens: " << print(tokens) << ", size = " << tokens.size() << std::endl;
-      	packageDirectory(tokens.at(1).c_str(), tokens.at(2).c_str());
+      	packageDirectory(tokens.at(1).c_str(), dirs);
      }else if (tokens.at(0) == "unpack"){
          modassert(false, "unpack not yet implemented");
      }else if (tokens.at(0) == "package-info"){
@@ -253,3 +263,11 @@ void loopPackageShell(){
 	
 }
 
+////////////
+
+std::string readFileOrPackage(std::string filepath){
+   if (!mountedPackage.has_value()){
+      return doLoadFile(filepath);
+   }
+   return readPackageFile(filepath.c_str());
+}

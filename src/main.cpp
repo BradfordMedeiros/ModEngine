@@ -1040,9 +1040,10 @@ int main(int argc, char* argv[]){
         allFiles.push_back(file);
       }
     }
+
     for (auto &file : allFiles){
       std::cout << "file: " << file << std::endl;
-      auto tokens = parseFormat(loadFile(file));
+      auto tokens = parseFormat(readFileOrPackage(file));
       for (auto &token : tokens){
         if (token.attribute == "texture"){
           std::cout << "texture: " << token.payload << std::endl;

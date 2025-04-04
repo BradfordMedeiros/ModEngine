@@ -14,4 +14,8 @@ void mountPackage(const char* path);
 void unmountPackage();
 std::string readPackageFile(const char* file);
 
+///////
+std::string readFileOrPackage(std::string filepath);
+
+
 #endif

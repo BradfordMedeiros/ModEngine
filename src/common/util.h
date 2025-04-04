@@ -46,7 +46,7 @@ void modlog(const char* identifier, std::string value, MODLOG_LEVEL level = MODL
 void modlogSetEnabled(bool filterLogs, MODLOG_LEVEL level, std::vector<std::string> levels);
 void modlogSetLogEndpoint(std::optional<std::function<void(std::string&)>> fn);
 
-std::string loadFile(std::string filepath);
+std::string doLoadFile(std::string filepath);
 void saveFile(std::string filepath, std::string content);
 void rmFile(std::string filepath);
 bool fileExists(std::string path);

@@ -1,5 +1,8 @@
 #include "./obj_octree.h"
 
+std::string readFileOrPackage(std::string filepath);
+
+
 enum OctreeSelectionFace { FRONT, BACK, LEFT, RIGHT, UP, DOWN };
 std::optional<glm::ivec3> selectedIndex = glm::ivec3(1, 0, 0);
 std::optional<glm::ivec3> selectionDim = glm::ivec3(1, 1, 0);
@@ -1685,7 +1688,7 @@ GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util){
   createAutoSerializeWithTextureLoading((char*)&obj, octreeAutoserializer, attr, util);
   if (obj.map != ""){
     auto mapFilePath = util.pathForModLayer(obj.map);
-    auto serializedFileData = loadFile(mapFilePath);
+    auto serializedFileData = readFileOrPackage(mapFilePath);
     std::cout << "serialized data: " << serializedFileData << std::endl;    
     if (serializedFileData == ""){
       obj.octree = unsubdividedOctree;
@@ -2548,7 +2551,7 @@ std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctre
 
 void loadOctree(GameObjectOctree& octree, std::function<std::string(std::string)> loadFile, std::function<Mesh(MeshData&)> loadMesh){
   modlog("octree", "loading");
-  auto serializedData = loadFile(octree.map);
+  auto serializedData = readFileOrPackage(octree.map);
   octree.octree = deserializeOctree(serializedData);
   octree.mesh = createOctreeMesh(octree.octree, loadMesh);
 }
