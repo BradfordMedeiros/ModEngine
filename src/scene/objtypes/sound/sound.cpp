@@ -1,5 +1,6 @@
 #include "./sound.h"
 
+std::string readFileOrPackage(std::string filepath); // i dont really like directly referencing this here, but...it's ok
 static std::map<std::string, ALuint> soundBuffers;  
 static std::map<std::string, int> soundUsages;
 
@@ -96,7 +97,9 @@ ALuint findOrLoadBuffer(std::string filepath){
   if (soundBuffers.find(filepath) != soundBuffers.end()){
     return soundBuffers.at(filepath);
   }
-  ALuint soundBuffer = alutCreateBufferFromFile(filepath.c_str());
+
+  auto soundFileData = readFileOrPackage(filepath);
+  ALuint soundBuffer = alutCreateBufferFromFileImage(soundFileData.c_str(), soundFileData.size());
   ALenum error = alutGetError();
   if (error != ALUT_ERROR_NO_ERROR){
     std::cerr << "ERROR: " << alutGetErrorString(error) <<  ": " << std::strerror(errno) << std::endl;
