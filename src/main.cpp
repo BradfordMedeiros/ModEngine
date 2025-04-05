@@ -286,7 +286,7 @@ std::vector<std::string> listOctreeTextures(){
 void loadAllTextures(std::string& textureFolderPath){
   loadTextureWorld(world, "./res/models/box/grid.png", -1);
   loadTextureWorld(world, "./res/textures/wood.jpg", -1);
-  for (auto texturePath : listFilesWithExtensions(textureFolderPath, { "png", "jpg" })){
+  for (auto texturePath : listFilesWithExtensionsFromPackage(textureFolderPath, { "png", "jpg" })){
     loadTextureWorld(world, texturePath, -1);
   }
 
@@ -1052,7 +1052,7 @@ int main(int argc, char* argv[]){
     bool missingFiles = false;
     std::vector<std::string> allFiles;
     for (auto &path : pathsToValidate){
-      auto files = listFilesWithExtensions(path, { "rawscene" });
+      auto files = listFilesWithExtensionsFromPackage(path, { "rawscene" });
       for (auto &file : files){
         allFiles.push_back(file);
       }

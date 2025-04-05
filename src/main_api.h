@@ -21,6 +21,7 @@
 #include "./lines.h"
 #include "./sql/sql.h"
 #include "./scene/animation/timeplayback.h"
+#include "./package.h"
 
 struct DefaultResources {
   GameObject defaultCamera;

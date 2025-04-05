@@ -182,7 +182,7 @@ std::vector<std::string> listSceneFiles(std::optional<objid> sceneId){
     }
     return { sceneFileForSceneId(world, sceneId.value()) };
   }
-  return listFilesWithExtensions("./res/scenes", { "rawscene" });
+  return listFilesWithExtensionsFromPackage("./res/scenes", { "rawscene" });
 }
 
 int32_t loadSceneWithId(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> id){
@@ -626,17 +626,17 @@ std::optional<objid> prefabId(objid id){
 }
 
 std::vector<std::string> listModels(){
-  return listFilesWithExtensions("./res/models", { "obj", "dae", "gltf" });
+  return listFilesWithExtensionsFromPackage("./res/models", { "obj", "dae", "gltf" });
 }
 std::vector<std::string> listTextures(){
-  return listFilesWithExtensions("./res/textures", { "png", "jpg" });
+  return listFilesWithExtensionsFromPackage("./res/textures", { "png", "jpg" });
 }
 std::vector<std::string> listSoundFiles(){
-  return { listFilesWithExtensions("./res/sounds", { "wav" }) };
+  return { listFilesWithExtensionsFromPackage("./res/sounds", { "wav" }) };
 }
 
 std::vector<std::string> listSceneFiles(){
-  return { listFilesWithExtensions("./res/scenes", { "rawscene" }) };
+  return { listFilesWithExtensionsFromPackage("./res/scenes", { "rawscene" }) };
 }
 
 std::vector<std::string> listResources(std::string resourceType){
