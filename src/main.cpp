@@ -979,6 +979,11 @@ int main(int argc, char* argv[]){
   }
   modlog("command", argsString);
 
+  std::vector<char*> newArgv;
+  for (int i = 0; i < argc; i++){
+    newArgv.push_back(argv[i]);
+  }
+
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
    ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))
@@ -1021,7 +1026,19 @@ int main(int argc, char* argv[]){
    ("h,help", "Print help")
   ;        
 
-  const auto result = cxxoption.parse(argc, argv);
+  const auto initialResult = cxxoption.parse(argc, argv);
+  auto mount = initialResult["mount"].as<std::string>();
+  if (mount != ""){
+    mountPackage(mount.c_str());
+  }
+
+  auto startOptions = split(readFileOrPackage("./res/start.options"), '\n');
+  for (auto& option : startOptions){
+    newArgv.push_back((char*)(option.c_str()));
+  }
+  int newArgc = newArgv.size();
+  auto dataPtr = newArgv.data();
+  const auto result = cxxoption.parse(newArgc, dataPtr);
 
   auto levels = result["log"].as<std::vector<std::string>>();
   modlogSetEnabled(levels.size() > 0, static_cast<MODLOG_LEVEL>(result["loglevel"].as<int>()), levels);
@@ -1116,11 +1133,6 @@ int main(int argc, char* argv[]){
   }
 
 
-  auto mount = result["mount"].as<std::string>();
-  if (mount != ""){
-    mountPackage(mount.c_str());
-  }
-  
   if (result["shell"].as<bool>()){
     loopPackageShell();
   }
