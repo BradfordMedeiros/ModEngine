@@ -163,6 +163,17 @@ std::string readFile(Package& package, const char* file){
    return "";
 }
 
+bool fileExists(Package& package, const char* file){
+   std::string fileStr = std::string(file);
+   for (auto &fileMetadata : package.fileMetadata){
+      std::string name(fileMetadata.name);
+      if (name == fileStr){
+         return true;
+      }
+   }
+   return false;
+}
+
 std::optional<Package> mountedPackage;
 void mountPackage(const char* path){
    if (mountedPackage.has_value()){
@@ -270,4 +281,11 @@ std::string readFileOrPackage(std::string filepath){
       return doLoadFile(filepath);
    }
    return readPackageFile(filepath.c_str());
+}
+
+bool fileExistsFileOrPackage(std::string filepath){
+   if (!mountedPackage.has_value()){
+      return fileExists(filepath);
+   }
+   return fileExists(mountedPackage.value(), filepath.c_str());
 }

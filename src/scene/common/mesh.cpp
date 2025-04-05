@@ -46,6 +46,7 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
  
   Texture texture;
   if (meshData.hasDiffuseTexture){
+    std::cout << "ensure load texture dif: " << meshData.diffuseTexturePath << std::endl;
     texture = ensureLoadTexture(meshData.diffuseTexturePath); 
   }else{
     texture = ensureLoadTexture(defaultTexture); 

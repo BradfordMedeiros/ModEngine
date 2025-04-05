@@ -24,6 +24,7 @@ struct TextureRef {
   std::optional<objid> mappingTexture;
 };
 
+unsigned char* stbiloadImage(const char* textureFilePath, int* _textureWidth, int* _textureHeight, int* _numChannels, int forcedChannels);
 Texture loadTextureEmpty(int textureWidth, int textureHeight, int numChannels);
 Texture loadTextureSelection(int textureWidth, int textureHeight);
 Texture loadTextureData(unsigned char* data, int textureWidth, int textureHeight, int numChannels);

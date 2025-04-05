@@ -1,5 +1,14 @@
 #include "./texture.h"
 
+std::string readFileOrPackage(std::string filepath); // i dont really like directly referencing this here, but...it's ok
+
+unsigned char* stbiloadImage(const char* textureFilePath, int* _textureWidth, int* _textureHeight, int* _numChannels, int forcedChannels){
+  auto textureData = readFileOrPackage(textureFilePath); 
+  unsigned char* image_data = stbi_load_from_memory((const unsigned char*)textureData.c_str(), textureData.size(), _textureWidth, _textureHeight, _numChannels, forcedChannels);
+  return image_data;
+}
+
+
 Texture loadTextureEmpty(int textureWidth, int textureHeight, int numChannels){
   unsigned int texture;
   glGenTextures(1, &texture);
@@ -89,7 +98,7 @@ Texture loadTexture(std::string textureFilePath){
   int forcedChannels = 4;
   stbi_set_flip_vertically_on_load(true);
   modlog("load file loadTexture", textureFilePath);
-  unsigned char* data = stbi_load(textureFilePath.c_str(), &textureWidth, &textureHeight, &numChannels, forcedChannels); 
+  unsigned char* data = stbiloadImage(textureFilePath.c_str(), &textureWidth, &textureHeight, &numChannels, forcedChannels); 
   if (!data){
     throw std::runtime_error("failed loading texture " + textureFilePath + ", reason: " + stbi_failure_reason());
   }
@@ -104,7 +113,7 @@ void replaceTexture(Texture& texture, std::string& textureFilePath, bool allowFa
   stbi_set_flip_vertically_on_load(true);
 
   modlog("load file replaceTexture", textureFilePath);
-  unsigned char* data = stbi_load(textureFilePath.c_str(), &textureWidth, &textureHeight, &numChannels, forcedChannels); 
+  unsigned char* data = stbiloadImage(textureFilePath.c_str(), &textureWidth, &textureHeight, &numChannels, forcedChannels); 
   if (!data){
     if (!allowFail){
       throw std::runtime_error("failed loading texture " + textureFilePath + ", reason: " + stbi_failure_reason());
@@ -145,12 +154,12 @@ Texture loadCubemapTextureData(std::vector<unsigned char*> data, std::vector<int
 Texture loadCubemapTexture(std::string textureFilePathRoot){
   std::cout << "Event: loading texture: " << textureFilePathRoot << std::endl;
   std::vector<std::string> filepaths = {
-    std::filesystem::weakly_canonical(std::filesystem::path(textureFilePathRoot) / std::filesystem::path("right.jpg")).string(),
-    std::filesystem::weakly_canonical(std::filesystem::path(textureFilePathRoot) / std::filesystem::path("left.jpg")).string(),
-    std::filesystem::weakly_canonical(std::filesystem::path(textureFilePathRoot) / std::filesystem::path("top.jpg")).string(),
-    std::filesystem::weakly_canonical(std::filesystem::path(textureFilePathRoot) / std::filesystem::path("bottom.jpg")).string(),
-    std::filesystem::weakly_canonical(std::filesystem::path(textureFilePathRoot) / std::filesystem::path("front.jpg")).string(),
-    std::filesystem::weakly_canonical(std::filesystem::path(textureFilePathRoot) / std::filesystem::path("back.jpg")).string(),
+    std::filesystem::path(textureFilePathRoot) / std::filesystem::path("right.jpg").string(),
+    std::filesystem::path(textureFilePathRoot) / std::filesystem::path("left.jpg").string(),
+    std::filesystem::path(textureFilePathRoot) / std::filesystem::path("top.jpg").string(),
+    std::filesystem::path(textureFilePathRoot) / std::filesystem::path("bottom.jpg").string(),
+    std::filesystem::path(textureFilePathRoot) / std::filesystem::path("front.jpg").string(),
+    std::filesystem::path(textureFilePathRoot) / std::filesystem::path("back.jpg").string(),
   };
 
   std::vector<unsigned char*> datas;
@@ -165,7 +174,7 @@ Texture loadCubemapTexture(std::string textureFilePathRoot){
     stbi_set_flip_vertically_on_load(false);
 
     modlog("load file loadCubemapTexture", textureFilePathRoot);
-    unsigned char* data = stbi_load(filepath.c_str(), &textureWidth, &textureHeight, &numChannels, 0); 
+    unsigned char* data = stbiloadImage(filepath.c_str(), &textureWidth, &textureHeight, &numChannels, 0); 
     if (!data){
       throw std::runtime_error("failed loading texture " + textureFilePathRoot + ", reason: " + stbi_failure_reason());
     }
@@ -243,7 +252,7 @@ Texture loadTextureAtlasMaybeWriteCache(std::vector<std::string> textureFilePath
     int forcedChannels = 4;
 
     modlog("load file loadTextureAtlasMaybeWriteCache", textureFilePaths.at(i));
-    unsigned char* data = stbi_load(textureFilePaths.at(i).c_str(), &textureWidth, &textureHeight, &numChannels, forcedChannels); 
+    unsigned char* data = stbiloadImage(textureFilePaths.at(i).c_str(), &textureWidth, &textureHeight, &numChannels, forcedChannels); 
     if (!data){
       throw std::runtime_error("failed loading texture " + textureFilePaths.at(i) + ", reason: " + stbi_failure_reason());
     }

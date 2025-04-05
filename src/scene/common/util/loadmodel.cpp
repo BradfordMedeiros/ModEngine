@@ -288,9 +288,26 @@ std::string getTexturePath(aiTextureType type, std::string modelPath,  aiMateria
   aiString texturePath;
   material -> GetTexture(type, 0, &texturePath);
 
-  std::filesystem::path modellocation = std::filesystem::canonical(modelPath).parent_path();
-  std::filesystem::path relativePath = std::filesystem::weakly_canonical(modellocation / texturePath.C_Str()); //  / is append operator 
-  return relativePath.string();
+  std::filesystem::path modellocation = std::filesystem::path(modelPath).parent_path();
+  std::filesystem::path texturelocation = std::filesystem::path(texturePath.C_Str());
+
+  std::filesystem::path relativePath = (modellocation / texturelocation).lexically_normal(); //  / is append operator
+
+  bool shouldAddLeadingDot = false;
+  std::string finalPath = relativePath.string();
+  if (finalPath.size() >= 2){
+    if (!(finalPath.at(0) == '.' && finalPath.at(1) == '.')){
+      shouldAddLeadingDot = true;
+    }
+  }
+
+  std::cout << "modelPath: " << modelPath << std::endl;
+  std::cout << "get texture path: " << relativePath.string() << std::endl;
+  std::cout << "raw texture path: " << texturePath.C_Str() << std::endl;
+  if (shouldAddLeadingDot){
+    finalPath = "./" + finalPath;
+  }
+  return finalPath;
 }
 
 std::string print(std::vector<BoneWeighting>& bones, BoneInfo& boneInfo){
