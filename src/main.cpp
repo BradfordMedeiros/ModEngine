@@ -1028,6 +1028,11 @@ int main(int argc, char* argv[]){
 
   const auto initialResult = cxxoption.parse(argc, argv);
   auto mount = initialResult["mount"].as<std::string>();
+  if (mount == ""){
+    if (fileExists("./game.mod")){
+      mount = "./game.mod";
+    }
+  }
   if (mount != ""){
     mountPackage(mount.c_str());
   }
