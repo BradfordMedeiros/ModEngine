@@ -1,7 +1,7 @@
 #include "./modlayer.h"
 
 std::string readFileOrPackage(std::string filepath);
-bool fileExistsFileOrPackage(std::string filepath);
+bool fileExistsFromPackage(std::string filepath);
 
 std::vector<std::string> installedMods = {};  // static-state 
 void installMod(std::string layer){
@@ -43,7 +43,7 @@ std::string modlayerPath(std::string file){
 		auto modpathRoot = installedMods.at(i);
 		auto fullModpath = joinModPath(modpathRoot, file);
 		std::cout << "modlayer : modpath = " << modpathRoot << " file = " << file <<  " fullmodpath = " << fullModpath << std::endl;
-		if (fileExistsFileOrPackage(fullModpath)){
+		if (fileExistsFromPackage(fullModpath)){
 			return fullModpath;
 		}
 	}	
@@ -52,7 +52,7 @@ std::string modlayerPath(std::string file){
 
 bool modlayerFileExists(std::string file){
 	auto filepath = modlayerPath(file);
-	return fileExistsFileOrPackage(filepath);
+	return fileExistsFromPackage(filepath);
 }
 
 std::string modlayerReadFile(std::string file){

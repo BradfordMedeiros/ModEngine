@@ -291,7 +291,7 @@ std::string readFileOrPackage(std::string filepath){
    return readPackageFile(filepath.c_str());
 }
 
-bool fileExistsFileOrPackage(std::string filepath){
+bool fileExistsFromPackage(std::string filepath){
    if (!mountedPackage.has_value()){
       return realfiles::fileExists(filepath);
    }
@@ -303,6 +303,3 @@ std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, 
    return realfiles::listFilesWithExtensions(folder, extensions);
 }
 
-bool fileExistsFromPackage(std::string path){
-   return realfiles::fileExists(path);
-}

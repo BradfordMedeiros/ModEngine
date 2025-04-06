@@ -12,11 +12,9 @@ void loopPackageShell();
 
 void mountPackage(const char* path);
 void unmountPackage();
-std::string readPackageFile(const char* file);
 
-///////
 std::string readFileOrPackage(std::string filepath);
 std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, std::vector<std::string> extensions);
-bool fileExistsFromPackage(std::string path);
+bool fileExistsFromPackage(std::string filepath);
 
 #endif
