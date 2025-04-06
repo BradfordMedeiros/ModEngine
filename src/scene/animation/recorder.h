@@ -7,6 +7,7 @@
 #include <functional>
 #include "../common/util/types.h"
 #include "../../common/util.h"
+#include "../../common/files.h"
 
 struct Record {
   int time;

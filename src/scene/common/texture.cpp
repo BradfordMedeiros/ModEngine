@@ -1,6 +1,7 @@
 #include "./texture.h"
 
 std::string readFileOrPackage(std::string filepath); // i dont really like directly referencing this here, but...it's ok
+bool fileExistsFromPackage(std::string path);
 
 unsigned char* stbiloadImage(const char* textureFilePath, int* _textureWidth, int* _textureHeight, int* _numChannels, int forcedChannels){
   auto textureData = readFileOrPackage(textureFilePath); 
@@ -276,7 +277,7 @@ Texture loadTextureAtlasMaybeWriteCache(std::vector<std::string> textureFilePath
 
 Texture loadTextureAtlas(std::vector<std::string> textureFilePaths, std::optional<std::string> cacheFileName){
   // check if the file exists, if it does just load it, assemble it and then load
-  if (cacheFileName.has_value() && fileExists(cacheFileName.value())){
+  if (cacheFileName.has_value() && fileExistsFromPackage(cacheFileName.value())){
     return loadTexture(cacheFileName.value());
   }
   return loadTextureAtlasMaybeWriteCache(textureFilePaths, cacheFileName);

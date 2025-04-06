@@ -1,5 +1,7 @@
 #include "./scene.h"
 
+bool fileExistsFromPackage(std::string path);
+
 extern bool strictResourceMode;
 
 GameObject& getGameObject(World& world, objid id){
@@ -306,7 +308,7 @@ Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
   }
   auto texturePath = world.interface.modlayerPath(texturepath);
 
-  auto textureFileExists = fileExists(texturePath);
+  auto textureFileExists = fileExistsFromPackage(texturePath);
   if (strictResourceMode && !textureFileExists){
     modassert(false, std::string("texture does not exist: ") + texturepath);
   }
@@ -498,7 +500,7 @@ void loadModelData(World& world, std::string meshpath, int ownerId){
   if (world.modelDatas.find(meshpath) != world.modelDatas.end()){
     world.modelDatas.at(meshpath).owners.insert(ownerId);
   }else{
-    auto pathExists = fileExists(meshpath);
+    auto pathExists = fileExistsFromPackage(meshpath);
     if (!pathExists){
       if (strictResourceMode){
         modassert(false, std::string("model does not exist: ") + meshpath);
@@ -968,7 +970,7 @@ objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sce
 }
 
 objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> sceneId, std::optional<objid> parentId){
-  auto sceneFileExists = fileExists(sceneFile);
+  auto sceneFileExists = fileExistsFromPackage(sceneFile);
   if (strictResourceMode && !sceneFileExists){
     modassert(false, std::string("scene file does not exist: ") + sceneFile);
   }

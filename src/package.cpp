@@ -294,3 +294,7 @@ bool fileExistsFileOrPackage(std::string filepath){
 std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, std::vector<std::string> extensions){
    return listFilesWithExtensions(folder, extensions);
 }
+
+bool fileExistsFromPackage(std::string path){
+   return fileExists(path);
+}

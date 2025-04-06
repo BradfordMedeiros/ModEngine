@@ -7,6 +7,7 @@
 #include <queue>
 #include "assert.h"
 #include "../common/util.h"
+#include "../common/files.h"
 #include "./serialization.h"
 
 void offlineNewScene(std::string scenepath);

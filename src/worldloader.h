@@ -5,6 +5,7 @@
 #include <functional>
 #include <map>
 #include "./common/util.h"
+#include "./common/files.h"
 
 struct ChunkAddress {
   int x;

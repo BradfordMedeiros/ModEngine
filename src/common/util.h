@@ -46,18 +46,7 @@ void modlog(const char* identifier, std::string value, MODLOG_LEVEL level = MODL
 void modlogSetEnabled(bool filterLogs, MODLOG_LEVEL level, std::vector<std::string> levels);
 void modlogSetLogEndpoint(std::optional<std::function<void(std::string&)>> fn);
 
-std::string doLoadFile(std::string filepath);
-void saveFile(std::string filepath, std::string content);
-void rmFile(std::string filepath);
-bool fileExists(std::string path);
-std::optional<std::string> getExtension(std::string file);
-std::optional<std::string> getPreExtension(std::string file);
-std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector<std::string> extensions);
-std::vector<std::string> listFilesAndDir(std::filesystem::path path);
-std::vector<std::string> listAllFiles(std::filesystem::path path);
 
-enum FILE_EXTENSION_TYPE { IMAGE_EXTENSION, AUDIO_EXTENSION, MODEL_EXTENSION, UNKNOWN_EXTENSION };
-FILE_EXTENSION_TYPE getFileType(std::string filepath);
 
 bool stringContains(std::string& str, char character);
 bool stringContains(std::string& str, const char* value);
@@ -483,5 +472,11 @@ struct RenderStagesDofInfo {
   float nearplane;
   float farplane;
 };
+
+
+enum FILE_EXTENSION_TYPE { IMAGE_EXTENSION, AUDIO_EXTENSION, MODEL_EXTENSION, UNKNOWN_EXTENSION };
+FILE_EXTENSION_TYPE getFileType(std::string filepath);
+std::optional<std::string> getExtension(std::string file);
+std::optional<std::string> getPreExtension(std::string file);
 
 #endif
