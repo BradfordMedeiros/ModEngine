@@ -7,6 +7,7 @@ void utilParseAndSerializeQuatTest();
 void orientationFromPosTest();
 
 void envSubstTest();
+void isInFolderTest();
 
 #endif
 

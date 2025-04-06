@@ -274,6 +274,13 @@ void loopPackageShell(){
          if (tokens.size() >= 2){
             printFileInfo(mountedPackage.value(), tokens.at(1).c_str());
          }
+     }else if (tokens.at(0) == "list"){
+         if (!mountedPackage.has_value()){
+            std::cout << "No package mounted" << std::endl;
+            continue;
+         }
+         auto allFiles = allFilenames(mountedPackage.value());
+         std::cout << print(allFiles) << std::endl;
      }else{
       	std::cout << "invalid command got: " << value << std::endl;
       	std::cout << "tokens: " << print(tokens) << ", size = " << tokens.size() << std::endl;
@@ -300,6 +307,20 @@ bool fileExistsFromPackage(std::string filepath){
 
 
 std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, std::vector<std::string> extensions){
-   return realfiles::listFilesWithExtensions(folder, extensions);
+   if (!mountedPackage.has_value()){
+      return realfiles::listFilesWithExtensions(folder, extensions);
+   }
+
+   auto allFiles = allFilenames(mountedPackage.value());
+   std::vector<std::string> finalFiles;
+   for (auto &file : allFiles){
+      bool isValidExtension = isExtensionType(file, extensions);
+      if (isValidExtension && isInFolder(folder, file, "ModEngine")){ 
+         finalFiles.push_back(file);
+         std::cout << "this file is of extension: " << print(extensions) << ", file = " << file << std::endl;
+      }
+   }
+   return finalFiles;
+
 }
 

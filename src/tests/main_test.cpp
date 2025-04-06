@@ -78,6 +78,10 @@ std::vector<TestCase> tests = {
     .test = envSubstTest,
   },
   TestCase {
+    .name = "isInFolderTest",
+    .test = isInFolderTest,
+  },
+  TestCase {
     .name = "directionToQuatConversionTest",
     .test = directionToQuatConversionTest,
   },

@@ -1064,7 +1064,7 @@ int main(int argc, char* argv[]){
     }
 
     for (auto &file : allFiles){
-      std::cout << "file: " << file << std::endl;
+      std::cout << "validating file: " << file << std::endl;
       auto tokens = parseFormat(readFileOrPackage(file));
       for (auto &token : tokens){
         if (token.attribute == "texture"){

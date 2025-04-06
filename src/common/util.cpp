@@ -1170,3 +1170,32 @@ std::optional<std::string> getPreExtension(std::string file){
   }
   return std::nullopt;  
 }
+
+bool isInFolder(std::string folder, std::string path, std::string workingDir){
+   auto workingPath  = std::filesystem::path(workingDir);
+   auto folderPath = std::filesystem::path(folder);
+   if (!folderPath.is_absolute()){
+      folderPath = workingPath / folderPath;
+   }
+   auto filePath = std::filesystem::path(path);
+   if (!filePath.is_absolute()){
+      filePath = workingPath / filePath;
+   }
+   auto relative = std::filesystem::relative(filePath, folderPath);
+   return !relative.empty() && relative.native().at(0) != '.';
+}
+
+bool isExtensionType(std::string& file, std::vector<std::string>& extensions){
+  bool isValidExtension = false;
+  auto extensionData = getExtension(file);
+  if (extensionData.has_value()){
+    auto extension = extensionData.value();
+    for (auto knownExtension : extensions){
+      if (extension == knownExtension){
+        isValidExtension = true;
+        break;
+      }
+    }
+  }
+  return isValidExtension;
+}

@@ -132,3 +132,68 @@ void envSubstTest(){
     }
   }
 }
+
+
+struct inFolderTestContent {
+  std::string workingDir;
+  std::string folder;
+  std::string path;
+  bool isInFolder;
+};
+
+void isInFolderTest(){
+  std::vector<inFolderTestContent> tests = {
+    inFolderTestContent {
+      .workingDir = "/home",
+      .folder = "./",
+      .path = "./somefile",
+      .isInFolder = true,
+    },
+    inFolderTestContent {
+      .workingDir = "/home",
+      .folder = "./something/wow",
+      .path = "./somefile",
+      .isInFolder = false,
+    },
+    inFolderTestContent {
+      .workingDir = "/home",
+      .folder = "./something/wow",
+      .path = "./something/wow/go",
+      .isInFolder = true,
+    },
+    inFolderTestContent {
+      .workingDir = "/home",
+      .folder = "../home/something/wow",
+      .path = "./something/wow/go",
+      .isInFolder = true,
+    },
+    inFolderTestContent {
+      .workingDir = "/home",
+      .folder = "../another/something/wow",
+      .path = "./something/wow/go",
+      .isInFolder = false,
+    },
+    inFolderTestContent {
+      .workingDir = "/home",
+      .folder = ".",
+      .path = "../home/wow/go",
+      .isInFolder = true,
+    },
+    inFolderTestContent {
+      .workingDir = "./home/./../home",
+      .folder = ".",
+      .path = "../home/wow/go",
+      .isInFolder = true,
+    },
+  };
+
+  for (auto &test : tests){
+    auto inFolder = isInFolder(test.folder, test.path, test.workingDir);
+    if (inFolder != test.isInFolder){
+      throw std::logic_error(test.folder + ", " + test.path + ", " + (test.isInFolder ? "true" : "false"));
+    }
+  }
+}
+
+
+

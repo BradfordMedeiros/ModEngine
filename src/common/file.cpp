@@ -50,19 +50,9 @@ std::vector<std::string> listFilesAndDir(std::filesystem::path path){
 std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector<std::string> extensions){
   std::vector<std::string> models;
   for (auto file : listAllFiles(folder)){
-    auto extensionData = getExtension(file);
-    if (extensionData.has_value()){
-      auto extension = extensionData.value();
-      bool isValidExtension = false;
-      for (auto knownExtension : extensions){
-        if (extension == knownExtension){
-          isValidExtension = true;
-          break;
-        }
-      }
-      if (isValidExtension){
-        models.push_back(file);
-      }
+    bool isValidExtension = isExtensionType(file, extensions);
+    if (isValidExtension){
+      models.push_back(file);
     }
   }
   return models;
