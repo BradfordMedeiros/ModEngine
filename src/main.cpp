@@ -1070,14 +1070,14 @@ int main(int argc, char* argv[]){
         if (token.attribute == "texture"){
           std::cout << "texture: " << token.payload << std::endl;
 
-          if (!realfiles::fileExists(token.payload)){
+          if (!fileExistsFromPackage(token.payload)){
             missingFiles = true;
             std::cout << "\033[31mError:  " << token.payload << ", file = " << file << "\033[0m" << std::endl;
           }
         }
         if (token.attribute == "mesh"){
           std::cout << "mesh: " << token.payload << std::endl;
-          if (!realfiles::fileExists(token.payload)){
+          if (!fileExistsFromPackage(token.payload)){
             missingFiles = true;
             std::cout << "\033[31mError:  " << token.payload << ", file = " << file << "\033[0m" << std::endl;
           }
