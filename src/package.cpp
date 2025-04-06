@@ -163,6 +163,14 @@ std::string readFile(Package& package, const char* file){
    return "";
 }
 
+std::vector<std::string> allFilenames(Package& package){
+   std::vector<std::string> files;
+   for (auto &fileMetadata : package.fileMetadata){
+      files.push_back(fileMetadata.name);
+   }
+   return files;
+}
+
 bool fileExists(Package& package, const char* file){
    std::string fileStr = std::string(file);
    for (auto &fileMetadata : package.fileMetadata){
