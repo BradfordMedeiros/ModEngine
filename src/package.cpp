@@ -35,7 +35,7 @@ void packageDirectory(const char* output, std::vector<std::string> dirs){
 
    std::vector<std::string> allFiles;
    for (auto &dir : dirs){
-      auto files = listAllFiles(dir);
+      auto files = realfiles::listAllFiles(dir);
       for (auto &file : files){
          allFiles.push_back(file);
       }
@@ -61,7 +61,7 @@ void packageDirectory(const char* output, std::vector<std::string> dirs){
 
    // write file metadata 
    for (int i = 0; i < packageHeader.numberOfFiles; i++){
-      auto fileContent = doLoadFile(allFiles.at(i).c_str());
+      auto fileContent = realfiles::doLoadFile(allFiles.at(i).c_str());
 
    	FileMetadata fileMetadata {
 		  .offsetBytes = totalOffset,
@@ -82,7 +82,7 @@ void packageDirectory(const char* output, std::vector<std::string> dirs){
 
    std::cout << "packing files: total = " << allFiles.size() << std::endl;
    for (int i = 0; i < packageHeader.numberOfFiles; i++){
- 		auto tempData = doLoadFile(allFiles.at(i));	
+ 		auto tempData = realfiles::doLoadFile(allFiles.at(i));	
     	int32_t size = tempData.size();
     	if (size != 0){
     		const char* data = tempData.c_str();
@@ -278,23 +278,23 @@ void loopPackageShell(){
 
 std::string readFileOrPackage(std::string filepath){
    if (!mountedPackage.has_value()){
-      return doLoadFile(filepath);
+      return realfiles::doLoadFile(filepath);
    }
    return readPackageFile(filepath.c_str());
 }
 
 bool fileExistsFileOrPackage(std::string filepath){
    if (!mountedPackage.has_value()){
-      return fileExists(filepath);
+      return realfiles::fileExists(filepath);
    }
    return fileExists(mountedPackage.value(), filepath.c_str());
 }
 
 
 std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, std::vector<std::string> extensions){
-   return listFilesWithExtensions(folder, extensions);
+   return realfiles::listFilesWithExtensions(folder, extensions);
 }
 
 bool fileExistsFromPackage(std::string path){
-   return fileExists(path);
+   return realfiles::fileExists(path);
 }

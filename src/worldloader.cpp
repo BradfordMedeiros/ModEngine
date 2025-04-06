@@ -128,7 +128,7 @@ std::string serializeChunkMappingInfo(ChunkMappingInfo& mappingInfo){
   return content;
 }
 void saveChunkMappingInfo(DynamicLoading& world, std::string filepath){
-  saveFile(filepath, serializeChunkMappingInfo(world.mappingInfo));
+  realfiles::saveFile(filepath, serializeChunkMappingInfo(world.mappingInfo));
 }
 
 // @TODO currently dynamic chunkloading assumes it has exclusive access to scene management (or at least that loadscene/unload scene gives it that).

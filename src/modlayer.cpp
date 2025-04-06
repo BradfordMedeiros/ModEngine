@@ -43,7 +43,7 @@ std::string modlayerPath(std::string file){
 		auto modpathRoot = installedMods.at(i);
 		auto fullModpath = joinModPath(modpathRoot, file);
 		std::cout << "modlayer : modpath = " << modpathRoot << " file = " << file <<  " fullmodpath = " << fullModpath << std::endl;
-		if (fileExists(fullModpath)){
+		if (fileExistsFileOrPackage(fullModpath)){
 			return fullModpath;
 		}
 	}	

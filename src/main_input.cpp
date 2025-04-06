@@ -52,7 +52,7 @@ std::string dumpDebugInfo(bool fullInfo){
 
 void debugInfo(std::optional<std::string> filepath){
   if (filepath.has_value()){
-    saveFile(filepath.value(), dumpDebugInfo(false));
+    realfiles::saveFile(filepath.value(), dumpDebugInfo(false));
   }else{
     std::cout << dumpDebugInfo(false) << std::endl;
   }
@@ -1676,7 +1676,7 @@ std::vector<InputDispatch> inputFns = {
         modassert(octreeObject, "octree object null");
         saveOctree(*octreeObject, [](std::string filepath, std::string& data) -> void {
           auto modpath = modlayerPath(filepath);
-          saveFile(modpath, data);
+          realfiles::saveFile(modpath, data);
         });
       }
     }

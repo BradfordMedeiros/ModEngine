@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <assert.h>
 #include "./common/util.h"
-#include "./common/files.h"
 
 void installMod(std::string layer);
 void uninstallMod(std::string layer);

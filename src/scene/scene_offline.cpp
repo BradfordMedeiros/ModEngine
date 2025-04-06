@@ -2,18 +2,18 @@
 
 void offlineNewScene(std::string scenepath){
   std::cout << "offline: create new scene: " << scenepath << std::endl;
-  saveFile(scenepath, "");
+  realfiles::saveFile(scenepath, "");
 }
 void offlineDeleteScene(std::string scenepath){
   std::cout << "offline: delete new scene: " << scenepath << std::endl;
   std::remove(scenepath.c_str());
 }
 bool offlineSceneExists(std::string scenepath){
-  return fileExists(scenepath);
+  return realfiles::fileExists(scenepath);
 }
 void offlineCopyScene(std::string scenepath, std::string newScenepath, std::function<std::string(std::string)> readFile){
   std::cout << "offline: copy scene: " << scenepath << " in file: " << newScenepath << std::endl;
-  saveFile(newScenepath, readFile(scenepath));
+  realfiles::saveFile(newScenepath, readFile(scenepath));
 }
 
 void offlineRemoveElement(std::string scenepath, std::string elementName, std::function<std::string(std::string)> readFile){
@@ -26,7 +26,7 @@ void offlineRemoveElement(std::string scenepath, std::string elementName, std::f
     }
     newTokens.push_back(token);
   }
-  saveFile(scenepath, serializeSceneTokens(newTokens));
+  realfiles::saveFile(scenepath, serializeSceneTokens(newTokens));
 }
 
 void offlineSetElementAttributes(std::string scenepath, std::string elementName, std::vector<std::pair<std::string, std::string>> attrs, std::function<std::string(std::string)> readFile){
@@ -47,7 +47,7 @@ void offlineSetElementAttributes(std::string scenepath, std::string elementName,
       .payload = val,
     });
   }
-  saveFile(scenepath, serializeSceneTokens(newTokens));
+  realfiles::saveFile(scenepath, serializeSceneTokens(newTokens));
 }
 
 // like set element but preserves the old attributes
@@ -75,7 +75,7 @@ void offlineUpdateElementAttributes(std::string scenepath, std::string elementNa
       .payload = val,
     });
   }
-  saveFile(scenepath, serializeSceneTokens(newTokens));
+  realfiles::saveFile(scenepath, serializeSceneTokens(newTokens));
 }
 
 std::vector<Token> offlineGetElement(std::string scenepath, std::string elementName, std::function<std::string(std::string)> readFile){

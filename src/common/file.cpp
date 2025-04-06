@@ -1,5 +1,7 @@
 #include "./files.h"
 
+namespace realfiles {
+
 std::string doLoadFile(std::string filepath){
   modlog("load file", filepath);
    std::ifstream file(filepath.c_str());
@@ -66,3 +68,4 @@ std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector
   return models;
 }
 
+}

@@ -264,7 +264,7 @@ bool saveScene(bool includeIds, objid sceneId, std::optional<std::string> filena
   fileToSave = filename.has_value() ? filename.value() : fileToSave;
   std::cout << "saving scene id: " << sceneId << " to file: " << fileToSave << std::endl;
   if (isNotWriteProtectedFile(fileToSave)){
-    saveFile(fileToSave, serializeScene(world, sceneId, includeIds));
+    realfiles::saveFile(fileToSave, serializeScene(world, sceneId, includeIds));
     return true;
   }
   std::cout << "WARNING: CANNOT SAVE: " << fileToSave << " because is a protected file" << std::endl;
@@ -323,14 +323,14 @@ void createScene(std::string scenename){
   auto extension = getExtension(scenename);
   bool canSave = extension.has_value() && extension == "rawscene";
   assert(canSave);
-  saveFile(scenename, "");
+  realfiles::saveFile(scenename, "");
 }
 
 void deleteScene(std::string scenename){
   auto extension = getExtension(scenename);
   bool canSave = extension.has_value() && extension == "rawscene";
   assert(canSave && isNotWriteProtectedFile(scenename));
-  rmFile(scenename);
+  realfiles::rmFile(scenename);
 }
 
 std::vector<int32_t> getObjectsByType(std::string type){

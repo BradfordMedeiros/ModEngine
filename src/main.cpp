@@ -751,7 +751,7 @@ void signalHandler(int signum) {
   if (state.showDebug){
     auto crashFile = "./build/crash.info";
     std::cout << "wrote crash file: " << crashFile << std::endl;
-    saveFile(crashFile, debugInfo);
+    realfiles::saveFile(crashFile, debugInfo);
     printBacktrace();
   }
 }
@@ -1029,7 +1029,7 @@ int main(int argc, char* argv[]){
   const auto initialResult = cxxoption.parse(argc, argv);
   auto mount = initialResult["mount"].as<std::string>();
   if (mount == ""){
-    if (fileExists("./game.mod")){
+    if (realfiles::fileExists("./game.mod")){
       mount = "./game.mod";
     }
   }
@@ -1070,14 +1070,14 @@ int main(int argc, char* argv[]){
         if (token.attribute == "texture"){
           std::cout << "texture: " << token.payload << std::endl;
 
-          if (!fileExists(token.payload)){
+          if (!realfiles::fileExists(token.payload)){
             missingFiles = true;
             std::cout << "\033[31mError:  " << token.payload << ", file = " << file << "\033[0m" << std::endl;
           }
         }
         if (token.attribute == "mesh"){
           std::cout << "mesh: " << token.payload << std::endl;
-          if (!fileExists(token.payload)){
+          if (!realfiles::fileExists(token.payload)){
             missingFiles = true;
             std::cout << "\033[31mError:  " << token.payload << ", file = " << file << "\033[0m" << std::endl;
           }
@@ -2087,7 +2087,7 @@ int main(int argc, char* argv[]){
 
   cleanup:   
     if (shouldBenchmark){
-      saveFile(benchmarkFile, dumpDebugInfo());
+      realfiles::saveFile(benchmarkFile, dumpDebugInfo());
     }
     deinitPhysics(world.physicsEnvironment); 
     stopSoundSystem();
