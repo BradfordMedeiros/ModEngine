@@ -1,5 +1,8 @@
 #include "./readfont.h"
 
+std::string readFileOrPackage(std::string filepath); // i dont really like directly referencing this here, but...it's ok
+
+
 fontInfo getFont(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned int imageWidth, unsigned int imageHeight){
     fontInfo character;
 
@@ -13,14 +16,11 @@ fontInfo getFont(unsigned int x, unsigned int y, unsigned int width, unsigned in
 
 font readFont(std::string fontFolderpath){
 	std::string metadata = fontFolderpath + "/info.modfont";
-	std::ifstream file(metadata);
+    auto fileContent = readFileOrPackage(metadata);
+	std::istringstream file(fileContent);
 
 	font info;
 
-	if (!file.is_open()) {
-		throw std::runtime_error("Could not open file" + fontFolderpath);
-	}
-    
     std::string line;
     getline(file, line);		// first line is font name
     //info.fontname = line;
@@ -64,7 +64,6 @@ font readFont(std::string fontFolderpath){
         info.chars[ascii] = getFont(x, y, width, height, imageWidth, imageHeight);
     }
 
-    file.close();	
     return info;
 }
 
