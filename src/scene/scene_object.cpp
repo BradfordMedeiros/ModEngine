@@ -269,11 +269,11 @@ std::optional<std::string> lookupNormalTexture(World& world, std::string texture
   if (!world.interface.modlayerFileExists(textureName)){
     return std::nullopt;
   }
-  std::filesystem::path textureFile = std::filesystem::canonical(textureName);
+  std::filesystem::path textureFile(textureName);
   auto folder = textureFile.parent_path();
   auto newFileName = textureFile.stem().string() + ".normal" + textureFile.extension().string();
-  std::filesystem::path fullNormalPath = std::filesystem::weakly_canonical(folder / newFileName); //  / is append operator 
-  modlog("editor", "normal fullfilepath is: " + fullNormalPath.string());
+  std::filesystem::path fullNormalPath = folder / newFileName; //  / is append operator 
+  modlog("editor", "normal fullfilepath is: " + fullNormalPath.string() + ", orig was: " + textureName);
   if (!world.interface.modlayerFileExists(fullNormalPath)){
     return std::nullopt;
   }
@@ -297,7 +297,10 @@ void setTexture(World& world, objid index, std::string textureName, std::functio
       if (normalTexture.has_value()){
         meshObj -> normalTexture.textureString = normalTextureName.value();
         meshObj -> normalTexture.textureId = normalTexture.value().textureId;
-      }   
+      }else {
+        meshObj -> normalTexture.textureString = "";
+        meshObj -> normalTexture.textureId = -1;
+      }
     }
 
     GameObjectNavmesh* navmeshObj = std::get_if<GameObjectNavmesh>(&world.objectMapping.at(id));
