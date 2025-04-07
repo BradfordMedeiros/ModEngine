@@ -1,5 +1,7 @@
 #include "./loadmodel.h"
 
+std::string readFileOrPackage(std::string filepath);
+
 std::vector<Animation> processAnimations( const aiScene* scene){
   std::vector<Animation> animations;
 
@@ -549,14 +551,100 @@ void printDebugModelData(ModelData& data, std::string modelPath){
 
 }
 
+
+
+// This is some horrible shit to make the file IO able to read from in memory that I specify
+class CustomIOStream : public Assimp::IOStream {
+public:
+  std::string file;
+  int32_t seekOffset = 0;
+  int32_t fileSize = 0;
+  CustomIOStream(std::string file){
+    this -> file = file;
+    this -> fileSize = readFileOrPackage(file).size();
+  };
+  ~CustomIOStream(){};
+
+  size_t Read(void* pvBuffer, size_t pSize, size_t pCount) override {
+    auto fileContent = readFileOrPackage(this -> file);
+    if (this -> seekOffset >= fileContent.size()) {
+      return 0;  // End of file
+    }
+    auto numBytes = pSize * pCount;
+    numBytes = std::min(numBytes, fileContent.size() - this -> seekOffset);
+    memcpy(pvBuffer, fileContent.data() + this -> seekOffset, numBytes);
+    this -> seekOffset += numBytes;
+    return numBytes / pSize;
+  }
+  size_t Write( const void* pvBuffer, size_t pSize, size_t pCount) override{
+    modassert(false, std::string("write not supported, wanted to write: ") + std::string(this->file));
+    return 0;
+  }
+  aiReturn Seek( size_t pOffset, aiOrigin pOrigin) override{
+    if (pOrigin == aiOrigin_SET){
+      this -> seekOffset = pOffset;
+      //std::cout << "seek set: " << std::to_string(pOrigin) << std::endl;
+    }else if (pOrigin == aiOrigin_CUR){
+      this -> seekOffset = this -> seekOffset + pOffset;
+      //std::cout << "seek curr: " << std::to_string(pOrigin) << std::endl;
+    }else if (pOrigin == aiOrigin_END){
+      this -> seekOffset = this -> fileSize + pOffset;
+      //std::cout << "seek end: " << std::to_string(pOrigin) << std::endl;
+    }else{
+      modassert(false, "unexpected seek pOrigin");
+    }
+    return aiReturn_SUCCESS;
+  }
+  size_t Tell() const override{
+    modassert(false, std::string("Tell not supported, wanted to Tell: ") + std::string(this->file));
+    return 0;
+  }
+  size_t FileSize() const override {
+    return this -> fileSize;
+  }
+  void Flush () {}
+};
+
+// Fisher Price - My First Filesystem
+class MyIOSystem : public Assimp::IOSystem {
+public:
+  MyIOSystem() {}
+  ~MyIOSystem() {}
+
+  bool Exists(const char* file) const override {
+    //std::cout << "checking if file exists:  " << file << std::endl;
+    return true;
+  }
+  char getOsSeparator() const override {
+    return '/';
+  }
+  Assimp::IOStream* Open(const char* file, const char* mode) override {
+    std::cout << "iostream open file: " << file << std::endl;
+    ::CustomIOStream* ptr = new ::CustomIOStream(std::string(file));
+    return ptr;
+  }
+  void Close(Assimp::IOStream* pFile) override{ 
+    std::cout << "iostream closefile" << std::endl;
+    delete pFile; 
+  }
+};
+
 ModelDataCore loadModelCore(std::string modelPath){
    Assimp::Importer import;
+
+   MyIOSystem* ioSystem = new MyIOSystem;
+   import.SetIOHandler(ioSystem);
+
    modlog("load file loadModelCore", modelPath);
+   std::string fileContent = readFileOrPackage(modelPath);
+
    const aiScene* scene = import.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
    if (!scene || scene -> mFlags && AI_SCENE_FLAGS_INCOMPLETE || !scene -> mRootNode){
       std::cerr << "error loading model" << std::endl;
-      throw std::runtime_error("Error loading model: does the file " + modelPath + " exist and is valid?");
+      modassert(false, std::string("Error loading model: does the file ") + modelPath + " "  + std::string(import.GetErrorString()));
    } 
+   import.SetIOHandler(NULL); // otherwise Assimp::Importer will try to free this on destruct...ok bro 
+   delete ioSystem;
    std::cout << "loading file" << std::endl;
 
    std::map<int32_t, MeshData> meshIdToMeshData;
