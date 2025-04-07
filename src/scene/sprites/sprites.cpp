@@ -1,5 +1,8 @@
 #include "./sprites.h"
 
+std::string readFileOrPackage(std::string filepath); // i dont really like directly referencing this here, but...it's ok
+
+
 struct FontParamInfo {
   std::map<unsigned int, FontParams> fontmeshes;
   float lineSpacing;
@@ -42,7 +45,9 @@ FontParamInfo loadTtfFontMeshes(std::string filepath, ttfFont& fontToLoad, Textu
   std::map<unsigned int, FontParams> fontmeshes;
   FT_Library* freeType = initFreeType();
   FT_Face face;
-  if (FT_New_Face(*freeType, filepath.c_str(), 0, &face)){
+
+  auto fileContent = readFileOrPackage(filepath);
+  if (FT_New_Memory_Face(*freeType, (const unsigned char*)fileContent.c_str(), fileContent.size(), 0, &face)){
     modassert(false, "Error - FreeType - failed loading font");
   }
   FT_Set_Pixel_Sizes(face, 128, 128); // what size to set this?
