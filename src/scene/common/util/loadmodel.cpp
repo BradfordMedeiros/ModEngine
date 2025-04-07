@@ -632,8 +632,8 @@ public:
 ModelDataCore loadModelCore(std::string modelPath){
    Assimp::Importer import;
 
-   MyIOSystem* ioSystem = new MyIOSystem;
-   import.SetIOHandler(ioSystem);
+   MyIOSystem ioSystem ;
+   import.SetIOHandler(&ioSystem);
 
    modlog("load file loadModelCore", modelPath);
    std::string fileContent = readFileOrPackage(modelPath);
@@ -644,7 +644,6 @@ ModelDataCore loadModelCore(std::string modelPath){
       modassert(false, std::string("Error loading model: does the file ") + modelPath + " "  + std::string(import.GetErrorString()));
    } 
    import.SetIOHandler(NULL); // otherwise Assimp::Importer will try to free this on destruct...ok bro 
-   delete ioSystem;
    std::cout << "loading file" << std::endl;
 
    std::map<int32_t, MeshData> meshIdToMeshData;
