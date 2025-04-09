@@ -1,7 +1,7 @@
 #include "./scene_debug.h"
 
 std::string getDotInfoForNode(DotInfo& info){
-  return std::string("\"") + info.name + "(id: " + std::to_string(info.id) + ", sceneId:" + std::to_string(info.sceneId) + ", " + "groupId: " + std::to_string(info.groupId) + 
+  return std::string("\"") + info.name + "(id: " + std::to_string(info.id) + ", sceneId:" + std::to_string(info.sceneId) + ", " + "groupId: " + std::to_string(info.groupId) + ", prefabId: " + print(info.prefabId) + 
   ") pos: " + print(info.position) + " scale: " + print(info.scale) +  " rot: " + print(info.rotation) + " bone = " + std::string(info.isBone ? "true" : "false") +
   " meshes: [" + join(info.meshes, ' ') + "] disabled: " + print(info.isDisabled) +  "\"";
 }
@@ -26,6 +26,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
       .id = childObjH.id,
       .sceneId = childObjH.sceneId,
       .groupId = childObjH.groupId,
+      .prefabId = childObjH.prefabId,
       .position = childObj.transformation.position,
       .scale = childObj.transformation.scale,
       .rotation = childObj.transformation.rotation, 
@@ -51,6 +52,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
       .id = parentObj.id,
       .sceneId = parentObjH.sceneId,
       .groupId = parentObjH.groupId,
+      .prefabId = parentObjH.prefabId,
       .position = parentObj.transformation.position,
       .scale = parentObj.transformation.scale,
       .rotation = parentObj.transformation.rotation,

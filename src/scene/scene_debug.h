@@ -12,6 +12,7 @@ struct DotInfo {
   objid id;
   objid sceneId;
   objid groupId;
+  std::optional<objid> prefabId;
   glm::vec3 position;
   glm::vec3 scale;
   glm::quat rotation;

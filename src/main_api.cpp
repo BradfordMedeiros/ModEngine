@@ -195,7 +195,7 @@ int32_t loadSceneWithId(std::string sceneFile, std::vector<std::vector<std::stri
       .payload = tokens.at(2),
     });
   }
-  return addSceneToWorld(world, sceneFile, addedTokens, name, tags, id, std::nullopt);
+  return addSceneToWorld(world, sceneFile, addedTokens, name, tags, id, std::nullopt, std::nullopt);
 }
 
 int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags){

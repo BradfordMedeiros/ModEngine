@@ -17,6 +17,7 @@ struct GameObjectH {
   std::set<objid> children;
   objid groupId;       // grouping mechanism for nodes.  It is either its own id, or explicitly stated when created. 
   objid sceneId;
+  std::optional<objid> prefabId;
 };
 
 struct TransformCacheElement {
@@ -61,7 +62,7 @@ struct SceneSandbox {
 };
 
 std::vector<std::string> childnames(SceneSandbox& sandbox, GameObjectH& gameobjecth);
-void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children);
+void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children, std::optional<objid> prefabId);
 
 std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid);
 void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects);
@@ -100,7 +101,7 @@ struct AddSceneDataValues {
   std::vector<objid> idsAdded;
   std::map<std::string, GameobjAttributes> subelementAttributes;
 };
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields, std::optional<objid> parentId);
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields, std::optional<objid> parentId, std::optional<objid> prefabId);
 void removeScene(SceneSandbox& sandbox, objid sceneId);
 bool sceneExists(SceneSandbox& sandbox, objid sceneId);
 
@@ -115,7 +116,8 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
   std::map<objid, GameobjAttributes> additionalFields,
   std::function<objid()> getNewObjectId,
   std::function<std::set<std::string>(std::string&)> getObjautoserializerFields,
-  std::set<objid> boneIds
+  std::set<objid> boneIds,
+  std::optional<objid> prefabId
 );
 
 void makeParent(SceneSandbox& sandbox, objid child, objid parent);

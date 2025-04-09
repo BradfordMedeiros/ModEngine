@@ -321,24 +321,7 @@ std::optional<objid> prefabId(World& world, objid id){
   if (isPrefab(world, id)){
     return id;
   }
-
-  std::optional<int> currentId = id;
-  auto lastSceneId = sceneId(world.sandbox, id);
-  bool hasSceneNewId = false;
-  while(currentId.has_value()){
-    auto currSceneId = sceneId(world.sandbox, currentId.value());
-    if (currSceneId != lastSceneId){
-      lastSceneId = currSceneId;
-      hasSceneNewId = true;
-    }
-
-    if (hasSceneNewId && isPrefab(world, currentId.value())){
-      return currentId.value();
-    }
-    currentId = getParent(world.sandbox, currentId.value());
-
-  }
-  return std::nullopt;
+  return getGameObjectH(world.sandbox, id).prefabId;
 }
 
 

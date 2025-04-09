@@ -12,12 +12,13 @@ void enforceParentRelationship(Scene& scene, objid id, objid parentId){
   scene.idToGameObjectsH.at(parentId).children.insert(id);
 }
 
-objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parentId, GameObject& gameobjectObj){
+objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parentId, GameObject& gameobjectObj, std::optional<objid> prefabId){
   auto gameobjectH = GameObjectH { 
     .id = gameobjectObj.id,
     .parentId = parentId.has_value() ? parentId.value() : 0,
     .groupId = gameobjectObj.id,
     .sceneId = sceneId,
+    .prefabId = prefabId,
   };
   modassert(scene.idToGameObjectsH.find(gameobjectObj.id) == scene.idToGameObjectsH.end(), "id already exists");
   modassert(scene.sceneToNameToId.find(sceneId) != scene.sceneToNameToId.end(), std::string("scene does not exist: ") + std::to_string(sceneId));
@@ -36,7 +37,8 @@ SceneDeserialization createSceneFromParsedContent(
   objid sceneId,
   std::vector<Token> tokens,  
   std::function<objid()> getNewObjectId,
-  std::function<std::set<std::string>(std::string&)> getObjautoserializerFields
+  std::function<std::set<std::string>(std::string&)> getObjautoserializerFields,
+  std::optional<objid> prefabId
 ){
   Scene scene;
 
@@ -57,7 +59,7 @@ SceneDeserialization createSceneFromParsedContent(
 
   for (auto [name, gameobjectObj] : gameobjs){
     modassert(name == gameobjectObj.name, "names do not match");
-    sandboxAddToScene(scene, sceneId, std::nullopt, gameobjectObj);
+    sandboxAddToScene(scene, sceneId, std::nullopt, gameobjectObj, prefabId);
   }
 
   std::map<std::string, GameobjAttributes> additionalFields;
@@ -83,7 +85,7 @@ SceneDeserialization createSceneFromParsedContent(
 }
 
 // todo if this is an existing scene, it doesn't sponsor tags 
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData,  std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields, std::optional<objid> parentId){
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData,  std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields, std::optional<objid> parentId, std::optional<objid> prefabId){
   for (auto &[_, metadata] : sandbox.sceneIdToSceneMetadata){ // all scene names should be unique
     if (metadata.name == name && name != std::nullopt){
       modassert(false, std::string("scene name already exists: ") + name.value());
@@ -92,7 +94,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
 
 
   auto tokens = parseFormat(sceneData);
-  SceneDeserialization deserializedScene = createSceneFromParsedContent(sceneId, tokens, getUniqueObjId, getObjautoserializerFields);
+  SceneDeserialization deserializedScene = createSceneFromParsedContent(sceneId, tokens, getUniqueObjId, getObjautoserializerFields, prefabId);
 
   for (auto &[id, obj] : deserializedScene.scene.idToGameObjects){
     modassert(sandbox.mainScene.idToGameObjects.find(id) == sandbox.mainScene.idToGameObjects.end(), "duplicate id");
@@ -162,7 +164,8 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
   std::map<objid, GameobjAttributes> additionalFields,
   std::function<objid()> getNewObjectId,
   std::function<std::set<std::string>(std::string&)> getObjautoserializerFields,
-  std::set<objid> boneIds
+  std::set<objid> boneIds,
+  std::optional<objid> prefabId
 ){
   Scene& scene = sandbox.mainScene; 
   std::vector<LayerInfo>& layers = sandbox.layers;
@@ -190,7 +193,7 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
 
     modassert(names.at(nodeId) == gameobj.name, "names do not match");
-    auto addedId = sandboxAddToScene(scene, sceneId, std::nullopt, gameobj);
+    auto addedId = sandboxAddToScene(scene, sceneId, std::nullopt, gameobj, prefabId);
     addedIds.push_back(addedId);
     scene.idToGameObjectsH.at(id).groupId = rootId;
   }
@@ -206,9 +209,9 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
   return nameToAdditionalFields;
 } 
 
-void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children){
+void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children, std::optional<objid> prefabId){
   modassert(name == gameobjectObj.name, "names do not match");
-  auto addedId = sandboxAddToScene(sandbox.mainScene, sceneId, std::nullopt, gameobjectObj);      
+  auto addedId = sandboxAddToScene(sandbox.mainScene, sceneId, std::nullopt, gameobjectObj, prefabId);      
   for (auto child : children){
     if (sandbox.mainScene.sceneToNameToId.at(sceneId).find(child) == sandbox.mainScene.sceneToNameToId.at(sceneId).end()){
        // @TODO - shouldn't be an error should automatically create instead
@@ -367,7 +370,7 @@ SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std
 
   std::string name = "root";
   auto rootObj = gameObjectFromFields(name, 0, GameobjAttributes {}, getObjautoserializerFields(name), false); 
-  auto rootObjId = sandboxAddToScene(mainScene, 0, std::nullopt, rootObj);
+  auto rootObjId = sandboxAddToScene(mainScene, 0, std::nullopt, rootObj, std::nullopt);
 
   SceneSandbox sandbox {
     .mainScene = mainScene,

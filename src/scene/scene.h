@@ -48,15 +48,15 @@ World createWorld(
   std::vector<std::string> spriteMeshes
 );
 
-void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid>& idsAdded, std::function<objid()> getNewObjectId, std::map<std::string, GameobjAttributesWithId> additionalFields, std::map<std::string, GameobjAttributes>& submodelAttributes);
+void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid>& idsAdded, std::function<objid()> getNewObjectId, std::map<std::string, GameobjAttributesWithId> additionalFields, std::map<std::string, GameobjAttributes>& submodelAttributes, std::optional<objid> prefabId);
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId);
 Texture loadTextureAtlasWorld(World& world, std::string texturepath, std::vector<std::string> atlasTextures, std::optional<std::string> cacheFile, objid ownerId);
 Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight, std::optional<objid> mappingTexture);
 Texture loadTextureWorldSelection(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight, std::optional<objid> mappingTexture);
 void maybeReloadTextureWorld(World& world, std::string texturepath);
 
-objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> sceneId, std::optional<objid> parentId);
-objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> parentId);
+objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> sceneId, std::optional<objid> parentId, std::optional<objid> prefabId);
+objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> parentId, std::optional<objid> prefabId);
 void removeSceneFromWorld(World& world, objid sceneId);
 
 struct GameObjPair {
