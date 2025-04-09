@@ -61,7 +61,8 @@ struct SceneSandbox {
   std::set<objid> updatedIds;
 };
 
-std::vector<std::string> childnames(SceneSandbox& sandbox, GameObjectH& gameobjecth);
+
+std::vector<std::string> childnamesNoPrefabs(SceneSandbox& sandbox, GameObjectH& gameobjecth);
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children, std::optional<objid> prefabId);
 
 std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid);

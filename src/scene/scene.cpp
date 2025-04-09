@@ -809,7 +809,8 @@ std::string serializeScene(World& world, objid sceneId, bool includeIds){
 std::string serializeObjectById(World& world, objid id, std::string overridename){
   auto gameobj = getGameObject(world.sandbox, id);
   auto gameobjecth = getGameObjectH(world.sandbox, id);
-  auto children = childnames(world.sandbox, gameobjecth);
+  auto children = childnamesNoPrefabs(world.sandbox, gameobjecth);
+  
   auto additionalFields = getAdditionalFields(id, world.objectMapping, [&world](int textureId) -> std::string {
     return getTextureById(world, textureId).value();
   }, world.interface.saveFile);

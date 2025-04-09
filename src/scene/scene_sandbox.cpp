@@ -333,11 +333,11 @@ std::optional<objid> parentId(Scene& scene, objid id){
   return scene.idToGameObjectsH.at(id).parentId;
 }
 
-std::vector<std::string> childnames(SceneSandbox& sandbox, GameObjectH& gameobjecth){   
+std::vector<std::string> childnamesNoPrefabs(SceneSandbox& sandbox, GameObjectH& gameobjecth){   
   std::vector<std::string> childnames;
   for (auto childid : gameobjecth.children){
     auto childH = getGameObjectH(sandbox, childid);
-    if (childH.groupId == childid){
+    if (!childH.prefabId.has_value() &&  childH.groupId == childid){
       childnames.push_back(getGameObject(sandbox, childid).name);
     }
   }
@@ -353,7 +353,7 @@ std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<s
     auto gameobj = getGameObject(sandbox, id);
     auto gameobjecth = getGameObjectH(sandbox, id);
     auto additionalFields = getAdditionalFields(id); 
-    auto children = childnames(sandbox, gameobjecth);
+    auto children = childnamesNoPrefabs(sandbox, gameobjecth);
     sceneData = sceneData + serializeObj(id, gameobjecth.groupId, gameobj, children, includeIds, additionalFields,  "");
   }
   return sceneData;
