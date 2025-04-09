@@ -606,6 +606,8 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
     //modassert(!aboutEqual(oldRelativeTransform.scale.x, 0.f), "0 scale for x component");
     //modassert(!aboutEqual(oldRelativeTransform.scale.y, 0.f), "0 scale for y component");
     //modassert(!aboutEqual(oldRelativeTransform.scale.z, 0.f), "0 scale for z component");
+  }else{
+    getGameObject(sandbox, id).transformation = transform;
   }
   updateAllChildrenPositions(sandbox, id);
 }
