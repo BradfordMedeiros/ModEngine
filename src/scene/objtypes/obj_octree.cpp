@@ -455,7 +455,7 @@ Octree deserializeOctree(std::string& value){
 
   auto textures = deserializeTextures(lines.at(2));
   auto shapes = deserializeShapes(lines.at(3));
-  modassert(shapes.size() == textures.size(), std::string("texture size and shapes sizes disagree: t, s") + std::to_string(textures.size()) + ", " + std::to_string(shapes.size()));
+  modassert(shapes.size() == textures.size(), std::string("texture size and shapes sizes disagree: t, s = ") + std::to_string(textures.size()) + ", " + std::to_string(shapes.size()));
 
   auto textureAtlas = split(lines.at(4), ',');
   //modassert(equalOrdered(textureAtlas, atlasDimensions.value().textureNames), "textures changed");
@@ -2538,13 +2538,15 @@ void setOctreeTextureId(int textureId){
 }
 
 std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctree& obj, ObjectSerializeUtil& util){
-  std::vector<std::pair<std::string, std::string>> pairs;
 //  auto serializedData = serializeVoxelState(obj.voxel, util.textureName);
 //
 //  pairs.push_back(std::pair<std::string, std::string>("from", serializedData.voxelState));
 //  if (serializedData.textureState != ""){
 //    pairs.push_back(std::pair<std::string, std::string>("fromtextures", serializedData.textureState));
 //  }
+  saveOctree(obj, util.saveFile);
+  std::vector<std::pair<std::string, std::string>> pairs;
+  autoserializerSerialize((char*)&obj, octreeAutoserializer, pairs);
   return pairs;
 }
 

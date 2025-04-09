@@ -178,7 +178,7 @@ int renderObject(
   glm::mat4& finalModelMatrix
 );
 
-std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);
+std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName, std::function<void(std::string, std::string&)> saveFile);
 std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& toRender, const char* field);
 bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&);
 

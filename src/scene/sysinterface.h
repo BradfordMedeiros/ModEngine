@@ -15,6 +15,7 @@ struct SysInterface {
   std::function<bool(std::string)> modlayerFileExists;
   std::function<FontFamily&(std::string)> fontFamilyByName;
   std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine;
+  std::function<void(std::string, std::string&)> saveFile;
 };
 
 #endif

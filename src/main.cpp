@@ -1161,6 +1161,10 @@ int main(int argc, char* argv[]){
     .drawLine = [](glm::vec3 fromPos, glm::vec3 toPos, glm::vec4 color) -> void {
       addLineToNextCycleTint(lineData, fromPos, toPos, false, -1, color, std::nullopt, std::nullopt);
     },
+    .saveFile = [](std::string filepath, std::string& data) -> void {
+      auto modpath = modlayerPath(filepath);
+      realfiles::saveFile(modpath, data);
+    },
   };
 
   auto mods = result["mods"].as<std::vector<std::string>>();

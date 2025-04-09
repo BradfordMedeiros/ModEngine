@@ -802,7 +802,7 @@ std::string serializeScene(World& world, objid sceneId, bool includeIds){
   return serializeScene(world.sandbox, sceneId, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
     return getAdditionalFields(objectId, world.objectMapping, [&world](int textureId) -> std::string {
       return getTextureById(world, textureId).value();
-    });
+    }, world.interface.saveFile);
   }, includeIds);
 } 
 
@@ -812,7 +812,7 @@ std::string serializeObjectById(World& world, objid id, std::string overridename
   auto children = childnames(world.sandbox, gameobjecth);
   auto additionalFields = getAdditionalFields(id, world.objectMapping, [&world](int textureId) -> std::string {
     return getTextureById(world, textureId).value();
-  });
+  }, world.interface.saveFile);
   return serializeObj(id, gameobjecth.groupId, gameobj, children, false, additionalFields, overridename);
 }
 

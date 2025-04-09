@@ -431,13 +431,14 @@ bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const
   return false;
 }
   
-std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName){
+std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName, std::function<void(std::string, std::string&)> saveFile){
   GameObjectObj objectToSerialize = mapping.at(id);
   auto variantIndex = objectToSerialize.index();
   for (auto &objType : objTypes){
     if (variantIndex == objType.variantType){
       ObjectSerializeUtil serializeUtil {
         .textureName = getTextureName,
+        .saveFile = saveFile,
       };
       return objType.serialize(objectToSerialize, serializeUtil);
     }

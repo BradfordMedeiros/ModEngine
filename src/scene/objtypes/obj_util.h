@@ -41,6 +41,7 @@ struct ObjectTypeUtil {
 
 struct ObjectSerializeUtil {
   std::function<std::string(int)> textureName;
+  std::function<void(std::string, std::string&)> saveFile;
 };
 
 struct ObjectRemoveUtil {
