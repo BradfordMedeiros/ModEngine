@@ -1797,6 +1797,12 @@ int main(int argc, char* argv[]){
           auto groupId = getGroupId(world.sandbox, selectTargetId);
           auto idToUse = state.groupSelection ? groupId : selectTargetId;
 
+          auto isPrefab = prefabId(world, selectTargetId);
+          std::cout << "prefab: is a prefab: ? " << (isPrefab.has_value() ? "true" : "false") << std::endl;
+          if (isPrefab.has_value()){
+            idToUse = isPrefab.value();
+          }
+
           if (layerSelectIndex >= 0){
             modassert(idExists(world.sandbox, idToUse), "id does not exist shouldSelectItem");
             setSelectedIndex(state.editor, idToUse, !state.multiselect);
