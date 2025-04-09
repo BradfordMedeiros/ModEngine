@@ -227,25 +227,32 @@ void doUnloadScenes(){
   queuedUnloadScenes = {};
 }
 
-// This implementation could be a lot better.  
-// This ought to just update the old attributes to the new ones instead of unloaded/reloading
+
 void resetScene(std::optional<objid> sceneId){
-  /*std::cout << "reset scene placeholder for: " << (sceneId.has_value() ? std::to_string(sceneId.value()) : "no sceneid") << std::endl;
-  if (sceneId.has_value()){
-    auto sceneFile = sceneFileForSceneId(world, sceneId.value());
-    auto sceneName = sceneNameForSceneId(world, sceneId.value());
-    auto sceneTags = sceneTagsForSceneId(world, sceneId.value());
+  modassert(sceneId.has_value(), "i dont know why i allow sceneId.has_value(( = false")
+  
+  auto sceneFile = sceneFileForSceneId(world, sceneId.value());
+  auto sceneName = sceneNameForSceneId(world, sceneId.value());
+  auto sceneTags = sceneTagsForSceneId(world, sceneId.value());
 
-    auto parentObjId = listParentObjId(world.sandbox, sceneId.value());
-    unloadScene(sceneId.value());
-    loadSceneWithId(sceneFile, {}, sceneName, sceneTags, sceneId.value()); // additional args get lost, maybe i should keep this data around? 
-    if (parentObjId.has_value()){
-      auto rootObjIdNewScene = rootIdForScene(world.sandbox, sceneId.value());
-      makeParent(world.sandbox, rootObjIdNewScene, parentObjId.value());
-    }
-  }*/
-  modassert(false, "reset scene not yet implemented");
+  //auto parentObjId = listParentObjId(world.sandbox, sceneId.value());
+  unloadScene(sceneId.value());
 
+  // this is a hack since can't remove and readd in the same scene since duplicate name
+  schedule(-1, false, 10, NULL, [sceneFile, sceneName, sceneTags, sceneId](void*) -> void {
+    auto newSceneId =  sceneId.value();
+    newSceneId = getUniqueObjId();
+    loadSceneWithId(sceneFile, {}, sceneName, sceneTags, newSceneId); // additional args get lost, maybe i should keep this data around? 
+  });
+
+
+
+  // TODO - parent this to the scene you are resetting 
+
+  //if (parentObjId.has_value()){
+  //  auto rootObjIdNewScene = rootIdForScene(world.sandbox, sceneId.value());
+  //  makeParent(world.sandbox, rootObjIdNewScene, parentObjId.value());
+  //}
 }
 
 bool isNotWriteProtectedFile(std::string& fileToSave){
@@ -260,7 +267,7 @@ bool isNotWriteProtectedFile(std::string& fileToSave){
 }
 
 bool saveScene(bool includeIds, objid sceneId, std::optional<std::string> filename){
-  auto fileToSave = sceneFileForSceneId(world, sceneId);    // MAYBE SHOULD CREATE A CACHE OF WHAT FILE WAS WHAT SCENE?
+  auto fileToSave = sceneFileForSceneId(world, sceneId);
   fileToSave = filename.has_value() ? filename.value() : fileToSave;
   std::cout << "saving scene id: " << sceneId << " to file: " << fileToSave << std::endl;
   if (isNotWriteProtectedFile(fileToSave)){

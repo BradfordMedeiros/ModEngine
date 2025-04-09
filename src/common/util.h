@@ -479,6 +479,7 @@ FILE_EXTENSION_TYPE getFileType(std::string filepath);
 std::optional<std::string> getExtension(std::string file);
 std::optional<std::string> getPreExtension(std::string file);
 
+std::string relativePath(std::string folder, std::string path, std::string workingDir);
 bool isInFolder(std::string folder, std::string path, std::string workingDir);
 bool isExtensionType(std::string& file, std::vector<std::string>& extensions);
 
