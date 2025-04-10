@@ -313,6 +313,12 @@ glm::vec4 parseVec4(std::string positionRaw){
   in >> x >> y >> z >> w;
   return glm::vec4(x, y, z, w);  
 }
+glm::vec3 parseVec3(std::string positionRaw){
+  float x, y, z;
+  std::istringstream in(positionRaw);
+  in >> x >> y >> z;
+  return glm::vec3(x, y, z);  
+}
 bool maybeParseVec2(std::string positionRaw, glm::vec2& _vec){
   auto parts = filterWhitespace(split(positionRaw, ' '));
   if (parts.size() != 2){
