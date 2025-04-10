@@ -114,6 +114,10 @@ ManipulatorTools tools {
 
 void drawAABB(objid id){
   auto aabb = mainApi -> getModAABBModel(id);
+  if (!aabb.has_value()){
+    std::cout << "could not get the aabb for this model" << std::endl;
+    return;
+  }
   auto bounds = toBounds(aabb.value());
   mainApi -> drawLine(bounds.topLeftFront, bounds.topRightFront, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);
   mainApi -> drawLine(bounds.bottomLeftFront, bounds.bottomRightFront, false, -1, glm::vec4(1.f, 0.f, 0.f, 1.f), std::nullopt, std::nullopt);

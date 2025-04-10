@@ -351,7 +351,12 @@ std::vector<std::pair<std::string, std::string>> coreFields(GameObject& gameobje
 
 std::vector<std::pair<std::string, std::string>> uniqueAdditionalFields(GameObject& gameobject, std::map<std::string, std::string>& serializedPairs){
   std::vector<std::pair<std::string, std::string>> fields;
+  //typedef std::variant<std::vector<std::string>, float> AttributeValue;
+
   for (auto &[field, value] : gameobject.additionalAttr.attr){
+    if (field == "meshes"){
+      continue;
+    }
     modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
     auto strValue = std::get_if<std::string>(&value);
     auto floatValue = std::get_if<float>(&value);
@@ -369,7 +374,7 @@ std::vector<std::pair<std::string, std::string>> uniqueAdditionalFields(GameObje
     }else if (vec4Value){
       fields.push_back({ field, serializeVec(*vec4Value) });
     }else{
-      modassert(false, "invalid type uniqueAdditionalFields");
+      modassert(false, std::string("invalid type uniqueAdditionalFields: ") + field);
     }
   }
   return fields;

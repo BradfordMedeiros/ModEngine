@@ -1800,6 +1800,7 @@ int main(int argc, char* argv[]){
           auto isPrefab = prefabId(world, selectTargetId);
           std::cout << "prefab: is a prefab: ? " << (isPrefab.has_value() ? "true" : "false") << std::endl;
           if (isPrefab.has_value()){
+            std::cout << "prefab: is a prefab: ? " << std::to_string(isPrefab.has_value()) << std::endl;
             idToUse = isPrefab.value();
           }
 
