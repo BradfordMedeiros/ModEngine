@@ -764,6 +764,9 @@ void setWorldState(std::vector<ObjectValue> values){
   std::vector<ObjectValue> renderStagesValues;
   std::vector<ObjectValue> otherValues;
   for (auto &value: values){
+    if (value.object == "skybox" && value.attribute == "texture"){
+      state.updateSkybox = true;  // this should probably be moved to the state thing
+    }
     bool isRenderValue = value.object.at(0) == '$';
     if (isRenderValue){
       auto translatedObject = value.object.substr(1, value.object.size());

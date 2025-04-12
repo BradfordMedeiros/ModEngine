@@ -113,6 +113,7 @@ struct engineState {
   GameObjectCamera* activeCameraData;
 
   std::string skybox;
+  bool updateSkybox;
   glm::vec3 skyboxcolor;
   bool showSkybox;
 

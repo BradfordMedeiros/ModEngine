@@ -509,6 +509,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .activeCameraObj = NULL,
     .activeCameraData = NULL,
     .skybox = "",
+    .updateSkybox = true,
     .skyboxcolor = glm::vec3(1.f, 1.f, 1.f),
     .showSkybox = true,
     .enableDof = false,

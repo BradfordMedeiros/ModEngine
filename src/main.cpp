@@ -1726,6 +1726,10 @@ int main(int argc, char* argv[]){
       tickAnimations(world, timings, timePlayback.currentTime);
     }
 
+    if (state.updateSkybox){
+      loadSkybox(world, state.skybox); 
+      state.updateSkybox = false;
+    }
     tickRecordings(getTotalTimeGame());
     tickScheduledTasks();
     handleMovingObjects(timePlayback.currentTime);
