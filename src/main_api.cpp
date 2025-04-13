@@ -230,7 +230,11 @@ void doUnloadScenes(){
 
 void resetScene(std::optional<objid> sceneId){
   modassert(sceneId.has_value(), "i dont know why i allow sceneId.has_value(( = false")
-  
+    
+  auto exists = sceneExists(world.sandbox, sceneId.value());
+  modassert(exists, std::string("scene does not exist: ") + std::to_string(sceneId.value()))
+
+
   auto sceneFile = sceneFileForSceneId(world, sceneId.value());
   auto sceneName = sceneNameForSceneId(world, sceneId.value());
   auto sceneTags = sceneTagsForSceneId(world, sceneId.value());
@@ -241,7 +245,6 @@ void resetScene(std::optional<objid> sceneId){
   // this is a hack since can't remove and readd in the same scene since duplicate name
   schedule(-1, false, 10, NULL, [sceneFile, sceneName, sceneTags, sceneId](void*) -> void {
     auto newSceneId =  sceneId.value();
-    newSceneId = getUniqueObjId();
     loadSceneWithId(sceneFile, {}, sceneName, sceneTags, newSceneId); // additional args get lost, maybe i should keep this data around? 
   });
 
