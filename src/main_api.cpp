@@ -243,7 +243,7 @@ void resetScene(std::optional<objid> sceneId){
   unloadScene(sceneId.value());
 
   // this is a hack since can't remove and readd in the same scene since duplicate name
-  schedule(-1, false, 10, NULL, [sceneFile, sceneName, sceneTags, sceneId](void*) -> void {
+  schedule(-1, false, 0, NULL, [sceneFile, sceneName, sceneTags, sceneId](void*) -> void {
     auto newSceneId =  sceneId.value();
     loadSceneWithId(sceneFile, {}, sceneName, sceneTags, newSceneId); // additional args get lost, maybe i should keep this data around? 
   });
