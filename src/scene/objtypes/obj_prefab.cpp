@@ -16,13 +16,16 @@ std::vector<Token> prefabAdditionalTokens(GameobjAttributes& attributes){
   		auto tokenPayload = keyAndAttr.attributeValue;
   		auto payload = std::get_if<std::string>(&tokenPayload);
   		modassert(payload != NULL, "prefab attribute not string value");
-  		auto values = split(*payload, ':');
-  		modassert(values.size() == 2, std::string("invalid additive prefab attribute: " + *payload));
-  		addTokens.push_back(Token {
-  			.target = tokenTarget,
-  			.attribute = values.at(0),
-  			.payload = values.at(1),
-  		});
+  		auto payloadValues = split(*payload, ',');
+  		for (auto &payloadValue : payloadValues){
+  			auto values = split(payloadValue, ':');
+  			modassert(values.size() == 2, std::string("invalid additive prefab attribute: " + *payload));
+  			addTokens.push_back(Token {
+  				.target = tokenTarget,
+  				.attribute = values.at(0),
+  				.payload = values.at(1),
+  			});
+  		}
   	}
 
   }
