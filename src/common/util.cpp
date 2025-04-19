@@ -794,7 +794,8 @@ GameobjAttributes gameobjAttributes2To1(std::vector<GameobjAttribute>& attribute
     auto vec2Value = std::get_if<glm::vec2>(&attrValue.attributeValue);
     auto vec3Value = std::get_if<glm::vec3>(&attrValue.attributeValue);
     auto vec4Value = std::get_if<glm::vec4>(&attrValue.attributeValue);
-    if (stringValue || floatValue || vec2Value || vec3Value || vec4Value){
+    auto deleteAttr = std::get_if<DeleteAttribute>(&attrValue.attributeValue);
+    if (stringValue || floatValue || vec2Value || vec3Value || vec4Value || deleteAttr){
       attr.attr[attrValue.field] = attrValue.attributeValue;
     }else{
       modassert(false, "invalid attribute value type");
@@ -909,7 +910,12 @@ bool hasAttribute(GameobjAttributes& attrs, std::string& type){
 
 void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAttributes){
   for (auto &[name, value] : fromAttributes.attr){
-    toAttributes.attr[name] = value;
+    auto deleteAttr = std::get_if<DeleteAttribute>(&value);
+    if (deleteAttr != NULL){
+      toAttributes.attr.erase(name);
+    }else{
+      toAttributes.attr[name] = value;
+    }
   }
 }
 

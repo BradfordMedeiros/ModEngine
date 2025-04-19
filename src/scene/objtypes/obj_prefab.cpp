@@ -11,21 +11,21 @@ std::vector<Token> prefabAdditionalTokens(GameobjAttributes& attributes){
   // AttributeValue payload;
   for (auto &keyAndAttr : allKeysAndAttr){
   	auto attribute = keyAndAttr.field;
-  	if (attribute.at(0) == '+'){
+  	if (attribute.at(0) == '+'){   // prefabname:+object|attribute:attributevalue
   		auto tokenTarget = attribute.substr(1, attribute.size());
-  		auto tokenPayload = keyAndAttr.attributeValue;
-  		auto payload = std::get_if<std::string>(&tokenPayload);
-  		modassert(payload != NULL, "prefab attribute not string value");
-  		auto payloadValues = split(*payload, ',');
-  		for (auto &payloadValue : payloadValues){
-  			auto values = split(payloadValue, ':');
-  			modassert(values.size() == 2, std::string("invalid additive prefab attribute: " + *payload));
-  			addTokens.push_back(Token {
-  				.target = tokenTarget,
-  				.attribute = values.at(0),
-  				.payload = values.at(1),
-  			});
-  		}
+  		
+  		auto objectAndAttribute = split(tokenTarget, '|');
+  		auto payload = std::get_if<std::string>(&keyAndAttr.attributeValue);
+  		modassert(payload != NULL, std::string("invalid type for prefab attr: ") + attribute);
+  		modassert(payload -> at(0) == '|', std::string("payload needs | prefix: ") + attribute);
+  		auto payloadValue = payload -> substr(1, payload -> size());
+
+  		addTokens.push_back(Token {
+  			.target = objectAndAttribute.at(0),
+  			.attribute = objectAndAttribute.at(1),
+  			.payload = payloadValue,
+  		});
+  		
   	}
 
   }
