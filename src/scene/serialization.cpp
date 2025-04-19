@@ -215,7 +215,7 @@ std::vector<AutoSerialize> gameobjSerializer {
   AutoSerializeInt {
     .structOffset = offsetof(GameObject, physicsOptions.layer),
     .field = "physics_layer",
-    .defaultValue = 0,
+    .defaultValue = 2, // this probably makes more sense as a world.state but whatever so easy to change
   }, 
 };
 
