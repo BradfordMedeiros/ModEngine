@@ -1808,7 +1808,7 @@ int main(int argc, char* argv[]){
             idToUse = isPrefab.value();
           }
 
-          if (layerSelectIndex >= 0){
+          if (layerSelectIndex >= 0 && state.inputMode == ENABLED){
             modassert(idExists(world.sandbox, idToUse), "id does not exist shouldSelectItem");
             setSelectedIndex(state.editor, idToUse, !state.multiselect);
           }
