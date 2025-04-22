@@ -73,7 +73,6 @@ std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "camera",
     .variantType = getVariantIndex(GameObjectCamera{}),
-    .createObj = createCamera,
     .objectAttribute = convertObjectAttribute<GameObjectCamera>(getCameraAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectCamera>(setCameraAttribute),
     .serialize = convertSerialize<GameObjectCamera>(serializeCamera),
@@ -82,7 +81,6 @@ std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "portal",
     .variantType = getVariantIndex(GameObjectPortal{}),
-    .createObj = createPortal,
     .objectAttribute = convertObjectAttribute<GameObjectPortal>(getPortalAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectPortal>(setPortalAttribute),
     .serialize = convertSerialize<GameObjectPortal>(serializePortal),
@@ -91,7 +89,6 @@ std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "light",
     .variantType = getVariantIndex(GameObjectLight{}),
-    .createObj = createLight,
     .objectAttribute = convertObjectAttribute<GameObjectLight>(getLightAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectLight>(setLightAttribute),
     .serialize = convertSerialize<GameObjectLight>(serializeLight),
@@ -100,7 +97,6 @@ std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "sound",
     .variantType = getVariantIndex(GameObjectSound{}),
-    .createObj = createSound,
     .objectAttribute = convertObjectAttribute<GameObjectSound>(getSoundAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectSound>(setSoundAttribute),
     .serialize = convertSerialize<GameObjectSound>(serializeSound),
@@ -109,7 +105,6 @@ std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "text",
     .variantType = getVariantIndex(GameObjectUIText{}),
-    .createObj = createUIText,
     .objectAttribute = convertObjectAttribute<GameObjectUIText>(getTextAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectUIText>(setTextAttribute),
     .serialize = convertSerialize<GameObjectUIText>(serializeText),
@@ -118,7 +113,6 @@ std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "navmesh",
     .variantType = getVariantIndex(GameObjectNavmesh{}),
-    .createObj = createNavmesh,
     .objectAttribute = convertObjectAttribute<GameObjectNavmesh>(getNavmeshAttribute),
     .setAttribute = nothingSetAttribute,
     .serialize = serializeNotImplemented,
@@ -127,7 +121,6 @@ std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "emitter",
     .variantType = getVariantIndex(GameObjectEmitter{}),
-    .createObj = createEmitter,
     .objectAttribute = convertObjectAttribute<GameObjectEmitter>(getEmitterAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectEmitter>(setEmitterAttribute),
     .serialize = convertSerialize<GameObjectEmitter>(serializeEmitter),
@@ -136,7 +129,6 @@ std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "default",
     .variantType = getVariantIndex(GameObjectMesh{}),
-    .createObj = createMesh,
     .objectAttribute = convertObjectAttribute<GameObjectMesh>(getMeshAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectMesh>(setMeshAttribute),
     .serialize = convertSerialize<GameObjectMesh>(serializeMesh),
@@ -145,7 +137,6 @@ std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "octree", 
     .variantType = getVariantIndex(GameObjectOctree{}),
-    .createObj = createOctree, 
     .objectAttribute = convertObjectAttribute<GameObjectOctree>(getOctreeAttribute),
     .setAttribute = nothingSetAttribute,
     .serialize = convertSerialize<GameObjectOctree>(serializeOctree),
@@ -154,7 +145,6 @@ std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "prefab", 
     .variantType = getVariantIndex(GameObjectPrefab{}),
-    .createObj = createPrefabObj, 
     .objectAttribute = convertObjectAttribute<GameObjectPrefab>(getPrefabAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectPrefab>(setPrefabAttribute),
     .serialize = convertSerialize<GameObjectPrefab>(serializePrefabObj),
@@ -162,21 +152,56 @@ std::vector<ObjectType> objTypes = {
   },
 };
 
-GameObjectObj createObjectType(std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util){
-  for (auto &objType : objTypes){
-    if (objectType == objType.name){
-      return objType.createObj(attr, util);
-    }
-  }
-  std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
-  assert(false);
-  return GameObjectObj{};
-}
-
-void addObjectType(std::map<objid, GameObjectObj>& mapping, GameObjectObj& gameobj, objid id){
+void addObjectType(std::map<objid, GameObjectObj>& mapping, objid id, std::string name, GameobjAttributes& attr, ObjectTypeUtil util){
   assert(mapping.find(id) == mapping.end());
   modlog("objecttype - add", std::to_string(id));
-  mapping[id] = gameobj;
+  auto objectType = getType(name);
+  if (objectType == "default"){
+    mapping[id] = createMesh(attr, util);
+    return;
+  }
+  if (objectType == "camera"){
+    mapping[id] = createCamera(attr, util);
+    return;  
+  }
+  if (objectType == "portal"){
+    mapping[id] = createPortal(attr, util);
+    return;  
+  }
+  if (objectType == "light"){
+    mapping[id] = createLight(attr, util);
+    return;  
+  }
+  if (objectType == "camera"){
+    mapping[id] = createCamera(attr, util);
+    return;  
+  }
+  if (objectType == "sound"){
+    mapping[id] = createSound(attr, util);
+    return;  
+  }
+  if (objectType == "text"){
+    mapping[id] = createUIText(attr, util);
+    return;  
+  }
+  if (objectType == "navmesh"){
+    mapping[id] = createNavmesh(attr, util);
+    return;  
+  }
+  if (objectType == "emitter"){
+    mapping[id] = createEmitter(attr, util);
+    return;  
+  }
+  if (objectType == "octree"){
+    mapping[id] = createOctree(attr, util);
+    return;  
+  }
+  if (objectType == "prefab"){
+    mapping[id] = createPrefabObj(attr, util);
+    return;  
+  }
+
+  modassert(false, "invalid object type");
 }
 
 void removeObject(

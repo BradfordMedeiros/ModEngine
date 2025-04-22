@@ -926,8 +926,7 @@ void addObjectToWorld(
       .loadScene = loadScene,
       .getCurrentTime = world.interface.getCurrentTime,
     };
-    auto gameobjObj = createObjectType(getType(name), attr, util);
-    addObjectType(world.objectMapping.objects, gameobjObj, id);
+    addObjectType(world.objectMapping.objects, id, name, attr, util);
 }
 
 void addSerialObjectsToWorld(

@@ -126,15 +126,13 @@ ObjectMapping getObjectMapping();
 struct ObjectType {
   std::string name;
   std::size_t variantType;
-  std::function<GameObjectObj(GameobjAttributes&, ObjectTypeUtil&)> createObj;
   std::function<std::optional<AttributeValuePtr>(GameObjectObj&, const char* field)> objectAttribute;
   std::function<bool(GameObjectObj&, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&)> setAttribute;
   std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&, ObjectSerializeUtil&)> serialize;
   std::function<void(GameObjectObj&, ObjectRemoveUtil&)> removeObject;
 };
 
-GameObjectObj createObjectType(std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util);
-void addObjectType(std::map<objid, GameObjectObj>& mapping, GameObjectObj& gameobj, objid id);
+void addObjectType(std::map<objid, GameObjectObj>& mapping, objid id, std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util);
 
 void removeObject(
   std::map<objid, GameObjectObj>& mapping, 
