@@ -1,11 +1,11 @@
 #include "./scene_object.h"
 
 std::vector<LightInfo> getLightInfo(World& world){
-  auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
+  auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping.objects);
   std::vector<LightInfo> lights;
   for (int i = 0; i < lightsIndexs.size(); i++){
     auto objectId =  lightsIndexs.at(i);
-    GameObjectObj& objectLight = world.objectMapping.at(objectId);
+    GameObjectObj& objectLight = world.objectMapping.objects.at(objectId);
     auto lightObject = std::get_if<GameObjectLight>(&objectLight);
 
     auto lightTransform = fullTransformation(world.sandbox, objectId);
@@ -34,7 +34,7 @@ int getLightsArrayIndex(std::vector<LightInfo>& lights, objid lightId){
 
 
 std::optional<PortalInfo> getPortalInfo(World& world, objid id){
-  GameObjectObj& objectPortal = world.objectMapping.at(id);
+  GameObjectObj& objectPortal = world.objectMapping.objects.at(id);
   auto portalObject = std::get_if<GameObjectPortal>(&objectPortal);
   if (portalObject -> camera == ""){
     return std::nullopt;
@@ -60,7 +60,7 @@ std::optional<PortalInfo> getPortalInfo(World& world, objid id){
 }
 
 std::vector<PortalInfo> getPortalInfo(World& world){ 
-  auto portalIndexes = getGameObjectsIndex<GameObjectPortal>(world.objectMapping);
+  auto portalIndexes = getGameObjectsIndex<GameObjectPortal>(world.objectMapping.objects);
   std::vector<PortalInfo> portals;
   for (int i = 0; i < portalIndexes.size(); i++){
     auto portalInfo = getPortalInfo(world, portalIndexes.at(i));
@@ -72,7 +72,7 @@ std::vector<PortalInfo> getPortalInfo(World& world){
 }
 
 bool isPortal(World& world, objid id){
-  GameObjectObj& objectPortal = world.objectMapping.at(id);
+  GameObjectObj& objectPortal = world.objectMapping.objects.at(id);
   auto portalObject = std::get_if<GameObjectPortal>(&objectPortal);
   return portalObject != NULL;
 }
@@ -86,12 +86,12 @@ glm::mat4 renderPortalView(PortalInfo info, Transformation transform){
 }
 
 bool isOctree(World& world, objid id){
-  GameObjectObj& obj = world.objectMapping.at(id);
+  GameObjectObj& obj = world.objectMapping.objects.at(id);
   return std::get_if<GameObjectOctree>(&obj) != NULL;  
 }
 
 GameObjectCamera& getCamera(World& world, objid id){
-  GameObjectObj& obj = world.objectMapping.at(id);
+  GameObjectObj& obj = world.objectMapping.objects.at(id);
   GameObjectCamera*  cameraObj = std::get_if<GameObjectCamera>(&obj);
   assert(cameraObj != NULL);
   return *cameraObj;
@@ -103,7 +103,7 @@ std::optional<glm::vec3> aiNavigate(World& world, objid id, glm::vec3 target, st
     return raycast(world, posFrom, direction, maxDistance);
   };
   auto isNavmeshWorld = [&world](objid id) -> bool{ 
-    return isNavmesh(world.objectMapping, id);
+    return isNavmesh(world.objectMapping.objects, id);
   };
   auto position = [&world](objid id) -> glm::vec3 {
     return fullTransformation(world.sandbox, id).position;
@@ -164,7 +164,7 @@ std::vector<HitObject> contactTest(World& world, objid id){
 }
 
 std::optional<Texture> textureForId(World& world, objid id){
-  return textureForId(world.objectMapping, id);
+  return textureForId(world.objectMapping.objects, id);
 }
 
 // Fn seems broken, b/c sometimes meshesToRender is 0 size
@@ -176,7 +176,7 @@ void setObjectDimensions(World& world, std::vector<objid>& ids, float width, flo
     if (selected == -1 || !idExists(world.sandbox, selected)){
       return;
     }
-    GameObjectObj& gameObjV = world.objectMapping.at(selected); 
+    GameObjectObj& gameObjV = world.objectMapping.objects.at(selected); 
     auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
     if (meshObj != NULL){
       // @TODO this is resizing based upon first mesh only, which is questionable
@@ -289,7 +289,7 @@ void setTexture(World& world, objid index, std::string textureName, std::functio
   }
 
   for (auto id : getIdsInGroupByObjId(world.sandbox, index)){
-    GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
+    GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.objects.at(id));
     if (meshObj != NULL){
       meshObj -> texture.loadingInfo.textureString = textureName;
       meshObj -> texture.loadingInfo.textureId = textureId;
@@ -303,7 +303,7 @@ void setTexture(World& world, objid index, std::string textureName, std::functio
       }
     }
 
-    GameObjectNavmesh* navmeshObj = std::get_if<GameObjectNavmesh>(&world.objectMapping.at(id));
+    GameObjectNavmesh* navmeshObj = std::get_if<GameObjectNavmesh>(&world.objectMapping.objects.at(id));
     if (navmeshObj != NULL){
       setNavmeshTextureId(textureId);
     }
@@ -311,7 +311,7 @@ void setTexture(World& world, objid index, std::string textureName, std::functio
 }
 
 bool isPrefab(World& world, objid id){
-  GameObjectObj& objectPrefab = world.objectMapping.at(id);
+  GameObjectObj& objectPrefab = world.objectMapping.objects.at(id);
   auto prefabObject = std::get_if<GameObjectPrefab>(&objectPrefab);
   return prefabObject != NULL;
 }

@@ -167,7 +167,7 @@ void setPhysicsOptions(btRigidBody* body, rigidBodyOpts& opts){
   body -> setGravity(glmToBt(opts.gravity));
   body -> setFriction(opts.friction);
   body -> setRestitution(opts.restitution);
-  body -> setDamping(opts.linearDamping, body -> getAngularDamping());
+  body -> setDamping(0.1f, 0.6f);
 
   auto collisionFlags = body -> getCollisionFlags();
   auto isStatic = (collisionFlags | btCollisionObject::CF_KINEMATIC_OBJECT) ==  collisionFlags; 

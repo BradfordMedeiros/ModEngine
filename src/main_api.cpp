@@ -301,7 +301,7 @@ std::set<objid> getChildrenIdsAndParent(objid id){
 
 std::vector<ScenegraphDebug> scenegraph(){
   std::vector<ScenegraphDebug> parentToChild;
-  auto dotRelations = getDotRelations(world.sandbox, world.objectMapping);
+  auto dotRelations = getDotRelations(world.sandbox, world.objectMapping.objects);
   for (auto &dotRelation : dotRelations){
     if (dotRelation.parent.has_value()){
       parentToChild.push_back(ScenegraphDebug{
@@ -345,13 +345,13 @@ void deleteScene(std::string scenename){
 
 std::vector<int32_t> getObjectsByType(std::string type){
   if (type == "mesh"){
-    std::vector indexes = getGameObjectsIndex<GameObjectMesh>(world.objectMapping);
+    std::vector indexes = getGameObjectsIndex<GameObjectMesh>(world.objectMapping.objects);
     return indexes;
   }else if (type == "camera"){
-    std::vector indexes = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
+    std::vector indexes = getGameObjectsIndex<GameObjectCamera>(world.objectMapping.objects);
     return indexes;
   }
-  return getGameObjectsIndex(world.objectMapping);
+  return getGameObjectsIndex(world.objectMapping.objects);
 }
 
 std::vector<int32_t> getObjectsByAttr(std::string type, std::optional<AttributeValue> value, std::optional<int32_t> sceneId){
@@ -838,7 +838,7 @@ void setActiveCamera(std::optional<int32_t> cameraIdOpt){
     return;
   }
   auto cameraId = cameraIdOpt.value();
-  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
+  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping.objects);
   if (! (std::find(cameraIndexs.begin(), cameraIndexs.end(), cameraId) != cameraIndexs.end())){
     std::cout << "index: " << cameraId << " is not a valid index" << std::endl;
     auto objectExists  = idExists(world.sandbox, cameraId);
@@ -872,7 +872,7 @@ Transformation getView(){
 }
 
 void nextCamera(){
-  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
+  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping.objects);
   if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
     state.activeCameraObj = NULL;
     state.activeCameraData = NULL;
@@ -911,14 +911,14 @@ void setCameraRotation(glm::quat orientation){
 
 
 void playSoundState(objid id, std::optional<float> volume, std::optional<glm::vec3> position){
-  playSoundState(world.objectMapping, id, volume, position); 
+  playSoundState(world.objectMapping.objects, id, volume, position); 
 }
 
 void playSoundState(std::string source, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position){
   std::cout << "Info: play sound: " << source << std::endl;
   auto gameobj = getGameObjectByName(source, sceneId, false);
   if (gameobj.has_value()){
-    playSoundState(world.objectMapping, gameobj.value(), volume, position); 
+    playSoundState(world.objectMapping.objects, gameobj.value(), volume, position); 
   }else{
     std::cout << "ERROR: no source named: " << source << " in scene: " << sceneId << std::endl;
     assert(false);
@@ -929,7 +929,7 @@ void stopSoundState(std::string source, objid sceneId){
   std::cout << "Info: stop sound: " << source << std::endl;
   auto gameobj = getGameObjectByName(source, sceneId, false);
   if (gameobj.has_value()){
-    stopSoundState(world.objectMapping, gameobj.value()); 
+    stopSoundState(world.objectMapping.objects, gameobj.value()); 
   }else{
     std::cout << "ERROR: no source named: " << source << " in scene: " << sceneId << std::endl;
     //assert(false);

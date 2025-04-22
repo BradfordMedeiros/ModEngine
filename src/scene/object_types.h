@@ -116,7 +116,11 @@ static std::vector fields = {
 
 std::string getType(std::string name);
 
-std::map<objid, GameObjectObj> getObjectMapping();
+struct ObjectMapping {
+  std::map<objid, GameObjectObj> objects;
+};
+
+ObjectMapping getObjectMapping();
 
 
 struct ObjectType {

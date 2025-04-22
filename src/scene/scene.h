@@ -19,7 +19,7 @@
 struct World {
   physicsEnv physicsEnvironment;
   std::map<objid, PhysicsValue> rigidbodys;
-  std::map<objid, GameObjectObj> objectMapping;
+  ObjectMapping objectMapping;
   std::map<std::string, ModelDataRef> modelDatas;
   std::map<std::string, MeshRef> meshes;
   std::map<std::string, TextureRef> textures;

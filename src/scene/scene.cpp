@@ -28,7 +28,7 @@ std::vector<Mesh*> getMeshesForGameobj(World& world, objid gameobjId, bool useGr
 
   std::vector<Mesh*> nameAndMeshObjNames;
   for (auto id : allIds){
-    std::vector<Mesh>& meshes = getMeshesForId(world.objectMapping, id);
+    std::vector<Mesh>& meshes = getMeshesForId(world.objectMapping.objects, id);
     for (int i = 0; i < meshes.size(); i++){
       nameAndMeshObjNames.push_back(&meshes.at(i));
     }    
@@ -45,7 +45,7 @@ glm::vec3 getOffsetForBoundInfo(BoundInfo& boundInfo, glm::vec3 scale){
 
 std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index, bool useGroup){  
   GameObject& obj = getGameObject(world.sandbox, index);
-  GameObjectObj& gameObjV = world.objectMapping.at(index); 
+  GameObjectObj& gameObjV = world.objectMapping.objects.at(index); 
 
   BoundInfo boundInfo = { .xMin = -1,  .xMax = 1, .yMin = -1, .yMax = 1, .zMin = -1, .zMax = 1 };
   std::optional<glm::vec3> finalOffset = std::nullopt;
@@ -105,7 +105,7 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
 // this is embarrassingly inefficient and should not generally be used
 // use broader shapes, or/and create algorithm to combine these shapes 
 std::vector<glm::vec3> vertsForId(World& world, objid id){  
-  std::vector<Mesh>& meshes = getMeshesForId(world.objectMapping, id);
+  std::vector<Mesh>& meshes = getMeshesForId(world.objectMapping.objects, id);
   if (meshes.size() == 0){
     std::cout << "no meshes for: " << getGameObject(world, id).name << std::endl;
     return {};
@@ -137,7 +137,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
 
   btRigidBody* rigidBody = NULL;
 
-  GameObjectObj& toRender = world.objectMapping.at(id);
+  GameObjectObj& toRender = world.objectMapping.objects.at(id);
 
   GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&toRender);
   bool isOctree = octreeObj != NULL;
@@ -800,7 +800,7 @@ std::optional<std::string> getTextureById(World& world, int id){
 
 std::string serializeScene(World& world, objid sceneId, bool includeIds){
   return serializeScene(world.sandbox, sceneId, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
-    return getAdditionalFields(objectId, world.objectMapping, [&world](int textureId) -> std::string {
+    return getAdditionalFields(objectId, world.objectMapping.objects, [&world](int textureId) -> std::string {
       return getTextureById(world, textureId).value();
     }, world.interface.saveFile);
   }, includeIds);
@@ -811,7 +811,7 @@ std::string serializeObjectById(World& world, objid id, std::string overridename
   auto gameobjecth = getGameObjectH(world.sandbox, id);
   auto children = childnamesNoPrefabs(world.sandbox, gameobjecth);
   
-  auto additionalFields = getAdditionalFields(id, world.objectMapping, [&world](int textureId) -> std::string {
+  auto additionalFields = getAdditionalFields(id, world.objectMapping.objects, [&world](int textureId) -> std::string {
     return getTextureById(world, textureId).value();
   }, world.interface.saveFile);
   return serializeObj(id, gameobjecth.groupId, gameobj, children, false, additionalFields, overridename);
@@ -927,7 +927,7 @@ void addObjectToWorld(
       .getCurrentTime = world.interface.getCurrentTime,
     };
     auto gameobjObj = createObjectType(getType(name), attr, util);
-    addObjectType(world.objectMapping, gameobjObj, id);
+    addObjectType(world.objectMapping.objects, gameobjObj, id);
 }
 
 void addSerialObjectsToWorld(
@@ -996,7 +996,7 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
 
   world.interface.stopAnimation(objectId);
   removeObject(
-    world.objectMapping, 
+    world.objectMapping.objects, 
     objectId, 
     [](std::string cameraName) -> void {
       std::cout << "remove camera not yet implemented" << std::endl;
@@ -1225,7 +1225,7 @@ AttributeValuePtr ptrFromAttributeValue(AttributeValue& attributeValue){
 
 std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, const char* field){
   modassert(world.sandbox.mainScene.idToGameObjects.find(id) != world.sandbox.mainScene.idToGameObjects.end(), "getObjectAttributePtr gameobj does not exist");
-  modassert(world.objectMapping.find(id) != world.objectMapping.end(), std::string("getObjectAttributePtr gameobjObj does not exist: ") + std::to_string(id));
+  modassert(world.objectMapping.objects.find(id) != world.objectMapping.objects.end(), std::string("getObjectAttributePtr gameobjObj does not exist: ") + std::to_string(id));
 
   GameObject& gameobj = getGameObject(world, id);
   auto valuePtr = getAttributePtr(gameobj, field);
@@ -1233,7 +1233,7 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
     return valuePtr;
   }
   
-  GameObjectObj& gameobjObj = world.objectMapping.at(id);
+  GameObjectObj& gameobjObj = world.objectMapping.objects.at(id);
   auto objectValuePtr = getObjectAttributePtr(gameobjObj, field);
   if (objectValuePtr.has_value()){
     return objectValuePtr;
@@ -1356,7 +1356,7 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
 
   if (!setCoreAttr){
     SetAttrFlags setAttrFlags { .rebuildPhysics = false };
-    setObjectAttr = setObjectAttribute(world.objectMapping, id, field, value, util, setAttrFlags);
+    setObjectAttr = setObjectAttribute(world.objectMapping.objects, id, field, value, util, setAttrFlags);
     physicsObjectNeedsRebuild = physicsObjectNeedsRebuild || setAttrFlags.rebuildPhysics;  
   }
 
@@ -1591,7 +1591,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   for (auto id : world.entitiesToUpdate){
     if (idExists(world.sandbox, id)){  // why do i need this check?
       auto absolutePosition = fullTransformation(world.sandbox, id).position;
-      updateObjectPositions(world.objectMapping, id, absolutePosition, viewTransform);      
+      updateObjectPositions(world.objectMapping.objects, id, absolutePosition, viewTransform);      
     }
   }
 
@@ -1603,7 +1603,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
 
 
   // // https://gamedev.net/forums/topic/484984-skeletal-animation-non-uniform-scale/4172731/
-  for (auto &[id, obj] : world.objectMapping){
+  for (auto &[id, obj] : world.objectMapping.objects){
     GameObjectMesh* gameobjMesh = std::get_if<GameObjectMesh>(&obj);
     if (gameobjMesh){
       for (int i = 0; i < gameobjMesh -> meshesToRender.size(); i++){
@@ -1636,7 +1636,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       //auto transformation = fullTransformation(world.sandbox, selectedOctree.value());
       //std::cout << "octree transformation: " << print(transformation) << std::endl;
       auto transform = fullModelTransform(world.sandbox, selectedOctree.value());
-      GameObjectObj& toRender = world.objectMapping.at(selectedOctree.value());
+      GameObjectObj& toRender = world.objectMapping.objects.at(selectedOctree.value());
       GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&toRender);
       modassert(octreeObj, "draw selection grid onFrame not octree type");
       drawOctreeSelectionGrid(octreeObj -> octree, world.interface.drawLine, transform);

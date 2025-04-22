@@ -2,8 +2,10 @@
 
 void shaderLogDebug(const char* str);
 
-std::map<objid, GameObjectObj> getObjectMapping() {
-	std::map<objid, GameObjectObj> objectMapping;
+ObjectMapping getObjectMapping() {
+  ObjectMapping objectMapping {
+    .objects = {},
+  };
 	return objectMapping;
 }
 
