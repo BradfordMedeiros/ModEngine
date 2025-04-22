@@ -18,8 +18,8 @@
 
 ### default name override the default view layer.
 
-transparency:zindex:3
-transparency:depth:1
+transparency:zindex:1
+transparency:depth:0
 
 no_depth:zindex:2
 no_depth:depth:1
