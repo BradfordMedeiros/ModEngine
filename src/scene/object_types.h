@@ -126,7 +126,6 @@ ObjectMapping getObjectMapping();
 struct ObjectType {
   std::string name;
   std::size_t variantType;
-  std::function<bool(GameObjectObj&, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&)> setAttribute;
   std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&, ObjectSerializeUtil&)> serialize;
 };
 

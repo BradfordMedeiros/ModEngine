@@ -13,35 +13,6 @@ std::size_t getVariantIndex(GameObjectObj gameobj){
   return gameobj.index();
 }
 
-std::optional<AttributeValuePtr> nothingObjectAttribute(GameObjectObj& obj, const char* field){
-  //modassert(false, "object attribute not yet implemented for this type");
-  return std::nullopt; 
-}
-
-bool nothingSetAttribute(GameObjectObj& obj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&){
-  modassert(false, std::string("set attr not implemented for this type, field: ") + std::string(field));
-  return false;
-}
-
-template<typename T>
-std::function<std::optional<AttributeValuePtr>(GameObjectObj& obj, const char* field)> convertObjectAttribute(std::function<std::optional<AttributeValuePtr>(T&, const char* field)> getAttr) {   
-  return [getAttr](GameObjectObj& obj, const char* field) -> std::optional<AttributeValuePtr> {
-    auto objInstance = std::get_if<T>(&obj);
-    assert(objInstance != NULL);
-    return getAttr(*objInstance, field);
-  };
-}
-
-template<typename T>
-std::function<bool(GameObjectObj& obj, const char* field, AttributeValue value, ObjectSetAttribUtil&, SetAttrFlags&)> convertElementSetAttrValue(std::function<bool(T&, const char* field, AttributeValue value, ObjectSetAttribUtil&, SetAttrFlags&)> setAttr) {   
-  return [setAttr](GameObjectObj& obj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags& flags) -> bool {
-    auto objInstance = std::get_if<T>(&obj);
-    assert(objInstance != NULL);
-    return setAttr(*objInstance, field, value, util, flags);
-  };
-}
-
-
 //  std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&)> serialize;
 template<typename T>
 std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj& obj, ObjectSerializeUtil& util)> convertSerialize(std::function<std::vector<std::pair<std::string, std::string>>(T&, ObjectSerializeUtil&)> serialize) {   
@@ -49,15 +20,6 @@ std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj& ob
     auto objInstance = std::get_if<T>(&obj);
     assert(objInstance != NULL);
     return serialize(*objInstance, util);
-  };
-}
-
-template<typename T>
-std::function<void(GameObjectObj& obj, ObjectRemoveUtil&)> convertRemove(std::function<void(T&, ObjectRemoveUtil&)> rmObject) {   
-  return [rmObject](GameObjectObj& obj, ObjectRemoveUtil& util) -> void {
-    auto objInstance = std::get_if<T>(&obj);
-    assert(objInstance != NULL);
-    rmObject(*objInstance, util);
   };
 }
 
@@ -72,61 +34,51 @@ std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "camera",
     .variantType = getVariantIndex(GameObjectCamera{}),
-    .setAttribute = convertElementSetAttrValue<GameObjectCamera>(setCameraAttribute),
     .serialize = convertSerialize<GameObjectCamera>(serializeCamera),
   },
   ObjectType {
     .name = "portal",
     .variantType = getVariantIndex(GameObjectPortal{}),
-    .setAttribute = convertElementSetAttrValue<GameObjectPortal>(setPortalAttribute),
     .serialize = convertSerialize<GameObjectPortal>(serializePortal),
   },
   ObjectType {
     .name = "light",
     .variantType = getVariantIndex(GameObjectLight{}),
-    .setAttribute = convertElementSetAttrValue<GameObjectLight>(setLightAttribute),
     .serialize = convertSerialize<GameObjectLight>(serializeLight),
   },
   ObjectType {
     .name = "sound",
     .variantType = getVariantIndex(GameObjectSound{}),
-    .setAttribute = convertElementSetAttrValue<GameObjectSound>(setSoundAttribute),
     .serialize = convertSerialize<GameObjectSound>(serializeSound),
   },
   ObjectType {
     .name = "text",
     .variantType = getVariantIndex(GameObjectUIText{}),
-    .setAttribute = convertElementSetAttrValue<GameObjectUIText>(setTextAttribute),
     .serialize = convertSerialize<GameObjectUIText>(serializeText),
   },
   ObjectType {
     .name = "navmesh",
     .variantType = getVariantIndex(GameObjectNavmesh{}),
-    .setAttribute = nothingSetAttribute,
     .serialize = serializeNotImplemented,
   },
   ObjectType {
     .name = "emitter",
     .variantType = getVariantIndex(GameObjectEmitter{}),
-    .setAttribute = convertElementSetAttrValue<GameObjectEmitter>(setEmitterAttribute),
     .serialize = convertSerialize<GameObjectEmitter>(serializeEmitter),
   },
   ObjectType {
     .name = "default",
     .variantType = getVariantIndex(GameObjectMesh{}),
-    .setAttribute = convertElementSetAttrValue<GameObjectMesh>(setMeshAttribute),
     .serialize = convertSerialize<GameObjectMesh>(serializeMesh),
   },
   ObjectType {
     .name = "octree", 
     .variantType = getVariantIndex(GameObjectOctree{}),
-    .setAttribute = nothingSetAttribute,
     .serialize = convertSerialize<GameObjectOctree>(serializeOctree),
   },
   ObjectType {
     .name = "prefab", 
     .variantType = getVariantIndex(GameObjectPrefab{}),
-    .setAttribute = convertElementSetAttrValue<GameObjectPrefab>(setPrefabAttribute),
     .serialize = convertSerialize<GameObjectPrefab>(serializePrefabObj),
   },
 };
@@ -635,7 +587,6 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
   assert(false);  
   return {};
 }
-
 
 std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){
   std::vector<objid> indicies;
