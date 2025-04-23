@@ -19,52 +19,52 @@ std::string getType(std::string name){
   return type;
 }
 
-void addObjectType(std::map<objid, GameObjectObj>& mapping, objid id, std::string name, GameobjAttributes& attr, ObjectTypeUtil util){
-  assert(mapping.find(id) == mapping.end());
+void addObjectType(ObjectMapping& objectMapping, objid id, std::string name, GameobjAttributes& attr, ObjectTypeUtil util){
+  assert(objectMapping.objects.find(id) == objectMapping.objects.end());
   modlog("objecttype - add", std::to_string(id));
   auto objectType = getType(name);
   if (objectType == "default"){
-    mapping[id] = createMesh(attr, util);
+    objectMapping.objects[id] = createMesh(attr, util);
     return;
   }
   if (objectType == "camera"){
-    mapping[id] = createCamera(attr, util);
+    objectMapping.objects[id] = createCamera(attr, util);
     return;  
   }
   if (objectType == "portal"){
-    mapping[id] = createPortal(attr, util);
+    objectMapping.objects[id] = createPortal(attr, util);
     return;  
   }
   if (objectType == "light"){
-    mapping[id] = createLight(attr, util);
+    objectMapping.objects[id] = createLight(attr, util);
     return;  
   }
   if (objectType == "camera"){
-    mapping[id] = createCamera(attr, util);
+    objectMapping.objects[id] = createCamera(attr, util);
     return;  
   }
   if (objectType == "sound"){
-    mapping[id] = createSound(attr, util);
+    objectMapping.objects[id] = createSound(attr, util);
     return;  
   }
   if (objectType == "text"){
-    mapping[id] = createUIText(attr, util);
+    objectMapping.objects[id] = createUIText(attr, util);
     return;  
   }
   if (objectType == "navmesh"){
-    mapping[id] = createNavmesh(attr, util);
+    objectMapping.objects[id] = createNavmesh(attr, util);
     return;  
   }
   if (objectType == "emitter"){
-    mapping[id] = createEmitter(attr, util);
+    objectMapping.objects[id] = createEmitter(attr, util);
     return;  
   }
   if (objectType == "octree"){
-    mapping[id] = createOctree(attr, util);
+    objectMapping.objects[id] = createOctree(attr, util);
     return;  
   }
   if (objectType == "prefab"){
-    mapping[id] = createPrefabObj(attr, util);
+    objectMapping.objects[id] = createPrefabObj(attr, util);
     return;  
   }
 
@@ -72,12 +72,12 @@ void addObjectType(std::map<objid, GameObjectObj>& mapping, objid id, std::strin
 }
 
 void removeObject(
-  std::map<objid, GameObjectObj>& mapping, 
+  ObjectMapping& objectMapping,
   objid id, 
   std::function<void(std::string)> unbindCamera,
   std::function<void(objid)> unloadScene
 ){
-  if (mapping.find(id) == mapping.end()){
+  if (objectMapping.objects.find(id) == objectMapping.objects.end()){
     return;
   }
 
@@ -86,12 +86,12 @@ void removeObject(
     .unloadScene = unloadScene
   };
 
-  GameObjectObj& Object = mapping.at(id);
+  GameObjectObj& Object = objectMapping.objects.at(id);
   {
     auto gameobjectCamera = std::get_if<GameObjectCamera>(&Object);
     if (gameobjectCamera){
       // do nothing
-      mapping.erase(id);
+      objectMapping.objects.erase(id);
       return;
     }   
   }
@@ -99,7 +99,7 @@ void removeObject(
     auto gameobjectPortal = std::get_if<GameObjectPortal>(&Object);
     if (gameobjectPortal){
       // do nothing
-      mapping.erase(id);
+      objectMapping.objects.erase(id);
       return;
     }   
   }
@@ -108,7 +108,7 @@ void removeObject(
     if (gameobjectLight){
       // do nothing
       removeLight(*gameobjectLight, util);
-      mapping.erase(id);
+      objectMapping.objects.erase(id);
       return;
     }    
   }
@@ -117,7 +117,7 @@ void removeObject(
     if (gameobjectSound){
       // do nothing
       removeSound(*gameobjectSound, util);
-      mapping.erase(id);
+      objectMapping.objects.erase(id);
       return;
     }
   }
@@ -125,7 +125,7 @@ void removeObject(
     auto gameobjectUiText = std::get_if<GameObjectUIText>(&Object);
     if (gameobjectUiText){
       // do nothing
-      mapping.erase(id);
+      objectMapping.objects.erase(id);
       return;
     }
   }
@@ -133,7 +133,7 @@ void removeObject(
     auto gameobjectNavmesh = std::get_if<GameObjectNavmesh>(&Object);
     if (gameobjectNavmesh){
       removeNavmesh(*gameobjectNavmesh, util);
-      mapping.erase(id);
+      objectMapping.objects.erase(id);
       return;
     }
   }
@@ -142,7 +142,7 @@ void removeObject(
     if (gameobjectEmitter){
       // do nothing
       removeEmitterObj(*gameobjectEmitter, util);
-      mapping.erase(id);
+      objectMapping.objects.erase(id);
       return;
     }
   }
@@ -150,7 +150,7 @@ void removeObject(
     auto gameobjectMesh = std::get_if<GameObjectMesh>(&Object);
     if (gameobjectMesh){
       // do nothing
-      mapping.erase(id);
+      objectMapping.objects.erase(id);
       return;
     }
   }
@@ -158,7 +158,7 @@ void removeObject(
     auto gameObjectOctree = std::get_if<GameObjectOctree>(&Object);
     if (gameObjectOctree){
       // do nothing
-      mapping.erase(id);
+      objectMapping.objects.erase(id);
       return;
     }
   }
@@ -166,7 +166,7 @@ void removeObject(
     auto gameObjectPrefab = std::get_if<GameObjectPrefab>(&Object);
     if (gameObjectPrefab){
       removePrefabObj(*gameObjectPrefab, util);
-      mapping.erase(id);
+      objectMapping.objects.erase(id);
       return;
     }
   }
@@ -199,8 +199,8 @@ objid selectedId = 0;
 int renderObject(
   GLint shaderProgram,
   bool isSelectionShader,
-  objid id, 
-  std::map<objid, GameObjectObj>& mapping, 
+  objid id,
+  ObjectMapping& objectMapping,
   int showDebugMask,
   unsigned int portalTexture,
   unsigned int navmeshTexture,
@@ -213,7 +213,7 @@ int renderObject(
   glm::mat4& finalModelMatrix
 ){
 
-  GameObjectObj& toRender = mapping.at(id);
+  GameObjectObj& toRender = objectMapping.objects.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
 
   if (meshObj != NULL && !meshObj -> isDisabled && (meshObj -> meshesToRender.size() > 0)){

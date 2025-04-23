@@ -926,7 +926,7 @@ void addObjectToWorld(
       .loadScene = loadScene,
       .getCurrentTime = world.interface.getCurrentTime,
     };
-    addObjectType(world.objectMapping.objects, id, name, attr, util);
+    addObjectType(world.objectMapping, id, name, attr, util);
 }
 
 void addSerialObjectsToWorld(
@@ -995,7 +995,7 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
 
   world.interface.stopAnimation(objectId);
   removeObject(
-    world.objectMapping.objects, 
+    world.objectMapping, 
     objectId, 
     [](std::string cameraName) -> void {
       std::cout << "remove camera not yet implemented" << std::endl;

@@ -121,10 +121,10 @@ struct ObjectMapping {
 ObjectMapping getObjectMapping();
 
 
-void addObjectType(std::map<objid, GameObjectObj>& mapping, objid id, std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util);
+void addObjectType(ObjectMapping& objectMapping, objid id, std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util);
 
 void removeObject(
-  std::map<objid, GameObjectObj>& mapping, 
+  ObjectMapping& objectMapping, 
   objid id, 
   std::function<void(std::string)> unbindCamera,
   std::function<void(objid)> unloadScene
@@ -156,7 +156,7 @@ int renderObject(
   GLint shaderProgram,
   bool isSelectionShader,
   objid id, 
-  std::map<objid, GameObjectObj>& mapping,
+  ObjectMapping& objectMapping,
   int showDebugMask,
   unsigned int portalTexture,
   unsigned int navmeshTexture,

@@ -564,7 +564,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
               newShader, 
               newShader == *renderStages.selection.shader,
               id, 
-              world.objectMapping.objects, 
+              world.objectMapping, 
               state.showDebug ? state.showDebugMask : 0,
               (isPortal && portalTextureInCache &&  !isPerspectivePortal) ? portalIdCache.at(id) : -1,
               state.navmeshTextureId.has_value() ? state.navmeshTextureId.value() : -1,
