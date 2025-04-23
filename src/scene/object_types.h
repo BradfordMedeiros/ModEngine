@@ -114,20 +114,12 @@ static std::vector fields = {
   prefabField,
 };
 
-std::string getType(std::string name);
-
 struct ObjectMapping {
   std::map<objid, GameObjectObj> objects;
 };
 
 ObjectMapping getObjectMapping();
 
-
-struct ObjectType {
-  std::string name;
-  std::size_t variantType;
-  std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&, ObjectSerializeUtil&)> serialize;
-};
 
 void addObjectType(std::map<objid, GameObjectObj>& mapping, objid id, std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util);
 

@@ -9,79 +9,15 @@ ObjectMapping getObjectMapping() {
 	return objectMapping;
 }
 
-std::size_t getVariantIndex(GameObjectObj gameobj){
-  return gameobj.index();
+std::string getType(std::string name){
+  std::string type = "default";
+  for (Field field : fields){
+    if (name[0] == field.prefix){
+      type = field.type;
+    }
+  }
+  return type;
 }
-
-//  std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&)> serialize;
-template<typename T>
-std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj& obj, ObjectSerializeUtil& util)> convertSerialize(std::function<std::vector<std::pair<std::string, std::string>>(T&, ObjectSerializeUtil&)> serialize) {   
-  return [serialize](GameObjectObj& obj, ObjectSerializeUtil& util) -> std::vector<std::pair<std::string, std::string>> {
-    auto objInstance = std::get_if<T>(&obj);
-    assert(objInstance != NULL);
-    return serialize(*objInstance, util);
-  };
-}
-
-std::vector<std::pair<std::string, std::string>> serializeNotImplemented(GameObjectObj& obj, ObjectSerializeUtil& util){
-  std::cout << "ERROR: SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
-  //assert(false);
-  return { {"not", "implemented"}};    
-}
-
-
-std::vector<ObjectType> objTypes = {
-  ObjectType {
-    .name = "camera",
-    .variantType = getVariantIndex(GameObjectCamera{}),
-    .serialize = convertSerialize<GameObjectCamera>(serializeCamera),
-  },
-  ObjectType {
-    .name = "portal",
-    .variantType = getVariantIndex(GameObjectPortal{}),
-    .serialize = convertSerialize<GameObjectPortal>(serializePortal),
-  },
-  ObjectType {
-    .name = "light",
-    .variantType = getVariantIndex(GameObjectLight{}),
-    .serialize = convertSerialize<GameObjectLight>(serializeLight),
-  },
-  ObjectType {
-    .name = "sound",
-    .variantType = getVariantIndex(GameObjectSound{}),
-    .serialize = convertSerialize<GameObjectSound>(serializeSound),
-  },
-  ObjectType {
-    .name = "text",
-    .variantType = getVariantIndex(GameObjectUIText{}),
-    .serialize = convertSerialize<GameObjectUIText>(serializeText),
-  },
-  ObjectType {
-    .name = "navmesh",
-    .variantType = getVariantIndex(GameObjectNavmesh{}),
-    .serialize = serializeNotImplemented,
-  },
-  ObjectType {
-    .name = "emitter",
-    .variantType = getVariantIndex(GameObjectEmitter{}),
-    .serialize = convertSerialize<GameObjectEmitter>(serializeEmitter),
-  },
-  ObjectType {
-    .name = "default",
-    .variantType = getVariantIndex(GameObjectMesh{}),
-    .serialize = convertSerialize<GameObjectMesh>(serializeMesh),
-  },
-  ObjectType {
-    .name = "octree", 
-    .variantType = getVariantIndex(GameObjectOctree{}),
-    .serialize = convertSerialize<GameObjectOctree>(serializeOctree),
-  },
-  ObjectType {
-    .name = "prefab", 
-    .variantType = getVariantIndex(GameObjectPrefab{}),
-    .serialize = convertSerialize<GameObjectPrefab>(serializePrefabObj),
-  },
-};
 
 void addObjectType(std::map<objid, GameObjectObj>& mapping, objid id, std::string name, GameobjAttributes& attr, ObjectTypeUtil util){
   assert(mapping.find(id) == mapping.end());
@@ -572,19 +508,74 @@ bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const
 }
   
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName, std::function<void(std::string, std::string&)> saveFile){
-  GameObjectObj objectToSerialize = mapping.at(id);
+  GameObjectObj Object = mapping.at(id);
   ObjectSerializeUtil serializeUtil {
     .textureName = getTextureName,
     .saveFile = saveFile,
   };
-  auto variantIndex = objectToSerialize.index();
-  for (auto &objType : objTypes){
-    if (variantIndex == objType.variantType){
-      return objType.serialize(objectToSerialize, serializeUtil);
+
+  {
+    auto gameobjectCamera = std::get_if<GameObjectCamera>(&Object);
+    if (gameobjectCamera){
+      return serializeCamera(*gameobjectCamera, serializeUtil);
+    }   
+  }
+  {
+    auto gameobjectPortal = std::get_if<GameObjectPortal>(&Object);
+    if (gameobjectPortal){
+      return serializePortal(*gameobjectPortal, serializeUtil);
+    }   
+  }
+  {
+    auto gameobjectLight = std::get_if<GameObjectLight>(&Object);
+    if (gameobjectLight){
+      return serializeLight(*gameobjectLight, serializeUtil);
+    }    
+  }
+  {
+    auto gameobjectSound = std::get_if<GameObjectSound>(&Object);
+    if (gameobjectSound){
+      return serializeSound(*gameobjectSound, serializeUtil);
     }
   }
-  std::cout << "obj type not supported" << std::endl;
-  assert(false);  
+  {
+    auto gameobjectUiText = std::get_if<GameObjectUIText>(&Object);
+    if (gameobjectUiText){
+      return serializeText(*gameobjectUiText, serializeUtil);
+    }
+  }
+  {
+    auto gameobjectNavmesh = std::get_if<GameObjectNavmesh>(&Object);
+    if (gameobjectNavmesh){
+      modassert(false, "serialize navmesh not implemented");
+      return {};
+    }
+  }
+  {
+    auto gameobjectEmitter = std::get_if<GameObjectEmitter>(&Object);
+    if (gameobjectEmitter){
+      return serializeEmitter(*gameobjectEmitter, serializeUtil);
+    }
+  }
+  {
+    auto gameobjectMesh = std::get_if<GameObjectMesh>(&Object);
+    if (gameobjectMesh){
+      return serializeMesh(*gameobjectMesh, serializeUtil);
+    }
+  }
+  {
+    auto gameObjectOctree = std::get_if<GameObjectOctree>(&Object);
+    if (gameObjectOctree){
+      return serializeOctree(*gameObjectOctree, serializeUtil);
+    }
+  }
+  { 
+    auto gameObjectPrefab = std::get_if<GameObjectPrefab>(&Object);
+    if (gameObjectPrefab){
+      return serializePrefabObj(*gameObjectPrefab, serializeUtil);
+    }
+  }
+  modassert(false, "serialize objtype not implemented for this type");
   return {};
 }
 
@@ -598,7 +589,6 @@ std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){
 
 std::vector<Mesh> noMeshes;
 std::vector<Mesh>& getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id){  
-
   GameObjectObj& gameObj = mapping.at(id);
 
   {
@@ -699,14 +689,4 @@ void onObjectSelected(objid id){
 void onObjectUnselected(){
   modlog("on object unselected: ", "");
   selectedId = 0;
-}
-
-std::string getType(std::string name){
-  std::string type = "default";
-  for (Field field : fields){
-    if (name[0] == field.prefix){
-      type = field.type;
-    }
-  }
-  return type;
 }
