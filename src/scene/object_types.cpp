@@ -553,15 +553,69 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& Object, co
 }
 
 bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags& flags){
-  GameObjectObj& toRender = mapping.at(id);
-  auto variantIndex = toRender.index();
-  for (auto &objType : objTypes){
-    if (variantIndex == objType.variantType){
-      return objType.setAttribute(toRender, field, value, util, flags);
+  GameObjectObj& Object = mapping.at(id);
+
+  {
+    auto gameobjectCamera = std::get_if<GameObjectCamera>(&Object);
+    if (gameobjectCamera){
+      return setCameraAttribute(*gameobjectCamera, field, value, util, flags);
+    }   
+  }
+  {
+    auto gameobjectPortal = std::get_if<GameObjectPortal>(&Object);
+    if (gameobjectPortal){
+      return setPortalAttribute(*gameobjectPortal, field, value, util, flags);
+    }   
+  }
+  {
+    auto gameobjectLight = std::get_if<GameObjectLight>(&Object);
+    if (gameobjectLight){
+      return setLightAttribute(*gameobjectLight, field, value, util, flags);
+    }    
+  }
+  {
+    auto gameobjectSound = std::get_if<GameObjectSound>(&Object);
+    if (gameobjectSound){
+      return setSoundAttribute(*gameobjectSound, field, value, util, flags);
     }
   }
-  std::cout << "obj type not supported" << std::endl;
-  assert(false);
+  {
+    auto gameobjectUiText = std::get_if<GameObjectUIText>(&Object);
+    if (gameobjectUiText){
+      return setTextAttribute(*gameobjectUiText, field, value, util, flags);
+    }
+  }
+  {
+    auto gameobjectNavmesh = std::get_if<GameObjectNavmesh>(&Object);
+    if (gameobjectNavmesh){
+      return false; // do nothing
+    }
+  }
+  {
+    auto gameobjectEmitter = std::get_if<GameObjectEmitter>(&Object);
+    if (gameobjectEmitter){
+      return setEmitterAttribute(*gameobjectEmitter, field, value, util, flags);
+    }
+  }
+  {
+    auto gameobjectMesh = std::get_if<GameObjectMesh>(&Object);
+    if (gameobjectMesh){
+      return setMeshAttribute(*gameobjectMesh, field, value, util, flags);
+    }
+  }
+  {
+    auto gameObjectOctree = std::get_if<GameObjectOctree>(&Object);
+    if (gameObjectOctree){
+      return false;
+    }
+  }
+  { 
+    auto gameObjectPrefab = std::get_if<GameObjectPrefab>(&Object);
+    if (gameObjectPrefab){
+      return setPrefabAttribute(*gameObjectPrefab, field, value, util, flags);
+    }
+  }
+  modassert(false, "setAttribute invalid type");
   return false;
 }
   
