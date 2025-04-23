@@ -827,7 +827,7 @@ void setActiveCamera(std::optional<int32_t> cameraIdOpt){
     return;
   }
   auto cameraId = cameraIdOpt.value();
-  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping.objects);
+  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
   if (! (std::find(cameraIndexs.begin(), cameraIndexs.end(), cameraId) != cameraIndexs.end())){
     std::cout << "index: " << cameraId << " is not a valid index" << std::endl;
     auto objectExists  = idExists(world.sandbox, cameraId);
@@ -861,7 +861,7 @@ Transformation getView(){
 }
 
 void nextCamera(){
-  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping.objects);
+  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
   if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
     state.activeCameraObj = NULL;
     state.activeCameraData = NULL;

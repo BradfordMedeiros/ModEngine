@@ -579,14 +579,6 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
   return {};
 }
 
-std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){
-  std::vector<objid> indicies;
-  for (auto [id, _]: mapping){    
-      indicies.push_back(id);
-  }
-  return indicies;
-}
-
 std::vector<Mesh> noMeshes;
 std::vector<Mesh>& getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id){  
   GameObjectObj& gameObj = mapping.at(id);

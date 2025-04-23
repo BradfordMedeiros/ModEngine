@@ -174,9 +174,9 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& toRender, 
 bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&);
 
 template<typename T>
-std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){   // putting templates have to be in header?
+std::vector<objid> getGameObjectsIndex(ObjectMapping& mapping){   // putting templates have to be in header?
   std::vector<objid> indicies;
-  for (auto [id, gameobject]: mapping){
+  for (auto [id, gameobject]: mapping.objects){
     auto gameobjectP = std::get_if<T>(&gameobject);
     if (gameobjectP != NULL){
       indicies.push_back(id);
@@ -184,8 +184,6 @@ std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){
   }
   return indicies;
 }
-
-std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping);
 
 std::vector<Mesh>& getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id);
 

@@ -1,7 +1,7 @@
 #include "./scene_object.h"
 
 std::vector<LightInfo> getLightInfo(World& world){
-  auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping.objects);
+  auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
   std::vector<LightInfo> lights;
   for (int i = 0; i < lightsIndexs.size(); i++){
     auto objectId =  lightsIndexs.at(i);
@@ -60,7 +60,7 @@ std::optional<PortalInfo> getPortalInfo(World& world, objid id){
 }
 
 std::vector<PortalInfo> getPortalInfo(World& world){ 
-  auto portalIndexes = getGameObjectsIndex<GameObjectPortal>(world.objectMapping.objects);
+  auto portalIndexes = getGameObjectsIndex<GameObjectPortal>(world.objectMapping);
   std::vector<PortalInfo> portals;
   for (int i = 0; i < portalIndexes.size(); i++){
     auto portalInfo = getPortalInfo(world, portalIndexes.at(i));
