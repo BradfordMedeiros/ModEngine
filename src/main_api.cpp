@@ -301,7 +301,7 @@ std::set<objid> getChildrenIdsAndParent(objid id){
 
 std::vector<ScenegraphDebug> scenegraph(){
   std::vector<ScenegraphDebug> parentToChild;
-  auto dotRelations = getDotRelations(world.sandbox, world.objectMapping.objects);
+  auto dotRelations = getDotRelations(world.sandbox, world.objectMapping);
   for (auto &dotRelation : dotRelations){
     if (dotRelation.parent.has_value()){
       parentToChild.push_back(ScenegraphDebug{

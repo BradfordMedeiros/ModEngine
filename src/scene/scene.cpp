@@ -28,7 +28,7 @@ std::vector<Mesh*> getMeshesForGameobj(World& world, objid gameobjId, bool useGr
 
   std::vector<Mesh*> nameAndMeshObjNames;
   for (auto id : allIds){
-    std::vector<Mesh>& meshes = getMeshesForId(world.objectMapping.objects, id);
+    std::vector<Mesh>& meshes = getMeshesForId(world.objectMapping, id);
     for (int i = 0; i < meshes.size(); i++){
       nameAndMeshObjNames.push_back(&meshes.at(i));
     }    
@@ -105,7 +105,7 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
 // this is embarrassingly inefficient and should not generally be used
 // use broader shapes, or/and create algorithm to combine these shapes 
 std::vector<glm::vec3> vertsForId(World& world, objid id){  
-  std::vector<Mesh>& meshes = getMeshesForId(world.objectMapping.objects, id);
+  std::vector<Mesh>& meshes = getMeshesForId(world.objectMapping, id);
   if (meshes.size() == 0){
     std::cout << "no meshes for: " << getGameObject(world, id).name << std::endl;
     return {};
@@ -800,7 +800,7 @@ std::optional<std::string> getTextureById(World& world, int id){
 
 std::string serializeScene(World& world, objid sceneId, bool includeIds){
   return serializeScene(world.sandbox, sceneId, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
-    return getAdditionalFields(objectId, world.objectMapping.objects, [&world](int textureId) -> std::string {
+    return getAdditionalFields(objectId, world.objectMapping, [&world](int textureId) -> std::string {
       return getTextureById(world, textureId).value();
     }, world.interface.saveFile);
   }, includeIds);
@@ -811,7 +811,7 @@ std::string serializeObjectById(World& world, objid id, std::string overridename
   auto gameobjecth = getGameObjectH(world.sandbox, id);
   auto children = childnamesNoPrefabs(world.sandbox, gameobjecth);
   
-  auto additionalFields = getAdditionalFields(id, world.objectMapping.objects, [&world](int textureId) -> std::string {
+  auto additionalFields = getAdditionalFields(id, world.objectMapping, [&world](int textureId) -> std::string {
     return getTextureById(world, textureId).value();
   }, world.interface.saveFile);
   return serializeObj(id, gameobjecth.groupId, gameobj, children, false, additionalFields, overridename);

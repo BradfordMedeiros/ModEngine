@@ -507,8 +507,8 @@ bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* fiel
   return false;
 }
   
-std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName, std::function<void(std::string, std::string&)> saveFile){
-  GameObjectObj Object = mapping.at(id);
+std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, ObjectMapping& objectMapping, std::function<std::string(int)> getTextureName, std::function<void(std::string, std::string&)> saveFile){
+  GameObjectObj Object = objectMapping.objects.at(id);
   ObjectSerializeUtil serializeUtil {
     .textureName = getTextureName,
     .saveFile = saveFile,
@@ -580,8 +580,8 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
 }
 
 std::vector<Mesh> noMeshes;
-std::vector<Mesh>& getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id){  
-  GameObjectObj& gameObj = mapping.at(id);
+std::vector<Mesh>& getMeshesForId(ObjectMapping& mapping, objid id){  
+  GameObjectObj& gameObj = mapping.objects.at(id);
 
   {
     GameObjectMesh* meshObject = std::get_if<GameObjectMesh>(&gameObj);
@@ -600,8 +600,8 @@ std::vector<Mesh>& getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid
 }
 
 std::vector<std::string> emptyNames;
-std::vector<std::string>& getMeshNames(std::map<objid, GameObjectObj>& mapping, objid id){
-  GameObjectObj& gameObj = mapping.at(id);
+std::vector<std::string>& getMeshNames(ObjectMapping& mapping, objid id){
+  GameObjectObj& gameObj = mapping.objects.at(id);
   GameObjectMesh* meshObject = std::get_if<GameObjectMesh>(&gameObj);
   if (meshObject != NULL){
     return meshObject -> meshNames;

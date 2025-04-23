@@ -21,7 +21,7 @@ std::string readFileOrPackage(std::string filepath);
 
 std::string dumpDebugInfo(bool fullInfo){
   // this line is commented out b/c was segfaulting, probably should be written in a way that assumes the structure might be invalid
-  auto scenegraphInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping.objects) + "\n\n";
+  auto scenegraphInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
   auto gameobjInfo = debugAllGameObjects(world.sandbox);
   auto gameobjhInfo = debugAllGameObjectsH(world.sandbox);
   auto gameobjObjInfo = debugAllGameObjectObj(world.objectMapping.objects);

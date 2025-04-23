@@ -24,8 +24,8 @@ struct DotInfos {
   DotInfo child;
   std::optional<DotInfo> parent;
 };
-std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, GameObjectObj>& objectMapping);
-std::string scenegraphAsDotFormat(SceneSandbox& sandbox, std::map<objid, GameObjectObj>& objectMapping);
+std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, ObjectMapping& objectMapping);
+std::string scenegraphAsDotFormat(SceneSandbox& sandbox, ObjectMapping& objectMapping);
 
 std::string debugAllGameObjects(SceneSandbox& sandbox);
 std::string debugAllGameObjectsH(SceneSandbox& sandbox);

@@ -6,8 +6,8 @@ std::string getDotInfoForNode(DotInfo& info){
   " meshes: [" + join(info.meshes, ' ') + "] disabled: " + print(info.isDisabled) +  "\"";
 }
 
-std::optional<bool> isMeshDisabled(std::map<objid, GameObjectObj>& objectMapping, objid id){
-  GameObjectObj& gameObjV = objectMapping.at(id); 
+std::optional<bool> isMeshDisabled(ObjectMapping& objectMapping, objid id){
+  GameObjectObj& gameObjV = objectMapping.objects.at(id); 
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
   if (!meshObj){
     return std::nullopt;
@@ -15,12 +15,12 @@ std::optional<bool> isMeshDisabled(std::map<objid, GameObjectObj>& objectMapping
   return meshObj -> isDisabled;
 }
 
-std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, GameObjectObj>& objectMapping){
+std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, ObjectMapping& objectMapping){
   std::vector<DotInfos> dotRelations;
   forEveryGameobj(sandbox, [&sandbox, &objectMapping, &dotRelations](objid id, GameObject& childObj) -> void {
     auto childObjH = getGameObjectH(sandbox, id);
 
-    bool objectMappingExists = objectMapping.find(id) != objectMapping.end();
+    bool objectMappingExists = objectMapping.objects.find(id) != objectMapping.objects.end();
     DotInfo childInfo {
       .name = childObj.name,
       .id = childObjH.id,
@@ -46,7 +46,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
     auto parentObj = getGameObject(sandbox, parentId);
     auto parentObjH = getGameObjectH(sandbox, parentId);
 
-    bool parentObjectMappingExists = objectMapping.find(parentId) != objectMapping.end();
+    bool parentObjectMappingExists = objectMapping.objects.find(parentId) != objectMapping.objects.end();
     DotInfo parentInfo {
       .name = parentObj.name,
       .id = parentObj.id,
@@ -68,7 +68,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, Gam
   return dotRelations;
 }
 
-std::string scenegraphAsDotFormat(SceneSandbox& sandbox, std::map<objid, GameObjectObj>& objectMapping){
+std::string scenegraphAsDotFormat(SceneSandbox& sandbox, ObjectMapping& objectMapping){
   std::vector<DotInfos> dotRelations = getDotRelations(sandbox, objectMapping);
   std::string graph = "";
   std::string prefix = "strict graph {\n";
