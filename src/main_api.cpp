@@ -343,17 +343,6 @@ void deleteScene(std::string scenename){
   realfiles::rmFile(scenename);
 }
 
-std::vector<int32_t> getObjectsByType(std::string type){
-  if (type == "mesh"){
-    std::vector indexes = getGameObjectsIndex<GameObjectMesh>(world.objectMapping.objects);
-    return indexes;
-  }else if (type == "camera"){
-    std::vector indexes = getGameObjectsIndex<GameObjectCamera>(world.objectMapping.objects);
-    return indexes;
-  }
-  return getGameObjectsIndex(world.objectMapping.objects);
-}
-
 std::vector<int32_t> getObjectsByAttr(std::string type, std::optional<AttributeValue> value, std::optional<int32_t> sceneId){
   auto objIds = listObjInScene(world.sandbox, sceneId);
   std::vector<objid> idsWithAttrs;

@@ -34,7 +34,6 @@ struct CustomApiBindings {
   objid (*groupId)(int32_t);
   void (*removeObjectById)(int32_t id);
   void (*removeByGroupId)(int32_t id);
-  std::vector<int32_t> (*getObjectsByType)(std::string);
   std::vector<int32_t> (*getObjectsByAttr)(std::string, std::optional<AttributeValue>, std::optional<int32_t>);
   void (*setActiveCamera)(std::optional<int32_t> cameraId);
   std::optional<objid> (*getActiveCamera)();

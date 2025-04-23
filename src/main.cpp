@@ -1347,7 +1347,6 @@ int main(int argc, char* argv[]){
     .groupId = groupId,
     .removeObjectById = removeObjectById,
     .removeByGroupId = removeByGroupId,
-    .getObjectsByType = getObjectsByType,
     .getObjectsByAttr = getObjectsByAttr,
     .setActiveCamera = setActiveCamera,
     .getActiveCamera = getActiveCamera,
