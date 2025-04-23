@@ -72,70 +72,60 @@ std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "camera",
     .variantType = getVariantIndex(GameObjectCamera{}),
-    .objectAttribute = convertObjectAttribute<GameObjectCamera>(getCameraAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectCamera>(setCameraAttribute),
     .serialize = convertSerialize<GameObjectCamera>(serializeCamera),
   },
   ObjectType {
     .name = "portal",
     .variantType = getVariantIndex(GameObjectPortal{}),
-    .objectAttribute = convertObjectAttribute<GameObjectPortal>(getPortalAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectPortal>(setPortalAttribute),
     .serialize = convertSerialize<GameObjectPortal>(serializePortal),
   },
   ObjectType {
     .name = "light",
     .variantType = getVariantIndex(GameObjectLight{}),
-    .objectAttribute = convertObjectAttribute<GameObjectLight>(getLightAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectLight>(setLightAttribute),
     .serialize = convertSerialize<GameObjectLight>(serializeLight),
   },
   ObjectType {
     .name = "sound",
     .variantType = getVariantIndex(GameObjectSound{}),
-    .objectAttribute = convertObjectAttribute<GameObjectSound>(getSoundAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectSound>(setSoundAttribute),
     .serialize = convertSerialize<GameObjectSound>(serializeSound),
   },
   ObjectType {
     .name = "text",
     .variantType = getVariantIndex(GameObjectUIText{}),
-    .objectAttribute = convertObjectAttribute<GameObjectUIText>(getTextAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectUIText>(setTextAttribute),
     .serialize = convertSerialize<GameObjectUIText>(serializeText),
   },
   ObjectType {
     .name = "navmesh",
     .variantType = getVariantIndex(GameObjectNavmesh{}),
-    .objectAttribute = convertObjectAttribute<GameObjectNavmesh>(getNavmeshAttribute),
     .setAttribute = nothingSetAttribute,
     .serialize = serializeNotImplemented,
   },
   ObjectType {
     .name = "emitter",
     .variantType = getVariantIndex(GameObjectEmitter{}),
-    .objectAttribute = convertObjectAttribute<GameObjectEmitter>(getEmitterAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectEmitter>(setEmitterAttribute),
     .serialize = convertSerialize<GameObjectEmitter>(serializeEmitter),
   },
   ObjectType {
     .name = "default",
     .variantType = getVariantIndex(GameObjectMesh{}),
-    .objectAttribute = convertObjectAttribute<GameObjectMesh>(getMeshAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectMesh>(setMeshAttribute),
     .serialize = convertSerialize<GameObjectMesh>(serializeMesh),
   },
   ObjectType {
     .name = "octree", 
     .variantType = getVariantIndex(GameObjectOctree{}),
-    .objectAttribute = convertObjectAttribute<GameObjectOctree>(getOctreeAttribute),
     .setAttribute = nothingSetAttribute,
     .serialize = convertSerialize<GameObjectOctree>(serializeOctree),
   },
   ObjectType {
     .name = "prefab", 
     .variantType = getVariantIndex(GameObjectPrefab{}),
-    .objectAttribute = convertObjectAttribute<GameObjectPrefab>(getPrefabAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectPrefab>(setPrefabAttribute),
     .serialize = convertSerialize<GameObjectPrefab>(serializePrefabObj),
   },
@@ -498,11 +488,65 @@ int renderObject(
   return 0;
 }
 
-std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& toRender, const char* field){
-  auto variantIndex = toRender.index();
-  for (auto &objType : objTypes){
-    if (variantIndex == objType.variantType){
-      return objType.objectAttribute(toRender, field);
+std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& Object, const char* field){
+  {
+    auto gameobjectCamera = std::get_if<GameObjectCamera>(&Object);
+    if (gameobjectCamera){
+      return getCameraAttribute(*gameobjectCamera, field);
+    }   
+  }
+  {
+    auto gameobjectPortal = std::get_if<GameObjectPortal>(&Object);
+    if (gameobjectPortal){
+      return getPortalAttribute(*gameobjectPortal, field);
+    }   
+  }
+  {
+    auto gameobjectLight = std::get_if<GameObjectLight>(&Object);
+    if (gameobjectLight){
+      return getLightAttribute(*gameobjectLight, field);
+    }    
+  }
+  {
+    auto gameobjectSound = std::get_if<GameObjectSound>(&Object);
+    if (gameobjectSound){
+      return getSoundAttribute(*gameobjectSound, field);
+    }
+  }
+  {
+    auto gameobjectUiText = std::get_if<GameObjectUIText>(&Object);
+    if (gameobjectUiText){
+      return getTextAttribute(*gameobjectUiText, field);
+    }
+  }
+  {
+    auto gameobjectNavmesh = std::get_if<GameObjectNavmesh>(&Object);
+    if (gameobjectNavmesh){
+      return getNavmeshAttribute(*gameobjectNavmesh, field);
+    }
+  }
+  {
+    auto gameobjectEmitter = std::get_if<GameObjectEmitter>(&Object);
+    if (gameobjectEmitter){
+      return getEmitterAttribute(*gameobjectEmitter, field);
+    }
+  }
+  {
+    auto gameobjectMesh = std::get_if<GameObjectMesh>(&Object);
+    if (gameobjectMesh){
+      return getMeshAttribute(*gameobjectMesh, field);
+    }
+  }
+  {
+    auto gameObjectOctree = std::get_if<GameObjectOctree>(&Object);
+    if (gameObjectOctree){
+      return getOctreeAttribute(*gameObjectOctree, field);
+    }
+  }
+  { 
+    auto gameObjectPrefab = std::get_if<GameObjectPrefab>(&Object);
+    if (gameObjectPrefab){
+      return getPrefabAttribute(*gameObjectPrefab, field);
     }
   }
   assert(false);
