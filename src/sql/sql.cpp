@@ -650,7 +650,9 @@ void deleteRows(std::string tableName, SqlFilter& filter, std::string basePath){
   saveFile(tablePath(tableName, basePath), content);
 }
 
+
 std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query, std::string dataDir, bool* valid, std::string* error){
+  std::cout << "sql - executing sql query" << std::endl;
   assert(query.validQuery);
   *valid = true;
   try {

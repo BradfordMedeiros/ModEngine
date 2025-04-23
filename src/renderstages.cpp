@@ -18,7 +18,7 @@ int indexForRenderStage(std::vector<DeserializedRenderStage>& shaders, std::stri
 }
 
 void ensureUniformExists(
-  std::map<int, std::map<std::string, RenderStageUniformTypeValue>>& stagenameToUniformToValue,
+  std::unordered_map<int, std::unordered_map<std::string, RenderStageUniformTypeValue>>& stagenameToUniformToValue,
   int stageindex,
   std::string& uniformName
 ){
@@ -39,7 +39,7 @@ bool isRenderStageToken(Token& token){
 
 std::vector<DeserializedRenderStage> parseRenderStages(std::vector<Token>& tokens, unsigned int fb0, unsigned int fb1){
   std::vector<DeserializedRenderStage> additionalShaders;
-  std::map<int, std::map<std::string, RenderStageUniformTypeValue>> stagenameToUniformToValue;
+  std::unordered_map<int, std::unordered_map<std::string, RenderStageUniformTypeValue>> stagenameToUniformToValue;
 
   for (auto token : tokens){
     std::cout << "render stages: (" << token.target << ", " << token.attribute << ", " << token.payload << ")" << std::endl; 

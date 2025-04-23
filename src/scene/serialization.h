@@ -47,10 +47,10 @@ struct GameObject {
   GameobjAttributes additionalAttr;
 };
 
-
+enum ObjectType { OBJ_MESH, OBJ_CAMERA, OBJ_PORTAL, OBJ_SOUND, OBJ_LIGHT, OBJ_OCTREE, OBJ_EMITTER, OBJ_NAVMESH, OBJ_TEXT, OBJ_PREFAB };
 struct Field {
   char prefix;
-  std::string type;
+  ObjectType objectType;
 };
 
 std::vector<Token> parseFormat(std::string content);
@@ -69,7 +69,7 @@ struct AttrChildrenPair {
   std::vector<std::string> children;
 };
 
-std::map<std::string, AttrChildrenPair> deserializeSceneTokens(std::vector<Token> tokens);
+std::unordered_map<std::string, AttrChildrenPair> deserializeSceneTokens(std::vector<Token> tokens);
 GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj, GameobjAttributes& additionalFields);
 std::string serializeObj(objid id, objid groupId, GameObject& gameobject, std::vector<std::string> children, bool includeIds, std::vector<std::pair<std::string, std::string>> additionalFields, std::string name = "");
 

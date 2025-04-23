@@ -47,7 +47,7 @@ SceneDeserialization createSceneFromParsedContent(
   auto subelementAttrs = deserializeSceneTokens(dividedTokens.subelementTokens);
 
 
-  std::map<std::string, GameObject> gameobjs;
+  std::unordered_map<std::string, GameObject> gameobjs;
   for (auto [name, attrWithChildren] : serialGameAttrs){
     std::string value = name;
     auto idValue = objIdFromAttribute(attrWithChildren.attr);
@@ -62,7 +62,7 @@ SceneDeserialization createSceneFromParsedContent(
     sandboxAddToScene(scene, sceneId, std::nullopt, gameobjectObj, prefabId);
   }
 
-  std::map<std::string, GameobjAttributes> additionalFields;
+  std::unordered_map<std::string, GameobjAttributes> additionalFields;
   for (auto [name, attrWithChildren] : serialGameAttrs){
     for (auto childName : attrWithChildren.children){
       auto parentId = scene.sceneToNameToId.at(sceneId).at(name);
@@ -71,7 +71,7 @@ SceneDeserialization createSceneFromParsedContent(
     additionalFields[name] = attrWithChildren.attr;
   }
 
-  std::map<std::string, GameobjAttributes> subelementAttributes;
+  std::unordered_map<std::string, GameobjAttributes> subelementAttributes;
   for (auto &[name, attrWithChildren] : subelementAttrs){
     subelementAttributes[name] = attrWithChildren.attr;
   }
@@ -137,7 +137,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
   }
 
 
-  std::map<std::string, GameobjAttributesWithId>  additionalFields;
+  std::unordered_map<std::string, GameobjAttributesWithId>  additionalFields;
   for (auto &[name, attr] : deserializedScene.additionalFields){
     additionalFields[name] = GameobjAttributesWithId{
       .id = sandbox.mainScene.sceneToNameToId.at(sceneId).at(name),
@@ -153,15 +153,15 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
   return data;
 }
 
-std::map<std::string, GameobjAttributesWithId> multiObjAdd(
+std::unordered_map<std::string, GameobjAttributesWithId> multiObjAdd(
   SceneSandbox& sandbox,
   objid sceneId,
   objid rootId, 
   objid rootIdNode, 
-  std::map<objid, objid> childToParent, 
-  std::map<objid, Transformation> gameobjTransforms, 
-  std::map<objid, std::string> names,
-  std::map<objid, GameobjAttributes> additionalFields,
+  std::unordered_map<objid, objid> childToParent, 
+  std::unordered_map<objid, Transformation> gameobjTransforms, 
+  std::unordered_map<objid, std::string> names,
+  std::unordered_map<objid, GameobjAttributes> additionalFields,
   std::function<objid()> getNewObjectId,
   std::function<std::set<std::string>(std::string&)> getObjautoserializerFields,
   std::set<objid> boneIds,
@@ -170,8 +170,8 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
   Scene& scene = sandbox.mainScene; 
   std::vector<LayerInfo>& layers = sandbox.layers;
 
-  std::map<std::string,  GameobjAttributesWithId> nameToAdditionalFields;
-  std::map<objid, objid> nodeIdToRealId;
+  std::unordered_map<std::string,  GameobjAttributesWithId> nameToAdditionalFields;
+  std::unordered_map<objid, objid> nodeIdToRealId;
   auto rootObj = scene.idToGameObjects.at(rootId);
   std::vector<objid> addedIds;
 
@@ -312,12 +312,14 @@ std::vector<objid> getIdsInGroup(Scene& scene, objid groupId){
 }
 
 GameObject& getGameObject(Scene& scene, objid id){
-  modassert(scene.idToGameObjects.find(id) != scene.idToGameObjects.end(), "getGameObject gameobj does not exist");
-  return scene.idToGameObjects.at(id);
+  auto it = scene.idToGameObjects.find(id);
+  modassert(it != scene.idToGameObjects.end(), "getGameObject gameobj does not exist");
+  return it -> second;
 }
 GameObjectH& getGameObjectH(Scene& scene, objid id){
-  modassert(scene.idToGameObjectsH.find(id) != scene.idToGameObjectsH.end(), "getGameObjectH gameobjh does not exist");
-  return scene.idToGameObjectsH.at(id);
+  auto it = scene.idToGameObjectsH.find(id);
+  modassert(it != scene.idToGameObjectsH.end(), "getGameObjectH gameobjh does not exist");
+  return it -> second;
 }
 objid getGroupId(Scene& scene, objid id){
   return scene.idToGameObjectsH.at(id).groupId; 
@@ -664,7 +666,7 @@ glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
   //assert(element.updated == false && element.absTransformUpdated == false);
   return element.matrix;
 }
-Transformation fullTransformation(SceneSandbox& sandbox, objid id){
+Transformation& fullTransformation(SceneSandbox& sandbox, objid id){
   return sandbox.mainScene.absoluteTransforms.at(id).transform;
 }
 

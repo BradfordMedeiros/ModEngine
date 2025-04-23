@@ -271,7 +271,7 @@ struct GameobjAttribute {
 };
 
 struct GameobjAttributes {
-  std::map<std::string, AttributeValue> attr;
+  std::unordered_map<std::string, AttributeValue> attr;
 };
 
 GameobjAttributes gameobjAttrFromValue(std::string field, AttributeValue value);
@@ -303,7 +303,7 @@ bool aboutEqual(AttributeValue one, AttributeValue two);
 bool isIdentityVec(glm::vec4 vec);
 
 template<typename T, typename N>
-std::vector<T> mapKeys(std::map<T, N>& values){   
+std::vector<T> mapKeys(std::unordered_map<T, N>& values){   
   std::vector<T> transformedValues;
   for (auto &[id, _]: values){
     transformedValues.push_back(id);

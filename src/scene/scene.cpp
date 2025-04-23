@@ -21,21 +21,6 @@ GameObject& getGameObject(World& world, std::string name, objid sceneId){
   return *obj.value();
 }
 
-std::vector<Mesh*> getMeshesForGameobj(World& world, objid gameobjId, bool useGroup){
-  auto groupId = getGroupId(world.sandbox, gameobjId);
-  auto allIds = (useGroup && groupId == gameobjId) ? getIdsInGroupByObjId(world.sandbox, groupId) : std::vector<objid>({ gameobjId });
-  //std::cout << "1 physics : , groupId: " << groupId << ", ids " << print(allIds) << std::endl;
-
-  std::vector<Mesh*> nameAndMeshObjNames;
-  for (auto id : allIds){
-    std::vector<Mesh>& meshes = getMeshesForId(world.objectMapping, id);
-    for (int i = 0; i < meshes.size(); i++){
-      nameAndMeshObjNames.push_back(&meshes.at(i));
-    }    
-  }
-  return nameAndMeshObjNames;
-}
-
 glm::vec3 getOffsetForBoundInfo(BoundInfo& boundInfo, glm::vec3 scale){
   float xoffset = 0.5f * (boundInfo.xMax + boundInfo.xMin) * scale.x;
   float yoffset = 0.5f * (boundInfo.yMax + boundInfo.yMin) * scale.y;
@@ -43,36 +28,40 @@ glm::vec3 getOffsetForBoundInfo(BoundInfo& boundInfo, glm::vec3 scale){
   return glm::vec3(xoffset, yoffset, zoffset);
 }
 
+
 std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index, bool useGroup){  
   GameObject& obj = getGameObject(world.sandbox, index);
-  GameObjectObj& gameObjV = world.objectMapping.objects.at(index); 
 
   BoundInfo boundInfo = { .xMin = -1,  .xMax = 1, .yMin = -1, .yMax = 1, .zMin = -1, .zMax = 1 };
   std::optional<glm::vec3> finalOffset = std::nullopt;
 
-  auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
+  auto meshObj = getMesh(world.objectMapping, index); 
   if (meshObj != NULL){
     std::vector<BoundInfo> boundInfos;
-    std::vector<Mesh*> meshes = getMeshesForGameobj(world, index, useGroup);
-
-    for (Mesh* mesh : meshes){
-      boundInfos.push_back(mesh -> boundInfo);
+    auto groupId = getGroupId(world.sandbox, index);
+    auto allIds = (useGroup && groupId == index) ? getIdsInGroupByObjId(world.sandbox, index) : std::vector<objid>({ index });
+    for (auto id : allIds){
+      std::vector<Mesh>& meshes = getMeshesForId(world.objectMapping, id);
+      for (int i = 0; i < meshes.size(); i++){
+        boundInfos.push_back(meshes.at(i).boundInfo);
+      }    
     }
+     
     if (boundInfos.size() == 0){
       return std::nullopt;
     }
 
-    auto fullTransform = fullTransformation(world.sandbox, index);
+    auto& fullTransform = fullTransformation(world.sandbox, index);
     boundInfo = getMaxUnionBoundingInfo(boundInfos);
     finalOffset = getOffsetForBoundInfo(boundInfo, fullTransform.scale);
   }
 
-  auto navmeshObj = std::get_if<GameObjectNavmesh>(&gameObjV);
+  auto navmeshObj = getNavmesh(world.objectMapping, index);
   if (navmeshObj != NULL){
     boundInfo = navmeshObj -> meshes.at(0).boundInfo;
   }
 
-  auto textObj = std::get_if<GameObjectUIText>(&gameObjV);
+  auto textObj = getUIText(world.objectMapping, index);
   if (textObj != NULL){
     // textObj -> value, 1, textObj -> deltaOffset, textObj -> align, textObj -> wrap, textObj -> virtualization, &offset
     glm::vec3 offset(0.f, 0.f, 0.f);
@@ -137,9 +126,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
 
   btRigidBody* rigidBody = NULL;
 
-  GameObjectObj& toRender = world.objectMapping.objects.at(id);
-
-  GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&toRender);
+  GameObjectOctree* octreeObj = getOctree(world.objectMapping, id);
   bool isOctree = octreeObj != NULL;
 
   rigidBodyOpts opts = {
@@ -634,7 +621,7 @@ extern std::vector<AutoSerialize> prefabAutoserializer;
 extern std::vector<AutoSerialize> gameobjSerializer;
 
 void assertFieldTypesUnique(){
-  std::map<std::string, AttributeValueType> fieldToType = {};
+  std::unordered_map<std::string, AttributeValueType> fieldToType = {};
   std::vector<std::vector<AutoSerialize>*> allSerializers = {
     &meshAutoserializer,
     &cameraAutoserializer,
@@ -663,28 +650,26 @@ void assertFieldTypesUnique(){
 }
 
 std::set<std::string> getObjautoserializerFields(std::string& name){
-  auto type = getType(name);
-  if (type == "default"){
+  auto type = getObjectType(name);
+  if (type == OBJ_MESH){
     return serializerFieldNames(meshAutoserializer);
-  }else if (type == "camera"){
+  }else if (type == OBJ_CAMERA){
     return serializerFieldNames(cameraAutoserializer);
-  }else if (type == "portal"){
+  }else if (type == OBJ_PORTAL){
     return serializerFieldNames(portalAutoserializer);
-  }else if (type == "sound"){
+  }else if (type == OBJ_SOUND){
     return serializerFieldNames(soundAutoserializer);
-  }else if (type == "light"){
+  }else if (type == OBJ_LIGHT){
     return serializerFieldNames(lightAutoserializer);
-  }else if (type == "octree"){
+  }else if (type == OBJ_OCTREE){
     return serializerFieldNames(octreeAutoserializer);
-  }else if (type == "emitter"){
+  }else if (type == OBJ_EMITTER){
     return serializerFieldNames(emitterAutoserializer);
-  }else if (type == "navmesh"){
+  }else if (type == OBJ_NAVMESH){
     return serializerFieldNames(navmeshAutoserializer);
-  }else if (type == "text"){
+  }else if (type == OBJ_TEXT){
     return serializerFieldNames(textAutoserializer);
-  }else if (type == "custom"){
-    return {};
-  }else if (type == "prefab"){
+  }else if (type == OBJ_PREFAB){
     return serializerFieldNames(prefabAutoserializer);
   }
   modassert(false, "autoserializer not found");
@@ -745,7 +730,7 @@ World createWorld(
 
   // hackey, but createSceneSandbox adds root object with id 0 so this is needed
   std::vector<objid> idsAdded = { 0 };
-  std::map<std::string, GameobjAttributes> submodelAttributes;
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
 
   auto getId = createGetUniqueObjId(idsAdded);
   addSerialObjectsToWorld(world, 0, idsAdded, getId, {{ "root", GameobjAttributesWithId { .id = idsAdded.at(0), .attr = GameobjAttributes{}}}}, submodelAttributes, std::nullopt);
@@ -761,8 +746,8 @@ World createWorld(
   return world;
 }
 
-std::map<objid, GameobjAttributes> applyFieldsToSubelements(std::string meshName, ModelData& data, std::map<std::string, GameobjAttributes>& overrideAttributes){
-  std::map<objid, GameobjAttributes> additionalFieldsMap;
+std::unordered_map<objid, GameobjAttributes> applyFieldsToSubelements(std::string meshName, ModelData& data, std::unordered_map<std::string, GameobjAttributes>& overrideAttributes){
+  std::unordered_map<objid, GameobjAttributes> additionalFieldsMap;
   for (auto [nodeId, _] : data.nodeTransform){
     additionalFieldsMap[nodeId] = GameobjAttributes { };
   }
@@ -841,11 +826,11 @@ std::string serializeObject(World& world, objid id, bool includeSubmodelAttr, st
 std::set<objid> updatePhysicsFromSandbox(World& world){
   auto updatedIds = updateSandbox(world.sandbox);  
   for (auto index : updatedIds){
-    auto transform = fullTransformation(world.sandbox, index);
+    auto& transform = fullTransformation(world.sandbox, index);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body =  phys.body;
-      auto fullTransform = fullTransformation(world.sandbox, index);
+      auto& fullTransform = fullTransformation(world.sandbox, index);
       setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
     }
   }
@@ -868,7 +853,7 @@ void addObjectToWorld(
   std::string name,
   std::function<objid()> getId,
   GameobjAttributes& attr,
-  std::map<std::string, GameobjAttributes>& submodelAttributes, 
+  std::unordered_map<std::string, GameobjAttributes>& submodelAttributes, 
   std::optional<objid> prefabId
 ){
     auto loadMeshObject = createScopedLoadMesh(world, id);
@@ -934,8 +919,8 @@ void addSerialObjectsToWorld(
   objid sceneId, 
   std::vector<objid>& idsAdded,
   std::function<objid()> getNewObjectId,
-  std::map<std::string, GameobjAttributesWithId> nameToAttr,
-  std::map<std::string, GameobjAttributes>& submodelAttributes, 
+  std::unordered_map<std::string, GameobjAttributesWithId> nameToAttr,
+  std::unordered_map<std::string, GameobjAttributes>& submodelAttributes, 
   std::optional<objid> prefabId
 ){
   for (auto &[name, objAttr] : nameToAttr){
@@ -947,7 +932,7 @@ void addSerialObjectsToWorld(
   for (auto &id : idsAdded){
     auto phys = addPhysicsBody(world, id, true); 
     if (phys.body != NULL){   // why do I need this?
-      auto transform = fullTransformation(world.sandbox, id);
+      auto& transform = fullTransformation(world.sandbox, id);
       setTransform(world.physicsEnvironment, phys.body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation), transform.scale, transform.rotation);
     }  
   }
@@ -1144,17 +1129,16 @@ bool copyObjectToScene(World& world, objid id){
   return true;
 }
 
-void createObjectForScene(World& world, objid sceneId, std::string& name, AttrChildrenPair& attrWithChildren, std::map<std::string, GameobjAttributes>& submodelAttributes){
+void createObjectForScene(World& world, objid sceneId, std::string& name, AttrChildrenPair& attrWithChildren, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes){
   GameobjAttributes& attributes = attrWithChildren.attr;
   auto idAttr = objIdFromAttribute(attributes);
   objid idToAdd = idAttr.has_value() ? idAttr.value() : getUniqueObjId();
 
-  GameObjPair gameobjPair{
-    .gameobj = gameObjectFromFields(name, idToAdd, attributes, getObjautoserializerFields(name), false),
-  };
-  std::vector<objid> idsAdded = { gameobjPair.gameobj.id }; 
+  GameObject gameobj = gameObjectFromFields(name, idToAdd, attributes, getObjautoserializerFields(name), false);
+  
+  std::vector<objid> idsAdded = { gameobj.id }; 
   auto getId = createGetUniqueObjId(idsAdded);
-  addGameObjectToScene(world.sandbox, sceneId, name, gameobjPair.gameobj, attrWithChildren.children, std::nullopt);
+  addGameObjectToScene(world.sandbox, sceneId, name, gameobj, attrWithChildren.children, std::nullopt);
   addSerialObjectsToWorld(world, sceneId, idsAdded, getId, {{ name, GameobjAttributesWithId{ .id = idToAdd, .attr = attributes }}}, submodelAttributes, std::nullopt);
 }
 
@@ -1163,7 +1147,7 @@ std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serial
   auto dividedTokens = divideMainAndSubelementTokens(tokens);
   auto serialAttrs = deserializeSceneTokens(dividedTokens.mainTokens);
   auto subelementAttrs = deserializeSceneTokens(dividedTokens.subelementTokens);
-  std::map<std::string, GameobjAttributes> subelementAttributes;
+  std::unordered_map<std::string, GameobjAttributes> subelementAttributes;
   for (auto &[name, attrWithChildren] : subelementAttrs){
     subelementAttributes[name] = attrWithChildren.attr;
   }
@@ -1184,7 +1168,7 @@ std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serial
   };
 }
 
-objid addObjectToScene(World& world, objid sceneId, std::string name, AttrChildrenPair attrWithChildren, std::map<std::string, GameobjAttributes>& submodelAttributes){
+objid addObjectToScene(World& world, objid sceneId, std::string name, AttrChildrenPair attrWithChildren, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes){
   createObjectForScene(world, sceneId, name, attrWithChildren, submodelAttributes);
   return getIdForName(world.sandbox, name, sceneId);
 }
@@ -1224,7 +1208,7 @@ AttributeValuePtr ptrFromAttributeValue(AttributeValue& attributeValue){
 
 std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, const char* field){
   modassert(world.sandbox.mainScene.idToGameObjects.find(id) != world.sandbox.mainScene.idToGameObjects.end(), "getObjectAttributePtr gameobj does not exist");
-  modassert(world.objectMapping.objects.find(id) != world.objectMapping.objects.end(), std::string("getObjectAttributePtr gameobjObj does not exist: ") + std::to_string(id));
+  modassert(objExists(world.objectMapping, id), std::string("getObjectAttributePtr gameobjObj does not exist: ") + std::to_string(id));
 
   GameObject& gameobj = getGameObject(world, id);
   auto valuePtr = getAttributePtr(gameobj, field);
@@ -1232,8 +1216,7 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
     return valuePtr;
   }
   
-  GameObjectObj& gameobjObj = world.objectMapping.objects.at(id);
-  auto objectValuePtr = getObjectAttributePtr(gameobjObj, field);
+  auto objectValuePtr = getObjectAttributePtr(world.objectMapping, id, field);
   if (objectValuePtr.has_value()){
     return objectValuePtr;
   }
@@ -1389,7 +1372,7 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body =  phys.body;
-      auto transform = fullTransformation(world.sandbox, index);
+      auto& transform = fullTransformation(world.sandbox, index);
       setPosition(body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation));
     }
   }else{
@@ -1397,7 +1380,7 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body = phys.body;
-      auto transform = fullTransformation(world.sandbox, index);
+      auto& transform = fullTransformation(world.sandbox, index);
       setPosition(body, calcOffsetFromRotation(pos, phys.offset, transform.rotation));
     }
   }
@@ -1411,7 +1394,7 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       auto rigidBody = world.rigidbodys.at(index);
       auto body = rigidBody.body;
-      auto transform = fullTransformation(world.sandbox, index);
+      auto& transform = fullTransformation(world.sandbox, index);
       auto rot = transform.rotation;
       auto newPositionOffset = calcOffsetFromRotation(transform.position, rigidBody.offset, rot);
       setPosition(body, newPositionOffset);
@@ -1423,7 +1406,7 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       auto rigidBody = world.rigidbodys.at(index);
       auto body =  rigidBody.body;
-      auto transform = fullTransformation(world.sandbox, index);
+      auto& transform = fullTransformation(world.sandbox, index);
       auto rot = transform.rotation;
       auto newPositionOffset = calcOffsetFromRotation(transform.position, rigidBody.offset, rot);
       setPosition(body, newPositionOffset);
@@ -1453,12 +1436,12 @@ void physicsLocalTransformSet(World& world, objid index, Transformation transfor
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     PhysicsValue& phys = world.rigidbodys.at(index);
     auto body = phys.body;
-    auto fullTransform = fullTransformation(world.sandbox, index);
+    auto& fullTransform = fullTransformation(world.sandbox, index);
     setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
   }
 }
 
-void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, PhysicsValue>& rigidbodys){
+void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<objid, PhysicsValue>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     GameObject& gameobj = getGameObject(world, i);
     if (!gameobj.physicsOptions.isStatic){
@@ -1498,13 +1481,22 @@ glm::mat4 armatureTransform2(SceneSandbox& sandbox, objid id, std::string skelet
   return groupToModel;
 }
 
+void updateLookAt(World& world, Transformation& viewTransform){
+  for (auto &[id, gameobj]: world.sandbox.mainScene.idToGameObjects){
+    if (!gameobj.lookat){
+      return;
+    }             
+    glm::vec3 fromPos = fullTransformation(world.sandbox, id).position;
+    physicsRotateSet(world, id, orientationFromPos(fromPos, viewTransform.position), false);
+  }
+}
 
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool paused, Transformation& viewTransform, bool showVisualizations){
   if (!paused){
     updateEmitters(
       getEmitterSystem(), 
       timeElapsed,
-      [&world](GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions particleOpts) -> std::optional<objid> {     
+      [&world](GameobjAttributes attributes, std::unordered_map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions particleOpts) -> std::optional<objid> {     
         if (particleOpts.parentId.has_value() && !idExists(world.sandbox, particleOpts.parentId.value())){
           return std::nullopt;
         } 
@@ -1523,7 +1515,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
 
         // should get rid of this copying stuff, should make subelements just refer to suffix path
         auto newName =  getUniqueObjectName("emitter");
-        std::map<std::string, GameobjAttributes> submodelAttributesFixedPath;
+        std::unordered_map<std::string, GameobjAttributes> submodelAttributesFixedPath;
         for (auto &[name, attr] : submodelAttributes){
           submodelAttributesFixedPath[newName + "/" + name] = attr;
         }
@@ -1573,14 +1565,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   stepPhysicsSimulation(world.physicsEnvironment, timestep, paused, enablePhysics);
   updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);  
 
-  forEveryGameobj(world.sandbox, [&world, &viewTransform](objid id, GameObject& gameobj) -> void {
-    if (!gameobj.lookat){
-      return;
-    }             
-    glm::vec3 fromPos = fullTransformation(world.sandbox, id).position;
-    physicsRotateSet(world, id, orientationFromPos(fromPos, viewTransform.position), false);
-  }); 
-
+  updateLookAt(world, viewTransform);
 
   auto updatedIds = updatePhysicsFromSandbox(world);
   for (auto updatedId : updatedIds){
@@ -1594,35 +1579,28 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     }
   }
 
-  forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
-    if (id == getGroupId(world.sandbox, id) && world.entitiesToUpdate.find(id) != world.entitiesToUpdate.end()){
+  for (auto id : world.entitiesToUpdate){
+    GameObject& gameobj = getGameObject(world.sandbox, id); // i could defer getting this
+    if (id == getGroupId(world.sandbox, id)){ // why? 
       world.onObjectUpdate(gameobj);
-    }
-  });
-
-
-  // // https://gamedev.net/forums/topic/484984-skeletal-animation-non-uniform-scale/4172731/
-  for (auto &[id, obj] : world.objectMapping.objects){
-    GameObjectMesh* gameobjMesh = std::get_if<GameObjectMesh>(&obj);
-    if (gameobjMesh){
-      for (int i = 0; i < gameobjMesh -> meshesToRender.size(); i++){
-        Mesh& mesh = gameobjMesh -> meshesToRender.at(i);
-        for (Bone& bone : mesh.bones){
-          std::string rootname = getGameObject(world.sandbox, getGroupId(world.sandbox, id)).name;
-          auto boneId = maybeGetGameObjectByName(world.sandbox, bone.name, sceneId(world.sandbox, id), false);
-          modassert(boneId.has_value(), std::string("no bone names: ") + bone.name);
-          auto matrix = armatureTransform2(world.sandbox, boneId.value() -> id, rootname, sceneId(world.sandbox, id));
-          bone.offsetMatrix = matrix * glm::inverse(bone.initialBonePose);
-        }
-      }
     }
   }
 
-  //for (auto id : world.entitiesToUpdate){
-  //  if (getGameObject(world.sandbox, id).isBone){
-  //    std::cout << "want to update a bone: " << getGameObject(world.sandbox, id).name << std::endl;
-  //  }
-  //}
+
+  // // https://gamedev.net/forums/topic/484984-skeletal-animation-non-uniform-scale/4172731/
+  for (auto &[id, gameobjMesh] : world.objectMapping.mesh){
+    for (int i = 0; i < gameobjMesh.meshesToRender.size(); i++){
+      Mesh& mesh = gameobjMesh.meshesToRender.at(i);
+      for (Bone& bone : mesh.bones){
+        std::string rootname = getGameObject(world.sandbox, getGroupId(world.sandbox, id)).name;
+        auto boneId = maybeGetGameObjectByName(world.sandbox, bone.name, sceneId(world.sandbox, id), false);
+        modassert(boneId.has_value(), std::string("no bone names: ") + bone.name);
+        auto matrix = armatureTransform2(world.sandbox, boneId.value() -> id, rootname, sceneId(world.sandbox, id));
+        bone.offsetMatrix = matrix * glm::inverse(bone.initialBonePose);
+      }
+    }
+    
+  }
 
   world.entitiesToUpdate.clear();
 
@@ -1635,8 +1613,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       //auto transformation = fullTransformation(world.sandbox, selectedOctree.value());
       //std::cout << "octree transformation: " << print(transformation) << std::endl;
       auto transform = fullModelTransform(world.sandbox, selectedOctree.value());
-      GameObjectObj& toRender = world.objectMapping.objects.at(selectedOctree.value());
-      GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&toRender);
+      GameObjectOctree* octreeObj = getOctree(world.objectMapping, selectedOctree.value());
       modassert(octreeObj, "draw selection grid onFrame not octree type");
       drawOctreeSelectionGrid(octreeObj -> octree, world.interface.drawLine, transform);
     }    

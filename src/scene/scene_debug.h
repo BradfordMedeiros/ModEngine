@@ -29,12 +29,11 @@ std::string scenegraphAsDotFormat(SceneSandbox& sandbox, ObjectMapping& objectMa
 
 std::string debugAllGameObjects(SceneSandbox& sandbox);
 std::string debugAllGameObjectsH(SceneSandbox& sandbox);
-std::string debugAllGameObjectObj(std::map<objid, GameObjectObj>& objectMapping);
 std::string debugTransformCache(SceneSandbox& sandbox);
-std::string debugLoadedTextures(std::map<std::string, TextureRef>& textures);
-std::string debugLoadedMeshes(std::map<std::string, MeshRef>& meshes);
-std::string debugAnimations(std::map<objid, std::vector<Animation>>& animations);
-std::string debugPhysicsInfo(std::map<objid, PhysicsValue>& rigidbodys);
+std::string debugLoadedTextures(std::unordered_map<std::string, TextureRef>& textures);
+std::string debugLoadedMeshes(std::unordered_map<std::string, MeshRef>& meshes);
+std::string debugAnimations(std::unordered_map<objid, std::vector<Animation>>& animations);
+std::string debugPhysicsInfo(std::unordered_map<objid, PhysicsValue>& rigidbodys);
 std::string debugSceneInfo(SceneSandbox& sandbox);
 
 void printPhysicsInfo(PhysicsInfo physicsInfo);

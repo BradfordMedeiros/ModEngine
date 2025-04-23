@@ -1,6 +1,7 @@
 // TODO
 // TODO STATIC
 // TODO PEROBJECT
+// TODO PERF
 
 #include <csignal>
 #include <cxxopts.hpp>
@@ -37,7 +38,7 @@ std::string shaderFolderPath;
 std::string sqlDirectory = "./res/data/sql/";
 bool bootStrapperMode = false;
 bool strictResourceMode = false;
-std::map<std::string, std::string> args;
+std::unordered_map<std::string, std::string> args;
 extern std::vector<InputDispatch> inputFns;     
 
 // per frame variable data 
@@ -46,7 +47,7 @@ extern Stats statistics;
 LineData lineData = createLines();
 std::queue<StringAttribute> channelMessages;
 
-std::map<objid, unsigned int> portalIdCache;
+std::unordered_map<objid, unsigned int> portalIdCache;
 
 Transformation viewTransform {
   .position = glm::vec3(0.f, 0.f, 0.f),
@@ -490,15 +491,15 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     });
   }
   for (auto& layer : world.sandbox.layers){      // @TODO could organize this before to not require pass on each frame
-    for (auto data : datum){
-      GameObject& gameobject = world.sandbox.mainScene.idToGameObjects.at(data.id);
-      if (gameobject.layer == layer.name){
-        //onObject(data.id, data.modelMatrix, layer, gameobject.shader);
+    auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
+
+    for (auto& data : datum){
+      GameObject& gameobject = world.sandbox.mainScene.idToGameObjects.at(data.id); // slow 
+      if (gameobject.layer == layer.name){  // TODO PERF rm this string comparison 
         int32_t id = data.id; 
         glm::mat4& modelMatrix = *data.modelMatrix; 
         std::string& shader = gameobject.shader;
         modassert(id >= 0, "unexpected id render world");
-        auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
         // This could easily be moved to reduce opengl context switches since the onObject sorts on layers (so just have to pass down).  
         if (state.depthBufferLayer != layer.depthBufferLayer){
@@ -529,12 +530,17 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
         }
     
         shaderSetUniform(newShader, "projview", (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view));
-    
-        auto finalModelMatrix = (layer.scale ? calculateScaledMatrix(view, modelMatrix, layer.fov) : modelMatrix);
+        
+        static glm::mat4 scaledModelMatrix(1.f); // copy assignent showed up in profiling, so just using static here so can prevent copy in most cases
+        glm::mat4& finalModelMatrix = modelMatrix;
+        if (layer.scale){
+          scaledModelMatrix = calculateScaledMatrix(view, modelMatrix, layer.fov);
+          finalModelMatrix = scaledModelMatrix;
+        }
         bool isPortal = false;
         bool isPerspectivePortal = false;
 
-        for (auto portal : portals){
+        for (auto& portal : portals){
           if (id == portal.id){
             isPortal = true;
             isPerspectivePortal = portal.perspective;
@@ -554,13 +560,9 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
               shouldDraw = passesFrustumCulling(viewFrustum, cullingViewTransform, aabb.value());
             }
           }
-          // if (shouldDraw){
-          //   static int counter = 0;
-          //   std::cout << "passes culling name: " << getGameObject(world, id).name << " " << counter << std::endl;
-          //   counter++;
-          // }
+     
           if (shouldDraw){
-            auto trianglesDrawn = renderObject(
+            auto trianglesDrawn = renderObject(  // slow 
               newShader, 
               newShader == *renderStages.selection.shader,
               id, 
@@ -573,7 +575,6 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
               defaultResources.defaultMeshes,
               textBoundingOnly,
               state.showBones,
-              api,
               finalModelMatrix
             );
             numTriangles = numTriangles + trianglesDrawn;
@@ -853,8 +854,8 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   return triangles;
 }
 
-std::map<objid, unsigned int> renderPortals(RenderContext& context, Transformation cameraTransform){
-  std::map<objid, unsigned int> nextPortalCache;
+std::unordered_map<objid, unsigned int> renderPortals(RenderContext& context, Transformation cameraTransform){
+  std::unordered_map<objid, unsigned int> nextPortalCache;
   for (int i = 0; i < context.portals.size(); i++){
     auto portal = context.portals.at(i);
     auto portalViewMatrix = renderPortalView(portal, cameraTransform);

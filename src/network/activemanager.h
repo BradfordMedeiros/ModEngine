@@ -21,7 +21,7 @@
 #include "../common/util.h"
 #include "./network.h"
 
-std::map<std::string, std::string> listServers();
+std::unordered_map<std::string, std::string> listServers();
 std::string connectServer(std::string server, std::function<NetworkPacket(std::string)> getConnectPacket);
 void disconnectServer();
 bool isConnectedToServer();

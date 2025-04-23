@@ -412,7 +412,7 @@ void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld){
 }
 
 
-std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes){
+std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes){
   AttrChildrenPair attrWithChildren {
     .attr = attributes,
     .children = {},
@@ -827,7 +827,7 @@ void setActiveCamera(std::optional<int32_t> cameraIdOpt){
     return;
   }
   auto cameraId = cameraIdOpt.value();
-  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
+  auto cameraIndexs = getAllCameraIndexs(world.objectMapping);
   if (! (std::find(cameraIndexs.begin(), cameraIndexs.end(), cameraId) != cameraIndexs.end())){
     std::cout << "index: " << cameraId << " is not a valid index" << std::endl;
     auto objectExists  = idExists(world.sandbox, cameraId);
@@ -861,7 +861,7 @@ Transformation getView(){
 }
 
 void nextCamera(){
-  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
+  auto cameraIndexs = getAllCameraIndexs(world.objectMapping);
   if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
     state.activeCameraObj = NULL;
     state.activeCameraData = NULL;
@@ -925,7 +925,7 @@ void stopSoundState(std::string source, objid sceneId){
   }
 }
 
-std::string activeTextureName(int activeTextureIndex, std::map<std::string, TextureRef> worldTextures){
+std::string activeTextureName(int activeTextureIndex, std::unordered_map<std::string, TextureRef> worldTextures){
   int currentTextureIndex = 0;
   for (auto [name, _] : worldTextures){
     if (currentTextureIndex >= activeTextureIndex){
@@ -1087,8 +1087,8 @@ void markUserTexturesCleared(){
   }
 }
 
-extern std::map<std::string, std::string> args;
-std::map<std::string, std::string> getArgs(){
+extern std::unordered_map<std::string, std::string> args;
+std::unordered_map<std::string, std::string> getArgs(){
   return args;
 }
 

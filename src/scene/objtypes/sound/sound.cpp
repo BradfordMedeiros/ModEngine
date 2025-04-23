@@ -1,8 +1,8 @@
 #include "./sound.h"
 
 std::string readFileOrPackage(std::string filepath); // i dont really like directly referencing this here, but...it's ok
-static std::map<std::string, ALuint> soundBuffers;  
-static std::map<std::string, int> soundUsages;
+static std::unordered_map<std::string, ALuint> soundBuffers;  
+static std::unordered_map<std::string, int> soundUsages;
 
 void startSoundSystem(){
   alutInit(NULL, NULL);

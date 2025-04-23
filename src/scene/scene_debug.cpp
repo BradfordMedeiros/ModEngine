@@ -7,8 +7,7 @@ std::string getDotInfoForNode(DotInfo& info){
 }
 
 std::optional<bool> isMeshDisabled(ObjectMapping& objectMapping, objid id){
-  GameObjectObj& gameObjV = objectMapping.objects.at(id); 
-  auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
+  auto meshObj = getMesh(objectMapping, id);
   if (!meshObj){
     return std::nullopt;
   }
@@ -20,7 +19,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, ObjectMapping& obje
   forEveryGameobj(sandbox, [&sandbox, &objectMapping, &dotRelations](objid id, GameObject& childObj) -> void {
     auto childObjH = getGameObjectH(sandbox, id);
 
-    bool objectMappingExists = objectMapping.objects.find(id) != objectMapping.objects.end();
+    bool objectMappingExists = objExists(objectMapping, id);;
     DotInfo childInfo {
       .name = childObj.name,
       .id = childObjH.id,
@@ -46,7 +45,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, ObjectMapping& obje
     auto parentObj = getGameObject(sandbox, parentId);
     auto parentObjH = getGameObjectH(sandbox, parentId);
 
-    bool parentObjectMappingExists = objectMapping.objects.find(parentId) != objectMapping.objects.end();
+    bool parentObjectMappingExists = objExists(objectMapping, parentId);
     DotInfo parentInfo {
       .name = parentObj.name,
       .id = parentObj.id,
@@ -109,15 +108,6 @@ std::string debugAllGameObjectsH(SceneSandbox& sandbox){
   return content;
 }
 
-std::string debugAllGameObjectObj(std::map<objid, GameObjectObj>& objectMapping){
-  std::string content = "";
-  for (auto &[id, _] : objectMapping){
-    content += std::to_string(id);
-    content = content + "\n";
-  }
-  return content; 
-}
-
 std::string debugTransformCache(SceneSandbox& sandbox){
   std::string content = "";
   for (auto &[id, transformElement] : sandbox.mainScene.absoluteTransforms){
@@ -128,7 +118,7 @@ std::string debugTransformCache(SceneSandbox& sandbox){
   return content;  
 }
 
-std::string debugLoadedTextures(std::map<std::string, TextureRef>& textures){
+std::string debugLoadedTextures(std::unordered_map<std::string, TextureRef>& textures){
   std::string content = "";
   for (auto &[name, texture] : textures){
     content += name + " " + "[";
@@ -142,7 +132,7 @@ std::string debugLoadedTextures(std::map<std::string, TextureRef>& textures){
   return content;
 }
 
-std::string debugLoadedMeshes(std::map<std::string, MeshRef>& meshes){
+std::string debugLoadedMeshes(std::unordered_map<std::string, MeshRef>& meshes){
   std::string content = "";
   for (auto &[name, mesh] : meshes){
     content += name + " " + "[";
@@ -155,7 +145,7 @@ std::string debugLoadedMeshes(std::map<std::string, MeshRef>& meshes){
   return content; 
 }
 
-std::string debugAnimations(std::map<objid, std::vector<Animation>>& animations){
+std::string debugAnimations(std::unordered_map<objid, std::vector<Animation>>& animations){
   std::string content = "";
   for (auto &[id, animVals] : animations){
     content += std::to_string(id) + " " + "[";
@@ -168,7 +158,7 @@ std::string debugAnimations(std::map<objid, std::vector<Animation>>& animations)
   return content; 
 }
 
-std::string debugPhysicsInfo(std::map<objid, PhysicsValue>& rigidbodys){
+std::string debugPhysicsInfo(std::unordered_map<objid, PhysicsValue>& rigidbodys){
   std::string content = "";
   for (auto [id, physicsBody]: rigidbodys){
     content += std::to_string(id) + "\n";

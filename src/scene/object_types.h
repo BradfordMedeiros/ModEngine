@@ -31,74 +31,61 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-typedef std::variant<
-  GameObjectMesh, 
-  GameObjectCamera, 
-  GameObjectPortal, 
-  GameObjectSound, 
-  GameObjectLight, 
-  GameObjectOctree,
-  GameObjectEmitter,
-  GameObjectNavmesh,
-  GameObjectUIText,
-  GameObjectPrefab
-> GameObjectObj;
-
 // . reserved for prefix scene id
 // : reserved for divider 
 // attributes: mesh, disabled, textureoffset, texture
 static Field obj = {
   .prefix = '`', 
-  .type = "default",
+  .objectType = OBJ_MESH,
 };
 
 // attributes: none
 static Field camera = {
   .prefix = '>',
-  .type = "camera",
+  .objectType = OBJ_CAMERA,
 };
 
 // attributes: camera, perspective
 static Field portal = {
   .prefix = '@',
-  .type = "portal",
+  .objectType = OBJ_PORTAL,
 };
 
 // attributes: clip
 static Field sound = {
   .prefix = '&',
-  .type = "sound",
+  .objectType = OBJ_SOUND,
 };
 
 // attributes: color
 static Field light = {
   .prefix = '!',
-  .type = "light",
+  .objectType = OBJ_LIGHT,
 };
 
 static Field octreeField {
   .prefix = '*',
-  .type = "octree",
+  .objectType = OBJ_OCTREE,
 };
 
 static Field emitterField {
   .prefix = '+',
-  .type = "emitter",
+  .objectType = OBJ_EMITTER,
 };
 
 static Field navmeshField {
   .prefix = ';',
-  .type = "navmesh",
+  .objectType = OBJ_NAVMESH,
 };
 
 static Field uiTextField {
   .prefix = ')',
-  .type = "text",
+  .objectType = OBJ_TEXT,
 };
 
 static Field prefabField {
   .prefix = '[',
-  .type = "prefab",
+  .objectType = OBJ_PREFAB,
 };
 
 static std::vector fields = { 
@@ -114,8 +101,19 @@ static std::vector fields = {
   prefabField,
 };
 
+ObjectType getObjectType(std::string& name);
+
 struct ObjectMapping {
-  std::map<objid, GameObjectObj> objects;
+  std::unordered_map<objid, GameObjectMesh> mesh;
+  std::unordered_map<objid, GameObjectCamera> camera;
+  std::unordered_map<objid, GameObjectPortal> portal;
+  std::unordered_map<objid, GameObjectSound> sound;
+  std::unordered_map<objid, GameObjectLight> light;
+  std::unordered_map<objid, GameObjectOctree> octree;
+  std::unordered_map<objid, GameObjectEmitter> emitter;
+  std::unordered_map<objid, GameObjectNavmesh> navmesh;
+  std::unordered_map<objid, GameObjectUIText> text;
+  std::unordered_map<objid, GameObjectPrefab> prefab;
 };
 
 ObjectMapping getObjectMapping();
@@ -160,30 +158,17 @@ int renderObject(
   int showDebugMask,
   unsigned int portalTexture,
   unsigned int navmeshTexture,
-  glm::mat4 model,
+  glm::mat4& model,
   bool drawPoints,
   DefaultMeshes& defaultMeshes,
   bool selectionMode,
   bool drawBones,
-  RenderObjApi api,
   glm::mat4& finalModelMatrix
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, ObjectMapping& objectMapping, std::function<std::string(int)> getTextureName, std::function<void(std::string, std::string&)> saveFile);
-std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& toRender, const char* field);
+std::optional<AttributeValuePtr> getObjectAttributePtr(ObjectMapping& objectMapping, objid id, const char* field);
 bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&);
-
-template<typename T>
-std::vector<objid> getGameObjectsIndex(ObjectMapping& mapping){   // putting templates have to be in header?
-  std::vector<objid> indicies;
-  for (auto [id, gameobject]: mapping.objects){
-    auto gameobjectP = std::get_if<T>(&gameobject);
-    if (gameobjectP != NULL){
-      indicies.push_back(id);
-    }
-  }
-  return indicies;
-}
 
 std::vector<Mesh>& getMeshesForId(ObjectMapping& mapping, objid id);
 
@@ -198,5 +183,22 @@ void onObjectSelected(objid id);
 void onObjectUnselected();
 
 GameObjectOctree* getOctree(ObjectMapping& mapping, objid id);
+GameObjectNavmesh* getNavmesh(ObjectMapping& mapping, objid id);
+GameObjectLight* getLight(ObjectMapping& mapping, objid id);
+GameObjectPortal* getPortal(ObjectMapping& mapping, objid id);
+GameObjectMesh* getMesh(ObjectMapping& mapping, objid id);
+GameObjectPrefab* getPrefab(ObjectMapping& mapping, objid id);
+GameObjectCamera* getCameraObj(ObjectMapping& mapping, objid id);
+GameObjectUIText* getUIText(ObjectMapping& mapping, objid id);
+GameObjectSound* getSoundObj(ObjectMapping& mapping, objid id);
+GameObjectEmitter* getEmitter(ObjectMapping& mapping, objid id);
+
+std::vector<objid> getAllLightsIndexs(ObjectMapping& mapping);
+std::vector<objid> getAllPortalIndexs(ObjectMapping& mapping);
+std::vector<objid> getAllCameraIndexs(ObjectMapping& mapping);
+
+bool objExists(ObjectMapping& mapping, objid id);
+
+
 
 #endif 

@@ -1,70 +1,66 @@
 #include "./object_types.h"
 
 void shaderLogDebug(const char* str);
+extern RenderObjApi api;
 
 ObjectMapping getObjectMapping() {
   ObjectMapping objectMapping {
-    .objects = {},
   };
 	return objectMapping;
 }
 
-std::string getType(std::string name){
-  std::string type = "default";
+// enum ObjectType { OBJ_MESH, OBJ_CAMERA, OBJ_PORTAL, OBJ_SOUND, OBJ_LIGHT, OBJ_OCTREE, OBJ_EMITTER, OBJ_NAVMESH, OBJ_TEXT, OBJ_PREFAB };
+ObjectType getObjectType(std::string& name){
   for (Field field : fields){
-    if (name[0] == field.prefix){
-      type = field.type;
+    if (name.at(0) == field.prefix){
+      return field.objectType;
     }
   }
-  return type;
+  return OBJ_MESH;
 }
 
 void addObjectType(ObjectMapping& objectMapping, objid id, std::string name, GameobjAttributes& attr, ObjectTypeUtil util){
-  assert(objectMapping.objects.find(id) == objectMapping.objects.end());
+  modassert(!objExists(objectMapping, id), "addObjectType already exists");
   modlog("objecttype - add", std::to_string(id));
-  auto objectType = getType(name);
-  if (objectType == "default"){
-    objectMapping.objects[id] = createMesh(attr, util);
+  auto objectType = getObjectType(name);
+  if (objectType == OBJ_MESH){
+    objectMapping.mesh[id] = createMesh(attr, util);
     return;
   }
-  if (objectType == "camera"){
-    objectMapping.objects[id] = createCamera(attr, util);
+  if (objectType == OBJ_CAMERA){
+    objectMapping.camera[id] = createCamera(attr, util);
     return;  
   }
-  if (objectType == "portal"){
-    objectMapping.objects[id] = createPortal(attr, util);
+  if (objectType == OBJ_PORTAL){
+    objectMapping.portal[id] = createPortal(attr, util);
     return;  
   }
-  if (objectType == "light"){
-    objectMapping.objects[id] = createLight(attr, util);
+  if (objectType == OBJ_LIGHT){
+    objectMapping.light[id] = createLight(attr, util);
     return;  
   }
-  if (objectType == "camera"){
-    objectMapping.objects[id] = createCamera(attr, util);
+  if (objectType == OBJ_SOUND){
+    objectMapping.sound[id] = createSound(attr, util);
     return;  
   }
-  if (objectType == "sound"){
-    objectMapping.objects[id] = createSound(attr, util);
+  if (objectType == OBJ_TEXT){
+    objectMapping.text[id] = createUIText(attr, util);
     return;  
   }
-  if (objectType == "text"){
-    objectMapping.objects[id] = createUIText(attr, util);
+  if (objectType == OBJ_NAVMESH){
+    objectMapping.navmesh[id] = createNavmesh(attr, util);
     return;  
   }
-  if (objectType == "navmesh"){
-    objectMapping.objects[id] = createNavmesh(attr, util);
+  if (objectType == OBJ_EMITTER){
+    objectMapping.emitter[id] = createEmitter(attr, util);
     return;  
   }
-  if (objectType == "emitter"){
-    objectMapping.objects[id] = createEmitter(attr, util);
+  if (objectType == OBJ_OCTREE){
+    objectMapping.octree[id] = createOctree(attr, util);
     return;  
   }
-  if (objectType == "octree"){
-    objectMapping.objects[id] = createOctree(attr, util);
-    return;  
-  }
-  if (objectType == "prefab"){
-    objectMapping.objects[id] = createPrefabObj(attr, util);
+  if (objectType == OBJ_PREFAB){
+    objectMapping.prefab[id] = createPrefabObj(attr, util);
     return;  
   }
 
@@ -77,7 +73,7 @@ void removeObject(
   std::function<void(std::string)> unbindCamera,
   std::function<void(objid)> unloadScene
 ){
-  if (objectMapping.objects.find(id) == objectMapping.objects.end()){
+  if (!objExists(objectMapping, id)){
     return;
   }
 
@@ -86,87 +82,92 @@ void removeObject(
     .unloadScene = unloadScene
   };
 
-  GameObjectObj& Object = objectMapping.objects.at(id);
   {
-    auto gameobjectCamera = std::get_if<GameObjectCamera>(&Object);
+    auto gameobjectMesh = getMesh(objectMapping, id);
+    if (gameobjectMesh){
+      // do nothing
+      objectMapping.mesh.erase(id);
+      return;
+    }
+  }
+
+  {
+    auto gameobjectCamera = getCameraObj(objectMapping, id);;
     if (gameobjectCamera){
       // do nothing
-      objectMapping.objects.erase(id);
+      objectMapping.camera.erase(id);
       return;
     }   
   }
+
   {
-    auto gameobjectPortal = std::get_if<GameObjectPortal>(&Object);
+    auto gameobjectPortal = getPortal(objectMapping, id);
     if (gameobjectPortal){
       // do nothing
-      objectMapping.objects.erase(id);
+      objectMapping.portal.erase(id);
       return;
     }   
   }
   {
-    auto gameobjectLight = std::get_if<GameObjectLight>(&Object);
+    auto gameobjectLight = getLight(objectMapping, id);
     if (gameobjectLight){
       // do nothing
       removeLight(*gameobjectLight, util);
-      objectMapping.objects.erase(id);
+      objectMapping.light.erase(id);
       return;
     }    
   }
   {
-    auto gameobjectSound = std::get_if<GameObjectSound>(&Object);
+    auto gameobjectSound = getSoundObj(objectMapping, id);
     if (gameobjectSound){
       // do nothing
       removeSound(*gameobjectSound, util);
-      objectMapping.objects.erase(id);
+      objectMapping.sound.erase(id);
       return;
     }
   }
+
   {
-    auto gameobjectUiText = std::get_if<GameObjectUIText>(&Object);
-    if (gameobjectUiText){
-      // do nothing
-      objectMapping.objects.erase(id);
-      return;
-    }
-  }
-  {
-    auto gameobjectNavmesh = std::get_if<GameObjectNavmesh>(&Object);
-    if (gameobjectNavmesh){
-      removeNavmesh(*gameobjectNavmesh, util);
-      objectMapping.objects.erase(id);
-      return;
-    }
-  }
-  {
-    auto gameobjectEmitter = std::get_if<GameObjectEmitter>(&Object);
+    auto gameobjectEmitter = getEmitter(objectMapping, id);
     if (gameobjectEmitter){
       // do nothing
       removeEmitterObj(*gameobjectEmitter, util);
-      objectMapping.objects.erase(id);
+      objectMapping.emitter.erase(id);
       return;
     }
   }
+
   {
-    auto gameobjectMesh = std::get_if<GameObjectMesh>(&Object);
-    if (gameobjectMesh){
-      // do nothing
-      objectMapping.objects.erase(id);
-      return;
-    }
-  }
-  {
-    auto gameObjectOctree = std::get_if<GameObjectOctree>(&Object);
+    auto gameObjectOctree = getOctree(objectMapping, id);
     if (gameObjectOctree){
       // do nothing
-      objectMapping.objects.erase(id);
+      objectMapping.octree.erase(id);
       return;
     }
   }
+
+  {
+    auto gameobjectUiText = getUIText(objectMapping, id);
+    if (gameobjectUiText){
+      // do nothing
+      objectMapping.text.erase(id);
+      return;
+    }
+  }
+  {
+    auto gameobjectNavmesh = getNavmesh(objectMapping, id);
+    if (gameobjectNavmesh){
+      removeNavmesh(*gameobjectNavmesh, util);
+      objectMapping.navmesh.erase(id);
+      return;
+    }
+  }
+
   { 
-    auto gameObjectPrefab = std::get_if<GameObjectPrefab>(&Object);
+    auto gameObjectPrefab = getPrefab(objectMapping, id);
     if (gameObjectPrefab){
       removePrefabObj(*gameObjectPrefab, util);
-      objectMapping.objects.erase(id);
+      objectMapping.prefab.erase(id);
       return;
     }
   }
@@ -195,6 +196,7 @@ glm::vec4 getAlternatingColor(int index){
   return colors.at(index);
 }
 
+
 objid selectedId = 0;
 int renderObject(
   GLint shaderProgram,
@@ -204,18 +206,15 @@ int renderObject(
   int showDebugMask,
   unsigned int portalTexture,
   unsigned int navmeshTexture,
-  glm::mat4 model,
+  glm::mat4& model,
   bool drawPoints,
   DefaultMeshes& defaultMeshes,
   bool selectionMode,
   bool drawBones,
-  RenderObjApi api,
   glm::mat4& finalModelMatrix
 ){
 
-  GameObjectObj& toRender = objectMapping.objects.at(id);
-  auto meshObj = std::get_if<GameObjectMesh>(&toRender);
-
+  auto meshObj = getMesh(objectMapping, id);
   if (meshObj != NULL && !meshObj -> isDisabled && (meshObj -> meshesToRender.size() > 0)){
     int numTriangles = 0;
     for (int x = 0; x < meshObj -> meshesToRender.size(); x++){
@@ -251,27 +250,31 @@ int renderObject(
     }
     //api.drawSphere(boneTransform.position);
     auto model = glm::translate(glm::mat4(1.f), transform.position);
-    renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, model, id);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, model, id);
   }
+
   if (meshObj != NULL && (meshObj -> meshesToRender.size() > 0) && (showDebugMask & 0b1)) {
     //api.drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 100.f, 0.f), glm::vec4(1.f, 0.f, 0.f, 1.f));
     return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, finalModelMatrix, id);
   }
 
-  auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
+  if (meshObj){
+    return 0;
+  }
+
+  auto cameraObj = getCameraObj(objectMapping, id);
   if (cameraObj != NULL && (showDebugMask & 0b10)){
     auto transform = getTransformationFromMatrix(model).position;
     auto model = glm::translate(glm::mat4(1.f), transform);
     return renderDefaultNode(shaderProgram, *defaultMeshes.cameraMesh, model, id);
   }
 
-  auto soundObject = std::get_if<GameObjectSound>(&toRender);
+  auto soundObject = getSoundObj(objectMapping, id);
   if (soundObject != NULL && (showDebugMask & 0b100)){
     return renderDefaultNode(shaderProgram, *defaultMeshes.soundMesh, finalModelMatrix, id);
   }
 
-
-  auto portalObj = std::get_if<GameObjectPortal>(&toRender);
+  auto portalObj = getPortal(objectMapping, id);
   if (portalObj != NULL){
     MeshUniforms meshUniforms {
       .model = finalModelMatrix,
@@ -283,12 +286,12 @@ int renderObject(
     return defaultMeshes.portalMesh -> numTriangles;
   }
 
-  auto lightObj = std::get_if<GameObjectLight>(&toRender);
+  auto lightObj = getLight(objectMapping, id);
   if (lightObj != NULL && (showDebugMask & 0b1000)){   
     return renderDefaultNode(shaderProgram, *defaultMeshes.lightMesh, finalModelMatrix, id);
   }
 
-  auto octreeObj = std::get_if<GameObjectOctree>(&toRender);
+  auto octreeObj = getOctree(objectMapping, id);
   if (octreeObj != NULL){
     Mesh* octreeMesh = getOctreeMesh(*octreeObj);
     modassert(octreeMesh, "no octree mesh available");
@@ -301,12 +304,12 @@ int renderObject(
     return octreeMesh -> numTriangles;
   }
 
-  auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
+  auto emitterObj = getEmitter(objectMapping, id);
   if (emitterObj != NULL && (showDebugMask & 0b100000)){
     return renderDefaultNode(shaderProgram, *defaultMeshes.emitter, finalModelMatrix, id);
   }
 
-  auto navmeshObj = std::get_if<GameObjectNavmesh>(&toRender);
+  auto navmeshObj = getNavmesh(objectMapping, id);
   if (navmeshObj != NULL){
     MeshUniforms meshUniforms {
       .model = finalModelMatrix,
@@ -357,13 +360,13 @@ int renderObject(
     return navmeshObj -> meshes.at(0).numTriangles;
   }
 
-  auto textObj = std::get_if<GameObjectUIText>(&toRender);
+  auto textObj = getUIText(objectMapping, id);
   if (textObj != NULL){
     shaderSetUniform(shaderProgram, "tint", textObj -> tint);
     return api.drawWord(shaderProgram, id, textObj -> value, 1000.f /* 1000.f => -1,1 range for each quad */, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor, textObj -> fontFamily, selectionMode);
   }
 
-  auto prefabObj = std::get_if<GameObjectPrefab>(&toRender);
+  auto prefabObj = getPrefab(objectMapping, id);
   if (prefabObj != NULL){
     auto vertexCount = 0;
     if (showDebugMask & 0b10000000){
@@ -376,129 +379,131 @@ int renderObject(
   return 0;
 }
 
-std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& Object, const char* field){
+std::optional<AttributeValuePtr> getObjectAttributePtr(ObjectMapping& objectMapping, objid id, const char* field){
+  modassert(objExists(objectMapping, id), "getObjectAttributePtr obj does not exist");
   {
-    auto gameobjectCamera = std::get_if<GameObjectCamera>(&Object);
-    if (gameobjectCamera){
-      return getCameraAttribute(*gameobjectCamera, field);
-    }   
-  }
-  {
-    auto gameobjectPortal = std::get_if<GameObjectPortal>(&Object);
-    if (gameobjectPortal){
-      return getPortalAttribute(*gameobjectPortal, field);
-    }   
-  }
-  {
-    auto gameobjectLight = std::get_if<GameObjectLight>(&Object);
-    if (gameobjectLight){
-      return getLightAttribute(*gameobjectLight, field);
-    }    
-  }
-  {
-    auto gameobjectSound = std::get_if<GameObjectSound>(&Object);
-    if (gameobjectSound){
-      return getSoundAttribute(*gameobjectSound, field);
-    }
-  }
-  {
-    auto gameobjectUiText = std::get_if<GameObjectUIText>(&Object);
-    if (gameobjectUiText){
-      return getTextAttribute(*gameobjectUiText, field);
-    }
-  }
-  {
-    auto gameobjectNavmesh = std::get_if<GameObjectNavmesh>(&Object);
-    if (gameobjectNavmesh){
-      return getNavmeshAttribute(*gameobjectNavmesh, field);
-    }
-  }
-  {
-    auto gameobjectEmitter = std::get_if<GameObjectEmitter>(&Object);
-    if (gameobjectEmitter){
-      return getEmitterAttribute(*gameobjectEmitter, field);
-    }
-  }
-  {
-    auto gameobjectMesh = std::get_if<GameObjectMesh>(&Object);
+    auto gameobjectMesh = getMesh(objectMapping, id);
     if (gameobjectMesh){
       return getMeshAttribute(*gameobjectMesh, field);
     }
   }
   {
-    auto gameObjectOctree = std::get_if<GameObjectOctree>(&Object);
+    auto gameobjectCamera = getCameraObj(objectMapping, id);
+    if (gameobjectCamera){
+      return getCameraAttribute(*gameobjectCamera, field);
+    }   
+  }
+  {
+    auto gameobjectPortal = getPortal(objectMapping, id);
+    if (gameobjectPortal){
+      return getPortalAttribute(*gameobjectPortal, field);
+    }   
+  }
+  {
+    auto gameobjectLight = getLight(objectMapping, id);
+    if (gameobjectLight){
+      return getLightAttribute(*gameobjectLight, field);
+    }    
+  }
+  {
+    auto gameobjectSound = getSoundObj(objectMapping, id);
+    if (gameobjectSound){
+      return getSoundAttribute(*gameobjectSound, field);
+    }
+  }
+  {
+    auto gameobjectUiText = getUIText(objectMapping, id);
+    if (gameobjectUiText){
+      return getTextAttribute(*gameobjectUiText, field);
+    }
+  }
+  {
+    auto gameobjectNavmesh = getNavmesh(objectMapping, id);
+    if (gameobjectNavmesh){
+      return getNavmeshAttribute(*gameobjectNavmesh, field);
+    }
+  }
+  {
+    auto gameobjectEmitter = getEmitter(objectMapping, id);
+    if (gameobjectEmitter){
+      return getEmitterAttribute(*gameobjectEmitter, field);
+    }
+  }
+  {
+    auto gameObjectOctree = getOctree(objectMapping, id);
     if (gameObjectOctree){
       return getOctreeAttribute(*gameObjectOctree, field);
     }
   }
   { 
-    auto gameObjectPrefab = std::get_if<GameObjectPrefab>(&Object);
+    auto gameObjectPrefab = getPrefab(objectMapping, id);
     if (gameObjectPrefab){
       return getPrefabAttribute(*gameObjectPrefab, field);
     }
   }
-  assert(false);
+  modassert(false, "getObjectAttributePtr invalid type");
+  return std::optional<AttributeValuePtr>(std::nullopt);;
 }
 
 bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags& flags){
-  GameObjectObj& Object = objectMapping.objects.at(id);
+  modassert(objExists(objectMapping, id), "setObjectAttribute id does not exist");
+  {
+    auto gameobjectMesh = getMesh(objectMapping, id);
+    if (gameobjectMesh){
+      return setMeshAttribute(*gameobjectMesh, field, value, util, flags);
+    }
+  }
 
   {
-    auto gameobjectCamera = std::get_if<GameObjectCamera>(&Object);
+    auto gameobjectCamera = getCameraObj(objectMapping, id);
     if (gameobjectCamera){
       return setCameraAttribute(*gameobjectCamera, field, value, util, flags);
     }   
   }
   {
-    auto gameobjectPortal = std::get_if<GameObjectPortal>(&Object);
+    auto gameobjectPortal = getPortal(objectMapping, id);
     if (gameobjectPortal){
       return setPortalAttribute(*gameobjectPortal, field, value, util, flags);
     }   
   }
   {
-    auto gameobjectLight = std::get_if<GameObjectLight>(&Object);
+    auto gameobjectLight = getLight(objectMapping, id);
     if (gameobjectLight){
       return setLightAttribute(*gameobjectLight, field, value, util, flags);
     }    
   }
   {
-    auto gameobjectSound = std::get_if<GameObjectSound>(&Object);
+    auto gameobjectSound = getSoundObj(objectMapping, id);
     if (gameobjectSound){
       return setSoundAttribute(*gameobjectSound, field, value, util, flags);
     }
   }
   {
-    auto gameobjectUiText = std::get_if<GameObjectUIText>(&Object);
+    auto gameobjectUiText = getUIText(objectMapping, id);
     if (gameobjectUiText){
       return setTextAttribute(*gameobjectUiText, field, value, util, flags);
     }
   }
   {
-    auto gameobjectNavmesh = std::get_if<GameObjectNavmesh>(&Object);
+    auto gameobjectNavmesh = getNavmesh(objectMapping, id);
     if (gameobjectNavmesh){
       return false; // do nothing
     }
   }
   {
-    auto gameobjectEmitter = std::get_if<GameObjectEmitter>(&Object);
+    auto gameobjectEmitter = getEmitter(objectMapping, id);
     if (gameobjectEmitter){
       return setEmitterAttribute(*gameobjectEmitter, field, value, util, flags);
     }
   }
   {
-    auto gameobjectMesh = std::get_if<GameObjectMesh>(&Object);
-    if (gameobjectMesh){
-      return setMeshAttribute(*gameobjectMesh, field, value, util, flags);
-    }
-  }
-  {
-    auto gameObjectOctree = std::get_if<GameObjectOctree>(&Object);
+    auto gameObjectOctree = getOctree(objectMapping, id);
     if (gameObjectOctree){
       return false;
     }
   }
   { 
-    auto gameObjectPrefab = std::get_if<GameObjectPrefab>(&Object);
+    auto gameObjectPrefab = getPrefab(objectMapping, id);
     if (gameObjectPrefab){
       return setPrefabAttribute(*gameObjectPrefab, field, value, util, flags);
     }
@@ -508,69 +513,70 @@ bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* fiel
 }
   
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, ObjectMapping& objectMapping, std::function<std::string(int)> getTextureName, std::function<void(std::string, std::string&)> saveFile){
-  GameObjectObj Object = objectMapping.objects.at(id);
+  modassert(objExists(objectMapping, id), "getAdditionalFields obj does not exist");
   ObjectSerializeUtil serializeUtil {
     .textureName = getTextureName,
     .saveFile = saveFile,
   };
 
   {
-    auto gameobjectCamera = std::get_if<GameObjectCamera>(&Object);
+    auto gameobjectMesh = getMesh(objectMapping, id);
+    if (gameobjectMesh){
+      return serializeMesh(*gameobjectMesh, serializeUtil);
+    }
+  }
+  {
+    auto gameobjectCamera = getCameraObj(objectMapping, id);
     if (gameobjectCamera){
       return serializeCamera(*gameobjectCamera, serializeUtil);
     }   
   }
   {
-    auto gameobjectPortal = std::get_if<GameObjectPortal>(&Object);
+    auto gameobjectPortal = getPortal(objectMapping, id);
     if (gameobjectPortal){
       return serializePortal(*gameobjectPortal, serializeUtil);
     }   
   }
   {
-    auto gameobjectLight = std::get_if<GameObjectLight>(&Object);
+    auto gameobjectLight = getLight(objectMapping, id);
     if (gameobjectLight){
       return serializeLight(*gameobjectLight, serializeUtil);
     }    
   }
   {
-    auto gameobjectSound = std::get_if<GameObjectSound>(&Object);
+    auto gameobjectSound = getSoundObj(objectMapping, id);
     if (gameobjectSound){
       return serializeSound(*gameobjectSound, serializeUtil);
     }
   }
   {
-    auto gameobjectUiText = std::get_if<GameObjectUIText>(&Object);
+    auto gameobjectUiText = getUIText(objectMapping, id);
     if (gameobjectUiText){
       return serializeText(*gameobjectUiText, serializeUtil);
     }
   }
   {
-    auto gameobjectNavmesh = std::get_if<GameObjectNavmesh>(&Object);
+    auto gameobjectNavmesh = getNavmesh(objectMapping, id);
     if (gameobjectNavmesh){
       modassert(false, "serialize navmesh not implemented");
       return {};
     }
   }
   {
-    auto gameobjectEmitter = std::get_if<GameObjectEmitter>(&Object);
+    auto gameobjectEmitter = getEmitter(objectMapping, id);
     if (gameobjectEmitter){
       return serializeEmitter(*gameobjectEmitter, serializeUtil);
     }
   }
+
   {
-    auto gameobjectMesh = std::get_if<GameObjectMesh>(&Object);
-    if (gameobjectMesh){
-      return serializeMesh(*gameobjectMesh, serializeUtil);
-    }
-  }
-  {
-    auto gameObjectOctree = std::get_if<GameObjectOctree>(&Object);
+    auto gameObjectOctree = getOctree(objectMapping, id);
     if (gameObjectOctree){
       return serializeOctree(*gameObjectOctree, serializeUtil);
     }
   }
   { 
-    auto gameObjectPrefab = std::get_if<GameObjectPrefab>(&Object);
+    auto gameObjectPrefab = getPrefab(objectMapping, id);
     if (gameObjectPrefab){
       return serializePrefabObj(*gameObjectPrefab, serializeUtil);
     }
@@ -581,17 +587,16 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, O
 
 std::vector<Mesh> noMeshes;
 std::vector<Mesh>& getMeshesForId(ObjectMapping& mapping, objid id){  
-  GameObjectObj& gameObj = mapping.objects.at(id);
 
   {
-    GameObjectMesh* meshObject = std::get_if<GameObjectMesh>(&gameObj);
+    GameObjectMesh* meshObject = getMesh(mapping, id);
     if (meshObject != NULL){
       return meshObject -> meshesToRender;
     }
   }
 
   {
-    GameObjectNavmesh* navmeshObject = std::get_if<GameObjectNavmesh>(&gameObj);
+    GameObjectNavmesh* navmeshObject = getNavmesh(mapping, id);
     if (navmeshObject != NULL){
       return navmeshObject -> meshes;
     }
@@ -601,8 +606,7 @@ std::vector<Mesh>& getMeshesForId(ObjectMapping& mapping, objid id){
 
 std::vector<std::string> emptyNames;
 std::vector<std::string>& getMeshNames(ObjectMapping& mapping, objid id){
-  GameObjectObj& gameObj = mapping.objects.at(id);
-  GameObjectMesh* meshObject = std::get_if<GameObjectMesh>(&gameObj);
+  GameObjectMesh* meshObject = getMesh(mapping, id);
   if (meshObject != NULL){
     return meshObject -> meshNames;
   }
@@ -610,15 +614,11 @@ std::vector<std::string>& getMeshNames(ObjectMapping& mapping, objid id){
 }
 
 bool isNavmesh(ObjectMapping& mapping, objid id){
-  auto object = mapping.objects.at(id); 
-  auto navmesh = std::get_if<GameObjectNavmesh>(&object);
-  return navmesh != NULL;
+  return getNavmesh(mapping, id) != NULL;
 }
 
 std::optional<Texture> textureForId(ObjectMapping& mapping, objid id){
-  auto Object = mapping.objects.at(id); 
-
-  auto meshObj = std::get_if<GameObjectMesh>(&Object);
+  auto meshObj = getMesh(mapping, id);
   if (meshObj != NULL){
     for (int i = 0; i < meshObj -> meshNames.size(); i++){
       if (isRootMeshName(meshObj -> meshNames.at(i))){
@@ -631,8 +631,7 @@ std::optional<Texture> textureForId(ObjectMapping& mapping, objid id){
 }
 
 void updateObjectPositions(ObjectMapping& mapping, objid id, glm::vec3 position, Transformation& viewTransform){
-  auto object = mapping.objects.at(id); 
-  auto soundObj = std::get_if<GameObjectSound>(&object);
+  auto soundObj = getSoundObj(mapping, id);
   if (soundObj != NULL){
     if (soundObj -> center){
       setSoundPosition(soundObj -> source, viewTransform.position.x, viewTransform.position.y, viewTransform.position.z);
@@ -641,18 +640,14 @@ void updateObjectPositions(ObjectMapping& mapping, objid id, glm::vec3 position,
     }
   }
 
-  auto lightObj = std::get_if<GameObjectLight>(&object);
+  auto lightObj = getLight(mapping, id);
   if (lightObj != NULL){
     updateVoxelLightPosition(id, position, lightObj -> voxelSize);
   }
 }
 
 void playSoundState(ObjectMapping& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position){
-  if (mapping.objects.find(id) == mapping.objects.end()){
-    return;
-  }
-  auto object = mapping.objects.at(id);
-  auto soundObj = std::get_if<GameObjectSound>(&object);
+  auto soundObj = getSoundObj(mapping, id);
   if (soundObj != NULL){
     playSource(soundObj -> source, volume, position);
   }else{
@@ -661,11 +656,7 @@ void playSoundState(ObjectMapping& mapping, objid id, std::optional<float> volum
 }
 
 void stopSoundState(ObjectMapping& mapping, objid id){
-  if (mapping.objects.find(id) == mapping.objects.end()){
-    return;
-  }
-  auto object = mapping.objects.at(id);
-  auto soundObj = std::get_if<GameObjectSound>(&object);
+  auto soundObj = getSoundObj(mapping, id);
   if (soundObj != NULL){
     stopSource(soundObj -> source);
   }else{
@@ -684,7 +675,139 @@ void onObjectUnselected(){
 }
 
 GameObjectOctree* getOctree(ObjectMapping& mapping, objid id){
-  GameObjectObj& objectOctree = mapping.objects.at(id);
-  GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
-  return octreeObject;
+  auto it = mapping.octree.find(id);
+  if (it == mapping.octree.end()) {
+      return NULL;
+  }
+  return &it->second;
+}
+
+GameObjectNavmesh* getNavmesh(ObjectMapping& mapping, objid id){
+  auto it = mapping.navmesh.find(id);
+  if (it == mapping.navmesh.end()) {
+      return NULL;
+  }
+  return &it->second;
+}
+
+GameObjectLight* getLight(ObjectMapping& mapping, objid id){
+  auto it = mapping.light.find(id);
+  if (it == mapping.light.end()) {
+      return NULL;
+  }
+  return &it->second;
+}
+
+GameObjectPortal* getPortal(ObjectMapping& mapping, objid id){
+  auto it = mapping.portal.find(id);
+  if (it == mapping.portal.end()) {
+      return NULL;
+  }
+  return &it->second;
+}
+
+GameObjectMesh* getMesh(ObjectMapping& mapping, objid id){
+  auto it = mapping.mesh.find(id);
+  if (it == mapping.mesh.end()) {
+      return NULL;
+  }
+  return &it->second;
+}
+
+GameObjectPrefab* getPrefab(ObjectMapping& mapping, objid id){
+  auto it = mapping.prefab.find(id);
+  if (it == mapping.prefab.end()) {
+      return NULL;
+  }
+  return &it->second;
+}
+
+GameObjectCamera* getCameraObj(ObjectMapping& mapping, objid id){
+  auto it = mapping.camera.find(id);
+  if (it == mapping.camera.end()) {
+      return NULL;
+  }
+  return &it->second;
+}
+
+GameObjectUIText* getUIText(ObjectMapping& mapping, objid id){
+  auto it = mapping.text.find(id);
+  if (it == mapping.text.end()) {
+      return NULL;
+  }
+  return &it->second;
+}
+
+GameObjectSound* getSoundObj(ObjectMapping& mapping, objid id){
+  auto it = mapping.sound.find(id);
+  if (it == mapping.sound.end()) {
+      return NULL;
+  }
+  return &it->second;
+}
+
+GameObjectEmitter* getEmitter(ObjectMapping& mapping, objid id){
+  auto it = mapping.emitter.find(id);
+  if (it == mapping.emitter.end()) {
+      return NULL;
+  }
+  return &it->second;
+}
+
+std::vector<objid> getAllLightsIndexs(ObjectMapping& mapping){
+  std::vector<objid> ids;
+  for (auto &[id, _] : mapping.light){
+    ids.push_back(id);
+  }
+  return ids;
+}
+
+std::vector<objid> getAllPortalIndexs(ObjectMapping& mapping){
+  std::vector<objid> ids;
+  for (auto &[id, _] : mapping.portal){
+    ids.push_back(id);
+  }
+  return ids;  
+}
+
+std::vector<objid> getAllCameraIndexs(ObjectMapping& mapping){
+  std::vector<objid> ids;
+  for (auto &[id, _] : mapping.camera){
+    ids.push_back(id);
+  }
+  return ids;  
+}
+
+bool objExists(ObjectMapping& mapping, objid id){
+  if (mapping.mesh.find(id) != mapping.mesh.end()){
+    return true;
+  }
+  if (mapping.camera.find(id) != mapping.camera.end()){
+    return true;
+  }
+  if (mapping.portal.find(id) != mapping.portal.end()){
+    return true;
+  }
+  if (mapping.sound.find(id) != mapping.sound.end()){
+    return true;
+  }
+  if (mapping.light.find(id) != mapping.light.end()){
+    return true;
+  }
+  if (mapping.octree.find(id) != mapping.octree.end()){
+    return true;
+  }
+  if (mapping.emitter.find(id) != mapping.emitter.end()){
+    return true;
+  }
+  if (mapping.navmesh.find(id) != mapping.navmesh.end()){
+    return true;
+  }
+  if (mapping.text.find(id) != mapping.text.end()){
+    return true;
+  }
+  if (mapping.prefab.find(id) != mapping.prefab.end()){
+    return true;
+  }
+  return false;
 }

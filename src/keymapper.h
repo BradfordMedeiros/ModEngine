@@ -36,11 +36,11 @@ struct InputDispatch {
 
 struct KeyRemapper {
   std::vector<KeyMapping> mapping;                          // ascii value key to ascii value key
-  std::map<int, KeyAxisConfiguration> axisConfigurations;
+  std::unordered_map<int, KeyAxisConfiguration> axisConfigurations;
   std::vector<InputDispatch> inputFns;
 
   // Cached Data
-  std::map<int, bool> lastFrameDown;
+  std::unordered_map<int, bool> lastFrameDown;
 };
 
 KeyRemapper readMapping(std::string filemapping, std::vector<InputDispatch> inputFns, std::function<std::string(std::string)> readFile);
