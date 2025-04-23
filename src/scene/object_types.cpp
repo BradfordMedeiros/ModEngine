@@ -67,7 +67,6 @@ std::vector<std::pair<std::string, std::string>> serializeNotImplemented(GameObj
   return { {"not", "implemented"}};    
 }
 
-void removeDoNothing(GameObjectObj& obj, ObjectRemoveUtil& util){}
 
 std::vector<ObjectType> objTypes = {
   ObjectType {
@@ -76,7 +75,6 @@ std::vector<ObjectType> objTypes = {
     .objectAttribute = convertObjectAttribute<GameObjectCamera>(getCameraAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectCamera>(setCameraAttribute),
     .serialize = convertSerialize<GameObjectCamera>(serializeCamera),
-    .removeObject = removeDoNothing,
   },
   ObjectType {
     .name = "portal",
@@ -84,7 +82,6 @@ std::vector<ObjectType> objTypes = {
     .objectAttribute = convertObjectAttribute<GameObjectPortal>(getPortalAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectPortal>(setPortalAttribute),
     .serialize = convertSerialize<GameObjectPortal>(serializePortal),
-    .removeObject = removeDoNothing,
   },
   ObjectType {
     .name = "light",
@@ -92,7 +89,6 @@ std::vector<ObjectType> objTypes = {
     .objectAttribute = convertObjectAttribute<GameObjectLight>(getLightAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectLight>(setLightAttribute),
     .serialize = convertSerialize<GameObjectLight>(serializeLight),
-    .removeObject = convertRemove<GameObjectLight>(removeLight),
   },
   ObjectType {
     .name = "sound",
@@ -100,7 +96,6 @@ std::vector<ObjectType> objTypes = {
     .objectAttribute = convertObjectAttribute<GameObjectSound>(getSoundAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectSound>(setSoundAttribute),
     .serialize = convertSerialize<GameObjectSound>(serializeSound),
-    .removeObject = convertRemove<GameObjectSound>(removeSound),
   },
   ObjectType {
     .name = "text",
@@ -108,7 +103,6 @@ std::vector<ObjectType> objTypes = {
     .objectAttribute = convertObjectAttribute<GameObjectUIText>(getTextAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectUIText>(setTextAttribute),
     .serialize = convertSerialize<GameObjectUIText>(serializeText),
-    .removeObject = removeDoNothing,
   },
   ObjectType {
     .name = "navmesh",
@@ -116,7 +110,6 @@ std::vector<ObjectType> objTypes = {
     .objectAttribute = convertObjectAttribute<GameObjectNavmesh>(getNavmeshAttribute),
     .setAttribute = nothingSetAttribute,
     .serialize = serializeNotImplemented,
-    .removeObject = convertRemove<GameObjectNavmesh>(removeNavmesh),
   },
   ObjectType {
     .name = "emitter",
@@ -124,7 +117,6 @@ std::vector<ObjectType> objTypes = {
     .objectAttribute = convertObjectAttribute<GameObjectEmitter>(getEmitterAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectEmitter>(setEmitterAttribute),
     .serialize = convertSerialize<GameObjectEmitter>(serializeEmitter),
-    .removeObject = convertRemove<GameObjectEmitter>(removeEmitterObj),
   },
   ObjectType {
     .name = "default",
@@ -132,7 +124,6 @@ std::vector<ObjectType> objTypes = {
     .objectAttribute = convertObjectAttribute<GameObjectMesh>(getMeshAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectMesh>(setMeshAttribute),
     .serialize = convertSerialize<GameObjectMesh>(serializeMesh),
-    .removeObject = removeDoNothing,
   },
   ObjectType {
     .name = "octree", 
@@ -140,7 +131,6 @@ std::vector<ObjectType> objTypes = {
     .objectAttribute = convertObjectAttribute<GameObjectOctree>(getOctreeAttribute),
     .setAttribute = nothingSetAttribute,
     .serialize = convertSerialize<GameObjectOctree>(serializeOctree),
-    .removeObject  = removeDoNothing,
   },
   ObjectType {
     .name = "prefab", 
@@ -148,7 +138,6 @@ std::vector<ObjectType> objTypes = {
     .objectAttribute = convertObjectAttribute<GameObjectPrefab>(getPrefabAttribute),
     .setAttribute = convertElementSetAttrValue<GameObjectPrefab>(setPrefabAttribute),
     .serialize = convertSerialize<GameObjectPrefab>(serializePrefabObj),
-    .removeObject  = convertRemove<GameObjectPrefab>(removePrefabObj),
   },
 };
 
@@ -213,23 +202,97 @@ void removeObject(
   if (mapping.find(id) == mapping.end()){
     return;
   }
-  auto Object = mapping.at(id); 
-  auto variantIndex = Object.index();
-  for (auto &objType : objTypes){
-    if (variantIndex == objType.variantType){
-      std::cout << "type is: " << objType.name << std::endl;
-      ObjectRemoveUtil util { 
-        .id = id, 
-        .unloadScene = unloadScene
-      };
-      objType.removeObject(Object, util);
-      modlog("objecttype - remove", std::to_string(id));
+
+  ObjectRemoveUtil util { 
+    .id = id, 
+    .unloadScene = unloadScene
+  };
+
+  GameObjectObj& Object = mapping.at(id);
+  {
+    auto gameobjectCamera = std::get_if<GameObjectCamera>(&Object);
+    if (gameobjectCamera){
+      // do nothing
+      mapping.erase(id);
+      return;
+    }   
+  }
+  {
+    auto gameobjectPortal = std::get_if<GameObjectPortal>(&Object);
+    if (gameobjectPortal){
+      // do nothing
+      mapping.erase(id);
+      return;
+    }   
+  }
+  {
+    auto gameobjectLight = std::get_if<GameObjectLight>(&Object);
+    if (gameobjectLight){
+      // do nothing
+      removeLight(*gameobjectLight, util);
+      mapping.erase(id);
+      return;
+    }    
+  }
+  {
+    auto gameobjectSound = std::get_if<GameObjectSound>(&Object);
+    if (gameobjectSound){
+      // do nothing
+      removeSound(*gameobjectSound, util);
       mapping.erase(id);
       return;
     }
   }
-  std::cout << "object type not implemented" << std::endl;
-  assert(false);
+  {
+    auto gameobjectUiText = std::get_if<GameObjectUIText>(&Object);
+    if (gameobjectUiText){
+      // do nothing
+      mapping.erase(id);
+      return;
+    }
+  }
+  {
+    auto gameobjectNavmesh = std::get_if<GameObjectNavmesh>(&Object);
+    if (gameobjectNavmesh){
+      removeNavmesh(*gameobjectNavmesh, util);
+      mapping.erase(id);
+      return;
+    }
+  }
+  {
+    auto gameobjectEmitter = std::get_if<GameObjectEmitter>(&Object);
+    if (gameobjectEmitter){
+      // do nothing
+      removeEmitterObj(*gameobjectEmitter, util);
+      mapping.erase(id);
+      return;
+    }
+  }
+  {
+    auto gameobjectMesh = std::get_if<GameObjectMesh>(&Object);
+    if (gameobjectMesh){
+      // do nothing
+      mapping.erase(id);
+      return;
+    }
+  }
+  {
+    auto gameObjectOctree = std::get_if<GameObjectOctree>(&Object);
+    if (gameObjectOctree){
+      // do nothing
+      mapping.erase(id);
+      return;
+    }
+  }
+  { 
+    auto gameObjectPrefab = std::get_if<GameObjectPrefab>(&Object);
+    if (gameObjectPrefab){
+      removePrefabObj(*gameObjectPrefab, util);
+      mapping.erase(id);
+      return;
+    }
+  }
+  modassert(false, "invalid gameobj objtype");
 }
 
 

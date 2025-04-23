@@ -129,7 +129,6 @@ struct ObjectType {
   std::function<std::optional<AttributeValuePtr>(GameObjectObj&, const char* field)> objectAttribute;
   std::function<bool(GameObjectObj&, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&)> setAttribute;
   std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&, ObjectSerializeUtil&)> serialize;
-  std::function<void(GameObjectObj&, ObjectRemoveUtil&)> removeObject;
 };
 
 void addObjectType(std::map<objid, GameObjectObj>& mapping, objid id, std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util);
