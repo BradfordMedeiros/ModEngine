@@ -900,14 +900,14 @@ void setCameraRotation(glm::quat orientation){
 
 
 void playSoundState(objid id, std::optional<float> volume, std::optional<glm::vec3> position){
-  playSoundState(world.objectMapping.objects, id, volume, position); 
+  playSoundState(world.objectMapping, id, volume, position); 
 }
 
 void playSoundState(std::string source, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position){
   std::cout << "Info: play sound: " << source << std::endl;
   auto gameobj = getGameObjectByName(source, sceneId, false);
   if (gameobj.has_value()){
-    playSoundState(world.objectMapping.objects, gameobj.value(), volume, position); 
+    playSoundState(world.objectMapping, gameobj.value(), volume, position); 
   }else{
     std::cout << "ERROR: no source named: " << source << " in scene: " << sceneId << std::endl;
     assert(false);
@@ -918,7 +918,7 @@ void stopSoundState(std::string source, objid sceneId){
   std::cout << "Info: stop sound: " << source << std::endl;
   auto gameobj = getGameObjectByName(source, sceneId, false);
   if (gameobj.has_value()){
-    stopSoundState(world.objectMapping.objects, gameobj.value()); 
+    stopSoundState(world.objectMapping, gameobj.value()); 
   }else{
     std::cout << "ERROR: no source named: " << source << " in scene: " << sceneId << std::endl;
     //assert(false);

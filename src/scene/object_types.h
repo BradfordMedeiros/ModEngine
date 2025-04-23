@@ -188,11 +188,11 @@ std::vector<objid> getGameObjectsIndex(ObjectMapping& mapping){   // putting tem
 std::vector<Mesh>& getMeshesForId(ObjectMapping& mapping, objid id);
 
 std::vector<std::string>& getMeshNames(ObjectMapping& mapping, objid id);
-bool isNavmesh(std::map<objid, GameObjectObj>& mapping, objid id);
-std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id);
-void updateObjectPositions(std::map<objid, GameObjectObj>& mapping, objid, glm::vec3 position, Transformation& viewTransform);
-void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position);
-void stopSoundState(std::map<objid, GameObjectObj>& mapping, objid id);
+bool isNavmesh(ObjectMapping& mapping, objid id);
+std::optional<Texture> textureForId(ObjectMapping& mapping, objid id);
+void updateObjectPositions(ObjectMapping& mapping, objid, glm::vec3 position, Transformation& viewTransform);
+void playSoundState(ObjectMapping& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position);
+void stopSoundState(ObjectMapping& mapping, objid id);
 
 void onObjectSelected(objid id);
 void onObjectUnselected();

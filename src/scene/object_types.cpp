@@ -609,14 +609,14 @@ std::vector<std::string>& getMeshNames(ObjectMapping& mapping, objid id){
   return emptyNames;
 }
 
-bool isNavmesh(std::map<objid, GameObjectObj>& mapping, objid id){
-  auto object = mapping.at(id); 
+bool isNavmesh(ObjectMapping& mapping, objid id){
+  auto object = mapping.objects.at(id); 
   auto navmesh = std::get_if<GameObjectNavmesh>(&object);
   return navmesh != NULL;
 }
 
-std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id){
-  auto Object = mapping.at(id); 
+std::optional<Texture> textureForId(ObjectMapping& mapping, objid id){
+  auto Object = mapping.objects.at(id); 
 
   auto meshObj = std::get_if<GameObjectMesh>(&Object);
   if (meshObj != NULL){
@@ -630,8 +630,8 @@ std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, obj
   return std::nullopt;
 }
 
-void updateObjectPositions(std::map<objid, GameObjectObj>& mapping, objid id, glm::vec3 position, Transformation& viewTransform){
-  auto object = mapping.at(id); 
+void updateObjectPositions(ObjectMapping& mapping, objid id, glm::vec3 position, Transformation& viewTransform){
+  auto object = mapping.objects.at(id); 
   auto soundObj = std::get_if<GameObjectSound>(&object);
   if (soundObj != NULL){
     if (soundObj -> center){
@@ -647,11 +647,11 @@ void updateObjectPositions(std::map<objid, GameObjectObj>& mapping, objid id, gl
   }
 }
 
-void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position){
-  if (mapping.find(id) == mapping.end()){
+void playSoundState(ObjectMapping& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position){
+  if (mapping.objects.find(id) == mapping.objects.end()){
     return;
   }
-  auto object = mapping.at(id);
+  auto object = mapping.objects.at(id);
   auto soundObj = std::get_if<GameObjectSound>(&object);
   if (soundObj != NULL){
     playSource(soundObj -> source, volume, position);
@@ -660,11 +660,11 @@ void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id, std::opti
   }
 }
 
-void stopSoundState(std::map<objid, GameObjectObj>& mapping, objid id){
-  if (mapping.find(id) == mapping.end()){
+void stopSoundState(ObjectMapping& mapping, objid id){
+  if (mapping.objects.find(id) == mapping.objects.end()){
     return;
   }
-  auto object = mapping.at(id);
+  auto object = mapping.objects.at(id);
   auto soundObj = std::get_if<GameObjectSound>(&object);
   if (soundObj != NULL){
     stopSource(soundObj -> source);

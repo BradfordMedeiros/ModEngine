@@ -103,7 +103,7 @@ std::optional<glm::vec3> aiNavigate(World& world, objid id, glm::vec3 target, st
     return raycast(world, posFrom, direction, maxDistance);
   };
   auto isNavmeshWorld = [&world](objid id) -> bool{ 
-    return isNavmesh(world.objectMapping.objects, id);
+    return isNavmesh(world.objectMapping, id);
   };
   auto position = [&world](objid id) -> glm::vec3 {
     return fullTransformation(world.sandbox, id).position;
@@ -164,7 +164,7 @@ std::vector<HitObject> contactTest(World& world, objid id){
 }
 
 std::optional<Texture> textureForId(World& world, objid id){
-  return textureForId(world.objectMapping.objects, id);
+  return textureForId(world.objectMapping, id);
 }
 
 // Fn seems broken, b/c sometimes meshesToRender is 0 size
