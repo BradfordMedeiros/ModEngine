@@ -682,3 +682,9 @@ void onObjectUnselected(){
   modlog("on object unselected: ", "");
   selectedId = 0;
 }
+
+GameObjectOctree* getOctree(ObjectMapping& mapping, objid id){
+  GameObjectObj& objectOctree = mapping.objects.at(id);
+  GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
+  return octreeObject;
+}

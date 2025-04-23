@@ -197,4 +197,6 @@ void stopSoundState(ObjectMapping& mapping, objid id);
 void onObjectSelected(objid id);
 void onObjectUnselected();
 
+GameObjectOctree* getOctree(ObjectMapping& mapping, objid id);
+
 #endif 

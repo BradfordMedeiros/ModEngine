@@ -1589,8 +1589,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
       for (auto &selectedIndex : state.editor.selectedObjs){
-        GameObjectObj& objectOctree = world.objectMapping.objects.at(selectedIndex);
-        GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
+        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
         if (octreeObject != NULL){
           if (isCtrlHeld){
             deleteSelectedOctreeNodes(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex));
