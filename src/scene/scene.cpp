@@ -1355,7 +1355,7 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
 
   if (!setCoreAttr){
     SetAttrFlags setAttrFlags { .rebuildPhysics = false };
-    setObjectAttr = setObjectAttribute(world.objectMapping.objects, id, field, value, util, setAttrFlags);
+    setObjectAttr = setObjectAttribute(world.objectMapping, id, field, value, util, setAttrFlags);
     physicsObjectNeedsRebuild = physicsObjectNeedsRebuild || setAttrFlags.rebuildPhysics;  
   }
 

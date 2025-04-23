@@ -440,8 +440,8 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(GameObjectObj& Object, co
   assert(false);
 }
 
-bool setObjectAttribute(std::map<objid, GameObjectObj>& mapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags& flags){
-  GameObjectObj& Object = mapping.at(id);
+bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags& flags){
+  GameObjectObj& Object = objectMapping.objects.at(id);
 
   {
     auto gameobjectCamera = std::get_if<GameObjectCamera>(&Object);
