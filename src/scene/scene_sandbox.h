@@ -26,9 +26,9 @@ struct TransformCacheElement {
 };
 
 struct Scene {
-  std::map<objid, GameObject> idToGameObjects;
-  std::map<objid, GameObjectH> idToGameObjectsH;
-  std::map<objid, std::map<std::string, objid>> sceneToNameToId;
+  std::unordered_map<objid, GameObject> idToGameObjects;
+  std::unordered_map<objid, GameObjectH> idToGameObjectsH;
+  std::unordered_map<objid, std::unordered_map<std::string, objid>> sceneToNameToId;
   std::unordered_map<objid, TransformCacheElement> absoluteTransforms; 
 };
 
@@ -42,8 +42,8 @@ struct Scene {
 
 struct SceneDeserialization {
   Scene scene;
-  std::map<std::string, GameobjAttributes> additionalFields;
-  std::map<std::string, GameobjAttributes> subelementAttributes;
+  std::unordered_map<std::string, GameobjAttributes> additionalFields;
+  std::unordered_map<std::string, GameobjAttributes> subelementAttributes;
 };
 
 struct SceneMetadata {
@@ -53,8 +53,8 @@ struct SceneMetadata {
 };
 
 struct SceneSandbox {
-  std::map<objid, objid> sceneIdToRootObj;
-  std::map<objid, SceneMetadata> sceneIdToSceneMetadata;
+  std::unordered_map<objid, objid> sceneIdToRootObj;
+  std::unordered_map<objid, SceneMetadata> sceneIdToSceneMetadata;
   Scene mainScene;
   std::vector<LayerInfo> layers;
 
@@ -89,7 +89,7 @@ GameObjectH& getGameObjectH(SceneSandbox& sandbox, objid id);
 GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name, objid sceneId);
 
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id);
-Transformation fullTransformation(SceneSandbox& sandbox, objid id);
+Transformation& fullTransformation(SceneSandbox& sandbox, objid id);
 
 void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool justAdded = false);
 
@@ -98,23 +98,23 @@ struct GameobjAttributesWithId {
   GameobjAttributes attr;
 };
 struct AddSceneDataValues {
-  std::map<std::string, GameobjAttributesWithId>  additionalFields;
+  std::unordered_map<std::string, GameobjAttributesWithId>  additionalFields;
   std::vector<objid> idsAdded;
-  std::map<std::string, GameobjAttributes> subelementAttributes;
+  std::unordered_map<std::string, GameobjAttributes> subelementAttributes;
 };
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields, std::optional<objid> parentId, std::optional<objid> prefabId);
 void removeScene(SceneSandbox& sandbox, objid sceneId);
 bool sceneExists(SceneSandbox& sandbox, objid sceneId);
 
-std::map<std::string, GameobjAttributesWithId> multiObjAdd(
+std::unordered_map<std::string, GameobjAttributesWithId> multiObjAdd(
   SceneSandbox& sandbox,
   objid sceneId,
   objid rootId,
   objid rootIdNode, 
-  std::map<objid, objid> childToParent, 
-  std::map<objid, Transformation> gameobjTransforms, 
-  std::map<objid, std::string> names, 
-  std::map<objid, GameobjAttributes> additionalFields,
+  std::unordered_map<objid, objid> childToParent, 
+  std::unordered_map<objid, Transformation> gameobjTransforms, 
+  std::unordered_map<objid, std::string> names, 
+  std::unordered_map<objid, GameobjAttributes> additionalFields,
   std::function<objid()> getNewObjectId,
   std::function<std::set<std::string>(std::string&)> getObjautoserializerFields,
   std::set<objid> boneIds,

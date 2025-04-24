@@ -33,7 +33,7 @@ Recording loadRecording(std::string name, std::function<AttributeValue(std::stri
   std::string serializedData = readFile(name);
   auto properties = filterWhitespace(split(serializedData, '\n'));
 
-  std::map<int, std::vector<Property>> values;
+  std::unordered_map<int, std::vector<Property>> values;
   for (auto property : properties){
     auto attributeLine = filterWhitespace(split(property, ':'));
     auto time = std::atoi(attributeLine.at(0).c_str());

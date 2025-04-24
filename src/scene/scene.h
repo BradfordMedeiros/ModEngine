@@ -18,12 +18,12 @@
 
 struct World {
   physicsEnv physicsEnvironment;
-  std::map<objid, PhysicsValue> rigidbodys;
-  std::map<objid, GameObjectObj> objectMapping;
-  std::map<std::string, ModelDataRef> modelDatas;
-  std::map<std::string, MeshRef> meshes;
-  std::map<std::string, TextureRef> textures;
-  std::map<objid, std::vector<Animation>> animations;
+  std::unordered_map<objid, PhysicsValue> rigidbodys;
+  ObjectMapping objectMapping;
+  std::unordered_map<std::string, ModelDataRef> modelDatas;
+  std::unordered_map<std::string, MeshRef> meshes;
+  std::unordered_map<std::string, TextureRef> textures;
+  std::unordered_map<objid, std::vector<Animation>> animations;
   std::function<void(GameObject&)> onObjectUpdate;
   std::function<void(GameObject&)> onObjectCreate;
   std::function<void(objid, bool)> onObjectDelete;
@@ -48,7 +48,7 @@ World createWorld(
   std::vector<std::string> spriteMeshes
 );
 
-void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid>& idsAdded, std::function<objid()> getNewObjectId, std::map<std::string, GameobjAttributesWithId> additionalFields, std::map<std::string, GameobjAttributes>& submodelAttributes, std::optional<objid> prefabId);
+void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid>& idsAdded, std::function<objid()> getNewObjectId, std::unordered_map<std::string, GameobjAttributesWithId> additionalFields, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes, std::optional<objid> prefabId);
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId);
 Texture loadTextureAtlasWorld(World& world, std::string texturepath, std::vector<std::string> atlasTextures, std::optional<std::string> cacheFile, objid ownerId);
 Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight, std::optional<objid> mappingTexture);
@@ -59,11 +59,7 @@ objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& a
 objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> parentId, std::optional<objid> prefabId);
 void removeSceneFromWorld(World& world, objid sceneId);
 
-struct GameObjPair {
-  GameObject gameobj;
-  GameObjectObj gameobjObj;
-};
-objid addObjectToScene(World& world, objid sceneId, std::string name, AttrChildrenPair attrWithChildren, std::map<std::string, GameobjAttributes>& submodelAttributes);
+objid addObjectToScene(World& world, objid sceneId, std::string name, AttrChildrenPair attrWithChildren, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes);
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId);
 
 void removeObjectFromScene(World& world, objid id);
@@ -74,7 +70,7 @@ bool copyObjectToScene(World& world, objid id);
 struct SingleObjDeserialization {
   std::string name;
   AttrChildrenPair attrWithChildren;
-  std::map<std::string, GameobjAttributes> submodelAttributes;
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
 };
 std::optional<SingleObjDeserialization> deserializeSingleObj(std::string& serializedObj, objid id, bool useObjId);
 
@@ -120,7 +116,6 @@ Transformation gameobjectTransformation(World& world, objid id, bool isWorld);
 
 void loadSkybox(World& world, std::string skyboxpath);
 
-std::string getType(std::string name);
 void freeTextureRefsIdByOwner(World& world, int ownerId, std::optional<int> id);
 void freeTextureRefsByOwner(World& world, int ownerId);
 

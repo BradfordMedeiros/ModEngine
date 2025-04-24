@@ -69,7 +69,7 @@ KeyRemapper readMapping(std::string filemapping, std::vector<InputDispatch> inpu
   }
 
   std::vector<KeyMapping> mapping;
-  std::map<int, KeyAxisConfiguration> axisConfigurations; 
+  std::unordered_map<int, KeyAxisConfiguration> axisConfigurations; 
   std::string keyMapperContent = readFile(filemapping);
 
   auto mappedLines = filterWhitespace(filterComments(split(keyMapperContent, '\n')));

@@ -167,7 +167,7 @@ void setPhysicsOptions(btRigidBody* body, rigidBodyOpts& opts){
   body -> setGravity(glmToBt(opts.gravity));
   body -> setFriction(opts.friction);
   body -> setRestitution(opts.restitution);
-  body -> setDamping(opts.linearDamping, body -> getAngularDamping());
+  body -> setDamping(0.1f, 0.6f);
 
   auto collisionFlags = body -> getCollisionFlags();
   auto isStatic = (collisionFlags | btCollisionObject::CF_KINEMATIC_OBJECT) ==  collisionFlags; 
@@ -440,7 +440,7 @@ bool AllHitsRayResultCallbackCustomFilter::needsCollision(btBroadphaseProxy* pro
 }
 
 
-std::optional<objid> getIdForRigidBody(std::map<objid, PhysicsValue>& rigidbodys, const btCollisionObject* obj){
+std::optional<objid> getIdForRigidBody(std::unordered_map<objid, PhysicsValue>& rigidbodys, const btCollisionObject* obj){
   for (auto &[id, physicsObj] : rigidbodys){
     if (physicsObj.body == obj){
       return id;
@@ -449,7 +449,7 @@ std::optional<objid> getIdForRigidBody(std::map<objid, PhysicsValue>& rigidbodys
   return std::nullopt;
 }
 
-std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, PhysicsValue>& rigidbodys, glm::vec3 posFrom, glm::quat direction, float maxDistance){
+std::vector<HitObject> raycast(physicsEnv& env, std::unordered_map<objid, PhysicsValue>& rigidbodys, glm::vec3 posFrom, glm::quat direction, float maxDistance){
   std::vector<HitObject> hitobjects;
   AllHitsRayResultCallbackCustomFilter result(glmToBt(posFrom),glmToBt(posFrom));
  
@@ -517,7 +517,7 @@ public:
     btCollisionObject* testCollisionObj;
 };
 
-std::vector<HitObject> contactTest(physicsEnv& env, std::map<objid, PhysicsValue>& rigidbodys, btRigidBody* body){
+std::vector<HitObject> contactTest(physicsEnv& env, std::unordered_map<objid, PhysicsValue>& rigidbodys, btRigidBody* body){
   auto contactCallback = ContactResultCallback(body);
   std::vector<HitObject> hitobjects = {};
   auto originalId = getIdForRigidBody(rigidbodys, body);
@@ -544,7 +544,7 @@ std::vector<HitObject> contactTest(physicsEnv& env, std::map<objid, PhysicsValue
 
 
 // Create way to do visualization for this, add more shape types currently only sphere
-std::vector<HitObject> contactTestShape(physicsEnv& env, std::map<objid, PhysicsValue>& rigidbodys, glm::vec3 pos, glm::quat orientation, glm::vec3 scale){
+std::vector<HitObject> contactTestShape(physicsEnv& env, std::unordered_map<objid, PhysicsValue>& rigidbodys, glm::vec3 pos, glm::quat orientation, glm::vec3 scale){
   static rigidBodyOpts opts {
     .linear = glm::vec3(1.f, 1.f, 1.f),
     .angular = glm::vec3(1.f, 1.f, 1.f),

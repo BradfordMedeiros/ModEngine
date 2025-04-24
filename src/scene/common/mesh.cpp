@@ -204,7 +204,7 @@ Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> e
 // in practice this gets called for other shaders too 
 // should just create another functon to handle the ui shader
 
-void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms){
+void drawMesh(Mesh& mesh, GLint shaderProgram, bool drawPoints, MeshUniforms& meshUniforms){
   //meshUniforms.useInstancing = true;
 
   shaderSetUniform(shaderProgram, "model", meshUniforms.model);

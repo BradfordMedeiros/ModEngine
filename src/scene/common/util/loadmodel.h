@@ -37,11 +37,11 @@ struct Animation {
 };
 
 struct ModelData {
-  std::map<int32_t, MeshData> meshIdToMeshData;
-  std::map<int32_t, std::vector<int>> nodeToMeshId;
-  std::map<int32_t, int32_t> childToParent;
-  std::map<int32_t, Transformation> nodeTransform;
-  std::map<int32_t, std::string> names;
+  std::unordered_map<int32_t, MeshData> meshIdToMeshData;
+  std::unordered_map<int32_t, std::vector<int>> nodeToMeshId;
+  std::unordered_map<int32_t, int32_t> childToParent;
+  std::unordered_map<int32_t, Transformation> nodeTransform;
+  std::unordered_map<int32_t, std::string> names;
   std::set<int32_t> bones;
   std::vector<Animation> animations;
 };

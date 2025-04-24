@@ -433,8 +433,8 @@ bool equalOrdered(std::vector<std::string>& mapTextures, std::vector<std::string
 }
 
 
-std::map<int, int> getTextureMapping(std::vector<std::string>& mapTextures, std::vector<std::string>& atlasTextures, std::vector<std::vector<FaceTexture>>& faceTextures){
-  std::map<int, int> mapToAtlas;
+std::unordered_map<int, int> getTextureMapping(std::vector<std::string>& mapTextures, std::vector<std::string>& atlasTextures, std::vector<std::vector<FaceTexture>>& faceTextures){
+  std::unordered_map<int, int> mapToAtlas;
   for (int x = 0; x < mapTextures.size(); x++){
     for (int y = 0; y < atlasTextures.size(); y++){
       if (mapTextures.at(x) == atlasTextures.at(y)){

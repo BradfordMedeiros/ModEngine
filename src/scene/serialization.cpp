@@ -313,8 +313,8 @@ DividedTokens divideMainAndSubelementTokens(std::vector<Token> tokens){
   };
   return dividedTokens;
 }
-std::map<std::string, AttrChildrenPair> deserializeSceneTokens(std::vector<Token> tokens){
-  std::map<std::string, AttrChildrenPair> objectAttributes;
+std::unordered_map<std::string, AttrChildrenPair> deserializeSceneTokens(std::vector<Token> tokens){
+  std::unordered_map<std::string, AttrChildrenPair> objectAttributes;
 
   for (Token token : tokens){
     modassert(token.target != "" && token.attribute != "" && token.payload != "", "empty tokens");
@@ -349,7 +349,7 @@ std::vector<std::pair<std::string, std::string>> coreFields(GameObject& gameobje
   return pairs;
 }
 
-std::vector<std::pair<std::string, std::string>> uniqueAdditionalFields(GameObject& gameobject, std::map<std::string, std::string>& serializedPairs){
+std::vector<std::pair<std::string, std::string>> uniqueAdditionalFields(GameObject& gameobject, std::unordered_map<std::string, std::string>& serializedPairs){
   std::vector<std::pair<std::string, std::string>> fields;
   //typedef std::variant<std::vector<std::string>, float> AttributeValue;
 
@@ -429,7 +429,7 @@ std::string serializeObj(
     sceneData = sceneData + gameobjectName + ":id:" + std::to_string(gameobject.id) + "\n";
   }
 
-  std::map<std::string, std::string> serializedPairs;
+  std::unordered_map<std::string, std::string> serializedPairs;
   for (auto &additionalField : coreFields(gameobject)){
     serializedPairs[additionalField.first] = additionalField.second;
   }

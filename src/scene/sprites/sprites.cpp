@@ -4,12 +4,12 @@ std::string readFileOrPackage(std::string filepath); // i dont really like direc
 
 
 struct FontParamInfo {
-  std::map<unsigned int, FontParams> fontmeshes;
+  std::unordered_map<unsigned int, FontParams> fontmeshes;
   float lineSpacing;
 };
 
 FontParamInfo loadModFontMeshes(font& fontToLoad){
-  std::map<unsigned int, FontParams> fontmeshes;
+  std::unordered_map<unsigned int, FontParams> fontmeshes;
   for (const auto &[ascii, font]: fontToLoad.chars) {
     assert(fontmeshes.find(ascii) == fontmeshes.end());
     std::cout << "loaded font mesh: " << ascii << " (" << ((char)ascii) << ")" << std::endl;
@@ -42,7 +42,7 @@ FT_Library* initFreeType(){
 }
 
 FontParamInfo loadTtfFontMeshes(std::string filepath, ttfFont& fontToLoad, Texture& nullTexture){
-  std::map<unsigned int, FontParams> fontmeshes;
+  std::unordered_map<unsigned int, FontParams> fontmeshes;
   FT_Library* freeType = initFreeType();
   FT_Face face;
 
@@ -134,7 +134,7 @@ std::vector<FontFamily> loadFontMeshes(std::vector<FontToLoad> fontInfos, Textur
 }
 
 
-void drawSpriteZBias(GLint shaderProgram, Mesh mesh, float left, float top, float width, float height, glm::mat4 model, float zbias, glm::vec4 tint, objid id){
+void drawSpriteZBias(GLint shaderProgram, Mesh& mesh, float left, float top, float width, float height, glm::mat4 model, float zbias, glm::vec4 tint, objid id){
   auto scaleMatrix = glm::scale(glm::mat4(1.f), glm::vec3(width * 1.0f, height * 1.0f, 1.0f));
   auto translateMatrix = glm::translate(glm::mat4(1.f), glm::vec3(left, top, zbias));
   glm::mat4 modelMatrix = model * translateMatrix * scaleMatrix; 
@@ -149,10 +149,10 @@ void drawSpriteZBias(GLint shaderProgram, Mesh mesh, float left, float top, floa
 }
 
 /// these two functions are now equivalent since drawing things non-centered has not been useful
-void drawSprite(GLint shaderProgram, Mesh mesh, float left, float top, float width, float height, glm::mat4 model, glm::vec4 tint, objid id){
+void drawSprite(GLint shaderProgram, Mesh& mesh, float left, float top, float width, float height, glm::mat4 model, glm::vec4 tint, objid id){
   drawSpriteZBias(shaderProgram, mesh, left, top, width, height, model, 0.f, tint, id);
 }
-void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float centerY, float width, float height, glm::vec4 tint, objid id){
+void drawSpriteAround(GLint shaderProgram, Mesh& mesh, float centerX, float centerY, float width, float height, glm::vec4 tint, objid id){
   drawSprite(shaderProgram, mesh, centerX, centerY, width, height, glm::mat4(1.f), tint, id);
 }
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -247,7 +247,7 @@ struct DrawingInfoValues {
 
 
 DrawingInfoValues computeDrawingInfo(FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
-  std::map<unsigned int, FontParams>& fontMeshes = fontFamily.asciToMesh;
+  std::unordered_map<unsigned int, FontParams>& fontMeshes = fontFamily.asciToMesh;
   float fontSizeNdi = convertFontSizeToNdi(fontSize);
   float offsetDelta = 2.f * fontSizeNdi;
 

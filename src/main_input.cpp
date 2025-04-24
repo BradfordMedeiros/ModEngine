@@ -24,7 +24,6 @@ std::string dumpDebugInfo(bool fullInfo){
   auto scenegraphInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
   auto gameobjInfo = debugAllGameObjects(world.sandbox);
   auto gameobjhInfo = debugAllGameObjectsH(world.sandbox);
-  auto gameobjObjInfo = debugAllGameObjectObj(world.objectMapping);
   auto cacheInfo = debugTransformCache(world.sandbox);
   auto textureInfo = debugLoadedTextures(world.textures);
   auto meshInfo = debugLoadedMeshes(world.meshes);
@@ -38,7 +37,6 @@ std::string dumpDebugInfo(bool fullInfo){
     auto content = "gameobj info - id id name\n" + gameobjInfo + "\n" + 
       "scenegraph info\n" + scenegraphInfo + "\n" +
       "gameobjh info - id id sceneId groupId parentId | [children]\n" + gameobjhInfo + "\n" +
-      "gameobjObj - id\n" + gameobjObjInfo + "\n" + 
       "transform cache - id pos scale\n" + cacheInfo + "\n" + 
       "texture cache\n" + textureInfo + "\n" +
       "mesh cache\n" + meshInfo + "\n" + 
@@ -221,8 +219,7 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
  
   auto octreeId = getSelectedOctreeId();
   if (octreeId.has_value()){
-    GameObjectObj& objectOctree = world.objectMapping.at(octreeId.value());
-    GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
+    GameObjectOctree* octreeObject = getOctree(world.objectMapping, octreeId.value());
     if (octreeObject != NULL){
       auto isShiftHeld = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
@@ -366,7 +363,7 @@ void doOctreeRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPos)
   auto adjustedToPos = glm::inverse(octreeModelMatrix) * glm::vec4(toPos.x, toPos.y, toPos.z, 1.f);
   auto adjustedDir = adjustedToPos - adjustedPosition;
 
-  GameObjectOctree* octreeObj = std::get_if<GameObjectOctree>(&world.objectMapping.at(id));
+  GameObjectOctree* octreeObj = getOctree(world.objectMapping, id);
   if (octreeObj){
     modassert(octreeObj, "draw selection grid onFrame not octree type");
     handleOctreeRaycast(octreeObj -> octree, adjustedPosition, adjustedDir, glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS, id);
@@ -407,13 +404,13 @@ void drop_callback(GLFWwindow* window, int count, const char** paths){
       GameobjAttributes attr {
         .attr = {{ "clip", std::string(paths[i]) }}, 
       };
-      std::map<std::string, GameobjAttributes> submodelAttributes;
+      std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
       makeObjectAttr(sceneId, "&" + objectName, attr, submodelAttributes);
     }else if (fileType == MODEL_EXTENSION){
       GameobjAttributes attr {
         .attr = {{ "mesh", std::string(paths[i]) }}, 
       };
-      std::map<std::string, GameobjAttributes> submodelAttributes;
+      std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
       makeObjectAttr(sceneId, objectName, attr, submodelAttributes);
     }else if (fileType == UNKNOWN_EXTENSION){
       std::cout << "UNKNOWN file format, so doing nothing: " << paths[i] << std::endl;
@@ -499,7 +496,7 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
 }
 
 void processKeyBindings(GLFWwindow *window, KeyRemapper& remapper){
-  std::map<int, bool> lastFrameDown = {};
+  std::unordered_map<int, bool> lastFrameDown = {};
   for (auto inputFn : remapper.inputFns){
     if (state.inputMode == DISABLED && !inputFn.alwaysEnable){
       continue;
@@ -1589,8 +1586,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
       for (auto &selectedIndex : state.editor.selectedObjs){
-        GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
-        GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
+        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
         if (octreeObject != NULL){
           if (isCtrlHeld){
             deleteSelectedOctreeNodes(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex));
@@ -1614,8 +1610,8 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
       for (auto &selectedIndex : state.editor.selectedObjs){
-        GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
-        GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
+        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
+        modassert(octreeObject, "octree object is null");
         writeOctreeTexture(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), isCtrlHeld, TEXTURE_UP);
       }
     }
@@ -1649,8 +1645,8 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       for (auto &selectedIndex : state.editor.selectedObjs){
-        GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
-        GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
+        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
+        modassert(octreeObject, "octree object is null");
         loadOctree(
           *octreeObject, 
           [](std::string filepath) -> std::string {
@@ -1671,8 +1667,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       for (auto &selectedIndex : state.editor.selectedObjs){
-        GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
-        GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
+        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
         modassert(octreeObject, "octree object null");
         saveOctree(*octreeObject, [](std::string filepath, std::string& data) -> void {
           auto modpath = modlayerPath(filepath);
@@ -1690,8 +1685,8 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       for (auto &selectedIndex : state.editor.selectedObjs){
-        GameObjectObj& objectOctree = world.objectMapping.at(selectedIndex);
-        GameObjectOctree* octreeObject = std::get_if<GameObjectOctree>(&objectOctree);
+        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
+        modassert(octreeObject, "octree object null");
         makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
         updatePhysicsBody(world, selectedIndex);
       }

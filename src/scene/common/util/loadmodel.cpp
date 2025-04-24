@@ -125,7 +125,7 @@ struct BoneWeighting {
 
 struct BoneInfo {
   std::vector<Bone> bones;
-  std::map<unsigned int, std::vector<BoneWeighting>>  vertexBoneWeight;
+  std::unordered_map<unsigned int, std::vector<BoneWeighting>>  vertexBoneWeight;
 };
 
 void printMatrix(std::string bonename, aiMatrix4x4& matrix, glm::mat4 glmMatrix){
@@ -146,7 +146,7 @@ BoneInfo processBones(aiMesh* mesh){
 
   aiBone** bones = mesh -> mBones;
 
-  std::map<unsigned int, std::vector<BoneWeighting>> vertexToBones;
+  std::unordered_map<unsigned int, std::vector<BoneWeighting>> vertexToBones;
   for (int i = 0; i < mesh -> mNumBones; i++){
     aiBone* bone = bones[i];
     Bone meshBone {
@@ -177,7 +177,7 @@ BoneInfo processBones(aiMesh* mesh){
   return info;
 }
 
-void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeighting>>&  vertexBoneWeight, int vertexId, int32_t* indices, float* weights, int size){
+void setDefaultBoneIndexesAndWeights(std::unordered_map<unsigned int, std::vector<BoneWeighting>>&  vertexBoneWeight, int vertexId, int32_t* indices, float* weights, int size){
   std::vector<BoneWeighting> weighting;
   if (vertexBoneWeight.find(vertexId) != vertexBoneWeight.end()){
     weighting = vertexBoneWeight.at(vertexId);
@@ -218,7 +218,7 @@ std::optional<int32_t> getNodeId(ModelData& data, std::string nodename){
   return std::nullopt;
 }
 
-void setInitialBonePoses(ModelData& data, std::map<int32_t, glm::mat4>& fullnodeTransform){
+void setInitialBonePoses(ModelData& data, std::unordered_map<int32_t, glm::mat4>& fullnodeTransform){
   for (auto &[id, transform] : fullnodeTransform){
     printMatrixInformation(transform, std::string("initialbone - ") + std::to_string(id));
   }
@@ -472,9 +472,9 @@ void processNode(
    }
 }
 
-void assertAllNamesUnique(std::map<int32_t, std::string>& idToName){
+void assertAllNamesUnique(std::unordered_map<int32_t, std::string>& idToName){
   bool foundDuplicate = false;
-  std::map<std::string, int> names;
+  std::unordered_map<std::string, int> names;
   for (auto [val, name] : idToName){
     if (names.find(name) != names.end()){
       foundDuplicate = true;
@@ -646,12 +646,12 @@ ModelDataCore loadModelCore(std::string modelPath){
    import.SetIOHandler(NULL); // otherwise Assimp::Importer will try to free this on destruct...ok bro 
    std::cout << "loading file" << std::endl;
 
-   std::map<int32_t, MeshData> meshIdToMeshData;
-   std::map<int32_t, std::vector<int>> nodeToMeshId;
-   std::map<int32_t, int32_t> childToParent;
-   std::map<int32_t, Transformation> nodeTransform;
-   std::map<int32_t, glm::mat4> fullnodeTransform;
-   std::map<int32_t, std::string> names;
+   std::unordered_map<int32_t, MeshData> meshIdToMeshData;
+   std::unordered_map<int32_t, std::vector<int>> nodeToMeshId;
+   std::unordered_map<int32_t, int32_t> childToParent;
+   std::unordered_map<int32_t, Transformation> nodeTransform;
+   std::unordered_map<int32_t, glm::mat4> fullnodeTransform;
+   std::unordered_map<int32_t, std::string> names;
 
    auto animations = processAnimations(scene);
 

@@ -26,7 +26,7 @@ struct AnimationData {
 };
 
 struct AnimationState {
-  std::map<int32_t, AnimationData> playbacks;
+  std::unordered_map<int32_t, AnimationData> playbacks;
 };
 
 struct WorldTiming {

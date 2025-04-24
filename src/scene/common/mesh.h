@@ -73,7 +73,7 @@ struct ShaderTextureBinding {
   unsigned int textureUnit;
   unsigned int textureId;
 };
-void drawMesh(Mesh mesh, GLint shaderProgram, bool drawPoints, MeshUniforms meshUniforms);
+void drawMesh(Mesh& mesh, GLint shaderProgram, bool drawPoints, MeshUniforms& meshUniforms);
 
 struct LineRenderData {
   unsigned int VAO;

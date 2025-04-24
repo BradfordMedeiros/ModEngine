@@ -34,7 +34,6 @@ struct CustomApiBindings {
   objid (*groupId)(int32_t);
   void (*removeObjectById)(int32_t id);
   void (*removeByGroupId)(int32_t id);
-  std::vector<int32_t> (*getObjectsByType)(std::string);
   std::vector<int32_t> (*getObjectsByAttr)(std::string, std::optional<AttributeValue>, std::optional<int32_t>);
   void (*setActiveCamera)(std::optional<int32_t> cameraId);
   std::optional<objid> (*getActiveCamera)();
@@ -94,7 +93,7 @@ struct CustomApiBindings {
   double (*timeSeconds)(bool realtime);
   double (*timeElapsed)();
   bool (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename);
-  std::map<std::string, std::string> (*listServers)();
+  std::unordered_map<std::string, std::string> (*listServers)();
   std::string (*connectServer)(std::string server);
   void (*disconnectServer)();
   void (*sendMessageTcp)(std::string data);
@@ -105,7 +104,7 @@ struct CustomApiBindings {
   std::optional<RecordingState>(*recordingState)(objid id);
   objid (*createRecording)(objid id);
   void (*saveRecording)(objid recordingId, std::string filepath);
-  std::optional<objid> (*makeObjectAttr)(objid sceneId, std::string name, GameobjAttributes& attr, std::map<std::string, GameobjAttributes>& submodelAttributes);
+  std::optional<objid> (*makeObjectAttr)(objid sceneId, std::string name, GameobjAttributes& attr, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes);
   void (*makeParent)(objid child, objid parent);
   std::optional<objid> (*getParent)(objid id);
   std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance);
@@ -119,7 +118,7 @@ struct CustomApiBindings {
   void (*rmLoadAround)(objid);
   void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string);
   void (*generateMeshRaw)(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indexs, std::string);
-  std::map<std::string, std::string> (*getArgs)();
+  std::unordered_map<std::string, std::string> (*getArgs)();
   void (*debugInfo)(std::optional<std::string> filepath);
   void (*setWorldState)(std::vector<ObjectValue> values);
   std::vector<ObjectValue> (*getWorldState)();

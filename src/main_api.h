@@ -90,7 +90,6 @@ void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2)
 
 bool gameobjExists(objid id);
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit);
-std::vector<int32_t> getObjectsByType(std::string type);
 std::vector<int32_t> getObjectsByAttr(std::string type, std::optional<AttributeValue> value, std::optional<int32_t> sceneId);
 std::optional<std::string> getGameObjectName(int32_t index);
 std::optional<AttributeValuePtr> getObjectAttributePtr(int32_t id, const char* field);
@@ -108,7 +107,7 @@ void setGameObjectScale(int32_t index, glm::vec3 scale, bool isWorld);
 glm::quat getGameObjectRotation(int32_t index, bool isWorld);
 void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld);
 
-std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes);
+std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes);
 std::vector<objid> idsInGroupById(objid);
 objid groupId(objid);
 
@@ -214,7 +213,7 @@ void clearTexture(unsigned int textureId, std::optional<bool> autoclear, std::op
 void markUserTexturesCleared();
 
 std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query, bool* valid);
-std::map<std::string, std::string> getArgs();
+std::unordered_map<std::string, std::string> getArgs();
 
 void schedule(objid id, bool realtime, float delayTimeMs, void* data, std::function<void(void*)> fn);
 void tickScheduledTasks();
