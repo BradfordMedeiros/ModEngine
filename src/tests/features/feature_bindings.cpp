@@ -79,7 +79,8 @@ CScriptBinding cscriptCreateEmissionBinding(CustomApiBindings& api){
 }
 
 
-void addNObjects(CustomApiBindings& gameapi, objid sceneId, int width, int height, int depth){
+std::set<objid> addNObjects(CustomApiBindings& gameapi, objid sceneId, int width, int height, int depth, std::string mesh){
+  std::set<objid> ids;
   for (int x = 0; x < width; x++){
     for (int z = 0; z < depth; z++){
       for (int y = 0; y < height; y++){
@@ -88,17 +89,20 @@ void addNObjects(CustomApiBindings& gameapi, objid sceneId, int width, int heigh
         float zoffset = 2.5f * z;
         GameobjAttributes attr {
           .attr = {
-            { "mesh", "../gameresources/build/primitives/walls/1-0.2-1.gltf" },
-            { "position", glm::vec3(xoffset, yoffset, zoffset) },
-            { "texture", "./res/textures/hexglow.png" },
+            { "mesh", mesh },
+            //{ "texture", "./res/textures/hexglow.png" },
           },
         };
         std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
         auto name = std::string("debug-obj-") + std::to_string(getUniqueObjId());
-        gameapi.makeObjectAttr(sceneId, name, attr, submodelAttributes);   
+        auto id = gameapi.makeObjectAttr(sceneId, name, attr, submodelAttributes);
+        std::cout << "addNObjects: " << id.value() << std::endl;
+        gameapi.setGameObjectPosition(gameapi.groupId(id.value()), glm::vec3(xoffset, yoffset, zoffset), true);
+        ids.insert(id.value()); 
       }
     }
   }
+  return ids;
 }
 
 CScriptBinding cscriptCreateNObjectsBinding(CustomApiBindings& api){
@@ -122,7 +126,39 @@ CScriptBinding cscriptCreateNObjectsBinding(CustomApiBindings& api){
         z = std::atoi(args.at("z").c_str());
       }
 
-      addNObjects(api, 0, x, y, z);
+      addNObjects(api, 0, x, y, z,"../gameresources/build/primitives/walls/1-0.2-1.gltf");
+    }
+
+  };
+
+  return binding; 
+}
+
+CScriptBinding cscriptCreateAnimationBinding(CustomApiBindings& api){
+  auto binding = createCScriptBinding("test/animation", api);
+  binding.onFrame = [&api](int32_t id, void* data) -> void {
+    static bool didAddObjects = false;
+    if (!didAddObjects){
+      didAddObjects = true;
+
+      auto args = api.getArgs();
+      int x = 1;
+      if (args.find("x") != args.end()){
+        x = std::atoi(args.at("x").c_str());
+      }
+      int y = 1;
+      if (args.find("y") != args.end()){
+        y = std::atoi(args.at("y").c_str());
+      }
+      int z = 1;
+      if (args.find("z") != args.end()){
+        z = std::atoi(args.at("z").c_str());
+      }
+
+      auto ids = addNObjects(api, 0, x, y, z, "../gameresources/build/characters/plaguerobot.gltf");
+      for (auto id : ids){
+        api.playAnimation(id, "walk", LOOP);
+      }
     }
 
   };

@@ -397,7 +397,13 @@ std::unordered_map<std::string, FeatureScene> featureScenes = {
       .sceneFile = std::nullopt,
       .createBinding = cscriptCreateNObjectsBinding,
       .scriptAuto = true,
-  }}
+  }},
+  {
+    "animation", FeatureScene {
+      .sceneFile = std::nullopt,
+      .createBinding = cscriptCreateAnimationBinding,
+      .scriptAuto = true,   
+  }},
 };
 
 
