@@ -21,6 +21,7 @@ struct GameObjectH {
 };
 
 struct TransformCacheElement {
+  objid gameobjIndex;
   Transformation transform;
   glm::mat4 matrix;
 };

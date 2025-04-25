@@ -8,15 +8,9 @@ GameObject& getGameObjectDirectIndex(SceneSandbox& sandbox, objid id){
   //modassert(buffer.inUse, "gameobject is stale");
   return buffer.gameobj;
 }
-void enforceParentRelationship(Scene& scene, objid id, objid parentId){
-  auto oldParent = scene.idToGameObjectsH.at(id).parentId;
-  if (oldParent){
-    scene.idToGameObjectsH.at(oldParent).children.erase(id);
-  }
-  scene.idToGameObjectsH.at(id).parentId = parentId;
-  scene.idToGameObjectsH.at(parentId).children.insert(id);
-}
 
+// This means I just keep on expanding larger. 
+// I might want to just make this fixed size to begin with but the budget is hard to say. 
 void addNextFree(Scene& scene, GameObject& gameobj){
   for (int i = 0; i < scene.gameobjects.size(); i++){
     if (!scene.gameobjects.at(i).inUse){
@@ -29,6 +23,20 @@ void addNextFree(Scene& scene, GameObject& gameobj){
     .inUse = true,
     .gameobj = gameobj,
   });
+}
+void freeGameObject(GameObjectBuffer& obj){
+  std::cout << "change gameobject: remove " << obj.gameobj.id << std::endl;
+  obj.inUse = false;
+}
+
+
+void enforceParentRelationship(Scene& scene, objid id, objid parentId){
+  auto oldParent = scene.idToGameObjectsH.at(id).parentId;
+  if (oldParent){
+    scene.idToGameObjectsH.at(oldParent).children.erase(id);
+  }
+  scene.idToGameObjectsH.at(id).parentId = parentId;
+  scene.idToGameObjectsH.at(parentId).children.insert(id);
 }
 
 objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parentId, GameObject& gameobjectObj, std::optional<objid> prefabId){
@@ -197,6 +205,20 @@ GameObject& getGameObject(Scene& scene, objid id){
   modassert(false, "cannot find object");
   return defaultObj;
 }
+GameObject& getGameObject(Scene& scene, objid id, objid* gameobjIndex){
+  for (int i = 0; i < scene.gameobjects.size(); i++){
+    auto& obj = scene.gameobjects.at(i);
+    if (!obj.inUse){
+      continue;
+    }
+    if (obj.gameobj.id == id){
+      *gameobjIndex = i;
+      return obj.gameobj;
+    }
+  }
+  modassert(false, "cannot find object");
+  return defaultObj;
+}
 
 std::unordered_map<std::string, GameobjAttributesWithId> multiObjAdd(
   SceneSandbox& sandbox,
@@ -306,8 +328,7 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objec
     auto sceneId = scene.idToGameObjectsH.at(id).sceneId;
     for (auto &obj : scene.gameobjects){
       if (obj.gameobj.id == id){
-        std::cout << "change gameobject: remove " << obj.gameobj.id << std::endl;
-        obj.inUse = false;
+        freeGameObject(obj);
       }
     }
     scene.idToGameObjectsH.erase(id);
@@ -624,7 +645,9 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
     if (gameobj.physicsOptions.isStatic || !gameobj.physicsOptions.enabled || justAdded /* this is so when you spawn it, the relative transform determines where it goes */){
        auto currentConstraint = gameobj.transformation;
        auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
+       auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
        sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
+         .gameobjIndex = gameobjIndex,
          .transform = newTransform,
          .matrix = matrixFromComponents(newTransform),
        };       
@@ -639,7 +662,8 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
 }
 
 void addObjectToCache(SceneSandbox& sandbox, objid id){
-  GameObject object = getGameObject(sandbox, id);
+  objid gameobjIndex = 0;
+  GameObject object = getGameObject(sandbox.mainScene, id, &gameobjIndex);
   auto elementMatrix = matrixFromComponents(
     glm::mat4(1.f),
     object.transformation.position, 
@@ -647,6 +671,7 @@ void addObjectToCache(SceneSandbox& sandbox, objid id){
     object.transformation.rotation
   );
   sandbox.mainScene.absoluteTransforms[id] = TransformCacheElement {
+    .gameobjIndex = gameobjIndex,
     .transform = getTransformationFromMatrix(elementMatrix),
     .matrix = elementMatrix,
   };
@@ -659,8 +684,10 @@ void removeObjectFromCache(SceneSandbox& sandbox, objid id){
 
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   auto parentId = getGameObjectH(sandbox, id).parentId;
+  auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
 
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
+    .gameobjIndex = gameobjIndex,
     .transform =  transform,
     .matrix = matrixFromComponents(transform),
   };
@@ -680,7 +707,10 @@ void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation tra
   auto parentId = getGameObjectH(sandbox, id).parentId;
   getGameObject(sandbox, id).transformation = transform;
   auto newTransform = parentId == 0 ? transform : calcAbsoluteTransform(sandbox, parentId, transform);
+
+  auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
+    .gameobjIndex = gameobjIndex,
     .transform = newTransform,
     .matrix = matrixFromComponents(newTransform),
   };

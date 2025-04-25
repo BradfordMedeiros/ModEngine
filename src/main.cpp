@@ -500,19 +500,9 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 
   std::vector<traversalData> datum;
   for (auto &[id, transformCacheElement] : world.sandbox.mainScene.absoluteTransforms){
-    static std::unordered_map<objid, objid> idToIndexCache;
-    objid directIndexId = 0;
-    auto it = idToIndexCache.find(id);
-    if (it == idToIndexCache.end()){
-      directIndexId = directIndex(id);
-      idToIndexCache[id] = directIndexId;
-    }else{
-      directIndexId = it -> second;
-    }
-
     datum.push_back(traversalData{
       .id = id,
-      .directIndex = directIndexId,
+      .directIndex = transformCacheElement.gameobjIndex,
       .modelMatrix = &transformCacheElement.matrix,
     });
   }
