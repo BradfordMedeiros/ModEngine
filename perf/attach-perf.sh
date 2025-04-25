@@ -9,4 +9,4 @@ then
 	exit 1
 fi
 
-(cd ../ && perf record -g --output=./perf/perf.data -i )
+(cd ../ && perf record -g --output=./perf/perf.data -i -p $process_id)
