@@ -506,7 +506,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .printKeyStrokes = false,
     .cullEnabled = true,
     .groupSelection = true,
-    .activeCameraObj = NULL,
+    .activeCameraObj = std::nullopt,
     .activeCameraData = NULL,
     .skybox = "",
     .updateSkybox = true,

@@ -468,8 +468,23 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
 
 struct traversalData {
   objid id;
+  objid directIndex;
   glm::mat4* modelMatrix;
 };
+
+objid directIndex(objid objectId){
+  for (int i = 0; i < world.sandbox.mainScene.gameobjects.size(); i++){
+    GameObjectBuffer& buffer = world.sandbox.mainScene.gameobjects.at(i);
+    if (!buffer.inUse){
+      continue;
+    }
+    if (buffer.gameobj.id == objectId){
+      return i;
+    }
+  }
+  modassert(false, "no fresh gameobject for this id");
+  return 0;
+}
 
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
   glUseProgram(shaderProgram);
@@ -487,14 +502,17 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   for (auto &[id, transformCacheElement] : world.sandbox.mainScene.absoluteTransforms){
     datum.push_back(traversalData{
       .id = id,
+      .directIndex = transformCacheElement.gameobjIndex,
       .modelMatrix = &transformCacheElement.matrix,
     });
   }
+
+
   for (auto& layer : world.sandbox.layers){      // @TODO could organize this before to not require pass on each frame
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
     for (auto& data : datum){
-      GameObject& gameobject = world.sandbox.mainScene.idToGameObjects.at(data.id); // slow 
+      GameObject& gameobject = getGameObjectDirectIndex(world.sandbox, data.directIndex); 
       if (gameobject.layer == layer.name){  // TODO PERF rm this string comparison 
         int32_t id = data.id; 
         glm::mat4& modelMatrix = *data.modelMatrix; 

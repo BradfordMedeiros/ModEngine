@@ -109,7 +109,7 @@ struct engineState {
   bool cullEnabled;
 
   bool groupSelection;
-  GameObject* activeCameraObj;
+  std::optional<objid> activeCameraObj;
   GameObjectCamera* activeCameraData;
 
   std::string skybox;

@@ -8,6 +8,11 @@ GameObject& getGameObject(World& world, objid id){
   return getGameObject(world.sandbox, id);
 }
 
+GameObject& getGameObjectDirectIndex(World& world, objid id){
+  return getGameObjectDirectIndex(world.sandbox, id);
+}
+
+
 std::optional<objid> getGameObjectByNamePrefix(World& world, std::string name, objid sceneId, bool sceneIdExplicit){
   auto obj = maybeGetGameObjectByName(world.sandbox, name, sceneId, true);
   if (obj.has_value()){
@@ -1207,7 +1212,6 @@ AttributeValuePtr ptrFromAttributeValue(AttributeValue& attributeValue){
 }
 
 std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, const char* field){
-  modassert(world.sandbox.mainScene.idToGameObjects.find(id) != world.sandbox.mainScene.idToGameObjects.end(), "getObjectAttributePtr gameobj does not exist");
   modassert(objExists(world.objectMapping, id), std::string("getObjectAttributePtr gameobjObj does not exist: ") + std::to_string(id));
 
   GameObject& gameobj = getGameObject(world, id);
@@ -1482,12 +1486,15 @@ glm::mat4 armatureTransform2(SceneSandbox& sandbox, objid id, std::string skelet
 }
 
 void updateLookAt(World& world, Transformation& viewTransform){
-  for (auto &[id, gameobj]: world.sandbox.mainScene.idToGameObjects){
-    if (!gameobj.lookat){
-      return;
+  for (auto &gameobj : world.sandbox.mainScene.gameobjects){
+    if (!gameobj.inUse){
+      continue;
+    }
+    if (!gameobj.gameobj.lookat){
+      continue;
     }             
-    glm::vec3 fromPos = fullTransformation(world.sandbox, id).position;
-    physicsRotateSet(world, id, orientationFromPos(fromPos, viewTransform.position), false);
+    glm::vec3 fromPos = fullTransformation(world.sandbox, gameobj.gameobj.id).position;
+    physicsRotateSet(world, gameobj.gameobj.id, orientationFromPos(fromPos, viewTransform.position), false);
   }
 }
 
