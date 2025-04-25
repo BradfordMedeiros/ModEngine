@@ -499,6 +499,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   std::optional<GLint> lastShaderId = std::nullopt;
 
   std::vector<traversalData> datum;
+  datum.reserve(world.sandbox.mainScene.absoluteTransforms.size());  // large # of elements, showed up in perf
   for (auto &[id, transformCacheElement] : world.sandbox.mainScene.absoluteTransforms){
     datum.push_back(traversalData{
       .id = id,
@@ -518,12 +519,16 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
         int32_t id = data.id; 
         glm::mat4& modelMatrix = *data.modelMatrix; 
         std::string& shader = gameobject.shader;
-        modassert(id >= 0, "unexpected id render world");
+        if (id < 0){
+          modassert(false, "unexpected id render world");
+        }
 
         // This could easily be moved to reduce opengl context switches since the onObject sorts on layers (so just have to pass down).  
         if (state.depthBufferLayer != layer.depthBufferLayer){
           state.depthBufferLayer = layer.depthBufferLayer;
-          modassert(state.depthBufferLayer < renderingResources.framebuffers.depthTextures.size(), std::string("invalid layer index: ") + std::to_string(state.depthBufferLayer) + std::string(" [") + layer.name + std::string("]"));
+          if(state.depthBufferLayer >= renderingResources.framebuffers.depthTextures.size()){
+            modassert(false, std::string("invalid layer index: ") + std::to_string(state.depthBufferLayer) + std::string(" [") + layer.name + std::string("]"));
+          }
           setActiveDepthTexture(renderingResources.framebuffers.fbo, &renderingResources.framebuffers.depthTextures.at(0), layer.depthBufferLayer);
           glClear(GL_DEPTH_BUFFER_BIT);
         }

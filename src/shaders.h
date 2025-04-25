@@ -15,7 +15,7 @@ struct ShaderInformation {
 };
 
 unsigned int* loadShaderIntoCache(std::string shaderString, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args);
-unsigned int getShaderByShaderString(std::string shaderString, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile, std::function<std::unordered_map<std::string, std::string>&()> getArgs, bool* loadedNewShader);
+unsigned int getShaderByShaderString(std::string& shaderString, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile, std::function<std::unordered_map<std::string, std::string>&()> getArgs, bool* loadedNewShader);
 std::optional<unsigned int> shaderByName(std::string name);
 void reloadShaders(std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args);
 void unloadShader(objid shaderId);

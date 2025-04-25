@@ -185,7 +185,7 @@ ShaderStringVals parseShaderString(std::string& shaderString){
   };
 }
 
-unsigned int getShaderByShaderString(std::string shaderString, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile, std::function<std::unordered_map<std::string, std::string>&()> getArgs, bool* loadedNewShader){
+unsigned int getShaderByShaderString(std::string& shaderString, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile, std::function<std::unordered_map<std::string, std::string>&()> getArgs, bool* loadedNewShader){
   modassert(shaderString.size() != 0, "getShaderByShaderString shader string size is 0");
   if (loadedNewShader){
     *loadedNewShader = false;
