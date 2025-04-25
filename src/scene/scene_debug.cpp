@@ -86,8 +86,11 @@ std::string scenegraphAsDotFormat(SceneSandbox& sandbox, ObjectMapping& objectMa
 
 std::string debugAllGameObjects(SceneSandbox& sandbox){
   std::string content = "";
-  for (auto &[id, gameobj] : sandbox.mainScene.idToGameObjects){
-    content += std::to_string(id) + " " + std::to_string(gameobj.id) + " " + gameobj.name + "\n";
+  for (auto &gameobj : sandbox.mainScene.gameobjects){
+    if (!gameobj.inUse){
+      continue;
+    }
+    content += std::to_string(gameobj.gameobj.id) + " " + std::to_string(gameobj.gameobj.id) + " " + gameobj.gameobj.name + "\n";
   }
   return content;
 }

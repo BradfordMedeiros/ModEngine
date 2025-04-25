@@ -25,8 +25,13 @@ struct TransformCacheElement {
   glm::mat4 matrix;
 };
 
+struct GameObjectBuffer {
+  bool inUse;
+  GameObject gameobj;
+};
+
 struct Scene {
-  std::unordered_map<objid, GameObject> idToGameObjects;
+  std::vector<GameObjectBuffer> gameobjects;
   std::unordered_map<objid, GameObjectH> idToGameObjectsH;
   std::unordered_map<objid, std::unordered_map<std::string, objid>> sceneToNameToId;
   std::unordered_map<objid, TransformCacheElement> absoluteTransforms; 
@@ -85,6 +90,8 @@ bool idExists(SceneSandbox& sandbox, objid id);
 bool idExists(SceneSandbox& sandbox, std::string name, objid sceneId);
 GameObject& getGameObject(SceneSandbox& sandbox, objid id);
 GameObject& getGameObject(SceneSandbox& sandbox, std::string name, objid sceneId);
+GameObject& getGameObjectDirectIndex(SceneSandbox& sandbox, objid id);
+
 GameObjectH& getGameObjectH(SceneSandbox& sandbox, objid id);
 GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name, objid sceneId);
 

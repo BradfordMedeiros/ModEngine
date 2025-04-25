@@ -798,10 +798,13 @@ objid listSceneId(int32_t id){
 }
 
 Transformation getCameraTransform(){
-  if (state.useDefaultCamera || state.activeCameraObj == NULL){
+  if (state.useDefaultCamera || !state.activeCameraObj.has_value()){
     return defaultResources.defaultCamera.transformation;
   }
-  return gameobjectTransformation(world, state.activeCameraObj -> id, true);
+
+  auto cameraExists = idExists(world.sandbox, state.activeCameraObj.value());
+  modassert(cameraExists, std::string("camera does not exist: ") + std::to_string(state.activeCameraObj.value()));
+  return gameobjectTransformation(world, state.activeCameraObj.value(), true);
 }
 
 Transformation getCullingTransform(){
@@ -812,16 +815,16 @@ Transformation getCullingTransform(){
 }
 
 void maybeResetCamera(int32_t id){
-  if (state.activeCameraObj != NULL &&  id == state.activeCameraObj -> id){
-    state.activeCameraObj = NULL;
+  if (state.activeCameraObj.has_value() &&  id == state.activeCameraObj.value()){
+    state.activeCameraObj = std::nullopt;
     state.activeCameraData = NULL;
     std::cout << "active camera reset" << std::endl;
   }
 }
 void setActiveCamera(std::optional<int32_t> cameraIdOpt){
   if (!cameraIdOpt.has_value()){
-    if (state.activeCameraObj){
-      auto currCameraId = state.activeCameraObj -> id;
+    if (state.activeCameraObj.has_value()){
+      auto currCameraId = state.activeCameraObj.value();
       maybeResetCamera(currCameraId);
     }
     return;
@@ -842,18 +845,15 @@ void setActiveCamera(std::optional<int32_t> cameraIdOpt){
 
 
   state.useDefaultCamera = false;
-  state.activeCameraObj = &getGameObject(world, cameraId);
+  state.activeCameraObj = cameraId;
   state.activeCameraData = &getCamera(world, cameraId);
-  cBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
+  //cBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
   std::cout << "set active camera to id: " << cameraId << std::endl;
   std::cout << "camera data: " << state.activeCameraData -> enableDof << ", " << state.activeCameraData -> minBlurDistance << ", " << state.activeCameraData -> maxBlurDistance << std::endl;
 }
 
 std::optional<objid> getActiveCamera(){
-  if (state.activeCameraObj == NULL){
-    return std::nullopt;
-  }
-  return state.activeCameraObj -> id;
+  return state.activeCameraObj;;
 }
 
 Transformation getView(){
@@ -863,7 +863,7 @@ Transformation getView(){
 void nextCamera(){
   auto cameraIndexs = getAllCameraIndexs(world.objectMapping);
   if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
-    state.activeCameraObj = NULL;
+    state.activeCameraObj = std::nullopt;
     state.activeCameraData = NULL;
     return;
   }
@@ -874,27 +874,27 @@ void nextCamera(){
 }
 
 void moveCamera(glm::vec3 offset){
-  if (state.activeCameraObj == NULL){
+  if (!state.activeCameraObj.has_value()){
     defaultResources.defaultCamera.transformation.position = moveRelative(defaultResources.defaultCamera.transformation.position, defaultResources.defaultCamera.transformation.rotation, glm::vec3(offset), false);
   }else{
-    auto cameraLocalTransform = gameobjectTransformation(world, state.activeCameraObj -> id, false);
-    setGameObjectPosition(state.activeCameraObj ->id, moveRelative(cameraLocalTransform.position, cameraLocalTransform.rotation, glm::vec3(offset), false), true);
+    auto cameraLocalTransform = gameobjectTransformation(world, state.activeCameraObj.value(), false);
+    setGameObjectPosition(state.activeCameraObj.value(), moveRelative(cameraLocalTransform.position, cameraLocalTransform.rotation, glm::vec3(offset), false), true);
   }
 }
 
 void rotateCamera(float xoffset, float yoffset){
-  if (state.activeCameraObj == NULL){
+  if (!state.activeCameraObj.has_value()){
     defaultResources.defaultCamera.transformation.rotation = setFrontDelta(defaultResources.defaultCamera.transformation.rotation, xoffset, yoffset, 0, 0.1);
   }else{
-    auto cameraRelativeRotation = gameobjectRotation(world, state.activeCameraObj -> id, false);
-    setGameObjectRotation(state.activeCameraObj ->id, setFrontDelta(cameraRelativeRotation, xoffset, yoffset, 0, 0.1), true);
+    auto cameraRelativeRotation = gameobjectRotation(world, state.activeCameraObj.value(), false);
+    setGameObjectRotation(state.activeCameraObj.value(), setFrontDelta(cameraRelativeRotation, xoffset, yoffset, 0, 0.1), true);
   }
 }
 void setCameraRotation(glm::quat orientation){
-  if (state.activeCameraObj == NULL){
+  if (!state.activeCameraObj.has_value()){
     defaultResources.defaultCamera.transformation.rotation = orientation;
   }else{
-    setGameObjectRotation(state.activeCameraObj ->id, orientation, true);
+    setGameObjectRotation(state.activeCameraObj.value(), orientation, true);
   }
 }
 

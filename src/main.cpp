@@ -471,6 +471,20 @@ struct traversalData {
   glm::mat4* modelMatrix;
 };
 
+objid directIndex(objid objectId){
+  for (int i = 0; i < world.sandbox.mainScene.gameobjects.size(); i++){
+    GameObjectBuffer& buffer = world.sandbox.mainScene.gameobjects.at(i);
+    if (!buffer.inUse){
+      continue;
+    }
+    if (buffer.gameobj.id == objectId){
+      return i;
+    }
+  }
+  modassert(false, "no fresh gameobject for this id");
+  return 0;
+}
+
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
   glUseProgram(shaderProgram);
   int numTriangles = 0;
@@ -490,11 +504,25 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       .modelMatrix = &transformCacheElement.matrix,
     });
   }
+
+
   for (auto& layer : world.sandbox.layers){      // @TODO could organize this before to not require pass on each frame
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
     for (auto& data : datum){
-      GameObject& gameobject = world.sandbox.mainScene.idToGameObjects.at(data.id); // slow 
+      static std::unordered_map<objid, objid> idToIndexCache;
+
+      objid directIndexId = 0;
+      auto it = idToIndexCache.find(data.id);
+      if (it == idToIndexCache.end()){
+        directIndexId = directIndex(data.id);
+        idToIndexCache[data.id] = directIndexId;
+      }else{
+        directIndexId = it -> second;
+      }
+
+
+      GameObject& gameobject = getGameObjectDirectIndex(world.sandbox, directIndexId); 
       if (gameobject.layer == layer.name){  // TODO PERF rm this string comparison 
         int32_t id = data.id; 
         glm::mat4& modelMatrix = *data.modelMatrix; 
