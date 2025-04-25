@@ -468,6 +468,7 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
 
 struct traversalData {
   objid id;
+  objid directIndex;
   glm::mat4* modelMatrix;
 };
 
@@ -499,8 +500,19 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 
   std::vector<traversalData> datum;
   for (auto &[id, transformCacheElement] : world.sandbox.mainScene.absoluteTransforms){
+    static std::unordered_map<objid, objid> idToIndexCache;
+    objid directIndexId = 0;
+    auto it = idToIndexCache.find(id);
+    if (it == idToIndexCache.end()){
+      directIndexId = directIndex(id);
+      idToIndexCache[id] = directIndexId;
+    }else{
+      directIndexId = it -> second;
+    }
+
     datum.push_back(traversalData{
       .id = id,
+      .directIndex = directIndexId,
       .modelMatrix = &transformCacheElement.matrix,
     });
   }
@@ -510,19 +522,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
     for (auto& data : datum){
-      static std::unordered_map<objid, objid> idToIndexCache;
-
-      objid directIndexId = 0;
-      auto it = idToIndexCache.find(data.id);
-      if (it == idToIndexCache.end()){
-        directIndexId = directIndex(data.id);
-        idToIndexCache[data.id] = directIndexId;
-      }else{
-        directIndexId = it -> second;
-      }
-
-
-      GameObject& gameobject = getGameObjectDirectIndex(world.sandbox, directIndexId); 
+      GameObject& gameobject = getGameObjectDirectIndex(world.sandbox, data.directIndex); 
       if (gameobject.layer == layer.name){  // TODO PERF rm this string comparison 
         int32_t id = data.id; 
         glm::mat4& modelMatrix = *data.modelMatrix; 
