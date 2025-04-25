@@ -510,6 +510,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 
   for (auto& layer : world.sandbox.layers){      // @TODO could organize this before to not require pass on each frame
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
+    auto newProjView = (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view);
 
     for (auto& data : datum){
       GameObject& gameobject = getGameObjectDirectIndex(world.sandbox, data.directIndex); 
@@ -547,7 +548,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
           setRenderUniformData(newShader, layer.uniforms);
         }
     
-        shaderSetUniform(newShader, "projview", (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view));
+        shaderSetUniform(newShader, "projview", newProjView);
         
         static glm::mat4 scaledModelMatrix(1.f); // copy assignent showed up in profiling, so just using static here so can prevent copy in most cases
         glm::mat4& finalModelMatrix = modelMatrix;
