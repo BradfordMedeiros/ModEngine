@@ -13,8 +13,13 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES .so .a)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   message("CMAKE - ModEngine Debug")
+  
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0")
+
   set(CMAKE_ENABLE_EXPORTS TRUE) # TODO -> modassert backtrace symbols
   add_definitions(-DMODDEBUG)
+
 endif()
     
 if (CMAKE_BUILD_TYPE STREQUAL "Release")

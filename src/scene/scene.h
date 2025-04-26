@@ -93,7 +93,7 @@ void updatePhysicsBody(World& world, objid id);
 
 void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool paused, Transformation& viewTransform, bool showVisualizations);
 
-std::optional<objid> getGameObjectByNamePrefix(World& world, std::string name, objid sceneId, bool sceneIdExplicit);
+std::optional<objid> getGameObjectByNamePrefix(World& world, std::string name, objid sceneId);
 GameObject& getGameObject(World& world, objid id);
 GameObject& getGameObject(World& world, std::string name, objid sceneId);
 

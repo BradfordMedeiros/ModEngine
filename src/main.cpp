@@ -342,29 +342,7 @@ void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
   }
 }
 
-RenderObjApi api {
-  .drawLine = interface.drawLine,
-  .drawSphere = [](glm::vec3 pos) -> int {
-    auto sphereLines = drawSphere();
-    const float sphereScale = 0.05f;
-    for (auto &line : sphereLines){
-      // can use addShaepData next cycle with selection id if we want to be able to drag these around
-      interface.drawLine(line.fromPos * sphereScale + pos, line.toPos * sphereScale + pos, glm::vec4(0.f, 0.f, 1.f, 1.f));
-    }
-    modassert(false, "did not return id");
-    return 0;
-  },
-  .drawWord = drawWord,
-  .isBone = [](objid id) -> bool {
-    return getGameObject(world.sandbox, id).isBone;
-  },
-  .getParentId = [](objid id) -> std::optional<objid> {
-    return getGameObjectH(world.sandbox, id).parentId;
-  },
-  .getTransform = [](objid id) -> Transformation {
-    return fullTransformation(world.sandbox, id);
-  },
-};
+RenderObjApi api {};
 
  // very gross and coupled to game code, and just generally horrible
 // but simple enough until have a better fix eg extended file syntax, naming convention, or templated shaders
@@ -1189,6 +1167,30 @@ int main(int argc, char* argv[]){
     .saveFile = [](std::string filepath, std::string& data) -> void {
       auto modpath = modlayerPath(filepath);
       realfiles::saveFile(modpath, data);
+    },
+  };
+
+  api = RenderObjApi  {
+    .drawLine = interface.drawLine,
+    .drawSphere = [](glm::vec3 pos) -> int {
+      auto sphereLines = drawSphere();
+      const float sphereScale = 0.05f;
+      for (auto &line : sphereLines){
+        // can use addShaepData next cycle with selection id if we want to be able to drag these around
+        interface.drawLine(line.fromPos * sphereScale + pos, line.toPos * sphereScale + pos, glm::vec4(0.f, 0.f, 1.f, 1.f));
+      }
+      modassert(false, "did not return id");
+      return 0;
+    },
+    .drawWord = drawWord,
+    .isBone = [](objid id) -> bool {
+      return getGameObject(world.sandbox, id).isBone;
+    },
+    .getParentId = [](objid id) -> std::optional<objid> {
+      return getGameObjectH(world.sandbox, id).parentId;
+    },
+    .getTransform = [](objid id) -> Transformation {
+      return fullTransformation(world.sandbox, id);
     },
   };
 

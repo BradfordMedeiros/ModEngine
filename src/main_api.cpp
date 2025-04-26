@@ -52,7 +52,7 @@ bool gameobjExists(objid id){
 }
 
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit){    
-  return getGameObjectByNamePrefix(world, name, sceneId, sceneIdExplicit);
+  return getGameObjectByNamePrefix(world, name, sceneId);
 }
 
 
