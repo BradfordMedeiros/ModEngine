@@ -236,13 +236,9 @@ void drawMesh(Mesh& mesh, GLint shaderProgram, bool drawPoints, MeshUniforms& me
   glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasBones"), hasBones);
 
   if (hasBones){
-    for (int i = 0; i < 100; i++){
+    for (int i = 0; i < meshUniforms.bones -> size(); i++){
       auto boneUniformLocation = glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str());
-      if (i >= meshUniforms.bones -> size()){
-        shaderSetUniform(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str(), glm::mat4(1.f));
-      }else{
-        shaderSetUniform(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str(), meshUniforms.bones -> at(i).offsetMatrix);
-      }
+      shaderSetUniform(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str(), meshUniforms.bones -> at(i).offsetMatrix);
     }
   }
 

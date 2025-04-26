@@ -579,10 +579,17 @@ void freeMeshRefsByOwner(World& world, int ownerId){
   }
 }
 
-std::function<Mesh(std::string)> getCreateMeshCopy(World& world){
-  return [&world](std::string meshname) -> Mesh {
-    std::cout << "ensure mesh getting: " << meshname << std::endl;
-    return world.meshes.at(meshname).mesh;
+std::function<Mesh(std::string)> getCreateMeshCopy(World& world, std::string& rootname){
+  return [&world, &rootname](std::string meshname) -> Mesh {
+    std::cout << "ensure mesh, loading getting copy: " << meshname << ", rootname: " << rootname << std::endl;
+    Mesh meshCopy = world.meshes.at(meshname).mesh;
+    for (auto &bone : meshCopy.bones){
+      std::cout << "ensure mesh, loading bone: " << bone.name <<  ", short = " << bone.shortName << std::endl;
+      std::string newName = rootname + "/" + bone.shortName;
+      std::cout << "ensure mesh, loading corrected: " << newName  << std::endl;
+      bone.name = newName;
+    }
+    return meshCopy;
   };
 }
 
@@ -859,19 +866,20 @@ void addObjectToWorld(
   std::function<objid()> getId,
   GameobjAttributes& attr,
   std::unordered_map<std::string, GameobjAttributes>& submodelAttributes, 
-  std::optional<objid> prefabId
+  std::optional<objid> prefabId,
+  std::string rootname
 ){
     auto loadMeshObject = createScopedLoadMesh(world, id);
     auto ensureTextureLoaded = [&world, id](std::string texturepath) -> Texture {
       std::cout << "Custom texture loading: " << texturepath << std::endl;
       return loadTextureWorld(world, texturepath, id);
     };
-    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes, prefabId](std::string meshName) {
+    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes, prefabId, rootname](std::string meshName) {
       // this assumes that the root mesh is loaded first, which i should probably cover, although it probably doesnt get hit
       modassert(meshName.size() > 0, std::string("invalid mesh name:  ") + meshName + ", name = " + name);
       modassert(isRootMeshName(meshName), "ensureMeshLoaded called on something that was not a root mesh");
 
-      std::cout << "ensure mesh, loading: " << meshName << ", name = " << name << std::endl;
+      std::cout << "ensure mesh, loading: " << meshName << ", name = " << rootname << std::endl;
       ModelData modelData = modelDataFromCache(world, meshName, name, id);
       attr.attr["meshes"] =  meshNamesForNode(modelData, meshName, name);
 
@@ -891,7 +899,7 @@ void addObjectToWorld(
         id
       );
       for (auto &[name, objAttr] : newSerialObjs){
-        addObjectToWorld(world, sceneId, objAttr.id, name, getId, objAttr.attr, submodelAttributes, prefabId);
+        addObjectToWorld(world, sceneId, objAttr.id, name, getId, objAttr.attr, submodelAttributes, prefabId, rootname);
       }
     }; 
 
@@ -904,7 +912,7 @@ void addObjectToWorld(
 
     ObjectTypeUtil util {
       .id = id,
-      .createMeshCopy = getCreateMeshCopy(world),
+      .createMeshCopy = getCreateMeshCopy(world, rootname),
       .meshes = world.meshes,
       .ensureTextureLoaded = ensureTextureLoaded,
       .releaseTexture = [&world, id](int textureId){
@@ -930,7 +938,7 @@ void addSerialObjectsToWorld(
 ){
   for (auto &[name, objAttr] : nameToAttr){
     // Warning: getNewObjectId will mutate the idsAdded.  
-    addObjectToWorld(world, sceneId, objAttr.id, name, getNewObjectId, objAttr.attr, submodelAttributes, prefabId);
+    addObjectToWorld(world, sceneId, objAttr.id, name, getNewObjectId, objAttr.attr, submodelAttributes, prefabId, name);
   }
 
 
@@ -1602,6 +1610,8 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
         std::string rootname = getGameObject(world.sandbox, getGroupId(world.sandbox, id)).name;
         auto boneId = maybeGetGameObjectByName(world.sandbox, bone.name, sceneId(world.sandbox, id));
         modassert(boneId.has_value(), std::string("no bone names: ") + bone.name);
+
+        std::cout << "Looking for root: " << rootname << ", bone name: " << bone.name << std::endl;
         auto matrix = armatureTransform2(world.sandbox, boneId.value() -> id, rootname, sceneId(world.sandbox, id));
         bone.offsetMatrix = matrix * glm::inverse(bone.initialBonePose);
       }

@@ -237,6 +237,7 @@ void renameRootNode(ModelData& data, std::string rootname, std::string realrootn
   for (auto &[_, meshdata] : data.meshIdToMeshData){
     for (auto &bone : meshdata.bones){
       // bone.name
+      bone.shortName = bone.name;
       if (bone.name == realrootname){
         bone.name = rootname;
         assert(false);   // figure out when this happens
