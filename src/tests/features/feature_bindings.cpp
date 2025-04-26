@@ -79,6 +79,7 @@ CScriptBinding cscriptCreateEmissionBinding(CustomApiBindings& api){
 }
 
 
+int addNCounter = 0;
 std::set<objid> addNObjects(CustomApiBindings& gameapi, objid sceneId, int width, int height, int depth, std::string mesh){
   std::set<objid> ids;
   for (int x = 0; x < width; x++){
@@ -94,9 +95,10 @@ std::set<objid> addNObjects(CustomApiBindings& gameapi, objid sceneId, int width
           },
         };
         std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-        auto name = std::string("debug-obj-") + std::to_string(getUniqueObjId());
+        auto name = std::string("debug-obj-") + std::to_string(addNCounter);
+        addNCounter++;
         auto id = gameapi.makeObjectAttr(sceneId, name, attr, submodelAttributes);
-        std::cout << "addNObjects: " << id.value() << std::endl;
+        std::cout << "addNObjects: " << addNCounter << std::endl;
         gameapi.setGameObjectPosition(gameapi.groupId(id.value()), glm::vec3(xoffset, yoffset, zoffset), true);
         ids.insert(id.value()); 
       }
@@ -157,7 +159,7 @@ CScriptBinding cscriptCreateAnimationBinding(CustomApiBindings& api){
 
       auto ids = addNObjects(api, 0, x, y, z, "../gameresources/build/characters/plaguerobot.gltf");
       for (auto id : ids){
-        api.playAnimation(id, "walk", LOOP);
+      //  api.playAnimation(id, "walk", LOOP);
       }
     }
 

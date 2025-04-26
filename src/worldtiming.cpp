@@ -15,7 +15,7 @@ WorldTiming createWorldTiming(float initialTime){
 
 std::function<void(std::string name, Transformation pose)> scopeSetPose(World& world, std::set<objid>& disableIds, objid idScene){
   return [&world, &disableIds, idScene](std::string name, Transformation pose) -> void {
-    auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene, false);
+    auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene);  // TODO PERF
     if (gameobj.has_value()){
       if (disableIds.count(gameobj.value() -> id) > 0){
         return;

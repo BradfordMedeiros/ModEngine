@@ -13,15 +13,15 @@ GameObject& getGameObjectDirectIndex(World& world, objid id){
 }
 
 
-std::optional<objid> getGameObjectByNamePrefix(World& world, std::string name, objid sceneId, bool sceneIdExplicit){
-  auto obj = maybeGetGameObjectByName(world.sandbox, name, sceneId, true);
+std::optional<objid> getGameObjectByNamePrefix(World& world, std::string name, objid sceneId){
+  auto obj = maybeGetGameObjectByName(world.sandbox, name, sceneId);
   if (obj.has_value()){
     return obj.value() -> id;
   }
   return std::nullopt;
 }
 GameObject& getGameObject(World& world, std::string name, objid sceneId){
-  auto obj = maybeGetGameObjectByName(world.sandbox, name, sceneId, false);
+  auto obj = maybeGetGameObjectByName(world.sandbox, name, sceneId);
   modassert(obj.has_value(), std::string("gameobject : ") + name + " does not exist");
   return *obj.value();
 }
@@ -1457,15 +1457,15 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<obj
       });
       gameobj.physicsOptions.velocity = getVelocity(rigidBody.body);
       gameobj.physicsOptions.angularVelocity = getAngularVelocity(rigidBody.body);
+      clampMaxVelocity(rigidBody.body, gameobj.physicsOptions.maxspeed);
     }
-    clampMaxVelocity(rigidBody.body, gameobj.physicsOptions.maxspeed);
   }
 }
 
 extern bool useTransform2;
 
 glm::mat4 armatureTransform2(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
-  auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId, false);
+  auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId);
   assert(gameobj.has_value());
  
   auto groupTransform = fullModelTransform(sandbox, gameobj.value() -> id);
@@ -1485,8 +1485,8 @@ glm::mat4 armatureTransform2(SceneSandbox& sandbox, objid id, std::string skelet
   return groupToModel;
 }
 
-void updateLookAt(World& world, Transformation& viewTransform){
-  for (auto &gameobj : world.sandbox.mainScene.gameobjects){
+void updateLookAt(World& world, Transformation& viewTransform){  
+  for (auto &gameobj : world.sandbox.mainScene.gameobjects){ // TODO PEROBJECT
     if (!gameobj.inUse){
       continue;
     }
@@ -1600,7 +1600,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       Mesh& mesh = gameobjMesh.meshesToRender.at(i);
       for (Bone& bone : mesh.bones){
         std::string rootname = getGameObject(world.sandbox, getGroupId(world.sandbox, id)).name;
-        auto boneId = maybeGetGameObjectByName(world.sandbox, bone.name, sceneId(world.sandbox, id), false);
+        auto boneId = maybeGetGameObjectByName(world.sandbox, bone.name, sceneId(world.sandbox, id));
         modassert(boneId.has_value(), std::string("no bone names: ") + bone.name);
         auto matrix = armatureTransform2(world.sandbox, boneId.value() -> id, rootname, sceneId(world.sandbox, id));
         bone.offsetMatrix = matrix * glm::inverse(bone.initialBonePose);
