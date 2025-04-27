@@ -39,7 +39,7 @@ void enforceParentRelationship(Scene& scene, objid id, objid parentId){
   scene.idToGameObjectsH.at(parentId).children.insert(id);
 }
 
-objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parentId, GameObject& gameobjectObj, std::optional<objid> prefabId){
+void sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parentId, GameObject& gameobjectObj, std::optional<objid> prefabId){
   auto gameobjectH = GameObjectH { 
     .id = gameobjectObj.id,
     .parentId = parentId.has_value() ? parentId.value() : 0,
@@ -59,7 +59,6 @@ objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parent
     modassert(false, std::string("name already exists: " + gameobjectObj.name))
   }
   scene.sceneToNameToId.at(sceneId)[gameobjectObj.name] = gameobjectObj.id;
-  return gameobjectObj.id;
 }
 
 // todo if this is an existing scene, it doesn't sponsor tags 
@@ -238,7 +237,8 @@ std::unordered_map<std::string, GameobjAttributesWithId> multiObjAdd(
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
 
     modassert(names.at(nodeId) == gameobj.name, "names do not match");
-    auto addedId = sandboxAddToScene(scene, sceneId, std::nullopt, gameobj, prefabId);
+    sandboxAddToScene(scene, sceneId, std::nullopt, gameobj, prefabId);
+    auto addedId = gameobj.id;
     addedIds.push_back(addedId);
     scene.idToGameObjectsH.at(id).groupId = rootId;
   }
@@ -256,7 +256,8 @@ std::unordered_map<std::string, GameobjAttributesWithId> multiObjAdd(
 
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children, std::optional<objid> prefabId){
   modassert(name == gameobjectObj.name, "names do not match");
-  auto addedId = sandboxAddToScene(sandbox.mainScene, sceneId, std::nullopt, gameobjectObj, prefabId);      
+  sandboxAddToScene(sandbox.mainScene, sceneId, std::nullopt, gameobjectObj, prefabId);      
+  auto addedId = gameobjectObj.id;
   for (auto child : children){
     if (sandbox.mainScene.sceneToNameToId.at(sceneId).find(child) == sandbox.mainScene.sceneToNameToId.at(sceneId).end()){
        // @TODO - shouldn't be an error should automatically create instead
@@ -424,8 +425,8 @@ SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std
 
   std::string name = "root";
   auto rootObj = gameObjectFromFields(name, 0, GameobjAttributes {}, getObjautoserializerFields(name), false); 
-  auto rootObjId = sandboxAddToScene(mainScene, 0, std::nullopt, rootObj, std::nullopt);
-
+  sandboxAddToScene(mainScene, 0, std::nullopt, rootObj, std::nullopt);
+  auto rootObjId = rootObj.id;
   SceneSandbox sandbox {
     .mainScene = mainScene,
     .layers = layers,
