@@ -11,18 +11,19 @@ GameObject& getGameObjectDirectIndex(SceneSandbox& sandbox, objid id){
 
 // This means I just keep on expanding larger. 
 // I might want to just make this fixed size to begin with but the budget is hard to say. 
-void addNextFree(Scene& scene, GameObject& gameobj){
+int addNextFree(Scene& scene, GameObject& gameobj){
   for (int i = 0; i < scene.gameobjects.size(); i++){
     if (!scene.gameobjects.at(i).inUse){
       scene.gameobjects.at(i).gameobj = gameobj;
       scene.gameobjects.at(i).inUse = true;
-      return;
+      return i;
     }
   }
   scene.gameobjects.push_back(GameObjectBuffer {
     .inUse = true,
     .gameobj = gameobj,
   });
+  return (scene.gameobjects.size() - 1);
 }
 void freeGameObject(GameObjectBuffer& obj){
   std::cout << "change gameobject: remove " << obj.gameobj.id << std::endl;
@@ -53,7 +54,8 @@ void sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parentI
   scene.idToGameObjectsH[gameobjectObj.id] = gameobjectH;
 
   std::cout << "change gameobject: add " << gameobjectObj.id << std::endl;
-  addNextFree(scene, gameobjectObj);
+  auto index = addNextFree(scene, gameobjectObj);
+  scene.idToGameObjectsH.at(gameobjectObj.id).gameobjIndex = index;
 
   if (scene.sceneToNameToId.at(sceneId).find(gameobjectObj.name) != scene.sceneToNameToId.at(sceneId).end()){
     modassert(false, std::string("name already exists: " + gameobjectObj.name))
@@ -102,23 +104,25 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
     }
   }
 
+
+  for (auto &[id, obj] : newScene.idToGameObjectsH){
+    modassert(sandbox.mainScene.idToGameObjectsH.find(id) == sandbox.mainScene.idToGameObjectsH.end(), "duplicate id");
+    sandbox.mainScene.idToGameObjectsH[id] = obj;
+    if (parentId.has_value() && obj.parentId == 0){
+      enforceParentRelationship(sandbox.mainScene, id, parentId.value());
+    }
+  }
   for (auto &obj : newScene.gameobjects){
     if (!obj.inUse){
       continue;
     }
     auto id = obj.gameobj.id;
-    modassert(sandbox.mainScene.idToGameObjectsH.find(id) == sandbox.mainScene.idToGameObjectsH.end(), "duplicate id");
 
     std::cout << "change gameobject: add " << obj.gameobj.id << std::endl;
-    addNextFree(sandbox.mainScene, obj.gameobj);
+    auto index = addNextFree(sandbox.mainScene, obj.gameobj);
+    sandbox.mainScene.idToGameObjectsH.at(obj.gameobj.id).gameobjIndex = index;
 
     modlog("sandbox add id", std::to_string(id));
-  }
-  for (auto &[id, obj] : newScene.idToGameObjectsH){
-    sandbox.mainScene.idToGameObjectsH[id] = obj;
-    if (parentId.has_value() && obj.parentId == 0){
-      enforceParentRelationship(sandbox.mainScene, id, parentId.value());
-    }
   }
 
   bool existingScene = sandbox.mainScene.sceneToNameToId.find(sceneId) != sandbox.mainScene.sceneToNameToId.end();
