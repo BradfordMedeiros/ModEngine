@@ -7,19 +7,19 @@
 #include "../common/mesh.h"
 #include "./animation.h"
 
-void playbackAnimation(
+std::vector<AnimationPose> playbackAnimation(
   Animation& animation, 
-  float currentTime, 
-  std::function<void(std::string, Transformation)> setPose
+  float currentTime
 );
 
-void playbackAnimationBlend(
+
+
+std::vector<AnimationPose> playbackAnimationBlend(
   Animation& animation,
   Animation& animation2,
   float currentTime,
   float currentTimeAnimation2,
-  float blendFactor,
-  std::function<void(std::string, Transformation)> setPose
+  float blendFactor
 );
 
 #endif

@@ -13,44 +13,44 @@ WorldTiming createWorldTiming(float initialTime){
   return timing;
 }
 
-std::function<void(std::string name, Transformation pose)> scopeSetPose(World& world, std::set<objid>& disableIds, objid idScene){
-  return [&world, &disableIds, idScene](std::string name, Transformation pose) -> void {
-    auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene);  // TODO PERF
-    if (gameobj.has_value()){
-      if (disableIds.count(gameobj.value() -> id) > 0){
-        return;
-      }
-      physicsLocalTransformSet(world, gameobj.value() -> id, pose);
-    }else{
-      std::cout << "warning no bone node named: " << name << std::endl;
-      assert(false);
-    }
-  };
-}
+
 
 bool enableBlending = true;
 float blendingWindow = 0.25f;  // this should be able to be specified by the animation most likely
 
+void setPoses(World& world, std::set<objid>& disableIds, objid idScene, std::vector<AnimationPose>& poses){
+  for (auto& pose : poses){
+    auto gameobj =  maybeGetGameObjectByName(world.sandbox, pose.channelName, idScene);  // TODO PERF
+    if (gameobj.has_value()){
+      if (disableIds.count(gameobj.value() -> id) > 0){
+        continue;
+      }
+      physicsLocalTransformSet(world, gameobj.value() -> id, pose.pose);
+    }else{
+      std::cout << "warning no bone node named: " << pose.channelName << std::endl;
+      assert(false);
+    }
+    //printMatrixInformation(pose.pose, std::string("SET_CHANNEL:") + pose.channelName);
+  }
+}
 void tickAnimation(World& world, std::set<objid>& disableAnimationIds, AnimationData& playback, float currentTime){
   if (enableBlending && playback.blendData.has_value()){
     float timeElapsedBlendStart = currentTime - playback.blendData.value().blendStartTime;
     float aFactor = glm::min(1.f, timeElapsedBlendStart / blendingWindow);
     // if afactor > 1.f or something like that, could get rid of the old animation value
     //modassert(false, "blend not yet supported");
-    playbackAnimationBlend(
+
+    auto newPoses = playbackAnimationBlend(
       playback.animation,
       playback.blendData.value().animation, 
       currentTime - playback.initTime,
       currentTime - playback.blendData.value().oldAnimationInit, 
-      aFactor,
-      scopeSetPose(world, disableAnimationIds, playback.idScene)
+      aFactor
     );
+    setPoses(world, disableAnimationIds, playback.idScene, newPoses);
   }else{
-    playbackAnimation(
-      playback.animation, 
-      currentTime - playback.initTime, 
-      scopeSetPose(world,  disableAnimationIds, playback.idScene)
-    );
+    auto newPoses = playbackAnimation(playback.animation, currentTime - playback.initTime);
+    setPoses(world,  disableAnimationIds, playback.idScene, newPoses);
   }
 }
 
@@ -185,10 +185,6 @@ void setAnimationPose(World& world, objid id, std::string animationToPlay, float
   auto groupId = getGroupId(world.sandbox, id);
   auto animation = getAnimation(world, groupId, animationToPlay).value();
   auto idScene = sceneId(world.sandbox, groupId);
-
-  playbackAnimation(
-    animation, 
-    time,
-    scopeSetPose(world, emptySet, idScene)
-  );
+  auto newPoses = playbackAnimation(animation, time);
+  setPoses(world, emptySet, idScene, newPoses);
 }

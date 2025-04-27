@@ -1,16 +1,12 @@
 #include "./playback.h"
 
 
-void playbackAnimation(
+std::vector<AnimationPose> playbackAnimation(
   Animation& animation,  
-  float currentTime, 
-  std::function<void(std::string, Transformation)> setPose
+  float currentTime
 ){  
   auto posesForTick = animationPosesAtTime(animation, currentTime);
-  for (auto pose : posesForTick){
-    //printMatrixInformation(pose.pose, std::string("SET_CHANNEL:") + pose.channelName);
-    setPose(pose.channelName, pose.pose);
-  }
+  return posesForTick;
 }
 
 struct ChannelWithTwoPoses {
@@ -78,22 +74,17 @@ std::vector<AnimationPose> combineAnimationPoses(std::vector<AnimationPose>& pos
   return finalChannelPoses;
 }
 
-void playbackAnimationBlend(
+std::vector<AnimationPose> playbackAnimationBlend(
   Animation& animation,
   Animation& animation2,
   float currentTime,
   float currentTimeAnimation2,
-  float blendFactor,
-  std::function<void(std::string, Transformation)> setPose
+  float blendFactor
 ){ 
   std::cout << "blend: a factor is: " << currentTime << ", " << blendFactor << std::endl;
   auto posesForTick = animationPosesAtTime(animation, currentTime);
   auto oldPosesForTick = animationPosesAtTime(animation2, currentTimeAnimation2);
   auto combinedPoses = combineAnimationPoses(posesForTick, oldPosesForTick, blendFactor);
-
-  for (auto pose : combinedPoses){
-    //printMatrixInformation(pose.pose, std::string("SET_CHANNEL:") + pose.channelName);
-    setPose(pose.channelName, pose.pose);
-  }
+  return combinedPoses;
 }
 

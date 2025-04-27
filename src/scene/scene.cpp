@@ -1443,7 +1443,7 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
   world.entitiesToUpdate.insert(index);
 }
 
-void physicsLocalTransformSet(World& world, objid index, Transformation transform){
+void physicsLocalTransformSet(World& world, objid index, Transformation& transform){
   updateRelativeTransform(world.sandbox, index, transform);
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     PhysicsValue& phys = world.rigidbodys.at(index);
@@ -1483,13 +1483,14 @@ glm::mat4 armatureTransform2(SceneSandbox& sandbox, objid id, std::string skelet
   //auto groupToModel =  modelTransform * glm::inverse(groupTransform); 
   auto groupToModel =  glm::inverse(groupTransform) * modelTransform; 
 
+  /*
   auto resultCheck = groupTransform * groupToModel;
   if (false && resultCheck != modelTransform){
     std::cout << "group_to_model = " << print(groupToModel) << std::endl;
     std::cout << "result_check = " << print(resultCheck) << std::endl;
     std::cout << "model_transform = " << print(modelTransform) << std::endl;
     assert(false);
-  }
+  }*/
   return groupToModel;
 }
 
