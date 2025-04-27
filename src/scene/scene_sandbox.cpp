@@ -72,12 +72,13 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
 
   std::unordered_map<std::string, GameobjAttributes> subelementAttributes;
   std::unordered_map<std::string, GameobjAttributes> newAdditionalFields;
-  Scene scene;
+  Scene newScene;
   {
     auto tokens = parseFormat(sceneData);
     auto dividedTokens = divideMainAndSubelementTokens(tokens);
     auto serialGameAttrs = deserializeSceneTokens(dividedTokens.mainTokens);
     auto subelementAttrs = deserializeSceneTokens(dividedTokens.subelementTokens);
+
     std::unordered_map<std::string, GameObject> gameobjs;
     for (auto [name, attrWithChildren] : serialGameAttrs){
       std::string value = name;
@@ -85,15 +86,15 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
       objid id = idValue.has_value() ? idValue.value() : getUniqueObjId();
       gameobjs[value] = gameObjectFromFields(value, id, attrWithChildren.attr, getObjautoserializerFields(value), false);
     }
-    scene.sceneToNameToId[sceneId] = {};
+    newScene.sceneToNameToId[sceneId] = {};
     for (auto [name, gameobjectObj] : gameobjs){
       modassert(name == gameobjectObj.name, "names do not match");
-      sandboxAddToScene(scene, sceneId, std::nullopt, gameobjectObj, prefabId);
+      sandboxAddToScene(newScene, sceneId, std::nullopt, gameobjectObj, prefabId);
     }
     for (auto [name, attrWithChildren] : serialGameAttrs){
       for (auto childName : attrWithChildren.children){
-        auto parentId = scene.sceneToNameToId.at(sceneId).at(name);
-        enforceParentRelationship(scene, scene.sceneToNameToId.at(sceneId).at(childName), parentId);
+        auto parentId = newScene.sceneToNameToId.at(sceneId).at(name);
+        enforceParentRelationship(newScene, newScene.sceneToNameToId.at(sceneId).at(childName), parentId);
       }
       newAdditionalFields[name] = attrWithChildren.attr;
     }
@@ -102,7 +103,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
     }
   }
 
-  for (auto &obj : scene.gameobjects){
+  for (auto &obj : newScene.gameobjects){
     if (!obj.inUse){
       continue;
     }
@@ -114,7 +115,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
 
     modlog("sandbox add id", std::to_string(id));
   }
-  for (auto &[id, obj] : scene.idToGameObjectsH){
+  for (auto &[id, obj] : newScene.idToGameObjectsH){
     sandbox.mainScene.idToGameObjectsH[id] = obj;
     if (parentId.has_value() && obj.parentId == 0){
       enforceParentRelationship(sandbox.mainScene, id, parentId.value());
@@ -132,7 +133,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
     }; 
   }
 
-  for (auto &[name, id] : scene.sceneToNameToId.at(sceneId)){
+  for (auto &[name, id] : newScene.sceneToNameToId.at(sceneId)){
     modassert(sandbox.mainScene.sceneToNameToId.at(sceneId).find(name) == sandbox.mainScene.sceneToNameToId.at(sceneId).end(), "duplicate name");
     sandbox.mainScene.sceneToNameToId.at(sceneId)[name] = id;
   }
@@ -145,7 +146,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
     }
   }
 
-  for (auto &obj : scene.gameobjects){
+  for (auto &obj : newScene.gameobjects){
     if (!obj.inUse){
       continue;
     }
