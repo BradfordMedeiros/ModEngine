@@ -166,6 +166,21 @@ void testpass(std::string target){
   }
 #endif
 
+#ifdef INCLUDE_VPX
+  #include <vpx/vpx_decoder.h>
+  #include <vpx/vp8dx.h>
+
+  void vpxTest(){
+    vpx_codec_ctx_t codec;
+    vpx_codec_dec_cfg_t cfg = {0};
+    vpx_codec_iface_t *iface = vpx_codec_vp9_dx();
+    if (vpx_codec_dec_init(&codec, iface, &cfg, 0)) {
+        fprintf(stderr, "Failed to initialize decoder\n");
+    }
+    testpass("Vpx");
+  }
+#endif 
+
 int main(int argc, char* argv[]){
 	#ifdef INCLUDE_GLFW
 		glfwTest();
@@ -203,5 +218,10 @@ int main(int argc, char* argv[]){
     freetypeTest();
   #endif
 
+  #ifdef INCLUDE_VPX
+    vpxTest();
+  #endif 
+
 	std::cout << "Build test runs (" << numDepsTested << " dependencies tested)" << std::endl;
 }
+

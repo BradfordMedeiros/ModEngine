@@ -27,6 +27,10 @@ sudo apt-get install libalut-dev
 sudo apt-get install libopenal-dev
 sudo apt-get install libavformat57 libavformat-dev libavcodec57 libswscale-dev libswresample-dev
 
+libvpx (video)
+sudo apt-get install libvpx-dev
+
+
 ===============
 dev tools:
 cmake 

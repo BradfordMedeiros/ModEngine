@@ -98,9 +98,15 @@ else()
     add_definitions(-DINCLUDE_BULLET)
   endif()
 
-  #set(NO_INCLUDE_FREETYPE TRUE)
+  set(NO_INCLUDE_FREETYPE TRUE)
   if (NOT NO_INCLUDE_FREETYPE)
     add_definitions(-DINCLUDE_FREETYPE)
+  endif()
+
+
+  set(NO_INCLUDE_VPX TRUE)
+  if (NOT NO_INCLUDE_VPX)
+    add_definitions(-DINCLUDE_VPX)
   endif()
 
   add_executable(${PROJECT_NAME} ${source_list})
@@ -237,10 +243,14 @@ if (NOT NO_INCLUDE_FREETYPE)
   add_subdirectory("${FREETYPE_DIR}")
   target_link_libraries(${PROJECT_NAME} "freetype" "${FREETYPE_DIR}")
   target_include_directories(${PROJECT_NAME} PRIVATE "${FREETYPE_DIR}/include")
-  ####################################################
-  #add_subdirectory(${LIB_DIR}/bullet3 bullet)
-  #target_include_directories(${PROJECT_NAME} PRIVATE "${LIB_DIR}/bullet3/src/")
-  #target_link_libraries(${PROJECT_NAME} "Bullet3Common;BulletDynamics;BulletInverseDynamics;BulletCollision;LinearMath;BulletSoftBody")
 else()
   message("MODBUILD - Not Including FreeType")
+endif()
+
+## VPX - video
+if (NOT NO_INCLUDE_VPX)
+  message("MODBUILD - Including VPX")
+  target_link_libraries(${PROJECT_NAME} "vpx")
+else()
+  message("MODBUILD - Not Including Vpx")
 endif()
