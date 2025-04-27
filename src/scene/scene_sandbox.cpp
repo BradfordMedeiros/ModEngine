@@ -64,61 +64,8 @@ objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parent
 
 struct SceneDeserialization {
   Scene scene;
-  std::unordered_map<std::string, GameobjAttributes> additionalFields;
-  std::unordered_map<std::string, GameobjAttributes> subelementAttributes;
 };
 
-
-SceneDeserialization createSceneFromParsedContent(
-  objid sceneId,
-  std::vector<Token> tokens,  
-  std::function<objid()> getNewObjectId,
-  std::function<std::set<std::string>(std::string&)> getObjautoserializerFields,
-  std::optional<objid> prefabId
-){
-  Scene scene;
-
-  auto dividedTokens = divideMainAndSubelementTokens(tokens);
-  auto serialGameAttrs = deserializeSceneTokens(dividedTokens.mainTokens);
-  auto subelementAttrs = deserializeSceneTokens(dividedTokens.subelementTokens);
-
-
-  std::unordered_map<std::string, GameObject> gameobjs;
-  for (auto [name, attrWithChildren] : serialGameAttrs){
-    std::string value = name;
-    auto idValue = objIdFromAttribute(attrWithChildren.attr);
-    objid id = idValue.has_value() ? idValue.value() : getNewObjectId();
-    gameobjs[value] = gameObjectFromFields(value, id, attrWithChildren.attr, getObjautoserializerFields(value), false);
-  }
-
-  scene.sceneToNameToId[sceneId] = {};
-
-  for (auto [name, gameobjectObj] : gameobjs){
-    modassert(name == gameobjectObj.name, "names do not match");
-    sandboxAddToScene(scene, sceneId, std::nullopt, gameobjectObj, prefabId);
-  }
-
-  std::unordered_map<std::string, GameobjAttributes> additionalFields;
-  for (auto [name, attrWithChildren] : serialGameAttrs){
-    for (auto childName : attrWithChildren.children){
-      auto parentId = scene.sceneToNameToId.at(sceneId).at(name);
-      enforceParentRelationship(scene, scene.sceneToNameToId.at(sceneId).at(childName), parentId);
-    }
-    additionalFields[name] = attrWithChildren.attr;
-  }
-
-  std::unordered_map<std::string, GameobjAttributes> subelementAttributes;
-  for (auto &[name, attrWithChildren] : subelementAttrs){
-    subelementAttributes[name] = attrWithChildren.attr;
-  }
-
-  SceneDeserialization deserializedScene {
-    .scene = scene,
-    .additionalFields = additionalFields,
-    .subelementAttributes = subelementAttributes,
-  };
-  return deserializedScene;
-}
 
 // todo if this is an existing scene, it doesn't sponsor tags 
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData,  std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields, std::optional<objid> parentId, std::optional<objid> prefabId){
@@ -128,9 +75,42 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
     }
   }
 
+  SceneDeserialization deserializedScene{};
+  std::unordered_map<std::string, GameobjAttributes> subelementAttributes;
+  std::unordered_map<std::string, GameobjAttributes> newAdditionalFields;
 
-  auto tokens = parseFormat(sceneData);
-  SceneDeserialization deserializedScene = createSceneFromParsedContent(sceneId, tokens, getUniqueObjId, getObjautoserializerFields, prefabId);
+  {
+    auto tokens = parseFormat(sceneData);
+    Scene scene;
+    auto dividedTokens = divideMainAndSubelementTokens(tokens);
+    auto serialGameAttrs = deserializeSceneTokens(dividedTokens.mainTokens);
+    auto subelementAttrs = deserializeSceneTokens(dividedTokens.subelementTokens);
+    std::unordered_map<std::string, GameObject> gameobjs;
+    for (auto [name, attrWithChildren] : serialGameAttrs){
+      std::string value = name;
+      auto idValue = objIdFromAttribute(attrWithChildren.attr);
+      objid id = idValue.has_value() ? idValue.value() : getUniqueObjId();
+      gameobjs[value] = gameObjectFromFields(value, id, attrWithChildren.attr, getObjautoserializerFields(value), false);
+    }
+    scene.sceneToNameToId[sceneId] = {};
+    for (auto [name, gameobjectObj] : gameobjs){
+      modassert(name == gameobjectObj.name, "names do not match");
+      sandboxAddToScene(scene, sceneId, std::nullopt, gameobjectObj, prefabId);
+    }
+    for (auto [name, attrWithChildren] : serialGameAttrs){
+      for (auto childName : attrWithChildren.children){
+        auto parentId = scene.sceneToNameToId.at(sceneId).at(name);
+        enforceParentRelationship(scene, scene.sceneToNameToId.at(sceneId).at(childName), parentId);
+      }
+      newAdditionalFields[name] = attrWithChildren.attr;
+    }
+    for (auto &[name, attrWithChildren] : subelementAttrs){
+      subelementAttributes[name] = attrWithChildren.attr;
+    }
+    deserializedScene = SceneDeserialization {
+      .scene = scene,
+    };
+  }
 
   for (auto &obj : deserializedScene.scene.gameobjects){
     if (!obj.inUse){
@@ -184,7 +164,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
 
 
   std::unordered_map<std::string, GameobjAttributesWithId>  additionalFields;
-  for (auto &[name, attr] : deserializedScene.additionalFields){
+  for (auto &[name, attr] : newAdditionalFields){
     additionalFields[name] = GameobjAttributesWithId{
       .id = sandbox.mainScene.sceneToNameToId.at(sceneId).at(name),
       .attr = attr,
@@ -194,7 +174,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
   AddSceneDataValues data  {
     .additionalFields = additionalFields,
     .idsAdded = idsAdded,
-    .subelementAttributes = deserializedScene.subelementAttributes,
+    .subelementAttributes = subelementAttributes,
   };
   return data;
 }
