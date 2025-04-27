@@ -561,7 +561,7 @@ std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId)
     ids.push_back(idToVisit);
     visited.insert(idToVisit);
     idsToVisit.pop();
-    auto objH = sandbox.mainScene.idToGameObjectsH.at(idToVisit);
+    GameObjectH& objH = sandbox.mainScene.idToGameObjectsH.at(idToVisit);
     for (objid id : objH.children){
       if (visited.count(id) == 0){
         idsToVisit.push(id);
@@ -585,14 +585,15 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
     if (sandbox.mainScene.absoluteTransforms.find(id) == sandbox.mainScene.absoluteTransforms.end()){
       continue;
     }
-    auto parentId = getGameObjectH(sandbox, id).parentId;
+    GameObjectH& gameobjecth = getGameObjectH(sandbox, id);
+    auto parentId = gameobjecth.parentId;
     if (parentId == 0){
       continue;
     }
     if (sandbox.mainScene.absoluteTransforms.find(parentId) == sandbox.mainScene.absoluteTransforms.end()){
       continue;
     }
-    GameObject& gameobj = getGameObject(sandbox, id);
+    GameObject& gameobj = getGameObjectDirectIndex(sandbox, gameobjecth.gameobjIndex);
     if (gameobj.physicsOptions.isStatic || !gameobj.physicsOptions.enabled || justAdded /* this is so when you spawn it, the relative transform determines where it goes */){
        auto currentConstraint = gameobj.transformation;
        auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
@@ -614,7 +615,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
 
 void addObjectToCache(SceneSandbox& sandbox, objid id){
   objid gameobjIndex = 0;
-  GameObject object = getGameObject(sandbox.mainScene, id, &gameobjIndex);
+  GameObject& object = getGameObject(sandbox.mainScene, id, &gameobjIndex);
   auto elementMatrix = matrixFromComponents(
     glm::mat4(1.f),
     object.transformation.position, 
@@ -655,8 +656,10 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
   updateAllChildrenPositions(sandbox, id);
 }
 void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform){
-  auto parentId = getGameObjectH(sandbox, id).parentId;
-  getGameObject(sandbox, id).transformation = transform;
+  GameObjectH& gameobjH = getGameObjectH(sandbox, id);
+  auto parentId = gameobjH.parentId;
+  auto directIndex = gameobjH.gameobjIndex;
+  getGameObjectDirectIndex(sandbox, directIndex).transformation = transform;
   auto newTransform = parentId == 0 ? transform : calcAbsoluteTransform(sandbox, parentId, transform);
 
   auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
