@@ -79,7 +79,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
     auto subelementAttrs = deserializeSceneTokens(dividedTokens.subelementTokens);
 
     std::unordered_map<std::string, GameObject> gameobjs;
-    for (auto [name, attrWithChildren] : serialGameAttrs){
+    for (auto &[name, attrWithChildren] : serialGameAttrs){
       std::string value = name;
       auto idValue = objIdFromAttribute(attrWithChildren.attr);
       objid id = idValue.has_value() ? idValue.value() : getUniqueObjId();
