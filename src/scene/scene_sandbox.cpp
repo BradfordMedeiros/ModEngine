@@ -62,6 +62,13 @@ objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parent
   return gameobjectObj.id;
 }
 
+struct SceneDeserialization {
+  Scene scene;
+  std::unordered_map<std::string, GameobjAttributes> additionalFields;
+  std::unordered_map<std::string, GameobjAttributes> subelementAttributes;
+};
+
+
 SceneDeserialization createSceneFromParsedContent(
   objid sceneId,
   std::vector<Token> tokens,  

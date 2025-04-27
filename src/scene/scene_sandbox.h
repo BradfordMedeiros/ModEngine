@@ -46,12 +46,6 @@ struct Scene {
 // add to absolute transforms (as value = position + contstaint)
 // when update position of anything -> update absolute transform
 
-struct SceneDeserialization {
-  Scene scene;
-  std::unordered_map<std::string, GameobjAttributes> additionalFields;
-  std::unordered_map<std::string, GameobjAttributes> subelementAttributes;
-};
-
 struct SceneMetadata {
   std::string scenefile;
   std::optional<std::string> name;
