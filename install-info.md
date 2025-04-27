@@ -27,6 +27,9 @@ sudo apt-get install libalut-dev
 sudo apt-get install libopenal-dev
 sudo apt-get install libavformat57 libavformat-dev libavcodec57 libswscale-dev libswresample-dev
 
+webm video
+apt-get install libwebm-dev=1.0.0.28-1
+
 ===============
 dev tools:
 cmake 

@@ -166,6 +166,37 @@ void testpass(std::string target){
   }
 #endif
 
+#ifdef INCLUDE_VIDEO
+  #include <webm/webm_parser.h>
+  #include <webm/file_reader.h>
+
+  #include <vpx/vpx_decoder.h>
+  #include <vpx/vp8dx.h>
+
+  void videoTest(){
+    // Open the WebM file
+
+    FILE* file = std::fopen("../gameresources/video/bigbuck.webm", "rb");
+    if (!file) {
+      std::cerr << "File cannot be opened\n";
+      return;
+    }
+    std::cout << "opened the file" << std::endl;
+
+    webm::FileReader reader(file);
+    webm::WebmParser parser;
+
+    vpx_codec_ctx_t codec;
+    vpx_codec_dec_cfg_t cfg = {0};
+    vpx_codec_iface_t *iface = vpx_codec_vp9_dx();
+    if (vpx_codec_dec_init(&codec, iface, &cfg, 0)) {
+      fprintf(stderr, "Failed to initialize decoder\n");
+    }
+
+    testpass("webm");
+  }
+#endif 
+
 int main(int argc, char* argv[]){
 	#ifdef INCLUDE_GLFW
 		glfwTest();
@@ -203,5 +234,10 @@ int main(int argc, char* argv[]){
     freetypeTest();
   #endif
 
+  #ifdef INCLUDE_VIDEO
+    videoTest();
+  #endif 
+
 	std::cout << "Build test runs (" << numDepsTested << " dependencies tested)" << std::endl;
 }
+
