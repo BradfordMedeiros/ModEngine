@@ -149,6 +149,10 @@ if (NOT NO_INCLUDE_OPENAL)
   # https://stackoverflow.com/questions/15452676/how-to-compile-openal-program-with-g-ubuntu/15452771
   message("MODBUILD - Including OpenAl")
   target_link_libraries(${PROJECT_NAME} "openal")
+  target_link_libraries(${PROJECT_NAME} "vorbis")
+  target_link_libraries(${PROJECT_NAME} "vorbisfile")
+
+  
 
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
   find_library(ALUT_LIBRARY NAMES alut PATHS /usr/lib /usr/local/lib)

@@ -12,6 +12,8 @@
 #include <cstring>
 #include <queue>
 #include <glm/glm.hpp>
+#include <vorbis/vorbisfile.h>
+
 #include "../../../common/util.h"
 // https://www.openal.org/documentation/OpenAL_Programmers_Guide.pdf
 

@@ -93,16 +93,82 @@ int getUsages(std::string filepath){
   return soundUsages.at(filepath);
 }
 
+void readVorbisFile(std::string& filepath, ALuint* _soundBuffer){
+  FILE* file = fopen(filepath.c_str(), "rb");
+  if (!file) {
+    modassert(false, "could not open the file");
+  }
+
+  std::cout << "about to open file" << std::endl;
+  OggVorbis_File vf;
+  if (ov_open(file, &vf, NULL, 0) < 0) {
+    fclose(file);
+    modassert(false, "Error reading Ogg Vorbis file.\n");
+  }
+
+  vorbis_info* vi = ov_info(&vf, -1);
+
+  std::cout << "bitrate is: " << vi -> bitrate_nominal << std::endl;
+
+  size_t bufferSize = ov_pcm_total(&vf, -1) * vi -> channels * 2; // 2 bytes per sample, per channel 
+  bufferSize = bufferSize + 1; // + 1 since need to get 0 bytes read on the last byte to detect finished
+
+  char* buffer = (char*)malloc(bufferSize);
+
+  int bitstream;
+  int bufferOffset = 0;
+  int sizePerRead = 4096;
+  int expectedReadLimit = bufferSize / sizePerRead;
+
+  int numReads = 0;
+  while(true){
+    if (numReads > (expectedReadLimit * 10)){
+      modassert(false, "Took too long reading vorbis audio file");
+    }
+    numReads++;
+
+    auto bytesRemaining = bufferSize - bufferOffset;
+    if (bytesRemaining < sizePerRead){
+      sizePerRead = bytesRemaining;
+    }
+    modassert(sizePerRead != 0, "cannot provide empty buffer to read");
+
+    auto value = ov_read(&vf, buffer + bufferOffset, sizePerRead, 0, 2, 1, &bitstream);
+    if (value == OV_HOLE || value == OV_EBADLINK || value == OV_EINVAL || value < 0){
+      modassert(false, "bad file read");
+    }
+    bufferOffset = bufferOffset + value;
+    if (value == 0){
+      break;
+    }
+  }
+
+  auto format = vi->channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
+
+  alGenBuffers(1, _soundBuffer);
+  alBufferData(*_soundBuffer, format, buffer, bufferOffset, vi -> rate);
+
+  free(buffer);
+  ov_clear(&vf); // this closes the file handle  https://xiph.org/vorbis/doc/vorbisfile/ov_open.html
+}
+
 ALuint findOrLoadBuffer(std::string filepath){
   if (soundBuffers.find(filepath) != soundBuffers.end()){
     return soundBuffers.at(filepath);
   }
 
-  auto soundFileData = readFileOrPackage(filepath);
-  ALuint soundBuffer = alutCreateBufferFromFileImage(soundFileData.c_str(), soundFileData.size());
+  ALuint soundBuffer = 0;
+  auto extension = getExtension(filepath);
+  if (extension.value() == "ogg"){
+    readVorbisFile(filepath, &soundBuffer);
+  }else{
+    auto soundFileData = readFileOrPackage(filepath);
+    soundBuffer = alutCreateBufferFromFileImage(soundFileData.c_str(), soundFileData.size());    
+  }
+
   ALenum error = alutGetError();
   if (error != ALUT_ERROR_NO_ERROR){
-    std::cerr << "ERROR: " << alutGetErrorString(error) <<  ": " << std::strerror(errno) << std::endl;
+    std::cerr << "ERROR: ALUT Error: " << alutGetErrorString(error) <<  ": " << std::strerror(errno) << std::endl;
     throw std::runtime_error("error loading buffer");
   }
   soundBuffers[filepath] = soundBuffer;
