@@ -2,6 +2,7 @@
 // TODO STATIC
 // TODO PEROBJECT
 // TODO PERF
+// TODO CRITICAL FIX
 
 #include <csignal>
 #include <cxxopts.hpp>

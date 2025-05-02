@@ -160,7 +160,12 @@ ALuint findOrLoadBuffer(std::string filepath){
   ALuint soundBuffer = 0;
   auto extension = getExtension(filepath);
   if (extension.value() == "ogg"){
-    readVorbisFile(filepath, &soundBuffer);
+    //readVorbisFile(filepath, &soundBuffer);
+
+    // temporary code just so vorbis can work with mod...temporarily...obviously have to fix
+    // TODO CRITICAL FIX
+    auto soundFileData = readFileOrPackage("./res/sounds/hitmarker.wav");
+    soundBuffer = alutCreateBufferFromFileImage(soundFileData.c_str(), soundFileData.size());    
   }else{
     auto soundFileData = readFileOrPackage(filepath);
     soundBuffer = alutCreateBufferFromFileImage(soundFileData.c_str(), soundFileData.size());    
