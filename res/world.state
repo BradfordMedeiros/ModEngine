@@ -16,7 +16,7 @@ editor:debug:false
 #editor:debugmask:126  # this & the above number determines if the debug object should show
 
 editor:debugmask:8
-#editor:showbones:true
+editor:showbones:false
 
 
 physics:enabled:true
@@ -84,7 +84,8 @@ mouse:show-cursor:false
 #skybox:color:0.1 0.1 0.1
 
 rendering:cull:disabled
-rendering:frustumcull:enabled
+#rendering:frustumcull:enabled
+rendering:frustumcull:disabled
 
 editor:showgrid:false
 editor:gridsize:40

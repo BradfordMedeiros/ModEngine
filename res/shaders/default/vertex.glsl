@@ -68,6 +68,10 @@ void main(){
       (bones[aBoneIndex[3]] * aBoneWeight[3] * multiplier);
 
       fullmodel = model  * mul;
+      
+      if (useInstancing){
+        fullmodel = model  * mul;
+      }
       modelPosition = fullmodel * vec4(aPos.xyz, 1.0);
 
       /*if (totalWeight == 1){

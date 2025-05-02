@@ -1026,6 +1026,8 @@ int main(int argc, char* argv[]){
    ("strict", "Assert the existance of resources during runtime", cxxopts::value<bool>()->default_value("true"))
    ("shell", "Packaging shell",  cxxopts::value<bool>()->default_value("false"))
    ("mount", "Mod package to mount instead of using the file system", cxxopts::value<std::string>()->default_value(""))
+   ("package", "Package files to a .mod file instead of running the game", cxxopts::value<std::string>()->default_value(""))
+   ("p,pak", "Package files to include", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("h,help", "Print help")
   ;        
 
@@ -1136,6 +1138,7 @@ int main(int argc, char* argv[]){
   if (args.find("sqldir") != args.end()){
     sqlDirectory = args.at("sqldir");
   }
+
   if (result["sqlshell"].as<bool>()){
     return loopSqlShell(sqlDirectory);
   }
@@ -1143,6 +1146,17 @@ int main(int argc, char* argv[]){
 
   if (result["shell"].as<bool>()){
     loopPackageShell();
+  }
+
+  auto package = result["package"].as<std::string>();
+  if (package != ""){
+    auto filesToInclude = result["pak"].as<std::vector<std::string>>();
+    std::cout << "creating package: " << package << std::endl;
+    for (auto &file : filesToInclude){
+      std::cout << "include: " << file << std::endl;
+    }
+    packageDirectory(package.c_str(), filesToInclude);
+    exit(0);
   }
 
   auto filewatch = watchFiles(result["watch"].as<std::string>(), 1.f);

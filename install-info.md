@@ -30,10 +30,17 @@ sudo apt-get install libavformat57 libavformat-dev libavcodec57 libswscale-dev l
 for vorbis file format support
 sudo apt install libvorbis-dev
 
-webm video
-apt-get install libwebm-dev=1.0.0.28-1
 
 ===============
 dev tools:
 cmake 
 standard gnu stuff (make, bash utils etc)
+
+
+# webm...might get rid of this, probably should move into submodule too i guess make?
+git clone https://github.com/webmproject/libwebm.git
+cd libwebm
+cd libwebm/build
+cmake ..
+make
+make install
