@@ -209,12 +209,25 @@ if (NOT NO_INCLUDE_ASSIMP)
   # @todo This can be made faster by settings build options to selectively build importers/etc
   set(ASSIMP_DIR "${LIB_DIR}/assimp")
   set(ASSIMP_BUILD_DIR "${BUILD_LIB_DIR}/assimp")
+
   set(ASSIMP_BUILD_TESTS OFF CACHE INTERNAL "If the test suite for Assimp is built in addition to the library.")
   set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE INTERNAL "If the supplementary tools for Assimp are built in addition to the library.")
+  
+  set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "Disable all exporters" FORCE)
+  set(ASSIMP_NO_EXPORT ON CACHE BOOL "Disable all export code" FORCE)
+  set(ASSIMP_INSTALL OFF CACHE BOOL "Don't generate install targets" FORCE)
+
+  set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "Disable all importers" FORCE)
+  set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "Enable glTF importer" FORCE)
+  set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "Enable OBJ importer" FORCE)
+  set(ASSIMP_BUILD_COLLADA_IMPORTER ON CACHE BOOL "" FORCE)  # .dae file...lets get rid of this
+  set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "Disable sample apps" FORCE)
+
   add_subdirectory("${ASSIMP_DIR}")
   target_link_libraries(${PROJECT_NAME} "assimp")
   target_include_directories(${PROJECT_NAME} PRIVATE "${ASSIMP_DIR}/include")
   target_include_directories(${PROJECT_NAME} PRIVATE "${ASSIMP_BUILD_DIR}/include")
+
 else()
   message("MODBUILD - Not Including ASSIMP")
 endif()
