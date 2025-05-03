@@ -53,6 +53,7 @@ Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId);
 Texture loadTextureAtlasWorld(World& world, std::string texturepath, std::vector<std::string> atlasTextures, std::optional<std::string> cacheFile, objid ownerId);
 Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight, std::optional<objid> mappingTexture);
 Texture loadTextureWorldSelection(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight, std::optional<objid> mappingTexture);
+Texture loadTextureDataWorld(World& world, std::string texturepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels, objid ownerId);
 void maybeReloadTextureWorld(World& world, std::string texturepath);
 
 objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> sceneId, std::optional<objid> parentId, std::optional<objid> prefabId);

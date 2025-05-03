@@ -22,6 +22,7 @@
 #include "./world_tasks.h"
 #include "./shaderstate.h"
 #include "./package.h"
+#include "./webm.h"
 
 #ifdef ADDITIONAL_SRC_HEADER
   #include STR(ADDITIONAL_SRC_HEADER)
@@ -1719,6 +1720,22 @@ int main(int argc, char* argv[]){
     runFeatureScene(featureTest);
   }
 
+  std::string videoPath = "../gameresources/video/voyage_to_the_moon.ogv";
+  auto video = loadVideo(videoPath.c_str());
+
+  Texture videoTexture = loadTextureDataWorld(
+     world,
+     "./res/texturevideotexture",
+     video.avFrame2 -> data[0], 
+     video.avFrame2 -> width, 
+     video.avFrame2 -> height, 
+     4,
+     -1
+   );
+
+  auto videoAudio = createBufferedAudio();
+ 
+
   bool shouldQuitControl = false;
   if (result["skiploop"].as<bool>()){
     goto cleanup;
@@ -1742,6 +1759,35 @@ int main(int argc, char* argv[]){
     if (shouldExit || shouldQuitControl){
       goto cleanup;
     }
+
+/////////////////
+  if (video.videoTimestamp < getTotalTimeGame()){
+      // perhaps i should catch up if i'm running behind quicker
+      int stream = nextFrame(video);
+      if (stream == video.streamIndexs.video){
+        updateTextureData( 
+          videoTexture,
+          video.avFrame2 -> data[0], 
+          video.avFrame2 -> width, 
+          video.avFrame2 -> height
+        );
+      }else if (stream == video.streamIndexs.audio){
+          auto audioCodec = video.codecs.audioCodec;
+          auto bufferSize = av_samples_get_buffer_size(NULL, audioCodec -> channels, video.avFrame -> nb_samples, audioCodec -> sample_fmt, 0);
+          auto numChannels = audioCodec -> channels;
+//  
+          //// @TODO process all channels
+          //// @TODO chandle more formats to eliminate assertion below 
+          //// | int outputSamples = swr_convert(p_swrContext,  p_destBuffer, p_destLinesize,  (const uint8_t**)p_frame->extended_data, p_frame->nb_samples);
+          std::cout << "fmt name: " << av_get_sample_fmt_name(audioCodec -> sample_fmt) << std::endl;;
+          modassert(audioCodec -> sample_fmt == AV_SAMPLE_FMT_S16, "unexpected audio code format");
+          playBufferedAudio(videoAudio, (uint8_t*)video.avFrame -> data[0], bufferSize, audioCodec -> sample_rate);
+  //    }
+    }
+  }
+/////////////////////
+
+
     resetReservedId();
     disposeTempBufferedData(lineData);
     doRemoveQueuedRemovals();

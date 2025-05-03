@@ -200,8 +200,10 @@ Texture loadCubemapTexture(std::string textureFilePathRoot){
 
 void updateTextureData(Texture& texture, unsigned char* data, int textureWidth, int textureHeight){
   glBindTexture(GL_TEXTURE_2D, texture.textureId);
-  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, textureWidth, textureHeight, GL_RGB, GL_UNSIGNED_BYTE, data);
+  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, textureWidth, textureHeight, GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
+//   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
 
 void saveTextureData(std::string filepath, char* data, int width, int height){
   stbi_flip_vertically_on_write(1);
