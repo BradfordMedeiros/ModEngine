@@ -125,7 +125,7 @@ Package loadPackage(const char* path){
 
       // TODO - I need to think about the null terminating of this.  I think the last element handles this since we
       // limit the size as 255 for the string on write and 256 element (index = 255) should always have the 0
-    	guard(fread(&fileMetadata.name, sizeof(char), 256, package.handle));
+    	guard(fread(fileMetadata.name, sizeof(char), 256, package.handle));
 
     	// 	char name[256];
 
@@ -329,11 +329,35 @@ struct OpenPackageFile {
    bool nativeFs;
    FILE* nativeFile = NULL;
    bool remove = false;
+   size_t packageFileSize = 0;
+   size_t packageFileOffset = 0;
+   size_t packageCurrentOffset = 0;
 };
 std::vector<OpenPackageFile> openFiles;
 // 
 unsigned int openFileOrPackage(std::string filepath){
    static unsigned int fileHandle = 0;
+   if (mountedPackage.has_value()){
+      for (auto &fileMetadata : mountedPackage.value().fileMetadata){
+         std::string name(fileMetadata.name);
+         if (name == filepath){
+            size_t size = fileMetadata.sizeBytes;
+            size_t offsetBytes = fileMetadata.offsetBytes;
+            unsigned int handle = fileHandle;
+            openFiles.push_back(OpenPackageFile {
+               .fileHandle = handle,
+               .nativeFs = false,
+               .packageFileSize = size,
+               .packageFileOffset = offsetBytes,
+            });
+            fileHandle++;
+            return handle;
+         }
+      }
+      modassert(false, std::string("did not find file: ") + std::string(filepath));
+      return 0;
+   }
+
    FILE* file = fopen(filepath.c_str(), "rb");
    modassert(file != NULL, "file handle is NULL");
    unsigned int handle = fileHandle;
@@ -348,8 +372,10 @@ unsigned int openFileOrPackage(std::string filepath){
 int closeFileOrPackage(unsigned int handle){
    for (auto &file : openFiles){
       if (file.fileHandle == handle){
-         auto error = fclose(file.nativeFile);
-         modassert(error == 0, "error closing file");
+         if (file.nativeFs){
+            auto error = fclose(file.nativeFile);
+            modassert(error == 0, "error closing file");
+         }
          file.remove = true;
          break;
       }
@@ -366,7 +392,17 @@ int closeFileOrPackage(unsigned int handle){
 size_t readFileOrPackage(unsigned int handle, void *ptr, size_t size, size_t nmemb){
    for (auto &file : openFiles){
       if (file.fileHandle == handle){
-         return fread(ptr, size, nmemb, file.nativeFile);
+         if (file.nativeFs){
+            return fread(ptr, size, nmemb, file.nativeFile);
+         }else{
+            if (file.packageCurrentOffset >= file.packageFileSize){
+               return 0;
+            }
+            fseek(mountedPackage.value().handle, file.packageFileOffset + file.packageCurrentOffset, SEEK_SET);
+            auto objectsRead = fread(ptr, size, nmemb, mountedPackage.value().handle);
+            file.packageCurrentOffset += objectsRead * size;
+            return objectsRead;
+         }
       }
    }
    modassert(false, "invalid file handle");
@@ -375,7 +411,20 @@ size_t readFileOrPackage(unsigned int handle, void *ptr, size_t size, size_t nme
 int seekFileOrPackage(unsigned int handle, int offset, int whence){
    for (auto &file : openFiles){
       if (file.fileHandle == handle){
-         return fseek(file.nativeFile, offset, whence);
+         if (file.nativeFs){
+            return fseek(file.nativeFile, offset, whence);
+         }else{
+            if (whence == SEEK_SET){
+               file.packageCurrentOffset = offset;
+            }else if (whence == SEEK_CUR){
+               file.packageCurrentOffset += offset;
+            }else if (whence == SEEK_END){
+               file.packageCurrentOffset = file.packageFileSize + offset;
+            }else{
+               modassert(false, "unexpected whence value");
+            }
+            return 0;
+         }
       }
    }
    modassert(false, "invalid file handle");
@@ -384,7 +433,11 @@ int seekFileOrPackage(unsigned int handle, int offset, int whence){
 size_t tellFileOrPackage(unsigned int handle){
    for (auto &file : openFiles){
       if (file.fileHandle == handle){
-        return ftell(file.nativeFile);
+         if (file.nativeFs){
+           return ftell(file.nativeFile);
+         }else{
+           return file.packageCurrentOffset;
+         }
       }
    }
    modassert(false, "invalid file handle");

@@ -140,8 +140,9 @@ void readVorbisFile(std::string& filepath, ALuint* _soundBuffer){
   unsigned int fileHandle = openFileOrPackage(filepath.c_str());
 
   OggVorbis_File vf;
-  if (ov_open_callbacks(&fileHandle, &vf, NULL, 0, vorbisFileFns) < 0) {
-    modassert(false, "Error setting up callbacks");
+  auto result = ov_open_callbacks(&fileHandle, &vf, NULL, 0, vorbisFileFns); 
+  if (result < 0) {
+    modassert(false, std::string("Error setting up callbacks: ") + std::to_string(result));
   }
 
   vorbis_info* vi = ov_info(&vf, -1);
