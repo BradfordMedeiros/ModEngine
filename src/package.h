@@ -18,4 +18,10 @@ std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, 
 bool fileExistsFromPackage(std::string filepath);
 void packageDirectory(const char* output, std::vector<std::string> dirs);
 
+unsigned int openFileOrPackage(std::string filepath);
+int closeFileOrPackage(unsigned int handle);
+size_t readFileOrPackage(unsigned int handle, void *ptr, size_t size, size_t nmemb);
+int seekFileOrPackage(unsigned int handle, int offset, int whence);
+size_t tellFileOrPackage(unsigned int handle);
+
 #endif

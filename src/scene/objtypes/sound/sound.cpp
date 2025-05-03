@@ -1,6 +1,11 @@
 #include "./sound.h"
 
 std::string readFileOrPackage(std::string filepath); // i dont really like directly referencing this here, but...it's ok
+unsigned int openFileOrPackage(std::string filepath);
+int closeFileOrPackage(unsigned int handle);
+size_t readFileOrPackage(unsigned int handle, void *ptr, size_t size, size_t nmemb);
+int seekFileOrPackage(unsigned int handle, int offset, int whence);
+size_t tellFileOrPackage(unsigned int handle);
 static std::unordered_map<std::string, ALuint> soundBuffers;  
 static std::unordered_map<std::string, int> soundUsages;
 
@@ -86,6 +91,7 @@ void setListenerPosition(float x, float y, float z, std::vector<float> forward, 
 }
 
 
+
 int getUsages(std::string filepath){
   if (soundUsages.find(filepath) == soundUsages.end()){
     return 0;
@@ -93,17 +99,49 @@ int getUsages(std::string filepath){
   return soundUsages.at(filepath);
 }
 
-void readVorbisFile(std::string& filepath, ALuint* _soundBuffer){
-  FILE* file = fopen(filepath.c_str(), "rb");
-  if (!file) {
-    modassert(false, "could not open the file");
-  }
+size_t my_read_func(void *ptr, size_t size, size_t nmemb, void *datasource) {
+  unsigned int* handle = static_cast<unsigned int*>(datasource);
+  modassert(handle, "handle is null");
+  modlog("vorbis", "read");
+  return readFileOrPackage(*handle, ptr, size, nmemb);
+}
 
-  std::cout << "about to open file" << std::endl;
+int my_seek_func(void *datasource, ogg_int64_t offset, int whence) {
+  unsigned int* handle = static_cast<unsigned int*>(datasource);
+  modassert(handle, "handle is null");
+  modlog("vorbis", "seek");
+  return seekFileOrPackage(*handle, offset, whence);
+}
+
+int my_close_func(void *datasource) {
+  unsigned int* handle = static_cast<unsigned int*>(datasource);
+  modassert(handle, "handle is null");
+  modlog("vorbis", "close");
+  return closeFileOrPackage(*handle);
+}
+
+long my_tell_func(void *datasource) {
+  unsigned int* handle = static_cast<unsigned int*>(datasource);
+  modassert(handle, "handle is null");
+  modlog("vorbis", "tell");
+  return tellFileOrPackage(*handle);
+}
+
+ov_callbacks vorbisFileFns = {
+    .read_func = my_read_func,
+    .seek_func = my_seek_func,
+    .close_func = my_close_func,
+    .tell_func = my_tell_func
+};
+
+void readVorbisFile(std::string& filepath, ALuint* _soundBuffer){
+  modlog("vorbis", filepath);
+  modlog("vorbis", "open");
+  unsigned int fileHandle = openFileOrPackage(filepath.c_str());
+
   OggVorbis_File vf;
-  if (ov_open(file, &vf, NULL, 0) < 0) {
-    fclose(file);
-    modassert(false, "Error reading Ogg Vorbis file.\n");
+  if (ov_open_callbacks(&fileHandle, &vf, NULL, 0, vorbisFileFns) < 0) {
+    modassert(false, "Error setting up callbacks");
   }
 
   vorbis_info* vi = ov_info(&vf, -1);
@@ -160,12 +198,7 @@ ALuint findOrLoadBuffer(std::string filepath){
   ALuint soundBuffer = 0;
   auto extension = getExtension(filepath);
   if (extension.value() == "ogg"){
-    //readVorbisFile(filepath, &soundBuffer);
-
-    // temporary code just so vorbis can work with mod...temporarily...obviously have to fix
-    // TODO CRITICAL FIX
-    auto soundFileData = readFileOrPackage("./res/sounds/hitmarker.wav");
-    soundBuffer = alutCreateBufferFromFileImage(soundFileData.c_str(), soundFileData.size());    
+    readVorbisFile(filepath, &soundBuffer);
   }else{
     auto soundFileData = readFileOrPackage(filepath);
     soundBuffer = alutCreateBufferFromFileImage(soundFileData.c_str(), soundFileData.size());    

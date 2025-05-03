@@ -14,7 +14,7 @@ struct FileMetadata {
 };
 
 struct Package {
-    FILE* handle = NULL;
+   FILE* handle = NULL;
    PackageHeader header;
    std::vector<FileMetadata> fileMetadata;
 };
@@ -324,3 +324,69 @@ std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, 
 
 }
 
+struct OpenPackageFile {
+   unsigned int fileHandle;
+   bool nativeFs;
+   FILE* nativeFile = NULL;
+   bool remove = false;
+};
+std::vector<OpenPackageFile> openFiles;
+// 
+unsigned int openFileOrPackage(std::string filepath){
+   static unsigned int fileHandle = 0;
+   FILE* file = fopen(filepath.c_str(), "rb");
+   modassert(file != NULL, "file handle is NULL");
+   unsigned int handle = fileHandle;
+   openFiles.push_back(OpenPackageFile {
+      .fileHandle = handle,
+      .nativeFs = true,
+      .nativeFile = file,
+   });
+   fileHandle++;
+   return handle;
+}
+int closeFileOrPackage(unsigned int handle){
+   for (auto &file : openFiles){
+      if (file.fileHandle == handle){
+         auto error = fclose(file.nativeFile);
+         modassert(error == 0, "error closing file");
+         file.remove = true;
+         break;
+      }
+   }
+   std::vector<OpenPackageFile> newFiles;
+   for (auto &file : openFiles){
+      if (!file.remove){
+         newFiles.push_back(file);
+      }
+   }
+   openFiles = newFiles;
+   return 0;
+}
+size_t readFileOrPackage(unsigned int handle, void *ptr, size_t size, size_t nmemb){
+   for (auto &file : openFiles){
+      if (file.fileHandle == handle){
+         return fread(ptr, size, nmemb, file.nativeFile);
+      }
+   }
+   modassert(false, "invalid file handle");
+   return 0;
+}
+int seekFileOrPackage(unsigned int handle, int offset, int whence){
+   for (auto &file : openFiles){
+      if (file.fileHandle == handle){
+         return fseek(file.nativeFile, offset, whence);
+      }
+   }
+   modassert(false, "invalid file handle");
+   return -1;
+}
+size_t tellFileOrPackage(unsigned int handle){
+   for (auto &file : openFiles){
+      if (file.fileHandle == handle){
+        return ftell(file.nativeFile);
+      }
+   }
+   modassert(false, "invalid file handle");
+   return 0;
+}
