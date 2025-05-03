@@ -63,6 +63,10 @@ void addObjectType(ObjectMapping& objectMapping, objid id, std::string name, Gam
     objectMapping.prefab[id] = createPrefabObj(attr, util);
     return;  
   }
+  if (objectType == OBJ_VIDEO){
+    objectMapping.video[id] = createVideoObj(attr, util);
+    return;
+  }
 
   modassert(false, "invalid object type");
 }
@@ -171,6 +175,16 @@ void removeObject(
       return;
     }
   }
+
+  {
+    auto gameObjectVideo = getVideo(objectMapping, id);
+    if (gameObjectVideo){
+      removeVideoObj(*gameObjectVideo, util);
+      objectMapping.video.erase(id);
+      return;
+    }
+  }
+
   modassert(false, "invalid gameobj objtype");
 }
 
@@ -375,6 +389,12 @@ int renderObject(
     return vertexCount;
   }
 
+  auto videoObj = getVideo(objectMapping, id);
+  if (videoObj){
+    modassert(false, "render video obj not implemented");
+    return 0;
+  }
+
   //modassert(false, "invalid object type found");
   return 0;
 }
@@ -439,6 +459,12 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(ObjectMapping& objectMapp
     auto gameObjectPrefab = getPrefab(objectMapping, id);
     if (gameObjectPrefab){
       return getPrefabAttribute(*gameObjectPrefab, field);
+    }
+  }
+  {
+    auto gameObjectVideo = getVideo(objectMapping, id);
+    if (gameObjectVideo){
+      return getVideoAttribute(*gameObjectVideo, field);
     }
   }
   modassert(false, "getObjectAttributePtr invalid type");
@@ -506,6 +532,12 @@ bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* fiel
     auto gameObjectPrefab = getPrefab(objectMapping, id);
     if (gameObjectPrefab){
       return setPrefabAttribute(*gameObjectPrefab, field, value, util, flags);
+    }
+  }
+  {
+    auto gameObjectVideo = getVideo(objectMapping, id);
+    if (gameObjectVideo){
+      return setVideoAttribute(*gameObjectVideo, field, value, util, flags);
     }
   }
   modassert(false, "setAttribute invalid type");
@@ -579,6 +611,12 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, O
     auto gameObjectPrefab = getPrefab(objectMapping, id);
     if (gameObjectPrefab){
       return serializePrefabObj(*gameObjectPrefab, serializeUtil);
+    }
+  }
+  {
+    auto gameObjectVideo = getVideo(objectMapping, id);
+    if (gameObjectVideo){
+      return serializeVideo(*gameObjectVideo, serializeUtil);
     }
   }
   modassert(false, "serialize objtype not implemented for this type");
@@ -721,6 +759,15 @@ GameObjectPrefab* getPrefab(ObjectMapping& mapping, objid id){
   }
   return &it->second;
 }
+
+GameObjectVideo* getVideo(ObjectMapping& mapping, objid id){
+  auto it = mapping.video.find(id);
+  if (it == mapping.video.end()) {
+      return NULL;
+  }
+  return &it->second;
+}
+
 
 GameObjectCamera* getCameraObj(ObjectMapping& mapping, objid id){
   auto it = mapping.camera.find(id);

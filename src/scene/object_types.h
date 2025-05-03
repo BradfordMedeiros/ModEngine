@@ -19,6 +19,7 @@
 #include "./objtypes/obj_octree.h"
 #include "./objtypes/obj_prefab.h"
 #include "./objtypes/obj_util.h"
+#include "./objtypes/obj_video.h"
 #include "../colorselection.h"
 #include "../shaders.h"
 
@@ -88,6 +89,11 @@ static Field prefabField {
   .objectType = OBJ_PREFAB,
 };
 
+static Field videoField {
+  .prefix = ']',
+  .objectType = OBJ_VIDEO,
+};
+
 static std::vector fields = { 
   obj, 
   camera, 
@@ -99,6 +105,7 @@ static std::vector fields = {
   navmeshField, 
   uiTextField,
   prefabField,
+  videoField,
 };
 
 ObjectType getObjectType(std::string& name);
@@ -114,6 +121,7 @@ struct ObjectMapping {
   std::unordered_map<objid, GameObjectNavmesh> navmesh;
   std::unordered_map<objid, GameObjectUIText> text;
   std::unordered_map<objid, GameObjectPrefab> prefab;
+  std::unordered_map<objid, GameObjectVideo> video;
 };
 
 ObjectMapping getObjectMapping();
@@ -192,6 +200,7 @@ GameObjectCamera* getCameraObj(ObjectMapping& mapping, objid id);
 GameObjectUIText* getUIText(ObjectMapping& mapping, objid id);
 GameObjectSound* getSoundObj(ObjectMapping& mapping, objid id);
 GameObjectEmitter* getEmitter(ObjectMapping& mapping, objid id);
+GameObjectVideo* getVideo(ObjectMapping& mapping, objid id);
 
 std::vector<objid> getAllLightsIndexs(ObjectMapping& mapping);
 std::vector<objid> getAllPortalIndexs(ObjectMapping& mapping);

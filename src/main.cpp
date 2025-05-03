@@ -1720,7 +1720,7 @@ int main(int argc, char* argv[]){
     runFeatureScene(featureTest);
   }
 
-  std::string videoPath = "../gameresources/video/voyage_to_the_moon.ogv";
+  std::string videoPath = "../gameresources/video/bigbuck.webm";
   auto video = loadVideo(videoPath.c_str());
 
   Texture videoTexture = loadTextureDataWorld(
