@@ -390,8 +390,13 @@ int renderObject(
 
   auto videoObj = getVideo(objectMapping, id);
   if (videoObj){
-    //modassert(false, "render video obj not implemented");
-    return 0;
+    MeshUniforms meshUniforms {
+      .model = finalModelMatrix,
+      .customTextureId = videoObj -> texture.textureId,
+      .id = id,
+    };
+    drawMesh(*defaultMeshes.portalMesh, shaderProgram, false, meshUniforms);
+    return defaultMeshes.portalMesh -> numTriangles;
   }
 
   //modassert(false, "invalid object type found");
