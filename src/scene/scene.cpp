@@ -631,6 +631,7 @@ extern std::vector<AutoSerialize> navmeshAutoserializer;
 extern std::vector<AutoSerialize> textAutoserializer;
 extern std::vector<AutoSerialize> prefabAutoserializer;
 extern std::vector<AutoSerialize> gameobjSerializer;
+extern std::vector<AutoSerialize> videoAutoserializer;
 
 void assertFieldTypesUnique(){
   std::unordered_map<std::string, AttributeValueType> fieldToType = {};
@@ -646,6 +647,7 @@ void assertFieldTypesUnique(){
     &textAutoserializer,
     &prefabAutoserializer,
     &gameobjSerializer,
+    &videoAutoserializer,
   };
   for (auto serializer : allSerializers){
     auto allFields = serializerFieldNames(*serializer);
@@ -683,6 +685,8 @@ std::set<std::string> getObjautoserializerFields(std::string& name){
     return serializerFieldNames(textAutoserializer);
   }else if (type == OBJ_PREFAB){
     return serializerFieldNames(prefabAutoserializer);
+  }else if (type == OBJ_VIDEO){
+    return serializerFieldNames(videoAutoserializer);
   }
   modassert(false, "autoserializer not found");
   return {};
@@ -923,6 +927,9 @@ void addObjectToWorld(
       .pathForModLayer = world.interface.modlayerPath,
       .loadScene = loadScene,
       .getCurrentTime = world.interface.getCurrentTime,
+      .loadTextureData = [&world, id](std::string texturepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels) -> Texture {
+        return loadTextureDataWorld(world, texturepath, data, textureWidth, textureHeight, numChannels, id);
+      },
     };
     addObjectType(world.objectMapping, id, name, attr, util);
 }
@@ -1594,6 +1601,10 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       updateObjectPositions(world.objectMapping, id, absolutePosition, viewTransform);      
     }
   }
+  for (auto &[id, videoObj] : world.objectMapping.video){
+    onVideoObjFrame(videoObj, timeElapsed);
+  }
+
 
   for (auto id : world.entitiesToUpdate){
     GameObject& gameobj = getGameObject(world.sandbox, id); // i could defer getting this

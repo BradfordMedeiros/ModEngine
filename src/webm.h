@@ -30,8 +30,8 @@ struct StreamIndexs {
 };
 
 struct StreamCodecs {
-  AVCodecContext *videoCodec;
-  AVCodecContext *audioCodec;
+  AVCodecContext* videoCodec;
+  AVCodecContext* audioCodec;
 };
 
 struct VideoContent {

@@ -37,6 +37,7 @@ struct ObjectTypeUtil {
   std::function<std::string(std::string)> pathForModLayer;
   std::function<objid(std::string, std::vector<Token>&)> loadScene;
   std::function<float()> getCurrentTime;
+  std::function<Texture(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> loadTextureData;
 };
 
 struct ObjectSerializeUtil {

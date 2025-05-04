@@ -9,7 +9,6 @@ ObjectMapping getObjectMapping() {
 	return objectMapping;
 }
 
-// enum ObjectType { OBJ_MESH, OBJ_CAMERA, OBJ_PORTAL, OBJ_SOUND, OBJ_LIGHT, OBJ_OCTREE, OBJ_EMITTER, OBJ_NAVMESH, OBJ_TEXT, OBJ_PREFAB };
 ObjectType getObjectType(std::string& name){
   for (Field field : fields){
     if (name.at(0) == field.prefix){
@@ -391,7 +390,7 @@ int renderObject(
 
   auto videoObj = getVideo(objectMapping, id);
   if (videoObj){
-    modassert(false, "render video obj not implemented");
+    //modassert(false, "render video obj not implemented");
     return 0;
   }
 
@@ -854,6 +853,9 @@ bool objExists(ObjectMapping& mapping, objid id){
     return true;
   }
   if (mapping.prefab.find(id) != mapping.prefab.end()){
+    return true;
+  }
+  if (mapping.video.find(id) != mapping.video.end()){
     return true;
   }
   return false;

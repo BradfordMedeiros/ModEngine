@@ -270,6 +270,20 @@ if (NOT NO_INCLUDE_VIDEO)
   message("MODBUILD - Including WEBM AND VPX")
   target_link_libraries(${PROJECT_NAME} "webm")
   target_link_libraries(${PROJECT_NAME} "vpx")
+
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(AVCODEC     REQUIRED libavcodec)
+  pkg_check_modules(AVFORMAT    REQUIRED libavformat)
+  pkg_check_modules(AVUTIL      REQUIRED libavutil)
+  pkg_check_modules(SWSCALE     REQUIRED  libswscale)
+  pkg_check_modules(SWRESAMPLE  REQUIRED libswresample)
+  
+  target_link_libraries(${PROJECT_NAME} ${AVFORMAT_LIBRARIES})
+  target_link_libraries(${PROJECT_NAME} ${AVCODEC_LIBRARIES})
+  target_link_libraries(${PROJECT_NAME} ${AVUTIL_LIBRARIES})
+  target_link_libraries(${PROJECT_NAME} ${SWSCALE_LIBRARIES})
+  target_link_libraries(${PROJECT_NAME} "swresample")      # todo make standard
+
 else()
   message("MODBUILD - Not Including WEBM AND VPX")
 endif()
