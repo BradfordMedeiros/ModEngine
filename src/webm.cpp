@@ -205,9 +205,9 @@ VideoContent loadVideo(const char* videopath){
   auto format = AV_PIX_FMT_RGBA;
 
   // These determine the output scaling of AVFrame2 (see usage in readFrame)
-  avFrame2 -> width = 200;
-  avFrame2 -> height = 100;
-  avFrame2 -> linesize[0] = 100;
+  avFrame2 -> width = 800;
+  avFrame2 -> height = 400;
+  avFrame2 -> linesize[0] = 400;
 
   av_image_alloc(avFrame2 -> data, avFrame2 -> linesize, avFrame2 -> width, avFrame2 -> height,  format, 1); 
 
