@@ -15,7 +15,19 @@ std::vector<AutoSerialize> videoAutoserializer {
     .structOffset = offsetof(GameObjectVideo, texturePath),
     .field = "texturepath",
     .defaultValue = "./res/texturevideotexture",
-  }
+  },
+  AutoSerializeString {
+    .structOffset = offsetof(GameObjectVideo, video),
+    .field = "video",
+    .defaultValue = "../gameresources/video/bigbuck.webm",
+  },
+  AutoSerializeBool {
+    .structOffset = offsetof(GameObjectVideo, playing),
+    .field = "playing",
+    .onString = "enabled",
+    .offString = "disabled",
+    .defaultValue = true,
+  },
 };
 
 GameObjectVideo createVideoObj(GameobjAttributes& attr, ObjectTypeUtil& util){
@@ -23,8 +35,7 @@ GameObjectVideo createVideoObj(GameobjAttributes& attr, ObjectTypeUtil& util){
   createAutoSerializeWithTextureLoading((char*)&videoObj, videoAutoserializer, attr, util);
 	modassert(!textureLoaded(videoObj.texturePath), "texture already loaded for video");
 
-  std::string videoPath = "../gameresources/video/bigbuck.webm";
-	auto videoContent = loadVideo(videoPath.c_str());
+	auto videoContent = loadVideo(videoObj.video.c_str());
 
   Texture texture = util.loadTextureData(
     videoObj.texturePath,
@@ -37,6 +48,8 @@ GameObjectVideo createVideoObj(GameobjAttributes& attr, ObjectTypeUtil& util){
 	videoObj.texture = texture;
 	videoObj.videoContent = videoContent;
 	videoObj.sound = createBufferedAudio();
+
+	videoObj.playing = true;
 
 	return videoObj;
 }
@@ -61,10 +74,20 @@ bool setVideoAttribute(GameObjectVideo& obj, const char* field, AttributeValue v
 }
 
 void onVideoObjFrame(GameObjectVideo& videoObj, float currentTime){
+	std::cout << "onVideoObjFrame length: " << getVideoLength(videoObj) << std::endl;
   VideoContent& video = videoObj.videoContent;
+  if (!videoObj.playing){
+  	return;
+  }
   if (video.videoTimestamp < currentTime){
       // perhaps i should catch up if i'm running behind quicker
-      int stream = nextFrame(video);
+  		bool videoEnd = false;
+      int stream = nextFrame(video, &videoEnd);
+      if (videoEnd){
+      	videoObj.playing = false;
+      	modlog("video", "stopped playing");
+      	return;
+      }
       if (stream == video.streamIndexs.video){
         updateTextureData( 
           videoObj.texture,
@@ -80,8 +103,21 @@ void onVideoObjFrame(GameObjectVideo& videoObj, float currentTime){
           //// @TODO chandle more formats to eliminate assertion below 
           //// | int outputSamples = swr_convert(p_swrContext,  p_destBuffer, p_destLinesize,  (const uint8_t**)p_frame->extended_data, p_frame->nb_samples);
           std::cout << "fmt name: " << av_get_sample_fmt_name(audioCodec -> sample_fmt) << std::endl;;
-         // modassert(audioCodec -> sample_fmt == AV_SAMPLE_FMT_S16, "unexpected audio code format");
+         	// modassert(audioCodec -> sample_fmt == AV_SAMPLE_FMT_S16, "unexpected audio code format");
           playBufferedAudio(videoObj.sound, (uint8_t*)video.avFrame -> data[0], bufferSize, audioCodec -> sample_rate);
     }
   }
+}
+
+void seekVideo(GameObjectVideo& obj, float time){
+	seekVideo(obj.videoContent, time);
+}
+
+float getVideoLength(GameObjectVideo& obj){
+	if (obj.videoContent.formatContext -> duration == AV_NOPTS_VALUE){
+		return 0.f;
+	}
+  int64_t duration_microseconds = obj.videoContent.formatContext -> duration;
+  double duration_seconds = static_cast<double>(duration_microseconds) / AV_TIME_BASE;
+	return duration_seconds;
 }

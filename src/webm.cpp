@@ -1,132 +1,5 @@
 #include "./webm.h"
 
-// https://github.com/BradfordMedeiros/ModEngine/blob/5a5b6670135f8d9c489ae6851e663c76b5c3edcb/src/scene/types/video.cpp
-
-
-static constexpr int kWebmReaderError = 1;
-static constexpr int kWebmReaderEof = 2;
-class WebmReader : public webm::Reader
-{
-public:
-    WebmReader(std::string filepath){
-    	this -> m_position = 0;
-    	this -> filepath = filepath;
-        //SDL_SeekIO(m_io, 0, SDL_IO_SEEK_SET);
-		this -> file = fopen(filepath.c_str(), "rb");
-		modassert(file != NULL, "did not open file");
-    }
-    ~WebmReader(){
-    	std::cout << "WebmReader out of scope" << std::endl;
-    	fclose(this -> file);
-    }
-
-    void Seek(std::uint64_t position)
-    {
-       std::cout << "WebmReader:Seek" << std::endl;
-       fseek(this -> file, position, SEEK_SET);
-       m_position = position;
-    }
-
-    webm::Status Skip(std::uint64_t num_to_skip, std::uint64_t* num_actually_skipped)
-    {
-    	std::cout << "WebmReader:Skip" << std::endl;
-        auto value = fseek(this -> file, num_to_skip, SEEK_CUR);
-        modassert(value == 0, "seek returned non zero value");
-        m_position += num_to_skip;
-        *num_actually_skipped = num_to_skip;
-        return webm::Status(webm::Status::kOkCompleted);
-    }
-
-    webm::Status Read(std::size_t num_to_read, std::uint8_t* buffer, std::uint64_t* num_actually_read)
-    {
-    	std::cout << "WebmReader:Read" << std::endl;
-
-    	auto bytesRead = fread(buffer, sizeof(std::uint8_t), num_to_read, this -> file);
-    	*num_actually_read = bytesRead;
-        this -> m_position += bytesRead;
-        if (bytesRead > 0 && bytesRead == num_to_read){
-            return webm::Status(webm::Status::kOkCompleted);
-        }else if (bytesRead > 0 && bytesRead < num_to_read){
-            return webm::Status(webm::Status::kOkPartial);
-        }else if (bytesRead == 0){
-           return webm::Status(kWebmReaderEof);
-        }
-       	modassert(false, "didnt code this case");
-        return webm::Status(webm::Status::kOkPartial);
-    }
-
-    std::uint64_t Position() const
-    {
-       std::cout << "WebmReader:Position" << std::endl;
-       return m_position;
-    }
-
-   // SDL_IOStream *m_io;
-   std::uint64_t m_position;
-   std::string filepath;
-   FILE* file;
-};
-
-class WebmCallback : public webm::Callback
-{
-public:
-    WebmCallback(){}
-
-    webm::Status OnInfo(const webm::ElementMetadata &metadata, const webm::Info &info) override {
-       std::cout << "WebmCallback:OnInfo" << std::endl;
-
-       auto timescale = info.timecode_scale.value();
-       auto duration = info.duration.value();
-       auto title = info.title.value();
-
-       std::cout << "WebmCallback::OnInfo timescale is: " << timescale << std::endl;
-       std::cout << "WebmCallback::OnInfo duration: " << duration << std::endl;
-       std::cout << "WebmCallback::OnInfo title: " << title << std::endl;
-
-       return webm::Status(webm::Status::kOkCompleted);
-    }
-
-    webm::Status OnClusterBegin(const webm::ElementMetadata &metadata,
-                                const webm::Cluster &cluster, webm::Action *action) override {
-      std::cout << "WebmCallback:OnClusterBegin" << std::endl;
-      return webm::Status(webm::Status::kOkCompleted);
-    }
-
-    webm::Status OnSimpleBlockBegin(const webm::ElementMetadata &metadata,
-                                    const webm::SimpleBlock &simple_block,
-                                    webm::Action *action) override {
-      std::cout << "WebmCallback:OnSimpleBlockBegin" << std::endl;
-      return webm::Status(webm::Status::kOkCompleted);
-    }
-
-    webm::Status OnSimpleBlockEnd(const webm::ElementMetadata &metadata,
-                                  const webm::SimpleBlock &simple_block) override {
-      std::cout << "WebmCallback:OnSimpleBlockEnd" << std::endl;
-      return webm::Status(webm::Status::kOkCompleted);
-    }
-
-    webm::Status OnBlockBegin(const webm::ElementMetadata &metadata,
-                              const webm::Block &block, webm::Action *action) override {
-      std::cout << "WebmCallback:OnBlockBegin" << std::endl;
-      return webm::Status(webm::Status::kOkCompleted);
-    }
-
-    webm::Status OnFrame(const webm::FrameMetadata &metadata, webm::Reader *reader,
-                         std::uint64_t *bytes_remaining) override {
-      std::cout << "WebmCallback:OnFrame" << std::endl;
-      return Skip(reader, bytes_remaining);
-    }
-
-    webm::Status OnTrackEntry(const webm::ElementMetadata &metadata,
-                              const webm::TrackEntry &track_entry) override {
-      std::cout << "WebmCallback:OnTrackEntry" << std::endl;
-      return webm::Status(webm::Status::kOkCompleted);
-    }
-
-private:
-};
-
-
 StreamIndexs getStreamIndexs(AVFormatContext *formatContext) {
   auto numStreams = formatContext -> nb_streams;
   int videoStream = -1;
@@ -206,8 +79,13 @@ void printAudioFrameInfo(AVFrame* avFrame,  AVCodecContext* audioCodec){
 
 }
 
-int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext* codecContext, AVCodecContext* audioCodec, AVFrame* avFrame, AVFrame* avFrame2, StreamIndexs& streams, AVPixelFormat destFormat, float* videoTimestamp){
+int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext* codecContext, AVCodecContext* audioCodec, AVFrame* avFrame, AVFrame* avFrame2, StreamIndexs& streams, AVPixelFormat destFormat, float* videoTimestamp, bool* videoEnd){
+  *videoEnd = false;
   auto readValue = av_read_frame(formatContext, avPacket);
+  if (readValue == AVERROR_EOF){
+    *videoEnd = true;
+    return -1;
+  }
   auto streamIndex = avPacket -> stream_index;
   if (readValue == 0 && avPacket -> stream_index == streams.video){
     auto sendValue = avcodec_send_packet(codecContext, avPacket);
@@ -225,8 +103,9 @@ int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext
     if (receiveValue != 0){
       if (receiveValue == AVERROR_EOF){ // not actually an error
         std::cout << "ERROR: VIDEO: LAST FRAME" << std::endl;
+        *videoEnd = true;
+        return -1;
       }
-      assert(false);
     }
 
     auto swsContext = sws_getContext(avFrame -> width, avFrame -> height, codecContext -> pix_fmt, avFrame2 -> width, avFrame2 -> height, destFormat,  SWS_FAST_BILINEAR, NULL, NULL, NULL);
@@ -239,9 +118,8 @@ int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext
     //printFrameInfo(avFrame);
 
     auto videoStream = formatContext -> streams[streams.video];
-    auto pts = avFrame -> pts;
     auto timebase = av_q2d(videoStream -> time_base);
-    auto currentFrameTime = pts * timebase;  // Each pts you advance 1 timebase
+    auto currentFrameTime = avFrame -> pts * timebase;  // Each pts you advance 1 timebase
     *videoTimestamp = currentFrameTime;
   }else if (avPacket -> stream_index == streams.audio){
     // move this to the top video decoding
@@ -262,14 +140,15 @@ int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext
     if (receiveValue != 0){
       if (receiveValue == AVERROR_EOF){ // not actually an error
         std::cout << "ERROR: AUDIO: LAST FRAME" << std::endl;
+        *videoEnd = true;
+        return -1;
       }
       //assert(false);
     }
 
     auto audioStream = formatContext -> streams[streams.audio];
-    auto pts = avFrame -> pts;
     auto timebase = av_q2d(audioStream -> time_base);
-    auto currentFrameTime = pts * timebase;  // Each pts you advance 1 timebase
+    auto currentFrameTime = avFrame -> pts * timebase;  // Each pts you advance 1 timebase
     *videoTimestamp = currentFrameTime;
     //printAudioFrameInfo(avFrame, audioCodec);
   }else{
@@ -342,22 +221,29 @@ VideoContent loadVideo(const char* videopath){
   std::cout << "video: " << videopath << " is: " << videoContent.formatContext -> duration << std::endl;
   std::cout << "number video streams: " << numStreams << std::endl;
   std::cout << "video index: " << videoContent.streamIndexs.video << ", audio index:" << videoContent.streamIndexs.audio << std::endl;
-  nextFrame(videoContent);
+  bool endOfVideo = false;
+  nextFrame(videoContent, &endOfVideo);
   return videoContent;
 }
 
-int nextFrame(VideoContent& content){
-  return readFrame(content.formatContext, content.avPacket, content.codecs.videoCodec, content.codecs.audioCodec, content.avFrame, content.avFrame2, content.streamIndexs, content.format, &content.videoTimestamp);
+int nextFrame(VideoContent& content, bool* videoEnd){
+  return readFrame(content.formatContext, content.avPacket, content.codecs.videoCodec, content.codecs.audioCodec, content.avFrame, content.avFrame2, content.streamIndexs, content.format, &content.videoTimestamp, videoEnd);
 }
 
-void seekVideo(VideoContent& content){
-  assert(false);
-}
-void pauseVideo(VideoContent& content){
-  assert(false);
-}
-void resumeVideo(VideoContent& content){
-  assert(false);
+void seekVideo(VideoContent& content, float time){
+  auto streams = getStreamIndexs(content.formatContext);
+  int64_t target_global_pts = time * AV_TIME_BASE; // Seek to 30 seconds, in microseconds
+  int64_t video_stream_pts = av_rescale_q(target_global_pts, AV_TIME_BASE_Q, content.codecs.videoCodec -> time_base);
+  int64_t audio_stream_pts = av_rescale_q(target_global_pts, AV_TIME_BASE_Q, content.codecs.audioCodec -> time_base);
+  av_seek_frame(content.formatContext, streams.video, video_stream_pts, AVSEEK_FLAG_BACKWARD);
+  av_seek_frame(content.formatContext, streams.audio, audio_stream_pts, AVSEEK_FLAG_BACKWARD);
+  // Says to flush buffers, but I can't tell the difference, and this crashes
+  //for (int i = 0; i < content.formatContext -> nb_streams; i++) {
+  //  AVStream*stream = content.formatContext -> streams[i];
+  //  if (stream -> codec) {
+  //    avcodec_flush_buffers(stream -> codec);
+  //  }
+  //}  
 }
 
 void freeVideoContent(VideoContent& content){

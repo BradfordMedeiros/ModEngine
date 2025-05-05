@@ -11,7 +11,9 @@ struct GameObjectVideo {
   BufferedAudio sound;
   Texture texture;
   bool drawMesh;
+  bool playing;
   std::string texturePath;
+  std::string video;
 };
 
 GameObjectVideo createVideoObj(GameobjAttributes& attr, ObjectTypeUtil& util);
@@ -21,5 +23,7 @@ std::vector<std::pair<std::string, std::string>> serializeVideo(GameObjectVideo&
 std::optional<AttributeValuePtr> getVideoAttribute(GameObjectVideo& obj, const char* field);
 bool setVideoAttribute(GameObjectVideo& obj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&);
 void onVideoObjFrame(GameObjectVideo& obj, float currentTime);
+void seekVideo(GameObjectVideo& obj, float time);
+float getVideoLength(GameObjectVideo& obj);
 
 #endif
