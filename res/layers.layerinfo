@@ -41,5 +41,12 @@ basicui:!enableLighting:false
 basicui:?enableLighting:bool
 basicui:selection:-2
 
+basicui2:zindex:0
+basicui2:view:false
+basicui2:ortho:true
+basicui2:!enableLighting:false
+basicui2:?enableLighting:bool
+basicui2:selection:-2
+
 
 noselect:selection:-1
