@@ -84,7 +84,8 @@ void onVideoObjFrame(GameObjectVideo& videoObj, float currentTime){
   		bool videoEnd = false;
       int stream = nextFrame(video, &videoEnd);
       if (videoEnd){
-      	videoObj.playing = false;
+      	//videoObj.playing = false;
+        seekVideo(videoObj, 0.f);
       	modlog("video", "stopped playing");
       	return;
       }

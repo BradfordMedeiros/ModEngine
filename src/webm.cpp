@@ -98,7 +98,15 @@ int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext
     }else if (sendValue ==  AVERROR(ENOMEM)){
       std::cout << "send packet: averror(ENOMEM)" << std::endl;
     }
-    assert(sendValue == 0);
+
+    if (sendValue != 0){
+      char errbuf[AV_ERROR_MAX_STRING_SIZE] = {0};
+      av_strerror(sendValue, errbuf, sizeof(errbuf));
+      std::string errorStr = std::string(errbuf);
+      std::cout << "send value: " << errorStr << std::endl;
+      //modassert(false, "bad send value");
+      return -1;
+    }
     auto receiveValue = avcodec_receive_frame(codecContext, avFrame);
     if (receiveValue != 0){
       if (receiveValue == AVERROR_EOF){ // not actually an error
@@ -231,12 +239,19 @@ int nextFrame(VideoContent& content, bool* videoEnd){
 }
 
 void seekVideo(VideoContent& content, float time){
+  modlog("seeking video to: ", std::to_string(time));
   auto streams = getStreamIndexs(content.formatContext);
   int64_t target_global_pts = time * AV_TIME_BASE; // Seek to 30 seconds, in microseconds
-  int64_t video_stream_pts = av_rescale_q(target_global_pts, AV_TIME_BASE_Q, content.codecs.videoCodec -> time_base);
-  int64_t audio_stream_pts = av_rescale_q(target_global_pts, AV_TIME_BASE_Q, content.codecs.audioCodec -> time_base);
-  av_seek_frame(content.formatContext, streams.video, video_stream_pts, AVSEEK_FLAG_BACKWARD);
-  av_seek_frame(content.formatContext, streams.audio, audio_stream_pts, AVSEEK_FLAG_BACKWARD);
+
+
+  std::cout << "seeking video, time base: " << content.formatContext -> streams[streams.video] -> time_base.num << ", den = " << content.formatContext -> streams[streams.video] -> time_base.den << std::endl;
+  int64_t video_stream_pts = av_rescale_q(target_global_pts, AV_TIME_BASE_Q, content.formatContext -> streams[streams.video] -> time_base);
+  int64_t audio_stream_pts = av_rescale_q(target_global_pts, AV_TIME_BASE_Q, content.formatContext -> streams[streams.audio] -> time_base);
+
+
+  modlog("seeking video to pts: ", std::to_string(video_stream_pts));
+  av_seek_frame(content.formatContext, streams.video, video_stream_pts, AVSEEK_FLAG_ANY);
+  av_seek_frame(content.formatContext, streams.audio, audio_stream_pts, AVSEEK_FLAG_ANY);
   // Says to flush buffers, but I can't tell the difference, and this crashes
   //for (int i = 0; i < content.formatContext -> nb_streams; i++) {
   //  AVStream*stream = content.formatContext -> streams[i];
@@ -244,6 +259,14 @@ void seekVideo(VideoContent& content, float time){
   //    avcodec_flush_buffers(stream -> codec);
   //  }
   //}  
+
+  avcodec_flush_buffers(content.codecs.videoCodec);
+  avcodec_flush_buffers(content.codecs.audioCodec);
+ // av_packet_unref(content.avPacket);
+ // av_frame_unref(content.avFrame);
+ // av_frame_unref(content.avFrame2);
+
+  content.videoTimestamp = -1;
 }
 
 void freeVideoContent(VideoContent& content){
