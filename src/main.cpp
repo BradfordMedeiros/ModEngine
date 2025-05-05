@@ -964,6 +964,11 @@ SelectionResult readSelectionFromBuffer(bool readSelectionShader, glm::vec2 adju
   return selectionResult;
 }
 
+
+bool textureLoaded(std::string& texturepath){
+  return textureLoaded(world, texturepath);
+}
+
 void onGLFWEerror(int error, const char* description){
   std::cerr << "Error: " << description << std::endl;
 }

@@ -1,35 +1,44 @@
 #include "./obj_video.h"
 
 void updateTextureData(Texture& texture, unsigned char* data, int textureWidth, int textureHeight);
+bool textureLoaded(std::string& texturepath);
 
 std::vector<AutoSerialize> videoAutoserializer {
-  //AutoSerializeBool {
-  //  .structOffset = offsetof(GameObjectCamera, enableDof),
-  //  .field = "dof",
-  //  .onString = "enabled",
-  //  .offString = "disabled",
-  //  .defaultValue = false,
-  //},
-
+  AutoSerializeBool {
+    .structOffset = offsetof(GameObjectVideo, drawMesh),
+    .field = "show",
+    .onString = "enabled",
+    .offString = "disabled",
+    .defaultValue = false,
+  },
+  AutoSerializeString {
+    .structOffset = offsetof(GameObjectVideo, texturePath),
+    .field = "texturepath",
+    .defaultValue = "./res/texturevideotexture",
+  }
 };
 
 GameObjectVideo createVideoObj(GameobjAttributes& attr, ObjectTypeUtil& util){
+	GameObjectVideo videoObj {};
+  createAutoSerializeWithTextureLoading((char*)&videoObj, videoAutoserializer, attr, util);
+	modassert(!textureLoaded(videoObj.texturePath), "texture already loaded for video");
+
   std::string videoPath = "../gameresources/video/bigbuck.webm";
 	auto videoContent = loadVideo(videoPath.c_str());
 
   Texture texture = util.loadTextureData(
-    "./res/texturevideotexture",
+    videoObj.texturePath,
     videoContent.avFrame2 -> data[0], 
     videoContent.avFrame2 -> width, 
     videoContent.avFrame2 -> height, 
     4
   );
 
-	return GameObjectVideo{
-		.videoContent = videoContent,
-		.sound = createBufferedAudio(),
-		.texture = texture,
-	};
+	videoObj.texture = texture;
+	videoObj.videoContent = videoContent;
+	videoObj.sound = createBufferedAudio();
+
+	return videoObj;
 }
 
 void removeVideoObj(GameObjectVideo& videoObj, ObjectRemoveUtil& util){
@@ -51,7 +60,7 @@ bool setVideoAttribute(GameObjectVideo& obj, const char* field, AttributeValue v
   return autoserializerSetAttrWithTextureLoading((char*)&obj, videoAutoserializer, field, value, util);
 }
 
-void onVideoObjFrame(GameObjectVideo& videoObj, float currentTime){ // getTotalTimeGame()
+void onVideoObjFrame(GameObjectVideo& videoObj, float currentTime){
   VideoContent& video = videoObj.videoContent;
   if (video.videoTimestamp < currentTime){
       // perhaps i should catch up if i'm running behind quicker

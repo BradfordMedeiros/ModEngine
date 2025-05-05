@@ -389,7 +389,7 @@ int renderObject(
   }
 
   auto videoObj = getVideo(objectMapping, id);
-  if (videoObj){
+  if (videoObj && videoObj -> drawMesh){
     MeshUniforms meshUniforms {
       .model = finalModelMatrix,
       .customTextureId = videoObj -> texture.textureId,

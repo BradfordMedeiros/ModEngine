@@ -10,6 +10,8 @@ struct GameObjectVideo {
   VideoContent videoContent;
   BufferedAudio sound;
   Texture texture;
+  bool drawMesh;
+  std::string texturePath;
 };
 
 GameObjectVideo createVideoObj(GameobjAttributes& attr, ObjectTypeUtil& util);

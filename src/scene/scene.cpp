@@ -317,6 +317,10 @@ Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
   return texture;
 }
 
+bool textureLoaded(World& world, std::string& texturepath){
+  return world.textures.find(texturepath) != world.textures.end();
+}
+
 Texture loadTextureAtlasWorld(World& world, std::string texturepath, std::vector<std::string> atlasTextures, std::optional<std::string> cacheFile, objid ownerId){
   if (world.textures.find(texturepath) != world.textures.end()){
     world.textures.at(texturepath).owners.insert(ownerId);
