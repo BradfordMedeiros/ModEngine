@@ -116,10 +116,12 @@ int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext
       }
     }
 
+    // don't allocate every frame
     auto swsContext = sws_getContext(avFrame -> width, avFrame -> height, codecContext -> pix_fmt, avFrame2 -> width, avFrame2 -> height, destFormat,  SWS_FAST_BILINEAR, NULL, NULL, NULL);
     assert(swsContext != NULL);
     sws_scale(swsContext, avFrame -> data, avFrame -> linesize, 0, avFrame -> height, avFrame2-> data, avFrame2 -> linesize);
-
+    sws_freeContext(swsContext);
+    
     assert(avFrame2 -> width != 0);
     assert(avFrame2 -> height != 0);
     assert(avFrame2 -> linesize[0] != 0);
