@@ -22,7 +22,6 @@
 #include "./world_tasks.h"
 #include "./shaderstate.h"
 #include "./package.h"
-#include "./webm.h"
 
 #ifdef ADDITIONAL_SRC_HEADER
   #include STR(ADDITIONAL_SRC_HEADER)

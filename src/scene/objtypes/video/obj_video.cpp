@@ -73,41 +73,69 @@ bool setVideoAttribute(GameObjectVideo& obj, const char* field, AttributeValue v
   return autoserializerSetAttrWithTextureLoading((char*)&obj, videoAutoserializer, field, value, util);
 }
 
-void onVideoObjFrame(GameObjectVideo& videoObj, float currentTime){
+void onVideoObjFrame(GameObjectVideo& videoObj, float currentTime, Transformation& viewTransform){
+  setSoundPosition(videoObj.sound.source, viewTransform.position.x, viewTransform.position.y, viewTransform.position.z);
+
 	std::cout << "onVideoObjFrame length: " << getVideoLength(videoObj) << std::endl;
   VideoContent& video = videoObj.videoContent;
   if (!videoObj.playing){
   	return;
   }
-  if (video.videoTimestamp < currentTime){
-      // perhaps i should catch up if i'm running behind quicker
-  		bool videoEnd = false;
-      int stream = nextFrame(video, &videoEnd);
-      if (videoEnd){
-      	//videoObj.playing = false;
-        seekVideo(videoObj, 0.f);
-      	modlog("video", "stopped playing");
-      	return;
-      }
-      if (stream == video.streamIndexs.video){
-        updateTextureData( 
-          videoObj.texture,
-          video.avFrame2 -> data[0], 
-          video.avFrame2 -> width, 
-          video.avFrame2 -> height
-        );
-      }else if (stream == video.streamIndexs.audio){
+
+  std::cout << "video timestamp: " << video.videoTimestamp << ", current time = " << currentTime << std::endl;
+
+  if (!videoObj.startTime.has_value()){
+    videoObj.startTime = currentTime;
+  }
+
+  bool shouldUpdateTexture = false;
+  int numFramesDecoded = 0;
+  while(true){ // probably should have a max iterations here 
+    numFramesDecoded++;
+    float timeIntoVideo = currentTime - videoObj.startTime.value();
+    if (video.videoTimestamp <= timeIntoVideo){
+        float timeDifference = timeIntoVideo - video.videoTimestamp;
+        modlog("video lag", std::to_string(timeDifference));
+        modlog("video desired", std::to_string(timeIntoVideo));
+        modlog("video actual", std::to_string(video.videoTimestamp));
+        // perhaps i should catch up if i'm running behind quicker
+        bool videoEnd = false;
+        int stream = nextFrame(video, &videoEnd);
+        if (videoEnd){
+          //videoObj.playing = false;
+          float time = 0.f;
+          seekVideo(videoObj, time);
+          videoObj.startTime = currentTime - time;
+          modlog("video", "stopped playing");
+          return;
+        }
+
+        if (stream == video.streamIndexs.video){
+          shouldUpdateTexture = true;
+        }else if (stream == video.streamIndexs.audio){
           auto audioCodec = video.codecs.audioCodec;
           auto bufferSize = av_samples_get_buffer_size(NULL, audioCodec -> channels, video.avFrame -> nb_samples, audioCodec -> sample_fmt, 0);
           auto numChannels = audioCodec -> channels;
           //// @TODO process all channels
           //// @TODO chandle more formats to eliminate assertion below 
           //// | int outputSamples = swr_convert(p_swrContext,  p_destBuffer, p_destLinesize,  (const uint8_t**)p_frame->extended_data, p_frame->nb_samples);
-          std::cout << "fmt name: " << av_get_sample_fmt_name(audioCodec -> sample_fmt) << std::endl;;
-         	// modassert(audioCodec -> sample_fmt == AV_SAMPLE_FMT_S16, "unexpected audio code format");
-          playBufferedAudio(videoObj.sound, (uint8_t*)video.avFrame -> data[0], bufferSize, audioCodec -> sample_rate);
+          if (video.avFrame -> nb_samples == 0){
+            continue;
+          }
+          std::cout << "avFrame buffered audio: " << std::to_string(audioCodec -> sample_rate) << ", nb_samples = " << video.avFrame -> nb_samples << ", fmt = " << av_get_sample_fmt_name(audioCodec -> sample_fmt) << ", channels = " << numChannels <<  std::endl;
+          //if (audioCodec -> sample_fmt != AV_SAMPLE_FMT_S16){
+          //  const char* sample_fmt_str = av_get_sample_fmt_name(audioCodec -> sample_fmt);
+          //  modassert(false, std::string("unexpected audio code format: ") + std::string(sample_fmt_str));
+          //}
+          playBufferedAudio(videoObj.sound, (void*)video.avFrame -> data[0], bufferSize, audioCodec -> sample_rate);
+      }
+    }else{
+      break;
     }
   }
+
+  modlog("video frames", std::to_string(numFramesDecoded));
+  updateTextureData(videoObj.texture, video.avFrame2 -> data[0], video.avFrame2 -> width, video.avFrame2 -> height);
 }
 
 void seekVideo(GameObjectVideo& obj, float time){

@@ -1606,7 +1606,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     }
   }
   for (auto &[id, videoObj] : world.objectMapping.video){
-    onVideoObjFrame(videoObj, timeElapsed);
+    onVideoObjFrame(videoObj, timeElapsed, viewTransform);
   }
 
 

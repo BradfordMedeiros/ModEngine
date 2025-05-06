@@ -19,7 +19,7 @@
 #include "./objtypes/obj_octree.h"
 #include "./objtypes/obj_prefab.h"
 #include "./objtypes/obj_util.h"
-#include "./objtypes/obj_video.h"
+#include "./objtypes/video/obj_video.h"
 #include "../colorselection.h"
 #include "../shaders.h"
 

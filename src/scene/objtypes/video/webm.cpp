@@ -86,8 +86,16 @@ int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext
     *videoEnd = true;
     return -1;
   }
+
   auto streamIndex = avPacket -> stream_index;
   if (readValue == 0 && avPacket -> stream_index == streams.video){
+    auto videoStream = formatContext -> streams[streams.video];
+    auto timebase = av_q2d(videoStream -> time_base);
+    auto currentFrameTime = avFrame -> pts * timebase;  // Each pts you advance 1 timebase
+   
+    std::cout << "video pt current time: " << currentFrameTime << std::endl;
+    //*videoTimestamp = currentFrameTime;
+
     auto sendValue = avcodec_send_packet(codecContext, avPacket);
     if (sendValue ==  AVERROR_EOF){
       std::cout << "send packet: end of field" << std::endl;
@@ -127,13 +135,14 @@ int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext
     assert(avFrame2 -> linesize[0] != 0);
     //printFrameInfo(avFrame);
 
-    auto videoStream = formatContext -> streams[streams.video];
-    auto timebase = av_q2d(videoStream -> time_base);
-    auto currentFrameTime = avFrame -> pts * timebase;  // Each pts you advance 1 timebase
-    *videoTimestamp = currentFrameTime;
   }else if (avPacket -> stream_index == streams.audio){
     // move this to the top video decoding
     std::cout << "INFO: VIDEO: processing audio frame" << std::endl;
+    auto audioStream = formatContext -> streams[streams.audio];
+    auto timebase = av_q2d(audioStream -> time_base);
+    auto currentFrameTime = avFrame -> pts * timebase;  // Each pts you advance 1 timebase
+    *videoTimestamp = currentFrameTime;
+    std::cout << "video pt audio current time: " << currentFrameTime << std::endl;
 
     auto sendValue = avcodec_send_packet(audioCodec, avPacket);
     if (sendValue ==  AVERROR_EOF){
@@ -156,10 +165,6 @@ int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext
       //assert(false);
     }
 
-    auto audioStream = formatContext -> streams[streams.audio];
-    auto timebase = av_q2d(audioStream -> time_base);
-    auto currentFrameTime = avFrame -> pts * timebase;  // Each pts you advance 1 timebase
-    *videoTimestamp = currentFrameTime;
     //printAudioFrameInfo(avFrame, audioCodec);
   }else{
     std::cout << "INFO: video: READ error or end of video" << std::endl;
@@ -207,9 +212,9 @@ VideoContent loadVideo(const char* videopath){
   auto format = AV_PIX_FMT_RGBA;
 
   // These determine the output scaling of AVFrame2 (see usage in readFrame)
-  avFrame2 -> width = 800;
-  avFrame2 -> height = 400;
-  avFrame2 -> linesize[0] = 400;
+  avFrame2 -> width = 1600;
+  avFrame2 -> height = 800;
+  avFrame2 -> linesize[0] = 800;
 
   av_image_alloc(avFrame2 -> data, avFrame2 -> linesize, avFrame2 -> width, avFrame2 -> height,  format, 1); 
 
@@ -264,9 +269,6 @@ void seekVideo(VideoContent& content, float time){
 
   avcodec_flush_buffers(content.codecs.videoCodec);
   avcodec_flush_buffers(content.codecs.audioCodec);
- // av_packet_unref(content.avPacket);
- // av_frame_unref(content.avFrame);
- // av_frame_unref(content.avFrame2);
 
   content.videoTimestamp = -1;
 }

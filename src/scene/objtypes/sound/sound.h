@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <iostream>
 #include <AL/alut.h>
+#include <AL/alext.h>
 #include <iostream>
 #include <stdexcept>
 #include <cerrno>
@@ -42,6 +43,6 @@ struct BufferedAudio {
 
 BufferedAudio createBufferedAudio();
 void freeBufferedAudio(BufferedAudio& buffer);
-void playBufferedAudio(BufferedAudio& buffer, uint8_t* data, int datasize, int samplerate);
+void playBufferedAudio(BufferedAudio& buffer, void* data, int datasize, int samplerate);
 
 #endif
