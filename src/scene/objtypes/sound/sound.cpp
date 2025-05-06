@@ -250,7 +250,7 @@ void unloadSoundState(ALuint source,  std::string filepath){
   }
 }
 
-const int NUM_AUDIO_BUFFERS = 100;
+const int NUM_AUDIO_BUFFERS = 5; // increasing this can add latency 
 BufferedAudio createBufferedAudio(){
   ALuint buffers[NUM_AUDIO_BUFFERS];
   ALuint source;
@@ -267,7 +267,7 @@ BufferedAudio createBufferedAudio(){
   }
   std::queue<ALuint> freeBuffers;
   for (int i = 0; i < NUM_AUDIO_BUFFERS; i++){
-    freeBuffers.push(i);
+    freeBuffers.push(buffers[i]);
   }
 
   BufferedAudio audio {
@@ -291,7 +291,7 @@ void freeBufferedAudio(BufferedAudio& buffer){
 }
 
 bool isPlaying = false;
-void playBufferedAudio(BufferedAudio& buffer, uint8_t* data, int datasize, int samplerate){
+void playBufferedAudio(BufferedAudio& buffer, void* data, int datasize, int samplerate){
   auto alutError = alGetError();
   if (alutError  != AL_NO_ERROR){
     std::cout << "alut error: " << alutError << std::endl;
@@ -299,31 +299,40 @@ void playBufferedAudio(BufferedAudio& buffer, uint8_t* data, int datasize, int s
 
   auto alError = alGetError();
   ALuint freeBuffer = -1;
-  while(alError == AL_NO_ERROR){
-    alSourceUnqueueBuffers(buffer.source, 1, &freeBuffer);
-    alError = alGetError();
-    assert(alError == AL_NO_ERROR || alError == AL_INVALID_VALUE);
-    if (alError != AL_INVALID_VALUE){
-      assert(freeBuffer != -1);
-      buffer.freeBuffers.push(freeBuffer);
-    }
+
+
+  ALint processed = 0;
+  alGetSourcei(buffer.source, AL_BUFFERS_PROCESSED, &processed);
+  while (processed-- > 0) {
+      alSourceUnqueueBuffers(buffer.source, 1, &freeBuffer);
+      if (alGetError() == AL_NO_ERROR) {
+          buffer.freeBuffers.push(freeBuffer);
+      }
   }
+
 
   if(!buffer.freeBuffers.empty()){
     ALuint bufferId = buffer.freeBuffers.front();
     buffer.freeBuffers.pop();
-    alBufferData(bufferId,  AL_FORMAT_STEREO16, data, datasize, samplerate);
+    alBufferData(bufferId,  AL_FORMAT_MONO_FLOAT32, data, datasize, samplerate);
+    alError = alGetError();
+    if (alError != AL_NO_ERROR){
+      modlog("buffered audio", "error bufferData");
+    }
+
     alSourceQueueBuffers(buffer.source, 1, &bufferId);
-    assert(alError == AL_NO_ERROR || alError == AL_INVALID_VALUE);
+   // assert(alError == AL_NO_ERROR || alError == AL_INVALID_VALUE);
+  }else{
+    modlog("buffered audio", "no buffers, dropping sample");
   }
 
   int state;
   alGetSourcei(buffer.source, AL_SOURCE_STATE, &state);
   if (state == AL_STOPPED){
-    std::cout << "BUFFER STREAM WAS STOPPED!!!" << std::endl;
+    std::cout << "buffered audio BUFFER STREAM WAS STOPPED!!!" << std::endl;
     alSourcePlay(buffer.source);
   }else if (state == AL_INITIAL){
-    std::cout << "BUFFER STREAM INITIAL START!!!" << std::endl;
+    std::cout << "buffered audio BUFFER STREAM INITIAL START!!!" << std::endl;
     alSourcePlay(buffer.source);
   }else if (state == AL_PLAYING){
 
