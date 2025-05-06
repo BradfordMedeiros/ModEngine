@@ -256,9 +256,9 @@ void seekVideo(VideoContent& content, float time){
   int64_t audio_stream_pts = av_rescale_q(target_global_pts, AV_TIME_BASE_Q, content.formatContext -> streams[streams.audio] -> time_base);
 
 
-  modlog("seeking video to pts: ", std::to_string(video_stream_pts));
-  av_seek_frame(content.formatContext, streams.video, video_stream_pts, AVSEEK_FLAG_ANY);
-  av_seek_frame(content.formatContext, streams.audio, audio_stream_pts, AVSEEK_FLAG_ANY);
+  modlog("video seeking video to pts: ", std::to_string(video_stream_pts));
+  av_seek_frame(content.formatContext, -1, target_global_pts, AVSEEK_FLAG_BACKWARD);
+ // av_seek_frame(content.formatContext, streams.audio, audio_stream_pts, AVSEEK_FLAG_ANY);
   // Says to flush buffers, but I can't tell the difference, and this crashes
   //for (int i = 0; i < content.formatContext -> nb_streams; i++) {
   //  AVStream*stream = content.formatContext -> streams[i];

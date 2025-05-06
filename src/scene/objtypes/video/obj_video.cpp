@@ -93,19 +93,23 @@ void onVideoObjFrame(GameObjectVideo& videoObj, float currentTime, Transformatio
   while(true){ // probably should have a max iterations here 
     numFramesDecoded++;
     float timeIntoVideo = currentTime - videoObj.startTime.value();
+    float timeDifference = timeIntoVideo - video.videoTimestamp;
+    modlog("video lag", std::to_string(timeDifference));
+    modlog("video desired", std::to_string(timeIntoVideo));
+    modlog("video actual", std::to_string(video.videoTimestamp));
+
     if (video.videoTimestamp <= timeIntoVideo){
-        float timeDifference = timeIntoVideo - video.videoTimestamp;
-        modlog("video lag", std::to_string(timeDifference));
-        modlog("video desired", std::to_string(timeIntoVideo));
-        modlog("video actual", std::to_string(video.videoTimestamp));
         // perhaps i should catch up if i'm running behind quicker
         bool videoEnd = false;
-        int stream = nextFrame(video, &videoEnd);
+        int stream = nextFrame(video, &videoEnd);\
+        modlog("video", "reading frame");
         if (videoEnd){
           //videoObj.playing = false;
-          float time = 0.f;
+          float time = 5.f;
           seekVideo(videoObj, time);
           videoObj.startTime = currentTime - time;
+          videoObj.videoContent.videoTimestamp = time;
+
           modlog("video", "stopped playing");
           return;
         }
