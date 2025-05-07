@@ -82,7 +82,7 @@ void onVideoObjFrame(GameObjectVideo& videoObj, float currentTime, Transformatio
   	return;
   }
 
-  std::cout << "video timestamp: " << video.videoTimestamp << ", current time = " << currentTime << std::endl;
+  std::cout << "video latestTimestamp: " << video.latestTimestamp << ", current time = " << currentTime << std::endl;
 
   if (!videoObj.startTime.has_value()){
     videoObj.startTime = currentTime;
@@ -92,23 +92,27 @@ void onVideoObjFrame(GameObjectVideo& videoObj, float currentTime, Transformatio
   int numFramesDecoded = 0;
   while(true){ // probably should have a max iterations here 
     numFramesDecoded++;
+    if (numFramesDecoded > 10){  // TODO relate this to framerate better
+      break;
+    }
     float timeIntoVideo = currentTime - videoObj.startTime.value();
-    float timeDifference = timeIntoVideo - video.videoTimestamp;
+    float timeDifference = timeIntoVideo - video.latestTimestamp;
     modlog("video lag", std::to_string(timeDifference));
     modlog("video desired", std::to_string(timeIntoVideo));
-    modlog("video actual", std::to_string(video.videoTimestamp));
+    modlog("video actual", std::to_string(video.latestTimestamp));
 
-    if (video.videoTimestamp <= timeIntoVideo){
+    if (video.latestTimestamp <= timeIntoVideo){
         // perhaps i should catch up if i'm running behind quicker
         bool videoEnd = false;
         int stream = nextFrame(video, &videoEnd);\
         modlog("video", "reading frame");
         if (videoEnd){
           //videoObj.playing = false;
-          float time = 5.f;
+          float time = 15.f;
           seekVideo(videoObj, time);
           videoObj.startTime = currentTime - time;
-          videoObj.videoContent.videoTimestamp = time;
+          videoObj.videoContent.latestTimestamp = time;
+          videoObj.videoContent.audioTimestamp = time;
 
           modlog("video", "stopped playing");
           return;

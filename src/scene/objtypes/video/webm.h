@@ -42,7 +42,8 @@ struct VideoContent {
   StreamIndexs streamIndexs;
   StreamCodecs codecs;
   AVPixelFormat format;
-  float videoTimestamp;
+  float latestTimestamp;
+  float audioTimestamp;
 };
 
 VideoContent loadVideo(const char* videopath);

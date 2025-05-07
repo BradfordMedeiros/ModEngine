@@ -79,7 +79,7 @@ void printAudioFrameInfo(AVFrame* avFrame,  AVCodecContext* audioCodec){
 
 }
 
-int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext* codecContext, AVCodecContext* audioCodec, AVFrame* avFrame, AVFrame* avFrame2, StreamIndexs& streams, AVPixelFormat destFormat, float* videoTimestamp, bool* videoEnd){
+int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext* codecContext, AVCodecContext* audioCodec, AVFrame* avFrame, AVFrame* avFrame2, StreamIndexs& streams, AVPixelFormat destFormat, float* latestTimestamp, bool* videoEnd, float* audioTimestamp){
   *videoEnd = false;
   auto readValue = av_read_frame(formatContext, avPacket);
   if (readValue == AVERROR_EOF){
@@ -94,7 +94,7 @@ int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext
     auto currentFrameTime = avFrame -> pts * timebase;  // Each pts you advance 1 timebase
    
     std::cout << "video pt current time: " << currentFrameTime << std::endl;
-    //*videoTimestamp = currentFrameTime;
+    *latestTimestamp = currentFrameTime;
 
     auto sendValue = avcodec_send_packet(codecContext, avPacket);
     if (sendValue ==  AVERROR_EOF){
@@ -141,7 +141,8 @@ int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext
     auto audioStream = formatContext -> streams[streams.audio];
     auto timebase = av_q2d(audioStream -> time_base);
     auto currentFrameTime = avFrame -> pts * timebase;  // Each pts you advance 1 timebase
-    *videoTimestamp = currentFrameTime;
+    *latestTimestamp = currentFrameTime;
+    *audioTimestamp = currentFrameTime;
     std::cout << "video pt audio current time: " << currentFrameTime << std::endl;
 
     auto sendValue = avcodec_send_packet(audioCodec, avPacket);
@@ -231,7 +232,8 @@ VideoContent loadVideo(const char* videopath){
     .streamIndexs = streamIndexs,
     .codecs = getCodecs(formatContext, streamIndexs),
     .format = format,
-    .videoTimestamp = -1,
+    .latestTimestamp = -1,
+    .audioTimestamp = -1,
   };
   std::cout << "video: " << videopath << " is: " << videoContent.formatContext -> duration << std::endl;
   std::cout << "number video streams: " << numStreams << std::endl;
@@ -242,7 +244,7 @@ VideoContent loadVideo(const char* videopath){
 }
 
 int nextFrame(VideoContent& content, bool* videoEnd){
-  return readFrame(content.formatContext, content.avPacket, content.codecs.videoCodec, content.codecs.audioCodec, content.avFrame, content.avFrame2, content.streamIndexs, content.format, &content.videoTimestamp, videoEnd);
+  return readFrame(content.formatContext, content.avPacket, content.codecs.videoCodec, content.codecs.audioCodec, content.avFrame, content.avFrame2, content.streamIndexs, content.format, &content.latestTimestamp, videoEnd, &content.audioTimestamp);
 }
 
 void seekVideo(VideoContent& content, float time){
@@ -270,7 +272,8 @@ void seekVideo(VideoContent& content, float time){
   avcodec_flush_buffers(content.codecs.videoCodec);
   avcodec_flush_buffers(content.codecs.audioCodec);
 
-  content.videoTimestamp = -1;
+  content.latestTimestamp = -1;
+  content.audioTimestamp = -1;
 }
 
 void freeVideoContent(VideoContent& content){
