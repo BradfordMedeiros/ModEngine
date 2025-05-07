@@ -44,6 +44,8 @@ struct VideoContent {
   AVPixelFormat format;
   float latestTimestamp;
   float audioTimestamp;
+  AVIOContext* avioCtx;
+  unsigned int* fileHandle;
 };
 
 VideoContent loadVideo(const char* videopath);

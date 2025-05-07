@@ -1,5 +1,10 @@
 #include "./webm.h"
 
+unsigned int openFileOrPackage(std::string filepath);
+int closeFileOrPackage(unsigned int handle);
+size_t readFileOrPackage(unsigned int handle, void *ptr, size_t size, size_t nmemb);
+int seekFileOrPackage(unsigned int handle, int offset, int whence);
+
 StreamIndexs getStreamIndexs(AVFormatContext *formatContext) {
   auto numStreams = formatContext -> nb_streams;
   int videoStream = -1;
@@ -175,6 +180,19 @@ int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext
   return streamIndex;
 }
 
+
+int read_packet(void* opaque, uint8_t* buf, int buf_size) {
+  unsigned int* handle = static_cast<unsigned int*>(opaque);
+  modassert(handle, "handle is null");
+  return readFileOrPackage(*handle, buf, 1, buf_size);
+}
+int64_t seek(void *opaque, int64_t offset, int whence) {
+  unsigned int* handle = static_cast<unsigned int*>(opaque);
+  modassert(handle, "handle is null");
+  return seekFileOrPackage(*handle, offset, whence);
+}
+
+
 bool initialized = false;
 VideoContent loadVideo(const char* videopath){
   if (!initialized){
@@ -182,13 +200,25 @@ VideoContent loadVideo(const char* videopath){
     initialized = true;
   }
 
+  int bufferSize = 1024 * 4;
+
+  auto fileHandle = openFileOrPackage(videopath);
+  unsigned int* handle = (unsigned int*)malloc(sizeof(unsigned int));
+  *handle = fileHandle;
+
+  unsigned char* avioCtxBuffer = (unsigned char*)av_malloc(bufferSize);
+  AVIOContext* avioCtx = avio_alloc_context(avioCtxBuffer, bufferSize, 0, handle, read_packet, NULL, seek);
+
   // https://ffmpeg.org/doxygen/trunk/structAVFormatContext.html
   AVFormatContext* formatContext = avformat_alloc_context();
   if (!formatContext){
     std::cout << "ERROR: Could not allocate memory for avformatcontext" << std::endl;
     assert(false);
   }
-  
+  formatContext -> pb = avioCtx;
+  formatContext -> flags |= AVFMT_FLAG_CUSTOM_IO;
+
+
   auto openValue = avformat_open_input(&formatContext, videopath, NULL, NULL);
   if (openValue != 0){
     std::cout << "ERROR: could not open video: " << videopath << std::endl;
@@ -234,6 +264,9 @@ VideoContent loadVideo(const char* videopath){
     .format = format,
     .latestTimestamp = -1,
     .audioTimestamp = -1,
+    .avioCtx = avioCtx,
+    .fileHandle = handle,
+
   };
   std::cout << "video: " << videopath << " is: " << videoContent.formatContext -> duration << std::endl;
   std::cout << "number video streams: " << numStreams << std::endl;
@@ -280,9 +313,15 @@ void freeVideoContent(VideoContent& content){
   av_packet_free(&content.avPacket);
   freeCodecs(content.codecs);
   av_frame_free(&content.avFrame);
-  av_freep(content.avFrame2 -> data);
   av_frame_free(&content.avFrame2);
   avformat_close_input(&content.formatContext);
+
+  av_freep(&content.avioCtx -> buffer);
+  avio_context_free(&content.avioCtx);
+
+  closeFileOrPackage(*content.fileHandle);
+  free(content.fileHandle);
+
 }
 
 void webmTest(){
