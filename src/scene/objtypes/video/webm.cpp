@@ -313,6 +313,8 @@ void freeVideoContent(VideoContent& content){
   av_packet_free(&content.avPacket);
   freeCodecs(content.codecs);
   av_frame_free(&content.avFrame);
+
+  av_freep(content.avFrame2 -> data);
   av_frame_free(&content.avFrame2);
   avformat_close_input(&content.formatContext);
 
