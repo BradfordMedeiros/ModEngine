@@ -537,7 +537,7 @@ GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name, objid scene
 Transformation calcRelativeTransform(Transformation& child, Transformation& parent){
   auto absTransformCache = matrixFromComponents(child); 
   auto parentTransform = matrixFromComponents(parent);
-  auto relativeTransform = glm::inverse(parentTransform) * absTransformCache;
+  auto relativeTransform = glm::affineInverse(parentTransform) * absTransformCache;
   return getTransformationFromMatrix(relativeTransform);
 }
 
