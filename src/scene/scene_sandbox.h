@@ -83,7 +83,7 @@ SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std
 void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, GameObject& gameobj)> onElement);
 std::vector<objid> allSceneIds(SceneSandbox& sandbox, std::optional<std::vector<std::string>> tags);
 bool extractSceneIdFromName(std::string& name, objid* _id, std::string* _searchName);
-std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string name, objid sceneId);
+std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string& name, objid sceneId);
 objid getGroupId(SceneSandbox& sandbox, objid id);
 objid getIdForName(SceneSandbox& sandbox, std::string name, objid sceneId);
 std::vector<objid> getIdsInGroupByObjId(SceneSandbox& sandbox, objid index);

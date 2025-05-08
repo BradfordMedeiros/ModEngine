@@ -9,6 +9,8 @@ struct GameObjectMesh {
   std::optional<std::string> rootMesh;
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;   // @TODO  I shouldn't be storing the actual mesh here.  Instead I should just be referencing global meshes
+  std::vector<std::vector<objid>> boneGameObjIdCache;  // TODO - i look these up in the main loop...it might be nice to do during load instead
+
   bool isDisabled;
   TextureInformation texture;
   TextureLoadingData normalTexture;

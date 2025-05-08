@@ -1483,11 +1483,8 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<obj
 
 extern bool useTransform2;
 
-glm::mat4 armatureTransform2(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
-  auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId);
-  assert(gameobj.has_value());
- 
-  auto groupTransform = fullModelTransform(sandbox, gameobj.value() -> id);
+glm::mat4 armatureTransform2(SceneSandbox& sandbox, objid id, objid skeletonId){
+  auto groupTransform = fullModelTransform(sandbox, skeletonId);
   auto modelTransform = fullModelTransform(sandbox, id);
   // group * something = model (aka aX = b, so X = inv(A) * B)
   // inverse(group) * model
@@ -1622,13 +1619,23 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   for (auto &[id, gameobjMesh] : world.objectMapping.mesh){
     for (int i = 0; i < gameobjMesh.meshesToRender.size(); i++){
       Mesh& mesh = gameobjMesh.meshesToRender.at(i);
-      for (Bone& bone : mesh.bones){
-        std::string rootname = getGameObject(world.sandbox, getGroupId(world.sandbox, id)).name;
-        auto boneId = maybeGetGameObjectByName(world.sandbox, bone.name, sceneId(world.sandbox, id)); // TODO PERF
-        modassert(boneId.has_value(), std::string("no bone names: ") + bone.name);
+      for (int j = 0; j < mesh.bones.size(); j++){
+        Bone& bone = mesh.bones.at(j);
+        std::string rootname = getGameObject(world.sandbox, getGroupId(world.sandbox, id)).name;  // TODO PERF - store the id instead
+        auto boneId = gameobjMesh.boneGameObjIdCache.at(i).at(j);
+        if (boneId == 0){
+          boneId = maybeGetGameObjectByName(world.sandbox, bone.name, sceneId(world.sandbox, id)).value() -> id; 
+          // modassert(boneId.has_value(), std::string("no bone names: ") + bone.name);
+          gameobjMesh.boneGameObjIdCache.at(i).at(j) = boneId;
+        }
 
         std::cout << "Looking for root: " << rootname << ", bone name: " << bone.name << std::endl;
-        auto matrix = armatureTransform2(world.sandbox, boneId.value() -> id, rootname, sceneId(world.sandbox, id));
+
+        auto gameobj = maybeGetGameObjectByName(world.sandbox, rootname, sceneId(world.sandbox, id));
+        assert(gameobj.has_value());
+        auto skeletonId = gameobj.value() -> id;
+
+        auto matrix = armatureTransform2(world.sandbox, boneId, skeletonId);
         bone.offsetMatrix = matrix * glm::inverse(bone.initialBonePose);
       }
     }

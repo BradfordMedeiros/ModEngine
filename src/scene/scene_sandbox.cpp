@@ -239,7 +239,7 @@ std::unordered_map<std::string, GameobjAttributesWithId> multiObjAdd(
 
   std::unordered_map<std::string,  GameobjAttributesWithId> nameToAdditionalFields;
   std::unordered_map<objid, objid> nodeIdToRealId;
-  auto rootObj = getGameObject(scene, rootId);
+  auto& rootObj = getGameObject(scene, rootId);
   std::vector<objid> addedIds;
 
   for (auto [nodeId, transform] : gameobjTransforms){
@@ -324,7 +324,7 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objec
     //s  continue;
     //s}
 
-    std::string objectName = getGameObject(scene, id).name;
+    std::string& objectName = getGameObject(scene, id).name;
     auto sceneId = scene.idToGameObjectsH.at(id).sceneId;
     for (auto &obj : scene.gameobjects){
       if (obj.gameobj.id == id){
@@ -426,8 +426,8 @@ std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<s
     if (obj.sceneId != sceneId){
       continue;
     }
-    auto gameobj = getGameObject(sandbox, id);
-    auto gameobjecth = getGameObjectH(sandbox, id);
+    auto& gameobj = getGameObject(sandbox, id);
+    auto& gameobjecth = getGameObjectH(sandbox, id);
     auto additionalFields = getAdditionalFields(id); 
     auto children = childnamesNoPrefabs(sandbox, gameobjecth);
     sceneData = sceneData + serializeObj(id, gameobjecth.groupId, gameobj, children, includeIds, additionalFields,  "");
@@ -487,7 +487,7 @@ std::vector<objid> allSceneIds(SceneSandbox& sandbox, std::optional<std::vector<
   return sceneIds;
 } 
 
-std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string name, objid sceneId){
+std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string& name, objid sceneId){
   for (auto &gameObj : sandbox.mainScene.gameobjects){
     if (!gameObj.inUse){
       continue;
@@ -631,7 +631,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
 
 void addObjectToCache(SceneSandbox& sandbox, objid id){
   objid gameobjIndex = 0;
-  GameObject object = getGameObject(sandbox.mainScene, id, &gameobjIndex);
+  GameObject& object = getGameObject(sandbox.mainScene, id, &gameobjIndex);
   auto elementMatrix = matrixFromComponents(
     glm::mat4(1.f),
     object.transformation.position, 
