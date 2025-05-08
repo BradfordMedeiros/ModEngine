@@ -18,6 +18,20 @@ WorldTiming createWorldTiming(float initialTime){
 bool enableBlending = true;
 float blendingWindow = 0.25f;  // this should be able to be specified by the animation most likely
 
+std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit);
+AnimationWithIds resolveAnimationIds(Animation& animation, objid sceneId) {
+  std::vector<objid> channelObjIds;
+  for (auto &channel : animation.channels){
+    auto id = getGameObjectByName(channel.nodeName, sceneId, true).value();
+    channelObjIds.push_back(id);
+  }
+  return AnimationWithIds {
+    .animation = animation,
+    .channelObjIds = channelObjIds,
+  };
+}
+
+
 void setPoses(World& world, std::set<objid>& disableIds, objid idScene, std::vector<AnimationPose>& poses){
   for (auto& pose : poses){
     if (disableIds.count(pose.targetId) > 0){
@@ -34,9 +48,11 @@ void tickAnimation(World& world, std::set<objid>& disableAnimationIds, Animation
     // if afactor > 1.f or something like that, could get rid of the old animation value
     //modassert(false, "blend not yet supported");
 
+    auto resolvedAnimation1 = resolveAnimationIds(playback.animation, playback.idScene);
+    auto resolvedAnimationBlend = resolveAnimationIds(playback.blendData.value().animation, playback.idScene);
     auto newPoses = playbackAnimationBlend(
-      playback.animation,
-      playback.blendData.value().animation, 
+      resolvedAnimation1,
+      resolvedAnimationBlend, 
       currentTime - playback.initTime,
       currentTime - playback.blendData.value().oldAnimationInit, 
       aFactor,
@@ -44,7 +60,8 @@ void tickAnimation(World& world, std::set<objid>& disableAnimationIds, Animation
     );
     setPoses(world, disableAnimationIds, playback.idScene, newPoses);
   }else{
-    auto newPoses = playbackAnimation(playback.animation, currentTime - playback.initTime, playback.idScene);
+    auto resolvedAnimation = resolveAnimationIds(playback.animation, playback.idScene);
+    auto newPoses = playbackAnimation(resolvedAnimation, currentTime - playback.initTime, playback.idScene);
     setPoses(world,  disableAnimationIds, playback.idScene, newPoses);
   }
 }
@@ -180,6 +197,8 @@ void setAnimationPose(World& world, objid id, std::string animationToPlay, float
   auto groupId = getGroupId(world.sandbox, id);
   auto animation = getAnimation(world, groupId, animationToPlay).value();
   auto idScene = sceneId(world.sandbox, groupId);
-  auto newPoses = playbackAnimation(animation, time, idScene);
+
+  auto resolvedAnimation = resolveAnimationIds(animation, idScene);
+  auto newPoses = playbackAnimation(resolvedAnimation, time, idScene);
   setPoses(world, emptySet, idScene, newPoses);
 }
