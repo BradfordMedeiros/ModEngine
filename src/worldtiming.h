@@ -10,14 +10,14 @@
 struct BlendAnimationData {
   float oldAnimationInit;
   float blendStartTime;
-  Animation animation;
+  AnimationWithIds animation;
 };
 
 struct AnimationData {
   objid groupId;
   objid idScene;
   std::string rootname;
-  Animation animation;
+  AnimationWithIds animation;
   float animLength;
   AnimationType animationType;
   float initTime;

@@ -36,6 +36,11 @@ struct Animation {
   std::vector<AnimationChannel> channels;
 };
 
+struct AnimationWithIds {
+  Animation animation;
+  std::vector<objid> channelObjIds;
+};
+
 struct ModelData {
   std::unordered_map<int32_t, MeshData> meshIdToMeshData;
   std::unordered_map<int32_t, std::vector<int>> nodeToMeshId;

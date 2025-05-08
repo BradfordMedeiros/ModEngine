@@ -1,12 +1,11 @@
 #include "./playback.h"
 
-
 std::vector<AnimationPose> playbackAnimation(
-  Animation& animation,  
+  AnimationWithIds& animation,  
   float currentTime,
   objid sceneId
 ){  
-  auto posesForTick = animationPosesAtTime(animation, currentTime, sceneId);
+  auto posesForTick = animationPosesAtTime(currentTime, sceneId, animation);
   return posesForTick;
 }
 
@@ -76,16 +75,16 @@ std::vector<AnimationPose> combineAnimationPoses(std::vector<AnimationPose>& pos
 }
 
 std::vector<AnimationPose> playbackAnimationBlend(
-  Animation& animation,
-  Animation& animation2,
+  AnimationWithIds& animation,
+  AnimationWithIds& animation2,
   float currentTime,
   float currentTimeAnimation2,
   float blendFactor,
   objid sceneId
 ){ 
   std::cout << "blend: a factor is: " << currentTime << ", " << blendFactor << std::endl;
-  auto posesForTick = animationPosesAtTime(animation, currentTime, sceneId);
-  auto oldPosesForTick = animationPosesAtTime(animation2, currentTimeAnimation2, sceneId);
+  auto posesForTick = animationPosesAtTime(currentTime, sceneId, animation);
+  auto oldPosesForTick = animationPosesAtTime(currentTimeAnimation2, sceneId, animation2);
   auto combinedPoses = combineAnimationPoses(posesForTick, oldPosesForTick, blendFactor);
   return combinedPoses;
 }

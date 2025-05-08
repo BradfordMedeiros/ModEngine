@@ -89,18 +89,33 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
   timings.playbacksToRemove.clear();
 }
 
-std::optional<Animation> getAnimation(World& world, int32_t groupId, std::string animationToPlay){  
+
+std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit);
+AnimationWithIds resolveAnimationIds(Animation& animation, objid sceneId) {
+  std::vector<objid> channelObjIds;
+  for (auto &channel : animation.channels){
+    auto id = getGameObjectByName(channel.nodeName, sceneId, true).value();
+    channelObjIds.push_back(id);
+  }
+  return AnimationWithIds {
+    .animation = animation,
+    .channelObjIds = channelObjIds,
+  };
+}
+
+std::optional<AnimationWithIds> getAnimation(World& world, int32_t groupId, std::string animationToPlay){  
   if (world.animations.find(groupId) == world.animations.end()){
     return std::nullopt;
   }
-  for (auto animation :  world.animations.at(groupId)){
+  for (auto& animation :  world.animations.at(groupId)){
     if (animation.name == animationToPlay){
-      return animation;
+      auto idForScene = sceneId(world.sandbox, groupId);
+      return resolveAnimationIds(animation, idForScene);
     }
   }
   std::cout << "ERROR: no animation found named: " << animationToPlay << std::endl;
   std::cout << "ERROR INFO: existing animation names [" << world.animations.at(groupId).size() << "] - ";
-  for (auto animation : world.animations.at(groupId)){
+  for (auto& animation : world.animations.at(groupId)){
     std::cout << animation.name << " ";
   }
   std::cout << std::endl;
@@ -142,9 +157,9 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
 
   auto animation = getAnimation(world, groupId, animationToPlay).value();
 
-  std::string animationname = animation.name;
-  float animLength = animationLengthSeconds(animation);
-  modlog("animation", std::string("adding animation: ") + animationname + ", length = " + std::to_string(animLength) + ", numticks = " + std::to_string(animation.duration) + ", ticks/s = " + std::to_string(animation.ticksPerSecond) + ", groupId = " + std::to_string(groupId));
+  std::string& animationname = animation.animation.name;
+  float animLength = animationLengthSeconds(animation.animation);
+  modlog("animation", std::string("adding animation: ") + animationname + ", length = " + std::to_string(animLength) + ", numticks = " + std::to_string(animation.animation.duration) + ", ticks/s = " + std::to_string(animation.animation.ticksPerSecond) + ", groupId = " + std::to_string(groupId));
 
   timings.animations.playbacks[groupId] = AnimationData {
     .groupId = groupId,

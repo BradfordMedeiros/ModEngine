@@ -1,7 +1,5 @@
 #include "./animation.h"
 
-std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit);
-
 struct KeyIndex {
   int primaryIndex;
   int secondaryIndex;
@@ -78,7 +76,8 @@ Transformation secondaryPoseFromKeyInfo(AnimationChannel& channel, KeyInfo& keyI
 }
 
 bool shouldInterpolate = true;
-std::vector<AnimationPose> animationPosesAtTime(Animation& animation, float currentTime, objid sceneId){
+std::vector<AnimationPose> animationPosesAtTime(float currentTime, objid sceneId, AnimationWithIds& animationWithIds){
+  Animation& animation = animationWithIds.animation;
   assert(animation.ticksPerSecond != 0);                                                      // some models can have 0 ticks, probably should just set a default rate for these
 
   std::vector<AnimationPose> poses;
@@ -87,7 +86,10 @@ std::vector<AnimationPose> animationPosesAtTime(Animation& animation, float curr
 
   //modlog("animation", std::string("current time: ") + std::to_string(currentTime) + ", " + std::string("current tick: ") + std::to_string(currentTick));
 
-  for (auto channel : animation.channels){
+
+  for (int i = 0; i < animation.channels.size(); i++){
+    auto targetId = animationWithIds.channelObjIds.at(i);
+    auto& channel = animation.channels.at(i);
     auto keyInfo = keyInfoForTick(channel, currentTick);
     Transformation newNodeTransformation = (
       shouldInterpolate ? 
@@ -101,7 +103,6 @@ std::vector<AnimationPose> animationPosesAtTime(Animation& animation, float curr
       primaryPoseFromKeyInfo(channel, keyInfo)
     );
 
-    auto targetId = getGameObjectByName(channel.nodeName, sceneId, true).value();
     poses.push_back(AnimationPose{
       .targetId = targetId,
       .pose = newNodeTransformation,

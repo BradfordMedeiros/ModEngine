@@ -8,7 +8,7 @@
 #include "./animation.h"
 
 std::vector<AnimationPose> playbackAnimation(
-  Animation& animation, 
+  AnimationWithIds& animation, 
   float currentTime,
   objid sceneId
 );
@@ -16,8 +16,8 @@ std::vector<AnimationPose> playbackAnimation(
 
 
 std::vector<AnimationPose> playbackAnimationBlend(
-  Animation& animation,
-  Animation& animation2,
+  AnimationWithIds& animation,
+  AnimationWithIds& animation2,
   float currentTime,
   float currentTimeAnimation2,
   float blendFactor,
