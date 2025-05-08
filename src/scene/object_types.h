@@ -110,6 +110,12 @@ static std::vector fields = {
 
 ObjectType getObjectType(std::string& name);
 
+struct Object {
+  objid id;
+  ObjectType type;
+  unsigned int index;
+};
+
 struct ObjectMapping {
   std::unordered_map<objid, GameObjectMesh> mesh;
   std::unordered_map<objid, GameObjectCamera> camera;

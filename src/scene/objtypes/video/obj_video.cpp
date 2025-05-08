@@ -14,7 +14,7 @@ std::vector<AutoSerialize> videoAutoserializer {
   AutoSerializeString {
     .structOffset = offsetof(GameObjectVideo, texturePath),
     .field = "texturepath",
-    .defaultValue = "./res/texturevideotexture",
+    .defaultValue = "",
   },
   AutoSerializeString {
     .structOffset = offsetof(GameObjectVideo, video),
@@ -33,12 +33,17 @@ std::vector<AutoSerialize> videoAutoserializer {
 GameObjectVideo createVideoObj(GameobjAttributes& attr, ObjectTypeUtil& util){
 	GameObjectVideo videoObj {};
   createAutoSerializeWithTextureLoading((char*)&videoObj, videoAutoserializer, attr, util);
-	modassert(!textureLoaded(videoObj.texturePath), "texture already loaded for video");
 
 	auto videoContent = loadVideo(videoObj.video.c_str());
 
+  std::string texturePath = videoObj.texturePath;
+  if (texturePath == ""){
+    texturePath = std::string("video-tex-") + std::to_string(getUniqueObjId());
+  }
+  modassert(!textureLoaded(texturePath), "texture already loaded for video");
+
   Texture texture = util.loadTextureData(
-    videoObj.texturePath,
+    texturePath,
     videoContent.avFrame2 -> data[0], 
     videoContent.avFrame2 -> width, 
     videoContent.avFrame2 -> height, 

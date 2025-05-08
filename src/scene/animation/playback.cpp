@@ -3,14 +3,15 @@
 
 std::vector<AnimationPose> playbackAnimation(
   Animation& animation,  
-  float currentTime
+  float currentTime,
+  objid sceneId
 ){  
-  auto posesForTick = animationPosesAtTime(animation, currentTime);
+  auto posesForTick = animationPosesAtTime(animation, currentTime, sceneId);
   return posesForTick;
 }
 
 struct ChannelWithTwoPoses {
-  std::string channel;
+  objid targetId;
   std::optional<Transformation> pose1;
   std::optional<Transformation> pose2;
 };
@@ -21,7 +22,7 @@ std::vector<AnimationPose> combineAnimationPoses(std::vector<AnimationPose>& pos
 
   for (auto &channel : pose1){
     channels.push_back(ChannelWithTwoPoses{
-      .channel = channel.channelName,
+      .targetId = channel.targetId,
       .pose1 = channel.pose,
       .pose2 = IDENTITY_TRANSFORMATION,
     });
@@ -31,14 +32,14 @@ std::vector<AnimationPose> combineAnimationPoses(std::vector<AnimationPose>& pos
   for (auto &channel : pose2){
     std::optional<int> foundChannelIndex = std::nullopt;
     for (int i = 0; i < channels.size(); i++){
-      if (channels.at(i).channel == channel.channelName){
+      if (channels.at(i).targetId == channel.targetId){
         foundChannelIndex = i;
         break;
       }
     }
     if (!foundChannelIndex.has_value()){
       channels.push_back(ChannelWithTwoPoses {
-        .channel = channel.channelName,
+        .targetId = channel.targetId,
         .pose1 = IDENTITY_TRANSFORMATION,
         .pose2 = channel.pose,
       });
@@ -51,12 +52,12 @@ std::vector<AnimationPose> combineAnimationPoses(std::vector<AnimationPose>& pos
   for (auto &channel : channels){
     if (channel.pose1.has_value() && !channel.pose2.has_value()){
       finalChannelPoses.push_back(AnimationPose {
-        .channelName = channel.channel,
+        .targetId = channel.targetId,
         .pose = channel.pose1.value(),
       });
     }else if (!channel.pose1.has_value() && channel.pose2.has_value()){
       finalChannelPoses.push_back(AnimationPose {
-        .channelName = channel.channel,
+        .targetId = channel.targetId,
         .pose = channel.pose2.value(),
       });
     }else{
@@ -65,7 +66,7 @@ std::vector<AnimationPose> combineAnimationPoses(std::vector<AnimationPose>& pos
       auto interpolated = interpolate(transform2, transform1, lerpAmount, lerpAmount, lerpAmount);
 
       finalChannelPoses.push_back(AnimationPose {
-        .channelName = channel.channel,
+        .targetId = channel.targetId,
         .pose = interpolated,
       });  
     }
@@ -79,11 +80,12 @@ std::vector<AnimationPose> playbackAnimationBlend(
   Animation& animation2,
   float currentTime,
   float currentTimeAnimation2,
-  float blendFactor
+  float blendFactor,
+  objid sceneId
 ){ 
   std::cout << "blend: a factor is: " << currentTime << ", " << blendFactor << std::endl;
-  auto posesForTick = animationPosesAtTime(animation, currentTime);
-  auto oldPosesForTick = animationPosesAtTime(animation2, currentTimeAnimation2);
+  auto posesForTick = animationPosesAtTime(animation, currentTime, sceneId);
+  auto oldPosesForTick = animationPosesAtTime(animation2, currentTimeAnimation2, sceneId);
   auto combinedPoses = combineAnimationPoses(posesForTick, oldPosesForTick, blendFactor);
   return combinedPoses;
 }

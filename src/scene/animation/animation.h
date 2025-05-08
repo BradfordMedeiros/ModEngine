@@ -7,10 +7,10 @@
 #include "../common/util/loadmodel.h"
 
 struct AnimationPose {
-  std::string channelName;
+  objid targetId;
   Transformation pose;
 };
 
-std::vector<AnimationPose> animationPosesAtTime(Animation& animation, float currentTime);
+std::vector<AnimationPose> animationPosesAtTime(Animation& animation, float currentTime, objid sceneId);
 
 #endif

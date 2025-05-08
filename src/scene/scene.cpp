@@ -1624,7 +1624,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       Mesh& mesh = gameobjMesh.meshesToRender.at(i);
       for (Bone& bone : mesh.bones){
         std::string rootname = getGameObject(world.sandbox, getGroupId(world.sandbox, id)).name;
-        auto boneId = maybeGetGameObjectByName(world.sandbox, bone.name, sceneId(world.sandbox, id));
+        auto boneId = maybeGetGameObjectByName(world.sandbox, bone.name, sceneId(world.sandbox, id)); // TODO PERF
         modassert(boneId.has_value(), std::string("no bone names: ") + bone.name);
 
         std::cout << "Looking for root: " << rootname << ", bone name: " << bone.name << std::endl;

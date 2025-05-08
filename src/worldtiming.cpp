@@ -20,16 +20,10 @@ float blendingWindow = 0.25f;  // this should be able to be specified by the ani
 
 void setPoses(World& world, std::set<objid>& disableIds, objid idScene, std::vector<AnimationPose>& poses){
   for (auto& pose : poses){
-    auto gameobj =  maybeGetGameObjectByName(world.sandbox, pose.channelName, idScene);  // TODO PERF
-    if (gameobj.has_value()){
-      if (disableIds.count(gameobj.value() -> id) > 0){
-        continue;
-      }
-      physicsLocalTransformSet(world, gameobj.value() -> id, pose.pose);
-    }else{
-      std::cout << "warning no bone node named: " << pose.channelName << std::endl;
-      assert(false);
+    if (disableIds.count(pose.targetId) > 0){
+      continue;
     }
+    physicsLocalTransformSet(world, pose.targetId, pose.pose);
     //printMatrixInformation(pose.pose, std::string("SET_CHANNEL:") + pose.channelName);
   }
 }
@@ -45,11 +39,12 @@ void tickAnimation(World& world, std::set<objid>& disableAnimationIds, Animation
       playback.blendData.value().animation, 
       currentTime - playback.initTime,
       currentTime - playback.blendData.value().oldAnimationInit, 
-      aFactor
+      aFactor,
+      playback.idScene
     );
     setPoses(world, disableAnimationIds, playback.idScene, newPoses);
   }else{
-    auto newPoses = playbackAnimation(playback.animation, currentTime - playback.initTime);
+    auto newPoses = playbackAnimation(playback.animation, currentTime - playback.initTime, playback.idScene);
     setPoses(world,  disableAnimationIds, playback.idScene, newPoses);
   }
 }
@@ -185,6 +180,6 @@ void setAnimationPose(World& world, objid id, std::string animationToPlay, float
   auto groupId = getGroupId(world.sandbox, id);
   auto animation = getAnimation(world, groupId, animationToPlay).value();
   auto idScene = sceneId(world.sandbox, groupId);
-  auto newPoses = playbackAnimation(animation, time);
+  auto newPoses = playbackAnimation(animation, time, idScene);
   setPoses(world, emptySet, idScene, newPoses);
 }

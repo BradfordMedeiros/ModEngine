@@ -9,7 +9,8 @@
 
 std::vector<AnimationPose> playbackAnimation(
   Animation& animation, 
-  float currentTime
+  float currentTime,
+  objid sceneId
 );
 
 
@@ -19,7 +20,8 @@ std::vector<AnimationPose> playbackAnimationBlend(
   Animation& animation2,
   float currentTime,
   float currentTimeAnimation2,
-  float blendFactor
+  float blendFactor,
+  objid sceneId
 );
 
 #endif

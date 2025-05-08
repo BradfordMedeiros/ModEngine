@@ -70,6 +70,11 @@ void addObjectType(ObjectMapping& objectMapping, objid id, std::string name, Gam
   modassert(false, "invalid object type");
 }
 
+ObjectType getType(ObjectMapping& objectMapping, objid id){
+  modassert(false, "getType invalid type");
+  return OBJ_MESH;
+}
+
 void removeObject(
   ObjectMapping& objectMapping,
   objid id, 
