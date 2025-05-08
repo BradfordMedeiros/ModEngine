@@ -51,7 +51,7 @@ bool gameobjExists(objid id){
   return true;
 }
 
-std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit){    
+std::optional<objid> getGameObjectByName(std::string name, objid sceneId){    
   return getGameObjectByNamePrefix(world, name, sceneId);
 }
 
@@ -905,7 +905,7 @@ void playSoundState(objid id, std::optional<float> volume, std::optional<glm::ve
 
 void playSoundState(std::string source, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position){
   std::cout << "Info: play sound: " << source << std::endl;
-  auto gameobj = getGameObjectByName(source, sceneId, false);
+  auto gameobj = getGameObjectByName(source, sceneId);
   if (gameobj.has_value()){
     playSoundState(world.objectMapping, gameobj.value(), volume, position); 
   }else{
@@ -916,7 +916,7 @@ void playSoundState(std::string source, objid sceneId, std::optional<float> volu
 
 void stopSoundState(std::string source, objid sceneId){
   std::cout << "Info: stop sound: " << source << std::endl;
-  auto gameobj = getGameObjectByName(source, sceneId, false);
+  auto gameobj = getGameObjectByName(source, sceneId);
   if (gameobj.has_value()){
     stopSoundState(world.objectMapping, gameobj.value()); 
   }else{

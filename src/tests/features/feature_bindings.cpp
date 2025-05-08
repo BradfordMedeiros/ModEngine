@@ -54,7 +54,7 @@ CScriptBinding cscriptSoundBinding(CustomApiBindings& api){
       return;
     }
     auto sceneId = api.listSceneId(id);
-    auto sampleId = api.getGameObjectByName("&sample", sceneId, true).value();
+    auto sampleId = api.getGameObjectByName("&sample", sceneId).value();
     api.playClipById(sampleId, std::nullopt, std::nullopt);
   };
   return binding;
@@ -64,7 +64,7 @@ CScriptBinding cscriptCreateEmissionBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("test/test-sound", api);
   binding.onFrame = [&api](int32_t id, void* data) -> void {
     auto sceneId = api.listSceneId(id);
-    auto cubeId = api.getGameObjectByName("boxfront/Cube", sceneId, true).value();
+    auto cubeId = api.getGameObjectByName("boxfront/Cube", sceneId).value();
 
     auto currentTime = api.timeSeconds(false);
 

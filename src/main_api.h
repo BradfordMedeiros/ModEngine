@@ -89,7 +89,7 @@ void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2,
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2);
 
 bool gameobjExists(objid id);
-std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit);
+std::optional<objid> getGameObjectByName(std::string name, objid sceneId);
 std::vector<int32_t> getObjectsByAttr(std::string type, std::optional<AttributeValue> value, std::optional<int32_t> sceneId);
 std::optional<std::string> getGameObjectName(int32_t index);
 std::optional<AttributeValuePtr> getObjectAttributePtr(int32_t id, const char* field);

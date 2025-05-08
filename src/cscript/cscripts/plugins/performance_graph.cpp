@@ -21,7 +21,7 @@ void createObj(objid sceneId){
   auto objectId = mainApi -> makeObjectAttr(sceneId, "performance-test-obj", attr, submodelAttributes); 
   modassert(objectId.has_value(), "cannot create performance-test-obj, probably already exists");
 
-  auto planeObj = mainApi -> getGameObjectByName("performance-test-obj/Plane", sceneId, true);
+  auto planeObj = mainApi -> getGameObjectByName("performance-test-obj/Plane", sceneId);
   mainApi -> setGameObjectAttr(planeObj.value(), { GameobjAttribute{ .field = "texture", .attributeValue = textureName }});
 }
 
