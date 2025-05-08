@@ -18,20 +18,6 @@ WorldTiming createWorldTiming(float initialTime){
 bool enableBlending = true;
 float blendingWindow = 0.25f;  // this should be able to be specified by the animation most likely
 
-std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit);
-AnimationWithIds resolveAnimationIds(Animation& animation, objid sceneId) {
-  std::vector<objid> channelObjIds;
-  for (auto &channel : animation.channels){
-    auto id = getGameObjectByName(channel.nodeName, sceneId, true).value();
-    channelObjIds.push_back(id);
-  }
-  return AnimationWithIds {
-    .animation = animation,
-    .channelObjIds = channelObjIds,
-  };
-}
-
-
 void setPoses(World& world, std::set<objid>& disableIds, objid idScene, std::vector<AnimationPose>& poses){
   for (auto& pose : poses){
     if (disableIds.count(pose.targetId) > 0){
@@ -48,11 +34,9 @@ void tickAnimation(World& world, std::set<objid>& disableAnimationIds, Animation
     // if afactor > 1.f or something like that, could get rid of the old animation value
     //modassert(false, "blend not yet supported");
 
-    auto resolvedAnimation1 = resolveAnimationIds(playback.animation, playback.idScene);
-    auto resolvedAnimationBlend = resolveAnimationIds(playback.blendData.value().animation, playback.idScene);
     auto newPoses = playbackAnimationBlend(
-      resolvedAnimation1,
-      resolvedAnimationBlend, 
+      playback.animation,
+      playback.blendData.value().animation, 
       currentTime - playback.initTime,
       currentTime - playback.blendData.value().oldAnimationInit, 
       aFactor,
@@ -60,8 +44,7 @@ void tickAnimation(World& world, std::set<objid>& disableAnimationIds, Animation
     );
     setPoses(world, disableAnimationIds, playback.idScene, newPoses);
   }else{
-    auto resolvedAnimation = resolveAnimationIds(playback.animation, playback.idScene);
-    auto newPoses = playbackAnimation(resolvedAnimation, currentTime - playback.initTime, playback.idScene);
+    auto newPoses = playbackAnimation(playback.animation, currentTime - playback.initTime, playback.idScene);
     setPoses(world,  disableAnimationIds, playback.idScene, newPoses);
   }
 }
@@ -106,18 +89,33 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
   timings.playbacksToRemove.clear();
 }
 
-std::optional<Animation> getAnimation(World& world, int32_t groupId, std::string animationToPlay){  
+
+std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit);
+AnimationWithIds resolveAnimationIds(Animation& animation, objid sceneId) {
+  std::vector<objid> channelObjIds;
+  for (auto &channel : animation.channels){
+    auto id = getGameObjectByName(channel.nodeName, sceneId, true).value();
+    channelObjIds.push_back(id);
+  }
+  return AnimationWithIds {
+    .animation = animation,
+    .channelObjIds = channelObjIds,
+  };
+}
+
+std::optional<AnimationWithIds> getAnimation(World& world, int32_t groupId, std::string animationToPlay){  
   if (world.animations.find(groupId) == world.animations.end()){
     return std::nullopt;
   }
-  for (auto animation :  world.animations.at(groupId)){
+  for (auto& animation :  world.animations.at(groupId)){
     if (animation.name == animationToPlay){
-      return animation;
+      auto idForScene = sceneId(world.sandbox, groupId);
+      return resolveAnimationIds(animation, idForScene);
     }
   }
   std::cout << "ERROR: no animation found named: " << animationToPlay << std::endl;
   std::cout << "ERROR INFO: existing animation names [" << world.animations.at(groupId).size() << "] - ";
-  for (auto animation : world.animations.at(groupId)){
+  for (auto& animation : world.animations.at(groupId)){
     std::cout << animation.name << " ";
   }
   std::cout << std::endl;
@@ -159,9 +157,9 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
 
   auto animation = getAnimation(world, groupId, animationToPlay).value();
 
-  std::string animationname = animation.name;
-  float animLength = animationLengthSeconds(animation);
-  modlog("animation", std::string("adding animation: ") + animationname + ", length = " + std::to_string(animLength) + ", numticks = " + std::to_string(animation.duration) + ", ticks/s = " + std::to_string(animation.ticksPerSecond) + ", groupId = " + std::to_string(groupId));
+  std::string& animationname = animation.animation.name;
+  float animLength = animationLengthSeconds(animation.animation);
+  modlog("animation", std::string("adding animation: ") + animationname + ", length = " + std::to_string(animLength) + ", numticks = " + std::to_string(animation.animation.duration) + ", ticks/s = " + std::to_string(animation.animation.ticksPerSecond) + ", groupId = " + std::to_string(groupId));
 
   timings.animations.playbacks[groupId] = AnimationData {
     .groupId = groupId,
@@ -197,8 +195,6 @@ void setAnimationPose(World& world, objid id, std::string animationToPlay, float
   auto groupId = getGroupId(world.sandbox, id);
   auto animation = getAnimation(world, groupId, animationToPlay).value();
   auto idScene = sceneId(world.sandbox, groupId);
-
-  auto resolvedAnimation = resolveAnimationIds(animation, idScene);
-  auto newPoses = playbackAnimation(resolvedAnimation, time, idScene);
+  auto newPoses = playbackAnimation(animation, time, idScene);
   setPoses(world, emptySet, idScene, newPoses);
 }
