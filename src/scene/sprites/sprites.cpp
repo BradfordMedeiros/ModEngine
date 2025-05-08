@@ -138,7 +138,6 @@ void drawSpriteZBias(GLint shaderProgram, Mesh& mesh, float left, float top, flo
   auto scaleMatrix = glm::scale(glm::mat4(1.f), glm::vec3(width * 1.0f, height * 1.0f, 1.0f));
   auto translateMatrix = glm::translate(glm::mat4(1.f), glm::vec3(left, top, zbias));
   glm::mat4 modelMatrix = model * translateMatrix * scaleMatrix; 
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix)); // get rid of this already in draw mesh
 
   MeshUniforms meshUniforms {
     .model = modelMatrix,
@@ -246,7 +245,7 @@ struct DrawingInfoValues {
 };
 
 
-DrawingInfoValues computeDrawingInfo(FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
+DrawingInfoValues computeDrawingInfo(FontFamily& fontFamily, std::string& word, float left, float top, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
   std::unordered_map<unsigned int, FontParams>& fontMeshes = fontFamily.asciToMesh;
   float fontSizeNdi = convertFontSizeToNdi(fontSize);
   float offsetDelta = 2.f * fontSizeNdi;
@@ -370,7 +369,7 @@ DrawingInfoValues computeDrawingInfo(FontFamily& fontFamily, std::string word, f
 }
 
 //
-BoundInfo boundInfoForCenteredText(FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength, glm::vec3* _offset){
+BoundInfo boundInfoForCenteredText(FontFamily& fontFamily, std::string& word, float left, float top, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength, glm::vec3* _offset){
   auto drawingData = computeDrawingInfo(fontFamily, word, left, top, fontSize, align, wrap, virtualization, cursorIndex, cursorIndexLeft, highlightLength);
   auto drawingDimensions = calcDrawSizing(drawingData.drawingInfo);
   auto offsetToCenter = calcAlignOffset(drawingDimensions, align, left, top);
@@ -392,7 +391,7 @@ BoundInfo boundInfoForCenteredText(FontFamily& fontFamily, std::string word, flo
   return info;
 }
 
-int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength, bool drawBoundingOnly, glm::vec4 tint, objid id){
+int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 model, std::string& word, float left, float top, unsigned int fontSize, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength, bool drawBoundingOnly, glm::vec4 tint, objid id){
   int numTriangles = 0;
   if (drawBoundingOnly){
     glm::vec3 offset(0.f, 0.f, 0.f);
@@ -422,7 +421,7 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
   return numTriangles;
 }
 
-void drawWords(GLint shaderProgram, FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize, std::optional<float> maxWidthNdi, glm::vec4 tint, objid id){
+void drawWords(GLint shaderProgram, FontFamily& fontFamily, std::string& word, float left, float top, unsigned int fontSize, std::optional<float> maxWidthNdi, glm::vec4 tint, objid id){
   TextWrap textWrap { .type = WRAP_NONE, .wrapamount = 0.f };
   if (maxWidthNdi.has_value()){
     textWrap = TextWrap {
