@@ -725,7 +725,7 @@ std::function<objid(void)> createGetUniqueObjId(std::vector<objid>& idsAdded){
 World createWorld(
   collisionPairPosFn onObjectEnter, 
   collisionPairFn onObjectLeave, 
-  std::function<void(GameObject&)> onObjectUpdate,  
+  std::function<void(objid)> onObjectUpdate,  
   std::function<void(GameObject&)> onObjectCreate, 
   std::function<void(objid, bool)> onObjectDelete, 
   btIDebugDraw* debugDrawer,
@@ -1608,34 +1608,34 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
 
 
   for (auto id : world.entitiesToUpdate){
-    GameObject& gameobj = getGameObject(world.sandbox, id); // i could defer getting this
     if (id == getGroupId(world.sandbox, id)){ // why? 
-      world.onObjectUpdate(gameobj);
+      world.onObjectUpdate(id);
     }
   }
 
 
   // // https://gamedev.net/forums/topic/484984-skeletal-animation-non-uniform-scale/4172731/
   for (auto &[id, gameobjMesh] : world.objectMapping.mesh){
+    if (gameobjMesh.rootidCache == 0){
+      std::string& rootname = getGameObject(world.sandbox, getGroupId(world.sandbox, id)).name;  // TODO PERF - store the id instead
+      std::cout << "Looking for root: " << rootname << std::endl;
+      auto gameobj = maybeGetGameObjectByName(world.sandbox, rootname, sceneId(world.sandbox, id));
+      modassert(gameobj.has_value(), "did not find root gameobj");
+      modassert(gameobj.value() != NULL, "gameobj root was NULL");
+      gameobjMesh.rootidCache = gameobj.value() -> id;       
+    }
     for (int i = 0; i < gameobjMesh.meshesToRender.size(); i++){
       Mesh& mesh = gameobjMesh.meshesToRender.at(i);
       for (int j = 0; j < mesh.bones.size(); j++){
         Bone& bone = mesh.bones.at(j);
-        std::string rootname = getGameObject(world.sandbox, getGroupId(world.sandbox, id)).name;  // TODO PERF - store the id instead
-        auto boneId = gameobjMesh.boneGameObjIdCache.at(i).at(j);
+        objid boneId = gameobjMesh.boneGameObjIdCache.at(i).at(j);
         if (boneId == 0){
           boneId = maybeGetGameObjectByName(world.sandbox, bone.name, sceneId(world.sandbox, id)).value() -> id; 
           // modassert(boneId.has_value(), std::string("no bone names: ") + bone.name);
           gameobjMesh.boneGameObjIdCache.at(i).at(j) = boneId;
         }
-
-        std::cout << "Looking for root: " << rootname << ", bone name: " << bone.name << std::endl;
-
-        auto gameobj = maybeGetGameObjectByName(world.sandbox, rootname, sceneId(world.sandbox, id));
-        assert(gameobj.has_value());
-        auto skeletonId = gameobj.value() -> id;
-
-        auto matrix = armatureTransform2(world.sandbox, boneId, skeletonId);
+        modassert(gameobjMesh.rootidCache != 0, "didn't get root id cache");
+        auto matrix = armatureTransform2(world.sandbox, boneId, gameobjMesh.rootidCache);
         bone.offsetMatrix = matrix * glm::inverse(bone.initialBonePose);
       }
     }

@@ -17,6 +17,8 @@ struct GameObjectMesh {
   float discardAmount;
   glm::vec3 emissionAmount;
   glm::vec4 tint;
+  objid rootidCache;
+
 };
 
 GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util);

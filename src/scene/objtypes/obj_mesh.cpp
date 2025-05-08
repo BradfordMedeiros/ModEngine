@@ -63,6 +63,7 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
     .meshNames = meshesToLoad,
     .meshesToRender = meshesToRender,
   };
+  obj.rootidCache = 0;
 
   std::vector<std::vector<objid>> boneGameObjIdCache;
   for (auto &mesh : obj.meshesToRender){
@@ -73,7 +74,7 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
     boneGameObjIdCache.push_back(emptyCache);
   }
   obj.boneGameObjIdCache = boneGameObjIdCache;
-  
+
   //std::cout << "root mesh name: " << rootMeshName << ", node only: " << obj.nodeOnly << std::endl;
   createAutoSerializeWithTextureLoading((char*)&obj, meshAutoserializer, attr, util);
   return obj;

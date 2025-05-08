@@ -24,7 +24,7 @@ struct World {
   std::unordered_map<std::string, MeshRef> meshes;
   std::unordered_map<std::string, TextureRef> textures;
   std::unordered_map<objid, std::vector<Animation>> animations;
-  std::function<void(GameObject&)> onObjectUpdate;
+  std::function<void(objid)> onObjectUpdate;
   std::function<void(GameObject&)> onObjectCreate;
   std::function<void(objid, bool)> onObjectDelete;
   std::set<objid> entitiesToUpdate;
@@ -38,7 +38,7 @@ std::set<std::string> getObjautoserializerFields(std::string& name);
 World createWorld(
   collisionPairPosFn onObjectEnter, 
   collisionPairFn onObjectLeave, 
-  std::function<void(GameObject&)> onObjectUpdate, 
+  std::function<void(objid)> onObjectUpdate, 
   std::function<void(GameObject&)> onObjectCreate,
   std::function<void(objid, bool)> onObjectDelete,
   btIDebugDraw* debugDrawer,

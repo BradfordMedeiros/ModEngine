@@ -239,7 +239,7 @@ std::unordered_map<std::string, GameobjAttributesWithId> multiObjAdd(
 
   std::unordered_map<std::string,  GameobjAttributesWithId> nameToAdditionalFields;
   std::unordered_map<objid, objid> nodeIdToRealId;
-  auto& rootObj = getGameObject(scene, rootId);
+  auto rootObj = getGameObject(scene, rootId);
   std::vector<objid> addedIds;
 
   for (auto [nodeId, transform] : gameobjTransforms){

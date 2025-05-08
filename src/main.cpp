@@ -1596,17 +1596,23 @@ int main(int argc, char* argv[]){
 
   std::vector<std::string> allTexturesToLoad = {  "./res/textures/crosshairs/crosshair029.png", "./res/textures/crosshairs/crosshair008.png" };
 
+  bool enableNet = false;
   world = createWorld(
     onObjectEnter, 
     onObjectLeave, 
-    [](GameObject& obj) -> void {
-      netObjectUpdate(world, obj, netcode, bootStrapperMode);
+    [enableNet](objid id) -> void {
+      if (enableNet){
+        GameObject& obj = getGameObject(world.sandbox, id); // i could defer getting this
+        netObjectUpdate(world, obj, netcode, bootStrapperMode);        
+      }
     }, 
-    [](GameObject& obj) -> void {
-      netObjectCreate(world, obj, netcode, bootStrapperMode);
+    [enableNet](GameObject& obj) -> void {
+      if (enableNet){
+        netObjectCreate(world, obj, netcode, bootStrapperMode);
+      }
       cBindings.onObjectAdded(obj.id);
     },
-    [](objid id, bool isNet) -> void {
+    [enableNet](objid id, bool isNet) -> void {
       std::cout << "deleted obj id: " << id << std::endl;
       maybeResetCamera(id);
       unsetSelectedIndex(state.editor, id, true);
@@ -1614,7 +1620,9 @@ int main(int argc, char* argv[]){
         setSelectedOctreeId(std::nullopt);
       }
       removeScheduledTaskByOwner({ id });
-      netObjectDelete(id, isNet, netcode, bootStrapperMode);
+      if (enableNet){
+        netObjectDelete(id, isNet, netcode, bootStrapperMode);
+      }
       cBindings.onObjectRemoved(id);
       freeTexture(id);
     }, 
