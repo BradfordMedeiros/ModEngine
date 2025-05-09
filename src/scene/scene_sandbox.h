@@ -144,7 +144,6 @@ void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation tra
 void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position);
 void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position);
 void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale);
-void updateRelativeScale(SceneSandbox& sandbox, objid id, glm::vec3 scale);
 void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation);
 void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation);
 

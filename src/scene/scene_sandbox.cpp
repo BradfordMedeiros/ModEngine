@@ -702,11 +702,7 @@ void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
   newTransform.scale = scale;
   updateAbsoluteTransform(sandbox, id, newTransform); 
 }
-void updateRelativeScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
-  auto oldRelativeTransform = calcRelativeTransform(sandbox, id);
-  oldRelativeTransform.scale = scale;
-  updateRelativeTransform(sandbox, id, oldRelativeTransform);
-}
+
 void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
   auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
   Transformation newTransform = oldAbsoluteTransform.transform;

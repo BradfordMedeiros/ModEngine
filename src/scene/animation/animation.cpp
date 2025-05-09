@@ -12,8 +12,6 @@ struct KeyInfo {
 };
 
 //// slightly off, check comparison func, maybe to do with the float values idk.
-// this probably will need to be sped up.  Might make sense to put this into a ticktime -> position/scale/rot structure + seems to miss last key.  assumes array is in time order as well.
-// ^ old note, dont remember, should verify
 template<typename KeyType>   
 KeyIndex findKeyIndex(std::vector<KeyType>& keys, float currentTick, int lookupFromIndex){
   int primaryTick = lookupFromIndex;
@@ -83,7 +81,6 @@ std::vector<AnimationPose> animationPosesAtTime(float currentTime, objid sceneId
 
   std::vector<AnimationPose> poses;
 
-  std::cout << "ticks per second: " << animation.ticksPerSecond << std::endl;
   auto currentTick = currentTime * animation.ticksPerSecond;                                  // 200 ticks / 100 ticks per second = 2 seconds
   //printAnimationInfo(animation, currentTime,currentTick);
 
@@ -107,8 +104,6 @@ std::vector<AnimationPose> animationPosesAtTime(float currentTime, objid sceneId
     lookup.lastAnimationIndexScale = keyInfo.scale.primaryIndex;
     lookup.lastAnimationIndexRot = keyInfo.rotation.primaryIndex;
     lookup.lastTick = currentTick;
-
-    std::cout << "last rot index: " << lookup.lastAnimationIndexRot << std::endl;
 
     Transformation newNodeTransformation = (
       shouldInterpolate ? 
