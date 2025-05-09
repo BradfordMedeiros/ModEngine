@@ -1,5 +1,7 @@
 #include "./worldtiming.h"
 
+std::optional<objid> getGameObjectByName(std::string name, objid sceneId);
+
 WorldTiming createWorldTiming(float initialTime){
   AnimationState animations;
   std::vector<int32_t> playbacksToRemove;
@@ -89,8 +91,6 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
   timings.playbacksToRemove.clear();
 }
 
-
-std::optional<objid> getGameObjectByName(std::string name, objid sceneId);
 AnimationWithIds resolveAnimationIds(Animation& animation, objid sceneId) {
   std::vector<objid> channelObjIds;
   std::vector<KeyInfoLookup> lookup;
