@@ -93,13 +93,16 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId);
 AnimationWithIds resolveAnimationIds(Animation& animation, objid sceneId) {
   std::vector<objid> channelObjIds;
+  std::vector<KeyInfoLookup> lookup;
   for (auto &channel : animation.channels){
     auto id = getGameObjectByName(channel.nodeName, sceneId).value();
     channelObjIds.push_back(id);
+    lookup.push_back(KeyInfoLookup{});
   }
   return AnimationWithIds {
     .animation = animation,
     .channelObjIds = channelObjIds,
+    .lookup = lookup,
   };
 }
 

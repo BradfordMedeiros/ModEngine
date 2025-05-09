@@ -36,9 +36,17 @@ struct Animation {
   std::vector<AnimationChannel> channels;
 };
 
+struct KeyInfoLookup {
+  int lastAnimationIndexPos = 0;
+  int lastAnimationIndexScale = 0;
+  int lastAnimationIndexRot = 0;
+  float lastTick = 0;
+};
+
 struct AnimationWithIds {
   Animation animation;
   std::vector<objid> channelObjIds;
+  std::vector<KeyInfoLookup> lookup;
 };
 
 struct ModelData {

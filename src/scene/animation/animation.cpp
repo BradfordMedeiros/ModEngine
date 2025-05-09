@@ -15,11 +15,12 @@ struct KeyInfo {
 // this probably will need to be sped up.  Might make sense to put this into a ticktime -> position/scale/rot structure + seems to miss last key.  assumes array is in time order as well.
 // ^ old note, dont remember, should verify
 template<typename KeyType>   
-KeyIndex findKeyIndex(std::vector<KeyType>& keys, float currentTick){
-  int primaryTick = 0;
-  int secondaryTick = 0;
+KeyIndex findKeyIndex(std::vector<KeyType>& keys, float currentTick, int lookupFromIndex){
+  int primaryTick = lookupFromIndex;
+  int secondaryTick = lookupFromIndex;
   float primaryIndexAmount = 0.f;
-  for (int i = 0; i < keys.size(); i++){                 
+
+  for (int i = lookupFromIndex; i < keys.size(); i++){
     auto key = keys[i];
     if (i == (keys.size() - 1)){
       if (key.mTime <= currentTick){
@@ -52,11 +53,11 @@ KeyIndex findKeyIndex(std::vector<KeyType>& keys, float currentTick){
   };
 }
 
-KeyInfo keyInfoForTick(AnimationChannel& channel, float currentTick){
+KeyInfo keyInfoForTick(AnimationChannel& channel, float currentTick, KeyInfoLookup& keylookup){
   return KeyInfo {
-    .position = findKeyIndex(channel.positionKeys, currentTick),
-    .scale = findKeyIndex(channel.scalingKeys, currentTick),
-    .rotation = findKeyIndex(channel.rotationKeys, currentTick),
+    .position = findKeyIndex(channel.positionKeys, currentTick, 0),
+    .scale = findKeyIndex(channel.scalingKeys, currentTick, 0),
+    .rotation = findKeyIndex(channel.rotationKeys, currentTick, 0),
   };
 }
 
@@ -81,16 +82,34 @@ std::vector<AnimationPose> animationPosesAtTime(float currentTime, objid sceneId
   assert(animation.ticksPerSecond != 0);                                                      // some models can have 0 ticks, probably should just set a default rate for these
 
   std::vector<AnimationPose> poses;
+
+  std::cout << "ticks per second: " << animation.ticksPerSecond << std::endl;
   auto currentTick = currentTime * animation.ticksPerSecond;                                  // 200 ticks / 100 ticks per second = 2 seconds
   //printAnimationInfo(animation, currentTime,currentTick);
 
   //modlog("animation", std::string("current time: ") + std::to_string(currentTime) + ", " + std::string("current tick: ") + std::to_string(currentTick));
 
-
   for (int i = 0; i < animation.channels.size(); i++){
     auto targetId = animationWithIds.channelObjIds.at(i);
     auto& channel = animation.channels.at(i);
-    auto keyInfo = keyInfoForTick(channel, currentTick);
+    auto& lookup = animationWithIds.lookup.at(i);
+
+    if (currentTick < lookup.lastTick){
+      lookup.lastAnimationIndexPos = 0;
+      lookup.lastAnimationIndexScale = 0;
+      lookup.lastAnimationIndexRot = 0;
+      lookup.lastTick = 0;
+    }
+
+    auto keyInfo = keyInfoForTick(channel, currentTick, lookup);
+
+    lookup.lastAnimationIndexPos = keyInfo.position.primaryIndex;
+    lookup.lastAnimationIndexScale = keyInfo.scale.primaryIndex;
+    lookup.lastAnimationIndexRot = keyInfo.rotation.primaryIndex;
+    lookup.lastTick = currentTick;
+
+    std::cout << "last rot index: " << lookup.lastAnimationIndexRot << std::endl;
+
     Transformation newNodeTransformation = (
       shouldInterpolate ? 
       interpolate(
