@@ -292,7 +292,7 @@ std::vector<int32_t> listScenes(std::optional<std::vector<std::string>> tags){
   return filteredIds;
 }
 
-std::vector<objid> listObjAndDescInScene(objid sceneId){
+std::set<objid> listObjAndDescInScene(objid sceneId){
   return listObjAndDescInScene(world.sandbox, sceneId);
 }
 std::set<objid> getChildrenIdsAndParent(objid id){

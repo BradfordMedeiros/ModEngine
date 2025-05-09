@@ -77,7 +77,7 @@ void resetScene(std::optional<objid> sceneId);
 bool saveScene(bool includeIds, objid sceneId, std::optional<std::string> filename);
 
 std::vector<int32_t> listScenes(std::optional<std::vector<std::string>> tags);
-std::vector<objid> listObjAndDescInScene(objid sceneId);
+std::set<objid> listObjAndDescInScene(objid sceneId);
 std::set<objid> getChildrenIdsAndParent(objid id);
 std::vector<ScenegraphDebug> scenegraph();
 
