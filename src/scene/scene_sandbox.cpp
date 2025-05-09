@@ -317,9 +317,6 @@ std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid id){
 void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects){  
   for (auto id : objects){
     Scene& scene = sandbox.mainScene;
-    //sif (scene.idToGameObjectsH.find(id) == scene.idToGameObjectsH.end()){
-    //s  continue;
-    //s}
 
     std::string& objectName = getGameObject(scene, id).name;
     auto sceneId = scene.idToGameObjectsH.at(id).sceneId;
