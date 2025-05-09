@@ -647,6 +647,10 @@ void removeObjectFromCache(SceneSandbox& sandbox, objid id){
   sandbox.updatedIds.erase(id);
 }
 
+struct AbsoluteTransformUpdate {
+
+};
+
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   auto parentId = getGameObjectH(sandbox, id).parentId;
   auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
@@ -681,6 +685,89 @@ void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation tra
   };
   updateAllChildrenPositions(sandbox, id);
 }
+
+glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
+  TransformCacheElement& element = sandbox.mainScene.absoluteTransforms.at(id);
+  return element.matrix;
+}
+Transformation& fullTransformation(SceneSandbox& sandbox, objid id){
+  return sandbox.mainScene.absoluteTransforms.at(id).transform;
+}
+
+void removeScene(SceneSandbox& sandbox, objid sceneId){
+  modassert(sceneId != 0, "cannot remove root scene");
+  modassert (sandbox.mainScene.sceneToNameToId.find(sceneId) != sandbox.mainScene.sceneToNameToId.end(), "scene does not exist");
+  //removeObjectsFromScenegraph(sandbox, listObjAndDescInScene(sandbox, sceneId)); // @TODO this should get children too
+  sandbox.sceneIdToSceneMetadata.erase(sceneId);
+  sandbox.mainScene.sceneToNameToId.erase(sceneId); 
+}
+
+bool hasDescendent(SceneSandbox& sandbox, objid id, objid descendent){
+  auto allDescendents = getChildrenIdsAndParent(sandbox.mainScene, id);
+  return (allDescendents.count(descendent) > 0);
+}
+
+void makeParent(SceneSandbox& sandbox, objid child, objid parent){
+  modassert(child != parent, "cannot parent a node to itself");
+  modassert(!hasDescendent(sandbox, child, parent), "cannot parent a node to a descendent of itself");
+  enforceParentRelationship(sandbox.mainScene, child, parent);
+  updateAllChildrenPositions(sandbox, parent, true); // TODO - only update the newly parented children
+}
+
+std::optional<objid> getParent(SceneSandbox& sandbox, objid id){
+  GameObjectH& gameobjecth = getGameObjectH(sandbox, id);
+  if (gameobjecth.parentId == 0){
+    return std::nullopt;
+  }
+  return gameobjecth.parentId;
+}
+
+// Misc utility fns 
+bool sceneExists(SceneSandbox& sandbox, objid sceneId){
+  return !(sandbox.sceneIdToSceneMetadata.find(sceneId) == sandbox.sceneIdToSceneMetadata.end());
+}    
+
+objid sceneId(SceneSandbox& sandbox, objid id){
+  return sandbox.mainScene.idToGameObjectsH.at(id).sceneId;
+}
+
+std::vector<objid> getByName(SceneSandbox& sandbox, std::string name){
+  std::vector<objid> ids;
+  for (auto &gameobj : sandbox.mainScene.gameobjects){
+    if (!gameobj.inUse){
+      continue;
+    }
+    if (gameobj.gameobj.name == name){
+      ids.push_back(gameobj.gameobj.id);
+    }
+  }
+  return ids;
+}
+
+objid rootSceneId(SceneSandbox& sandbox){
+  return 0;
+}
+
+std::optional<objid> sceneIdByName(SceneSandbox& sandbox, std::string name){
+  for (auto &[sceneId, metadata] : sandbox.sceneIdToSceneMetadata){
+    if (metadata.name == name){
+      return sceneId;
+    }
+  }
+  return std::nullopt;
+}
+
+int getNumberOfObjects(SceneSandbox& sandbox){
+  return sandbox.mainScene.gameobjects.size();
+}
+
+int getNumberScenesLoaded(SceneSandbox& sandbox){
+  return sandbox.mainScene.sceneToNameToId.size();
+}
+
+
+// For convenience, just use the absolute / relative transform
+////////////////////////////////////////////////////////////////////////
 void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
   auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
   Transformation newTransform = oldAbsoluteTransform.transform;
@@ -710,82 +797,4 @@ void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation)
   auto oldRelativeTransform = calcRelativeTransform(sandbox, id);
   oldRelativeTransform.rotation = rotation;
   updateRelativeTransform(sandbox, id, oldRelativeTransform);
-}
-
-glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
-  TransformCacheElement& element = sandbox.mainScene.absoluteTransforms.at(id);
-  //assert(element.updated == false && element.absTransformUpdated == false);
-  return element.matrix;
-}
-Transformation& fullTransformation(SceneSandbox& sandbox, objid id){
-  return sandbox.mainScene.absoluteTransforms.at(id).transform;
-}
-
-void removeScene(SceneSandbox& sandbox, objid sceneId){
-  modassert(sceneId != 0, "cannot remove root scene");
-  modassert (sandbox.mainScene.sceneToNameToId.find(sceneId) != sandbox.mainScene.sceneToNameToId.end(), "scene does not exist");
-  //removeObjectsFromScenegraph(sandbox, listObjAndDescInScene(sandbox, sceneId)); // @TODO this should get children too
-  sandbox.sceneIdToSceneMetadata.erase(sceneId);
-  sandbox.mainScene.sceneToNameToId.erase(sceneId); 
-}
-bool sceneExists(SceneSandbox& sandbox, objid sceneId){
-  return !(sandbox.sceneIdToSceneMetadata.find(sceneId) == sandbox.sceneIdToSceneMetadata.end());
-}    
-
-bool hasDescendent(SceneSandbox& sandbox, objid id, objid descendent){
-  auto allDescendents = getChildrenIdsAndParent(sandbox.mainScene, id);
-  return (allDescendents.count(descendent) > 0);
-}
-
-void makeParent(SceneSandbox& sandbox, objid child, objid parent){
-  modassert(child != parent, "cannot parent a node to itself");
-  modassert(!hasDescendent(sandbox, child, parent), "cannot parent a node to a descendent of itself");
-  enforceParentRelationship(sandbox.mainScene, child, parent);
-  updateAllChildrenPositions(sandbox, parent, true); // TODO - only update the newly parented children
-}
-
-std::optional<objid> getParent(SceneSandbox& sandbox, objid id){
-  GameObjectH& gameobjecth = getGameObjectH(sandbox, id);
-  if (gameobjecth.parentId == 0){
-    return std::nullopt;
-  }
-  return gameobjecth.parentId;
-}
-
-objid sceneId(SceneSandbox& sandbox, objid id){
-  return sandbox.mainScene.idToGameObjectsH.at(id).sceneId;
-}
-
-std::vector<objid> getByName(SceneSandbox& sandbox, std::string name){
-  std::vector<objid> ids;
-  for (auto &gameobj : sandbox.mainScene.gameobjects){
-    if (!gameobj.inUse){
-      continue;
-    }
-    if (gameobj.gameobj.name == name){
-      ids.push_back(gameobj.gameobj.id);
-    }
-  }
-  return ids;
-}
-
-int getNumberOfObjects(SceneSandbox& sandbox){
-  return sandbox.mainScene.gameobjects.size();
-}
-
-int getNumberScenesLoaded(SceneSandbox& sandbox){
-  return sandbox.mainScene.sceneToNameToId.size();
-}
-
-std::optional<objid> sceneIdByName(SceneSandbox& sandbox, std::string name){
-  for (auto &[sceneId, metadata] : sandbox.sceneIdToSceneMetadata){
-    if (metadata.name == name){
-      return sceneId;
-    }
-  }
-  return std::nullopt;
-}
-
-objid rootSceneId(SceneSandbox& sandbox){
-  return 0;
 }
