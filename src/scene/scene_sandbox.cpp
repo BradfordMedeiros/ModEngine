@@ -556,11 +556,8 @@ Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId){
 
 // What should the absolute transform be given a parents absolute and a relative child transform
 Transformation calcAbsoluteTransform(SceneSandbox& sandbox, objid parentId, Transformation transform){
-  Transformation parentTransform = sandbox.mainScene.absoluteTransforms.at(parentId).transform;
-
-  glm::mat4 parentMatrix = matrixFromComponents(parentTransform);
+  glm::mat4 parentMatrix = sandbox.mainScene.absoluteTransforms.at(parentId).matrix;
   glm::mat4 childMatrix = matrixFromComponents(transform);
-
   auto finalTransform = parentMatrix * childMatrix;
   return getTransformationFromMatrix(finalTransform);
 }
@@ -695,7 +692,7 @@ void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position)
   auto oldRelativeTransform = calcRelativeTransform(sandbox, id);
   oldRelativeTransform.position = position;
   updateRelativeTransform(sandbox, id, oldRelativeTransform);
-}
+};;
 void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
   auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
   Transformation newTransform = oldAbsoluteTransform.transform;
