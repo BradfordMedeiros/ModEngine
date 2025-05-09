@@ -290,19 +290,16 @@ void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name
   addObjectToCache(sandbox, addedId);
 }
 
-void traverseNodes(Scene& scene, objid id, std::function<void(objid)> onAddObject){
+void traverseNodes(Scene& scene, objid id, std::set<objid>& objectIds){
   auto parentObjH = scene.idToGameObjectsH.at(id);
-  onAddObject(parentObjH.id);
+  objectIds.insert(parentObjH.id);
   for (objid id : parentObjH.children){
-    traverseNodes(scene, id, onAddObject);
+    traverseNodes(scene, id, objectIds);
   }
 }
 std::set<objid> getChildrenIdsAndParent(Scene& scene,  objid id){
   std::set<objid> objectIds;
-  auto onAddObject = [&objectIds](objid id) -> void {
-    objectIds.insert(id);
-  };
-  traverseNodes(scene, id, onAddObject);
+  traverseNodes(scene, id, objectIds);
   return objectIds;
 }
 
