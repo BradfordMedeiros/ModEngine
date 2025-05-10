@@ -21,7 +21,7 @@ struct CustomApiBindings {
   std::vector<std::string> (*listSceneFiles)(std::optional<objid> sceneId);
   std::optional<objid> (*sceneIdByName)(std::string name);
   std::optional<std::string>(*sceneNameById)(objid id);
-  std::vector<objid>(*listObjAndDescInScene)(objid sceneId);
+  std::set<objid>(*listObjAndDescInScene)(objid sceneId);
   std::set<objid> (*getChildrenIdsAndParent)(objid id);
   objid (*rootSceneId)();
   std::vector<ScenegraphDebug> (*scenegraph)();

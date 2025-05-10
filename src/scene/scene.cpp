@@ -1037,7 +1037,7 @@ void removeObjectFromScene(World& world, objid gameobjId){
     //assert(false);
     return;
   }
-  auto idsToRemove = idsToRemoveFromScenegraph(world.sandbox, gameobjId);
+  std::set<objid> idsToRemove = idsToRemoveFromScenegraph(world.sandbox, gameobjId);
   for (auto id : idsToRemove){
     if (!idExists(world.sandbox, id)){
       continue;
@@ -1084,12 +1084,12 @@ void removeGroupFromScene(World& world, objid idInGroup){
 // idk
 // maybe this isn't too bad, might need to make the listObj more efficient ? 
 // just kind of gross
-std::vector<objid> stableObjInScene(World& world, objid sceneId){
+std::set<objid> stableObjInScene(World& world, objid sceneId){
   const int LOOP_LIMIT = 1000;
   std::set<objid> idAlreadyCalledDelete;
   for (int i = 0; i < LOOP_LIMIT; i++){
     bool newObject = false;
-    auto objectIds = listObjAndDescInScene(world.sandbox, sceneId);
+    std::set<objid> objectIds = listObjAndDescInScene(world.sandbox, sceneId);
     bool oneExists = false;
     for (auto objectId : objectIds){
       if (!idExists(world.sandbox, objectId)){
@@ -1122,7 +1122,7 @@ void removeSceneFromWorld(World& world, objid sceneId){
     return;   // @todo maybe better to throw error instead
   }
 
-  auto objectIds = stableObjInScene(world, sceneId);
+  std::set<objid> objectIds = stableObjInScene(world, sceneId);
   std::set<objid> scenesToUnload;
   for (auto objectId : objectIds){
     if (!idExists(world.sandbox, objectId)){  // this is needed b/c removeobject by id can in turn end up removing other entities
