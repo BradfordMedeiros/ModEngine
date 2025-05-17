@@ -268,21 +268,25 @@ endif()
 ## WEBM - video
 if (NOT NO_INCLUDE_VIDEO)
   message("MODBUILD - Including WEBM AND VPX")
-  target_link_libraries(${PROJECT_NAME} "webm")
-  target_link_libraries(${PROJECT_NAME} "vpx")
+  #target_link_libraries(${PROJECT_NAME} "webm")
+  #target_link_libraries(${PROJECT_NAME} "vpx")
 
-  find_package(PkgConfig REQUIRED)
-  pkg_check_modules(AVCODEC     REQUIRED libavcodec)
-  pkg_check_modules(AVFORMAT    REQUIRED libavformat)
-  pkg_check_modules(AVUTIL      REQUIRED libavutil)
-  pkg_check_modules(SWSCALE     REQUIRED  libswscale)
-  pkg_check_modules(SWRESAMPLE  REQUIRED libswresample)
-  
-  target_link_libraries(${PROJECT_NAME} ${AVFORMAT_LIBRARIES})
-  target_link_libraries(${PROJECT_NAME} ${AVCODEC_LIBRARIES})
-  target_link_libraries(${PROJECT_NAME} ${AVUTIL_LIBRARIES})
-  target_link_libraries(${PROJECT_NAME} ${SWSCALE_LIBRARIES})
-  target_link_libraries(${PROJECT_NAME} "swresample")      # todo make standard
+  set(FFMPEG_ROOT "${LIB_DIR}/ffmpeg_n4.4.1/build")
+  set(FFMPEG_INCLUDE_DIR "${FFMPEG_ROOT}/include")
+  set(FFMPEG_LIB_DIR "${FFMPEG_ROOT}/lib")
+
+  include_directories(${FFMPEG_INCLUDE_DIR})
+  link_directories(${FFMPEG_LIB_DIR})
+
+  set(FFMPEG_LIBS
+      avformat
+      avcodec
+      avutil
+      swscale
+      swresample
+  )
+
+  target_link_libraries(${PROJECT_NAME} ${FFMPEG_LIBS})
 
 else()
   message("MODBUILD - Not Including WEBM AND VPX")
