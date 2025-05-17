@@ -46,3 +46,40 @@ cd libwebm/build
 cmake ..
 make
 make install
+
+
+
+### Building ffmpeg
+Vendored in the dependencies, this is how i built it. 
+headers: build/include  , .so files : build/lib
+
+
+ffmpeg 
+./configure \
+  --prefix="$PWD/build" \
+  --disable-static \
+  --enable-shared \
+  --disable-everything \
+  --enable-avformat \
+  --enable-avcodec \
+  --enable-avutil \
+  --enable-protocol=file \
+  --enable-decoder=vp8 \
+  --enable-decoder=vp9 \
+  --enable-decoder=libvpx_vp8 \
+  --enable-decoder=libvpx_vp9 \
+  --enable-decoder=opus \
+  --enable-decoder=vorbis \
+  --enable-demuxer=matroska \
+  --enable-parser=vp8 \
+  --enable-parser=vp9 \
+  --enable-libvpx \
+  --enable-libopus \
+  --enable-libvorbis \
+  --disable-network \
+  --disable-doc \
+  --disable-debug \
+  --disable-autodetect
+
+make -j$(nproc)
+make install

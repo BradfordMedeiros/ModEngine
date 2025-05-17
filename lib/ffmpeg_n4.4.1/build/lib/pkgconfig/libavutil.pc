@@ -1,0 +1,14 @@
+prefix=/home/brad/gamedev/mosttrusted/libs/ffmpeg/build
+exec_prefix=${prefix}
+libdir=/home/brad/gamedev/mosttrusted/libs/ffmpeg/build/lib
+includedir=/home/brad/gamedev/mosttrusted/libs/ffmpeg/build/include
+
+Name: libavutil
+Description: FFmpeg utility library
+Version: 56.70.100
+Requires: 
+Requires.private: 
+Conflicts:
+Libs: -L${libdir}  -lavutil 
+Libs.private: -pthread -lm
+Cflags: -I${includedir}

@@ -1,0 +1,14 @@
+prefix=/home/brad/gamedev/mosttrusted/libs/ffmpeg/build
+exec_prefix=${prefix}
+libdir=/home/brad/gamedev/mosttrusted/libs/ffmpeg/build/lib
+includedir=/home/brad/gamedev/mosttrusted/libs/ffmpeg/build/include
+
+Name: libavfilter
+Description: FFmpeg audio/video filtering library
+Version: 7.110.100
+Requires: 
+Requires.private: libavutil >= 56.70.100
+Conflicts:
+Libs: -L${libdir}  -lavfilter 
+Libs.private: -pthread -lm
+Cflags: -I${includedir}
