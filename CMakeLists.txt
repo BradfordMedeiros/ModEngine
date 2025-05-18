@@ -278,13 +278,14 @@ if (NOT NO_INCLUDE_VIDEO)
   include_directories(${FFMPEG_INCLUDE_DIR})
   link_directories(${FFMPEG_LIB_DIR})
 
-  set(FFMPEG_LIBS
-      avformat
-      avcodec
-      avutil
-      swscale
-      swresample
-  )
+  target_link_libraries(${PROJECT_NAME} "avformat" "${FFMPEG_LIB_DIR}")
+  target_link_libraries(${PROJECT_NAME} "avcodec" "${FFMPEG_LIB_DIR}")
+  target_link_libraries(${PROJECT_NAME} "avutil" "${FFMPEG_LIB_DIR}")
+  target_link_libraries(${PROJECT_NAME} "avformat" "${FFMPEG_LIB_DIR}")
+
+  target_link_libraries(${PROJECT_NAME} "swscale" "${FFMPEG_LIB_DIR}")
+  target_link_libraries(${PROJECT_NAME} "swresample" "${FFMPEG_LIB_DIR}")
+
 
   target_link_libraries(${PROJECT_NAME} ${FFMPEG_LIBS})
 
