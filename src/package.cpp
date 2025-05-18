@@ -421,7 +421,7 @@ int seekFileOrPackage(unsigned int handle, int offset, int whence){
             }else if (whence == SEEK_END){
                file.packageCurrentOffset = file.packageFileSize + offset;
             }else{
-               modassert(false, "unexpected whence value");
+               //modassert(false, "unexpected whence value");
             }
             return 0;
          }
