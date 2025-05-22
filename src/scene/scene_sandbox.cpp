@@ -501,22 +501,54 @@ std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId)
   return ids;
 }
 
-
-struct RelativeTransformUpdate {
+struct TransformUpdate {
   objid id;
   Transformation transform;
 };
-std::vector<RelativeTransformUpdate> relativeUpdates;
+std::vector<TransformUpdate> relativeUpdates;
+std::vector<TransformUpdate> absoluteUpdates;
+
 bool printUpdatePositions = false;
+
+int nodeDepth(SceneSandbox& sandbox, objid id){
+  int depth = 0;
+
+  objid currentId = id;
+  while(true){
+    auto parentId = getGameObjectH(sandbox, currentId).parentId;
+    if (parentId == 0){
+      return depth;
+    }
+    currentId = parentId;
+    depth++;
+  }
+  return 0;
+}
 
 std::set<objid> updateSandbox(SceneSandbox& sandbox){
   std::set<objid> oldUpdated = sandbox.updatedIds;
   sandbox.updatedIds = {};
-  relativeUpdates = {};
+
+  //for (auto &update : relativeUpdates){
+  //  getGameObject(sandbox, update.id).transformation = update.transform;
+  //}
 
   printUpdatePositions = true;
   updateAllChildrenPositions(sandbox, 0, false);
   printUpdatePositions = false;
+
+  std::vector<int> depths;
+  for (auto &update : absoluteUpdates){
+    depths.push_back(nodeDepth(sandbox, update.id));
+  }
+
+  std::cout << "update depth size: " << print(depths) << std::endl;
+  for (int i = 0; i < absoluteUpdates.size(); i++){
+
+  }
+
+  relativeUpdates = {};
+  absoluteUpdates = {};
 
   return oldUpdated;
 }
@@ -541,6 +573,8 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
       continue;
     }
     GameObject& gameobj = getGameObject(sandbox, id);
+
+    // physicsOptions.enabled exempt because a physics object is not effected by the parent
     if (!gameobj.physicsOptions.enabled || justAdded /* this is so when you spawn it, the relative transform determines where it goes */){
        auto currentConstraint = gameobj.transformation;
        auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
@@ -556,8 +590,6 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
     }
   }
 }
-
-
 
 void addObjectToCache(SceneSandbox& sandbox, objid id){
   objid gameobjIndex = 0;
@@ -579,8 +611,6 @@ void removeObjectFromCache(SceneSandbox& sandbox, objid id){
   sandbox.updatedIds.erase(id);
 }
 
-
-
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   auto parentId = getGameObjectH(sandbox, id).parentId;
   auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
@@ -600,6 +630,10 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
     getGameObject(sandbox, id).transformation = transform;
   }
   updateAllChildrenPositions(sandbox, id);
+  absoluteUpdates.push_back(TransformUpdate {
+    .id = id,
+    .transform = transform,
+  });
 }
 void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   auto parentId = getGameObjectH(sandbox, id).parentId;
@@ -612,7 +646,7 @@ void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation tra
     .transform = newTransform,
   };
   updateAllChildrenPositions(sandbox, id);
-  relativeUpdates.push_back(RelativeTransformUpdate {
+  relativeUpdates.push_back(TransformUpdate {
     .id = id,
     .transform = transform,
   });
