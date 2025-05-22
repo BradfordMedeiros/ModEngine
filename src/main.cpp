@@ -448,7 +448,7 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
 struct traversalData {
   objid id;
   objid directIndex;
-  glm::mat4* modelMatrix;
+  glm::mat4 modelMatrix;
 };
 
 objid directIndex(objid objectId){
@@ -483,7 +483,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     datum.push_back(traversalData{
       .id = id,
       .directIndex = transformCacheElement.gameobjIndex,
-      .modelMatrix = &transformCacheElement.matrix,
+      .modelMatrix = matrixFromComponents(transformCacheElement.transform),
     });
   }
 
@@ -496,7 +496,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       GameObject& gameobject = getGameObjectDirectIndex(world.sandbox, data.directIndex); 
       if (gameobject.layer == layer.name){  // TODO PERF rm this string comparison 
         int32_t id = data.id; 
-        glm::mat4& modelMatrix = *data.modelMatrix; 
+        glm::mat4& modelMatrix = data.modelMatrix; 
         std::string& shader = gameobject.shader;
         if (id < 0){
           modassert(false, "unexpected id render world");
@@ -699,8 +699,11 @@ void renderDebugUi(Color pixelColor){
   drawTextNdi("cursor: (" + std::to_string(ndiX) + " | " + std::to_string(ndiY) + ") - " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.resolution.x) + "||" + std::to_string(state.resolution.y) + ")", uiXOffset, uiYOffset + offsetPerLine * 5, state.fontsize);
   
   std::string position = "n/a";
+  std::string worldPosition= "n/a";
   std::string scale = "n/a";
+  std::string worldScale = "n/a";
   std::string rotation = "n/a";
+  std::string worldRotation = "n/a";
 
   auto selectedValue = latestSelected(state.editor);
   if (selectedValue.has_value()){
@@ -709,12 +712,18 @@ void renderDebugUi(Color pixelColor){
     position = print(transformation.position);
     scale = print(transformation.scale);
     rotation = serializeQuat(transformation.rotation);
+
+    auto worldTransformation = gameobjectTransformation(world, selectedIndex, true);
+    worldPosition = print(worldTransformation.position);
+    worldScale = print(worldTransformation.scale);
+    worldRotation = print(worldTransformation.rotation);
   }
 
-  drawTextNdi("position: " + position, uiXOffset, uiYOffset + offsetPerLine * 6, state.fontsize);
-  drawTextNdi("scale: " + scale, uiXOffset, uiYOffset + offsetPerLine * 7, state.fontsize);
-  drawTextNdi("rotation: " + rotation, uiXOffset, uiYOffset + offsetPerLine * 8, state.fontsize);
+  drawTextNdi("position: " + position + " / " + worldPosition, uiXOffset, uiYOffset + offsetPerLine * 6, state.fontsize);
+  drawTextNdi("scale: " + scale + " / " + worldScale, uiXOffset, uiYOffset + offsetPerLine * 7, state.fontsize);
+  drawTextNdi("rotation: " + rotation + worldRotation, uiXOffset, uiYOffset + offsetPerLine * 8, state.fontsize);
     
+
   drawTextNdi("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), uiXOffset, uiYOffset + offsetPerLine * 9, state.fontsize);
   drawTextNdi("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , uiXOffset, uiYOffset + offsetPerLine * 10, state.fontsize);
 
