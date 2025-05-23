@@ -99,7 +99,7 @@ std::set<objid> addNObjects(CustomApiBindings& gameapi, objid sceneId, int width
         addNCounter++;
         auto id = gameapi.makeObjectAttr(sceneId, name, attr, submodelAttributes);
         std::cout << "addNObjects: " << addNCounter << std::endl;
-        gameapi.setGameObjectPosition(gameapi.groupId(id.value()), glm::vec3(xoffset, yoffset, zoffset), true);
+        gameapi.setGameObjectPosition(gameapi.groupId(id.value()), glm::vec3(xoffset, yoffset, zoffset), true, Hint{});
         ids.insert(id.value()); 
       }
     }

@@ -484,4 +484,8 @@ std::string relativePath(std::string folder, std::string path, std::string worki
 bool isInFolder(std::string folder, std::string path, std::string workingDir);
 bool isExtensionType(std::string& file, std::vector<std::string>& extensions);
 
+struct Hint {
+  const char* hint = NULL;
+};
+
 #endif

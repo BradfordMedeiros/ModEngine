@@ -537,6 +537,7 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
 std::set<objid> updateSandbox(SceneSandbox& sandbox){
   std::set<objid> oldUpdated = sandbox.updatedIds;
   sandbox.updatedIds = {};
+  std::cout << "hint---------- updateSandbox ------------------" << std::endl;
   return oldUpdated;
 }
 

@@ -1388,7 +1388,7 @@ void setAttributes(World& world, objid id, std::vector<GameobjAttribute> allAttr
   }
 }
 
-void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative){
+void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative, Hint hint){
   //std::cout << "physics translate set: " << index << " relative: " << relative << std::endl;
   if (relative){
     updateRelativePosition(world.sandbox, index, pos, Hint{});
@@ -1399,7 +1399,7 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative
       setPosition(body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation));
     }
   }else{
-    updateAbsolutePosition(world.sandbox, index, pos, Hint{ .hint = "physicsTranslateSet" });
+    updateAbsolutePosition(world.sandbox, index, pos, hint);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body = phys.body;

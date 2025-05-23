@@ -11,7 +11,7 @@ struct ManipulatorSelection {
 
 struct ManipulatorTools {
   std::function<glm::vec3(objid)> getPosition;
-  std::function<void(objid, glm::vec3, bool)> setPosition;
+  std::function<void(objid, glm::vec3, bool, Hint)> setPosition;
   std::function<glm::vec3(objid)> getScale;
   std::function<void(objid, glm::vec3)> setScale;
   std::function<glm::quat(objid)> getRotation;

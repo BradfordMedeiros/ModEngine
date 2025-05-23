@@ -21,6 +21,7 @@
 #include "./lines.h"
 #include "./sql/sql.h"
 #include "./scene/animation/timeplayback.h"
+#include "./scene/scene_sandbox.h"
 #include "./package.h"
 
 struct DefaultResources {
@@ -98,7 +99,7 @@ void setGameObjectAttr(int32_t id, std::vector<GameobjAttribute> attrs);
 void setSingleGameObjectAttr(int32_t id, const char* field, AttributeValue value);
 
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld);
-void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld);
+void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld, Hint hint);
 
 glm::vec3 getGameObjectScale(int32_t index);
 glm::vec3 getGameObjectScale2(int32_t index, bool isWorld);

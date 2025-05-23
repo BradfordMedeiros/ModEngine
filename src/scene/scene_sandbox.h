@@ -142,9 +142,7 @@ int getNumberOfObjects(SceneSandbox& sandbox);
 int getNumberScenesLoaded(SceneSandbox& sandbox);
 std::optional<objid> sceneIdByName(SceneSandbox& sandbox, std::string name);
 
-struct Hint {
-  const char* hint = NULL;
-};
+
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint);
 void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint);
 void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position, Hint hint);
