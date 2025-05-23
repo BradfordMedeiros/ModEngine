@@ -11,6 +11,7 @@
 #include "../perf/benchstats.h"
 #include "../scene/objtypes/lighting/scene_lighting.h"
 #include "../scene/common/util/types.h"
+#include "../scene/scene_sandbox.h"
 
 struct CustomApiBindings {
   int32_t (*listSceneId)(int32_t objid);
@@ -58,7 +59,7 @@ struct CustomApiBindings {
   void (*setGameObjectAttr)(int32_t id, std::vector<GameobjAttribute> attrs);
   void (*setSingleGameObjectAttr)(int32_t id, const char* field, AttributeValue value);
   glm::vec3 (*getGameObjectPos)(int32_t index, bool world);
-  void (*setGameObjectPosition)(int32_t index, glm::vec3 pos, bool world);
+  void (*setGameObjectPosition)(int32_t index, glm::vec3 pos, bool world, Hint hint);
   glm::quat (*getGameObjectRotation)(int32_t index, bool world);
   void (*setGameObjectRot)(int32_t index, glm::quat rotation, bool world);
   glm::vec3 (*getGameObjectScale)(int32_t index, bool world);

@@ -18,7 +18,7 @@ std::unordered_map<objid, PlayingRecording> playingRecordings;
 // moving objects 
 void moveCameraTo(objid cameraId, glm::vec3 position, std::optional<float> duration){
   if (!duration.has_value()){
-    setGameObjectPosition(cameraId, position, true);
+    setGameObjectPosition(cameraId, position, true, Hint { .hint = "moveCameraTo" });
     return;
   }
   requestMovingObjects[cameraId] = RequestMovingObject {
@@ -37,7 +37,7 @@ void handleMovingObjects(float currTime){
     percentage = percentage > 1.f ? 1.f : percentage;
     auto distance = percentage * (movingObject.finalPos - movingObject.initialPos);
     auto newPosition = movingObject.initialPos + distance;
-    setGameObjectPosition(id, newPosition, true);
+    setGameObjectPosition(id, newPosition, true, Hint { .hint = "handleMovingObjects" });
     if (finished){
       idsToRemove.push_back(id);
     }

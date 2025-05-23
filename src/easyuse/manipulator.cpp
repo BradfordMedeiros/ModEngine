@@ -108,7 +108,7 @@ void manipulatorEnsureExists(ManipulatorData& manipulatorState, ManipulatorTools
   auto manipulatorId = manipulatorState.manipulatorId;
   auto selectedObjs = tools.getSelectedIds();
   modassert(selectedObjs.mainObj.has_value(), "manipulator selected obj main value does not have a value");
-  tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()), true);
+  tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()), true, Hint { .hint = "manipulatorEnsureExists" });
 }
 
 
@@ -267,7 +267,7 @@ void updateManipulatorToCurrentObjTranslate(ManipulatorData& manipulatorState, M
   auto manipulatorId = manipulatorState.manipulatorId;
   auto selectedObjs = tools.getSelectedIds();
   modassert(selectedObjs.mainObj.has_value(), "manipulator selected obj main value does not have a value");
-  tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()), true);
+  tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()), true,  Hint { .hint = "updateManipulatorToCurrentObjTranslate" });
   if (!update.options.relativePositionMode){
     auto snapRotation = tools.getSnapRotation();
     if (snapRotation.has_value()){
@@ -283,7 +283,7 @@ void updateManipulatorToCurrentObjScale(ManipulatorData& manipulatorState, Manip
   auto manipulatorId = manipulatorState.manipulatorId;
   auto selectedObjs = tools.getSelectedIds();
   modassert(selectedObjs.mainObj.has_value(), "manipulator selected obj main value does not have a value");
-  tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()), true);
+  tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()), true, Hint { .hint = "updateManipulatorToCurrentObjScale" });
   tools.setRotation(manipulatorState.manipulatorId, tools.getRotation(selectedObjs.mainObj.value()));
 }
 
@@ -326,7 +326,7 @@ std::vector<ManipulatorState> manipulatorStates = {
       auto oldManipulatorPos = getInitialTransformation(manipulatorState, manipulatorState.manipulatorId).position;
       auto manipulatorPos =  (update.options.manipulatorPositionMode == SNAP_ABSOLUTE) ? tools.snapPosition(oldManipulatorPos + positionDiff) : (oldManipulatorPos + positionDiff);
       auto actualPositionDiff = manipulatorPos - oldManipulatorPos;
-      tools.setPosition(manipulatorState.manipulatorId, manipulatorPos, true);
+      tools.setPosition(manipulatorState.manipulatorId, manipulatorPos, true, Hint { .hint = "ManipulatorState - translateMode1" });
 
 
       auto translateMirror = update.options.translateMirror && update.selectedObjs.selectedIds.size() > 1;
@@ -346,7 +346,7 @@ std::vector<ManipulatorState> manipulatorStates = {
           }
         }
         auto newPosition = oldPosition + deltaPosition;
-        tools.setPosition(targetId, newPosition, true);
+        tools.setPosition(targetId, newPosition, true, Hint { .hint = "ManipulatorState - translateMode2" });
       }
     },
     .nextStates = {
@@ -410,7 +410,7 @@ std::vector<ManipulatorState> manipulatorStates = {
           auto scaledOffsetFromMean = scaleRatio * offsetFromMean;
           std::cout << "scale ratio: " << print(scaleRatio) << std::endl;
           std::cout << "mean position: " << print(initialTransform.position - manipulatorState.meanPosition.value()) << std::endl;
-          tools.setPosition(targetId, manipulatorState.meanPosition.value() + scaledOffsetFromMean, true);
+          tools.setPosition(targetId, manipulatorState.meanPosition.value() + scaledOffsetFromMean, true, Hint { .hint = "ManipulatorState - scaleMode" });
         }
         tools.setScale(targetId, relativeScale);
       }
@@ -482,7 +482,7 @@ std::vector<ManipulatorState> manipulatorStates = {
             rotationDiff,
             snapFn
           );
-          tools.setPosition(targetId, newTargetRotPos.position, true);
+          tools.setPosition(targetId, newTargetRotPos.position, true, Hint { .hint = "manipulator - rotateMode" });
           tools.setRotation(targetId, newTargetRotPos.rotation);
         }
     },

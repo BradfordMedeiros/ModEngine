@@ -82,7 +82,7 @@ void sandboxUpdateParentRelative(){
   auto objectOneId = getGameObjectH(sandbox, "object_one", 1).id;
   auto objectTwoId = getGameObjectH(sandbox, "object_two", 1).id;
 
-  updateRelativePosition(sandbox, objectOneId, glm::vec3(3.f, 1.f, 1.f));
+  updateRelativePosition(sandbox, objectOneId, glm::vec3(3.f, 1.f, 1.f), Hint{});
   updateSandbox(sandbox);
 
   auto posObjectTwoParented = fullTransformation(sandbox, objectTwoId);
@@ -102,7 +102,7 @@ void sandboxUpdateParentAbsolute(){
   auto objectOneId = getGameObjectH(sandbox, "object_one", 1).id;
   auto objectTwoId = getGameObjectH(sandbox, "object_two", 1).id;
 
-  updateAbsolutePosition(sandbox, objectOneId, glm::vec3(3.f, 1.f, 1.f));
+  updateAbsolutePosition(sandbox, objectOneId, glm::vec3(3.f, 1.f, 1.f), Hint{});
   updateSandbox(sandbox);
 
   auto posObjectTwoParented = fullTransformation(sandbox, objectTwoId);
@@ -123,8 +123,8 @@ void sandboxUpdateParentAndChildRelative(){
   auto objectOneId = getGameObjectH(sandbox, "object_one", 1).id;
   auto objectTwoId = getGameObjectH(sandbox, "object_two", 1).id;
 
-  updateRelativePosition(sandbox, objectOneId, glm::vec3(3.f, 1.f, 1.f));
-  updateRelativePosition(sandbox, objectTwoId, glm::vec3(-4.f, -1.f, -1.f));
+  updateRelativePosition(sandbox, objectOneId, glm::vec3(3.f, 1.f, 1.f), Hint{});
+  updateRelativePosition(sandbox, objectTwoId, glm::vec3(-4.f, -1.f, -1.f), Hint{});
 
   updateSandbox(sandbox);
 

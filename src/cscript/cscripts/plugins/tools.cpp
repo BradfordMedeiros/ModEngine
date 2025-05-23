@@ -37,7 +37,7 @@ extern LineData lineData;
 std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes);
 LayerInfo getLayerForId(objid id);
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld);
-void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld);
+void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld, Hint hint);
 glm::quat getGameObjectRotation(int32_t index, bool isWorld);
 void setGameObjectScale(int32_t index, glm::vec3 scale, bool isWorld);
 glm::vec3 getGameObjectScale(int32_t index);

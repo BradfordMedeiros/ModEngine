@@ -388,8 +388,8 @@ glm::vec3 getGameObjectPosition(int32_t index, bool isWorld){
   return gameobjectPosition(world, index, isWorld);
 }
 
-void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld){
-  physicsTranslateSet(world, index, pos, !isWorld);
+void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld, Hint hint){
+  physicsTranslateSet(world, index, pos, !isWorld, hint);
 }
 
 glm::vec3 getGameObjectScale(int32_t index){
@@ -878,7 +878,7 @@ void moveCamera(glm::vec3 offset){
     defaultResources.defaultCamera.transformation.position = moveRelative(defaultResources.defaultCamera.transformation.position, defaultResources.defaultCamera.transformation.rotation, glm::vec3(offset), false);
   }else{
     auto cameraLocalTransform = gameobjectTransformation(world, state.activeCameraObj.value(), false);
-    setGameObjectPosition(state.activeCameraObj.value(), moveRelative(cameraLocalTransform.position, cameraLocalTransform.rotation, glm::vec3(offset), false), true);
+    setGameObjectPosition(state.activeCameraObj.value(), moveRelative(cameraLocalTransform.position, cameraLocalTransform.rotation, glm::vec3(offset), false), true, Hint{ .hint = "moveCamera" });
   }
 }
 
