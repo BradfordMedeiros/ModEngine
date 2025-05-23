@@ -612,6 +612,8 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
     if (sandbox.mainScene.absoluteTransforms.find(parentId) == sandbox.mainScene.absoluteTransforms.end()){
       continue;
     }
+
+
     GameObject& gameobj = getGameObject(sandbox, id);
 
     // physicsOptions.enabled exempt because a physics object is not effected by the parent
@@ -655,18 +657,22 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
   for (auto &update : relativeUpdates){
     if (update.id == id){
       auto existingHint = update.hint;
-      std::cout << "existing hint: " << (existingHint ? existingHint : "[not provided]") << std::endl;
-      std::cout << "current hint: " << (hint ? hint : "[not provided]") << std::endl;
+      std::cout << "discarding existing hint: " << (existingHint ? existingHint : "[not provided]") << std::endl;
+      std::cout << "discarding current hint: " << (hint ? hint : "[not provided]") << std::endl;
       //modassert(false, "absolute update but already have an relative");
+      std::cout << "discarding hint" << std::endl; 
+      return;
       update.transform = transform;
     }
   }
   for (auto &update : absoluteUpdates){
     if (update.id == id){
       auto existingHint = update.hint;
-      std::cout << "existing hint: " << (existingHint ? existingHint : "[not provided]") << std::endl;
-      std::cout << "current hint: " << (hint ? hint : "[not provided]") << std::endl;
+      std::cout << "discarding existing hint: " << (existingHint ? existingHint : "[not provided]") << std::endl;
+      std::cout << "discarding current hint: " << (hint ? hint : "[not provided]") << ", already has: " << existingHint << std::endl;
       //modassert(false, "multiple absolute updates for one transform");
+      std::cout << "discarding hint" << std::endl; 
+      return;
       update.transform = transform;
       return;
     }
@@ -678,16 +684,29 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
   });
 }
 void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform, const char* hint){
-  //for (auto &update : relativeUpdates){
-  //  if (update.id == id){
-  //    modassert(false, "multiple relative updates for one transform");
-  //  }
-  //}
-  //for (auto &update : absoluteUpdates){
-  //  if (update.id == id){
-  //    modassert(false, "relative update but already have an absolute");
-  //  }
-  //}
+  for (auto &update : relativeUpdates){
+    if (update.id == id){
+      auto existingHint = update.hint;
+      std::cout << "discarding existing hint: " << (existingHint ? existingHint : "[not provided]") << std::endl;
+      std::cout << "discarding current hint: " << (hint ? hint : "[not provided]") << std::endl;
+      //modassert(false, "multiple relative updates for one transform");
+      std::cout << "discarding hint" << std::endl; 
+      return;
+      update.transform = transform;
+
+    }
+  }
+  for (auto &update : absoluteUpdates){
+    if (update.id == id){
+      auto existingHint = update.hint;
+      std::cout << "discarding existing hint: " << (existingHint ? existingHint : "[not provided]") << std::endl;
+      std::cout << "discarding current hint: " << (hint ? hint : "[not provided]") << std::endl;
+      //modassert(false, "relative update but already have an absolute");
+      std::cout << "discarding hint" << std::endl; 
+      return;
+      update.transform = transform;
+    }
+  }
   relativeUpdates.push_back(TransformUpdate {
     .id = id,
     .transform = transform,
