@@ -1388,10 +1388,10 @@ void setAttributes(World& world, objid id, std::vector<GameobjAttribute> allAttr
   }
 }
 
-void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative){
+void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative, const char* hint){
   //std::cout << "physics translate set: " << index << " relative: " << relative << std::endl;
   if (relative){
-    updateRelativePosition(world.sandbox, index, pos);
+    updateRelativePosition(world.sandbox, index, pos, "physicsTranslateSet");
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body =  phys.body;
@@ -1399,7 +1399,7 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative
       setPosition(body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation));
     }
   }else{
-    updateAbsolutePosition(world.sandbox, index, pos);
+    updateAbsolutePosition(world.sandbox, index, pos, hint);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body = phys.body;
@@ -1413,7 +1413,7 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative
 void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relative){
   //std::cout << "physics rotate set: " << index << " relative: " << relative << std::endl;
   if (relative){
-    updateRelativeRotation(world.sandbox, index, rotation);
+    updateRelativeRotation(world.sandbox, index, rotation, "physicsRotateSet");
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       auto rigidBody = world.rigidbodys.at(index);
       auto body = rigidBody.body;
@@ -1425,7 +1425,7 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
     }
   }else{
     //modassert(false, "not supposed to be absolute");
-    updateAbsoluteRotation(world.sandbox, index, rotation);
+    updateAbsoluteRotation(world.sandbox, index, rotation, "physicsRotateSet");
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       auto rigidBody = world.rigidbodys.at(index);
       auto body =  rigidBody.body;
@@ -1440,7 +1440,7 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
 }
 
 void physicsScaleSet(World& world, objid index, glm::vec3 scale){
-  updateAbsoluteScale(world.sandbox, index, scale);
+  updateAbsoluteScale(world.sandbox, index, scale, "physicsScaleSet");
 
   std::cout << "physics scale set: " << index << " - " <<  print(scale) << std::endl;
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
@@ -1455,7 +1455,7 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
 }
 
 void physicsLocalTransformSet(World& world, objid index, Transformation& transform){
-  updateRelativeTransform(world.sandbox, index, transform);
+  updateRelativeTransform(world.sandbox, index, transform, "physicsLocalTransformSet");
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     PhysicsValue& phys = world.rigidbodys.at(index);
     auto body = phys.body;
@@ -1473,7 +1473,7 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<obj
         .position = calcOffsetFromRotationReverse(getPosition(rigidBody.body), rigidBody.offset, rotation),
         .scale = getScale(rigidBody.body),
         .rotation = rotation,
-      });
+      }, "updatePhysicsPositionsAndClampVelocity");
       gameobj.physicsOptions.velocity = getVelocity(rigidBody.body);
       gameobj.physicsOptions.angularVelocity = getAngularVelocity(rigidBody.body);
       clampMaxVelocity(rigidBody.body, gameobj.physicsOptions.maxspeed);
@@ -1564,7 +1564,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
             .position = oldTransformation.position,
             .scale = oldTransformation.scale,
             .rotation = oldTransformation.rotation,
-          });
+          }, "particle-update");
           useTransform2 = false;
           //auto newTransformation = gameobjectTransformation(world, objectAdded, true);
           //modassert(aboutEqual(oldTransformation.position, newTransformation.position) && aboutEqual(oldTransformation.scale, newTransformation.scale), std::string("transforms not equal: old = ") + print(oldTransformation) + ", new = " + print(newTransformation));
@@ -1589,19 +1589,19 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   stepPhysicsSimulation(world.physicsEnvironment, timestep, paused, enablePhysics);
   updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);  
 
-  updateLookAt(world, viewTransform);
+  //updateLookAt(world, viewTransform);
 
   auto updatedIds = updatePhysicsFromSandbox(world);
   for (auto updatedId : updatedIds){
     world.entitiesToUpdate.insert(updatedId);
   }
 
-  for (auto id : world.entitiesToUpdate){
-    if (idExists(world.sandbox, id)){  // why do i need this check?
-      auto absolutePosition = fullTransformation(world.sandbox, id).position;
-      updateObjectPositions(world.objectMapping, id, absolutePosition, viewTransform);      
-    }
-  }
+  //for (auto id : world.entitiesToUpdate){
+  //  if (idExists(world.sandbox, id)){  // why do i need this check?
+  //    auto absolutePosition = fullTransformation(world.sandbox, id).position;
+  //    updateObjectPositions(world.objectMapping, id, absolutePosition, viewTransform);      
+  //  }
+  //}
   for (auto &[id, videoObj] : world.objectMapping.video){
     onVideoObjFrame(videoObj, timeElapsed, viewTransform);
   }

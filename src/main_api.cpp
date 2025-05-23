@@ -389,7 +389,7 @@ glm::vec3 getGameObjectPosition(int32_t index, bool isWorld){
 }
 
 void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld){
-  physicsTranslateSet(world, index, pos, !isWorld);
+  physicsTranslateSet(world, index, pos, !isWorld, "main-api-setGameObjectPosition");
 }
 
 glm::vec3 getGameObjectScale(int32_t index){

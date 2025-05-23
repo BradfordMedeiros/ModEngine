@@ -504,6 +504,7 @@ std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId)
 struct TransformUpdate {
   objid id;
   Transformation transform;
+  const char* hint = NULL;
 };
 std::vector<TransformUpdate> relativeUpdates;
 std::vector<TransformUpdate> absoluteUpdates;
@@ -546,6 +547,8 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
     if (parentId == 0){
       sandbox.mainScene.absoluteTransforms.at(update.id).transform = update.transform;
     }
+    updateAllChildrenPositions(sandbox, update.id, false);
+
   }
   updateAllChildrenPositions(sandbox, 0, false);
 
@@ -580,13 +583,6 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
       }
     }
     currentDepth++;
-  }
-  updateAllChildrenPositions(sandbox, 0, false);
-
-  for (auto &gameObj : sandbox.mainScene.gameobjects){
-    if (gameObj.inUse){
-      oldUpdated.insert(gameObj.gameobj.id);
-    }
   }
 
   relativeUpdates = {};
@@ -655,13 +651,43 @@ void removeObjectFromCache(SceneSandbox& sandbox, objid id){
   sandbox.updatedIds.erase(id);
 }
 
-void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
+void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform, const char* hint){
+  for (auto &update : relativeUpdates){
+    if (update.id == id){
+      auto existingHint = update.hint;
+      std::cout << "existing hint: " << (existingHint ? existingHint : "[not provided]") << std::endl;
+      std::cout << "current hint: " << (hint ? hint : "[not provided]") << std::endl;
+      //modassert(false, "absolute update but already have an relative");
+      update.transform = transform;
+    }
+  }
+  for (auto &update : absoluteUpdates){
+    if (update.id == id){
+      auto existingHint = update.hint;
+      std::cout << "existing hint: " << (existingHint ? existingHint : "[not provided]") << std::endl;
+      std::cout << "current hint: " << (hint ? hint : "[not provided]") << std::endl;
+      //modassert(false, "multiple absolute updates for one transform");
+      update.transform = transform;
+      return;
+    }
+  }
   absoluteUpdates.push_back(TransformUpdate {
     .id = id,
     .transform = transform,
+    .hint = hint,
   });
 }
-void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform){
+void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform, const char* hint){
+  //for (auto &update : relativeUpdates){
+  //  if (update.id == id){
+  //    modassert(false, "multiple relative updates for one transform");
+  //  }
+  //}
+  //for (auto &update : absoluteUpdates){
+  //  if (update.id == id){
+  //    modassert(false, "relative update but already have an absolute");
+  //  }
+  //}
   relativeUpdates.push_back(TransformUpdate {
     .id = id,
     .transform = transform,
@@ -827,32 +853,32 @@ int getNumberScenesLoaded(SceneSandbox& sandbox){
 
 // For convenience, just use the absolute / relative transform
 ////////////////////////////////////////////////////////////////////////
-void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
+void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position, const char* hint){
   auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
   Transformation newTransform = oldAbsoluteTransform.transform;
   newTransform.position = position;
-  updateAbsoluteTransform(sandbox, id, newTransform);
+  updateAbsoluteTransform(sandbox, id, newTransform, hint);
 }
-void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
+void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position, const char* hint){
    // just update the constraint, mark absolute transform dirtyu
   auto oldRelativeTransform = calcRelativeTransform(sandbox, id);
   oldRelativeTransform.position = position;
-  updateRelativeTransform(sandbox, id, oldRelativeTransform);
+  updateRelativeTransform(sandbox, id, oldRelativeTransform, hint);
 };;
-void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
+void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale, const char* hint){
   auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
   Transformation newTransform = oldAbsoluteTransform.transform;
   newTransform.scale = scale;
-  updateAbsoluteTransform(sandbox, id, newTransform); 
+  updateAbsoluteTransform(sandbox, id, newTransform, hint); 
 }
-void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
+void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation, const char* hint){
   auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
   Transformation newTransform = oldAbsoluteTransform.transform;
   newTransform.rotation = rotation;
-  updateAbsoluteTransform(sandbox, id, newTransform); 
+  updateAbsoluteTransform(sandbox, id, newTransform, hint); 
 }
-void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
+void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation, const char* hint){
   auto oldRelativeTransform = calcRelativeTransform(sandbox, id);
   oldRelativeTransform.rotation = rotation;
-  updateRelativeTransform(sandbox, id, oldRelativeTransform);
+  updateRelativeTransform(sandbox, id, oldRelativeTransform, hint);
 }
