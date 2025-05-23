@@ -98,7 +98,7 @@ GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name, objid scene
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id);
 Transformation& fullTransformation(SceneSandbox& sandbox, objid id);
 
-void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool justAdded = false);
+void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool justAdded, std::set<objid> alwaysUpdate = {}, std::set<objid> neverUpdate = {});
 
 struct GameobjAttributesWithId {
   objid id;
