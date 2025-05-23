@@ -561,7 +561,9 @@ void removeObjectFromCache(SceneSandbox& sandbox, objid id){
   sandbox.updatedIds.erase(id);
 }
 
-void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
+void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint){
+  std::cout << "updateAbsoluteTransform hint: " << id << " " << getGameObject(sandbox, id).name << " : " <<  (hint.hint ? hint.hint : "[no hint]") << std::endl;
+
   auto parentId = getGameObjectH(sandbox, id).parentId;
   auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
 
@@ -582,7 +584,9 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
   }
   updateAllChildrenPositions(sandbox, id);
 }
-void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform){
+void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint){
+  std::cout << "updateRelativeTransform hint: " << id << " " << getGameObject(sandbox, id).name << " : " <<  (hint.hint ? hint.hint : "[no hint]") << std::endl;
+
   auto parentId = getGameObjectH(sandbox, id).parentId;
   getGameObject(sandbox, id).transformation = transform;
   auto newTransform = parentId == 0 ? transform : calcAbsoluteTransform(sandbox, parentId, transform);
@@ -755,32 +759,32 @@ int getNumberScenesLoaded(SceneSandbox& sandbox){
 
 // For convenience, just use the absolute / relative transform
 ////////////////////////////////////////////////////////////////////////
-void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
+void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position, Hint hint){
   auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
   Transformation newTransform = oldAbsoluteTransform.transform;
   newTransform.position = position;
-  updateAbsoluteTransform(sandbox, id, newTransform);
+  updateAbsoluteTransform(sandbox, id, newTransform, hint);
 }
-void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
+void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position, Hint hint){
    // just update the constraint, mark absolute transform dirtyu
   auto oldRelativeTransform = calcRelativeTransform(sandbox, id);
   oldRelativeTransform.position = position;
-  updateRelativeTransform(sandbox, id, oldRelativeTransform);
+  updateRelativeTransform(sandbox, id, oldRelativeTransform, hint);
 };;
-void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
+void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale, Hint hint){
   auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
   Transformation newTransform = oldAbsoluteTransform.transform;
   newTransform.scale = scale;
-  updateAbsoluteTransform(sandbox, id, newTransform); 
+  updateAbsoluteTransform(sandbox, id, newTransform, hint); 
 }
-void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
+void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation, Hint hint){
   auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
   Transformation newTransform = oldAbsoluteTransform.transform;
   newTransform.rotation = rotation;
-  updateAbsoluteTransform(sandbox, id, newTransform); 
+  updateAbsoluteTransform(sandbox, id, newTransform, hint); 
 }
-void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
+void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation, Hint hint){
   auto oldRelativeTransform = calcRelativeTransform(sandbox, id);
   oldRelativeTransform.rotation = rotation;
-  updateRelativeTransform(sandbox, id, oldRelativeTransform);
+  updateRelativeTransform(sandbox, id, oldRelativeTransform, hint);
 }

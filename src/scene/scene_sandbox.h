@@ -142,13 +142,16 @@ int getNumberOfObjects(SceneSandbox& sandbox);
 int getNumberScenesLoaded(SceneSandbox& sandbox);
 std::optional<objid> sceneIdByName(SceneSandbox& sandbox, std::string name);
 
-void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform);
-void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform);
-void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position);
-void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position);
-void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale);
-void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation);
-void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation);
+struct Hint {
+  const char* hint = NULL;
+};
+void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint);
+void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint);
+void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position, Hint hint);
+void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position, Hint hint);
+void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale, Hint hint);
+void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation, Hint hint);
+void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation, Hint hint);
 
 std::set<objid> updateSandbox(SceneSandbox& sandbox);
 

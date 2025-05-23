@@ -1391,7 +1391,7 @@ void setAttributes(World& world, objid id, std::vector<GameobjAttribute> allAttr
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative){
   //std::cout << "physics translate set: " << index << " relative: " << relative << std::endl;
   if (relative){
-    updateRelativePosition(world.sandbox, index, pos);
+    updateRelativePosition(world.sandbox, index, pos, Hint{});
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body =  phys.body;
@@ -1399,7 +1399,7 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative
       setPosition(body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation));
     }
   }else{
-    updateAbsolutePosition(world.sandbox, index, pos);
+    updateAbsolutePosition(world.sandbox, index, pos, Hint{ .hint = "physicsTranslateSet" });
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body = phys.body;
@@ -1413,7 +1413,7 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative
 void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relative){
   //std::cout << "physics rotate set: " << index << " relative: " << relative << std::endl;
   if (relative){
-    updateRelativeRotation(world.sandbox, index, rotation);
+    updateRelativeRotation(world.sandbox, index, rotation, Hint{});
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       auto rigidBody = world.rigidbodys.at(index);
       auto body = rigidBody.body;
@@ -1425,7 +1425,7 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
     }
   }else{
     //modassert(false, "not supposed to be absolute");
-    updateAbsoluteRotation(world.sandbox, index, rotation);
+    updateAbsoluteRotation(world.sandbox, index, rotation, Hint{ .hint = "physicsRotateSet" });
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       auto rigidBody = world.rigidbodys.at(index);
       auto body =  rigidBody.body;
@@ -1440,7 +1440,7 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
 }
 
 void physicsScaleSet(World& world, objid index, glm::vec3 scale){
-  updateAbsoluteScale(world.sandbox, index, scale);
+  updateAbsoluteScale(world.sandbox, index, scale, Hint{ .hint = "physicsScaleSet" });
 
   std::cout << "physics scale set: " << index << " - " <<  print(scale) << std::endl;
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
@@ -1455,7 +1455,7 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
 }
 
 void physicsLocalTransformSet(World& world, objid index, Transformation& transform){
-  updateRelativeTransform(world.sandbox, index, transform);
+  updateRelativeTransform(world.sandbox, index, transform, Hint{});
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     PhysicsValue& phys = world.rigidbodys.at(index);
     auto body = phys.body;
@@ -1473,7 +1473,7 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<obj
         .position = calcOffsetFromRotationReverse(getPosition(rigidBody.body), rigidBody.offset, rotation),
         .scale = getScale(rigidBody.body),
         .rotation = rotation,
-      });
+      }, Hint { .hint = "updatePhysicsPositionsAndClampVelocity" });
       gameobj.physicsOptions.velocity = getVelocity(rigidBody.body);
       gameobj.physicsOptions.angularVelocity = getAngularVelocity(rigidBody.body);
       clampMaxVelocity(rigidBody.body, gameobj.physicsOptions.maxspeed);
@@ -1564,7 +1564,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
             .position = oldTransformation.position,
             .scale = oldTransformation.scale,
             .rotation = oldTransformation.rotation,
-          });
+          }, Hint{ .hint = "particle-emitter" });
           useTransform2 = false;
           //auto newTransformation = gameobjectTransformation(world, objectAdded, true);
           //modassert(aboutEqual(oldTransformation.position, newTransformation.position) && aboutEqual(oldTransformation.scale, newTransformation.scale), std::string("transforms not equal: old = ") + print(oldTransformation) + ", new = " + print(newTransformation));
