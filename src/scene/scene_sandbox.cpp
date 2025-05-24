@@ -507,6 +507,9 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
   auto updatedIdElements = bfsElementAndChildren(sandbox, updatedId);
   //std::cout << "should update: " << print(updatedIdElements) << std::endl;
   for (auto id : updatedIdElements){
+    if (id == updatedId && !justAdded){
+      continue;
+    }
     if (id != updatedId){
       sandbox.updatedIds.insert(id);  
     }
@@ -525,6 +528,7 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
        auto currentConstraint = gameobj.transformation;
        auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
        auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
+       std::cout << "hint -------------------- child update - " << id << ", " << getGameObject(sandbox, id).name << std::endl; 
        sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
          .gameobjIndex = gameobjIndex,
          .transform = newTransform,
