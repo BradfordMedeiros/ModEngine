@@ -639,11 +639,13 @@ void removeObjectFromCache(SceneSandbox& sandbox, objid id){
 }
 
 
-bool updateTransformImmediate = false;
+bool updateTransformImmediate = true;
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint){
 
   if (updateTransformImmediate){
-    std::cout << "updateAbsoluteTransform hint: " << id << " " << getGameObject(sandbox, id).name << " : " <<  (hint.hint ? hint.hint : "[no hint]") << std::endl;
+    std::cout << "updateAbsoluteTransform hint: " <<  " [" << id << " " << getGameObject(sandbox, id).name << "] " << (hint.hint ? hint.hint : "[no hint]") << " " << print(transform) << std::endl;
+    std::cout << "updateAbsoluteTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+    std::cout << "updateAbsoluteTransform hint        old abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;
 
     auto parentId = getGameObjectH(sandbox, id).parentId;
     auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
@@ -664,6 +666,9 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
     }
     updateAllChildrenPositions(sandbox, id, {});
 
+    std::cout << "updateAbsoluteTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+    std::cout << "updateAbsoluteTransform hint        new abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;
+
   }else{
     updates.push_back(TransformUpdate {
       .relative = false,
@@ -676,7 +681,9 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
 }
 void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint){
   if (updateTransformImmediate){
-    std::cout << "updateRelativeTransform hint: " << id << " " << getGameObject(sandbox, id).name << " : " <<  (hint.hint ? hint.hint : "[no hint]") << std::endl;
+    std::cout << "updateRelativeTransform hint: " << " [" << id << " " << getGameObject(sandbox, id).name << "]  " << (hint.hint ? hint.hint : "[no hint]") << " " << print(transform) <<  std::endl;
+    std::cout << "updateRelativeTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+
     auto parentId = getGameObjectH(sandbox, id).parentId;
     getGameObject(sandbox, id).transformation = transform;
     auto newTransform = parentId == 0 ? transform : calcAbsoluteTransform(sandbox, parentId, transform);
@@ -687,6 +694,7 @@ void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation tra
       .transform = newTransform,
     };
     updateAllChildrenPositions(sandbox, id, {});
+    std::cout << "updateRelativeTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
   }else{
     updates.push_back(TransformUpdate {
       .relative = true,
