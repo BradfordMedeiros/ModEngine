@@ -501,13 +501,16 @@ std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId)
   return ids;
 }
 
-void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool justAdded){
+void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool justAdded, std::set<objid> absoluteUpdates){
   //std::cout << "should update id: " << updatedId << std::endl;
   // do a breath first search, and then update it in that order
   auto updatedIdElements = bfsElementAndChildren(sandbox, updatedId);
   //std::cout << "should update: " << print(updatedIdElements) << std::endl;
   for (auto id : updatedIdElements){
     if (id == updatedId && !justAdded){
+      continue;
+    }
+    if (absoluteUpdates.count(id) > 0){
       continue;
     }
     if (id != updatedId){
@@ -528,7 +531,10 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
        auto currentConstraint = gameobj.transformation;
        auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
        auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
-       std::cout << "hint -------------------- child update - " << id << ", " << getGameObject(sandbox, id).name << std::endl; 
+       std::cout << "> hint [child update]          [" << id << " " << getGameObject(sandbox, id).name << "]" << std::endl; 
+       std::cout << "> hint [child update]               new rel: " << print(currentConstraint) << std::endl; 
+       std::cout << "> hint [child update]               new abs: " << print(newTransform) << std::endl; 
+
        sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
          .gameobjIndex = gameobjIndex,
          .transform = newTransform,
@@ -549,14 +555,16 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
   std::cout << "hint---------- updateSandbox start------------------" << std::endl;
   std::set<objid> oldUpdated = sandbox.updatedIds;
 
-  
+  std::set<objid> hasAbsolute;
+
   for (auto &update : updates){
     if (update.relative){
 
       auto& transform = update.transform;
       auto id = update.id;
 
-      std::cout << "updateRelativeTransform hint: " << id << " " << getGameObject(sandbox, id).name << " : " <<  (update.hint.hint ? update.hint.hint : "[no hint]") << std::endl;
+      std::cout << "updateRelativeTransform hint: " << " [" << id << " " << getGameObject(sandbox, id).name << "]  " << (update.hint.hint ? update.hint.hint : "[no hint]") << " " << print(update.transform) <<  std::endl;
+      std::cout << "updateRelativeTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
 
       auto parentId = getGameObjectH(sandbox, id).parentId;
       getGameObject(sandbox, id).transformation = transform;
@@ -567,12 +575,17 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
         .gameobjIndex = gameobjIndex,
         .transform = newTransform,
       };
-      updateAllChildrenPositions(sandbox, id);
+      updateAllChildrenPositions(sandbox, id, false, hasAbsolute);
+      std::cout << "updateRelativeTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+
     }else{
       auto& transform = update.transform;
       auto id = update.id;
+      hasAbsolute.insert(id);
 
-      std::cout << "updateAbsoluteTransform hint: " << id << " " << getGameObject(sandbox, id).name << " : " <<  (update.hint.hint ? update.hint.hint : "[no hint]") << std::endl;
+      std::cout << "updateAbsoluteTransform hint: " <<  " [" << id << " " << getGameObject(sandbox, id).name << "] " << (update.hint.hint ? update.hint.hint : "[no hint]") << " " << print(update.transform) << std::endl;
+      std::cout << "updateAbsoluteTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+      std::cout << "updateAbsoluteTransform hint        old abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;
 
       auto parentId = getGameObjectH(sandbox, id).parentId;
       auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
@@ -589,7 +602,12 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
       }else{
         getGameObject(sandbox, id).transformation = transform;
       }
-      updateAllChildrenPositions(sandbox, id);
+
+      std::cout << "updateAbsoluteTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+      std::cout << "updateAbsoluteTransform hint        new abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;
+
+
+      updateAllChildrenPositions(sandbox, id, false, {});
     }
   }
 
@@ -613,7 +631,7 @@ void addObjectToCache(SceneSandbox& sandbox, objid id){
     .gameobjIndex = gameobjIndex,
     .transform = getTransformationFromMatrix(elementMatrix),
   };
-  updateAllChildrenPositions(sandbox, id, true);
+  updateAllChildrenPositions(sandbox, id, true, {});
 }
 void removeObjectFromCache(SceneSandbox& sandbox, objid id){
   sandbox.mainScene.absoluteTransforms.erase(id);
@@ -644,7 +662,7 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
     }else{
       getGameObject(sandbox, id).transformation = transform;
     }
-    updateAllChildrenPositions(sandbox, id);
+    updateAllChildrenPositions(sandbox, id, {});
 
   }else{
     updates.push_back(TransformUpdate {
@@ -668,7 +686,7 @@ void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation tra
       .gameobjIndex = gameobjIndex,
       .transform = newTransform,
     };
-    updateAllChildrenPositions(sandbox, id);
+    updateAllChildrenPositions(sandbox, id, {});
   }else{
     updates.push_back(TransformUpdate {
       .relative = true,
@@ -704,7 +722,7 @@ void makeParent(SceneSandbox& sandbox, objid child, objid parent){
   modassert(child != parent, "cannot parent a node to itself");
   modassert(!hasDescendent(sandbox, child, parent), "cannot parent a node to a descendent of itself");
   enforceParentRelationship(sandbox.mainScene, child, parent);
-  updateAllChildrenPositions(sandbox, parent, true); // TODO - only update the newly parented children
+  updateAllChildrenPositions(sandbox, parent, true, {}); // TODO - only update the newly parented children
 }
 
 
