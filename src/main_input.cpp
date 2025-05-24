@@ -253,11 +253,11 @@ void handleSnapEasy(objid id, bool left){
   if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
     auto objPos = getGameObjectPosition(id, true);
     auto snapAmount = left ? snapTranslateDown(state.easyUse, state.snappingMode, objPos, state.manipulatorAxis) : snapTranslateUp(state.easyUse, state.snappingMode, objPos, state.manipulatorAxis);
-    setGameObjectPosition(id, snapAmount, true, Hint { .hint = "handleSnapEasy" });
+    setGameObjectPosition(id, snapAmount, true, Hint { .hint = "handleSnapEasy position" });
   }else if (state.manipulatorMode == ROTATE){
     auto objRot = getGameObjectRotation(id, true);
     auto snapAmount = left ? snapAngleDown(state.easyUse, state.snappingMode, objRot, state.manipulatorAxis) : snapAngleUp(state.easyUse, state.snappingMode, objRot, state.manipulatorAxis);
-    setGameObjectRotation(id, snapAmount, false);
+    setGameObjectRotation(id, snapAmount, false, Hint { .hint = "handleSnapEasy rotate" });
   }else if (state.manipulatorMode == SCALE){
     auto objScale = getGameObjectScale(id);
     auto snapAmount = left ? snapScaleDown(state.easyUse, state.snappingMode, objScale, state.manipulatorAxis) : snapScaleUp(state.easyUse, state.snappingMode, objScale, state.manipulatorAxis);

@@ -407,8 +407,8 @@ glm::quat getGameObjectRotation(int32_t index, bool isWorld){
   return gameobjectRotation(world, index, isWorld);
 }
 
-void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld){
-  physicsRotateSet(world, index, rotation, !isWorld);
+void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld, Hint hint){
+  physicsRotateSet(world, index, rotation, !isWorld, hint);
 }
 
 
@@ -887,14 +887,14 @@ void rotateCamera(float xoffset, float yoffset){
     defaultResources.defaultCamera.transformation.rotation = setFrontDelta(defaultResources.defaultCamera.transformation.rotation, xoffset, yoffset, 0, 0.1);
   }else{
     auto cameraRelativeRotation = gameobjectRotation(world, state.activeCameraObj.value(), false);
-    setGameObjectRotation(state.activeCameraObj.value(), setFrontDelta(cameraRelativeRotation, xoffset, yoffset, 0, 0.1), true);
+    setGameObjectRotation(state.activeCameraObj.value(), setFrontDelta(cameraRelativeRotation, xoffset, yoffset, 0, 0.1), true, Hint { .hint = "mainApi - rotateCamera" });
   }
 }
 void setCameraRotation(glm::quat orientation){
   if (!state.activeCameraObj.has_value()){
     defaultResources.defaultCamera.transformation.rotation = orientation;
   }else{
-    setGameObjectRotation(state.activeCameraObj.value(), orientation, true);
+    setGameObjectRotation(state.activeCameraObj.value(), orientation, true, Hint { .hint = "mainApi - setCameraRotation" });
   }
 }
 

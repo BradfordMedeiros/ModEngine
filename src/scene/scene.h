@@ -87,7 +87,7 @@ std::string serializeScene(World& world, objid sceneId, bool includeIds);
 std::string serializeObject(World& world, objid id, bool includeSubmodelAttr, std::string overridename = "");
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative, Hint hint);
-void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relative);  
+void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relative, Hint hint);  
 void physicsScaleSet(World& world, objid index, glm::vec3 scale);
 void physicsLocalTransformSet(World& world, objid index, Transformation& transform);
 

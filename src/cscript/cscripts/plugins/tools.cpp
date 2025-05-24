@@ -41,7 +41,7 @@ void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld, Hint hint
 glm::quat getGameObjectRotation(int32_t index, bool isWorld);
 void setGameObjectScale(int32_t index, glm::vec3 scale, bool isWorld);
 glm::vec3 getGameObjectScale(int32_t index);
-void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld);
+void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld, Hint hint);
 void removeObjectById(objid id);
 void removeLinesByOwner(LineData& lineData, objid owner);
 objid addLineToNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, LineColor color, std::optional<unsigned int> textureId);
@@ -82,7 +82,7 @@ ManipulatorTools tools {
   .getScale = getGameObjectScale,
   .setScale = [](int32_t index, glm::vec3 scale) -> void { setGameObjectScale(index, scale, true); },
   .getRotation = [](objid id) -> glm::quat { return getGameObjectRotation(id, false); },
-  .setRotation = [](objid id, glm::quat rot) -> void { setGameObjectRotation(id, rot, true); },
+  .setRotation = [](objid id, glm::quat rot) -> void { setGameObjectRotation(id, rot, true, Hint { .hint = "manipulator setRotation" }); },
   .snapPosition = [](glm::vec3 pos) -> glm::vec3 {
     return snapTranslate(state.easyUse, pos);
   },

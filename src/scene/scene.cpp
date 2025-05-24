@@ -1391,7 +1391,7 @@ void setAttributes(World& world, objid id, std::vector<GameobjAttribute> allAttr
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative, Hint hint){
   //std::cout << "physics translate set: " << index << " relative: " << relative << std::endl;
   if (relative){
-    updateRelativePosition(world.sandbox, index, pos, Hint{});
+    updateRelativePosition(world.sandbox, index, pos, hint);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body =  phys.body;
@@ -1410,10 +1410,20 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative
   world.entitiesToUpdate.insert(index);
 }
 
-void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relative){
+void physicsLocalTransformSet(World& world, objid index, Transformation& transform){
+  updateRelativeTransform(world.sandbox, index, transform, Hint{ .hint = "physicsLocalTransformSet" });
+  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    PhysicsValue& phys = world.rigidbodys.at(index);
+    auto body = phys.body;
+    auto& fullTransform = fullTransformation(world.sandbox, index);
+    setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
+  }
+}
+
+void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relative, Hint hint){
   //std::cout << "physics rotate set: " << index << " relative: " << relative << std::endl;
   if (relative){
-    updateRelativeRotation(world.sandbox, index, rotation, Hint{});
+    updateRelativeRotation(world.sandbox, index, rotation, hint);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       auto rigidBody = world.rigidbodys.at(index);
       auto body = rigidBody.body;
@@ -1425,7 +1435,7 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
     }
   }else{
     //modassert(false, "not supposed to be absolute");
-    updateAbsoluteRotation(world.sandbox, index, rotation, Hint{ .hint = "physicsRotateSet" });
+    updateAbsoluteRotation(world.sandbox, index, rotation, hint);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       auto rigidBody = world.rigidbodys.at(index);
       auto body =  rigidBody.body;
@@ -1454,15 +1464,6 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
   world.entitiesToUpdate.insert(index);
 }
 
-void physicsLocalTransformSet(World& world, objid index, Transformation& transform){
-  updateRelativeTransform(world.sandbox, index, transform, Hint{});
-  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    PhysicsValue& phys = world.rigidbodys.at(index);
-    auto body = phys.body;
-    auto& fullTransform = fullTransformation(world.sandbox, index);
-    setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
-  }
-}
 
 void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<objid, PhysicsValue>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
@@ -1511,7 +1512,7 @@ void updateLookAt(World& world, Transformation& viewTransform){
       continue;
     }             
     glm::vec3 fromPos = fullTransformation(world.sandbox, gameobj.gameobj.id).position;
-    physicsRotateSet(world, gameobj.gameobj.id, orientationFromPos(fromPos, viewTransform.position), false);
+    physicsRotateSet(world, gameobj.gameobj.id, orientationFromPos(fromPos, viewTransform.position), false, Hint { .hint = "updateLookAt" });
   }
 }
 
@@ -1547,7 +1548,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
         
         objid objectAdded = addObjectToScene(world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, newName, attrChildren, submodelAttributesFixedPath);
         if (particleOpts.orientation.has_value()){
-          physicsRotateSet(world, objectAdded, particleOpts.orientation.value(), true);
+          physicsRotateSet(world, objectAdded, particleOpts.orientation.value(), true, Hint { .hint = "updateEmitters - orientation" });
         }
 
         auto oldTransformation = gameobjectTransformation(world, objectAdded, true);
