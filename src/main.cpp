@@ -448,7 +448,7 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
 struct traversalData {
   objid id;
   objid directIndex;
-  glm::mat4* modelMatrix;
+  glm::mat4 modelMatrix;
 };
 
 objid directIndex(objid objectId){
@@ -483,7 +483,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     datum.push_back(traversalData{
       .id = id,
       .directIndex = transformCacheElement.gameobjIndex,
-      .modelMatrix = &transformCacheElement.matrix,
+      .modelMatrix = matrixFromComponents(transformCacheElement.transform),
     });
   }
 
@@ -496,7 +496,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       GameObject& gameobject = getGameObjectDirectIndex(world.sandbox, data.directIndex); 
       if (gameobject.layer == layer.name){  // TODO PERF rm this string comparison 
         int32_t id = data.id; 
-        glm::mat4& modelMatrix = *data.modelMatrix; 
+        glm::mat4& modelMatrix = data.modelMatrix; 
         std::string& shader = gameobject.shader;
         if (id < 0){
           modassert(false, "unexpected id render world");

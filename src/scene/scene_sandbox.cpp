@@ -470,7 +470,7 @@ Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId){
 
 // What should the absolute transform be given a parents absolute and a relative child transform
 Transformation calcAbsoluteTransform(SceneSandbox& sandbox, objid parentId, Transformation transform){
-  glm::mat4 parentMatrix = sandbox.mainScene.absoluteTransforms.at(parentId).matrix;
+  glm::mat4 parentMatrix = matrixFromComponents(sandbox.mainScene.absoluteTransforms.at(parentId).transform);
   glm::mat4 childMatrix = matrixFromComponents(transform);
   auto finalTransform = parentMatrix * childMatrix;
   return getTransformationFromMatrix(finalTransform);
@@ -528,7 +528,6 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
        sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
          .gameobjIndex = gameobjIndex,
          .transform = newTransform,
-         .matrix = matrixFromComponents(newTransform),
        };       
     }
   }
@@ -553,7 +552,6 @@ void addObjectToCache(SceneSandbox& sandbox, objid id){
   sandbox.mainScene.absoluteTransforms[id] = TransformCacheElement {
     .gameobjIndex = gameobjIndex,
     .transform = getTransformationFromMatrix(elementMatrix),
-    .matrix = elementMatrix,
   };
   updateAllChildrenPositions(sandbox, id, true);
 }
@@ -571,7 +569,6 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .gameobjIndex = gameobjIndex,
     .transform =  transform,
-    .matrix = matrixFromComponents(transform),
   };
 
   if (parentId != 0){
@@ -596,14 +593,13 @@ void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation tra
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .gameobjIndex = gameobjIndex,
     .transform = newTransform,
-    .matrix = matrixFromComponents(newTransform),
   };
   updateAllChildrenPositions(sandbox, id);
 }
 
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
   TransformCacheElement& element = sandbox.mainScene.absoluteTransforms.at(id);
-  return element.matrix;
+  return matrixFromComponents(element.transform);
 }
 Transformation& fullTransformation(SceneSandbox& sandbox, objid id){
   return sandbox.mainScene.absoluteTransforms.at(id).transform;
