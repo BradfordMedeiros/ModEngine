@@ -1,5 +1,7 @@
 #include "./scene_sandbox.h"
 
+const bool enableTransformLogging = false;
+
 void addObjectToCache(SceneSandbox& sandbox, objid id);
 void removeObjectFromCache(SceneSandbox& sandbox, objid id);
 
@@ -532,9 +534,11 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
        auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
        auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
 
-       std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]          [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]" << std::endl; 
-       std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]               new rel: " << print(currentConstraint) << std::endl; 
-       std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]               new abs: " << print(newTransform) << std::endl; 
+       if (enableTransformLogging){
+         std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]          [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]" << std::endl; 
+         std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]               new rel: " << print(currentConstraint) << std::endl; 
+         std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]               new abs: " << print(newTransform) << std::endl; 
+       }
 
        sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
          .gameobjIndex = gameobjIndex,
@@ -553,22 +557,24 @@ struct TransformUpdate {
 std::vector<TransformUpdate> updates;
 
 std::set<objid> updateSandbox(SceneSandbox& sandbox){
-  std::cout << "hint---------- updateSandbox start------------------" << std::endl;
+  if (enableTransformLogging){
+    std::cout << "hint---------- updateSandbox start------------------" << std::endl;
+  }
   std::set<objid> oldUpdated = sandbox.updatedIds;
 
   std::set<objid> hasAbsolute;
-
   for (auto &update : updates){
     if (update.relative){
 
       auto& transform = update.transform;
       auto id = update.id;
 
-      printColor("----------", CONSOLE_COLOR_GREEN);
-      std::cout << inColor("updateRelativeTransform hint: ", CONSOLE_COLOR_GREEN) << " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]  " << (update.hint.hint ? update.hint.hint : "[no hint]") << " " <<  inColor(print(update.transform), CONSOLE_COLOR_YELLOW) <<  std::endl;
-      printColor("----------", CONSOLE_COLOR_GREEN);
-
-      std::cout << "updateRelativeTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+      if (enableTransformLogging){
+        printColor("----------", CONSOLE_COLOR_GREEN);
+        std::cout << inColor("updateRelativeTransform hint: ", CONSOLE_COLOR_GREEN) << " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]  " << (update.hint.hint ? update.hint.hint : "[no hint]") << " " <<  inColor(print(update.transform), CONSOLE_COLOR_YELLOW) <<  std::endl;
+        printColor("----------", CONSOLE_COLOR_GREEN);
+        std::cout << "updateRelativeTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;        
+      }
 
       auto parentId = getGameObjectH(sandbox, id).parentId;
       getGameObject(sandbox, id).transformation = transform;
@@ -580,16 +586,20 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
         .transform = newTransform,
       };
       updateAllChildrenPositions(sandbox, id, false, hasAbsolute);
-      std::cout << "updateRelativeTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
 
+      if (enableTransformLogging){
+        std::cout << "updateRelativeTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+      }
     }else{
       auto& transform = update.transform;
       auto id = update.id;
       hasAbsolute.insert(id);
 
-      std::cout << inColor("updateAbsoluteTransform hint: ", CONSOLE_COLOR_GREEN) <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (update.hint.hint ? update.hint.hint : "[no hint]") << " " << inColor(print(update.transform), CONSOLE_COLOR_YELLOW) << std::endl;
-      std::cout << "updateAbsoluteTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
-      std::cout << "updateAbsoluteTransform hint        old abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;
+      if (enableTransformLogging){
+        std::cout << inColor("updateAbsoluteTransform hint: ", CONSOLE_COLOR_GREEN) <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (update.hint.hint ? update.hint.hint : "[no hint]") << " " << inColor(print(update.transform), CONSOLE_COLOR_YELLOW) << std::endl;
+        std::cout << "updateAbsoluteTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+        std::cout << "updateAbsoluteTransform hint        old abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;        
+      }
 
       auto parentId = getGameObjectH(sandbox, id).parentId;
       auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
@@ -607,8 +617,10 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
         getGameObject(sandbox, id).transformation = transform;
       }
 
-      std::cout << "updateAbsoluteTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
-      std::cout << "updateAbsoluteTransform hint        new abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;
+      if (enableTransformLogging){
+        std::cout << "updateAbsoluteTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+        std::cout << "updateAbsoluteTransform hint        new abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;
+      }
 
 
       updateAllChildrenPositions(sandbox, id, false, {});
@@ -618,7 +630,9 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
   sandbox.updatedIds = {};
   updates = {};
 
-  std::cout << "hint---------- updateSandbox end------------------" << std::endl;
+  if (enableTransformLogging){
+    std::cout << "hint---------- updateSandbox end------------------" << std::endl;
+  }
   return oldUpdated;
 }
 
@@ -643,15 +657,17 @@ void removeObjectFromCache(SceneSandbox& sandbox, objid id){
 }
 
 
-bool updateTransformImmediate = false;
+bool updateTransformImmediate = true;
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint){
 
   if (updateTransformImmediate){
-    printColor("updateAbsoluteTransform hint: ", CONSOLE_COLOR_GREEN);
-    std::cout <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (hint.hint ? hint.hint : "[no hint]") << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) << std::endl;
 
-    std::cout << "updateAbsoluteTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
-    std::cout << "updateAbsoluteTransform hint        old abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;
+    if (enableTransformLogging){
+      printColor("updateAbsoluteTransform hint: ", CONSOLE_COLOR_GREEN);
+      std::cout <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (hint.hint ? hint.hint : "[no hint]") << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) << std::endl;
+      std::cout << "updateAbsoluteTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+      std::cout << "updateAbsoluteTransform hint        old abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;
+    }
 
     auto parentId = getGameObjectH(sandbox, id).parentId;
     auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
@@ -672,8 +688,11 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
     }
     updateAllChildrenPositions(sandbox, id, {});
 
-    std::cout << "updateAbsoluteTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
-    std::cout << "updateAbsoluteTransform hint        new abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;
+    if (enableTransformLogging){
+      std::cout << "updateAbsoluteTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+      std::cout << "updateAbsoluteTransform hint        new abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;      
+    }
+
 
   }else{
     updates.push_back(TransformUpdate {
@@ -687,9 +706,11 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
 }
 void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint){
   if (updateTransformImmediate){
-    printColor("updateRelativeTransform hint: ", CONSOLE_COLOR_GREEN);
-    std::cout << " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]  " << (hint.hint ? hint.hint : "[no hint]") << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) <<  std::endl;
-    std::cout << "updateRelativeTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+    if (enableTransformLogging){
+      printColor("updateRelativeTransform hint: ", CONSOLE_COLOR_GREEN);
+      std::cout << " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]  " << (hint.hint ? hint.hint : "[no hint]") << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) <<  std::endl;
+      std::cout << "updateRelativeTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+    }
 
     auto parentId = getGameObjectH(sandbox, id).parentId;
     getGameObject(sandbox, id).transformation = transform;
@@ -701,7 +722,10 @@ void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation tra
       .transform = newTransform,
     };
     updateAllChildrenPositions(sandbox, id, {});
-    std::cout << "updateRelativeTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+
+    if (enableTransformLogging){
+      std::cout << "updateRelativeTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+    }
   }else{
     updates.push_back(TransformUpdate {
       .relative = true,
