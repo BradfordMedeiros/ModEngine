@@ -1,6 +1,7 @@
 #include "./scene_sandbox.h"
 
-const bool enableTransformLogging = false;
+const bool enableTransformLogging = true;
+const bool updateTransformImmediate = true;
 
 void addObjectToCache(SceneSandbox& sandbox, objid id);
 void removeObjectFromCache(SceneSandbox& sandbox, objid id);
@@ -558,7 +559,7 @@ std::vector<TransformUpdate> updates;
 
 std::set<objid> updateSandbox(SceneSandbox& sandbox){
   if (enableTransformLogging){
-    std::cout << "hint---------- updateSandbox start------------------" << std::endl;
+    std::cout << inColor("hint---------- updateSandbox start------------------", CONSOLE_COLOR_RED) << std::endl;
   }
   std::set<objid> oldUpdated = sandbox.updatedIds;
 
@@ -570,9 +571,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
       auto id = update.id;
 
       if (enableTransformLogging){
-        printColor("----------", CONSOLE_COLOR_GREEN);
         std::cout << inColor("updateRelativeTransform hint: ", CONSOLE_COLOR_GREEN) << " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]  " << (update.hint.hint ? update.hint.hint : "[no hint]") << " " <<  inColor(print(update.transform), CONSOLE_COLOR_YELLOW) <<  std::endl;
-        printColor("----------", CONSOLE_COLOR_GREEN);
         std::cout << "updateRelativeTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;        
       }
 
@@ -597,8 +596,8 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
 
       if (enableTransformLogging){
         std::cout << inColor("updateAbsoluteTransform hint: ", CONSOLE_COLOR_GREEN) <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (update.hint.hint ? update.hint.hint : "[no hint]") << " " << inColor(print(update.transform), CONSOLE_COLOR_YELLOW) << std::endl;
-        std::cout << "updateAbsoluteTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
-        std::cout << "updateAbsoluteTransform hint        old abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;        
+        std::cout << "                                    old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+        std::cout << "                                    old abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;        
       }
 
       auto parentId = getGameObjectH(sandbox, id).parentId;
@@ -618,8 +617,8 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
       }
 
       if (enableTransformLogging){
-        std::cout << "updateAbsoluteTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
-        std::cout << "updateAbsoluteTransform hint        new abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;
+        std::cout << "                                     new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+        std::cout << "                                     new abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;
       }
 
 
@@ -631,7 +630,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
   updates = {};
 
   if (enableTransformLogging){
-    std::cout << "hint---------- updateSandbox end------------------" << std::endl;
+    std::cout << inColor("hint---------- updateSandbox end------------------", CONSOLE_COLOR_RED) << std::endl;
   }
   return oldUpdated;
 }
@@ -657,14 +656,12 @@ void removeObjectFromCache(SceneSandbox& sandbox, objid id){
 }
 
 
-bool updateTransformImmediate = true;
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint){
 
   if (updateTransformImmediate){
 
     if (enableTransformLogging){
-      printColor("updateAbsoluteTransform hint: ", CONSOLE_COLOR_GREEN);
-      std::cout <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (hint.hint ? hint.hint : "[no hint]") << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) << std::endl;
+      std::cout << inColor("updateAbsoluteTransform hint: ", CONSOLE_COLOR_GREEN) << " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (hint.hint ? hint.hint : "[no hint]") << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) << std::endl;
       std::cout << "updateAbsoluteTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
       std::cout << "updateAbsoluteTransform hint        old abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;
     }
@@ -695,6 +692,9 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
 
 
   }else{
+    if (enableTransformLogging){
+      std::cout << inColor("hint - queue updateAbsoluteTransform: ", CONSOLE_COLOR_GREEN) <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (hint.hint ? hint.hint : "[no hint]") << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) << std::endl;
+    }
     updates.push_back(TransformUpdate {
       .relative = false,
       .id = id,
@@ -707,8 +707,7 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
 void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint){
   if (updateTransformImmediate){
     if (enableTransformLogging){
-      printColor("updateRelativeTransform hint: ", CONSOLE_COLOR_GREEN);
-      std::cout << " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]  " << (hint.hint ? hint.hint : "[no hint]") << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) <<  std::endl;
+      std::cout << inColor("updateRelativeTransform hint: ", CONSOLE_COLOR_GREEN) << " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]  " << (hint.hint ? hint.hint : "[no hint]") << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) <<  std::endl;
       std::cout << "updateRelativeTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
     }
 
@@ -724,9 +723,12 @@ void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation tra
     updateAllChildrenPositions(sandbox, id, {});
 
     if (enableTransformLogging){
-      std::cout << "updateRelativeTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
+      std::cout << "hint updateRelativeTransform        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
     }
   }else{
+    if (enableTransformLogging){
+      std::cout << inColor("hint updateRelativeTransform queue: ", CONSOLE_COLOR_GREEN) <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (hint.hint ? hint.hint : "[no hint]") << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) << std::endl;
+    }
     updates.push_back(TransformUpdate {
       .relative = true,
       .id = id,
@@ -736,11 +738,17 @@ void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation tra
   }
 }
 
-glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
+glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id, const char* hint){
+  if (enableTransformLogging){
+    std::cout << inColor("hint - readTransform", CONSOLE_COLOR_GREEN) << ": [" << id << ", " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]" << " " << (hint ? hint : "[no hint]") << std::endl;
+  }
   TransformCacheElement& element = sandbox.mainScene.absoluteTransforms.at(id);
   return matrixFromComponents(element.transform);
 }
-Transformation& fullTransformation(SceneSandbox& sandbox, objid id){
+Transformation& fullTransformation(SceneSandbox& sandbox, objid id, const char* hint){
+  if (enableTransformLogging){
+    std::cout << inColor("hint - readTransform", CONSOLE_COLOR_GREEN) << ": [" << id << ", " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]" " " << (hint ? hint : "[no hint]") << std::endl;
+  }
   return sandbox.mainScene.absoluteTransforms.at(id).transform;
 }
 

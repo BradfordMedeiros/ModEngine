@@ -7,7 +7,7 @@ std::vector<LightInfo> getLightInfo(World& world){
     auto objectId =  lightsIndexs.at(i);
     auto lightObject = getLight(world.objectMapping, objectId);
     modassert(lightObject, "getLightInfo - not a light");
-    auto lightTransform = fullTransformation(world.sandbox, objectId);
+    auto lightTransform = fullTransformation(world.sandbox, objectId, "getLightInfo");
     LightInfo light {
       .transform = lightTransform,
       .light = *lightObject,
@@ -40,8 +40,8 @@ std::optional<PortalInfo> getPortalInfo(World& world, objid id){
   }
   auto sceneId = getGameObjectH(world.sandbox, id).sceneId;
   auto cameraId = getGameObject(world, portalObject -> camera, sceneId).id;
-  auto cameraFullTransform = fullTransformation(world.sandbox, cameraId);
-  auto portalFullTransform = fullTransformation(world.sandbox, id);
+  auto cameraFullTransform = fullTransformation(world.sandbox, cameraId, "getPortalInfo cameraFullTransform");
+  auto portalFullTransform = fullTransformation(world.sandbox, id, "getPortalInfo portalFullTransform");
 
   PortalInfo info {
     .cameraTransform = cameraFullTransform,
@@ -97,7 +97,7 @@ std::optional<glm::vec3> aiNavigate(World& world, objid id, glm::vec3 target, st
     return isNavmesh(world.objectMapping, id);
   };
   auto position = [&world](objid id) -> glm::vec3 {
-    return fullTransformation(world.sandbox, id).position;
+    return fullTransformation(world.sandbox, id, "aiNavigate").position;
   };
 
   auto currentMeshId = targetNavmeshId(position(id), raycastWorld, isNavmeshWorld);

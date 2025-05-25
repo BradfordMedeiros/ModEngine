@@ -1760,6 +1760,7 @@ int main(int argc, char* argv[]){
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
   PROFILE("FRAME",
+    std::cout << inColor("hint - START FRAME", CONSOLE_COLOR_YELLOW) << std::endl;
     auto shouldExit = updateTime(fpsFixed, fixedDelta, state.engineSpeed, timetoexit, hasFramelimit, minDeltaTime, fpsLag);
     if (shouldExit || shouldQuitControl){
       goto cleanup;

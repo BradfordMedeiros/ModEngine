@@ -95,8 +95,8 @@ GameObject& getGameObjectDirectIndex(SceneSandbox& sandbox, objid id);
 GameObjectH& getGameObjectH(SceneSandbox& sandbox, objid id);
 GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name, objid sceneId);
 
-glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id);
-Transformation& fullTransformation(SceneSandbox& sandbox, objid id);
+glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id, const char* hint = NULL);
+Transformation& fullTransformation(SceneSandbox& sandbox, objid id, const char* hint = NULL);
 
 void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool justAdded = false, std::set<objid> absoluteUpdates = {});
 
