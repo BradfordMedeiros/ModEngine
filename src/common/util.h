@@ -488,4 +488,9 @@ struct Hint {
   const char* hint = NULL;
 };
 
+
+enum CONSOLE_COLOR { CONSOLE_COLOR_GREEN, CONSOLE_COLOR_RED, CONSOLE_COLOR_BLUE, CONSOLE_COLOR_YELLOW };
+void printColor(std::string str, std::optional<CONSOLE_COLOR> color);
+std::string inColor(std::string str, std::optional<CONSOLE_COLOR> color);
+
 #endif
