@@ -56,7 +56,7 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
       return std::nullopt;
     }
 
-    auto& fullTransform = fullTransformation(world.sandbox, index);
+    auto& fullTransform = fullTransformation(world.sandbox, index, "getPhysicsInfoForGameObject");
     boundInfo = getMaxUnionBoundingInfo(boundInfos);
     finalOffset = getOffsetForBoundInfo(boundInfo, fullTransform.scale);
   }
@@ -846,11 +846,10 @@ std::string serializeObject(World& world, objid id, bool includeSubmodelAttr, st
 std::set<objid> updatePhysicsFromSandbox(World& world){
   auto updatedIds = updateSandbox(world.sandbox);  
   for (auto index : updatedIds){
-    auto& transform = fullTransformation(world.sandbox, index);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body =  phys.body;
-      auto& fullTransform = fullTransformation(world.sandbox, index);
+      auto& fullTransform = fullTransformation(world.sandbox, index, "read back transform for rigid body position");
       setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
     }
   }
@@ -956,7 +955,7 @@ void addSerialObjectsToWorld(
   for (auto &id : idsAdded){
     auto phys = addPhysicsBody(world, id, true); 
     if (phys.body != NULL){   // why do I need this?
-      auto& transform = fullTransformation(world.sandbox, id);
+      auto& transform = fullTransformation(world.sandbox, id, "addSerialObjectsToWorld");
       setTransform(world.physicsEnvironment, phys.body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation), transform.scale, transform.rotation);
     }  
   }
@@ -1307,7 +1306,7 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool veloci
   //std::cout << "rigid bodies new: " << world.rigidbodys.size() << std::endl;
 
   //auto transformation = gameobjectTransformation(world, id, false);
-  physicsLocalTransformSet(world, id, gameobj.transformation);
+  //physicsLocalTransformSet(world, id, gameobj.transformation);
   btRigidBody* body = world.rigidbodys.find(id) != world.rigidbodys.end() ? world.rigidbodys.at(id).body : NULL;
 
   if (body != NULL){
@@ -1395,7 +1394,7 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body =  phys.body;
-      auto& transform = fullTransformation(world.sandbox, index);
+      auto& transform = fullTransformation(world.sandbox, index, "physicsTranslateSet - read back to set physics position - relative");
       setPosition(body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation));
     }
   }else{
@@ -1403,7 +1402,7 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body = phys.body;
-      auto& transform = fullTransformation(world.sandbox, index);
+      auto& transform = fullTransformation(world.sandbox, index, "physicsTranslateSet - read back to set physics position - absolute");
       setPosition(body, calcOffsetFromRotation(pos, phys.offset, transform.rotation));
     }
   }
@@ -1415,7 +1414,7 @@ void physicsLocalTransformSet(World& world, objid index, Transformation& transfo
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     PhysicsValue& phys = world.rigidbodys.at(index);
     auto body = phys.body;
-    auto& fullTransform = fullTransformation(world.sandbox, index);
+    auto& fullTransform = fullTransformation(world.sandbox, index, "physicsLocalTransformSet");
     setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
   }
 }
@@ -1427,7 +1426,7 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       auto rigidBody = world.rigidbodys.at(index);
       auto body = rigidBody.body;
-      auto& transform = fullTransformation(world.sandbox, index);
+      auto& transform = fullTransformation(world.sandbox, index, "physicsRotateSet relative");
       auto rot = transform.rotation;
       auto newPositionOffset = calcOffsetFromRotation(transform.position, rigidBody.offset, rot);
       setPosition(body, newPositionOffset);
@@ -1439,7 +1438,7 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       auto rigidBody = world.rigidbodys.at(index);
       auto body =  rigidBody.body;
-      auto& transform = fullTransformation(world.sandbox, index);
+      auto& transform = fullTransformation(world.sandbox, index, "physicsRotateSet absolute");
       auto rot = transform.rotation;
       auto newPositionOffset = calcOffsetFromRotation(transform.position, rigidBody.offset, rot);
       setPosition(body, newPositionOffset);
@@ -1511,7 +1510,7 @@ void updateLookAt(World& world, Transformation& viewTransform){
     if (!gameobj.gameobj.lookat){
       continue;
     }             
-    glm::vec3 fromPos = fullTransformation(world.sandbox, gameobj.gameobj.id).position;
+    glm::vec3 fromPos = fullTransformation(world.sandbox, gameobj.gameobj.id, "lookat get position").position;
     physicsRotateSet(world, gameobj.gameobj.id, orientationFromPos(fromPos, viewTransform.position), false, Hint { .hint = "updateLookAt" });
   }
 }
@@ -1526,7 +1525,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
           return std::nullopt;
         } 
         std::cout << "INFO: emitter: creating particle from emitter: " << getGameObject(world.sandbox, emitterNodeId).name << std::endl;
-        attributes.attr["position"] = particleOpts.position.has_value() ?  particleOpts.position.value() : fullTransformation(world.sandbox, emitterNodeId).position;
+        attributes.attr["position"] = particleOpts.position.has_value() ?  particleOpts.position.value() : fullTransformation(world.sandbox, emitterNodeId, "emitter - get position").position;
         if (particleOpts.velocity.has_value()){
           attributes.attr["physics_velocity"] = particleOpts.velocity.value();
         }
@@ -1599,7 +1598,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
 
   for (auto id : world.entitiesToUpdate){
     if (idExists(world.sandbox, id)){  // why do i need this check?
-      auto absolutePosition = fullTransformation(world.sandbox, id).position;
+      auto absolutePosition = fullTransformation(world.sandbox, id, "object type position updates").position;
       updateObjectPositions(world.objectMapping, id, absolutePosition, viewTransform);      
     }
   }
@@ -1675,26 +1674,26 @@ std::vector<std::string> sceneTagsForSceneId(World& world, objid sceneId){
 
 glm::vec3 gameobjectPosition(World& world, objid id, bool isWorld){
   if (isWorld){
-    return fullTransformation(world.sandbox, id).position;
+    return fullTransformation(world.sandbox, id, "gameobjectPosition").position;
   }
   return calcRelativeTransform(world.sandbox, id).position; // getGameObject(world, id).transformation.position;   // fix relative reference
 }
 glm::vec3 gameobjectScale(World& world, objid id, bool isWorld){
   if (isWorld){
-    return fullTransformation(world.sandbox, id).scale;
+    return fullTransformation(world.sandbox, id, "gameobjectScale").scale;
   }
   return calcRelativeTransform(world.sandbox, id).scale;   // fix relative reference
 }
 glm::quat gameobjectRotation(World& world, objid id, bool isWorld){
   if (isWorld){
-    return fullTransformation(world.sandbox, id).rotation;
+    return fullTransformation(world.sandbox, id, "gameobjectRotation").rotation;
   }
   return calcRelativeTransform(world.sandbox, id).rotation;  // fix relative reference
 }
 
 Transformation gameobjectTransformation(World& world, objid id, bool isWorld){
   if (isWorld){
-    return fullTransformation(world.sandbox, id);
+    return fullTransformation(world.sandbox, id, "gameobjectTransformation");
   }
   return calcRelativeTransform(world.sandbox, id);
 }

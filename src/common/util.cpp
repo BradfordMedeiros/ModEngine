@@ -1225,3 +1225,34 @@ bool isExtensionType(std::string& file, std::vector<std::string>& extensions){
   }
   return isValidExtension;
 }
+
+void printColor(std::string str, std::optional<CONSOLE_COLOR> color){
+  if (!color.has_value()){
+    std::cout << str;
+    return;
+  }
+  if (color.value() == CONSOLE_COLOR_GREEN){
+    std::cout << "\033[1;32m" << str << "\033[0m";
+  }else if (color.value() == CONSOLE_COLOR_RED){
+    std::cout << "\033[1;31m" << str << "\033[0m";
+  }else{
+    modassert(false, "invalid color");
+  }
+}
+
+std::string inColor(std::string str, std::optional<CONSOLE_COLOR> color){
+  if (!color.has_value()){
+    return str;
+  }
+  if (color.value() == CONSOLE_COLOR_GREEN){
+    return std::string("\033[1;32m") + str + "\033[0m";
+  }else if (color.value() == CONSOLE_COLOR_RED){
+    return std::string("\033[1;31m") + str + "\033[0m";
+  }else if (color.value() == CONSOLE_COLOR_BLUE){
+    return std::string("\033[1;34m") + str + "\033[0m";
+  }else if (color.value() == CONSOLE_COLOR_YELLOW){
+    return std::string("\033[1;33m") + str + "\033[0m";
+  }else{
+    modassert(false, "invalid color");
+  }
+}
