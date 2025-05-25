@@ -565,7 +565,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
       auto id = update.id;
 
       printColor("----------", CONSOLE_COLOR_GREEN);
-      std::cout << "updateRelativeTransform hint: " << " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]  " << (update.hint.hint ? update.hint.hint : "[no hint]") << " " <<  inColor(print(update.transform), CONSOLE_COLOR_YELLOW) <<  std::endl;
+      std::cout << inColor("updateRelativeTransform hint: ", CONSOLE_COLOR_GREEN) << " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]  " << (update.hint.hint ? update.hint.hint : "[no hint]") << " " <<  inColor(print(update.transform), CONSOLE_COLOR_YELLOW) <<  std::endl;
       printColor("----------", CONSOLE_COLOR_GREEN);
 
       std::cout << "updateRelativeTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
@@ -587,7 +587,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
       auto id = update.id;
       hasAbsolute.insert(id);
 
-      std::cout << "updateAbsoluteTransform hint: " <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (update.hint.hint ? update.hint.hint : "[no hint]") << " " << inColor(print(update.transform), CONSOLE_COLOR_YELLOW) << std::endl;
+      std::cout << inColor("updateAbsoluteTransform hint: ", CONSOLE_COLOR_GREEN) <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (update.hint.hint ? update.hint.hint : "[no hint]") << " " << inColor(print(update.transform), CONSOLE_COLOR_YELLOW) << std::endl;
       std::cout << "updateAbsoluteTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
       std::cout << "updateAbsoluteTransform hint        old abs: " <<  print(sandbox.mainScene.absoluteTransforms.at(id).transform) << std::endl;
 
@@ -643,7 +643,7 @@ void removeObjectFromCache(SceneSandbox& sandbox, objid id){
 }
 
 
-bool updateTransformImmediate = true;
+bool updateTransformImmediate = false;
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint){
 
   if (updateTransformImmediate){
