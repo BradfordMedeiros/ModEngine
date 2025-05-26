@@ -60,7 +60,7 @@ struct CustomApiBindings {
   void (*setSingleGameObjectAttr)(int32_t id, const char* field, AttributeValue value);
   glm::vec3 (*getGameObjectPos)(int32_t index, bool world, const char* hint);
   void (*setGameObjectPosition)(int32_t index, glm::vec3 pos, bool world, Hint hint);
-  glm::quat (*getGameObjectRotation)(int32_t index, bool world);
+  glm::quat (*getGameObjectRotation)(int32_t index, bool world, const char* hint);
   void (*setGameObjectRot)(int32_t index, glm::quat rotation, bool world, Hint hint);
   glm::vec3 (*getGameObjectScale)(int32_t index, bool world);
   void (*setGameObjectScale)(int32_t index, glm::vec3 scale, bool world);

@@ -124,7 +124,7 @@ std::optional<ModAABB2> getModAABBModel(int32_t id){
   };
 
   auto bounds = toBounds(aabb);
-  auto rotation = getGameObjectRotation(id, true);
+  auto rotation = getGameObjectRotation(id, true, "getModAABBModel");
   std::vector<glm::vec3> newBoundingBox {
     rotation * bounds.topLeftFront,
     rotation * bounds.topRightFront,
@@ -403,8 +403,8 @@ void setGameObjectScale(int32_t index, glm::vec3 scale, bool isWorld){
   physicsScaleSet(world, index, scale);
 }
 
-glm::quat getGameObjectRotation(int32_t index, bool isWorld){
-  return gameobjectRotation(world, index, isWorld, "getGameObjectRotation");
+glm::quat getGameObjectRotation(int32_t index, bool isWorld, const char* hint){
+  return gameobjectRotation(world, index, isWorld, hint);
 }
 
 void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld, Hint hint){

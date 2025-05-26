@@ -105,7 +105,7 @@ glm::vec3 getGameObjectScale(int32_t index);
 glm::vec3 getGameObjectScale2(int32_t index, bool isWorld);
 void setGameObjectScale(int32_t index, glm::vec3 scale, bool isWorld);
 
-glm::quat getGameObjectRotation(int32_t index, bool isWorld);
+glm::quat getGameObjectRotation(int32_t index, bool isWorld, const char* hint);
 void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld, Hint hint);
 
 std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes);

@@ -18,7 +18,7 @@ void drawNormals(){
     auto groupId = mainApi -> groupId(idInScene);
     auto name = mainApi -> getGameObjNameForId(idInScene).value();
     auto position = mainApi -> getGameObjectPos(idInScene, true, "tools.cpp drawNormals");
-    auto rotation = mainApi -> getGameObjectRotation(idInScene, true);
+    auto rotation = mainApi -> getGameObjectRotation(idInScene, true, "tools.cpp drawNormals");
     auto toPosition = position + (rotation * glm::vec3(0.f, 0.f, -1.f));
     auto leftArrow = position + (rotation * glm::vec3(-0.2f, 0.f, -0.8f));
     auto rightArrow = position + (rotation * glm::vec3(0.2f, 0.f, -0.8f));
@@ -38,7 +38,7 @@ std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttr
 LayerInfo getLayerForId(objid id);
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld, const char* hint);
 void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld, Hint hint);
-glm::quat getGameObjectRotation(int32_t index, bool isWorld);
+glm::quat getGameObjectRotation(int32_t index, bool isWorld, const char* hint);
 void setGameObjectScale(int32_t index, glm::vec3 scale, bool isWorld);
 glm::vec3 getGameObjectScale(int32_t index);
 void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld, Hint hint);
@@ -81,7 +81,7 @@ ManipulatorTools tools {
   .setPosition = setGameObjectPosition,
   .getScale = getGameObjectScale,
   .setScale = [](int32_t index, glm::vec3 scale) -> void { setGameObjectScale(index, scale, true); },
-  .getRotation = [](objid id) -> glm::quat { return getGameObjectRotation(id, false); },
+  .getRotation = [](objid id) -> glm::quat { return getGameObjectRotation(id, false, "ManipulatorTools - getRotation"); },
   .setRotation = [](objid id, glm::quat rot) -> void { setGameObjectRotation(id, rot, true, Hint { .hint = "manipulator setRotation" }); },
   .snapPosition = [](glm::vec3 pos) -> glm::vec3 {
     return snapTranslate(state.easyUse, pos);
@@ -156,7 +156,7 @@ void drawBounding(objid id){
     glm::vec3 topLeftBack(-0.5f * width, 0.5f * height, 0.5f * depth);
     glm::vec3 topRightBack(0.5f * width, 0.5f * height, 0.5f * depth);        
 
-    auto rotation = mainApi -> getGameObjectRotation(id, true);
+    auto rotation = mainApi -> getGameObjectRotation(id, true, "tools - drawBounding");
     auto scale = mainApi -> getGameObjectScale(id, true);
 
     bottomLeft *= scale;
