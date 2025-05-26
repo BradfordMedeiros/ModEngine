@@ -16,6 +16,7 @@ void afterFrameForScripts();
 
 struct CScriptBindingCallbacks {
   func onFrame;
+  func onFrameAfterUpdate;
   colposfun onCollisionEnter;
   colfun onCollisionExit;
   mousecallback onMouseCallback;

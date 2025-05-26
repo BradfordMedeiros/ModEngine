@@ -1426,7 +1426,7 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       auto rigidBody = world.rigidbodys.at(index);
       auto body = rigidBody.body;
-      auto& transform = fullTransformation(world.sandbox, index, "physicsRotateSet relative");
+      auto& transform = fullTransformation(world.sandbox, index, hint.hint);
       auto rot = transform.rotation;
       auto newPositionOffset = calcOffsetFromRotation(transform.position, rigidBody.offset, rot);
       setPosition(body, newPositionOffset);
@@ -1438,7 +1438,7 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       auto rigidBody = world.rigidbodys.at(index);
       auto body =  rigidBody.body;
-      auto& transform = fullTransformation(world.sandbox, index, "physicsRotateSet absolute");
+      auto& transform = fullTransformation(world.sandbox, index, hint.hint);
       auto rot = transform.rotation;
       auto newPositionOffset = calcOffsetFromRotation(transform.position, rigidBody.offset, rot);
       setPosition(body, newPositionOffset);
