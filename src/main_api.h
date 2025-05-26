@@ -98,7 +98,7 @@ std::optional<AttributeValue> getObjectAttribute(int32_t id, const char* field);
 void setGameObjectAttr(int32_t id, std::vector<GameobjAttribute> attrs);
 void setSingleGameObjectAttr(int32_t id, const char* field, AttributeValue value);
 
-glm::vec3 getGameObjectPosition(int32_t index, bool isWorld);
+glm::vec3 getGameObjectPosition(int32_t index, bool isWorld, const char* hint);
 void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld, Hint hint);
 
 glm::vec3 getGameObjectScale(int32_t index);

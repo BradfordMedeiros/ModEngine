@@ -708,12 +708,12 @@ void renderDebugUi(Color pixelColor){
   auto selectedValue = latestSelected(state.editor);
   if (selectedValue.has_value()){
     auto selectedIndex = selectedValue.value();
-    auto transformation = gameobjectTransformation(world, selectedIndex, false);
+    auto transformation = gameobjectTransformation(world, selectedIndex, false, "renderDebugUI display info relative");
     position = print(transformation.position);
     scale = print(transformation.scale);
     rotation = serializeQuat(transformation.rotation);
 
-    auto worldTransformation = gameobjectTransformation(world, selectedIndex, true);
+    auto worldTransformation = gameobjectTransformation(world, selectedIndex, true, "renderDebugUI display info world");
     worldPosition = print(worldTransformation.position);
     worldScale = print(worldTransformation.scale);
     worldRotation = print(worldTransformation.rotation);
@@ -1825,7 +1825,7 @@ int main(int argc, char* argv[]){
       handleChunkLoading(
         dynamicLoading, 
         [](objid id) -> glm::vec3 { 
-          return getGameObjectPosition(id, true);
+          return getGameObjectPosition(id, true, "chunk loading - get load around position");
         }, 
         [](std::string sceneFile, glm::vec3 offset, std::string parentNodeName) -> objid {
           modassert(false, "not implemented");

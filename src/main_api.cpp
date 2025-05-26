@@ -68,7 +68,7 @@ void applyImpulse(int32_t index, glm::vec3 impulse){
 void applyImpulseRel(int32_t index, glm::vec3 impulse){
   auto rigidBody = getRigidBody(index);
   if (rigidBody != NULL){
-    auto relativeRotation = gameobjectRotation(world, index, false);
+    auto relativeRotation = gameobjectRotation(world, index, false, "applyImpulseRel");
     glm::vec3 relativeImpulse = calculateRelativeOffset(relativeRotation, impulse, true);
     applyImpulse(rigidBody, relativeImpulse);
   }
@@ -161,7 +161,7 @@ std::optional<ModAABB2> getModAABBModel(int32_t id){
     }
   }
 
-  aabb.position  = getGameObjectPosition(id, true);
+  aabb.position  = getGameObjectPosition(id, true, "getModAABBModel");
   if (physicsInfo.value().offset.has_value()){
     aabb.position = aabb.position + physicsInfo.value().offset.value();
   }
@@ -384,8 +384,8 @@ void setSingleGameObjectAttr(int32_t id, const char* field, AttributeValue value
   setSingleGameObjectAttr(world, id, field, value);
 }
 
-glm::vec3 getGameObjectPosition(int32_t index, bool isWorld){
-  return gameobjectPosition(world, index, isWorld);
+glm::vec3 getGameObjectPosition(int32_t index, bool isWorld, const char* hint){
+  return gameobjectPosition(world, index, isWorld, hint);
 }
 
 void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld, Hint hint){
@@ -393,10 +393,10 @@ void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld, Hint hint
 }
 
 glm::vec3 getGameObjectScale(int32_t index){
-  return gameobjectScale(world, index, false);
+  return gameobjectScale(world, index, false, "getGameObjectScale");
 }
 glm::vec3 getGameObjectScale2(int32_t index, bool isWorld){
-  return gameobjectScale(world, index, isWorld);
+  return gameobjectScale(world, index, isWorld, "getGameObjectScale2");
 }
 void setGameObjectScale(int32_t index, glm::vec3 scale, bool isWorld){
   modassert(isWorld, "relative set scale not yet supported");
@@ -404,7 +404,7 @@ void setGameObjectScale(int32_t index, glm::vec3 scale, bool isWorld){
 }
 
 glm::quat getGameObjectRotation(int32_t index, bool isWorld){
-  return gameobjectRotation(world, index, isWorld);
+  return gameobjectRotation(world, index, isWorld, "getGameObjectRotation");
 }
 
 void setGameObjectRotation(int32_t index, glm::quat rotation, bool isWorld, Hint hint){
@@ -804,12 +804,12 @@ Transformation getCameraTransform(){
 
   auto cameraExists = idExists(world.sandbox, state.activeCameraObj.value());
   modassert(cameraExists, std::string("camera does not exist: ") + std::to_string(state.activeCameraObj.value()));
-  return gameobjectTransformation(world, state.activeCameraObj.value(), true);
+  return gameobjectTransformation(world, state.activeCameraObj.value(), true, "getCameraTransform");
 }
 
 Transformation getCullingTransform(){
   if (state.cullingObject.has_value()){
-    return gameobjectTransformation(world, state.cullingObject.value(), true);
+    return gameobjectTransformation(world, state.cullingObject.value(), true, "culling transform");
   }
   return getCameraTransform();
 }
@@ -877,7 +877,7 @@ void moveCamera(glm::vec3 offset){
   if (!state.activeCameraObj.has_value()){
     defaultResources.defaultCamera.transformation.position = moveRelative(defaultResources.defaultCamera.transformation.position, defaultResources.defaultCamera.transformation.rotation, glm::vec3(offset), false);
   }else{
-    auto cameraLocalTransform = gameobjectTransformation(world, state.activeCameraObj.value(), false);
+    auto cameraLocalTransform = gameobjectTransformation(world, state.activeCameraObj.value(), false, "move camera");
     setGameObjectPosition(state.activeCameraObj.value(), moveRelative(cameraLocalTransform.position, cameraLocalTransform.rotation, glm::vec3(offset), false), true, Hint{ .hint = "moveCamera" });
   }
 }
@@ -886,7 +886,7 @@ void rotateCamera(float xoffset, float yoffset){
   if (!state.activeCameraObj.has_value()){
     defaultResources.defaultCamera.transformation.rotation = setFrontDelta(defaultResources.defaultCamera.transformation.rotation, xoffset, yoffset, 0, 0.1);
   }else{
-    auto cameraRelativeRotation = gameobjectRotation(world, state.activeCameraObj.value(), false);
+    auto cameraRelativeRotation = gameobjectRotation(world, state.activeCameraObj.value(), false, "rotate camera");
     setGameObjectRotation(state.activeCameraObj.value(), setFrontDelta(cameraRelativeRotation, xoffset, yoffset, 0, 0.1), true, Hint { .hint = "mainApi - rotateCamera" });
   }
 }

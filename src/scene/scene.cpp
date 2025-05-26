@@ -1550,7 +1550,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
           physicsRotateSet(world, objectAdded, particleOpts.orientation.value(), true, Hint { .hint = "updateEmitters - orientation" });
         }
 
-        auto oldTransformation = gameobjectTransformation(world, objectAdded, true);
+        auto oldTransformation = gameobjectTransformation(world, objectAdded, true, "update emitters");
    
         if (particleOpts.parentId.has_value()){
           modlog("emitters", "parent to id: " + std::to_string(particleOpts.parentId.value()));
@@ -1672,28 +1672,28 @@ std::vector<std::string> sceneTagsForSceneId(World& world, objid sceneId){
   return world.sandbox.sceneIdToSceneMetadata.at(sceneId).tags;
 }
 
-glm::vec3 gameobjectPosition(World& world, objid id, bool isWorld){
+glm::vec3 gameobjectPosition(World& world, objid id, bool isWorld, const char* hint){
   if (isWorld){
-    return fullTransformation(world.sandbox, id, "gameobjectPosition").position;
+    return fullTransformation(world.sandbox, id, hint).position;
   }
   return calcRelativeTransform(world.sandbox, id).position; // getGameObject(world, id).transformation.position;   // fix relative reference
 }
-glm::vec3 gameobjectScale(World& world, objid id, bool isWorld){
+glm::vec3 gameobjectScale(World& world, objid id, bool isWorld, const char* hint){
   if (isWorld){
-    return fullTransformation(world.sandbox, id, "gameobjectScale").scale;
+    return fullTransformation(world.sandbox, id, hint).scale;
   }
   return calcRelativeTransform(world.sandbox, id).scale;   // fix relative reference
 }
-glm::quat gameobjectRotation(World& world, objid id, bool isWorld){
+glm::quat gameobjectRotation(World& world, objid id, bool isWorld, const char* hint){
   if (isWorld){
-    return fullTransformation(world.sandbox, id, "gameobjectRotation").rotation;
+    return fullTransformation(world.sandbox, id, hint).rotation;
   }
   return calcRelativeTransform(world.sandbox, id).rotation;  // fix relative reference
 }
 
-Transformation gameobjectTransformation(World& world, objid id, bool isWorld){
+Transformation gameobjectTransformation(World& world, objid id, bool isWorld, const char* hint){
   if (isWorld){
-    return fullTransformation(world.sandbox, id, "gameobjectTransformation");
+    return fullTransformation(world.sandbox, id, hint);
   }
   return calcRelativeTransform(world.sandbox, id);
 }

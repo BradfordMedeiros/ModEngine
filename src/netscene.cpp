@@ -49,7 +49,7 @@ void netObjectUpdate(World& world, GameObject& obj, NetCode& netcode, bool boots
   packet.payload.updatepacket = UpdatePacket { 
     .id = obj.id,
     .properties = Properties {
-      .transformation = gameobjectTransformation(world, obj.id, false),
+      .transformation = gameobjectTransformation(world, obj.id, false, "netObjectUpdate"),
     },
   };
   if (bootstrapperMode){

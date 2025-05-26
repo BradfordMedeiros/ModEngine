@@ -22,7 +22,7 @@ void moveCameraTo(objid cameraId, glm::vec3 position, std::optional<float> durat
     return;
   }
   requestMovingObjects[cameraId] = RequestMovingObject {
-    .initialPos = getGameObjectPosition(cameraId, true),
+    .initialPos = getGameObjectPosition(cameraId, true, "moveCameraTo"),
     .finalPos = position,
     .initialTime = timePlayback.currentTime,
     .duration = duration.value(),
@@ -200,7 +200,7 @@ float recordingLength(std::string recordingPath){
 
 void tickRecordings(float time){
   for (auto &[id, activeRecording] : activeRecordings){
-    auto localTransform = gameobjectTransformation(world, activeRecording.targetObj, false);
+    auto localTransform = gameobjectTransformation(world, activeRecording.targetObj, false, "tick recordings");
     saveRecordingIndex(activeRecording.recording, "position", localTransform.position, time);
   } 
 

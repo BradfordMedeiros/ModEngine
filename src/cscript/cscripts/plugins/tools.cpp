@@ -17,7 +17,7 @@ void drawNormals(){
   for (auto idInScene : selectedIds){
     auto groupId = mainApi -> groupId(idInScene);
     auto name = mainApi -> getGameObjNameForId(idInScene).value();
-    auto position = mainApi -> getGameObjectPos(idInScene, true);
+    auto position = mainApi -> getGameObjectPos(idInScene, true, "tools.cpp drawNormals");
     auto rotation = mainApi -> getGameObjectRotation(idInScene, true);
     auto toPosition = position + (rotation * glm::vec3(0.f, 0.f, -1.f));
     auto leftArrow = position + (rotation * glm::vec3(-0.2f, 0.f, -0.8f));
@@ -36,7 +36,7 @@ extern LineData lineData;
 
 std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes);
 LayerInfo getLayerForId(objid id);
-glm::vec3 getGameObjectPosition(int32_t index, bool isWorld);
+glm::vec3 getGameObjectPosition(int32_t index, bool isWorld, const char* hint);
 void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld, Hint hint);
 glm::quat getGameObjectRotation(int32_t index, bool isWorld);
 void setGameObjectScale(int32_t index, glm::vec3 scale, bool isWorld);
@@ -77,7 +77,7 @@ ManipulatorSelection onManipulatorSelected(){
 }
 
 ManipulatorTools tools {
-  .getPosition = [](objid id) -> glm::vec3 { return getGameObjectPosition(id, true); },
+  .getPosition = [](objid id) -> glm::vec3 { return getGameObjectPosition(id, true, "ManipulatorTools - getPosition"); },
   .setPosition = setGameObjectPosition,
   .getScale = getGameObjectScale,
   .setScale = [](int32_t index, glm::vec3 scale) -> void { setGameObjectScale(index, scale, true); },
@@ -135,7 +135,7 @@ void drawAABB(objid id){
 
 void drawBounding(objid id){
   auto physicsInfo = mainApi -> getPhysicsInfo(id);
-  auto position = mainApi -> getGameObjectPos(id, true);
+  auto position = mainApi -> getGameObjectPos(id, true, "tools - drawBounding");
   if (physicsInfo.has_value()){
     if (physicsInfo.value().offset.has_value()){
       position += physicsInfo.value().offset.value();
