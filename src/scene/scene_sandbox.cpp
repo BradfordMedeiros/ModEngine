@@ -529,7 +529,9 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
       continue;
     }
     GameObject& gameobj = getGameObject(sandbox, id);
-    if (gameobj.physicsOptions.isStatic || !gameobj.physicsOptions.enabled || justAdded /* this is so when you spawn it, the relative transform determines where it goes */){
+    auto isAbsoluteUpdateNode = absoluteUpdates.count(id) > 0;
+
+    if (!isAbsoluteUpdateNode && (gameobj.physicsOptions.isStatic || !gameobj.physicsOptions.enabled || justAdded /* this is so when you spawn it, the relative transform determines where it goes */)){
        auto currentConstraint = gameobj.transformation;
        auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
        auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
@@ -544,6 +546,10 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
          .gameobjIndex = gameobjIndex,
          .transform = newTransform,
        };       
+    }else{
+      if (enableTransformLogging){
+        std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]          [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] - skipping" << std::endl; 
+      }
     }
   }
 }
@@ -562,6 +568,21 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
   }
 
   std::set<objid> hasAbsolute;
+  for (auto &update : updates){
+    if (!update.relative){
+      hasAbsolute.insert(update.id);
+    }
+  }
+
+  std::set<objid> allIds;
+  for (auto &update : updates){
+    if (allIds.count(update.id) > 0){
+      modassert(false, std::string("duplicate id for node: ") + std::to_string(update.id) + ", " + getGameObject(sandbox, update.id).name);
+    }
+    allIds.insert(update.id);
+  }
+
+
   for (auto &update : updates){
     if (update.relative){
 
@@ -582,7 +603,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
         .gameobjIndex = gameobjIndex,
         .transform = newTransform,
       };
-      updateAllChildrenPositions(sandbox, id, false, {});
+      updateAllChildrenPositions(sandbox, id, false, hasAbsolute);
 
       if (enableTransformLogging){
         std::cout << "updateRelativeTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
@@ -620,7 +641,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
       }
 
 
-      updateAllChildrenPositions(sandbox, id, false, {});
+      updateAllChildrenPositions(sandbox, id, false, hasAbsolute);
     }
   }
 
