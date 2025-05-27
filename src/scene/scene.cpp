@@ -843,16 +843,49 @@ std::string serializeObject(World& world, objid id, bool includeSubmodelAttr, st
   return serializedData;
 }
 
+std::vector<objid> physicsPosToUpdate;
+std::vector<objid> physicsRotToUpdate;
+void postUpdatePhysicsTranslateSet(World& world, objid index){
+  PhysicsValue& phys = world.rigidbodys.at(index);
+  auto body =  phys.body;
+  auto& transform = fullTransformation(world.sandbox, index, "physicsTranslateSet - read back to set physics position");
+  setPosition(body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation));
+  std::cout << inColor("hint - physics setPosition", CONSOLE_COLOR_YELLOW) << ": [" << std::to_string(index) + " " + getGameObject(world, index).name + "] " << "postUpdatePhysicsTranslateSet" << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) << std::endl;
+}
+void postUpdatePhysicsRotateSet(World& world, objid index){
+  auto rigidBody = world.rigidbodys.at(index);
+  auto body =  rigidBody.body;
+  auto& transform = fullTransformation(world.sandbox, index, "postUpdatePhysicsRotateSet - read back to set physics pos/rotn");
+  auto rot = transform.rotation;
+  auto newPositionOffset = calcOffsetFromRotation(transform.position, rigidBody.offset, rot);
+  setRotation(body, rot);
+  std::cout << inColor("hint - physics setPosition setRotation", CONSOLE_COLOR_YELLOW) << ": [" << std::to_string(index) + " " + getGameObject(world, index).name + "] " << "postUpdatePhysicsRotateSet" << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) << std::endl;
+}
+
 std::set<objid> updatePhysicsFromSandbox(World& world){
   auto updatedIds = updateSandbox(world.sandbox);  
+  
+  for (auto id : physicsPosToUpdate){
+    postUpdatePhysicsTranslateSet(world, id);
+  }
+  for (auto id : physicsRotToUpdate){
+    postUpdatePhysicsRotateSet(world, id);
+  }
+  physicsPosToUpdate = {};
+  physicsRotToUpdate = {};
+
+
   for (auto index : updatedIds){
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body =  phys.body;
       auto& fullTransform = fullTransformation(world.sandbox, index, "read back transform for rigid body position");
       setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
+      std::cout << inColor("hint - physics setTransform", CONSOLE_COLOR_YELLOW) << ": [" << std::to_string(index) + " " + getGameObject(world, index).name + "] " << "setTransform" << " " << inColor(print(fullTransform), CONSOLE_COLOR_YELLOW) <<  std::endl;
     }
   }
+
+
   return updatedIds;
 }
 
@@ -1392,18 +1425,12 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative
   if (relative){
     updateRelativePosition(world.sandbox, index, pos, hint);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-      PhysicsValue& phys = world.rigidbodys.at(index);
-      auto body =  phys.body;
-      auto& transform = fullTransformation(world.sandbox, index, "physicsTranslateSet - read back to set physics position - relative");
-      setPosition(body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation));
+      physicsPosToUpdate.push_back(index);
     }
   }else{
     updateAbsolutePosition(world.sandbox, index, pos, hint);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-      PhysicsValue& phys = world.rigidbodys.at(index);
-      auto body = phys.body;
-      auto& transform = fullTransformation(world.sandbox, index, "physicsTranslateSet - read back to set physics position - absolute");
-      setPosition(body, calcOffsetFromRotation(pos, phys.offset, transform.rotation));
+      physicsPosToUpdate.push_back(index);
     }
   }
   world.entitiesToUpdate.insert(index);
@@ -1424,25 +1451,13 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
   if (relative){
     updateRelativeRotation(world.sandbox, index, rotation, hint);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-      auto rigidBody = world.rigidbodys.at(index);
-      auto body = rigidBody.body;
-      auto& transform = fullTransformation(world.sandbox, index, hint.hint);
-      auto rot = transform.rotation;
-      auto newPositionOffset = calcOffsetFromRotation(transform.position, rigidBody.offset, rot);
-      setPosition(body, newPositionOffset);
-      setRotation(body, rot);
+      physicsRotToUpdate.push_back(index);
     }
   }else{
     //modassert(false, "not supposed to be absolute");
     updateAbsoluteRotation(world.sandbox, index, rotation, hint);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-      auto rigidBody = world.rigidbodys.at(index);
-      auto body =  rigidBody.body;
-      auto& transform = fullTransformation(world.sandbox, index, hint.hint);
-      auto rot = transform.rotation;
-      auto newPositionOffset = calcOffsetFromRotation(transform.position, rigidBody.offset, rot);
-      setPosition(body, newPositionOffset);
-      setRotation(body, rot);
+      physicsRotToUpdate.push_back(index);
     }
   }
   world.entitiesToUpdate.insert(index);
@@ -1463,17 +1478,47 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
   world.entitiesToUpdate.insert(index);
 }
 
+bool hasPosUpdate(World& world, objid idToCheck){
+  for (auto id : physicsPosToUpdate){
+    if (id == idToCheck){
+      return true;
+    }
+  }
+  return false;
+}
+bool hasRotUpdate(World& world, objid idToCheck){
+  for (auto id : physicsRotToUpdate){
+    if (id == idToCheck){
+      return true;
+    }
+  }
+  return false;
+}
+
 
 void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<objid, PhysicsValue>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     GameObject& gameobj = getGameObject(world, i);
     if (!gameobj.physicsOptions.isStatic){
       auto rotation = getRotation(rigidBody.body);
-      updateAbsoluteTransform(world.sandbox, i, Transformation {
-        .position = calcOffsetFromRotationReverse(getPosition(rigidBody.body), rigidBody.offset, rotation),
-        .scale = getScale(rigidBody.body),
-        .rotation = rotation,
-      }, Hint { .hint = "updatePhysicsPositionsAndClampVelocity" });
+      auto posUpdate = hasPosUpdate(world, i);
+      auto rotUpdate = hasRotUpdate(world, i);
+      if (!posUpdate && !rotUpdate){
+        auto position = calcOffsetFromRotationReverse(getPosition(rigidBody.body), rigidBody.offset, rotation);
+        updateAbsoluteTransform(world.sandbox, i, Transformation {
+          .position = position,
+          .scale = getScale(rigidBody.body),
+          .rotation = rotation,
+        }, Hint { .hint = "updatePhysicsPositionsAndClampVelocity" });        
+      }else if (posUpdate){
+        updateAbsoluteRotation(world.sandbox, i, rotation,  Hint { .hint = "updatePhysicsPositionsAndClampVelocity posUpdate case" });
+      }else if (rotUpdate){
+        auto position = calcOffsetFromRotationReverse(getPosition(rigidBody.body), rigidBody.offset, rotation);
+        updateAbsolutePosition(world.sandbox, i, position,  Hint { .hint = "updatePhysicsPositionsAndClampVelocity rotUpdate case" });
+      }else{
+        modassert(false, "updatePhysicsPositionsAndClampVelocity invalid case");
+      }
+
       gameobj.physicsOptions.velocity = getVelocity(rigidBody.body);
       gameobj.physicsOptions.angularVelocity = getAngularVelocity(rigidBody.body);
       clampMaxVelocity(rigidBody.body, gameobj.physicsOptions.maxspeed);

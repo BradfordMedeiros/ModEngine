@@ -1,6 +1,7 @@
 #include "./scene_sandbox.h"
 
 const bool enableTransformLogging = true;
+const bool assertOnStale = false;
 const bool updateTransformImmediate = false;
 
 void addObjectToCache(SceneSandbox& sandbox, objid id);
@@ -513,9 +514,7 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
     if (id == updatedId && !justAdded){
       continue;
     }
-    if (absoluteUpdates.count(id) > 0){
-      continue;
-    }
+
     if (id != updatedId){
       sandbox.updatedIds.insert(id);  
     }
@@ -561,7 +560,6 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
   if (enableTransformLogging){
     std::cout << inColor("hint---------- updateSandbox start------------------", CONSOLE_COLOR_RED) << std::endl;
   }
-  std::set<objid> oldUpdated = sandbox.updatedIds;
 
   std::set<objid> hasAbsolute;
   for (auto &update : updates){
@@ -584,7 +582,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
         .gameobjIndex = gameobjIndex,
         .transform = newTransform,
       };
-      updateAllChildrenPositions(sandbox, id, false, hasAbsolute);
+      updateAllChildrenPositions(sandbox, id, false, {});
 
       if (enableTransformLogging){
         std::cout << "updateRelativeTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
@@ -626,6 +624,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
     }
   }
 
+  std::set<objid> oldUpdated = sandbox.updatedIds;
   sandbox.updatedIds = {};
   updates = {};
 
@@ -657,7 +656,6 @@ void removeObjectFromCache(SceneSandbox& sandbox, objid id){
 
 
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint){
-
   if (updateTransformImmediate){
 
     if (enableTransformLogging){
@@ -772,6 +770,7 @@ glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id, const char* hint){
     bool indirect = false;
     auto stale = isStale(sandbox, id, &indirect);
     std::cout << inColor("hint - readTransform", CONSOLE_COLOR_GREEN) << ": [" << id << ", " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]" " " << (hint ? hint : "[no hint]") << (stale ? inColor("  WARNING - STALE READ", CONSOLE_COLOR_RED) : "") << ((stale && indirect) ? inColor(" - INDIRECT ", CONSOLE_COLOR_RED) : "") << std::endl;
+    modassert(!assertOnStale || (assertOnStale && !stale), "stale transform");
   }
   TransformCacheElement& element = sandbox.mainScene.absoluteTransforms.at(id);
   return matrixFromComponents(element.transform);
@@ -783,6 +782,7 @@ Transformation& fullTransformation(SceneSandbox& sandbox, objid id, const char* 
     bool indirect = false;
     auto stale = isStale(sandbox, id, &indirect);
     std::cout << inColor("hint - readTransform", CONSOLE_COLOR_GREEN) << ": [" << id << ", " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]" " " << (hint ? hint : "[no hint]") << (stale ? inColor("  WARNING - STALE READ", CONSOLE_COLOR_RED) : "") << ((stale && indirect) ? inColor(" - INDIRECT ", CONSOLE_COLOR_RED) : "") << std::endl;
+    modassert(!assertOnStale || (assertOnStale && !stale), "stale transform");
   }
   return sandbox.mainScene.absoluteTransforms.at(id).transform;
 }
