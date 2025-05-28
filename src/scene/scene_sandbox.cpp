@@ -1021,8 +1021,7 @@ void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position,
     };
     updateValue.type = UPDATE_TRANSFORM;
 
-    auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
-    Transformation newTransform = oldAbsoluteTransform.transform;
+    Transformation newTransform =  getGameObject(sandbox, id).transformation;
     newTransform.position = position;
     updateValue.transform.transform = newTransform;
 
@@ -1031,19 +1030,72 @@ void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position,
 
 };;
 void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale, Hint hint){
-  auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
-  Transformation newTransform = oldAbsoluteTransform.transform;
-  newTransform.scale = scale;
-  updateAbsoluteTransform(sandbox, id, newTransform, hint); 
+  if (updateTransformImmediate){
+    auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
+    Transformation newTransform = oldAbsoluteTransform.transform;
+    newTransform.scale = scale;
+    updateAbsoluteTransform(sandbox, id, newTransform, hint); 
+  }else{
+    TransformUpdate2 updateValue { };
+    updateValue = TransformUpdate2 {
+      .relative = false,
+      .id = id,
+      .hint = hint,
+    };
+    updateValue.type = UPDATE_TRANSFORM;
+
+    auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
+    Transformation newTransform = oldAbsoluteTransform.transform;
+    newTransform.scale = scale;
+    updateValue.transform.transform = newTransform;
+
+    updates.push_back(updateValue);    
+  }
+
 }
 void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation, Hint hint){
-  auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
-  Transformation newTransform = oldAbsoluteTransform.transform;
-  newTransform.rotation = rotation;
-  updateAbsoluteTransform(sandbox, id, newTransform, hint); 
+  if (updateTransformImmediate){
+    auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
+    Transformation newTransform = oldAbsoluteTransform.transform;
+    newTransform.rotation = rotation;
+    updateAbsoluteTransform(sandbox, id, newTransform, hint); 
+  }else{
+    TransformUpdate2 updateValue { };
+    updateValue = TransformUpdate2 {
+      .relative = false,
+      .id = id,
+      .hint = hint,
+    };
+    updateValue.type = UPDATE_TRANSFORM;
+
+    auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
+    Transformation newTransform = oldAbsoluteTransform.transform;
+    newTransform.rotation = rotation;
+    updateValue.transform.transform = newTransform;
+
+    updates.push_back(updateValue);    
+  }
+
 }
 void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation, Hint hint){
-  auto oldRelativeTransform = calcRelativeTransform(sandbox, id);
-  oldRelativeTransform.rotation = rotation;
-  updateRelativeTransform(sandbox, id, oldRelativeTransform, hint);
+  if (updateTransformImmediate){
+    auto oldRelativeTransform = calcRelativeTransform(sandbox, id);
+    oldRelativeTransform.rotation = rotation;
+    updateRelativeTransform(sandbox, id, oldRelativeTransform, hint);
+  }else{
+    TransformUpdate2 updateValue { };
+    updateValue = TransformUpdate2 {
+      .relative = false,
+      .id = id,
+      .hint = hint,
+    };
+    updateValue.type = UPDATE_TRANSFORM;
+    Transformation newTransform =  getGameObject(sandbox, id).transformation;
+    newTransform.rotation = rotation;
+    updateValue.transform.transform = newTransform;
+
+    updates.push_back(updateValue);    
+
+  }
+
 }
