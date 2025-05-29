@@ -7,8 +7,7 @@ const bool updateTransformImmediate = false;
 void addObjectToCache(SceneSandbox& sandbox, objid id);
 void removeObjectFromCache(SceneSandbox& sandbox, objid id);
 
-enum TransformUpdateType { UPDATE_POS , UPDATE_SCALE, UPDATE_ROT, UPDATE_TRANSFORM };
-union TransformUpdateValue {
+struct TransformUpdateValue {
   glm::vec3 position;
   glm::vec3 scale;
   glm::quat rotation;
@@ -18,7 +17,9 @@ union TransformUpdateValue {
 struct TransformUpdate2 {
   bool relative;
   objid id;
-  TransformUpdateType type;
+  bool hasPosition = false;
+  bool hasScale = false;
+  bool hasRotation = false;
   TransformUpdateValue transform;
   Hint hint;
 };
@@ -593,7 +594,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
   std::set<objid> allIds;
   for (auto &update : updates){
     if (allIds.count(update.id) > 0){
-      modassert(false, std::string("duplicate id for node: ") + std::to_string(update.id) + ", " + getGameObject(sandbox, update.id).name + ", " + std::string(update.hint.hint ? update.hint.hint : "[no hint]"));
+     // modassert(false, std::string("duplicate id for node: ") + std::to_string(update.id) + ", " + getGameObject(sandbox, update.id).name + ", " + std::string(update.hint.hint ? update.hint.hint : "[no hint]"));
     }
     allIds.insert(update.id);
   }
@@ -601,8 +602,6 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
 
   for (auto &update : updates){
     if (update.relative){
-      modassert(update.type == UPDATE_TRANSFORM || update.type == UPDATE_POS || update.type == UPDATE_ROT, "unexpected transform update type relative");
-
       auto id = update.id;
 
       if (enableTransformLogging){
@@ -613,16 +612,14 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
       auto parentId = getGameObjectH(sandbox, id).parentId;
 
       auto& gameobj = getGameObject(sandbox, id);
-      if (update.type == UPDATE_TRANSFORM){
-        gameobj.transformation = update.transform.transform;
-      }else if (update.type == UPDATE_POS){
+      if (update.hasPosition){
         gameobj.transformation.position = update.transform.position;
-      }else if (update.type == UPDATE_SCALE){
+      }
+      if (update.hasScale){
         gameobj.transformation.scale = update.transform.scale;
-      }else if (update.type == UPDATE_ROT){
+      }
+      if (update.hasRotation){
         gameobj.transformation.rotation = update.transform.rotation;
-      }else{
-        modassert(false, "unexpected update type relative");
       }
 
       auto newTransform = parentId == 0 ? gameobj.transformation : calcAbsoluteTransform(sandbox, parentId, gameobj.transformation);
@@ -637,7 +634,6 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
         std::cout << "updateRelativeTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
       }
     }else{
-      modassert(update.type == UPDATE_TRANSFORM || update.type == UPDATE_POS || update.type == UPDATE_ROT, "unexpected transform update type absolute");
       auto& transform = update.transform.transform;
       auto id = update.id;
       hasAbsolute.insert(id);
@@ -652,16 +648,14 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
       auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
 
       auto newAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id).transform;
-      if (update.type == UPDATE_TRANSFORM){
-        newAbsoluteTransform = update.transform.transform;
-      }else if (update.type == UPDATE_POS){
+      if (update.hasPosition){
         newAbsoluteTransform.position = update.transform.position;
-      }else if (update.type == UPDATE_ROT){
-        newAbsoluteTransform.rotation = update.transform.rotation;
-      }else if (update.type == UPDATE_SCALE){
+      }
+      if (update.hasScale){
         newAbsoluteTransform.scale = update.transform.scale;
-      }else{
-        modassert(false, "unexpected update type absolute");
+      }
+      if (update.hasRotation){
+        newAbsoluteTransform.rotation = update.transform.rotation;
       }
 
       sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
@@ -763,8 +757,12 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
       .id = id,
       .hint = hint,
     };
-    updateValue.type = UPDATE_TRANSFORM;
-    updateValue.transform.transform = transform;
+    updateValue.hasPosition = true;
+    updateValue.hasScale = true;
+    updateValue.hasRotation = true;
+    updateValue.transform.position = transform.position;
+    updateValue.transform.scale = transform.scale;
+    updateValue.transform.rotation = transform.rotation;
     updates.push_back(updateValue);    
   }
 
@@ -801,8 +799,12 @@ void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation tra
       .id = id,
       .hint = hint,
     };
-    updateValue.type = UPDATE_TRANSFORM;
-    updateValue.transform.transform = transform;
+    updateValue.hasPosition = true;
+    updateValue.hasScale = true;
+    updateValue.hasRotation = true;
+    updateValue.transform.position = transform.position;
+    updateValue.transform.scale = transform.scale;
+    updateValue.transform.rotation = transform.rotation;
     updates.push_back(updateValue);    
   }
 }
@@ -1024,7 +1026,7 @@ void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position,
       .id = id,
       .hint = hint,
     };
-    updateValue.type = UPDATE_POS;
+    updateValue.hasPosition = true;
     updateValue.transform.position = position;
     updates.push_back(updateValue);    
   }
@@ -1047,7 +1049,7 @@ void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position,
       .id = id,
       .hint = hint,
     };
-    updateValue.type = UPDATE_POS;
+    updateValue.hasPosition = true;
     updateValue.transform.position = position;
     updates.push_back(updateValue);    
   }
@@ -1069,7 +1071,7 @@ void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale, Hint 
       .id = id,
       .hint = hint,
     };
-    updateValue.type = UPDATE_SCALE;
+    updateValue.hasScale = true;
     updateValue.transform.scale = scale;
     updates.push_back(updateValue);    
   }
@@ -1091,7 +1093,7 @@ void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation,
       .id = id,
       .hint = hint,
     };
-    updateValue.type = UPDATE_ROT;
+    updateValue.hasRotation = true;
     updateValue.transform.rotation = rotation;;
     updates.push_back(updateValue);    
   }
@@ -1112,7 +1114,7 @@ void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation,
       .id = id,
       .hint = hint,
     };
-    updateValue.type = UPDATE_ROT;
+    updateValue.hasRotation = true;
     updateValue.transform.rotation = rotation;
     updates.push_back(updateValue);    
   }
