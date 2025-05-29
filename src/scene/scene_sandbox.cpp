@@ -1,7 +1,7 @@
 #include "./scene_sandbox.h"
 
 const bool enableTransformLogging = true;
-const bool assertOnStale = true;
+const bool assertOnStale = false;
 const bool updateTransformImmediate = false;
 
 void addObjectToCache(SceneSandbox& sandbox, objid id);
@@ -572,7 +572,8 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
        };       
     }else{
       if (enableTransformLogging){
-        std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]          [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] - skipping" << std::endl; 
+        std::string reason = isAbsoluteUpdateNode ? "absolute" : "other";
+        std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]          [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] - skipping - reason: " << reason <<  std::endl; 
       }
     }
   }
@@ -1110,7 +1111,7 @@ void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation,
     }
     TransformUpdate2 updateValue { };
     updateValue = TransformUpdate2 {
-      .relative = false,
+      .relative = true,
       .id = id,
       .hint = hint,
     };
@@ -1118,5 +1119,4 @@ void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation,
     updateValue.transform.rotation = rotation;
     updates.push_back(updateValue);    
   }
-
 }
