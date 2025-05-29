@@ -1,13 +1,13 @@
 #include "./scene_sandbox.h"
 
 const bool enableTransformLogging = true;
-const bool assertOnStale = false;
-const bool updateTransformImmediate = true;
+const bool assertOnStale = true;
+const bool updateTransformImmediate = false;
 
 void addObjectToCache(SceneSandbox& sandbox, objid id);
 void removeObjectFromCache(SceneSandbox& sandbox, objid id);
 
-enum TransformUpdateType { UPDATE_POS , /*UPDATE_SCALE, UPDATE_ROT,*/ UPDATE_TRANSFORM };
+enum TransformUpdateType { UPDATE_POS , UPDATE_SCALE, UPDATE_ROT, UPDATE_TRANSFORM };
 union TransformUpdateValue {
   glm::vec3 position;
   glm::vec3 scale;
@@ -593,17 +593,16 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
   std::set<objid> allIds;
   for (auto &update : updates){
     if (allIds.count(update.id) > 0){
-     // modassert(false, std::string("duplicate id for node: ") + std::to_string(update.id) + ", " + getGameObject(sandbox, update.id).name);
+      modassert(false, std::string("duplicate id for node: ") + std::to_string(update.id) + ", " + getGameObject(sandbox, update.id).name + ", " + std::string(update.hint.hint ? update.hint.hint : "[no hint]"));
     }
     allIds.insert(update.id);
   }
 
 
   for (auto &update : updates){
-    modassert(update.type == UPDATE_TRANSFORM, "unexpected transform update type");
     if (update.relative){
+      modassert(update.type == UPDATE_TRANSFORM || update.type == UPDATE_POS || update.type == UPDATE_ROT, "unexpected transform update type relative");
 
-      auto& transform = update.transform.transform;
       auto id = update.id;
 
       if (enableTransformLogging){
@@ -612,9 +611,21 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
       }
 
       auto parentId = getGameObjectH(sandbox, id).parentId;
-      getGameObject(sandbox, id).transformation = transform;
-      auto newTransform = parentId == 0 ? transform : calcAbsoluteTransform(sandbox, parentId, transform);
-  
+
+      auto& gameobj = getGameObject(sandbox, id);
+      if (update.type == UPDATE_TRANSFORM){
+        gameobj.transformation = update.transform.transform;
+      }else if (update.type == UPDATE_POS){
+        gameobj.transformation.position = update.transform.position;
+      }else if (update.type == UPDATE_SCALE){
+        gameobj.transformation.scale = update.transform.scale;
+      }else if (update.type == UPDATE_ROT){
+        gameobj.transformation.rotation = update.transform.rotation;
+      }else{
+        modassert(false, "unexpected update type relative");
+      }
+
+      auto newTransform = parentId == 0 ? gameobj.transformation : calcAbsoluteTransform(sandbox, parentId, gameobj.transformation);
       auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
       sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
         .gameobjIndex = gameobjIndex,
@@ -626,6 +637,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
         std::cout << "updateRelativeTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
       }
     }else{
+      modassert(update.type == UPDATE_TRANSFORM || update.type == UPDATE_POS || update.type == UPDATE_ROT, "unexpected transform update type absolute");
       auto& transform = update.transform.transform;
       auto id = update.id;
       hasAbsolute.insert(id);
@@ -638,9 +650,23 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
 
       auto parentId = getGameObjectH(sandbox, id).parentId;
       auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
+
+      auto newAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id).transform;
+      if (update.type == UPDATE_TRANSFORM){
+        newAbsoluteTransform = update.transform.transform;
+      }else if (update.type == UPDATE_POS){
+        newAbsoluteTransform.position = update.transform.position;
+      }else if (update.type == UPDATE_ROT){
+        newAbsoluteTransform.rotation = update.transform.rotation;
+      }else if (update.type == UPDATE_SCALE){
+        newAbsoluteTransform.scale = update.transform.scale;
+      }else{
+        modassert(false, "unexpected update type absolute");
+      }
+
       sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
         .gameobjIndex = gameobjIndex,
-        .transform =  transform,
+        .transform =  newAbsoluteTransform,
       };
       if (parentId != 0){
         auto oldRelativeTransform = calcRelativeTransform(sandbox, id);
@@ -649,7 +675,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
         //modassert(!aboutEqual(oldRelativeTransform.scale.y, 0.f), "0 scale for y component");
         //modassert(!aboutEqual(oldRelativeTransform.scale.z, 0.f), "0 scale for z component");
       }else{
-        getGameObject(sandbox, id).transformation = transform;
+        getGameObject(sandbox, id).transformation = newAbsoluteTransform;
       }
 
       if (enableTransformLogging){
@@ -989,19 +1015,17 @@ void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position,
     newTransform.position = position;
     updateAbsoluteTransform(sandbox, id, newTransform, hint);
   }else{
+    if (enableTransformLogging){
+      std::cout << inColor("hint updateAbsolutePosition queue: ", CONSOLE_COLOR_GREEN) <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (hint.hint ? hint.hint : "[no hint]") << " " << inColor(print(position), CONSOLE_COLOR_YELLOW) << std::endl;
+    }
     TransformUpdate2 updateValue { };
     updateValue = TransformUpdate2 {
       .relative = false,
       .id = id,
       .hint = hint,
     };
-    updateValue.type = UPDATE_TRANSFORM;
-
-    auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
-    Transformation newTransform = oldAbsoluteTransform.transform;
-    newTransform.position = position;
-    updateValue.transform.transform = newTransform;
-
+    updateValue.type = UPDATE_POS;
+    updateValue.transform.position = position;
     updates.push_back(updateValue);    
   }
 
@@ -1013,18 +1037,18 @@ void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position,
     oldRelativeTransform.position = position;
     updateRelativeTransform(sandbox, id, oldRelativeTransform, hint);
   }else{
+    if (enableTransformLogging){
+      std::cout << inColor("hint updateRelativePosition queue: ", CONSOLE_COLOR_GREEN) <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (hint.hint ? hint.hint : "[no hint]") << " " << inColor(print(position), CONSOLE_COLOR_YELLOW) << std::endl;
+    }
+
     TransformUpdate2 updateValue { };
     updateValue = TransformUpdate2 {
       .relative = true,
       .id = id,
       .hint = hint,
     };
-    updateValue.type = UPDATE_TRANSFORM;
-
-    Transformation newTransform =  getGameObject(sandbox, id).transformation;
-    newTransform.position = position;
-    updateValue.transform.transform = newTransform;
-
+    updateValue.type = UPDATE_POS;
+    updateValue.transform.position = position;
     updates.push_back(updateValue);    
   }
 
@@ -1036,19 +1060,17 @@ void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale, Hint 
     newTransform.scale = scale;
     updateAbsoluteTransform(sandbox, id, newTransform, hint); 
   }else{
+    if (enableTransformLogging){
+      std::cout << inColor("hint updateAbsoluteScale queue: ", CONSOLE_COLOR_GREEN) <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (hint.hint ? hint.hint : "[no hint]") << " " << inColor(print(scale), CONSOLE_COLOR_YELLOW) << std::endl;
+    }
     TransformUpdate2 updateValue { };
     updateValue = TransformUpdate2 {
       .relative = false,
       .id = id,
       .hint = hint,
     };
-    updateValue.type = UPDATE_TRANSFORM;
-
-    auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
-    Transformation newTransform = oldAbsoluteTransform.transform;
-    newTransform.scale = scale;
-    updateValue.transform.transform = newTransform;
-
+    updateValue.type = UPDATE_SCALE;
+    updateValue.transform.scale = scale;
     updates.push_back(updateValue);    
   }
 
@@ -1060,19 +1082,17 @@ void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation,
     newTransform.rotation = rotation;
     updateAbsoluteTransform(sandbox, id, newTransform, hint); 
   }else{
+    if (enableTransformLogging){
+      std::cout << inColor("hint updateAbsoluteRotation queue: ", CONSOLE_COLOR_GREEN) <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (hint.hint ? hint.hint : "[no hint]") << " " << inColor(print(rotation), CONSOLE_COLOR_YELLOW) << std::endl;
+    }
     TransformUpdate2 updateValue { };
     updateValue = TransformUpdate2 {
       .relative = false,
       .id = id,
       .hint = hint,
     };
-    updateValue.type = UPDATE_TRANSFORM;
-
-    auto oldAbsoluteTransform = sandbox.mainScene.absoluteTransforms.at(id);
-    Transformation newTransform = oldAbsoluteTransform.transform;
-    newTransform.rotation = rotation;
-    updateValue.transform.transform = newTransform;
-
+    updateValue.type = UPDATE_ROT;
+    updateValue.transform.rotation = rotation;;
     updates.push_back(updateValue);    
   }
 
@@ -1083,19 +1103,18 @@ void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation,
     oldRelativeTransform.rotation = rotation;
     updateRelativeTransform(sandbox, id, oldRelativeTransform, hint);
   }else{
+    if (enableTransformLogging){
+      std::cout << inColor("hint updateRelativeRotation queue: ", CONSOLE_COLOR_GREEN) <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (hint.hint ? hint.hint : "[no hint]") << " " << inColor(print(rotation), CONSOLE_COLOR_YELLOW) << std::endl;
+    }
     TransformUpdate2 updateValue { };
     updateValue = TransformUpdate2 {
       .relative = false,
       .id = id,
       .hint = hint,
     };
-    updateValue.type = UPDATE_TRANSFORM;
-    Transformation newTransform =  getGameObject(sandbox, id).transformation;
-    newTransform.rotation = rotation;
-    updateValue.transform.transform = newTransform;
-
+    updateValue.type = UPDATE_ROT;
+    updateValue.transform.rotation = rotation;
     updates.push_back(updateValue);    
-
   }
 
 }
