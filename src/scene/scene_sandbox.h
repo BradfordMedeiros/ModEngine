@@ -23,7 +23,6 @@ struct GameObjectH {
 struct TransformCacheElement {
   objid gameobjIndex;
   Transformation transform;
-  bool dirtyAbsoluteUpdate = false;
 };
 
 struct GameObjectBuffer {
@@ -154,5 +153,6 @@ Transformation calcRelativeTransform(Transformation& child, Transformation& pare
 Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId);
 
 objid rootSceneId(SceneSandbox& sandbox);
+bool transformLoggingEnabled();
 
 #endif 

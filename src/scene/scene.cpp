@@ -845,12 +845,15 @@ std::string serializeObject(World& world, objid id, bool includeSubmodelAttr, st
 
 std::vector<objid> physicsPosToUpdate;
 std::vector<objid> physicsRotToUpdate;
+
 void postUpdatePhysicsTranslateSet(World& world, objid index){
   PhysicsValue& phys = world.rigidbodys.at(index);
   auto body =  phys.body;
   auto& transform = fullTransformation(world.sandbox, index, "physicsTranslateSet - read back to set physics position");
   setPosition(body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation));
-  std::cout << inColor("hint - physics setPosition", CONSOLE_COLOR_YELLOW) << ": [" << std::to_string(index) + " " + getGameObject(world, index).name + "] " << "postUpdatePhysicsTranslateSet" << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) << std::endl;
+  if (transformLoggingEnabled()){
+    std::cout << inColor("hint - physics setPosition", CONSOLE_COLOR_YELLOW) << ": [" << std::to_string(index) + " " + getGameObject(world, index).name + "] " << "postUpdatePhysicsTranslateSet" << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) << std::endl;
+  }
 }
 void postUpdatePhysicsRotateSet(World& world, objid index){
   auto rigidBody = world.rigidbodys.at(index);
@@ -859,7 +862,9 @@ void postUpdatePhysicsRotateSet(World& world, objid index){
   auto rot = transform.rotation;
   auto newPositionOffset = calcOffsetFromRotation(transform.position, rigidBody.offset, rot);
   setRotation(body, rot);
-  std::cout << inColor("hint - physics setPosition setRotation", CONSOLE_COLOR_YELLOW) << ": [" << std::to_string(index) + " " + getGameObject(world, index).name + "] " << "postUpdatePhysicsRotateSet" << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) << std::endl;
+  if (transformLoggingEnabled()){
+    std::cout << inColor("hint - physics setPosition setRotation", CONSOLE_COLOR_YELLOW) << ": [" << std::to_string(index) + " " + getGameObject(world, index).name + "] " << "postUpdatePhysicsRotateSet" << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) << std::endl;
+  }
 }
 
 std::set<objid> updatePhysicsFromSandbox(World& world){

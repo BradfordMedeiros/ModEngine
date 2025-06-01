@@ -1,6 +1,10 @@
 #include "./scene_sandbox.h"
 
 const bool enableTransformLogging = false;
+bool transformLoggingEnabled(){
+  return enableTransformLogging;
+}
+
 const bool assertOnStale = false;
 
 void addObjectToCache(SceneSandbox& sandbox, objid id);
@@ -585,16 +589,12 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
 
 
 void updateNodes(SceneSandbox& sandbox, std::set<objid>& alreadyUpdated, objid id, std::set<objid> absoluteUpdates){
-  std::cout << "updateNodes absoluteUpdates: " << print(absoluteUpdates) << std::endl;
-  std::cout << "updateNodes alreadyUpdated: " << print(alreadyUpdated) << std::endl;
-
   if (alreadyUpdated.count(id) > 0){
     return;
   }
 
   std::queue<objid> idsToVisit;  // shouldn't actually be needed since no common children
   auto currentId = id;
-  std::cout << "updateNodes start: " << currentId << std::endl;
 
   idsToVisit.push(currentId);
 
@@ -603,8 +603,6 @@ void updateNodes(SceneSandbox& sandbox, std::set<objid>& alreadyUpdated, objid i
     idsToVisit.pop();
 
     bool isAbsoluteUpdate = absoluteUpdates.count(idToVisit) > 0;
-
-    std::cout << "updateNodes: " << idToVisit << std::endl;
     auto objH = sandbox.mainScene.idToGameObjectsH.at(idToVisit);
     //std::cout << "updateNodes children for: " << id << ", " << objH.children.size() << std::endl;
 
@@ -714,7 +712,6 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
       sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
         .gameobjIndex = gameobjIndex,
         .transform =  newAbsoluteTransform,
-        .dirtyAbsoluteUpdate = true,
       };
      
       //if (enableTransformLogging){

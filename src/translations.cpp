@@ -284,7 +284,7 @@ glm::mat4 matrixFromComponents(glm::mat4 initialModel, glm::vec3 position, glm::
   glm::mat4 scaledModelMatrix = modelMatrix * glm::scale(glm::mat4(1.f), scale);
   return scaledModelMatrix;
 }
-glm::mat4 matrixFromComponents(Transformation transformation){
+glm::mat4 matrixFromComponents(Transformation& transformation){
   return matrixFromComponents(glm::mat4(1.f), transformation.position, transformation.scale, transformation.rotation);
 }
 
