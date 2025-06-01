@@ -23,6 +23,7 @@ struct GameObjectH {
 struct TransformCacheElement {
   objid gameobjIndex;
   Transformation transform;
+  bool dirtyAbsoluteUpdate = false;
 };
 
 struct GameObjectBuffer {
