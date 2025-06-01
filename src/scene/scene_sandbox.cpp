@@ -1,6 +1,6 @@
 #include "./scene_sandbox.h"
 
-const bool enableTransformLogging = true;
+const bool enableTransformLogging = false;
 const bool assertOnStale = false;
 const bool updateTransformImmediate = false;
 
@@ -592,35 +592,46 @@ void updateNodes(SceneSandbox& sandbox, std::set<objid>& alreadyUpdated, objid i
   if (alreadyUpdated.count(id) > 0){
     return;
   }
-  // if is a relative update
-  // 
 
   std::queue<objid> idsToVisit;  // shouldn't actually be needed since no common children
   auto currentId = id;
-
   std::cout << "updateNodes start: " << currentId << std::endl;
 
-  if (absoluteUpdates.count(currentId) == 0){
-    idsToVisit.push(currentId);
-  }
+  idsToVisit.push(currentId);
 
   while (idsToVisit.size() > 0){
     auto idToVisit = idsToVisit.front();
     idsToVisit.pop();
+
+    bool isAbsoluteUpdate = absoluteUpdates.count(idToVisit) > 0;
+
     std::cout << "updateNodes: " << idToVisit << std::endl;
     auto objH = sandbox.mainScene.idToGameObjectsH.at(idToVisit);
-    std::cout << "updateNodes children for: " << id << ", " << objH.children.size() << std::endl;
+    //std::cout << "updateNodes children for: " << id << ", " << objH.children.size() << std::endl;
 
-    for (objid id : objH.children){
-      if (absoluteUpdates.count(id) == 0){
-        idsToVisit.push(id);
+    auto& gameobj = getGameObject(sandbox, idToVisit);
+    auto parentId = getGameObjectH(sandbox, idToVisit).parentId;
+
+    if (isAbsoluteUpdate){
+      auto oldRelativeTransform = calcRelativeTransform(sandbox, idToVisit);
+      getGameObject(sandbox, idToVisit).transformation = oldRelativeTransform;
+    }else{
+      auto newTransform = parentId == 0 ? gameobj.transformation : calcAbsoluteTransform(sandbox, parentId, gameobj.transformation);
+      auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(idToVisit).gameobjIndex;
+      sandbox.mainScene.absoluteTransforms.at(idToVisit) = TransformCacheElement {
+        .gameobjIndex = gameobjIndex,
+        .transform = newTransform,
+      };
+    }
+    alreadyUpdated.insert(idToVisit);
+
+    for (objid childId : objH.children){
+      if (alreadyUpdated.count(childId) == 0){
+        idsToVisit.push(childId);
       }
     }    
   }
-  //
-
 }
-
 
 int getDepth(SceneSandbox& sandbox, objid id){
   if (id == 0){
@@ -719,22 +730,27 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
   // If it encounters and absolute transform node, it stops at that depth there
 
   std::set<objid> visitedNodes;
-
-
-  int numUpdates = 0;
-  int currDepth = 0;
-  while(numUpdates < updates.size()){
-    for (auto &update : updates){
-      auto nodeDepth = getDepth(sandbox, update.id);
-      if (nodeDepth == currDepth){
-        numUpdates++;
-        updateNodes(sandbox, visitedNodes, update.id, hasAbsolute);
+  {  // calculate the new relative transform for the absolute updates
+    int numUpdates = 0;
+    int currDepth = 0;
+    while(numUpdates < updates.size()){
+      for (auto &update : updates){
+        auto nodeDepth = getDepth(sandbox, update.id);
+        if (nodeDepth == currDepth){
+          numUpdates++;
+          updateNodes(sandbox, visitedNodes, update.id, hasAbsolute);
+        }
       }
-      // if same depth then do it 
-      // otherwise dont do it yet
+      currDepth++;
     }
-    currDepth++;
   }
+
+
+
+
+
+
+
    //for (auto &update : updates){
    // updateNodes(sandbox, visitedNodes, update.id, hasAbsolute);
     
