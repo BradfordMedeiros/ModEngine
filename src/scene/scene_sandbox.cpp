@@ -601,12 +601,12 @@ void updateNodes(SceneSandbox& sandbox, std::set<objid>& alreadyUpdated, objid i
     //std::cout << "updateNodes children for: " << id << ", " << objH.children.size() << std::endl;
 
     auto& gameobj = getGameObject(sandbox, idToVisit);
-    auto parentId = getGameObjectH(sandbox, idToVisit).parentId;
 
     if (isAbsoluteUpdate){
       auto oldRelativeTransform = calcRelativeTransform(sandbox, idToVisit);
-      getGameObject(sandbox, idToVisit).transformation = oldRelativeTransform;
+      gameobj.transformation = oldRelativeTransform;
     }else{
+      auto parentId = getGameObjectH(sandbox, idToVisit).parentId;
       auto newTransform = parentId == 0 ? gameobj.transformation : calcAbsoluteTransform(sandbox, parentId, gameobj.transformation);
       sandbox.mainScene.absoluteTransforms.at(idToVisit).transform = newTransform;
     }
