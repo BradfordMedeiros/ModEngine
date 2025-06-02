@@ -527,6 +527,23 @@ std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId)
   return ids;
 }
 
+int getDepth(SceneSandbox& sandbox, objid id){
+  if (id == 0){
+    return 0;
+  }
+  objid currentId = id;
+  int currDepth = 0;
+  while(true){
+    currDepth++;
+    auto parentId = getParent(sandbox, currentId);
+    if (!parentId.has_value()){
+      return currDepth;
+    }
+    currentId = parentId.value();
+  }
+  return currDepth;
+}
+
 void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
   auto updatedIdElements = bfsElementAndChildren(sandbox, updatedId);
   //std::cout << "should update: " << print(updatedIdElements) << std::endl;
@@ -557,6 +574,11 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
       .gameobjIndex = gameobjIndex,
       .transform = newTransform,
     };       
+  }
+
+  for (auto id : updatedIdElements){
+    auto depth = getDepth(sandbox, id);
+    getGameObjectH(sandbox, id).depth = depth;
   }
 }
 
@@ -597,24 +619,6 @@ void updateNodes(SceneSandbox& sandbox, std::set<objid>& alreadyUpdated, objid i
       }
     }    
   }
-}
-
-int getDepth(SceneSandbox& sandbox, objid id){
-  if (id == 0){
-    return 0;
-  }
-  //return 1;
-  objid currentId = id;
-  int currDepth = 0;
-  while(true){
-    currDepth++;
-    auto parentId = getParent(sandbox, currentId);
-    if (!parentId.has_value()){
-      return currDepth;
-    }
-    currentId = parentId.value();
-  }
-  return currDepth;
 }
 
 std::set<objid> updateSandbox(SceneSandbox& sandbox){
@@ -691,7 +695,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
     int currDepth = 0;
     while(numUpdates < updates.size()){
       for (auto &update : updates){
-        auto nodeDepth = getDepth(sandbox, update.id);
+        auto nodeDepth = getGameObjectH(sandbox, update.id).depth;
         if (nodeDepth == currDepth){
           numUpdates++;
           updateNodes(sandbox, visitedNodes, update.id, hasAbsolute);
