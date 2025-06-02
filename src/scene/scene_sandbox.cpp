@@ -501,13 +501,15 @@ Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId){
   return calcRelativeTransform(sandbox, childId, parentId);
 }
 
-// What should the absolute transform be given a parents absolute and a relative child transform
-Transformation calcAbsoluteTransform(SceneSandbox& sandbox, objid parentId, Transformation transform){
-  glm::mat4 parentMatrix = matrixFromComponents(sandbox.mainScene.absoluteTransforms.at(parentId).transform);
-  glm::mat4 childMatrix = matrixFromComponents(transform);
-  auto finalTransform = parentMatrix * childMatrix;
-  return getTransformationFromMatrix(finalTransform);
+Transformation calcAbsoluteTransform(SceneSandbox& sandbox, objid parentId, Transformation child){
+    auto& parent = sandbox.mainScene.absoluteTransforms.at(parentId).transform;
+    Transformation result;
+    result.rotation = parent.rotation * child.rotation;
+    result.scale = parent.scale * child.scale;
+    result.position = parent.position + (parent.rotation * (parent.scale * child.position));
+    return result;
 }
+
 
 std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId){
   std::vector<objid> ids;
