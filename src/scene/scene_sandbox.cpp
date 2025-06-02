@@ -507,46 +507,30 @@ Transformation calcAbsoluteTransform(SceneSandbox& sandbox, objid parentId, Tran
   return getTransformationFromMatrix(finalTransform);
 }
 
-std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId, std::set<objid>& absoluteUpdates){
+std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId){
   std::vector<objid> ids;
-  std::queue<objid> idsToVisit;  // shouldn't actually be needed since no common children
-  std::set<objid> visited;
+  std::queue<objid> idsToVisit;
 
   auto currentId = updatedId;
-
-  if (absoluteUpdates.count(currentId) == 0){
-    idsToVisit.push(currentId);
-  }
-
+  idsToVisit.push(currentId);
+  
   while (idsToVisit.size() > 0){
     auto idToVisit = idsToVisit.front();
     ids.push_back(idToVisit);
-    visited.insert(idToVisit);
     idsToVisit.pop();
-    auto objH = sandbox.mainScene.idToGameObjectsH.at(idToVisit);
+    GameObjectH& objH = sandbox.mainScene.idToGameObjectsH.at(idToVisit);
     for (objid id : objH.children){
-      if ((visited.count(id) == 0) && (absoluteUpdates.count(id) == 0)){
-        idsToVisit.push(id);
-      }
+      idsToVisit.push(id);
     }    
   }
-  //
 
   return ids;
 }
 
-void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool justAdded, std::set<objid> absoluteUpdates){
-  //std::cout << "should update id: " << updatedId << std::endl;
-  // do a breath first search, and then update it in that order
-
-  std::set<objid> excludeNodes;
-  auto updatedIdElements = bfsElementAndChildren(sandbox, updatedId, excludeNodes);
+void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
+  auto updatedIdElements = bfsElementAndChildren(sandbox, updatedId);
   //std::cout << "should update: " << print(updatedIdElements) << std::endl;
   for (auto id : updatedIdElements){
-    if (id == updatedId && !justAdded){
-      continue;
-    }
-
     if (id != updatedId){
       sandbox.updatedIds.insert(id);  
     }
@@ -560,30 +544,19 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId, bool jus
     if (sandbox.mainScene.absoluteTransforms.find(parentId) == sandbox.mainScene.absoluteTransforms.end()){
       continue;
     }
-    GameObject& gameobj = getGameObject(sandbox, id);
-    auto isAbsoluteUpdateNode = absoluteUpdates.count(id) > 0;
 
-    if (!isAbsoluteUpdateNode && (gameobj.physicsOptions.isStatic || !gameobj.physicsOptions.enabled || justAdded /* this is so when you spawn it, the relative transform determines where it goes */)){
-       auto currentConstraint = gameobj.transformation;
-       auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
-       auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
-
-       if (enableTransformLogging){
-         std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]          [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]" << std::endl; 
-         std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]               new rel: " << print(currentConstraint) << std::endl; 
-         std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]               new abs: " << print(newTransform) << std::endl; 
-       }
-
-       sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
-         .gameobjIndex = gameobjIndex,
-         .transform = newTransform,
-       };       
-    }else{
-      if (enableTransformLogging){
-        std::string reason = isAbsoluteUpdateNode ? "absolute" : "other";
-        std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]          [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] - skipping - reason: " << reason <<  std::endl; 
-      }
+    auto currentConstraint = getGameObject(sandbox, id).transformation;
+    auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
+    auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(id).gameobjIndex;
+    if (enableTransformLogging){
+      std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]          [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]" << std::endl; 
+      std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]               new rel: " << print(currentConstraint) << std::endl; 
+      std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]               new abs: " << print(newTransform) << std::endl; 
     }
+    sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
+      .gameobjIndex = gameobjIndex,
+      .transform = newTransform,
+    };       
   }
 }
 
@@ -603,7 +576,6 @@ void updateNodes(SceneSandbox& sandbox, std::set<objid>& alreadyUpdated, objid i
     idsToVisit.pop();
 
     bool isAbsoluteUpdate = absoluteUpdates.count(idToVisit) > 0;
-    auto objH = sandbox.mainScene.idToGameObjectsH.at(idToVisit);
     //std::cout << "updateNodes children for: " << id << ", " << objH.children.size() << std::endl;
 
     auto& gameobj = getGameObject(sandbox, idToVisit);
@@ -614,14 +586,11 @@ void updateNodes(SceneSandbox& sandbox, std::set<objid>& alreadyUpdated, objid i
       getGameObject(sandbox, idToVisit).transformation = oldRelativeTransform;
     }else{
       auto newTransform = parentId == 0 ? gameobj.transformation : calcAbsoluteTransform(sandbox, parentId, gameobj.transformation);
-      auto gameobjIndex = sandbox.mainScene.absoluteTransforms.at(idToVisit).gameobjIndex;
-      sandbox.mainScene.absoluteTransforms.at(idToVisit) = TransformCacheElement {
-        .gameobjIndex = gameobjIndex,
-        .transform = newTransform,
-      };
+      sandbox.mainScene.absoluteTransforms.at(idToVisit).transform = newTransform;
     }
     alreadyUpdated.insert(idToVisit);
 
+    GameObjectH& objH = sandbox.mainScene.idToGameObjectsH.at(idToVisit);
     for (objid childId : objH.children){
       if (alreadyUpdated.count(childId) == 0){
         idsToVisit.push(childId);
@@ -760,7 +729,7 @@ void addObjectToCache(SceneSandbox& sandbox, objid id){
     .gameobjIndex = gameobjIndex,
     .transform = getTransformationFromMatrix(elementMatrix),
   };
-  updateAllChildrenPositions(sandbox, id, true, {});
+  updateAllChildrenPositions(sandbox, id);
 }
 void removeObjectFromCache(SceneSandbox& sandbox, objid id){
   sandbox.mainScene.absoluteTransforms.erase(id);
@@ -877,7 +846,7 @@ void makeParent(SceneSandbox& sandbox, objid child, objid parent){
   modassert(child != parent, "cannot parent a node to itself");
   modassert(!hasDescendent(sandbox, child, parent), "cannot parent a node to a descendent of itself");
   enforceParentRelationship(sandbox.mainScene, child, parent);
-  updateAllChildrenPositions(sandbox, parent, true, {}); // TODO - only update the newly parented children
+  updateAllChildrenPositions(sandbox, parent); // TODO - only update the newly parented children
 }
 
 
