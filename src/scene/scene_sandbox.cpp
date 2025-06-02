@@ -47,6 +47,7 @@ void addNextFree(Scene& scene, GameObject& gameobj){
     if (!scene.gameobjects.at(i).inUse){
       scene.gameobjects.at(i).gameobj = gameobj;
       scene.gameobjects.at(i).inUse = true;
+      scene.idToGameObjectsH.at(gameobj.id).directIndex = i;
       return;
     }
   }
@@ -54,6 +55,7 @@ void addNextFree(Scene& scene, GameObject& gameobj){
     .inUse = true,
     .gameobj = gameobj,
   });
+  scene.idToGameObjectsH.at(gameobj.id).directIndex = (scene.gameobjects.size() - 1);
 }
 void freeGameObject(GameObjectBuffer& obj){
   std::cout << "change gameobject: remove " << obj.gameobj.id << std::endl;
@@ -600,13 +602,14 @@ void updateNodes(SceneSandbox& sandbox, std::unordered_set<objid>& alreadyUpdate
     bool isAbsoluteUpdate = absoluteUpdates.count(idToVisit) > 0;
     //std::cout << "updateNodes children for: " << id << ", " << objH.children.size() << std::endl;
 
-    auto& gameobj = getGameObject(sandbox, idToVisit);
+    auto& objh = getGameObjectH(sandbox, idToVisit);
+    auto& gameobj = getGameObjectDirectIndex(sandbox, objh.directIndex);
 
     if (isAbsoluteUpdate){
       auto oldRelativeTransform = calcRelativeTransform(sandbox, idToVisit);
       gameobj.transformation = oldRelativeTransform;
     }else{
-      auto parentId = getGameObjectH(sandbox, idToVisit).parentId;
+      auto parentId = objh.parentId;
       auto newTransform = parentId == 0 ? gameobj.transformation : calcAbsoluteTransform(sandbox, parentId, gameobj.transformation);
       sandbox.mainScene.absoluteTransforms.at(idToVisit).transform = newTransform;
     }
