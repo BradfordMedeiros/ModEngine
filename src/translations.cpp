@@ -278,14 +278,29 @@ glm::vec3 directionFromQuat(glm::quat direction){
   return direction * glm::vec3(0, 0, -1.f);
 }
 
+/*
+old implementation should be equivalent but the one i kept measures faster
 glm::mat4 matrixFromComponents(glm::mat4 initialModel, glm::vec3 position, glm::vec3 scale, glm::quat rotation){
   glm::mat4 modelMatrix = glm::translate(initialModel, position);
   modelMatrix = modelMatrix * glm::toMat4(rotation);
   glm::mat4 scaledModelMatrix = modelMatrix * glm::scale(glm::mat4(1.f), scale);
   return scaledModelMatrix;
+}*/
+glm::mat4 matrixFromComponents(glm::mat4 initialModel, glm::vec3 position, glm::vec3 scale, glm::quat rotation) {
+  glm::mat4 rotationMatrix = glm::toMat4(rotation);
+  rotationMatrix[0] *= scale.x;
+  rotationMatrix[1] *= scale.y;
+  rotationMatrix[2] *= scale.z;
+  glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * rotationMatrix;
+  return initialModel * transform;
 }
+
 glm::mat4 matrixFromComponents(Transformation& transformation){
-  return matrixFromComponents(glm::mat4(1.f), transformation.position, transformation.scale, transformation.rotation);
+  glm::mat4 rotationMatrix = glm::toMat4(transformation.rotation);
+  rotationMatrix[0] *= transformation.scale.x;
+  rotationMatrix[1] *= transformation.scale.y;
+  rotationMatrix[2] *= transformation.scale.z;
+  return glm::translate(glm::mat4(1.0f), transformation.position) * rotationMatrix;
 }
 
 
