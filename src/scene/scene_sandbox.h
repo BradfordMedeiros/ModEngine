@@ -4,6 +4,7 @@
 #include <set>
 #include <sstream>
 #include <functional>
+#include <unordered_set>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>

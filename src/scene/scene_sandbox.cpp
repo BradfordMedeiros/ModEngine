@@ -583,7 +583,7 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
 }
 
 
-void updateNodes(SceneSandbox& sandbox, std::set<objid>& alreadyUpdated, objid id, std::set<objid> absoluteUpdates){
+void updateNodes(SceneSandbox& sandbox, std::unordered_set<objid>& alreadyUpdated, objid id, std::unordered_set<objid>& absoluteUpdates){
   if (alreadyUpdated.count(id) > 0){
     return;
   }
@@ -652,7 +652,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
   }
 
   // Update the absolute transform for absolute transsforms
-  std::set<objid> hasAbsolute;
+  std::unordered_set<objid> hasAbsolute;
   for (auto &update : updates){
     if (!update.relative){
       auto& transform = update.transform.transform;
@@ -689,7 +689,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
     }
   }
 
-  std::set<objid> visitedNodes;
+  std::unordered_set<objid> visitedNodes;
   {
     int numUpdates = 0;
     int currDepth = 0;
