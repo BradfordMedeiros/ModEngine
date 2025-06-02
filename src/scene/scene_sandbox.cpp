@@ -692,16 +692,22 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
     }
   }
 
+  std::vector<int> updateDepths;
+  for (auto &update : updates){
+    auto depth = getGameObjectH(sandbox, update.id).depth;
+    updateDepths.push_back(depth);
+  }
+
   std::unordered_set<objid> visitedNodes;
   {
     int numUpdates = 0;
     int currDepth = 0;
     while(numUpdates < updates.size()){
-      for (auto &update : updates){
-        auto nodeDepth = getGameObjectH(sandbox, update.id).depth;
+      for (int i = 0; i < updates.size(); i++){
+        auto nodeDepth = updateDepths.at(i);
         if (nodeDepth == currDepth){
           numUpdates++;
-          updateNodes(sandbox, visitedNodes, update.id, hasAbsolute);
+          updateNodes(sandbox, visitedNodes, updates.at(i).id, hasAbsolute);
         }
       }
       currDepth++;
