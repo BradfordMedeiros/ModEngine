@@ -55,6 +55,7 @@ void addNextFree(Scene& scene, GameObject& gameobj){
     .inUse = true,
     .gameobj = gameobj,
   });
+
   scene.idToGameObjectsH.at(gameobj.id).directIndex = (scene.gameobjects.size() - 1);
 }
 void freeGameObject(GameObjectBuffer& obj){
@@ -157,24 +158,27 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
   auto tokens = parseFormat(sceneData);
   SceneDeserialization deserializedScene = createSceneFromParsedContent(sceneId, tokens, getUniqueObjId, getObjautoserializerFields, prefabId);
 
+  for (auto &[id, obj] : deserializedScene.scene.idToGameObjectsH){
+    modassert(sandbox.mainScene.idToGameObjectsH.find(id) == sandbox.mainScene.idToGameObjectsH.end(), "duplicate id");
+
+    sandbox.mainScene.idToGameObjectsH[id] = obj;
+    if (parentId.has_value() && obj.parentId == 0){
+      enforceParentRelationship(sandbox.mainScene, id, parentId.value());
+    }
+  }
+
   for (auto &obj : deserializedScene.scene.gameobjects){
     if (!obj.inUse){
       continue;
     }
     auto id = obj.gameobj.id;
-    modassert(sandbox.mainScene.idToGameObjectsH.find(id) == sandbox.mainScene.idToGameObjectsH.end(), "duplicate id");
 
     std::cout << "change gameobject: add " << obj.gameobj.id << std::endl;
     addNextFree(sandbox.mainScene, obj.gameobj);
 
     modlog("sandbox add id", std::to_string(id));
   }
-  for (auto &[id, obj] : deserializedScene.scene.idToGameObjectsH){
-    sandbox.mainScene.idToGameObjectsH[id] = obj;
-    if (parentId.has_value() && obj.parentId == 0){
-      enforceParentRelationship(sandbox.mainScene, id, parentId.value());
-    }
-  }
+
 
   bool existingScene = sandbox.mainScene.sceneToNameToId.find(sceneId) != sandbox.mainScene.sceneToNameToId.end();
   if (!existingScene){

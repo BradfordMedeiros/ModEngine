@@ -1533,22 +1533,11 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<obj
 
 extern bool useTransform2;
 
+// See if this can be sped up. 
 glm::mat4 armatureTransform2(SceneSandbox& sandbox, objid id, objid skeletonId){
   auto groupTransform = fullModelTransform(sandbox, skeletonId);
   auto modelTransform = fullModelTransform(sandbox, id);
-  // group * something = model (aka aX = b, so X = inv(A) * B)
-  // inverse(group) * model
-  //auto groupToModel =  modelTransform * glm::inverse(groupTransform); 
   auto groupToModel =  glm::affineInverse(groupTransform) * modelTransform; 
-
-  /*
-  auto resultCheck = groupTransform * groupToModel;
-  if (false && resultCheck != modelTransform){
-    std::cout << "group_to_model = " << print(groupToModel) << std::endl;
-    std::cout << "result_check = " << print(resultCheck) << std::endl;
-    std::cout << "model_transform = " << print(modelTransform) << std::endl;
-    assert(false);
-  }*/
   return groupToModel;
 }
 
