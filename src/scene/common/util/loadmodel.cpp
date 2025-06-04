@@ -152,10 +152,10 @@ BoneInfo processBones(aiMesh* mesh){
     Bone meshBone {
       .name = bone -> mName.C_Str(),
       .offsetMatrix = glm::mat4(1.f),
-      .initialBonePose = glm::mat4(1.f),  // this gets populated in setInitialBonePoses since needs lookup
+      .initialBonePoseInverse = glm::mat4(1.f),  // this gets populated in setInitialBonePoses since needs lookup
     };
 
-    printMatrix(meshBone.name, bone -> mOffsetMatrix, meshBone.initialBonePose);
+    printMatrix(meshBone.name, bone -> mOffsetMatrix, meshBone.initialBonePoseInverse);
 
     meshBones.push_back(meshBone);
 
@@ -224,8 +224,8 @@ void setInitialBonePoses(ModelData& data, std::unordered_map<int32_t, glm::mat4>
   }
   for (auto &[id, meshdata] : data.meshIdToMeshData){
     for (auto &bone : meshdata.bones){
-      bone.initialBonePose = fullnodeTransform.at(getNodeId(data, bone.name).value());
-      printMatrixInformation(bone.initialBonePose, std::string("offsetmatrix - " + bone.name));
+      bone.initialBonePoseInverse = glm::inverse(fullnodeTransform.at(getNodeId(data, bone.name).value()));
+      printMatrixInformation(bone.initialBonePoseInverse, std::string("offsetmatrix - " + bone.name));
     }
   }
 }
@@ -499,8 +499,8 @@ void printDebugModelData(ModelData& data, std::string modelPath){
     std::cout << "(" << meshid << ", [" << std::endl;
     for (auto bone : meshData.bones){
       std::cout << "  (" << bone.name << " " << std::endl;
-      auto initialBonePose = getTransformationFromMatrix(bone.initialBonePose);
-      printMatrixInformation(bone.initialBonePose, "    bone");
+      auto initialBonePoseInverse = getTransformationFromMatrix(bone.initialBonePoseInverse);
+      printMatrixInformation(bone.initialBonePoseInverse, "    bone");
       std::cout << "  )" << std::endl;
     }
     std::cout << "])" << std::endl;

@@ -23,7 +23,7 @@ struct Bone {
   std::string name;
   std::string shortName;
   glm::mat4 offsetMatrix;
-  glm::mat4 initialBonePose;
+  glm::mat4 initialBonePoseInverse;
 };
 
 struct MeshData {
