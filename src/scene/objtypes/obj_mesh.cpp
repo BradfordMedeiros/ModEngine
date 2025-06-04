@@ -75,6 +75,15 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   }
   obj.boneGameObjIdCache = boneGameObjIdCache;
 
+  obj.hasBones = false;
+  for (int i = 0; i < obj.meshesToRender.size(); i++){
+    Mesh& mesh = obj.meshesToRender.at(i);
+    if (mesh.bones.size() > 0){
+      obj.hasBones = true;
+      break;
+    }
+  }
+
   //std::cout << "root mesh name: " << rootMeshName << ", node only: " << obj.nodeOnly << std::endl;
   createAutoSerializeWithTextureLoading((char*)&obj, meshAutoserializer, attr, util);
   return obj;

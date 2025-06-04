@@ -1548,7 +1548,12 @@ void updateLookAt(World& world, Transformation& viewTransform){
 
 void updateBonesForAnimation(World& world){
   // // https://gamedev.net/forums/topic/484984-skeletal-animation-non-uniform-scale/4172731/
-  for (auto &[id, gameobjMesh] : world.objectMapping.mesh){
+
+  int numBones = 0;
+  for (auto &[id, gameobjMesh] : world.objectMapping.mesh){ // TODO PERF - make this a static array instead of looping over all meshes
+    if (!gameobjMesh.hasBones){
+      continue;
+    }
     if (gameobjMesh.rootidCache == 0){
       std::string& rootname = getGameObject(world.sandbox, getGroupId(world.sandbox, id)).name;  // TODO PERF - store the id instead
       std::cout << "Looking for root: " << rootname << std::endl;
@@ -1564,6 +1569,7 @@ void updateBonesForAnimation(World& world){
       for (int j = 0; j < mesh.bones.size(); j++){
         Bone& bone = mesh.bones.at(j);
         objid boneId = gameobjMesh.boneGameObjIdCache.at(i).at(j);
+        numBones++;
         if (boneId == 0){
           boneId = maybeGetGameObjectByName(world.sandbox, bone.name, sceneId(world.sandbox, id)).value() -> id; 
           // modassert(boneId.has_value(), std::string("no bone names: ") + bone.name);
@@ -1576,6 +1582,7 @@ void updateBonesForAnimation(World& world){
       }
     }
   }
+  std::cout << "num bones: " << numBones << std::endl;
 }
 
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool paused, Transformation& viewTransform, bool showVisualizations){

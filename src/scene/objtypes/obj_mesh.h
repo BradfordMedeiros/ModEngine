@@ -19,6 +19,7 @@ struct GameObjectMesh {
   glm::vec4 tint;
   objid rootidCache;
 
+  bool hasBones;
 };
 
 GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util);
