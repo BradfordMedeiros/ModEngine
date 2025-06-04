@@ -295,15 +295,51 @@ glm::mat4 matrixFromComponents(glm::mat4 initialModel, glm::vec3 position, glm::
   return initialModel * transform;
 }
 
-glm::mat4 matrixFromComponents(Transformation& transformation){
-  glm::mat4 rotationMatrix = glm::toMat4(transformation.rotation);
-  rotationMatrix[0] *= transformation.scale.x;
-  rotationMatrix[1] *= transformation.scale.y;
-  rotationMatrix[2] *= transformation.scale.z;
-  return glm::translate(glm::mat4(1.0f), transformation.position) * rotationMatrix;
+// This is equivalent to the above effectively, but it seems to be a bit faster when written out. 
+// Can just replace with a call to the above if does not help in measurements
+// This optimization is mainly done for the call in the animation function
+glm::mat4 matrixFromComponents(Transformation& transformation) {
+    const glm::quat& q = transformation.rotation;
+    const glm::vec3& s = transformation.scale;
+    const glm::vec3& t = transformation.position;
+
+    float x2 = q.x + q.x;
+    float y2 = q.y + q.y;
+    float z2 = q.z + q.z;
+
+    float xx = q.x * x2;
+    float yy = q.y * y2;
+    float zz = q.z * z2;
+
+    float xy = q.x * y2;
+    float xz = q.x * z2;
+    float yz = q.y * z2;
+
+    float wx = q.w * x2;
+    float wy = q.w * y2;
+    float wz = q.w * z2;
+
+    glm::mat4 result(1.0f);
+
+    result[0][0] = (1.0f - (yy + zz)) * s.x;
+    result[0][1] = (xy + wz) * s.x;
+    result[0][2] = (xz - wy) * s.x;
+    result[0][3] = 0.0f;
+
+    result[1][0] = (xy - wz) * s.y;
+    result[1][1] = (1.0f - (xx + zz)) * s.y;
+    result[1][2] = (yz + wx) * s.y;
+    result[1][3] = 0.0f;
+
+    result[2][0] = (xz + wy) * s.z;
+    result[2][1] = (yz - wx) * s.z;
+    result[2][2] = (1.0f - (xx + yy)) * s.z;
+    result[2][3] = 0.0f;
+
+    result[3] = glm::vec4(t, 1.0f);
+
+    return result;
 }
-
-
 
 void modDecompose(glm::mat4& matrix, glm::vec3& pos, glm::quat& rot, glm::vec3& scale){
   glm::vec3 skew;
