@@ -46,6 +46,7 @@ struct KeyInfoLookup {
 struct AnimationWithIds {
   Animation animation;
   std::vector<objid> channelObjIds;
+  std::vector<objid> channelObjDirectIds;
   std::vector<KeyInfoLookup> lookup;
 };
 

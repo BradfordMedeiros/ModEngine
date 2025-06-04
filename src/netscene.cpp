@@ -99,7 +99,7 @@ void handleCreate(World& world, UdpPacket& packet){
 void handleUpdate(World& world, UdpPacket& packet){
   auto update = packet.payload.updatepacket;
   if (idExists(world.sandbox, update.id)){
-    physicsLocalTransformSet(world, update.id, update.properties.transformation);
+    physicsLocalTransformSet(world, update.id, update.properties.transformation, std::nullopt);
   }else{
     std::cout << "WARNING: Udp client update: does not exist " << update.id << std::endl;
   }

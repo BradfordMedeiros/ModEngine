@@ -88,6 +88,7 @@ std::vector<AnimationPose> animationPosesAtTime(float currentTime, objid sceneId
 
   for (int i = 0; i < animation.channels.size(); i++){
     auto targetId = animationWithIds.channelObjIds.at(i);
+    auto directIndex = animationWithIds.channelObjDirectIds.at(i);
     auto& channel = animation.channels.at(i);
     auto& lookup = animationWithIds.lookup.at(i);
 
@@ -119,6 +120,7 @@ std::vector<AnimationPose> animationPosesAtTime(float currentTime, objid sceneId
 
     poses.push_back(AnimationPose{
       .targetId = targetId,
+      .directIndex = directIndex,
       .pose = newNodeTransformation,
     });
   }

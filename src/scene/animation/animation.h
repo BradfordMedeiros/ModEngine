@@ -8,6 +8,7 @@
 
 struct AnimationPose {
   objid targetId;
+  objid directIndex;
   Transformation pose;
 };
 

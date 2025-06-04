@@ -89,7 +89,7 @@ std::string serializeObject(World& world, objid id, bool includeSubmodelAttr, st
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative, Hint hint);
 void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relative, Hint hint);  
 void physicsScaleSet(World& world, objid index, glm::vec3 scale);
-void physicsLocalTransformSet(World& world, objid index, Transformation& transform);
+void physicsLocalTransformSet(World& world, objid index, Transformation& transform, std::optional<int> directIndex);
 
 void updatePhysicsBody(World& world, objid id);
 

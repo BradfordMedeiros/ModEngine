@@ -94,6 +94,7 @@ bool idExists(SceneSandbox& sandbox, std::string name, objid sceneId);
 GameObject& getGameObject(SceneSandbox& sandbox, objid id);
 GameObject& getGameObject(SceneSandbox& sandbox, std::string name, objid sceneId);
 GameObject& getGameObjectDirectIndex(SceneSandbox& sandbox, objid id);
+int getDirectIndexForId(SceneSandbox& sandbox, objid id);
 
 GameObjectH& getGameObjectH(SceneSandbox& sandbox, objid id);
 GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name, objid sceneId);
@@ -143,7 +144,7 @@ std::optional<objid> sceneIdByName(SceneSandbox& sandbox, std::string name);
 
 
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint);
-void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint);
+void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint, std::optional<int> directIndex);
 void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position, Hint hint);
 void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position, Hint hint);
 void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale, Hint hint);

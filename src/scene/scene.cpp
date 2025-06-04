@@ -1441,8 +1441,8 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative
   world.entitiesToUpdate.insert(index);
 }
 
-void physicsLocalTransformSet(World& world, objid index, Transformation& transform){
-  updateRelativeTransform(world.sandbox, index, transform, Hint{ .hint = "physicsLocalTransformSet" });
+void physicsLocalTransformSet(World& world, objid index, Transformation& transform, std::optional<int> directIndex){
+  updateRelativeTransform(world.sandbox, index, transform, Hint{ .hint = "physicsLocalTransformSet" }, directIndex);
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     PhysicsValue& phys = world.rigidbodys.at(index);
     auto body = phys.body;

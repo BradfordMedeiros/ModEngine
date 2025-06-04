@@ -25,6 +25,8 @@ struct TransformUpdate2 {
   bool hasRotation = false;
   TransformUpdateValue transform;
   Hint hint;
+
+  std::optional<objid> directIndex;
 };
 
 std::vector<TransformUpdate2> updates;
@@ -591,6 +593,10 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
 }
 
 
+int getDirectIndexForId(SceneSandbox& sandbox, objid id){
+  return getGameObjectH(sandbox, id).directIndex;
+}
+
 void updateNodes(SceneSandbox& sandbox, std::unordered_set<objid>& alreadyUpdated, objid id, std::unordered_set<objid>& absoluteUpdates){
   if (alreadyUpdated.count(id) > 0){
     return;
@@ -630,6 +636,14 @@ void updateNodes(SceneSandbox& sandbox, std::unordered_set<objid>& alreadyUpdate
   }
 }
 
+GameObject& getGameObjectFromUpdate(SceneSandbox& sandbox, TransformUpdate2& update){
+  if (update.directIndex.has_value()){
+    return getGameObjectDirectIndex(sandbox, update.directIndex.value());
+  }
+  auto& gameobj = getGameObject(sandbox, update.id);
+  return gameobj;
+}
+
 std::set<objid> updateSandbox(SceneSandbox& sandbox){
   if (enableTransformLogging){
     std::cout << inColor("hint---------- updateSandbox start------------------", CONSOLE_COLOR_RED) << std::endl;
@@ -643,7 +657,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
         std::cout << inColor("updateRelativeTransform hint: ", CONSOLE_COLOR_GREEN) << " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]  " << (update.hint.hint ? update.hint.hint : "[no hint]") << " " <<  inColor(print(update.transform), CONSOLE_COLOR_YELLOW) <<  std::endl;
         std::cout << "updateRelativeTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;        
       }
-      auto& gameobj = getGameObject(sandbox, id);
+      auto& gameobj = getGameObjectFromUpdate(sandbox, update);
       if (update.hasPosition){
         gameobj.transformation.position = update.transform.position;
       }
@@ -768,7 +782,7 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
   updateValue.transform.rotation = transform.rotation;
   updates.push_back(updateValue);    
 }
-void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint){
+void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint, std::optional<int> directIndex){
   if (enableTransformLogging){
     std::cout << inColor("hint updateRelativeTransform queue: ", CONSOLE_COLOR_GREEN) <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (hint.hint ? hint.hint : "[no hint]") << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) << std::endl;
   }
@@ -785,6 +799,7 @@ void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation tra
   updateValue.transform.position = transform.position;
   updateValue.transform.scale = transform.scale;
   updateValue.transform.rotation = transform.rotation;
+  updateValue.directIndex = directIndex;
   updates.push_back(updateValue);    
 }
 

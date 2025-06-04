@@ -25,7 +25,7 @@ void setPoses(World& world, std::set<objid>& disableIds, objid idScene, std::vec
     if (disableIds.count(pose.targetId) > 0){
       continue;
     }
-    physicsLocalTransformSet(world, pose.targetId, pose.pose);
+    physicsLocalTransformSet(world, pose.targetId, pose.pose, pose.directIndex);
     //printMatrixInformation(pose.pose, std::string("SET_CHANNEL:") + pose.channelName);
   }
 }
@@ -91,17 +91,22 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
   timings.playbacksToRemove.clear();
 }
 
-AnimationWithIds resolveAnimationIds(Animation& animation, objid sceneId) {
+AnimationWithIds resolveAnimationIds(World& world, Animation& animation, objid sceneId) {
   std::vector<objid> channelObjIds;
+  std::vector<objid> channelObjDirectIds;
   std::vector<KeyInfoLookup> lookup;
   for (auto &channel : animation.channels){
     auto id = getGameObjectByName(channel.nodeName, sceneId).value();
     channelObjIds.push_back(id);
+
+    auto directIndexId = getDirectIndexForId(world.sandbox, id);
+    channelObjDirectIds.push_back(directIndexId);
     lookup.push_back(KeyInfoLookup{});
   }
   return AnimationWithIds {
     .animation = animation,
     .channelObjIds = channelObjIds,
+    .channelObjDirectIds = channelObjDirectIds,
     .lookup = lookup,
   };
 }
@@ -113,7 +118,7 @@ std::optional<AnimationWithIds> getAnimation(World& world, int32_t groupId, std:
   for (auto& animation :  world.animations.at(groupId)){
     if (animation.name == animationToPlay){
       auto idForScene = sceneId(world.sandbox, groupId);
-      return resolveAnimationIds(animation, idForScene);
+      return resolveAnimationIds(world, animation, idForScene);
     }
   }
   std::cout << "ERROR: no animation found named: " << animationToPlay << std::endl;

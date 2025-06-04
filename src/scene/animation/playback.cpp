@@ -11,6 +11,7 @@ std::vector<AnimationPose> playbackAnimation(
 
 struct ChannelWithTwoPoses {
   objid targetId;
+  int directIndex;
   std::optional<Transformation> pose1;
   std::optional<Transformation> pose2;
 };
@@ -22,6 +23,7 @@ std::vector<AnimationPose> combineAnimationPoses(std::vector<AnimationPose>& pos
   for (auto &channel : pose1){
     channels.push_back(ChannelWithTwoPoses{
       .targetId = channel.targetId,
+      .directIndex = channel.directIndex,
       .pose1 = channel.pose,
       .pose2 = IDENTITY_TRANSFORMATION,
     });
@@ -39,6 +41,7 @@ std::vector<AnimationPose> combineAnimationPoses(std::vector<AnimationPose>& pos
     if (!foundChannelIndex.has_value()){
       channels.push_back(ChannelWithTwoPoses {
         .targetId = channel.targetId,
+        .directIndex = channel.directIndex,
         .pose1 = IDENTITY_TRANSFORMATION,
         .pose2 = channel.pose,
       });
@@ -52,11 +55,13 @@ std::vector<AnimationPose> combineAnimationPoses(std::vector<AnimationPose>& pos
     if (channel.pose1.has_value() && !channel.pose2.has_value()){
       finalChannelPoses.push_back(AnimationPose {
         .targetId = channel.targetId,
+        .directIndex = channel.directIndex,
         .pose = channel.pose1.value(),
       });
     }else if (!channel.pose1.has_value() && channel.pose2.has_value()){
       finalChannelPoses.push_back(AnimationPose {
         .targetId = channel.targetId,
+        .directIndex = channel.directIndex,
         .pose = channel.pose2.value(),
       });
     }else{
