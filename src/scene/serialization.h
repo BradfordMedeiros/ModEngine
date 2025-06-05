@@ -38,6 +38,7 @@ struct GameObject {
   Transformation transformation;
   physicsOpts physicsOptions;  // Should remove this and just get it from the physics system (probably)
   bool lookat;
+  int layerSymbol;
   std::string layer;
   std::string script;
   std::string shader;

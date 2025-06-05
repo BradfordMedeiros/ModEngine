@@ -251,6 +251,7 @@ struct RenderUniforms {
 
 struct LayerInfo {
   std::string name;
+  int symbol;
   int zIndex;
   bool orthographic;
   bool scale;

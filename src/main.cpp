@@ -465,6 +465,10 @@ objid directIndex(objid objectId){
   return 0;
 }
 
+bool sameLayer(std::string& layer1, std::string& layer2){
+  return layer1 == layer2;
+}
+
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
   glUseProgram(shaderProgram);
   int numTriangles = 0;
@@ -478,15 +482,17 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   std::optional<GLint> lastShaderId = std::nullopt;
 
   std::vector<traversalData> datum;
-  datum.reserve(world.sandbox.mainScene.absoluteTransforms.size());  // large # of elements, showed up in perf
+  datum.resize(world.sandbox.mainScene.absoluteTransforms.size());  // large # of elements, showed up in perf
+
+  int i = 0;
   for (auto &[id, transformCacheElement] : world.sandbox.mainScene.absoluteTransforms){
-    datum.push_back(traversalData{
+    datum[i] = traversalData{
       .id = id,
       .directIndex = transformCacheElement.gameobjIndex,
       .modelMatrix = matrixFromComponents(transformCacheElement.transform),
-    });
+    };
+    i++;
   }
-
 
   for (auto& layer : world.sandbox.layers){      // @TODO could organize this before to not require pass on each frame
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
@@ -494,7 +500,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 
     for (auto& data : datum){
       GameObject& gameobject = getGameObjectDirectIndex(world.sandbox, data.directIndex); 
-      if (gameobject.layer == layer.name){  // TODO PERF rm this string comparison 
+      if (gameobject.layerSymbol == layer.symbol){  // TODO PERF rm this string comparison 
         int32_t id = data.id; 
         glm::mat4& modelMatrix = data.modelMatrix; 
         std::string& shader = gameobject.shader;

@@ -1,5 +1,7 @@
 #include "./layers.h"
 
+int getSymbol(std::string name);
+
 std::unordered_map<std::string, RenderUniforms> allUniformsInfos(std::vector<Token>& uniformTokens){
   std::unordered_map<std::string, RenderUniforms> uniforms;
   auto renderStageValues = parseRenderStages(uniformTokens, 0, 0);  // kind of hackey, should make this common code less coupled to render stages
@@ -123,7 +125,8 @@ std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::strin
   for (auto layerName : layerNames){
     if (layers2.find(layerName) == layers2.end()){
       layers2[layerName] = LayerInfo {
-        .name = layerName, 
+        .name = layerName,
+        .symbol = getSymbol(layerName),
         .zIndex = 0,
         .orthographic = false,
         .scale = false,
@@ -155,6 +158,7 @@ std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::strin
   if (layers2.find("default") == layers2.end()){
     layers.push_back(LayerInfo{
       .name = "",
+      .symbol = getSymbol(""),
       .zIndex = 0,
       .orthographic = false,
       .scale = false,
@@ -173,7 +177,8 @@ std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::strin
       },
     });
   }else{
-    layers2.at("default").name = "";    
+    layers2.at("default").name = ""; 
+    layers2.at("default").symbol = getSymbol(""); 
   }
   for (auto &[_, layer] : layers2){
     layers.push_back(layer);
