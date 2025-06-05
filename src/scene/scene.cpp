@@ -1582,7 +1582,7 @@ void updateBonesForAnimation(World& world){
       }
     }
   }
-  std::cout << "num bones: " << numBones << std::endl;
+  //std::cout << "num bones: " << numBones << std::endl;
 }
 
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool paused, Transformation& viewTransform, bool showVisualizations){

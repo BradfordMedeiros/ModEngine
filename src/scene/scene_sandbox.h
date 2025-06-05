@@ -21,6 +21,9 @@ struct GameObjectH {
   objid depth = 0;
   int directIndex = -1;
   std::optional<objid> prefabId;
+
+  int updateFrame = -1;
+  int updateAbsoluteFrame = -1;
 };
 
 struct TransformCacheElement {

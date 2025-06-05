@@ -7,6 +7,7 @@ bool transformLoggingEnabled(){
 
 const bool assertOnStale = false;
 
+
 void addObjectToCache(SceneSandbox& sandbox, objid id);
 void removeObjectFromCache(SceneSandbox& sandbox, objid id);
 
@@ -29,7 +30,6 @@ struct TransformUpdate2 {
   std::optional<objid> directIndex;
 };
 
-std::vector<TransformUpdate2> updates;
 
 std::string print(TransformUpdateValue& update){
   return "placeholder for TransformUpdate2";
@@ -597,11 +597,10 @@ int getDirectIndexForId(SceneSandbox& sandbox, objid id){
   return getGameObjectH(sandbox, id).directIndex;
 }
 
-void updateNodes(SceneSandbox& sandbox, std::unordered_set<objid>& alreadyUpdated, objid id, std::unordered_set<objid>& absoluteUpdates){
-  if (alreadyUpdated.count(id) > 0){
-    return;
-  }
+std::vector<TransformUpdate2> updates;
+int currentFrameTick = 0;
 
+void updateNodes(SceneSandbox& sandbox, objid id){
   std::queue<objid> idsToVisit;  // shouldn't actually be needed since no common children
   auto currentId = id;
 
@@ -611,10 +610,13 @@ void updateNodes(SceneSandbox& sandbox, std::unordered_set<objid>& alreadyUpdate
     auto idToVisit = idsToVisit.front();
     idsToVisit.pop();
 
-    bool isAbsoluteUpdate = absoluteUpdates.count(idToVisit) > 0;
     //std::cout << "updateNodes children for: " << id << ", " << objH.children.size() << std::endl;
 
     auto& objh = getGameObjectH(sandbox, idToVisit);
+    if (objh.updateFrame == currentFrameTick){
+      continue;
+    }
+    bool isAbsoluteUpdate = objh.updateAbsoluteFrame == currentFrameTick;
     auto& gameobj = getGameObjectDirectIndex(sandbox, objh.directIndex);
 
     if (isAbsoluteUpdate){
@@ -625,13 +627,11 @@ void updateNodes(SceneSandbox& sandbox, std::unordered_set<objid>& alreadyUpdate
       auto newTransform = parentId == 0 ? gameobj.transformation : calcAbsoluteTransform(sandbox, parentId, gameobj.transformation);
       sandbox.mainScene.absoluteTransforms.at(idToVisit).transform = newTransform;
     }
-    alreadyUpdated.insert(idToVisit);
+    objh.updateFrame = currentFrameTick;
 
     GameObjectH& objH = sandbox.mainScene.idToGameObjectsH.at(idToVisit);
     for (objid childId : objH.children){
-      if (alreadyUpdated.count(childId) == 0){
-        idsToVisit.push(childId);
-      }
+      idsToVisit.push(childId);
     }    
   }
 }
@@ -645,6 +645,7 @@ GameObject& getGameObjectFromUpdate(SceneSandbox& sandbox, TransformUpdate2& upd
 }
 
 std::set<objid> updateSandbox(SceneSandbox& sandbox){
+  currentFrameTick++;
   if (enableTransformLogging){
     std::cout << inColor("hint---------- updateSandbox start------------------", CONSOLE_COLOR_RED) << std::endl;
   }
@@ -675,12 +676,10 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
   }
 
   // Update the absolute transform for absolute transsforms
-  std::unordered_set<objid> hasAbsolute;
   for (auto &update : updates){
     if (!update.relative){
       auto& transform = update.transform.transform;
       auto id = update.id;
-      hasAbsolute.insert(id);
 
       if (enableTransformLogging){
         std::cout << inColor("updateAbsoluteTransform hint: ", CONSOLE_COLOR_GREEN) <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (update.hint.hint ? update.hint.hint : "[no hint]") << " " << inColor(print(update.transform), CONSOLE_COLOR_YELLOW) << std::endl;
@@ -714,11 +713,15 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
 
   std::vector<int> updateDepths;
   for (auto &update : updates){
-    auto depth = getGameObjectH(sandbox, update.id).depth;
+    GameObjectH& gameobjh = getGameObjectH(sandbox, update.id);
+    auto depth = gameobjh.depth;
     updateDepths.push_back(depth);
+
+    if (!update.relative){
+      gameobjh.updateAbsoluteFrame = currentFrameTick;
+    }
   }
 
-  std::unordered_set<objid> visitedNodes;
   {
     int numUpdates = 0;
     int currDepth = 0;
@@ -727,7 +730,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
         auto nodeDepth = updateDepths.at(i);
         if (nodeDepth == currDepth){
           numUpdates++;
-          updateNodes(sandbox, visitedNodes, updates.at(i).id, hasAbsolute);
+          updateNodes(sandbox, updates.at(i).id);
         }
       }
       currDepth++;

@@ -231,7 +231,6 @@ int renderObject(
   bool drawBones,
   glm::mat4& finalModelMatrix
 ){
-
   auto meshObj = getMesh(objectMapping, id);
   if (meshObj != NULL && !meshObj -> isDisabled && (meshObj -> meshesToRender.size() > 0)){
     int numTriangles = 0;

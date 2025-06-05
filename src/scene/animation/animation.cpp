@@ -18,7 +18,9 @@ KeyIndex findKeyIndex(std::vector<KeyType>& keys, float currentTick, int lookupF
   int secondaryTick = lookupFromIndex;
   float primaryIndexAmount = 0.f;
 
+  int numKeysChecked = 0;
   for (int i = lookupFromIndex; i < keys.size(); i++){
+    numKeysChecked++;
     auto key = keys[i];
     if (i == (keys.size() - 1)){
       if (key.mTime <= currentTick){
@@ -32,7 +34,8 @@ KeyIndex findKeyIndex(std::vector<KeyType>& keys, float currentTick, int lookupF
     if (nextKeyIndex >= keys.size()){
       nextKeyIndex = keys.size() - 1;
     }
-    modassert(nextKeyIndex < keys.size(), std::string("find key index error, next key index: ") + std::to_string(nextKeyIndex) + ", keys size = " + std::to_string(keys.size()));
+    //modassert(nextKeyIndex < keys.size(), "find key index error, next key index");
+    //    modassert(nextKeyIndex < keys.size(), std::string("find key index error, next key index: ") + std::to_string(nextKeyIndex) + ", keys size = " + std::to_string(keys.size()));
     auto nextKey = keys[nextKeyIndex];
     if (key.mTime <= currentTick && nextKey.mTime > currentTick){    // mTime is in ticks
       primaryTick = i;
@@ -53,9 +56,9 @@ KeyIndex findKeyIndex(std::vector<KeyType>& keys, float currentTick, int lookupF
 
 KeyInfo keyInfoForTick(AnimationChannel& channel, float currentTick, KeyInfoLookup& keylookup){
   return KeyInfo {
-    .position = findKeyIndex(channel.positionKeys, currentTick, 0),
-    .scale = findKeyIndex(channel.scalingKeys, currentTick, 0),
-    .rotation = findKeyIndex(channel.rotationKeys, currentTick, 0),
+    .position = findKeyIndex(channel.positionKeys, currentTick, keylookup.lastAnimationIndexPos),
+    .scale = findKeyIndex(channel.scalingKeys, currentTick, keylookup.lastAnimationIndexScale),
+    .rotation = findKeyIndex(channel.rotationKeys, currentTick, keylookup.lastAnimationIndexRot),
   };
 }
 
