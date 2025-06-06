@@ -1571,13 +1571,14 @@ void updateBonesForAnimation(World& world){
         objid boneId = gameobjMesh.boneGameObjIdCache.at(i).at(j);
         numBones++;
         if (boneId == 0){
-          boneId = maybeGetGameObjectByName(world.sandbox, bone.name, sceneId(world.sandbox, id)).value() -> id; 
+          objid objNameId = maybeGetGameObjectByName(world.sandbox, bone.name, sceneId(world.sandbox, id)).value() -> id; 
           // modassert(boneId.has_value(), std::string("no bone names: ") + bone.name);
+          boneId = getDirectIndexForId(world.sandbox, objNameId);
           gameobjMesh.boneGameObjIdCache.at(i).at(j) = boneId;
         }
         modassert(gameobjMesh.rootidCache != 0, "didn't get root id cache");
 
-        auto groupToModel =  groupTransformInverse * fullModelTransform(world.sandbox, boneId); 
+        auto groupToModel = groupTransformInverse * fullModelTransformDirect(world.sandbox, boneId); 
         bone.offsetMatrix = groupToModel * bone.initialBonePoseInverse;
       }
     }

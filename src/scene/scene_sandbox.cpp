@@ -850,6 +850,17 @@ glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id, const char* hint){
   TransformCacheElement& element = getAbsoluteById(sandbox, id);
   return matrixFromComponents(element.transform);
 }
+glm::mat4 fullModelTransformDirect(SceneSandbox& sandbox, objid directIndex, const char* hint){
+  if (enableTransformLogging){
+    modassert(false, "enableTransformLogging not implemented for fullModelTransformDirect");
+    //bool indirect = false;
+    //auto stale = isStale(sandbox, id, &indirect);
+    //std::cout << inColor("hint - readTransform", CONSOLE_COLOR_GREEN) << ": [" << id << ", " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]" " " << (hint ? hint : "[no hint]") << (stale ? inColor("  WARNING - STALE READ", CONSOLE_COLOR_RED) : "") << ((stale && indirect) ? inColor(" - INDIRECT ", CONSOLE_COLOR_RED) : "") << std::endl;
+    //modassert(!assertOnStale || (assertOnStale && !stale), "stale transform");
+  }
+  TransformCacheElement& element = sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform;
+  return matrixFromComponents(element.transform);
+}
 
 Transformation& fullTransformation(SceneSandbox& sandbox, objid id, const char* hint){
   if (enableTransformLogging){
