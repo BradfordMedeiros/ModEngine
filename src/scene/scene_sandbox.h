@@ -33,6 +33,7 @@ struct TransformCacheElement {
 
 struct GameObjectBuffer {
   bool inUse;
+  TransformCacheElement absoluteTransform;
   GameObject gameobj;
 };
 
@@ -40,16 +41,7 @@ struct Scene {
   std::vector<GameObjectBuffer> gameobjects;
   std::unordered_map<objid, GameObjectH> idToGameObjectsH;
   std::unordered_map<objid, std::unordered_map<std::string, objid>> sceneToNameToId;
-  std::unordered_map<objid, TransformCacheElement> absoluteTransforms; 
 };
-
-// no parent:
-// add ot absolute transforms (as value = position)
-
-// with parent 
-// add to constraint
-// add to absolute transforms (as value = position + contstaint)
-// when update position of anything -> update absolute transform
 
 struct SceneDeserialization {
   Scene scene;
@@ -72,6 +64,7 @@ struct SceneSandbox {
   std::set<objid> updatedIds;
 };
 
+TransformCacheElement& getAbsoluteById(SceneSandbox& sandbox, objid id);
 
 std::vector<std::string> childnamesNoPrefabs(SceneSandbox& sandbox, GameObjectH& gameobjecth);
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children, std::optional<objid> prefabId);

@@ -113,10 +113,11 @@ std::string debugAllGameObjectsH(SceneSandbox& sandbox){
 
 std::string debugTransformCache(SceneSandbox& sandbox){
   std::string content = "";
-  for (auto &[id, transformElement] : sandbox.mainScene.absoluteTransforms){
-    auto transform = transformElement.transform;
-    content += std::to_string(id) + " " + "(" + print(transform.position) + ") (" + print(transform.scale) + ")\n";
-  }
+  modassert(false, "add back in the transforms here.  But can just to in on the gameobjects part");
+  //for (auto &[id, transformElement] : sandbox.mainScene.absoluteTransforms){
+  //  auto transform = transformElement.transform;
+  //  content += std::to_string(id) + " " + "(" + print(transform.position) + ") (" + print(transform.scale) + ")\n";
+  //}
   content = content + "\n";
   return content;  
 }
