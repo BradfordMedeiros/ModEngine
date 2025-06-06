@@ -27,7 +27,6 @@ struct GameObjectH {
 };
 
 struct TransformCacheElement {
-  objid gameobjIndex;
   Transformation transform;
 };
 

@@ -582,7 +582,6 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
     }
 
     sandbox.mainScene.gameobjects.at(gameobjIndex).absoluteTransform = TransformCacheElement {
-      .gameobjIndex = gameobjIndex,
       .transform = newTransform,
     };
   }
@@ -702,7 +701,6 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
       }
 
       sandbox.mainScene.gameobjects.at(gameobjIndex).absoluteTransform = TransformCacheElement {
-        .gameobjIndex = gameobjIndex,
         .transform =  newAbsoluteTransform,
       };
 
@@ -759,7 +757,6 @@ void addObjectToCache(SceneSandbox& sandbox, objid id){
     object.transformation.rotation
   );
   sandbox.mainScene.gameobjects.at(gameobjIndex).absoluteTransform = TransformCacheElement {
-    .gameobjIndex = gameobjIndex,
     .transform = getTransformationFromMatrix(elementMatrix),
   };
   updateAllChildrenPositions(sandbox, id);
