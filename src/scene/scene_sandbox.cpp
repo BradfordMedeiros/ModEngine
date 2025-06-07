@@ -196,7 +196,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
 
 
   std::vector<objid> idsAdded;
-  for (auto &[id, obj] :  sandbox.mainScene.idToGameObjectsH){
+  for (auto &[id, obj] : sandbox.mainScene.idToGameObjectsH){
     if (obj.sceneId == sceneId){
       idsAdded.push_back(id);
     }
@@ -337,7 +337,7 @@ std::unordered_map<std::string, GameobjAttributesWithId> multiObjAdd(
     modassert(names.at(nodeId) == gameobj.name, "names do not match");
     auto addedId = sandboxAddToScene(scene, sceneId, std::nullopt, gameobj, prefabId);
     addedIds.push_back(addedId);
-    scene.idToGameObjectsH.at(id).groupId = rootId;
+    getGameObjectH(scene, id).groupId = rootId;
   }
 
   for (auto [childId, parentId] : childToParent){
@@ -366,7 +366,7 @@ void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name
 }
 
 void traverseNodes(Scene& scene, objid id, std::set<objid>& objectIds){
-  auto parentObjH = scene.idToGameObjectsH.at(id);
+  auto parentObjH = getGameObjectH(scene, id);
   objectIds.insert(parentObjH.id);
   for (objid id : parentObjH.children){
     traverseNodes(scene, id, objectIds);
@@ -432,7 +432,7 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::set<objid> objects)
 
 
 std::optional<objid> parentId(Scene& scene, objid id){
-  return scene.idToGameObjectsH.at(id).parentId;
+  return getGameObjectH(scene, id).parentId;
 }
 
 std::vector<std::string> childnamesNoPrefabs(SceneSandbox& sandbox, GameObjectH& gameobjecth){   
