@@ -60,7 +60,6 @@ void addNextFree(Scene& scene, GameObject& gameobj, GameObjectH& gameobjh){
       scene.gameobjects.at(i).gameobj = gameobj;
       scene.gameobjects.at(i).gameobjh = gameobjh;
       scene.gameobjects.at(i).inUse = true;
-      scene.gameobjects.at(i).gameobjh.directIndex = i;
       scene.idToDirectIndex[gameobj.id] = i;
       return;
     }
@@ -70,7 +69,6 @@ void addNextFree(Scene& scene, GameObject& gameobj, GameObjectH& gameobjh){
     .gameobj = gameobj,
     .gameobjh = gameobjh,
   });
-  scene.gameobjects.at(scene.gameobjects.size() - 1).gameobjh.directIndex = (scene.gameobjects.size() - 1);
   scene.idToDirectIndex[gameobj.id] = (scene.gameobjects.size() - 1);
 }
 void freeGameObject(GameObjectBuffer& obj){
@@ -508,8 +506,7 @@ Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId){
   GameObjectH& childObjH = getGameObjectH(sandbox, childId);
   auto parentId = childObjH.parentId;
   if (parentId == 0){
-    return sandbox.mainScene.gameobjects.at(childObjH.directIndex).absoluteTransform.transform;
-  
+    return getAbsoluteById(sandbox, childId).transform;
   }
   return calcRelativeTransform(sandbox, childId, parentId);
 }
@@ -610,7 +607,7 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
 
 
 int getDirectIndexForId(SceneSandbox& sandbox, objid id){
-  return getGameObjectH(sandbox, id).directIndex;
+  return sandbox.mainScene.idToDirectIndex.at(id);
 }
 
 std::vector<TransformUpdate2> updates;
@@ -635,7 +632,7 @@ void updateNodes(SceneSandbox& sandbox, objid id){
       continue;
     }
     bool isAbsoluteUpdate = objh.updateAbsoluteFrame == currentFrameTick;
-    auto& gameobj = getGameObjectDirectIndex(sandbox, objh.directIndex);
+    auto& gameobj = getGameObjectDirectIndex(sandbox, directIndex);
 
     if (isAbsoluteUpdate){
       auto oldRelativeTransform = calcRelativeTransform(sandbox, idToVisit);
@@ -643,7 +640,7 @@ void updateNodes(SceneSandbox& sandbox, objid id){
     }else{
       auto parentId = objh.parentId;
       auto newTransform = parentId == 0 ? gameobj.transformation : calcAbsoluteTransform(sandbox, parentId, gameobj.transformation);
-      sandbox.mainScene.gameobjects.at(objh.directIndex).absoluteTransform.transform = newTransform;
+      sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform.transform = newTransform;
     }
     objh.updateFrame = currentFrameTick;
 
