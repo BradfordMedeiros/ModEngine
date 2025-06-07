@@ -197,7 +197,8 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
 
 
   std::vector<objid> idsAdded;
-  for (auto &[id, obj] : sandbox.mainScene.idToGameObjectsH){
+  for (auto &[id, _] : sandbox.mainScene.idToDirectIndex){
+    GameObjectH& obj = getGameObjectH(sandbox.mainScene, id);
     if (obj.sceneId == sceneId){
       idsAdded.push_back(id);
     }
@@ -388,7 +389,8 @@ std::set<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid id){
 
 std::vector<objid> listObjInScene(SceneSandbox& sandbox, std::optional<objid> sceneId){
   std::vector<objid> allObjects;
-  for (auto const&[id, obj] : sandbox.mainScene.idToGameObjectsH){
+  for (auto &[id, directIndex] : sandbox.mainScene.idToDirectIndex){
+    GameObjectH& obj = getGameObjectH(sandbox.mainScene, id);
     if (!sceneId.has_value() || obj.sceneId == sceneId.value()){
       allObjects.push_back(id);
     }
