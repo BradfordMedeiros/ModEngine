@@ -56,6 +56,7 @@ void addNextFree(Scene& scene, GameObject& gameobj, GameObjectH& gameobjh){
       scene.gameobjects.at(i).gameobj = gameobj;
       scene.gameobjects.at(i).inUse = true;
       scene.idToGameObjectsH.at(gameobj.id).directIndex = i;
+      scene.idToDirectIndex[gameobj.id] = i;
       return;
     }
   }
@@ -64,6 +65,7 @@ void addNextFree(Scene& scene, GameObject& gameobj, GameObjectH& gameobjh){
     .gameobj = gameobj,
   });
   scene.idToGameObjectsH.at(gameobj.id).directIndex = (scene.gameobjects.size() - 1);
+  scene.idToDirectIndex[gameobj.id] = (scene.gameobjects.size() - 1);
 }
 void freeGameObject(GameObjectBuffer& obj){
   std::cout << "change gameobject: remove " << obj.gameobj.id << std::endl;
@@ -417,6 +419,7 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::set<objid> objects)
       }
     }
     scene.idToGameObjectsH.erase(id);
+    scene.idToDirectIndex.erase(id);
     modlog("sandbox remove id", std::to_string(id));
     removeObjectFromCache(sandbox, id);
 
