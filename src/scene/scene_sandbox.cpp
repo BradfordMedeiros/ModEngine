@@ -167,7 +167,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
     if (!obj.inUse){
       continue;
     }
-    addNextFree(sandbox.mainScene, obj.gameobj, deserializedScene.scene.idToGameObjectsH.at(obj.gameobj.id));
+    addNextFree(sandbox.mainScene, obj.gameobj, getGameObjectH(deserializedScene.scene, obj.gameobj.id));
   }
 
 
@@ -266,7 +266,7 @@ std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::
       continue;
     }
     auto id = gameObj.gameobj.id;
-    if (gameObj.gameobj.name == name && (sandbox.mainScene.idToGameObjectsH.at(id).sceneId == sceneId)){
+    if (gameObj.gameobj.name == name && getGameObjectH(sandbox.mainScene, id).sceneId == sceneId){
       return &gameObj.gameobj;      
     }
   }
@@ -526,7 +526,7 @@ std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId)
     auto idToVisit = idsToVisit.front();
     ids.push_back(idToVisit);
     idsToVisit.pop();
-    GameObjectH& objH = sandbox.mainScene.idToGameObjectsH.at(idToVisit);
+    GameObjectH& objH = getGameObjectH(sandbox.mainScene, idToVisit);
     for (objid id : objH.children){
       idsToVisit.push(id);
     }    
@@ -559,14 +559,14 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
     if (id != updatedId){
       sandbox.updatedIds.insert(id);  
     }
-    if (sandbox.mainScene.idToGameObjectsH.find(id) == sandbox.mainScene.idToGameObjectsH.end()){
+    if (sandbox.mainScene.idToDirectIndex.find(id) == sandbox.mainScene.idToDirectIndex.end()){
       continue;
     }
     auto parentId = getGameObjectH(sandbox, id).parentId;
     if (parentId == 0){
       continue;
     }
-    if (sandbox.mainScene.idToGameObjectsH.find(parentId) == sandbox.mainScene.idToGameObjectsH.end()){
+    if (sandbox.mainScene.idToDirectIndex.find(parentId) == sandbox.mainScene.idToDirectIndex.end()){
       continue;
     }
 
@@ -937,7 +937,7 @@ objid getIdForName(SceneSandbox& sandbox, std::string name, objid sceneId){
 }
 
 objid getGroupId(Scene& scene, objid id){
-  return scene.idToGameObjectsH.at(id).groupId; 
+  return getGameObjectH(scene, id).groupId; 
 }
 objid getGroupId(SceneSandbox& sandbox, objid id){
   return getGroupId(sandbox.mainScene, id); 
@@ -979,7 +979,7 @@ bool sceneExists(SceneSandbox& sandbox, objid sceneId){
   return !(sandbox.sceneIdToSceneMetadata.find(sceneId) == sandbox.sceneIdToSceneMetadata.end());
 }    
 objid sceneId(SceneSandbox& sandbox, objid id){
-  return sandbox.mainScene.idToGameObjectsH.at(id).sceneId;
+  return getGameObjectH(sandbox.mainScene, id).sceneId;
 }
 
 std::vector<objid> getByName(SceneSandbox& sandbox, std::string name){

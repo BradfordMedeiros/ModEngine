@@ -93,6 +93,7 @@ GameObject& getGameObject(SceneSandbox& sandbox, std::string name, objid sceneId
 GameObject& getGameObjectDirectIndex(SceneSandbox& sandbox, objid id);
 int getDirectIndexForId(SceneSandbox& sandbox, objid id);
 
+GameObjectH& getGameObjectH(Scene& scene, objid id);
 GameObjectH& getGameObjectH(SceneSandbox& sandbox, objid id);
 GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name, objid sceneId);
 
