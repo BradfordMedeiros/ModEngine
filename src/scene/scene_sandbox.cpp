@@ -659,6 +659,11 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
   if (enableTransformLogging){
     std::cout << inColor("hint---------- updateSandbox start------------------", CONSOLE_COLOR_RED) << std::endl;
   }
+  for (auto &update : updates){
+    if (!update.directIndex.has_value()){
+      update.directIndex = getDirectIndexForId(sandbox, update.id);
+    }
+  }
 
   // Update the relative location for relative updates on the gameobj
   for (auto &update : updates){
@@ -669,7 +674,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
         std::cout << "updateRelativeTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;        
       }
 
-      auto& gameobj =  update.directIndex.has_value() ? getGameObjectDirectIndex(sandbox, update.directIndex.value()) : getGameObject(sandbox, update.id);
+      auto& gameobj = getGameObjectDirectIndex(sandbox, update.directIndex.value());
       if (update.hasPosition){
         gameobj.transformation.position = update.transform.position;
       }
@@ -691,7 +696,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
     if (!update.relative){
       auto& transform = update.transform.transform;
       auto id = update.id;
-      auto directIndex = update.directIndex.has_value() ? update.directIndex.value() : getDirectIndexForId(sandbox, id);
+      auto directIndex = update.directIndex.value();
 
       if (enableTransformLogging){
         std::cout << inColor("updateAbsoluteTransform hint: ", CONSOLE_COLOR_GREEN) <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (update.hint.hint ? update.hint.hint : "[no hint]") << " " << inColor(print(update.transform), CONSOLE_COLOR_YELLOW) << std::endl;
@@ -723,7 +728,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
 
   std::vector<int> updateDepths;
   for (auto &update : updates){
-    auto gameobjIndex = getDirectIndexForId(sandbox, update.id);
+    auto gameobjIndex = update.directIndex.value();
     GameObjectH& gameobjh = getGameObjectHDirectIndex(sandbox, gameobjIndex);
     auto depth = gameobjh.depth;
     updateDepths.push_back(depth);
