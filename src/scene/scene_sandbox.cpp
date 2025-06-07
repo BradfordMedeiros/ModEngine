@@ -946,9 +946,13 @@ objid getGroupId(SceneSandbox& sandbox, objid id){
 // TODO PEROBJECT
 std::vector<objid> getIdsInGroup(Scene& scene, objid groupId){
   std::vector<objid> ids;
-  for (auto [_, gameobj] : scene.idToGameObjectsH){
-    if (gameobj.groupId == groupId){
-      ids.push_back(gameobj.id);
+  for (auto &gameobjBuffer : scene.gameobjects){
+    if (!gameobjBuffer.inUse){
+      continue;
+    }
+    auto id = gameobjBuffer.gameobj.id;
+    if (getGameObjectH(scene, id).groupId == groupId){
+      ids.push_back(id);
     }
   }
   return ids;
