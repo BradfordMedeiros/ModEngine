@@ -47,7 +47,7 @@ GameObject& getGameObjectDirectIndex(SceneSandbox& sandbox, objid id){
 void addNextFree(Scene& scene, GameObject& gameobj, GameObjectH& gameobjh){
   std::cout << "change gameobject: add " << gameobj.id << std::endl;
 
-  modassert(scene.idToGameObjectsH.find(gameobj.id) == scene.idToGameObjectsH.end(), "duplicate id");
+  modassert(scene.idToDirectIndex.find(gameobj.id) == scene.idToDirectIndex.end(), "duplicate id");
 
   scene.idToGameObjectsH[gameobj.id] = gameobjh;
 
@@ -73,12 +73,12 @@ void freeGameObject(GameObjectBuffer& obj){
 }
 
 void enforceParentRelationship(Scene& scene, objid id, objid parentId){
-  auto oldParent = scene.idToGameObjectsH.at(id).parentId;
+  auto oldParent = getGameObjectH(scene, id).parentId;
   if (oldParent){
-    scene.idToGameObjectsH.at(oldParent).children.erase(id);
+    getGameObjectH(scene, oldParent).children.erase(id);
   }
-  scene.idToGameObjectsH.at(id).parentId = parentId;
-  scene.idToGameObjectsH.at(parentId).children.insert(id);
+  getGameObjectH(scene,  id).parentId = parentId;
+  getGameObjectH(scene,  parentId).children.insert(id);
 }
 
 objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parentId, GameObject& gameobjectObj, std::optional<objid> prefabId){
@@ -412,7 +412,7 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::set<objid> objects)
     Scene& scene = sandbox.mainScene;
 
     std::string& objectName = getGameObject(scene, id).name;
-    auto sceneId = scene.idToGameObjectsH.at(id).sceneId;
+    auto sceneId = getGameObjectH(scene, id).sceneId;
     for (auto &obj : scene.gameobjects){
       if (obj.gameobj.id == id){
         freeGameObject(obj);
@@ -627,7 +627,7 @@ void updateNodes(SceneSandbox& sandbox, objid id){
     }
     objh.updateFrame = currentFrameTick;
 
-    GameObjectH& objH = sandbox.mainScene.idToGameObjectsH.at(idToVisit);
+    GameObjectH& objH = getGameObjectH(sandbox.mainScene, idToVisit);
     for (objid childId : objH.children){
       idsToVisit.push(childId);
     }    
@@ -969,7 +969,7 @@ bool idExists(Scene& scene, objid id){
   return false;
 }
 bool idExists(SceneSandbox& sandbox, objid id){
-  return sandbox.mainScene.idToGameObjectsH.find(id) != sandbox.mainScene.idToGameObjectsH.end();
+  return sandbox.mainScene.idToDirectIndex.find(id) != sandbox.mainScene.idToDirectIndex.end();
 }
 bool idExists(SceneSandbox& sandbox, std::string name, objid sceneId){
   return maybeGetGameObjectByName(sandbox, name, sceneId).has_value();
