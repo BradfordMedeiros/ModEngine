@@ -66,6 +66,7 @@ struct SceneSandbox {
 };
 
 TransformCacheElement& getAbsoluteById(SceneSandbox& sandbox, objid id);
+TransformCacheElement& getAbsoluteByDirectIndex(SceneSandbox& sandbox, int directIndex);
 
 std::vector<std::string> childnamesNoPrefabs(SceneSandbox& sandbox, GameObjectH& gameobjecth);
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children, std::optional<objid> prefabId);

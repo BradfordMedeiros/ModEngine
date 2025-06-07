@@ -36,11 +36,17 @@ std::string print(TransformUpdateValue& update){
 }
 
 
-GameObject& getGameObjectDirectIndex(SceneSandbox& sandbox, objid id){
-  GameObjectBuffer& buffer = sandbox.mainScene.gameobjects[id];
+GameObject& getGameObjectDirectIndex(SceneSandbox& sandbox, int directIndex){
+  GameObjectBuffer& buffer = sandbox.mainScene.gameobjects.at(directIndex);
   //modassert(buffer.inUse, "gameobject is stale");
   return buffer.gameobj;
 }
+GameObjectH& getGameObjectHDirectIndex(SceneSandbox& sandbox, int directIndex){
+  GameObjectBuffer& buffer = sandbox.mainScene.gameobjects.at(directIndex);
+  //modassert(buffer.inUse, "gameobject is stale");
+  return buffer.gameobjh;
+}
+
 
 // This means I just keep on expanding larger. 
 // I might want to just make this fixed size to begin with but the budget is hard to say. 
@@ -517,6 +523,15 @@ Transformation calcAbsoluteTransform(SceneSandbox& sandbox, objid parentId, Tran
     return result;
 }
 
+Transformation calcAbsoluteTransformDirectIndex(SceneSandbox& sandbox, objid parentDirectIndex, Transformation child){
+    auto& parent = getAbsoluteByDirectIndex(sandbox, parentDirectIndex).transform;
+    Transformation result;
+    result.rotation = parent.rotation * child.rotation;
+    result.scale = parent.scale * child.scale;
+    result.position = parent.position + (parent.rotation * (parent.scale * child.position));
+    return result;
+}
+
 
 std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId){
   std::vector<objid> ids;
@@ -613,7 +628,9 @@ void updateNodes(SceneSandbox& sandbox, objid id){
 
     //std::cout << "updateNodes children for: " << id << ", " << objH.children.size() << std::endl;
 
-    auto& objh = getGameObjectH(sandbox, idToVisit);
+    auto directIndex = getDirectIndexForId(sandbox, idToVisit);
+
+    auto& objh = getGameObjectHDirectIndex(sandbox, directIndex);
     if (objh.updateFrame == currentFrameTick){
       continue;
     }
@@ -630,20 +647,12 @@ void updateNodes(SceneSandbox& sandbox, objid id){
     }
     objh.updateFrame = currentFrameTick;
 
-    GameObjectH& objH = getGameObjectH(sandbox.mainScene, idToVisit);
-    for (objid childId : objH.children){
+    for (objid childId : objh.children){
       idsToVisit.push(childId);
     }    
   }
 }
 
-GameObject& getGameObjectFromUpdate(SceneSandbox& sandbox, TransformUpdate2& update){
-  if (update.directIndex.has_value()){
-    return getGameObjectDirectIndex(sandbox, update.directIndex.value());
-  }
-  auto& gameobj = getGameObject(sandbox, update.id);
-  return gameobj;
-}
 
 std::set<objid> updateSandbox(SceneSandbox& sandbox){
   currentFrameTick++;
@@ -660,7 +669,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
         std::cout << "updateRelativeTransform hint        old rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;        
       }
 
-      auto& gameobj = getGameObjectFromUpdate(sandbox, update);
+      auto& gameobj =  update.directIndex.has_value() ? getGameObjectDirectIndex(sandbox, update.directIndex.value()) : getGameObject(sandbox, update.id);
       if (update.hasPosition){
         gameobj.transformation.position = update.transform.position;
       }
@@ -682,7 +691,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
     if (!update.relative){
       auto& transform = update.transform.transform;
       auto id = update.id;
-      auto gameobjIndex = getDirectIndexForId(sandbox, id);
+      auto directIndex = update.directIndex.has_value() ? update.directIndex.value() : getDirectIndexForId(sandbox, id);
 
       if (enableTransformLogging){
         std::cout << inColor("updateAbsoluteTransform hint: ", CONSOLE_COLOR_GREEN) <<  " [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "] " << (update.hint.hint ? update.hint.hint : "[no hint]") << " " << inColor(print(update.transform), CONSOLE_COLOR_YELLOW) << std::endl;
@@ -690,7 +699,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
         std::cout << "updateAbsoluteTransform hint        old abs: " <<  print(getAbsoluteById(sandbox, id).transform) << std::endl;        
       }
 
-      Transformation& newAbsoluteTransform = getAbsoluteById(sandbox, id).transform;
+      Transformation& newAbsoluteTransform = getAbsoluteByDirectIndex(sandbox, directIndex).transform;
       if (update.hasPosition){
         newAbsoluteTransform.position = update.transform.position;
       }
@@ -701,7 +710,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
         newAbsoluteTransform.rotation = update.transform.rotation;
       }
 
-      sandbox.mainScene.gameobjects.at(gameobjIndex).absoluteTransform = TransformCacheElement {
+      sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform = TransformCacheElement {
         .transform =  newAbsoluteTransform,
       };
 
@@ -714,7 +723,8 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
 
   std::vector<int> updateDepths;
   for (auto &update : updates){
-    GameObjectH& gameobjh = getGameObjectH(sandbox, update.id);
+    auto gameobjIndex = getDirectIndexForId(sandbox, update.id);
+    GameObjectH& gameobjh = getGameObjectHDirectIndex(sandbox, gameobjIndex);
     auto depth = gameobjh.depth;
     updateDepths.push_back(depth);
 
@@ -837,6 +847,10 @@ TransformCacheElement& getAbsoluteById(SceneSandbox& sandbox, objid id){
   auto directIndex = getDirectIndexForId(sandbox, id);
   return sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform;
 }
+TransformCacheElement& getAbsoluteByDirectIndex(SceneSandbox& sandbox, int directIndex){
+  return sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform;
+}
+
 
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id, const char* hint){
   if (enableTransformLogging){
