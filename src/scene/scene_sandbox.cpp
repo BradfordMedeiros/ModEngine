@@ -49,13 +49,12 @@ void addNextFree(Scene& scene, GameObject& gameobj, GameObjectH& gameobjh){
 
   modassert(scene.idToDirectIndex.find(gameobj.id) == scene.idToDirectIndex.end(), "duplicate id");
 
-  scene.idToGameObjectsH[gameobj.id] = gameobjh;
-
   for (int i = 0; i < scene.gameobjects.size(); i++){
     if (!scene.gameobjects.at(i).inUse){
       scene.gameobjects.at(i).gameobj = gameobj;
+      scene.gameobjects.at(i).gameobjh = gameobjh;
       scene.gameobjects.at(i).inUse = true;
-      scene.idToGameObjectsH.at(gameobj.id).directIndex = i;
+      scene.gameobjects.at(i).gameobjh.directIndex = i;
       scene.idToDirectIndex[gameobj.id] = i;
       return;
     }
@@ -63,8 +62,9 @@ void addNextFree(Scene& scene, GameObject& gameobj, GameObjectH& gameobjh){
   scene.gameobjects.push_back(GameObjectBuffer {
     .inUse = true,
     .gameobj = gameobj,
+    .gameobjh = gameobjh,
   });
-  scene.idToGameObjectsH.at(gameobj.id).directIndex = (scene.gameobjects.size() - 1);
+  scene.gameobjects.at(scene.gameobjects.size() - 1).gameobjh.directIndex = (scene.gameobjects.size() - 1);
   scene.idToDirectIndex[gameobj.id] = (scene.gameobjects.size() - 1);
 }
 void freeGameObject(GameObjectBuffer& obj){
@@ -257,9 +257,8 @@ GameObject& getGameObject(Scene& scene, objid id, objid* gameobjIndex){
 }
 
 GameObjectH& getGameObjectH(Scene& scene, objid id){
-  auto it = scene.idToGameObjectsH.find(id);
-  modassert(it != scene.idToGameObjectsH.end(), "getGameObjectH gameobjh does not exist");
-  return it -> second;
+  auto directIndex = scene.idToDirectIndex.at(id);
+  return scene.gameobjects.at(directIndex).gameobjh;
 }
 
 std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string& name, objid sceneId){
@@ -421,7 +420,6 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::set<objid> objects)
         freeGameObject(obj);
       }
     }
-    scene.idToGameObjectsH.erase(id);
     scene.idToDirectIndex.erase(id);
     modlog("sandbox remove id", std::to_string(id));
     removeObjectFromCache(sandbox, id);
@@ -470,7 +468,6 @@ std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<s
 SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields){
   Scene mainScene {
     .gameobjects = {},
-    .idToGameObjectsH = {},
     .sceneToNameToId = {{ 0, {}}},
   };
   std::sort(std::begin(layers), std::end(layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });

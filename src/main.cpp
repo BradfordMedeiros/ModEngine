@@ -482,7 +482,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   std::optional<GLint> lastShaderId = std::nullopt;
 
   std::vector<traversalData> datum;
-  datum.resize(world.sandbox.mainScene.idToGameObjectsH.size());  // large # of elements, showed up in perf
+  datum.resize(world.sandbox.mainScene.idToDirectIndex.size());  // large # of elements, showed up in perf
 
   int i = 0;
   for (int directIndex = 0; directIndex < world.sandbox.mainScene.gameobjects.size(); directIndex++){
@@ -496,7 +496,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       i++;
     }
   }
-  modassert(i == world.sandbox.mainScene.idToGameObjectsH.size(), "unexpect size mismatch");
+  modassert(i == world.sandbox.mainScene.idToDirectIndex.size(), "unexpect size mismatch");
 
   for (auto& layer : world.sandbox.layers){      // @TODO could organize this before to not require pass on each frame
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;

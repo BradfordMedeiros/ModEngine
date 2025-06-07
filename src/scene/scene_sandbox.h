@@ -34,11 +34,11 @@ struct GameObjectBuffer {
   bool inUse;
   TransformCacheElement absoluteTransform;
   GameObject gameobj;
+  GameObjectH gameobjh;
 };
 
 struct Scene {
   std::vector<GameObjectBuffer> gameobjects;
-  std::unordered_map<objid, GameObjectH> idToGameObjectsH;
   std::unordered_map<objid, int> idToDirectIndex;
 
   std::unordered_map<objid, std::unordered_map<std::string, objid>> sceneToNameToId;

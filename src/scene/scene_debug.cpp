@@ -97,7 +97,8 @@ std::string debugAllGameObjects(SceneSandbox& sandbox){
 
 std::string debugAllGameObjectsH(SceneSandbox& sandbox){
   std::string content = "";
-  for (auto &[id, gameobj] : sandbox.mainScene.idToGameObjectsH){
+  for (auto &[id, directIndex] : sandbox.mainScene.idToDirectIndex){
+    GameObjectH& gameobj = getGameObjectH(sandbox, id);
     content += std::to_string(id) + 
       " " + std::to_string(gameobj.id) + 
       " " + std::to_string(gameobj.sceneId) + 
