@@ -44,7 +44,13 @@ GameObject& getGameObjectDirectIndex(SceneSandbox& sandbox, objid id){
 
 // This means I just keep on expanding larger. 
 // I might want to just make this fixed size to begin with but the budget is hard to say. 
-void addNextFree(Scene& scene, GameObject& gameobj){
+void addNextFree(Scene& scene, GameObject& gameobj, GameObjectH& gameobjh){
+  std::cout << "change gameobject: add " << gameobj.id << std::endl;
+
+  modassert(scene.idToGameObjectsH.find(gameobj.id) == scene.idToGameObjectsH.end(), "duplicate id");
+
+  scene.idToGameObjectsH[gameobj.id] = gameobjh;
+
   for (int i = 0; i < scene.gameobjects.size(); i++){
     if (!scene.gameobjects.at(i).inUse){
       scene.gameobjects.at(i).gameobj = gameobj;
@@ -81,13 +87,9 @@ objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parent
     .sceneId = sceneId,
     .prefabId = prefabId,
   };
-  modassert(scene.idToGameObjectsH.find(gameobjectObj.id) == scene.idToGameObjectsH.end(), "id already exists");
   modassert(scene.sceneToNameToId.find(sceneId) != scene.sceneToNameToId.end(), std::string("scene does not exist: ") + std::to_string(sceneId));
 
-  scene.idToGameObjectsH[gameobjectObj.id] = gameobjectH;
-
-  std::cout << "change gameobject: add " << gameobjectObj.id << std::endl;
-  addNextFree(scene, gameobjectObj);
+  addNextFree(scene, gameobjectObj, gameobjectH);
 
   if (scene.sceneToNameToId.at(sceneId).find(gameobjectObj.name) != scene.sceneToNameToId.at(sceneId).end()){
     modassert(false, std::string("name already exists: " + gameobjectObj.name))
@@ -159,25 +161,18 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
   auto tokens = parseFormat(sceneData);
   SceneDeserialization deserializedScene = createSceneFromParsedContent(sceneId, tokens, getUniqueObjId, getObjautoserializerFields, prefabId);
 
-  for (auto &[id, obj] : deserializedScene.scene.idToGameObjectsH){
-    modassert(sandbox.mainScene.idToGameObjectsH.find(id) == sandbox.mainScene.idToGameObjectsH.end(), "duplicate id");
-
-    sandbox.mainScene.idToGameObjectsH[id] = obj;
-    if (parentId.has_value() && obj.parentId == 0){
-      enforceParentRelationship(sandbox.mainScene, id, parentId.value());
-    }
-  }
-
   for (auto &obj : deserializedScene.scene.gameobjects){
     if (!obj.inUse){
       continue;
     }
-    auto id = obj.gameobj.id;
+    addNextFree(sandbox.mainScene, obj.gameobj, deserializedScene.scene.idToGameObjectsH.at(obj.gameobj.id));
+  }
 
-    std::cout << "change gameobject: add " << obj.gameobj.id << std::endl;
-    addNextFree(sandbox.mainScene, obj.gameobj);
 
-    modlog("sandbox add id", std::to_string(id));
+  for (auto &[id, obj] : deserializedScene.scene.idToGameObjectsH){
+    if (parentId.has_value() && obj.parentId == 0){
+      enforceParentRelationship(sandbox.mainScene, id, parentId.value());
+    }
   }
 
 
