@@ -425,7 +425,9 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::set<objid> objects)
     removeObjectFromCache(sandbox, id);
 
     scene.sceneToNameToId.at(sceneId).erase(objectName);
-    for (auto &[_, objh] : scene.idToGameObjectsH){  
+
+    for (auto [gameobjid, directIndex] : scene.idToDirectIndex){
+      GameObjectH& objh = getGameObjectH(scene, gameobjid);
       objh.children.erase(id);
     }
   }
@@ -449,7 +451,8 @@ std::vector<std::string> childnamesNoPrefabs(SceneSandbox& sandbox, GameObjectH&
 std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds){
   std::string sceneData = "# Generated scene \n";
   modassert(sceneId != 0, "cannot serialize the main scene");
-  for (auto [id, obj]: sandbox.mainScene.idToGameObjectsH){
+  for (auto [id, directIndex]: sandbox.mainScene.idToDirectIndex){
+    GameObjectH& obj = getGameObjectH(sandbox.mainScene, id);
     if (obj.sceneId != sceneId){
       continue;
     }
