@@ -171,10 +171,11 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
   }
 
 
-  for (auto &[id, obj] : deserializedScene.scene.idToGameObjectsH){
+  for (auto &[id, directIndex] : deserializedScene.scene.idToDirectIndex){
+    GameObjectH& obj = getGameObjectH(deserializedScene.scene, id);
     if (parentId.has_value() && obj.parentId == 0){
       enforceParentRelationship(sandbox.mainScene, id, parentId.value());
-    }
+    } 
   }
 
 
