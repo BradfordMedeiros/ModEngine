@@ -80,10 +80,13 @@ void enforceParentRelationship(Scene& scene, objid id, objid parentId){
   auto oldParent = getGameObjectH(scene, id).parentId;
   if (oldParent){
     getGameObjectH(scene, oldParent).children.erase(id);
+    getGameObjectH(scene, oldParent).childrenDirectIndex.erase(scene.idToDirectIndex.at(id));
   }
   getGameObjectH(scene, id).parentId = parentId;
   getGameObjectH(scene, id).parentDirectIndex = scene.idToDirectIndex.at(parentId);
-  getGameObjectH(scene,  parentId).children.insert(id);
+  getGameObjectH(scene, parentId).children.insert(id);
+  getGameObjectH(scene, parentId).childrenDirectIndex.insert(scene.idToDirectIndex.at(id));
+
 }
 
 objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parentId, GameObject& gameobjectObj, std::optional<objid> prefabId){
@@ -435,6 +438,7 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::set<objid> objects)
     for (auto [gameobjid, directIndex] : scene.idToDirectIndex){
       GameObjectH& objh = getGameObjectH(scene, gameobjid);
       objh.children.erase(id);
+      objh.childrenDirectIndex.erase(directIndex);
     }
   }
 }
@@ -610,11 +614,12 @@ int getDirectIndexForId(SceneSandbox& sandbox, objid id){
 std::vector<TransformUpdate2> updates;
 int currentFrameTick = 0;
 
-void updateNodes(SceneSandbox& sandbox, objid id){
-  std::queue<objid> idsToVisit;  // shouldn't actually be needed since no common children
-  auto currentId = id;
+void updateNodes(SceneSandbox& sandbox, int directIndex){
+  static std::queue<objid> idsToVisit;  // shouldn't actually be needed since no common children
 
-  idsToVisit.push(getDirectIndexForId(sandbox, currentId));
+  idsToVisit.push(directIndex);
+  int numRelative = 0;
+  int numAbsolute = 0;
 
   while (idsToVisit.size() > 0){
     auto idToVisitDirect = idsToVisit.front();
@@ -634,19 +639,22 @@ void updateNodes(SceneSandbox& sandbox, objid id){
     auto& gameobj = getGameObjectDirectIndex(sandbox, directIndex);
 
     if (isAbsoluteUpdate){
+      numAbsolute++;
       auto oldRelativeTransform = calcRelativeTransform(sandbox, idToVisit);
       gameobj.transformation = oldRelativeTransform;
     }else{
+      numRelative++;
       auto parentDirectIndex = objh.parentDirectIndex;
       auto newTransform = parentId == 0 ? gameobj.transformation : calcAbsoluteTransformDirectIndex(sandbox, parentDirectIndex, gameobj.transformation);
       sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform.transform = newTransform;
     }
     objh.updateFrame = currentFrameTick;
 
-    for (objid childId : objh.children){
-      idsToVisit.push(getDirectIndexForId(sandbox, childId));
+    for (int childDirectIndex : objh.childrenDirectIndex){
+      idsToVisit.push(childDirectIndex);
     }    
   }
+  std::cout << "update nodes: rel: " << numRelative << " abs: " << numAbsolute << std::endl;
 }
 
 
@@ -742,7 +750,10 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
         auto nodeDepth = updateDepths.at(i);
         if (nodeDepth == currDepth){
           numUpdates++;
-          updateNodes(sandbox, updates.at(i).id);
+
+          if (getGameObjectHDirectIndex(sandbox, updates.at(i).directIndex.value()).updateFrame < currentFrameTick){
+            updateNodes(sandbox, updates.at(i).directIndex.value());
+          }
         }
       }
       currDepth++;

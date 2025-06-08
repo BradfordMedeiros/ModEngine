@@ -17,6 +17,7 @@ struct GameObjectH {
   objid parentId;
   int parentDirectIndex;
   std::set<objid> children;
+  std::set<int> childrenDirectIndex;
   objid groupId;       // grouping mechanism for nodes.  It is either its own id, or explicitly stated when created. 
   objid sceneId;
   objid depth = 0;
