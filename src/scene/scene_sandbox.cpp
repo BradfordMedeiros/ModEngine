@@ -81,7 +81,8 @@ void enforceParentRelationship(Scene& scene, objid id, objid parentId){
   if (oldParent){
     getGameObjectH(scene, oldParent).children.erase(id);
   }
-  getGameObjectH(scene,  id).parentId = parentId;
+  getGameObjectH(scene, id).parentId = parentId;
+  getGameObjectH(scene, id).parentDirectIndex = scene.idToDirectIndex.at(parentId);
   getGameObjectH(scene,  parentId).children.insert(id);
 }
 
@@ -89,6 +90,7 @@ objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parent
   auto gameobjectH = GameObjectH { 
     .id = gameobjectObj.id,
     .parentId = parentId.has_value() ? parentId.value() : 0,
+    .parentDirectIndex = 0,
     .groupId = gameobjectObj.id,
     .sceneId = sceneId,
     .prefabId = prefabId,
@@ -635,8 +637,7 @@ void updateNodes(SceneSandbox& sandbox, objid id){
       auto oldRelativeTransform = calcRelativeTransform(sandbox, idToVisit);
       gameobj.transformation = oldRelativeTransform;
     }else{
-      auto parentId = objh.parentId;
-      auto parentDirectIndex = getDirectIndexForId(sandbox, parentId);
+      auto parentDirectIndex = objh.parentDirectIndex;
       auto newTransform = parentId == 0 ? gameobj.transformation : calcAbsoluteTransformDirectIndex(sandbox, parentDirectIndex, gameobj.transformation);
       sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform.transform = newTransform;
     }
