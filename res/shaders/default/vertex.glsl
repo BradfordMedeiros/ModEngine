@@ -9,6 +9,8 @@ layout (location = 8) in float aBoneWeight[4];
 
 // per object
 uniform mat4 model;
+
+uniform mat4 groupToModel;
 uniform mat4 bones[ $BONES_BUFFER ];
 uniform bool hasBones;
 uniform float time;
@@ -67,10 +69,10 @@ void main(){
       (bones[aBoneIndex[2]] * aBoneWeight[2] * multiplier) + 
       (bones[aBoneIndex[3]] * aBoneWeight[3] * multiplier);
 
-      fullmodel = model  * mul;
+      fullmodel = model  * (inverse(groupToModel) * mul);
       
       if (useInstancing){
-        fullmodel = model  * mul;
+        fullmodel = model  * (inverse(groupToModel) * mul);
       }
       modelPosition = fullmodel * vec4(aPos.xyz, 1.0);
 

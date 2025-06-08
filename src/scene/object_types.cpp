@@ -247,6 +247,7 @@ int renderObject(
         .customTextureId = meshObj -> texture.loadingInfo.textureId,
         .customNormalTextureId = meshObj -> normalTexture.textureId,
         .tint = meshObj -> tint,
+        .bonesGroupModel = meshObj -> bonesGroupModel,
         .bones = &meshToRender.bones,
         .id = id,
       };

@@ -63,6 +63,7 @@ struct MeshUniforms {
   unsigned int customNormalTextureId = -1;
   unsigned int customOpacityTextureId = -1;
   glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f, 1.f);
+  glm::mat4 bonesGroupModel;
   std::vector<Bone>* bones = NULL;
   objid id = 0;
   bool useInstancing = false;

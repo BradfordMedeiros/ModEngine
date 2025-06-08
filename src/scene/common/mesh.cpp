@@ -240,6 +240,7 @@ void drawMesh(Mesh& mesh, GLint shaderProgram, bool drawPoints, MeshUniforms& me
       auto boneUniformLocation = glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str());
       shaderSetUniform(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str(), meshUniforms.bones -> at(i).offsetMatrix);
     }
+    shaderSetUniform(shaderProgram, "groupToModel", meshUniforms.bonesGroupModel);
   }
 
 

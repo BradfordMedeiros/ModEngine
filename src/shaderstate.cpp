@@ -69,7 +69,7 @@ void initDefaultShader(unsigned int shader){
     "encodedid", "textureid",
     "forceTint", // selection shader only
     "useInstancing", "instanceOffsets[0]",
-
+    "groupToModel",
   });
 }
 void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights, bool isSelection, glm::vec3 cameraPosition, std::vector<glm::mat4>& lightMatrixs){
@@ -206,6 +206,7 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
     "cameraPosition", "projview", "numlights", "enableLighting",
     "forceTint", // selection shader only
     "useInstancing", "instanceOffsets[0]",
+    "groupToModel",
   });
 
 

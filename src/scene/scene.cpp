@@ -1563,7 +1563,8 @@ void updateBonesForAnimation(World& world){
       gameobjMesh.rootidCache = gameobj.value() -> id;       
     }
 
-    auto groupTransformInverse = glm::affineInverse(fullModelTransform(world.sandbox, gameobjMesh.rootidCache));
+    auto groupTransformInverse = fullModelTransform(world.sandbox, gameobjMesh.rootidCache);
+    gameobjMesh.bonesGroupModel = groupTransformInverse;
     for (int i = 0; i < gameobjMesh.meshesToRender.size(); i++){
       Mesh& mesh = gameobjMesh.meshesToRender.at(i);
       for (int j = 0; j < mesh.bones.size(); j++){
@@ -1578,7 +1579,7 @@ void updateBonesForAnimation(World& world){
         }
         modassert(gameobjMesh.rootidCache != 0, "didn't get root id cache");
 
-        auto groupToModel = groupTransformInverse * fullModelTransformDirect(world.sandbox, boneId); 
+        auto groupToModel = fullModelTransformDirect(world.sandbox, boneId); 
         bone.offsetMatrix = groupToModel * bone.initialBonePoseInverse;
       }
     }

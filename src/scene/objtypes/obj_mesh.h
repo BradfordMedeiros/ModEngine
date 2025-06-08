@@ -20,6 +20,7 @@ struct GameObjectMesh {
   objid rootidCache;
 
   bool hasBones;
+  glm::mat4 bonesGroupModel;
 };
 
 GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util);
