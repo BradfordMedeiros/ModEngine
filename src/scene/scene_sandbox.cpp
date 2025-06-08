@@ -497,18 +497,13 @@ Transformation calcRelativeTransform(Transformation& child, Transformation& pare
   return getTransformationFromMatrix(relativeTransform);
 }
 
-// What position should the gameobject be based upon the two absolute transform of parent and child
-Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId, objid parentId){
-  return calcRelativeTransform(getAbsoluteById(sandbox, childId).transform, getAbsoluteById(sandbox, parentId).transform);
-}
-
 Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId){
   GameObjectH& childObjH = getGameObjectH(sandbox, childId);
   auto parentId = childObjH.parentId;
   if (parentId == 0){
     return getAbsoluteById(sandbox, childId).transform;
   }
-  return calcRelativeTransform(sandbox, childId, parentId);
+  return calcRelativeTransform(getAbsoluteById(sandbox, childId).transform, getAbsoluteById(sandbox, parentId).transform);
 }
 
 Transformation calcAbsoluteTransform(SceneSandbox& sandbox, objid parentId, Transformation child){
@@ -639,7 +634,8 @@ void updateNodes(SceneSandbox& sandbox, objid id){
       gameobj.transformation = oldRelativeTransform;
     }else{
       auto parentId = objh.parentId;
-      auto newTransform = parentId == 0 ? gameobj.transformation : calcAbsoluteTransform(sandbox, parentId, gameobj.transformation);
+      auto parentDirectIndex = getDirectIndexForId(sandbox, parentId);
+      auto newTransform = parentId == 0 ? gameobj.transformation : calcAbsoluteTransformDirectIndex(sandbox, parentDirectIndex, gameobj.transformation);
       sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform.transform = newTransform;
     }
     objh.updateFrame = currentFrameTick;
