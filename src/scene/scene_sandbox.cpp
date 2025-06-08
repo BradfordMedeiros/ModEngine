@@ -612,17 +612,19 @@ void updateNodes(SceneSandbox& sandbox, objid id){
   std::queue<objid> idsToVisit;  // shouldn't actually be needed since no common children
   auto currentId = id;
 
-  idsToVisit.push(currentId);
+  idsToVisit.push(getDirectIndexForId(sandbox, currentId));
 
   while (idsToVisit.size() > 0){
-    auto idToVisit = idsToVisit.front();
+    auto idToVisitDirect = idsToVisit.front();
     idsToVisit.pop();
 
     //std::cout << "updateNodes children for: " << id << ", " << objH.children.size() << std::endl;
 
-    auto directIndex = getDirectIndexForId(sandbox, idToVisit);
-
+    auto directIndex = idToVisitDirect;
     auto& objh = getGameObjectHDirectIndex(sandbox, directIndex);
+    auto idToVisit = objh.id;
+
+
     if (objh.updateFrame == currentFrameTick){
       continue;
     }
@@ -641,7 +643,7 @@ void updateNodes(SceneSandbox& sandbox, objid id){
     objh.updateFrame = currentFrameTick;
 
     for (objid childId : objh.children){
-      idsToVisit.push(childId);
+      idsToVisit.push(getDirectIndexForId(sandbox, childId));
     }    
   }
 }
