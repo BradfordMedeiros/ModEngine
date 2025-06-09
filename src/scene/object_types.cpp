@@ -569,66 +569,88 @@ int renderObject(
 
 std::optional<AttributeValuePtr> getObjectAttributePtr(ObjectMapping& objectMapping, objid id, const char* field){
   modassert(objExists(objectMapping, id), "getObjectAttributePtr obj does not exist");
+  
+  mesh:
   {
     auto gameobjectMesh = getMesh(objectMapping, id);
     if (gameobjectMesh){
       return getMeshAttribute(*gameobjectMesh, field);
     }
   }
+  
+  camera:
   {
     auto gameobjectCamera = getCameraObj(objectMapping, id);
     if (gameobjectCamera){
       return getCameraAttribute(*gameobjectCamera, field);
     }   
   }
+  
+  portal:
   {
     auto gameobjectPortal = getPortal(objectMapping, id);
     if (gameobjectPortal){
       return getPortalAttribute(*gameobjectPortal, field);
     }   
   }
+  
+  light:
   {
     auto gameobjectLight = getLight(objectMapping, id);
     if (gameobjectLight){
       return getLightAttribute(*gameobjectLight, field);
     }    
   }
+  
+  sound:
   {
     auto gameobjectSound = getSoundObj(objectMapping, id);
     if (gameobjectSound){
       return getSoundAttribute(*gameobjectSound, field);
     }
   }
+  
+  text:
   {
     auto gameobjectUiText = getUIText(objectMapping, id);
     if (gameobjectUiText){
       return getTextAttribute(*gameobjectUiText, field);
     }
   }
+  
+  navmesh:
   {
     auto gameobjectNavmesh = getNavmesh(objectMapping, id);
     if (gameobjectNavmesh){
       return getNavmeshAttribute(*gameobjectNavmesh, field);
     }
   }
+  
+  emitter:
   {
     auto gameobjectEmitter = getEmitter(objectMapping, id);
     if (gameobjectEmitter){
       return getEmitterAttribute(*gameobjectEmitter, field);
     }
   }
+  
+  octree:
   {
     auto gameObjectOctree = getOctree(objectMapping, id);
     if (gameObjectOctree){
       return getOctreeAttribute(*gameObjectOctree, field);
     }
   }
+  
+  prefab:
   { 
     auto gameObjectPrefab = getPrefab(objectMapping, id);
     if (gameObjectPrefab){
       return getPrefabAttribute(*gameObjectPrefab, field);
     }
   }
+  
+  video:
   {
     auto gameObjectVideo = getVideo(objectMapping, id);
     if (gameObjectVideo){
@@ -641,6 +663,8 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(ObjectMapping& objectMapp
 
 bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags& flags){
   modassert(objExists(objectMapping, id), "setObjectAttribute id does not exist");
+  
+  mesh:
   {
     auto gameobjectMesh = getMesh(objectMapping, id);
     if (gameobjectMesh){
@@ -648,60 +672,79 @@ bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* fiel
     }
   }
 
+  camera:
   {
     auto gameobjectCamera = getCameraObj(objectMapping, id);
     if (gameobjectCamera){
       return setCameraAttribute(*gameobjectCamera, field, value, util, flags);
     }   
   }
+  
+  portal:
   {
     auto gameobjectPortal = getPortal(objectMapping, id);
     if (gameobjectPortal){
       return setPortalAttribute(*gameobjectPortal, field, value, util, flags);
     }   
   }
+  
+  light:
   {
     auto gameobjectLight = getLight(objectMapping, id);
     if (gameobjectLight){
       return setLightAttribute(*gameobjectLight, field, value, util, flags);
     }    
   }
+  
+  sound:
   {
     auto gameobjectSound = getSoundObj(objectMapping, id);
     if (gameobjectSound){
       return setSoundAttribute(*gameobjectSound, field, value, util, flags);
     }
   }
+  
+  text:
   {
     auto gameobjectUiText = getUIText(objectMapping, id);
     if (gameobjectUiText){
       return setTextAttribute(*gameobjectUiText, field, value, util, flags);
     }
   }
+  
+  navmesh:
   {
     auto gameobjectNavmesh = getNavmesh(objectMapping, id);
     if (gameobjectNavmesh){
       return false; // do nothing
     }
   }
+  
+  emitter:
   {
     auto gameobjectEmitter = getEmitter(objectMapping, id);
     if (gameobjectEmitter){
       return setEmitterAttribute(*gameobjectEmitter, field, value, util, flags);
     }
   }
+  
+  octree:
   {
     auto gameObjectOctree = getOctree(objectMapping, id);
     if (gameObjectOctree){
       return false;
     }
   }
+  
+  prefab:
   { 
     auto gameObjectPrefab = getPrefab(objectMapping, id);
     if (gameObjectPrefab){
       return setPrefabAttribute(*gameObjectPrefab, field, value, util, flags);
     }
   }
+  
+  video:
   {
     auto gameObjectVideo = getVideo(objectMapping, id);
     if (gameObjectVideo){
@@ -719,42 +762,55 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, O
     .saveFile = saveFile,
   };
 
+  mesh:
   {
     auto gameobjectMesh = getMesh(objectMapping, id);
     if (gameobjectMesh){
       return serializeMesh(*gameobjectMesh, serializeUtil);
     }
   }
+  
+  camera:
   {
     auto gameobjectCamera = getCameraObj(objectMapping, id);
     if (gameobjectCamera){
       return serializeCamera(*gameobjectCamera, serializeUtil);
     }   
   }
+  
+  portal:
   {
     auto gameobjectPortal = getPortal(objectMapping, id);
     if (gameobjectPortal){
       return serializePortal(*gameobjectPortal, serializeUtil);
     }   
   }
+  
+  light:
   {
     auto gameobjectLight = getLight(objectMapping, id);
     if (gameobjectLight){
       return serializeLight(*gameobjectLight, serializeUtil);
     }    
   }
+  
+  sound:
   {
     auto gameobjectSound = getSoundObj(objectMapping, id);
     if (gameobjectSound){
       return serializeSound(*gameobjectSound, serializeUtil);
     }
   }
+  
+  text:
   {
     auto gameobjectUiText = getUIText(objectMapping, id);
     if (gameobjectUiText){
       return serializeText(*gameobjectUiText, serializeUtil);
     }
   }
+  
+  navmesh:
   {
     auto gameobjectNavmesh = getNavmesh(objectMapping, id);
     if (gameobjectNavmesh){
@@ -762,6 +818,8 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, O
       return {};
     }
   }
+  
+  emitter:
   {
     auto gameobjectEmitter = getEmitter(objectMapping, id);
     if (gameobjectEmitter){
@@ -769,18 +827,23 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, O
     }
   }
 
+  octree:
   {
     auto gameObjectOctree = getOctree(objectMapping, id);
     if (gameObjectOctree){
       return serializeOctree(*gameObjectOctree, serializeUtil);
     }
   }
+  
+  prefab:
   { 
     auto gameObjectPrefab = getPrefab(objectMapping, id);
     if (gameObjectPrefab){
       return serializePrefabObj(*gameObjectPrefab, serializeUtil);
     }
   }
+  
+  video:
   {
     auto gameObjectVideo = getVideo(objectMapping, id);
     if (gameObjectVideo){
@@ -793,7 +856,6 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, O
 
 std::vector<Mesh> noMeshes;
 std::vector<Mesh>& getMeshesForId(ObjectMapping& mapping, objid id){  
-
   {
     GameObjectMesh* meshObject = getMesh(mapping, id);
     if (meshObject != NULL){
