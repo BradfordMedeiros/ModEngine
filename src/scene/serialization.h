@@ -48,7 +48,11 @@ struct GameObject {
   GameobjAttributes additionalAttr;
 };
 
-enum ObjectType { OBJ_MESH, OBJ_CAMERA, OBJ_PORTAL, OBJ_SOUND, OBJ_LIGHT, OBJ_OCTREE, OBJ_EMITTER, OBJ_NAVMESH, OBJ_TEXT, OBJ_PREFAB, OBJ_VIDEO };
+enum ObjectType { OBJ_MESH, OBJ_CAMERA, OBJ_PORTAL, OBJ_SOUND, OBJ_LIGHT, OBJ_OCTREE, OBJ_EMITTER, OBJ_NAVMESH, OBJ_TEXT, OBJ_PREFAB, OBJ_VIDEO, OBJ_INVALID };
+struct ObjTypeLookup {
+  int index = -1;
+  ObjectType type = OBJ_INVALID; // { OBJ_MESH, OBJ_CAMERA, OBJ_PORTAL, OBJ_SOUND, OBJ_LIGHT, OBJ_OCTREE, OBJ_EMITTER, OBJ_NAVMESH, OBJ_TEXT, OBJ_PREFAB, OBJ_VIDEO };
+};
 struct Field {
   char prefix;
   ObjectType objectType;

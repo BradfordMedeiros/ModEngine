@@ -972,7 +972,9 @@ void addObjectToWorld(
         return loadTextureDataWorld(world, texturepath, data, textureWidth, textureHeight, numChannels, id);
       },
     };
-    addObjectType(world.objectMapping, id, name, attr, util);
+
+    ObjTypeLookup lookup{};
+    addObjectType(world.objectMapping, id, name, attr, util, &getObjTypeLookup(world.sandbox, id));
 }
 
 void addSerialObjectsToWorld(

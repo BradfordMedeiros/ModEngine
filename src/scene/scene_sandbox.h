@@ -37,6 +37,8 @@ struct GameObjectBuffer {
   TransformCacheElement absoluteTransform;
   GameObject gameobj;
   GameObjectH gameobjh;
+
+  ObjTypeLookup lookup;
 };
 
 struct Scene {
@@ -94,6 +96,7 @@ bool idExists(SceneSandbox& sandbox, std::string name, objid sceneId);
 GameObject& getGameObject(SceneSandbox& sandbox, objid id);
 GameObject& getGameObject(SceneSandbox& sandbox, std::string name, objid sceneId);
 GameObject& getGameObjectDirectIndex(SceneSandbox& sandbox, objid id);
+ObjTypeLookup& getObjTypeLookup(SceneSandbox& sandbox, objid id);
 int getDirectIndexForId(SceneSandbox& sandbox, objid id);
 
 GameObjectH& getGameObjectH(Scene& scene, objid id);

@@ -47,6 +47,11 @@ GameObjectH& getGameObjectHDirectIndex(SceneSandbox& sandbox, int directIndex){
   return buffer.gameobjh;
 }
 
+ObjTypeLookup& getObjTypeLookup(SceneSandbox& sandbox, objid id){
+  auto directIndex = sandbox.mainScene.idToDirectIndex.at(id);
+  return sandbox.mainScene.gameobjects.at(directIndex).lookup;
+}
+
 
 // This means I just keep on expanding larger. 
 // I might want to just make this fixed size to begin with but the budget is hard to say. 

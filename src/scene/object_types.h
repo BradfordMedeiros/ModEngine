@@ -133,7 +133,7 @@ struct ObjectMapping {
 ObjectMapping getObjectMapping();
 
 
-void addObjectType(ObjectMapping& objectMapping, objid id, std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util);
+void addObjectType(ObjectMapping& objectMapping, objid id, std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util, ObjTypeLookup* _objtypeLookup);
 
 void removeObject(
   ObjectMapping& objectMapping, 
@@ -177,7 +177,8 @@ int renderObject(
   DefaultMeshes& defaultMeshes,
   bool selectionMode,
   bool drawBones,
-  glm::mat4& finalModelMatrix
+  glm::mat4& finalModelMatrix,
+  ObjTypeLookup& lookup
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, ObjectMapping& objectMapping, std::function<std::string(int)> getTextureName, std::function<void(std::string, std::string&)> saveFile);

@@ -18,52 +18,63 @@ ObjectType getObjectType(std::string& name){
   return OBJ_MESH;
 }
 
-void addObjectType(ObjectMapping& objectMapping, objid id, std::string name, GameobjAttributes& attr, ObjectTypeUtil util){
+void addObjectType(ObjectMapping& objectMapping, objid id, std::string name, GameobjAttributes& attr, ObjectTypeUtil util, ObjTypeLookup* _objtypeLookup){
   modassert(!objExists(objectMapping, id), "addObjectType already exists");
   modlog("objecttype - add", std::to_string(id));
   auto objectType = getObjectType(name);
   if (objectType == OBJ_MESH){
     objectMapping.mesh[id] = createMesh(attr, util);
+    _objtypeLookup -> type = OBJ_MESH;
     return;
   }
   if (objectType == OBJ_CAMERA){
     objectMapping.camera[id] = createCamera(attr, util);
+    _objtypeLookup -> type = OBJ_CAMERA;
     return;  
   }
   if (objectType == OBJ_PORTAL){
     objectMapping.portal[id] = createPortal(attr, util);
+    _objtypeLookup -> type = OBJ_PORTAL;
     return;  
   }
   if (objectType == OBJ_LIGHT){
     objectMapping.light[id] = createLight(attr, util);
+    _objtypeLookup -> type = OBJ_LIGHT;
     return;  
   }
   if (objectType == OBJ_SOUND){
     objectMapping.sound[id] = createSound(attr, util);
+    _objtypeLookup -> type = OBJ_SOUND;
     return;  
   }
   if (objectType == OBJ_TEXT){
     objectMapping.text[id] = createUIText(attr, util);
+    _objtypeLookup -> type = OBJ_TEXT;
     return;  
   }
   if (objectType == OBJ_NAVMESH){
     objectMapping.navmesh[id] = createNavmesh(attr, util);
+    _objtypeLookup -> type = OBJ_NAVMESH;
     return;  
   }
   if (objectType == OBJ_EMITTER){
     objectMapping.emitter[id] = createEmitter(attr, util);
+    _objtypeLookup -> type = OBJ_EMITTER;
     return;  
   }
   if (objectType == OBJ_OCTREE){
     objectMapping.octree[id] = createOctree(attr, util);
+    _objtypeLookup -> type = OBJ_OCTREE;
     return;  
   }
   if (objectType == OBJ_PREFAB){
     objectMapping.prefab[id] = createPrefabObj(attr, util);
+    _objtypeLookup -> type = OBJ_PREFAB;
     return;  
   }
   if (objectType == OBJ_VIDEO){
     objectMapping.video[id] = createVideoObj(attr, util);
+    _objtypeLookup -> type = OBJ_VIDEO;
     return;
   }
 
@@ -229,183 +240,253 @@ int renderObject(
   DefaultMeshes& defaultMeshes,
   bool selectionMode,
   bool drawBones,
-  glm::mat4& finalModelMatrix
+  glm::mat4& finalModelMatrix,
+  ObjTypeLookup& lookup
 ){
-  auto meshObj = getMesh(objectMapping, id);
-  if (meshObj != NULL && !meshObj -> isDisabled && (meshObj -> meshesToRender.size() > 0)){
-    int numTriangles = 0;
-    for (int x = 0; x < meshObj -> meshesToRender.size(); x++){
-      Mesh& meshToRender = meshObj -> meshesToRender.at(x);
-      shaderLogDebug((std::string("draw mesh: ") + meshObj -> meshNames.at(x)).c_str());
 
+  if (lookup.type ==  OBJ_MESH){
+    goto mesh;
+  }
+  if (lookup.type == OBJ_CAMERA){
+    goto camera;
+  }
+  if (lookup.type == OBJ_SOUND){
+    goto sound;
+  }
+  if (lookup.type == OBJ_PORTAL){
+    goto portal;
+  }
+  if (lookup.type == OBJ_LIGHT){
+    goto light;
+  }
+  if (lookup.type == OBJ_OCTREE){
+    goto octree;
+  }
+  if (lookup.type == OBJ_EMITTER){
+    goto emitter;
+  }
+  if (lookup.type == OBJ_NAVMESH){
+    goto navmesh;
+  }
+  if (lookup.type == OBJ_TEXT){
+    goto text;
+  }
+  if (lookup.type == OBJ_PREFAB){
+    goto prefab;
+  }
+  if (lookup.type == OBJ_VIDEO){
+    goto video;
+  }
+
+  modassert(false, "invalid type, should not have reached here");
+
+  mesh: 
+  {
+    auto meshObj = getMesh(objectMapping, id);
+    if (meshObj != NULL && !meshObj -> isDisabled && (meshObj -> meshesToRender.size() > 0)){
+      int numTriangles = 0;
+      for (int x = 0; x < meshObj -> meshesToRender.size(); x++){
+        Mesh& meshToRender = meshObj -> meshesToRender.at(x);
+        shaderLogDebug((std::string("draw mesh: ") + meshObj -> meshNames.at(x)).c_str());
+  
+        MeshUniforms meshUniforms {
+          .model = finalModelMatrix,
+          .emissionAmount = meshObj -> emissionAmount,
+          .textureSize = meshObj -> texture.texturesize,
+          .textureTiling = meshObj -> texture.texturetiling,
+          .textureOffset = meshObj -> texture.textureoffset,
+          .customTextureId = meshObj -> texture.loadingInfo.textureId,
+          .customNormalTextureId = meshObj -> normalTexture.textureId,
+          .tint = meshObj -> tint,
+          .bonesGroupModel = meshObj -> bonesGroupModel,
+          .bones = &meshToRender.bones,
+          .id = id,
+        };
+        drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms);   
+        numTriangles = numTriangles + meshToRender.numTriangles; 
+      }
+      return numTriangles;
+    }
+  
+  
+    if (drawBones && api.isBone(id)){
+      auto transform = getTransformationFromMatrix(model);
+      auto parentId = api.getParentId(id);
+      auto boneTransform = api.getTransform(id);
+      if (parentId.has_value()){
+        auto parentTransform = api.getTransform(parentId.value());
+        api.drawLine(boneTransform.position, parentTransform.position, getAlternatingColor(0));
+      }
+      //api.drawSphere(boneTransform.position);
+      auto model = glm::translate(glm::mat4(1.f), transform.position);
+      return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, model, id);
+    }
+  
+    if (meshObj != NULL && (meshObj -> meshesToRender.size() > 0) && (showDebugMask & 0b1)) {
+      //api.drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 100.f, 0.f), glm::vec4(1.f, 0.f, 0.f, 1.f));
+      return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, finalModelMatrix, id);
+    }
+  
+    if (meshObj){
+      return 0;
+    }
+  }
+
+  camera: 
+  {
+    auto cameraObj = getCameraObj(objectMapping, id);
+    if (cameraObj != NULL && (showDebugMask & 0b10)){
+      auto transform = getTransformationFromMatrix(model).position;
+      auto model = glm::translate(glm::mat4(1.f), transform);
+      return renderDefaultNode(shaderProgram, *defaultMeshes.cameraMesh, model, id);
+    }
+  }
+
+  sound:
+  {
+    auto soundObject = getSoundObj(objectMapping, id);
+    if (soundObject != NULL && (showDebugMask & 0b100)){
+      return renderDefaultNode(shaderProgram, *defaultMeshes.soundMesh, finalModelMatrix, id);
+    }
+  }
+
+  portal: 
+  {
+    auto portalObj = getPortal(objectMapping, id);
+    if (portalObj != NULL){
       MeshUniforms meshUniforms {
         .model = finalModelMatrix,
-        .emissionAmount = meshObj -> emissionAmount,
-        .textureSize = meshObj -> texture.texturesize,
-        .textureTiling = meshObj -> texture.texturetiling,
-        .textureOffset = meshObj -> texture.textureoffset,
-        .customTextureId = meshObj -> texture.loadingInfo.textureId,
-        .customNormalTextureId = meshObj -> normalTexture.textureId,
-        .tint = meshObj -> tint,
-        .bonesGroupModel = meshObj -> bonesGroupModel,
-        .bones = &meshToRender.bones,
+        .customTextureId = portalTexture,
+        .bones = &defaultMeshes.nodeMesh -> bones,
         .id = id,
       };
-      drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms);   
-      numTriangles = numTriangles + meshToRender.numTriangles; 
+      drawMesh(*defaultMeshes.portalMesh, shaderProgram, false, meshUniforms);
+      return defaultMeshes.portalMesh -> numTriangles;
     }
-    return numTriangles;
   }
 
-
-  if (drawBones && api.isBone(id)){
-    auto transform = getTransformationFromMatrix(model);
-    auto parentId = api.getParentId(id);
-    auto boneTransform = api.getTransform(id);
-    if (parentId.has_value()){
-      auto parentTransform = api.getTransform(parentId.value());
-      api.drawLine(boneTransform.position, parentTransform.position, getAlternatingColor(0));
+  light:
+  {
+    auto lightObj = getLight(objectMapping, id);
+    if (lightObj != NULL && (showDebugMask & 0b1000)){   
+      return renderDefaultNode(shaderProgram, *defaultMeshes.lightMesh, finalModelMatrix, id);
     }
-    //api.drawSphere(boneTransform.position);
-    auto model = glm::translate(glm::mat4(1.f), transform.position);
-    return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, model, id);
   }
 
-  if (meshObj != NULL && (meshObj -> meshesToRender.size() > 0) && (showDebugMask & 0b1)) {
-    //api.drawLine(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 100.f, 0.f), glm::vec4(1.f, 0.f, 0.f, 1.f));
-    return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, finalModelMatrix, id);
+  octree:
+  {
+    auto octreeObj = getOctree(objectMapping, id);
+    if (octreeObj != NULL){
+      Mesh* octreeMesh = getOctreeMesh(*octreeObj);
+      modassert(octreeMesh, "no octree mesh available");
+  
+      MeshUniforms meshUniforms {
+        .model = finalModelMatrix,
+        .id = id,
+      };
+      drawMesh(*octreeMesh, shaderProgram, false, meshUniforms);
+      return octreeMesh -> numTriangles;
+    }
   }
 
-  if (meshObj){
+  emitter:
+  {
+    auto emitterObj = getEmitter(objectMapping, id);
+    if (emitterObj != NULL && (showDebugMask & 0b100000)){
+      return renderDefaultNode(shaderProgram, *defaultMeshes.emitter, finalModelMatrix, id);
+    }
+  }
+
+  navmesh:
+  {
+    auto navmeshObj = getNavmesh(objectMapping, id);
+    if (navmeshObj != NULL){
+      MeshUniforms meshUniforms {
+        .model = finalModelMatrix,
+        .customTextureId = navmeshTexture,
+        .id = id,
+      };
+      drawMesh(navmeshObj -> meshes.at(0), shaderProgram, false, meshUniforms);    
+  
+  
+      // this base id point index stuff is pretty hackey bullshit
+      // maybe i should pull out a function to render the object only in selection mode. 
+      // should refactor all this shit
+      int pointIndex = 0;
+      static objid baseId = 0;
+  
+      drawControlPoints(id, [selectionMode, shaderProgram, &model, &defaultMeshes, &pointIndex, isSelectionShader, id](glm::vec3 point) -> void {
+        //modassert(false, "drawControlPoints not yet implemented");
+  
+        objid objectId = 0;
+        if (selectionMode){
+          if (baseId == 0){
+            baseId = getUniqueObjIdReserved();
+            objectId = baseId;
+          }else{
+            objectId = getUniqueObjIdReserved();
+          }
+        }else{
+          objectId = baseId + pointIndex;
+        }
+        pointIndex++;
+  
+  
+        static glm::vec4 selectedColor  = glm::vec4(0.f, 0.f, 1.f, 0.5f);
+        static glm::vec4 notSelectedColor  = glm::vec4(1.f, 0.f, 0.f, 0.5f);
+  
+        auto isSelected = selectedId == objectId;
+        glm::vec4 color = isSelected ? glm::vec4(0.f, 0.f, 1.f, 0.5f) : glm::vec4(1.f, 0.f, 0.f, 0.5f);
+        //std::cout << "selected: " << selectedId << ", object id: " << objectId << ", isSelected = " << isSelected << ", color = " << print(color) << std::endl;
+        shaderSetUniform(shaderProgram, "tint", isSelected ? selectedColor : notSelectedColor);
+  
+        auto newModel = glm::translate(model, point);
+        renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, newModel, id);
+      });
+      if (!selectionMode){
+        baseId = 0;
+      }
+  
+      return navmeshObj -> meshes.at(0).numTriangles;
+    }
+  }
+
+  text:
+  {
+    auto textObj = getUIText(objectMapping, id);
+    if (textObj != NULL){
+      shaderSetUniform(shaderProgram, "tint", textObj -> tint);
+      return api.drawWord(shaderProgram, id, textObj -> value, 1000.f /* 1000.f => -1,1 range for each quad */, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor, textObj -> fontFamily, selectionMode);
+    }
+  }
+  
+  prefab:
+  {
+    auto prefabObj = getPrefab(objectMapping, id);
+    if (prefabObj != NULL){
+      auto vertexCount = 0;
+      if (showDebugMask & 0b10000000){
+        vertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, finalModelMatrix, id);
+      }
+      return vertexCount;
+    }
+  }
+  
+  video:
+  {
+    auto videoObj = getVideo(objectMapping, id);
+    if (videoObj && videoObj -> drawMesh){
+      MeshUniforms meshUniforms {
+        .model = finalModelMatrix,
+        .customTextureId = videoObj -> texture.textureId,
+        .id = id,
+      };
+      drawMesh(*defaultMeshes.portalMesh, shaderProgram, false, meshUniforms);
+      return defaultMeshes.portalMesh -> numTriangles;
+    }
+    //modassert(false, "invalid object type found");
     return 0;
   }
-
-  auto cameraObj = getCameraObj(objectMapping, id);
-  if (cameraObj != NULL && (showDebugMask & 0b10)){
-    auto transform = getTransformationFromMatrix(model).position;
-    auto model = glm::translate(glm::mat4(1.f), transform);
-    return renderDefaultNode(shaderProgram, *defaultMeshes.cameraMesh, model, id);
-  }
-
-  auto soundObject = getSoundObj(objectMapping, id);
-  if (soundObject != NULL && (showDebugMask & 0b100)){
-    return renderDefaultNode(shaderProgram, *defaultMeshes.soundMesh, finalModelMatrix, id);
-  }
-
-  auto portalObj = getPortal(objectMapping, id);
-  if (portalObj != NULL){
-    MeshUniforms meshUniforms {
-      .model = finalModelMatrix,
-      .customTextureId = portalTexture,
-      .bones = &defaultMeshes.nodeMesh -> bones,
-      .id = id,
-    };
-    drawMesh(*defaultMeshes.portalMesh, shaderProgram, false, meshUniforms);
-    return defaultMeshes.portalMesh -> numTriangles;
-  }
-
-  auto lightObj = getLight(objectMapping, id);
-  if (lightObj != NULL && (showDebugMask & 0b1000)){   
-    return renderDefaultNode(shaderProgram, *defaultMeshes.lightMesh, finalModelMatrix, id);
-  }
-
-  auto octreeObj = getOctree(objectMapping, id);
-  if (octreeObj != NULL){
-    Mesh* octreeMesh = getOctreeMesh(*octreeObj);
-    modassert(octreeMesh, "no octree mesh available");
-
-    MeshUniforms meshUniforms {
-      .model = finalModelMatrix,
-      .id = id,
-    };
-    drawMesh(*octreeMesh, shaderProgram, false, meshUniforms);
-    return octreeMesh -> numTriangles;
-  }
-
-  auto emitterObj = getEmitter(objectMapping, id);
-  if (emitterObj != NULL && (showDebugMask & 0b100000)){
-    return renderDefaultNode(shaderProgram, *defaultMeshes.emitter, finalModelMatrix, id);
-  }
-
-  auto navmeshObj = getNavmesh(objectMapping, id);
-  if (navmeshObj != NULL){
-    MeshUniforms meshUniforms {
-      .model = finalModelMatrix,
-      .customTextureId = navmeshTexture,
-      .id = id,
-    };
-    drawMesh(navmeshObj -> meshes.at(0), shaderProgram, false, meshUniforms);    
-
-
-    // this base id point index stuff is pretty hackey bullshit
-    // maybe i should pull out a function to render the object only in selection mode. 
-    // should refactor all this shit
-    int pointIndex = 0;
-    static objid baseId = 0;
-
-    drawControlPoints(id, [selectionMode, shaderProgram, &model, &defaultMeshes, &pointIndex, isSelectionShader, id](glm::vec3 point) -> void {
-      //modassert(false, "drawControlPoints not yet implemented");
-
-      objid objectId = 0;
-      if (selectionMode){
-        if (baseId == 0){
-          baseId = getUniqueObjIdReserved();
-          objectId = baseId;
-        }else{
-          objectId = getUniqueObjIdReserved();
-        }
-      }else{
-        objectId = baseId + pointIndex;
-      }
-      pointIndex++;
-
-
-      static glm::vec4 selectedColor  = glm::vec4(0.f, 0.f, 1.f, 0.5f);
-      static glm::vec4 notSelectedColor  = glm::vec4(1.f, 0.f, 0.f, 0.5f);
-
-      auto isSelected = selectedId == objectId;
-      glm::vec4 color = isSelected ? glm::vec4(0.f, 0.f, 1.f, 0.5f) : glm::vec4(1.f, 0.f, 0.f, 0.5f);
-      //std::cout << "selected: " << selectedId << ", object id: " << objectId << ", isSelected = " << isSelected << ", color = " << print(color) << std::endl;
-      shaderSetUniform(shaderProgram, "tint", isSelected ? selectedColor : notSelectedColor);
-
-      auto newModel = glm::translate(model, point);
-      renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, newModel, id);
-    });
-    if (!selectionMode){
-      baseId = 0;
-    }
-
-    return navmeshObj -> meshes.at(0).numTriangles;
-  }
-
-  auto textObj = getUIText(objectMapping, id);
-  if (textObj != NULL){
-    shaderSetUniform(shaderProgram, "tint", textObj -> tint);
-    return api.drawWord(shaderProgram, id, textObj -> value, 1000.f /* 1000.f => -1,1 range for each quad */, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor, textObj -> fontFamily, selectionMode);
-  }
-
-  auto prefabObj = getPrefab(objectMapping, id);
-  if (prefabObj != NULL){
-    auto vertexCount = 0;
-    if (showDebugMask & 0b10000000){
-      vertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, finalModelMatrix, id);
-    }
-    return vertexCount;
-  }
-
-  auto videoObj = getVideo(objectMapping, id);
-  if (videoObj && videoObj -> drawMesh){
-    MeshUniforms meshUniforms {
-      .model = finalModelMatrix,
-      .customTextureId = videoObj -> texture.textureId,
-      .id = id,
-    };
-    drawMesh(*defaultMeshes.portalMesh, shaderProgram, false, meshUniforms);
-    return defaultMeshes.portalMesh -> numTriangles;
-  }
-
-  //modassert(false, "invalid object type found");
-  return 0;
 }
 
 std::optional<AttributeValuePtr> getObjectAttributePtr(ObjectMapping& objectMapping, objid id, const char* field){

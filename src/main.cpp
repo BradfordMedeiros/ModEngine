@@ -503,7 +503,8 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     auto newProjView = (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view);
 
     for (auto& data : datum){
-      GameObject& gameobject = getGameObjectDirectIndex(world.sandbox, data.directIndex); 
+      auto& gameobjBuffer = world.sandbox.mainScene.gameobjects.at(data.directIndex);
+      GameObject& gameobject = gameobjBuffer.gameobj; 
       if (gameobject.layerSymbol == layer.symbol){  // TODO PERF rm this string comparison 
         int32_t id = data.id; 
         glm::mat4& modelMatrix = data.modelMatrix; 
@@ -588,7 +589,8 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
               defaultResources.defaultMeshes,
               textBoundingOnly,
               state.showBones,
-              finalModelMatrix
+              finalModelMatrix,
+              gameobjBuffer.lookup
             );
             numTriangles = numTriangles + trianglesDrawn;
           }
