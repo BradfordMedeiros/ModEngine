@@ -28,6 +28,7 @@ void addObjectType(ObjectMapping& objectMapping, objid id, std::string name, Gam
   modassert(!objExists(objectMapping, id), "addObjectType already exists");
   modlog("objecttype - add", std::to_string(id));
   auto objectType = getObjectType(name);
+  _objtypeLookup -> id = id;
   if (objectType == OBJ_MESH){
     objectMapping.mesh[id] = createMesh(attr, util);
     _objtypeLookup -> type = OBJ_MESH;
