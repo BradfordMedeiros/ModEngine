@@ -491,7 +491,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       datum[i] = traversalData{
         .id = gameobjBuffer.gameobj.id,
         .directIndex = directIndex,
-        .modelMatrix = matrixFromComponents(gameobjBuffer.absoluteTransform.transform),
+        .modelMatrix = gameobjBuffer.absoluteTransform.matrix,
       };
       i++;
     }

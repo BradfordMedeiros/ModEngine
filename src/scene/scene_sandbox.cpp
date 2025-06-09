@@ -597,6 +597,7 @@ void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
 
     sandbox.mainScene.gameobjects.at(gameobjIndex).absoluteTransform = TransformCacheElement {
       .transform = newTransform,
+      .matrix = matrixFromComponents(newTransform),
     };
   }
 
@@ -647,6 +648,7 @@ void updateNodes(SceneSandbox& sandbox, int directIndex){
       auto parentDirectIndex = objh.parentDirectIndex;
       auto newTransform = parentId == 0 ? gameobj.transformation : calcAbsoluteTransformDirectIndex(sandbox, parentDirectIndex, gameobj.transformation);
       sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform.transform = newTransform;
+      sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform.matrix = matrixFromComponents(newTransform);
     }
     objh.updateFrame = currentFrameTick;
 
@@ -721,6 +723,7 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
 
       sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform = TransformCacheElement {
         .transform =  newAbsoluteTransform,
+        .matrix = matrixFromComponents(newAbsoluteTransform),
       };
 
       //if (enableTransformLogging){
@@ -781,6 +784,7 @@ void addObjectToCache(SceneSandbox& sandbox, objid id){
   );
   sandbox.mainScene.gameobjects.at(gameobjIndex).absoluteTransform = TransformCacheElement {
     .transform = getTransformationFromMatrix(elementMatrix),
+    .matrix = elementMatrix,
   };
   updateAllChildrenPositions(sandbox, id);
 }
@@ -872,7 +876,7 @@ glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id, const char* hint){
     modassert(!assertOnStale || (assertOnStale && !stale), "stale transform");
   }
   TransformCacheElement& element = getAbsoluteById(sandbox, id);
-  return matrixFromComponents(element.transform);
+  return element.matrix;
 }
 glm::mat4 fullModelTransformDirect(SceneSandbox& sandbox, objid directIndex, const char* hint){
   if (enableTransformLogging){
@@ -883,7 +887,7 @@ glm::mat4 fullModelTransformDirect(SceneSandbox& sandbox, objid directIndex, con
     //modassert(!assertOnStale || (assertOnStale && !stale), "stale transform");
   }
   TransformCacheElement& element = sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform;
-  return matrixFromComponents(element.transform);
+  return element.matrix;
 }
 
 Transformation& fullTransformation(SceneSandbox& sandbox, objid id, const char* hint){
