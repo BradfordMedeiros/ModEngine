@@ -973,7 +973,6 @@ void addObjectToWorld(
       },
     };
 
-    ObjTypeLookup lookup{};
     addObjectType(world.objectMapping, id, name, attr, util, &getObjTypeLookup(world.sandbox, id));
 }
 

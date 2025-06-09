@@ -29,9 +29,10 @@ void addObjectType(ObjectMapping& objectMapping, objid id, std::string name, Gam
   modlog("objecttype - add", std::to_string(id));
   auto objectType = getObjectType(name);
   _objtypeLookup -> id = id;
+  _objtypeLookup -> type = objectType;
+
   if (objectType == OBJ_MESH){
     objectMapping.mesh[id] = createMesh(attr, util);
-    _objtypeLookup -> type = OBJ_MESH;
     //{
     //  std::cout << "change gameobject: add " << id << std::endl;
     //  bool added = false;
@@ -58,52 +59,42 @@ void addObjectType(ObjectMapping& objectMapping, objid id, std::string name, Gam
   }
   if (objectType == OBJ_CAMERA){
     objectMapping.camera[id] = createCamera(attr, util);
-    _objtypeLookup -> type = OBJ_CAMERA;
     return;  
   }
   if (objectType == OBJ_PORTAL){
     objectMapping.portal[id] = createPortal(attr, util);
-    _objtypeLookup -> type = OBJ_PORTAL;
     return;  
   }
   if (objectType == OBJ_LIGHT){
     objectMapping.light[id] = createLight(attr, util);
-    _objtypeLookup -> type = OBJ_LIGHT;
     return;  
   }
   if (objectType == OBJ_SOUND){
     objectMapping.sound[id] = createSound(attr, util);
-    _objtypeLookup -> type = OBJ_SOUND;
     return;  
   }
   if (objectType == OBJ_TEXT){
     objectMapping.text[id] = createUIText(attr, util);
-    _objtypeLookup -> type = OBJ_TEXT;
     return;  
   }
   if (objectType == OBJ_NAVMESH){
     objectMapping.navmesh[id] = createNavmesh(attr, util);
-    _objtypeLookup -> type = OBJ_NAVMESH;
     return;  
   }
   if (objectType == OBJ_EMITTER){
     objectMapping.emitter[id] = createEmitter(attr, util);
-    _objtypeLookup -> type = OBJ_EMITTER;
     return;  
   }
   if (objectType == OBJ_OCTREE){
     objectMapping.octree[id] = createOctree(attr, util);
-    _objtypeLookup -> type = OBJ_OCTREE;
     return;  
   }
   if (objectType == OBJ_PREFAB){
     objectMapping.prefab[id] = createPrefabObj(attr, util);
-    _objtypeLookup -> type = OBJ_PREFAB;
     return;  
   }
   if (objectType == OBJ_VIDEO){
     objectMapping.video[id] = createVideoObj(attr, util);
-    _objtypeLookup -> type = OBJ_VIDEO;
     return;
   }
 
@@ -303,6 +294,47 @@ glm::vec4 getAlternatingColor(int index){
   return colors.at(index);
 }
 
+std::optional<std::string> getGameObjectName(int32_t index);
+
+std::string typeForLookup(ObjTypeLookup& lookup){
+  if (lookup.type ==  OBJ_MESH){
+    return "OBJ_MESH";
+  }
+  if (lookup.type == OBJ_CAMERA){
+    return "OBJ_CAMERA";
+  }
+  if (lookup.type == OBJ_SOUND){
+    return "OBJ_SOUND";
+  }
+  if (lookup.type == OBJ_PORTAL){
+    return "OBJ_PORTAL";
+  }
+  if (lookup.type == OBJ_LIGHT){
+    return "OBJ_LIGHT";
+  }
+  if (lookup.type == OBJ_OCTREE){
+    return "OBJ_OCTREE";
+  }
+  if (lookup.type == OBJ_EMITTER){
+    return "OBJ_EMITTER";
+  }
+  if (lookup.type == OBJ_NAVMESH){
+    return "OBJ_NAVMESH";
+  }
+  if (lookup.type == OBJ_TEXT){
+    return "OBJ_TEXT";
+  }
+  if (lookup.type == OBJ_PREFAB){
+    return "OBJ_PREFAB";
+  }
+  if (lookup.type == OBJ_VIDEO){
+    return "OBJ_VIDEO";
+  }
+  if (lookup.type == OBJ_INVALID){
+    return "OBJ_INVALID";
+  }
+  return "bad lookup type";
+}
 
 objid selectedId = 0;
 int renderObject(
