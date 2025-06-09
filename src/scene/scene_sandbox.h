@@ -37,7 +37,6 @@ struct GameObjectBuffer {
   TransformCacheElement absoluteTransform;
   GameObject gameobj;
   GameObjectH gameobjh;
-
   ObjTypeLookup lookup;
 };
 

@@ -18,6 +18,12 @@ ObjectType getObjectType(std::string& name){
   return OBJ_MESH;
 }
 
+void freeMeshBuffer(std::vector<GameObjectMeshBuffer>& meshes, int index){
+  std::cout << "freeMeshBuffer: " << index << std::endl;
+  meshes.at(index).inUse = false;
+}
+
+
 void addObjectType(ObjectMapping& objectMapping, objid id, std::string name, GameobjAttributes& attr, ObjectTypeUtil util, ObjTypeLookup* _objtypeLookup){
   modassert(!objExists(objectMapping, id), "addObjectType already exists");
   modlog("objecttype - add", std::to_string(id));
@@ -25,6 +31,28 @@ void addObjectType(ObjectMapping& objectMapping, objid id, std::string name, Gam
   if (objectType == OBJ_MESH){
     objectMapping.mesh[id] = createMesh(attr, util);
     _objtypeLookup -> type = OBJ_MESH;
+    //{
+    //  std::cout << "change gameobject: add " << id << std::endl;
+    //  bool added = false;
+    //  int index = 0;
+    //  for (int i = 0; i < objectMapping.meshBuffer.size(); i++){
+    //    if (!objectMapping.meshBuffer.at(i).inUse){
+    //      objectMapping.meshBuffer.at(i).inUse = true;
+    //      objectMapping.meshBuffer.at(i).mesh = createMesh(attr, util);
+    //      added = true;
+    //      index = i;
+    //      break;
+    //    }
+    //  }
+    //  if (!added){
+    //    objectMapping.meshBuffer.push_back(GameObjectMeshBuffer {
+    //      .inUse = true,
+    //      .mesh = createMesh(attr, util),
+    //    });
+    //    index = objectMapping.meshBuffer.size() - 1;
+    //  }
+    //  _objtypeLookup -> index = index;
+    //}
     return;
   }
   if (objectType == OBJ_CAMERA){
@@ -90,7 +118,8 @@ void removeObject(
   ObjectMapping& objectMapping,
   objid id, 
   std::function<void(std::string)> unbindCamera,
-  std::function<void(objid)> unloadScene
+  std::function<void(objid)> unloadScene,
+  ObjTypeLookup& _objtypeLookup
 ){
   if (!objExists(objectMapping, id)){
     return;
@@ -101,6 +130,41 @@ void removeObject(
     .unloadScene = unloadScene
   };
 
+  if (_objtypeLookup.type == OBJ_MESH){
+    goto mesh;
+  }
+  if (_objtypeLookup.type == OBJ_CAMERA){
+    goto camera;
+  }
+  if (_objtypeLookup.type == OBJ_PORTAL){
+    goto portal;
+  }
+  if (_objtypeLookup.type == OBJ_LIGHT){
+    goto light;
+  }
+  if (_objtypeLookup.type == OBJ_SOUND){
+    goto sound;
+  }
+  if (_objtypeLookup.type == OBJ_EMITTER){
+    goto emitter;
+  }
+  if (_objtypeLookup.type == OBJ_OCTREE){
+    goto octree;
+  }
+  if (_objtypeLookup.type == OBJ_TEXT){
+    goto text;
+  }
+  if (_objtypeLookup.type == OBJ_NAVMESH){
+    goto navmesh;
+  }
+  if (_objtypeLookup.type == OBJ_PREFAB){
+    goto prefab;
+  }
+  if (_objtypeLookup.type == OBJ_VIDEO){
+    goto video;
+  }
+
+  mesh:
   {
     auto gameobjectMesh = getMesh(objectMapping, id);
     if (gameobjectMesh){
@@ -110,6 +174,7 @@ void removeObject(
     }
   }
 
+  camera:
   {
     auto gameobjectCamera = getCameraObj(objectMapping, id);;
     if (gameobjectCamera){
@@ -119,6 +184,7 @@ void removeObject(
     }   
   }
 
+  portal:
   {
     auto gameobjectPortal = getPortal(objectMapping, id);
     if (gameobjectPortal){
@@ -127,6 +193,8 @@ void removeObject(
       return;
     }   
   }
+
+  light:
   {
     auto gameobjectLight = getLight(objectMapping, id);
     if (gameobjectLight){
@@ -136,6 +204,8 @@ void removeObject(
       return;
     }    
   }
+
+  sound:
   {
     auto gameobjectSound = getSoundObj(objectMapping, id);
     if (gameobjectSound){
@@ -146,6 +216,7 @@ void removeObject(
     }
   }
 
+  emitter:
   {
     auto gameobjectEmitter = getEmitter(objectMapping, id);
     if (gameobjectEmitter){
@@ -156,6 +227,7 @@ void removeObject(
     }
   }
 
+  octree:
   {
     auto gameObjectOctree = getOctree(objectMapping, id);
     if (gameObjectOctree){
@@ -165,6 +237,7 @@ void removeObject(
     }
   }
 
+  text:
   {
     auto gameobjectUiText = getUIText(objectMapping, id);
     if (gameobjectUiText){
@@ -173,6 +246,8 @@ void removeObject(
       return;
     }
   }
+
+  navmesh:
   {
     auto gameobjectNavmesh = getNavmesh(objectMapping, id);
     if (gameobjectNavmesh){
@@ -182,6 +257,7 @@ void removeObject(
     }
   }
 
+  prefab:
   { 
     auto gameObjectPrefab = getPrefab(objectMapping, id);
     if (gameObjectPrefab){
@@ -191,6 +267,7 @@ void removeObject(
     }
   }
 
+  video:
   {
     auto gameObjectVideo = getVideo(objectMapping, id);
     if (gameObjectVideo){

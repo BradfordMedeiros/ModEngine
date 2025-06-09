@@ -1052,7 +1052,8 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
     [&world, &_scenesToUnload](objid sceneId) -> void {
       modlog("prefab unload scene", std::to_string(sceneId));
       _scenesToUnload.insert(sceneId);
-    }
+    },
+    getObjTypeLookup(world.sandbox, objectId)
   );
   
   freeModelDataRefsByOwner(world, objectId);

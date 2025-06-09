@@ -116,8 +116,15 @@ struct Object {
   unsigned int index;
 };
 
+struct GameObjectMeshBuffer {
+  bool inUse;
+  GameObjectMesh mesh;
+};
+
 struct ObjectMapping {
   std::unordered_map<objid, GameObjectMesh> mesh;
+  std::vector<GameObjectMeshBuffer> meshBuffer;
+
   std::unordered_map<objid, GameObjectCamera> camera;
   std::unordered_map<objid, GameObjectPortal> portal;
   std::unordered_map<objid, GameObjectSound> sound;
@@ -139,7 +146,8 @@ void removeObject(
   ObjectMapping& objectMapping, 
   objid id, 
   std::function<void(std::string)> unbindCamera,
-  std::function<void(objid)> unloadScene
+  std::function<void(objid)> unloadScene,
+  ObjTypeLookup& _objtypeLookup
 );
 
 struct DefaultMeshes {
