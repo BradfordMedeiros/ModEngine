@@ -567,7 +567,7 @@ int renderObject(
   }
 }
 
-std::optional<AttributeValuePtr> getObjectAttributePtr(ObjectMapping& objectMapping, objid id, const char* field){
+std::optional<AttributeValuePtr> getObjectAttributePtr(ObjectMapping& objectMapping, objid id, const char* field, ObjTypeLookup& objtypeLookup){
   modassert(objExists(objectMapping, id), "getObjectAttributePtr obj does not exist");
   
   mesh:
@@ -661,7 +661,7 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(ObjectMapping& objectMapp
   return std::optional<AttributeValuePtr>(std::nullopt);;
 }
 
-bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags& flags){
+bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags& flags, ObjTypeLookup& objtypeLookup){
   modassert(objExists(objectMapping, id), "setObjectAttribute id does not exist");
   
   mesh:
@@ -755,7 +755,7 @@ bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* fiel
   return false;
 }
   
-std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, ObjectMapping& objectMapping, std::function<std::string(int)> getTextureName, std::function<void(std::string, std::string&)> saveFile){
+std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, ObjectMapping& objectMapping, std::function<std::string(int)> getTextureName, std::function<void(std::string, std::string&)> saveFile, ObjTypeLookup& objtypeLookup){
   modassert(objExists(objectMapping, id), "getAdditionalFields obj does not exist");
   ObjectSerializeUtil serializeUtil {
     .textureName = getTextureName,
@@ -855,7 +855,7 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, O
 }
 
 std::vector<Mesh> noMeshes;
-std::vector<Mesh>& getMeshesForId(ObjectMapping& mapping, objid id){  
+std::vector<Mesh>& getMeshesForId(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup){  
   {
     GameObjectMesh* meshObject = getMesh(mapping, id);
     if (meshObject != NULL){
@@ -873,7 +873,7 @@ std::vector<Mesh>& getMeshesForId(ObjectMapping& mapping, objid id){
 }
 
 std::vector<std::string> emptyNames;
-std::vector<std::string>& getMeshNames(ObjectMapping& mapping, objid id){
+std::vector<std::string>& getMeshNames(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup){
   GameObjectMesh* meshObject = getMesh(mapping, id);
   if (meshObject != NULL){
     return meshObject -> meshNames;
@@ -885,7 +885,7 @@ bool isNavmesh(ObjectMapping& mapping, objid id){
   return getNavmesh(mapping, id) != NULL;
 }
 
-std::optional<Texture> textureForId(ObjectMapping& mapping, objid id){
+std::optional<Texture> textureForId(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup){
   auto meshObj = getMesh(mapping, id);
   if (meshObj != NULL){
     for (int i = 0; i < meshObj -> meshNames.size(); i++){

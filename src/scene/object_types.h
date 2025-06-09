@@ -189,15 +189,15 @@ int renderObject(
   ObjTypeLookup& lookup
 );
 
-std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, ObjectMapping& objectMapping, std::function<std::string(int)> getTextureName, std::function<void(std::string, std::string&)> saveFile);
-std::optional<AttributeValuePtr> getObjectAttributePtr(ObjectMapping& objectMapping, objid id, const char* field);
-bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&);
+std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, ObjectMapping& objectMapping, std::function<std::string(int)> getTextureName, std::function<void(std::string, std::string&)> saveFile, ObjTypeLookup& objtypeLookup);
+std::optional<AttributeValuePtr> getObjectAttributePtr(ObjectMapping& objectMapping, objid id, const char* field, ObjTypeLookup& objtypeLookup);
+bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&, ObjTypeLookup& objtypeLookup);
 
-std::vector<Mesh>& getMeshesForId(ObjectMapping& mapping, objid id);
+std::vector<Mesh>& getMeshesForId(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup);
 
-std::vector<std::string>& getMeshNames(ObjectMapping& mapping, objid id);
+std::vector<std::string>& getMeshNames(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup);
 bool isNavmesh(ObjectMapping& mapping, objid id);
-std::optional<Texture> textureForId(ObjectMapping& mapping, objid id);
+std::optional<Texture> textureForId(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup);
 void updateObjectPositions(ObjectMapping& mapping, objid, glm::vec3 position, Transformation& viewTransform);
 void playSoundState(ObjectMapping& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position);
 void stopSoundState(ObjectMapping& mapping, objid id);

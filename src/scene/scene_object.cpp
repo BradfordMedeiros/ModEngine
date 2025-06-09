@@ -155,7 +155,7 @@ std::vector<HitObject> contactTest(World& world, objid id){
 }
 
 std::optional<Texture> textureForId(World& world, objid id){
-  return textureForId(world.objectMapping, id);
+  return textureForId(world.objectMapping, id, getObjTypeLookup(world.sandbox, id));
 }
 
 // Fn seems broken, b/c sometimes meshesToRender is 0 size

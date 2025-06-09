@@ -46,7 +46,7 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
     auto groupId = getGroupId(world.sandbox, index);
     auto allIds = (useGroup && groupId == index) ? getIdsInGroupByObjId(world.sandbox, index) : std::vector<objid>({ index });
     for (auto id : allIds){
-      std::vector<Mesh>& meshes = getMeshesForId(world.objectMapping, id);
+      std::vector<Mesh>& meshes = getMeshesForId(world.objectMapping, id, getObjTypeLookup(world.sandbox, id));
       for (int i = 0; i < meshes.size(); i++){
         boundInfos.push_back(meshes.at(i).boundInfo);
       }    
@@ -99,7 +99,7 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
 // this is embarrassingly inefficient and should not generally be used
 // use broader shapes, or/and create algorithm to combine these shapes 
 std::vector<glm::vec3> vertsForId(World& world, objid id){  
-  std::vector<Mesh>& meshes = getMeshesForId(world.objectMapping, id);
+  std::vector<Mesh>& meshes = getMeshesForId(world.objectMapping, id, getObjTypeLookup(world.sandbox, id));
   if (meshes.size() == 0){
     std::cout << "no meshes for: " << getGameObject(world, id).name << std::endl;
     return {};
@@ -807,7 +807,7 @@ std::string serializeScene(World& world, objid sceneId, bool includeIds){
   return serializeScene(world.sandbox, sceneId, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
     return getAdditionalFields(objectId, world.objectMapping, [&world](int textureId) -> std::string {
       return getTextureById(world, textureId).value();
-    }, world.interface.saveFile);
+    }, world.interface.saveFile, getObjTypeLookup(world.sandbox, objectId));
   }, includeIds);
 } 
 
@@ -818,7 +818,7 @@ std::string serializeObjectById(World& world, objid id, std::string overridename
   
   auto additionalFields = getAdditionalFields(id, world.objectMapping, [&world](int textureId) -> std::string {
     return getTextureById(world, textureId).value();
-  }, world.interface.saveFile);
+  }, world.interface.saveFile, getObjTypeLookup(world.sandbox, id));
   return serializeObj(id, gameobjecth.groupId, gameobj, children, false, additionalFields, overridename);
 }
 
@@ -1278,8 +1278,8 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
   if (valuePtr.has_value()){
     return valuePtr;
   }
-  
-  auto objectValuePtr = getObjectAttributePtr(world.objectMapping, id, field);
+
+  auto objectValuePtr = getObjectAttributePtr(world.objectMapping, id, field, getObjTypeLookup(world.sandbox, id));
   if (objectValuePtr.has_value()){
     return objectValuePtr;
   }
@@ -1401,7 +1401,7 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
 
   if (!setCoreAttr){
     SetAttrFlags setAttrFlags { .rebuildPhysics = false };
-    setObjectAttr = setObjectAttribute(world.objectMapping, id, field, value, util, setAttrFlags);
+    setObjectAttr = setObjectAttribute(world.objectMapping, id, field, value, util, setAttrFlags, getObjTypeLookup(world.sandbox, id));
     physicsObjectNeedsRebuild = physicsObjectNeedsRebuild || setAttrFlags.rebuildPhysics;  
   }
 

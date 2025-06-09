@@ -30,7 +30,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, ObjectMapping& obje
       .scale = childObj.transformation.scale,
       .rotation = childObj.transformation.rotation, 
       .isBone = childObj.isBone,
-      .meshes = objectMappingExists ? getMeshNames(objectMapping, id) : std::vector<std::string>{},
+      .meshes = objectMappingExists ? getMeshNames(objectMapping, id, getObjTypeLookup(sandbox, id)) : std::vector<std::string>{},
       .isDisabled = isMeshDisabled(objectMapping, id),
     };
     if (id == 0){
@@ -56,7 +56,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, ObjectMapping& obje
       .scale = parentObj.transformation.scale,
       .rotation = parentObj.transformation.rotation,
       .isBone = parentObj.isBone,
-      .meshes = parentObjectMappingExists ? getMeshNames(objectMapping, parentId) : std::vector<std::string>{},
+      .meshes = parentObjectMappingExists ? getMeshNames(objectMapping, parentId, getObjTypeLookup(sandbox, parentId)) : std::vector<std::string>{},
       .isDisabled = isMeshDisabled(objectMapping, parentId),
     };
     dotRelations.push_back(DotInfos{
