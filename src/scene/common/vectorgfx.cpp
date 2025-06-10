@@ -75,14 +75,14 @@ std::vector<Line> drawGrid3D(int numCellsWidth, float cellSize, float offsetX, f
   for (int i = 0; i <= numCellsWidth; i++){
     float centeredOffsetY = -1.f * (numCellsWidth * cellSize) / 2.f;
     auto lines = drawGridXZ(numCellsWidth, numCellsWidth, cellSize, offsetX, centeredOffsetY + i * cellSize + offsetY, offsetZ, std::nullopt);
-    for (auto &line : allLines){
+    for (auto &line : lines){
       allLines.push_back(line);
     }
   }
   for (int i = 0; i <= numCellsWidth; i++){
     float centeredOffsetZ = -1.f * (numCellsWidth * cellSize) / 2.f;
     auto lines = drawGridXY(numCellsWidth, numCellsWidth, cellSize, offsetX, offsetY, centeredOffsetZ + i * cellSize + offsetZ, std::nullopt);
-    for (auto &line : allLines){
+    for (auto &line : lines){
       allLines.push_back(line);
     }
   }
