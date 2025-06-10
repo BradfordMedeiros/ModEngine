@@ -6,8 +6,8 @@ std::string getDotInfoForNode(DotInfo& info){
   " meshes: [" + join(info.meshes, ' ') + "] disabled: " + print(info.isDisabled) +  "\"";
 }
 
-std::optional<bool> isMeshDisabled(ObjectMapping& objectMapping, objid id){
-  auto meshObj = getMesh(objectMapping, id);
+std::optional<bool> isMeshDisabled(SceneSandbox& sandbox, ObjectMapping& objectMapping, objid id){
+  auto meshObj = getMesh(objectMapping, id, getObjTypeLookup(sandbox, id));
   if (!meshObj){
     return std::nullopt;
   }
@@ -31,7 +31,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, ObjectMapping& obje
       .rotation = childObj.transformation.rotation, 
       .isBone = childObj.isBone,
       .meshes = objectMappingExists ? getMeshNames(objectMapping, id, getObjTypeLookup(sandbox, id)) : std::vector<std::string>{},
-      .isDisabled = isMeshDisabled(objectMapping, id),
+      .isDisabled = isMeshDisabled(sandbox, objectMapping, id),
     };
     if (id == 0){
       dotRelations.push_back(DotInfos{
@@ -57,7 +57,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, ObjectMapping& obje
       .rotation = parentObj.transformation.rotation,
       .isBone = parentObj.isBone,
       .meshes = parentObjectMappingExists ? getMeshNames(objectMapping, parentId, getObjTypeLookup(sandbox, parentId)) : std::vector<std::string>{},
-      .isDisabled = isMeshDisabled(objectMapping, parentId),
+      .isDisabled = isMeshDisabled(sandbox, objectMapping, parentId),
     };
     dotRelations.push_back(DotInfos{
       .child = childInfo,

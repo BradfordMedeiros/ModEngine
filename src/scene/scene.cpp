@@ -40,7 +40,7 @@ std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index
   BoundInfo boundInfo = { .xMin = -1,  .xMax = 1, .yMin = -1, .yMax = 1, .zMin = -1, .zMax = 1 };
   std::optional<glm::vec3> finalOffset = std::nullopt;
 
-  auto meshObj = getMesh(world.objectMapping, index); 
+  auto meshObj = getMesh(world.objectMapping, index, getObjTypeLookup(world.sandbox, index)); 
   if (meshObj != NULL){
     std::vector<BoundInfo> boundInfos;
     auto groupId = getGroupId(world.sandbox, index);

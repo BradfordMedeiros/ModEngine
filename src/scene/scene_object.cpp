@@ -167,7 +167,7 @@ void setObjectDimensions(World& world, std::vector<objid>& ids, float width, flo
     if (selected == -1 || !idExists(world.sandbox, selected)){
       return;
     }
-    auto meshObj = getMesh(world.objectMapping, selected);
+    auto meshObj = getMesh(world.objectMapping, selected, getObjTypeLookup(world.sandbox, selected));
     if (meshObj != NULL){
       // @TODO this is resizing based upon first mesh only, which is questionable
       auto newScale = getScaleEquivalent(meshObj -> meshesToRender.at(0).boundInfo, width, height, depth);   // this is correlated to logic in scene//getPhysicsInfoForGameObject, needs to be fixed
@@ -279,7 +279,7 @@ void setTexture(World& world, objid index, std::string textureName, std::functio
   }
 
   for (auto id : getIdsInGroupByObjId(world.sandbox, index)){
-    GameObjectMesh* meshObj = getMesh(world.objectMapping, id);
+    GameObjectMesh* meshObj = getMesh(world.objectMapping, id, getObjTypeLookup(world.sandbox, id));
     if (meshObj != NULL){
       meshObj -> texture.loadingInfo.textureString = textureName;
       meshObj -> texture.loadingInfo.textureId = textureId;

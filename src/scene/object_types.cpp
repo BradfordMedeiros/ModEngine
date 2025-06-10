@@ -158,7 +158,7 @@ void removeObject(
 
   mesh:
   {
-    auto gameobjectMesh = getMesh(objectMapping, id);
+    auto gameobjectMesh = getMesh(objectMapping, id, _objtypeLookup);
     if (gameobjectMesh){
       // do nothing
       objectMapping.mesh.erase(id);
@@ -392,7 +392,7 @@ int renderObject(
 
   mesh: 
   {
-    auto meshObj = getMesh(objectMapping, id);
+    auto meshObj = getMesh(objectMapping, id, lookup);
     if (meshObj != NULL && !meshObj -> isDisabled && (meshObj -> meshesToRender.size() > 0)){
       int numTriangles = 0;
       for (int x = 0; x < meshObj -> meshesToRender.size(); x++){
@@ -604,7 +604,7 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(ObjectMapping& objectMapp
   
   mesh:
   {
-    auto gameobjectMesh = getMesh(objectMapping, id);
+    auto gameobjectMesh = getMesh(objectMapping, id, objtypeLookup);
     if (gameobjectMesh){
       return getMeshAttribute(*gameobjectMesh, field);
     }
@@ -698,7 +698,7 @@ bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* fiel
   
   mesh:
   {
-    auto gameobjectMesh = getMesh(objectMapping, id);
+    auto gameobjectMesh = getMesh(objectMapping, id, objtypeLookup);
     if (gameobjectMesh){
       return setMeshAttribute(*gameobjectMesh, field, value, util, flags);
     }
@@ -796,7 +796,7 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, O
 
   mesh:
   {
-    auto gameobjectMesh = getMesh(objectMapping, id);
+    auto gameobjectMesh = getMesh(objectMapping, id, objtypeLookup);
     if (gameobjectMesh){
       return serializeMesh(*gameobjectMesh, serializeUtil);
     }
@@ -889,7 +889,7 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, O
 std::vector<Mesh> noMeshes;
 std::vector<Mesh>& getMeshesForId(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup){  
   {
-    GameObjectMesh* meshObject = getMesh(mapping, id);
+    GameObjectMesh* meshObject = getMesh(mapping, id, objtypeLookup);
     if (meshObject != NULL){
       return meshObject -> meshesToRender;
     }
@@ -906,7 +906,7 @@ std::vector<Mesh>& getMeshesForId(ObjectMapping& mapping, objid id, ObjTypeLooku
 
 std::vector<std::string> emptyNames;
 std::vector<std::string>& getMeshNames(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup){
-  GameObjectMesh* meshObject = getMesh(mapping, id);
+  GameObjectMesh* meshObject = getMesh(mapping, id, objtypeLookup);
   if (meshObject != NULL){
     return meshObject -> meshNames;
   }
@@ -918,7 +918,7 @@ bool isNavmesh(ObjectMapping& mapping, objid id){
 }
 
 std::optional<Texture> textureForId(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup){
-  auto meshObj = getMesh(mapping, id);
+  auto meshObj = getMesh(mapping, id, objtypeLookup);
   if (meshObj != NULL){
     for (int i = 0; i < meshObj -> meshNames.size(); i++){
       if (isRootMeshName(meshObj -> meshNames.at(i))){
@@ -1006,7 +1006,7 @@ GameObjectPortal* getPortal(ObjectMapping& mapping, objid id){
   return &it->second;
 }
 
-GameObjectMesh* getMesh(ObjectMapping& mapping, objid id){
+GameObjectMesh* getMesh(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup){
   auto it = mapping.mesh.find(id);
   if (it == mapping.mesh.end()) {
       return NULL;

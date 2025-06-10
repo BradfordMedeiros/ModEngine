@@ -209,7 +209,7 @@ GameObjectOctree* getOctree(ObjectMapping& mapping, objid id);
 GameObjectNavmesh* getNavmesh(ObjectMapping& mapping, objid id);
 GameObjectLight* getLight(ObjectMapping& mapping, objid id);
 GameObjectPortal* getPortal(ObjectMapping& mapping, objid id);
-GameObjectMesh* getMesh(ObjectMapping& mapping, objid id);
+GameObjectMesh* getMesh(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup);
 GameObjectPrefab* getPrefab(ObjectMapping& mapping, objid id);
 GameObjectCamera* getCameraObj(ObjectMapping& mapping, objid id);
 GameObjectUIText* getUIText(ObjectMapping& mapping, objid id);
