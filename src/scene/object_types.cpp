@@ -25,7 +25,7 @@ void freeMeshBuffer(std::vector<GameObjectMeshBuffer>& meshes, int index){
 
 
 void addObjectType(ObjectMapping& objectMapping, objid id, std::string name, GameobjAttributes& attr, ObjectTypeUtil util, ObjTypeLookup* _objtypeLookup){
-  modassert(!objExists(objectMapping, id), "addObjectType already exists");
+  modassert(!objExists(objectMapping, id, *_objtypeLookup), "addObjectType already exists");
   modlog("objecttype - add", std::to_string(id));
   auto objectType = getObjectType(name);
   _objtypeLookup -> id = id;
@@ -113,7 +113,7 @@ void removeObject(
   std::function<void(objid)> unloadScene,
   ObjTypeLookup& _objtypeLookup
 ){
-  if (!objExists(objectMapping, id)){
+  if (!objExists(objectMapping, id, _objtypeLookup)){
     return;
   }
 
@@ -600,7 +600,7 @@ int renderObject(
 }
 
 std::optional<AttributeValuePtr> getObjectAttributePtr(ObjectMapping& objectMapping, objid id, const char* field, ObjTypeLookup& objtypeLookup){
-  modassert(objExists(objectMapping, id), "getObjectAttributePtr obj does not exist");
+  modassert(objExists(objectMapping, id, objtypeLookup), "getObjectAttributePtr obj does not exist");
   
   mesh:
   {
@@ -694,7 +694,7 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(ObjectMapping& objectMapp
 }
 
 bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags& flags, ObjTypeLookup& objtypeLookup){
-  modassert(objExists(objectMapping, id), "setObjectAttribute id does not exist");
+  modassert(objExists(objectMapping, id, objtypeLookup), "setObjectAttribute id does not exist");
   
   mesh:
   {
@@ -788,7 +788,7 @@ bool setObjectAttribute(ObjectMapping& objectMapping, objid id, const char* fiel
 }
   
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, ObjectMapping& objectMapping, std::function<std::string(int)> getTextureName, std::function<void(std::string, std::string&)> saveFile, ObjTypeLookup& objtypeLookup){
-  modassert(objExists(objectMapping, id), "getAdditionalFields obj does not exist");
+  modassert(objExists(objectMapping, id, objtypeLookup), "getAdditionalFields obj does not exist");
   ObjectSerializeUtil serializeUtil {
     .textureName = getTextureName,
     .saveFile = saveFile,
@@ -1087,7 +1087,7 @@ std::vector<objid> getAllCameraIndexs(ObjectMapping& mapping){
   return ids;  
 }
 
-bool objExists(ObjectMapping& mapping, objid id){
+bool objExists(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup){
   if (mapping.mesh.find(id) != mapping.mesh.end()){
     return true;
   }

@@ -19,7 +19,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, ObjectMapping& obje
   forEveryGameobj(sandbox, [&sandbox, &objectMapping, &dotRelations](objid id, GameObject& childObj) -> void {
     auto childObjH = getGameObjectH(sandbox, id);
 
-    bool objectMappingExists = objExists(objectMapping, id);;
+    bool objectMappingExists = objExists(objectMapping, id, getObjTypeLookup(sandbox, id));
     DotInfo childInfo {
       .name = childObj.name,
       .id = childObjH.id,
@@ -45,7 +45,7 @@ std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, ObjectMapping& obje
     auto parentObj = getGameObject(sandbox, parentId);
     auto parentObjH = getGameObjectH(sandbox, parentId);
 
-    bool parentObjectMappingExists = objExists(objectMapping, parentId);
+    bool parentObjectMappingExists = objExists(objectMapping, parentId, getObjTypeLookup(sandbox, parentId));
     DotInfo parentInfo {
       .name = parentObj.name,
       .id = parentObj.id,

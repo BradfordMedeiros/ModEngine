@@ -123,6 +123,7 @@ struct GameObjectMeshBuffer {
 
 struct ObjectMapping {
   std::unordered_map<objid, GameObjectMesh> mesh;
+
   std::vector<GameObjectMeshBuffer> meshBuffer;
 
   std::unordered_map<objid, GameObjectCamera> camera;
@@ -221,7 +222,7 @@ std::vector<objid> getAllLightsIndexs(ObjectMapping& mapping);
 std::vector<objid> getAllPortalIndexs(ObjectMapping& mapping);
 std::vector<objid> getAllCameraIndexs(ObjectMapping& mapping);
 
-bool objExists(ObjectMapping& mapping, objid id);
+bool objExists(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup);
 
 
 

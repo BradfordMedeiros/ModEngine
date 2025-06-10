@@ -1270,7 +1270,7 @@ AttributeValuePtr ptrFromAttributeValue(AttributeValue& attributeValue){
 }
 
 std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, const char* field){
-  modassert(objExists(world.objectMapping, id), std::string("getObjectAttributePtr gameobjObj does not exist: ") + std::to_string(id));
+  modassert(objExists(world.objectMapping, id, getObjTypeLookup(world.sandbox, id)), std::string("getObjectAttributePtr gameobjObj does not exist: ") + std::to_string(id));
 
   GameObject& gameobj = getGameObject(world, id);
   auto valuePtr = getAttributePtr(gameobj, field);
