@@ -1552,7 +1552,12 @@ void updateBonesForAnimation(World& world){
   // // https://gamedev.net/forums/topic/484984-skeletal-animation-non-uniform-scale/4172731/
 
   int numBones = 0;
-  for (auto &[id, gameobjMesh] : world.objectMapping.mesh){ // TODO PERF - make this a static array instead of looping over all meshes
+  for (auto &gameobjMeshBuffer : world.objectMapping.meshBuffer){
+    if (!gameobjMeshBuffer.inUse){
+      continue;
+    }
+    auto id = gameobjMeshBuffer.id;
+    GameObjectMesh& gameobjMesh = gameobjMeshBuffer.mesh; 
     if (!gameobjMesh.hasBones){
       continue;
     }

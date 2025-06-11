@@ -32,29 +32,30 @@ void addObjectType(ObjectMapping& objectMapping, objid id, std::string name, Gam
   _objtypeLookup -> type = objectType;
 
   if (objectType == OBJ_MESH){
-    objectMapping.mesh[id] = createMesh(attr, util);
-    //{
-    //  std::cout << "change gameobject: add " << id << std::endl;
-    //  bool added = false;
-    //  int index = 0;
-    //  for (int i = 0; i < objectMapping.meshBuffer.size(); i++){
-    //    if (!objectMapping.meshBuffer.at(i).inUse){
-    //      objectMapping.meshBuffer.at(i).inUse = true;
-    //      objectMapping.meshBuffer.at(i).mesh = createMesh(attr, util);
-    //      added = true;
-    //      index = i;
-    //      break;
-    //    }
-    //  }
-    //  if (!added){
-    //    objectMapping.meshBuffer.push_back(GameObjectMeshBuffer {
-    //      .inUse = true,
-    //      .mesh = createMesh(attr, util),
-    //    });
-    //    index = objectMapping.meshBuffer.size() - 1;
-    //  }
-    //  _objtypeLookup -> index = index;
-    //}
+    {
+      std::cout << "change gameobject: add " << id << std::endl;
+      bool added = false;
+      int index = 0;
+      for (int i = 0; i < objectMapping.meshBuffer.size(); i++){
+        if (!objectMapping.meshBuffer.at(i).inUse){
+          objectMapping.meshBuffer.at(i).inUse = true;
+          objectMapping.meshBuffer.at(i).id = id;
+          added = true;
+          index = i;
+          break;
+        }
+      }
+      if (!added){
+        objectMapping.meshBuffer.push_back(GameObjectMeshBuffer {
+          .inUse = true,
+          .id = id,
+        });
+        index = objectMapping.meshBuffer.size() - 1;
+      }
+
+      _objtypeLookup -> index = index;
+      objectMapping.meshBuffer.at(index).mesh = createMesh(attr, util);
+    }
     return;
   }
   if (objectType == OBJ_CAMERA){
@@ -161,7 +162,7 @@ void removeObject(
     auto gameobjectMesh = getMesh(objectMapping, id, _objtypeLookup);
     if (gameobjectMesh){
       // do nothing
-      objectMapping.mesh.erase(id);
+      objectMapping.meshBuffer.at(_objtypeLookup.index).inUse = false;
       return;
     }
   }
@@ -1007,11 +1008,14 @@ GameObjectPortal* getPortal(ObjectMapping& mapping, objid id){
 }
 
 GameObjectMesh* getMesh(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup){
-  auto it = mapping.mesh.find(id);
-  if (it == mapping.mesh.end()) {
-      return NULL;
+  if (objtypeLookup.type != OBJ_MESH){
+    return NULL;
   }
-  return &it->second;
+  GameObjectMeshBuffer& buffer = mapping.meshBuffer.at(objtypeLookup.index);
+  if (!buffer.inUse){
+    return NULL;
+  }
+  return &buffer.mesh;
 }
 
 GameObjectPrefab* getPrefab(ObjectMapping& mapping, objid id){
@@ -1088,7 +1092,8 @@ std::vector<objid> getAllCameraIndexs(ObjectMapping& mapping){
 }
 
 bool objExists(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup){
-  if (mapping.mesh.find(id) != mapping.mesh.end()){
+  auto meshPtr = getMesh(mapping, id, objtypeLookup);
+  if (meshPtr){
     return true;
   }
   if (mapping.camera.find(id) != mapping.camera.end()){

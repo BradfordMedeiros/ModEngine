@@ -118,12 +118,11 @@ struct Object {
 
 struct GameObjectMeshBuffer {
   bool inUse;
+  objid id;
   GameObjectMesh mesh;
 };
 
 struct ObjectMapping {
-  std::unordered_map<objid, GameObjectMesh> mesh;
-
   std::vector<GameObjectMeshBuffer> meshBuffer;
 
   std::unordered_map<objid, GameObjectCamera> camera;
