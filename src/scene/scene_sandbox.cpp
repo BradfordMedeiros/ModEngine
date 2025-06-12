@@ -244,30 +244,17 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
 
 GameObject defaultObj{};
 GameObject& getGameObject(Scene& scene, objid id){
-  for (auto &obj: scene.gameobjects){
-    if (!obj.inUse){
-      continue;
-    }
-    if (obj.gameobj.id == id){
-      return obj.gameobj;
-    }
-  }
-  modassert(false, "cannot find object");
-  return defaultObj;
+  auto directIndex = scene.idToDirectIndex.at(id);
+  GameObjectBuffer& buffer = scene.gameobjects.at(directIndex);
+  modassert(buffer.inUse, "buffer not in use 1");
+  return buffer.gameobj;
 }
 GameObject& getGameObject(Scene& scene, objid id, objid* gameobjIndex){
-  for (int i = 0; i < scene.gameobjects.size(); i++){
-    auto& obj = scene.gameobjects.at(i);
-    if (!obj.inUse){
-      continue;
-    }
-    if (obj.gameobj.id == id){
-      *gameobjIndex = i;
-      return obj.gameobj;
-    }
-  }
-  modassert(false, "cannot find object");
-  return defaultObj;
+  auto directIndex = scene.idToDirectIndex.at(id);
+  GameObjectBuffer& buffer = scene.gameobjects.at(directIndex);
+  modassert(buffer.inUse, "buffer not in use 2");
+  *gameobjIndex = directIndex;
+  return buffer.gameobj;
 }
 
 GameObjectH& getGameObjectH(Scene& scene, objid id){
