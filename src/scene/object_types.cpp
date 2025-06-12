@@ -25,7 +25,6 @@ void freeMeshBuffer(std::vector<GameObjectMeshBuffer>& meshes, int index){
 
 
 void addObjectType(ObjectMapping& objectMapping, objid id, std::string name, GameobjAttributes& attr, ObjectTypeUtil util, ObjTypeLookup* _objtypeLookup){
-  modassert(!objExists(objectMapping, id, *_objtypeLookup), "addObjectType already exists");
   modlog("objecttype - add", std::to_string(id));
   auto objectType = getObjectType(name);
   _objtypeLookup -> id = id;
@@ -1094,6 +1093,7 @@ std::vector<objid> getAllCameraIndexs(ObjectMapping& mapping){
 bool objExists(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup){
   auto meshPtr = getMesh(mapping, id, objtypeLookup);
   if (meshPtr){
+    std::cout << "found mesh type for id: " << id << std::endl;
     return true;
   }
   if (mapping.camera.find(id) != mapping.camera.end()){
