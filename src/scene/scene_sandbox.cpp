@@ -9,7 +9,6 @@ const bool assertOnStale = false;
 
 
 void addObjectToCache(SceneSandbox& sandbox, objid id);
-void removeObjectFromCache(SceneSandbox& sandbox, objid id);
 
 struct TransformUpdateValue {
   glm::vec3 position;
@@ -76,10 +75,7 @@ void addNextFree(Scene& scene, GameObject& gameobj, GameObjectH& gameobjh){
   });
   scene.idToDirectIndex[gameobj.id] = (scene.gameobjects.size() - 1);
 }
-void freeGameObject(GameObjectBuffer& obj){
-  std::cout << "change gameobject: remove " << obj.gameobj.id << std::endl;
-  obj.inUse = false;
-}
+
 
 void enforceParentRelationship(Scene& scene, objid id, objid parentId){
   auto oldParent = getGameObjectH(scene, id).parentId;
@@ -420,14 +416,13 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::set<objid> objects)
     objid gameobjIndex = 0;
     std::string& objectName = getGameObject(scene, id, &gameobjIndex).name;
     auto sceneId = getGameObjectHDirectIndex(scene, gameobjIndex).sceneId;
-    for (auto &obj : scene.gameobjects){
-      if (obj.gameobj.id == id){
-        freeGameObject(obj);
-      }
-    }
+
+    GameObjectBuffer& gameobjBuffer = scene.gameobjects.at(gameobjIndex);
+    gameobjBuffer.inUse = false;
+
     scene.idToDirectIndex.erase(id);
     modlog("sandbox remove id", std::to_string(id));
-    removeObjectFromCache(sandbox, id);
+    sandbox.updatedIds.erase(id);
 
     scene.sceneToNameToId.at(sceneId).erase(objectName);
 
@@ -782,9 +777,7 @@ void addObjectToCache(SceneSandbox& sandbox, objid id){
   };
   updateAllChildrenPositions(sandbox, id);
 }
-void removeObjectFromCache(SceneSandbox& sandbox, objid id){
-  sandbox.updatedIds.erase(id);
-}
+
 
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform, Hint hint){
   if (enableTransformLogging){
