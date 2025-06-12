@@ -81,6 +81,7 @@ CScriptBinding cscriptCreateEmissionBinding(CustomApiBindings& api){
 
 int addNCounter = 0;
 std::set<objid> addNObjects(CustomApiBindings& gameapi, objid sceneId, int width, int height, int depth, std::string mesh){
+  auto start = std::chrono::system_clock::now();
   std::set<objid> ids;
   for (int x = 0; x < width; x++){
     for (int z = 0; z < depth; z++){
@@ -104,6 +105,11 @@ std::set<objid> addNObjects(CustomApiBindings& gameapi, objid sceneId, int width
       }
     }
   }
+
+  auto end = std::chrono::system_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+  std::cout << "addNObjects seconds: " << duration.count() << std::endl;
+
   return ids;
 }
 

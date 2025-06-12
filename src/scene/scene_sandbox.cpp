@@ -536,25 +536,7 @@ Transformation calcAbsoluteTransformDirectIndex(SceneSandbox& sandbox, objid par
 }
 
 
-std::vector<objid> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId){
-  std::vector<objid> ids;
-  std::queue<objid> idsToVisit;
 
-  auto currentId = updatedId;
-  idsToVisit.push(currentId);
-  
-  while (idsToVisit.size() > 0){
-    auto idToVisit = idsToVisit.front();
-    ids.push_back(idToVisit);
-    idsToVisit.pop();
-    GameObjectH& objH = getGameObjectH(sandbox.mainScene, idToVisit);
-    for (objid id : objH.children){
-      idsToVisit.push(id);
-    }    
-  }
-
-  return ids;
-}
 
 int getDepth(SceneSandbox& sandbox, objid id){
   if (id == 0){
@@ -573,42 +555,58 @@ int getDepth(SceneSandbox& sandbox, objid id){
   return currDepth;
 }
 
-void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedId){
-  auto updatedIdElements = bfsElementAndChildren(sandbox, updatedId);
+std::vector<int> bfsElementAndChildren(SceneSandbox& sandbox, objid updatedId){
+  std::vector<int> ids;
+  std::queue<objid> idsToVisit;
+
+  auto currentId = updatedId;
+  idsToVisit.push(currentId);
+  
+  while (idsToVisit.size() > 0){
+    auto idToVisit = idsToVisit.front();
+    ids.push_back(idToVisit);
+    idsToVisit.pop();
+    GameObjectH& objH = getGameObjectHDirectIndex(sandbox, idToVisit);
+    for (objid id : objH.childrenDirectIndex){
+      idsToVisit.push(id);
+    }    
+  }
+
+  return ids;
+}
+void updateAllChildrenPositions(SceneSandbox& sandbox, objid updatedIdObjIndex){
+  auto updatedIdIndex = sandbox.mainScene.idToDirectIndex.at(updatedIdObjIndex);
+  auto updatedIdElements = bfsElementAndChildren(sandbox, updatedIdIndex);
   //std::cout << "should update: " << print(updatedIdElements) << std::endl;
-  for (auto id : updatedIdElements){
-    if (id != updatedId){
-      sandbox.updatedIds.insert(id);  
+  for (auto directIndex : updatedIdElements){
+    GameObjectH& gameobjh = getGameObjectHDirectIndex(sandbox, directIndex);
+
+    if (updatedIdIndex != updatedIdIndex){
+      sandbox.updatedIds.insert(gameobjh.id);  
     }
-    if (sandbox.mainScene.idToDirectIndex.find(id) == sandbox.mainScene.idToDirectIndex.end()){
-      continue;
-    }
-    auto parentId = getGameObjectH(sandbox, id).parentId;
+
+    auto parentId = gameobjh.parentDirectIndex;
     if (parentId == 0){
       continue;
     }
-    if (sandbox.mainScene.idToDirectIndex.find(parentId) == sandbox.mainScene.idToDirectIndex.end()){
-      continue;
-    }
 
-    objid gameobjIndex = 0;
-    auto currentConstraint = getGameObject(sandbox.mainScene, id, &gameobjIndex).transformation;
-    auto newTransform = calcAbsoluteTransform(sandbox, parentId, currentConstraint);
+    auto currentConstraint = getGameObjectDirectIndex(sandbox, directIndex).transformation;
+    auto newTransform = calcAbsoluteTransformDirectIndex(sandbox, parentId, currentConstraint);
     if (enableTransformLogging){
-      std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]          [" << id << " " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]" << std::endl; 
+      std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]          [" << " " << inColor(getGameObjectDirectIndex(sandbox, directIndex).name, CONSOLE_COLOR_BLUE) << "]" << std::endl; 
       std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]               new rel: " << print(currentConstraint) << std::endl; 
       std::cout << inColor("> ", CONSOLE_COLOR_YELLOW) << "hint [child update]               new abs: " << print(newTransform) << std::endl; 
     }
 
-    sandbox.mainScene.gameobjects.at(gameobjIndex).absoluteTransform = TransformCacheElement {
+    sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform = TransformCacheElement {
       .transform = newTransform,
       .matrix = matrixFromComponents(newTransform),
     };
   }
 
   for (auto id : updatedIdElements){
-    auto depth = getDepth(sandbox, id);
-    getGameObjectH(sandbox, id).depth = depth;
+    auto depth = getDepth(sandbox, getGameObjectDirectIndex(sandbox, id).id);
+    getGameObjectHDirectIndex(sandbox, id).depth = depth;
   }
 }
 
