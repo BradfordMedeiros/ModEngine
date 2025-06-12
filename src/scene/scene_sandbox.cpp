@@ -426,11 +426,11 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::set<objid> objects)
 
     scene.sceneToNameToId.at(sceneId).erase(objectName);
 
-    for (auto [gameobjid, directIndex] : scene.idToDirectIndex){
-      GameObjectH& objh = getGameObjectHDirectIndex(scene, directIndex);
-      objh.children.erase(id);
-      objh.childrenDirectIndex.erase(directIndex);
-    }
+    auto parentDirectIndex = gameobjBuffer.gameobjh.parentDirectIndex;
+    GameObjectH& objh = getGameObjectHDirectIndex(scene, parentDirectIndex);
+    objh.children.erase(id);
+    objh.childrenDirectIndex.erase(gameobjIndex);
+    
   }
 }
 
