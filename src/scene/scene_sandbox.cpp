@@ -261,6 +261,9 @@ GameObjectH& getGameObjectH(Scene& scene, objid id){
   auto directIndex = scene.idToDirectIndex.at(id);
   return scene.gameobjects.at(directIndex).gameobjh;
 }
+GameObjectH& getGameObjectHDirectIndex(Scene& scene, objid directIndex){
+  return scene.gameobjects.at(directIndex).gameobjh;
+}
 
 std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string& name, objid sceneId){
   for (auto &gameObj : sandbox.mainScene.gameobjects){
@@ -414,8 +417,9 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::set<objid> objects)
   for (auto id : objects){
     Scene& scene = sandbox.mainScene;
 
-    std::string& objectName = getGameObject(scene, id).name;
-    auto sceneId = getGameObjectH(scene, id).sceneId;
+    objid gameobjIndex = 0;
+    std::string& objectName = getGameObject(scene, id, &gameobjIndex).name;
+    auto sceneId = getGameObjectHDirectIndex(scene, gameobjIndex).sceneId;
     for (auto &obj : scene.gameobjects){
       if (obj.gameobj.id == id){
         freeGameObject(obj);
@@ -428,7 +432,7 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::set<objid> objects)
     scene.sceneToNameToId.at(sceneId).erase(objectName);
 
     for (auto [gameobjid, directIndex] : scene.idToDirectIndex){
-      GameObjectH& objh = getGameObjectH(scene, gameobjid);
+      GameObjectH& objh = getGameObjectHDirectIndex(scene, directIndex);
       objh.children.erase(id);
       objh.childrenDirectIndex.erase(directIndex);
     }
