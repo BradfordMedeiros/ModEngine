@@ -1533,8 +1533,6 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<obj
   }
 }
 
-extern bool useTransform2;
-
 void updateLookAt(World& world, Transformation& viewTransform){  
   for (auto &gameobj : world.sandbox.mainScene.gameobjects){ // TODO PEROBJECT
     if (!gameobj.inUse){
@@ -1637,14 +1635,12 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
           //std::cout << "old transform: " << print(oldTransformation) << std::endl;
           makeParent(world.sandbox, objectAdded, particleOpts.parentId.value());
 
-          useTransform2 = true;
           //getGameObject(world.sandbox, objectAdded).transformation = oldTransformation;
           updateAbsoluteTransform(world.sandbox, objectAdded, Transformation {
             .position = oldTransformation.position,
-            .scale = oldTransformation.scale,
+            .scale = constraint.scale,
             .rotation = oldTransformation.rotation,
           }, Hint{ .hint = "particle-emitter" });
-          useTransform2 = false;
           //auto newTransformation = gameobjectTransformation(world, objectAdded, true);
           //modassert(aboutEqual(oldTransformation.position, newTransformation.position) && aboutEqual(oldTransformation.scale, newTransformation.scale), std::string("transforms not equal: old = ") + print(oldTransformation) + ", new = " + print(newTransformation));
         }

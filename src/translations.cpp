@@ -346,31 +346,12 @@ void modDecompose(glm::mat4& matrix, glm::vec3& pos, glm::quat& rot, glm::vec3& 
   glm::vec4 perspective;
   glm::decompose(matrix, scale, rot, pos, skew, perspective);
 }
-void modDecompose2(glm::mat4& matrix, glm::vec3& pos, glm::quat& rot, glm::vec3& scale){
-    pos = matrix[3];
-    for(int i = 0; i < 3; i++){
-      scale[i] = glm::length(glm::vec3(matrix[i]));
-    }
-    glm::mat3 rotation(
-      glm::vec3(matrix[0]) / scale[0],
-      glm::vec3(matrix[1]) / scale[1],
-      glm::vec3(matrix[2]) / scale[2]
-    );
-    rot = glm::quat_cast(rotation);
-}
 
-// These are hackey, some numerical precision issues.  They should be interchangable but aren't.  
-// Should figure out what's wrong. 
-bool useTransform2 = false;
 Transformation getTransformationFromMatrix(glm::mat4 matrix){
   glm::vec3 scale;
   glm::quat rotation;
   glm::vec3 translation;
-  if (useTransform2){
-    modDecompose2(matrix, translation, rotation, scale);
-  }else{
-    modDecompose(matrix, translation, rotation, scale);
-  }
+  modDecompose(matrix, translation, rotation, scale);
   Transformation transform = {
     .position = translation,
     .scale = scale,
