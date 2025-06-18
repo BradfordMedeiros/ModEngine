@@ -993,7 +993,6 @@ void onGLFWEerror(int error, const char* description){
   std::cerr << "Error: " << description << std::endl;
 }
 
-
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
 const GLFWvidmode* mode = NULL;
@@ -1114,10 +1113,19 @@ int main(int argc, char* argv[]){
             std::cout << "\033[31mError:  " << token.payload << ", file = " << file << "\033[0m" << std::endl;
           }
         }
-        
-
       }
     }
+
+    #ifdef ADDITIONAL_SRC_HEADER
+      for (auto file : getAdditionalPathsToValidate()){
+        std::cout << "validating file: " << file << std::endl;
+        if (!fileExistsFromPackage(file)){
+          missingFiles = true;
+          std::cout << "\033[31mError:  " << " hardcoded resource reference missing - file = " << file << "\033[0m" << std::endl;
+        }
+      }      
+    #endif
+
     exit(missingFiles ? 1 : 0);
   }
 
