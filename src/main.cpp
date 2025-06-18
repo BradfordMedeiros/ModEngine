@@ -1017,7 +1017,7 @@ int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
    ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))
-   ("t,texture", "Additional textures folder to use", cxxopts::value<std::string>()->default_value("./res"))
+   ("t,texture", "Additional textures folder to use", cxxopts::value<std::string>()->default_value("./res/textures/fonts/gamefont"))
    ("x,scriptpath", "Script file to use", cxxopts::value<std::vector<std::string>>()->default_value(""))
    ("fps", "Framerate limit", cxxopts::value<int>()->default_value("0"))
    ("fps-fixed", "Whether to guarantee the framerate, which means values do not occur in realtime", cxxopts::value<bool>()->default_value("false"))
@@ -1653,7 +1653,9 @@ int main(int argc, char* argv[]){
     defaultMeshesToLoad,
     allTexturesToLoad
   );
-  loadAllTextures(textureFolderPath);
+  if (textureFolderPath != ""){
+    loadAllTextures(textureFolderPath);
+  }
   if (state.skybox != ""){
     loadSkybox(world, state.skybox); 
   }

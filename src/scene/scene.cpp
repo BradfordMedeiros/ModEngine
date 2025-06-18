@@ -597,14 +597,16 @@ std::function<Mesh(std::string)> getCreateMeshCopy(World& world, std::string& ro
   };
 }
 
+static objid skyboxOwnerId = getUniqueObjId();
 void loadSkybox(World& world, std::string skyboxpath){
   if (world.meshes.find("skybox") != world.meshes.end()){
     freeMeshRef(world, "skybox");
   }
+  freeTextureRefsByOwner(world, skyboxOwnerId);
 
   std::set<std::string> textureRefs = {};
   world.meshes["skybox"] = MeshRef {
-    .owners = { -1 },
+    .owners = { skyboxOwnerId },
     .textureRefs = {},
     .mesh = loadSkybox(
       "./res/textures/default.jpg", 
@@ -612,11 +614,11 @@ void loadSkybox(World& world, std::string skyboxpath){
       skyboxpath, 
       [&world, &textureRefs](std::string texture) -> Texture {
         textureRefs.insert(texture);
-        return loadTextureWorld(world, texture, -1);
+        return loadTextureWorld(world, texture, skyboxOwnerId);
       },
       [&world, &textureRefs](std::string texture) -> Texture {
         textureRefs.insert(texture);
-        return loadSkyboxWorld(world, texture, -1);
+        return loadSkyboxWorld(world, texture, skyboxOwnerId);
       }
     )
   };
