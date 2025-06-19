@@ -1,9 +1,9 @@
 #include "./obj_octree.h"
 
 std::string readFileOrPackage(std::string filepath);
+extern Octree unsubdividedOctree;
+extern Octree subdividedOne;
 
-
-enum OctreeSelectionFace { FRONT, BACK, LEFT, RIGHT, UP, DOWN };
 std::optional<glm::ivec3> selectedIndex = glm::ivec3(1, 0, 0);
 std::optional<glm::ivec3> selectionDim = glm::ivec3(1, 1, 0);
 OctreeSelectionFace editorOrientation = FRONT;
@@ -43,22 +43,6 @@ struct ClosestIntersection {
 
 std::optional<RaycastResult> raycastResult = std::nullopt;
 std::optional<ClosestIntersection> closestRaycast = std::nullopt;
-
-struct Faces {
-  float XYClose;
-  glm::vec3 XYClosePoint;
-  float XYFar;
-  glm::vec3 XYFarPoint;
-  float YZLeft;
-  glm::vec3 YZLeftPoint;
-  float YZRight;
-  glm::vec3 YZRightPoint;
-  float XZTop;
-  glm::vec3 XZTopPoint;
-  float XZBottom;
-  glm::vec3 XZBottomPoint;
-  glm::vec3 center;
-};
 
 
 std::optional<AtlasDimensions> atlasDimensions = AtlasDimensions {
@@ -1431,7 +1415,6 @@ std::vector<FinalShapeData> optimizePhysicsShapeData(std::vector<PhysicsShapeDat
   return optimizedShapes;
 }
 
-
 void createShapeData(std::vector<FinalShapeData>& shapeData, std::vector<PositionAndScale>& _octreeCubes, std::vector<Transformation>& _rampBlocks){
   for (auto &shape : shapeData){
     ShapeBlock* blockShape = std::get_if<ShapeBlock>(shape.shape);
@@ -1629,45 +1612,6 @@ Mesh* getOctreeMesh(GameObjectOctree& octree){
   return &octree.mesh;
 }
 
-Octree unsubdividedOctree {
-  .rootNode = OctreeDivision {
-    .fill = FILL_FULL,
-    .shape = ShapeBlock{},
-    .faces = defaultTextureCoords,
-    .divisions = {},
-  },
-};
-Octree subdividedOne {
-  .rootNode = OctreeDivision {
-    .fill = FILL_MIXED,
-    .shape = ShapeBlock{},
-    .faces = defaultTextureCoords,
-    .divisions = {
-      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-      OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-      OctreeDivision { 
-        .fill = FILL_MIXED,
-        .faces = defaultTextureCoords,
-        .divisions = {
-          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-          OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-        },
-      },
-      OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-      OctreeDivision { .fill = FILL_EMPTY, .shape = ShapeBlock{}, .faces = defaultTextureCoords},
-      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-      OctreeDivision { .fill = FILL_FULL, .shape = ShapeBlock{}, .faces = defaultTextureCoords },
-    },
-  },
-};
-
 std::vector<AutoSerialize> octreeAutoserializer {
   AutoSerializeString {
     .structOffset = offsetof(GameObjectOctree, map),
@@ -1675,7 +1619,6 @@ std::vector<AutoSerialize> octreeAutoserializer {
     .defaultValue = "",
   }
 };
-
 
 GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectOctree obj {};
@@ -1724,16 +1667,7 @@ Faces getFaces(int x, int y, int z, float size, int subdivisionLevel){
 
   return faces;
 }
-void visualizeFaces(Faces& faces, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
-  drawLine(faces.center, faces.YZLeftPoint, glm::vec4(1.f, 0.f, 0.f, 1.f));
-  drawLine(faces.center, faces.YZRightPoint, glm::vec4(0.f, 1.f, 0.f, 1.f));
 
-  drawLine(faces.center, faces.XZTopPoint, glm::vec4(0.f, 1.f, 0.f, 1.f));
-  drawLine(faces.center, faces.XZBottomPoint, glm::vec4(0.f, 0.f, 1.f, 1.f));
-
-  drawLine(faces.center, faces.XYClosePoint, glm::vec4(1.f, 1.f, 0.f, 1.f));
-  drawLine(faces.center, faces.XYFarPoint, glm::vec4(0.f, 1.f, 1.f, 1.f));
-}
 
 /* parametric form to solve 
   pos.x + dir.x * t = x
@@ -2002,130 +1936,9 @@ void handleOctreeRaycast(Octree& octree, glm::vec3 fromPos, glm::vec3 toPosDirec
   }
 }
 
-void drawGridSelectionXY(int x, int y, int z, int numCellsWidth, int numCellsHeight, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine, std::optional<OctreeSelectionFace> face){
-  float cellSize = size * glm::pow(0.5f, subdivision);
-
-  float offsetX = x * cellSize;
-  float offsetY = y * cellSize;
-  float offsetZ = -1 * z * cellSize;
-  glm::vec3 offset(offsetX, offsetY, offsetZ);
-
-  glm::vec4 color(0.f, 0.f, 1.f, 1.f);
-  drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(numCellsWidth * cellSize, 0.f, 0.f), color);
-  drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), color);
-  drawLine(offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), offset + glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
-  drawLine(offset + glm::vec3(numCellsWidth * cellSize, 0.f, 0.f), offset + glm::vec3(numCellsWidth * cellSize, numCellsHeight * cellSize, 0.f), color);
-}
-void drawGridSelectionYZ(int x, int y, int z, int numCellsHeight, int numCellsDepth, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine, std::optional<OctreeSelectionFace> face){
-  float cellSize = size * glm::pow(0.5f, subdivision);
-
-  float offsetX = x * cellSize;
-  float offsetY = y * cellSize;
-  float offsetZ = -1 * z * cellSize;
-  glm::vec3 offset(offsetX, offsetY, offsetZ);
-
-  glm::vec4 color(0.f, 0.f, 1.f, 1.f);
-  drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(0.f, 0.f, -1 * numCellsDepth * cellSize), color);
-  drawLine(offset + glm::vec3(0.f, 0.f, 0.f), offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), color);
-  drawLine(offset + glm::vec3(0.f, numCellsHeight * cellSize, 0.f), offset + glm::vec3(0.f, numCellsHeight * cellSize, -1 * numCellsDepth * cellSize), color);
-  drawLine(offset + glm::vec3(0.f, 0.f, -1 * numCellsDepth * cellSize), offset + glm::vec3(0.f, numCellsHeight * cellSize, -1 * numCellsDepth * cellSize), color);
-}
-void drawGridSelectionCube(int x, int y, int z, int numCellsWidth, int numCellsHeight, int numCellDepth, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine, std::optional<OctreeSelectionFace> face){
-  drawGridSelectionXY(x, y, z,     1, 1, subdivision, size, drawLine, face);
-  drawGridSelectionXY(x, y, z + 1, 1, 1, subdivision, size, drawLine, face);
-  drawGridSelectionYZ(x, y, z, 1, 1, subdivision, size, drawLine, face);
-  drawGridSelectionYZ(x + 1, y, z, 1, 1, subdivision, size, drawLine, face);
-}
-void drawOctreeSelectedCell(int x, int y, int z, int subdivision, float size, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
-  drawGridSelectionCube(x, y, z, 1, 1, 1, subdivision, size, drawLine, std::nullopt);
-}
-
-void drawPhysicsBlock(PositionAndScale& physicShape, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
-  auto leftX = physicShape.position.x;
-  auto rightX = physicShape.position.x + physicShape.size.x;
-  auto topY = physicShape.position.y + physicShape.size.y;
-  auto bottomY = physicShape.position.y;
-  auto farZ = physicShape.position.z - physicShape.size.z;
-  auto nearZ = physicShape.position.z;
-
-  drawLine(glm::vec3(leftX, bottomY, nearZ), glm::vec3(rightX, bottomY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-  drawLine(glm::vec3(leftX, topY, nearZ), glm::vec3(rightX, topY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-
-  drawLine(glm::vec3(leftX, bottomY, farZ), glm::vec3(rightX, bottomY, farZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-  drawLine(glm::vec3(leftX, topY, farZ), glm::vec3(rightX, topY, farZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-
-  drawLine(glm::vec3(leftX, topY, farZ), glm::vec3(leftX, topY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-  drawLine(glm::vec3(rightX, topY, farZ), glm::vec3(rightX, topY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-
-  drawLine(glm::vec3(leftX, bottomY, farZ), glm::vec3(leftX, bottomY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-  drawLine(glm::vec3(rightX, bottomY, farZ), glm::vec3(rightX, bottomY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-
-  drawLine(glm::vec3(rightX, bottomY, farZ), glm::vec3(rightX, topY, farZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-  drawLine(glm::vec3(leftX, bottomY, farZ), glm::vec3(leftX, topY, farZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-
-  drawLine(glm::vec3(rightX, bottomY, nearZ), glm::vec3(rightX, topY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-  drawLine(glm::vec3(leftX, bottomY, nearZ), glm::vec3(leftX, topY, nearZ), glm::vec4(1.f, 0.f, 0.f, 1.f));
-}
-void drawPhysicsShape(std::vector<glm::vec3>& verts, glm::vec3& centeringOffset, Transformation& transform, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
-  modassert(verts.size() % 3 == 0, "expected verts to be a multiple of 3");
-  auto scale = transform.scale * 2.f;
-  for (int i = 0; i < verts.size() - 1; i+=3){
-    auto pos1 = verts.at(i);
-    auto pos2 = verts.at(i + 1);
-    auto pos3 = verts.at(i + 2);
-
-    pos1 = pos1 + centeringOffset;
-    pos2 = pos2 + centeringOffset;
-    pos3 = pos3 + centeringOffset;
-
-    pos1 *= scale;  // * 2 since communicated to physics in half extents
-    pos2 *= scale;  // * 2 since communicated to physics in half extents
-    pos3 *= scale;  // * 2 since communicated to physics in half extents
-
-    pos1 = transform.rotation * pos1 + transform.position;
-    pos2 = transform.rotation * pos2 + transform.position;
-    pos3 = transform.rotation * pos3 + transform.position;
-
-    auto rotatedScaledCentering = transform.rotation * (centeringOffset * scale);
-
-    if (rotatedScaledCentering.x < 0){
-      rotatedScaledCentering.x *= -1;
-    }
-    if (rotatedScaledCentering.y < 0){
-      rotatedScaledCentering.y *= -1;
-    }
-    if (rotatedScaledCentering.z < 0){
-      rotatedScaledCentering.z *= -1;
-    }
-    rotatedScaledCentering.z *= -1; 
-
-    //std::cout << "values: c = " << print(centeringOffset) << ", s = " << print(scale) << ", r  = " << print(rotatedScale) << ", rc = " << print(rotatedCentering) << ", rsc = " << print(rotatedScaledCentering) << std::endl;
-
-    pos1 += rotatedScaledCentering;  // why doesn't this need the rotation added back in ? 
-    pos2 += rotatedScaledCentering;
-    pos3 += rotatedScaledCentering;
-
-    drawLine(pos1, pos2, glm::vec4(1.f, 0.f, 0.f, 1.f));
-    drawLine(pos1, pos3, glm::vec4(1.f, 0.f, 0.f, 1.f));
-    drawLine(pos2, pos3, glm::vec4(1.f, 0.f, 0.f, 1.f));
-
-  }
-}
-
-void drawPhysicsShapes(PhysicsShapes& physicsShapes, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
-  for (auto &block : physicsShapes.blocks){
-    drawPhysicsBlock(block, drawLine);
-  }
-
-  for (auto &shape : physicsShapes.shapes){
-    for (auto &transform : shape.specialBlocks){
-      drawPhysicsShape(shape.verts, shape.centeringOffset, transform, drawLine);
-    }
-  }
-}
+bool drawRaycastLine = false;
 
 bool drawAllSelectedBlocks = false;
-bool drawRaycastLine = false;
 void drawOctreeSelectionGrid(Octree& octree, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine2, glm::mat4 modelMatrix){
   std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLineModel = [drawLine2, &modelMatrix](glm::vec3 fromPos, glm::vec3 toPos, glm::vec4 color) -> void {
     glm::vec4 fromPosVec4(fromPos.x, fromPos.y, fromPos.z, 1.f);
@@ -2207,7 +2020,6 @@ void makeOctreeCellRamp(Octree& octree, int x, int y, int z, int subdivision, Ra
   };
   writeOctreeCell(octree,  x, y, z, subdivision, true); // kind of hackey, but just to ensure parents are updated
 }
-
 
 struct RampParams {
   float startHeight;
@@ -2543,7 +2355,6 @@ std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctre
   autoserializerSerialize((char*)&obj, octreeAutoserializer, pairs);
   return pairs;
 }
-
 
 void loadOctree(GameObjectOctree& octree, std::function<std::string(std::string)> loadFile, std::function<Mesh(MeshData&)> loadMesh){
   modlog("octree", "loading");

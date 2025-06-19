@@ -1,51 +1,12 @@
 #ifndef MOD_OBJ_OCTREE
 #define MOD_OBJ_OCTREE
 
-#include "../../common/util.h"
-#include "./obj_util.h"
-#include "../common/vectorgfx.h"
-#include "../../resources.h"
-
-struct FaceTexture {
-  int textureIndex;
-  glm::vec2 texCoordsTopLeft;
-  glm::vec2 texCoordsTopRight;
-  glm::vec2 texCoordsBottomLeft;
-  glm::vec2 texCoordsBottomRight;
-};
-
-enum FillType { FILL_FULL, FILL_EMPTY, FILL_MIXED };
-
-struct ShapeBlock { };
-
-enum RampDirection { RAMP_RIGHT, RAMP_LEFT, RAMP_FORWARD, RAMP_BACKWARD };
-struct ShapeRamp { 
-  RampDirection direction;
-  float startHeight;
-  float endHeight;
-  float startDepth;
-  float endDepth;
-};
-typedef std::variant<ShapeBlock, ShapeRamp> OctreeShape;
-
-struct OctreeDivision {
-  // -x +y -z 
-  // +x +y -z
-  // -x +y +z
-  // +x +y +z
-  // -x -y -z 
-  // +x -y -z
-  // -x -y +z
-  // +x -y +z
-  FillType fill;
-  OctreeShape shape;
-  std::vector<FaceTexture> faces;
-  std::vector<OctreeDivision> divisions;
-};
-
-struct Octree {
-  OctreeDivision rootNode;
-};
+#include "../../../common/util.h"
+#include "../obj_util.h"
+#include "../../common/vectorgfx.h"
+#include "../../../resources.h"
+#include "./octree_vector.h"
+#include "./octree_types.h"
 
 struct GameObjectOctree {
   std::string map;
@@ -88,11 +49,6 @@ void makeOctreeCellRamp(GameObjectOctree& gameobjOctree, Octree& octree, std::fu
 void loadOctree(GameObjectOctree& octree, std::function<std::string(std::string)> loadFile, std::function<Mesh(MeshData&)> loadMesh);
 void saveOctree(GameObjectOctree& octree, std::function<void(std::string, std::string&)> saveFile);
 void optimizeOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
-
-struct PhysicsShapes {
-  std::vector<PositionAndScale> blocks;
-  std::vector<PositionAndScaleVerts> shapes;
-};
 
 PhysicsShapes getPhysicsShapes(Octree& octree);
 std::string debugInfo(PhysicsShapes& physicsShapes);
