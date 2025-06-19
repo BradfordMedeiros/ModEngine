@@ -3,6 +3,8 @@
 
 #include <vector>
 #include "./octree_types.h"
+#include "../../../common/util.h"
+#include "../obj_util.h"
 
 struct PhysicsShapeData {
   OctreeShape* shape;
@@ -31,6 +33,8 @@ struct FinalShapeData {
 };
 std::vector<FinalShapeData> optimizePhysicsShapeData(std::vector<PhysicsShapeData>& shapeData);
 
+
+void createShapeData(std::vector<FinalShapeData>& shapeData, std::vector<PositionAndScale>& _octreeCubes, std::vector<Transformation>& _rampBlocks);
 
 #endif
 

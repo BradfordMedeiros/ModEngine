@@ -1029,55 +1029,6 @@ void addOctreeLevel(Octree& octree, std::vector<OctreeVertex>& points, glm::vec3
 2*/
 
 
-void createShapeData(std::vector<FinalShapeData>& shapeData, std::vector<PositionAndScale>& _octreeCubes, std::vector<Transformation>& _rampBlocks){
-  for (auto &shape : shapeData){
-    ShapeBlock* blockShape = std::get_if<ShapeBlock>(shape.shape);
-    ShapeRamp* rampShape = std::get_if<ShapeRamp>(shape.shape);
-    modassert(blockShape || rampShape, "shape type not supported");
-    if (blockShape){
-      _octreeCubes.push_back(PositionAndScale {
-        .position = shape.position, 
-        .size = glm::vec3(shape.shapeSize.x, shape.shapeSize.y, shape.shapeSize.z),
-      });
-    }else if (rampShape){
-      auto heightMultiplier = rampShape -> endHeight - rampShape -> startHeight;
-      float depth = rampShape -> endDepth - rampShape -> startDepth;
-      float ySize = shape.shapeSize.y * heightMultiplier;
-      auto rampPosition = shape.position + glm::vec3(0.f, shape.shapeSize.y * rampShape -> startHeight, 0.f);
-
-      if (rampShape -> direction == RAMP_FORWARD){
-        auto extraOffset = glm::vec3(0.f, 0.f, -1 * rampShape -> startDepth * shape.shapeSize.z);
-        _rampBlocks.push_back(Transformation {
-          .position = rampPosition + extraOffset,
-          .scale = glm::vec3(shape.shapeSize.x, ySize, shape.shapeSize.z * depth),
-          .rotation = MOD_ORIENTATION_FORWARD,
-        });
-      }else if (rampShape -> direction == RAMP_BACKWARD){
-        auto extraOffset = glm::vec3(0.f, 0.f, -1 * (1.f - rampShape -> endDepth) * shape.shapeSize.z);
-        _rampBlocks.push_back(Transformation {
-          .position = rampPosition + extraOffset,
-          .scale = glm::vec3(shape.shapeSize.x, ySize, shape.shapeSize.z * depth),
-          .rotation = MOD_ORIENTATION_BACKWARD,
-        });
-      }else if (rampShape -> direction == RAMP_LEFT){
-        auto extraOffset = glm::vec3(rampShape -> startDepth * shape.shapeSize.z, 0.f, 0.f);
-        _rampBlocks.push_back(Transformation {
-          .position = rampPosition + extraOffset,
-          .scale = glm::vec3(shape.shapeSize.x, ySize, shape.shapeSize.z * depth),
-          .rotation = MOD_ORIENTATION_RIGHT,
-        });
-      }else if (rampShape -> direction == RAMP_RIGHT){
-        auto extraOffset = glm::vec3((1.f - rampShape -> endDepth) * shape.shapeSize.z, 0.f, 0.f);
-        _rampBlocks.push_back(Transformation {
-          .position = rampPosition + extraOffset,
-          .scale = glm::vec3(shape.shapeSize.x, ySize, shape.shapeSize.z * depth),
-          .rotation = MOD_ORIENTATION_LEFT,
-        });
-      }
-    }
-  }
-}
-
 void addAllDivisions(std::vector<PhysicsShapeData>& shapeBlocks, OctreeDivision& octreeDivision, std::vector<int> path){
   if (octreeDivision.fill == FILL_FULL){
     shapeBlocks.push_back(PhysicsShapeData {
