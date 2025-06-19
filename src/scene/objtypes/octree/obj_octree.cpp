@@ -467,84 +467,7 @@ glm::ivec3 localIndexForSubdivision(int x, int y, int z, int sourceSubdivision, 
   auto indexs = indexForSubdivision(x, y, z, sourceSubdivision, targetSubdivision);
   return glm::ivec3(indexs.x % 2, indexs.y % 2, indexs.z % 2);
 }
-int xyzIndexToFlatIndex(glm::ivec3 index){
-  modassert(index.x >= 0 && index.x < 2, std::string("xyzIndexToFlatIndex: invalid x index: ") + print(index));
-  modassert(index.y >= 0 && index.y < 2, std::string("xyzIndexToFlatIndex: invalid y index: ") + print(index));
-  modassert(index.z >= 0 && index.z < 2, std::string("xyzIndexToFlatIndex: invalid z index: ") + print(index));
 
-  // -x +y -z 
-  if (index.x == 0 && index.y == 1 && index.z == 1){
-    return 0;
-  }
-
-  // +x +y -z
-  if (index.x == 1 && index.y == 1 && index.z == 1){
-    return 1;
-  }
-
-  // -x +y +z
-  if (index.x == 0 && index.y == 1 && index.z == 0){
-    return 2;
-  }
-
-  // +x +y +z
-  if (index.x == 1 && index.y == 1 && index.z == 0){
-    return 3;
-  }
-
-  // -x -y -z 
-  if (index.x == 0 && index.y == 0 && index.z == 1){
-    return 4;
-  }
-
-  // +x -y -z
-  if (index.x == 1 && index.y == 0 && index.z == 1){
-    return 5;
-  }
-
-  // -x -y +z
-  if (index.x == 0 && index.y == 0 && index.z == 0){
-    return 6;
-  }
-
-  // +x -y +z
-  if (index.x == 1 && index.y == 0 && index.z == 0){
-    return 7;
-  }
-
-  modassert(false, "xyzIndexToFlatIndex invalid");
-  return 0;
-}
-glm::ivec3 flatIndexToXYZ(int index){
-  modassert(index >= 0 && index < 8, "invalid flatIndexToXYZ");
-
-  if (index == 0){
-    return glm::ivec3(0, 1, 1);
-  }
-  if (index == 1){
-    return glm::ivec3(1, 1, 1);
-  }
-  if (index == 2){
-    return glm::ivec3(0, 1, 0);
-  }
-  if (index == 3){
-    return glm::ivec3(1, 1, 0);
-  }
-  if (index == 4){
-    return glm::ivec3(0, 0, 1);
-  }
-  if (index == 5){
-    return glm::ivec3(1, 0, 1);
-  }
-  if (index == 6){
-    return glm::ivec3(0, 0, 0);
-  }
-  if (index == 7){
-    return glm::ivec3(1, 0, 0);
-  }
-  modassert(false, "invalid flatIndexToXYZ error");
-  return glm::ivec3(0, 0, 0);
-}
 
 std::vector<glm::ivec3> octreePath(int x, int y, int z, int subdivision){
   std::vector<glm::ivec3> path;
@@ -554,25 +477,6 @@ std::vector<glm::ivec3> octreePath(int x, int y, int z, int subdivision){
     path.push_back(indexs);
   }
   return path;
-}
-
-struct ValueAndSubdivision {
-  glm::ivec3 value;
-  int subdivisionLevel;
-};
-
-ValueAndSubdivision indexForOctreePath(std::vector<int> path){
-  glm::ivec3 sumIndex(0, 0, 0);
-  int subdivisionLevel = 0;
-  for (int index : path){
-    sumIndex = sumIndex * 2;
-    sumIndex += flatIndexToXYZ(index);;
-    subdivisionLevel++;
-  }
-  return ValueAndSubdivision {
-    .value = sumIndex,
-    .subdivisionLevel = subdivisionLevel,
-  };
 }
 
 bool allFilledIn(OctreeDivision& octreeDivision, FillType fillType){
@@ -1052,27 +956,6 @@ void addRamp(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, st
   }
 }
 
-glm::vec3 offsetForFlatIndex(int index, float subdivisionSize, glm::vec3 rootPos){
-  if (index == 0){
-    return rootPos + glm::vec3(0.f, subdivisionSize, -subdivisionSize);
-  }else if (index == 1){
-    return rootPos + glm::vec3(subdivisionSize, subdivisionSize, -subdivisionSize);
-  }else if (index == 2){
-    return rootPos + glm::vec3(0.f, subdivisionSize, 0.f);
-  }else if (index == 3){
-    return rootPos + glm::vec3(subdivisionSize, subdivisionSize, 0.f);
-  }else if (index == 4){
-    return rootPos + glm::vec3(0.f, 0.f, -subdivisionSize);
-  }else if (index == 5){
-    return rootPos + glm::vec3(subdivisionSize, 0.f, -subdivisionSize);
-  }else if (index == 6){
-    return rootPos + glm::vec3(0.f, 0.f, 0.f);
-  }else if (index == 7){
-    return rootPos + glm::vec3(subdivisionSize, 0.f, 0.f);
-  }
-  modassert(false, "invalid flat index");
-  return glm::vec3(0.f, 0.f, 0.f);
-}
 
 void addOctreeLevel(Octree& octree, std::vector<OctreeVertex>& points, glm::vec3 rootPos, OctreeDivision& octreeDivision, float size, int subdivisionLevel, std::vector<int> path){
   std::cout << "addOctreeLevel: " << size << std::endl;
@@ -1175,29 +1058,6 @@ void addOctreeLevel(Octree& octree, std::vector<OctreeVertex>& points, glm::vec3
 1. decompose down to max subdivision levels, but make it sparse
 2*/
 
-struct PhysicsShapeData {
-  OctreeShape* shape;
-  std::vector<int> path;
-};
-
-struct SparseShape {
-  OctreeShape* shape;
-  std::vector<int> path;
-  bool deleted;
-  int minX;
-  int maxX;
-  int minY;
-  int maxY;
-  int minZ;
-  int maxZ;
-};
-
-std::string print(SparseShape& sparseShape){
-  glm::vec3 minValues(sparseShape.minX, sparseShape.minY, sparseShape.minZ);
-  glm::vec3 maxValues(sparseShape.maxX, sparseShape.maxY, sparseShape.maxZ);
-  std::string value = print(minValues) + " | " + print(maxValues);
-  return value;
-}
 
 SparseShape blockToSparseSubdivision(OctreeShape* shape, std::vector<int>& path, int subdivisionSize){
   modassert(path.size() <= subdivisionSize, "expected path.size() <= subdivisionSize");
@@ -1223,130 +1083,6 @@ SparseShape blockToSparseSubdivision(OctreeShape* shape, std::vector<int>& path,
   return sparseShape;
 }
 
-std::vector<SparseShape> joinSparseShapes(std::vector<SparseShape>& shapes){
-
-  // join along x
-
-  std::vector<SparseShape> joinedShapes;
-
-  for (int iterations = 0; iterations < 2; iterations++){
-    for (int i = 0; i < shapes.size(); i++){
-      for (int j = i + 1; j < shapes.size(); j++){
-        SparseShape& shape1 = shapes.at(i);
-        SparseShape& shape2 = shapes.at(j);
-        if (shape1.deleted || shape2.deleted){
-          continue;
-        }
-        // if shape2 can fit into shape1 in other y and z dimensions, and is right next ot it on the x
-        // or vice versa
-        if (
-          (shape2.minY == shape1.minY && shape2.maxY == shape1.maxY &&  shape2.minZ == shape1.minZ && shape2.maxZ == shape1.maxZ) || 
-          (shape1.minY == shape2.minY && shape1.maxY == shape2.maxY &&  shape1.minZ == shape2.minZ && shape1.maxZ == shape2.maxZ)
-        ){
-          std::cout << "found a candidate for joining: " << print(shape1) << ", " << print(shape2) << std::endl;
-          // if the shape is just in the other...shouldn't ever happen
-          if (shape2.minX >= shape1.minX && shape2.maxX <= shape1.maxX){
-            shape2.deleted = true;
-            modassert(false, "expected blocks being joined not to be completely within the other");
-          }
-          if (shape2.minX == shape1.maxX){
-            shape2.deleted = true;
-            shape1.maxX = shape2.maxX;
-          }
-          if (shape1.minX == shape2.maxX){
-            shape1.deleted = true;
-            shape2.maxX = shape1.maxX;
-          }
-        }
-      }
-    }
-
-    // join over y
-    for (int i = 0; i < shapes.size(); i++){
-      for (int j = i + 1; j < shapes.size(); j++){
-        SparseShape& shape1 = shapes.at(i);
-        SparseShape& shape2 = shapes.at(j);
-        if (shape1.deleted || shape2.deleted){
-          continue;
-        }
-        // if shape2 can fit into shape1 in other y and z dimensions, and is right next ot it on the x
-        // or vice versa
-        if (
-          (shape2.minX == shape1.minX && shape2.maxX == shape1.maxX &&  shape2.minZ == shape1.minZ && shape2.maxZ == shape1.maxZ) || 
-          (shape1.minX == shape2.minX && shape1.maxX == shape2.maxX &&  shape1.minZ == shape2.minZ && shape1.maxZ == shape2.maxZ)
-        ){
-          std::cout << "found a candidate for joining: " << print(shape1) << ", " << print(shape2) << std::endl;
-          // if the shape is just in the other...shouldn't ever happen
-          if (shape2.minY >= shape1.minY && shape2.maxY <= shape1.maxY){
-            shape2.deleted = true;
-            modassert(false, "expected blocks being joined not to be completely within the other");
-          }
-          if (shape2.minY == shape1.maxY){
-            shape2.deleted = true;
-            shape1.maxY = shape2.maxY;
-          }
-          if (shape1.minY == shape2.maxY){
-            shape1.deleted = true;
-            shape2.maxY = shape1.maxY;
-          }
-        }
-      }
-    }
-
-    // join over z
-    for (int i = 0; i < shapes.size(); i++){
-      for (int j = i + 1; j < shapes.size(); j++){
-        SparseShape& shape1 = shapes.at(i);
-        SparseShape& shape2 = shapes.at(j);
-        if (shape1.deleted || shape2.deleted){
-          continue;
-        }
-        // if shape2 can fit into shape1 in other y and z dimensions, and is right next ot it on the x
-        // or vice versa
-        if (
-          (shape2.minX == shape1.minX && shape2.maxX == shape1.maxX &&  shape2.minY == shape1.minY && shape2.maxY == shape1.maxY) || 
-          (shape1.minX == shape2.minX && shape1.maxX == shape2.maxX &&  shape1.minY == shape2.minY && shape1.maxY == shape2.maxY)
-        ){
-          std::cout << "found a candidate for joining: " << print(shape1) << ", " << print(shape2) << std::endl;
-          // if the shape is just in the other...shouldn't ever happen
-          if (shape2.minZ >= shape1.minZ && shape2.maxZ <= shape1.maxZ){
-            shape2.deleted = true;
-            modassert(false, "expected blocks being joined not to be completely within the other");
-          }
-          if (shape2.minZ == shape1.maxZ){
-            shape2.deleted = true;
-            shape1.maxZ = shape2.maxZ;
-          }
-          if (shape1.minZ == shape2.maxZ){
-            shape1.deleted = true;
-            shape2.maxZ = shape1.maxZ;
-          }
-        }
-      }
-    }
-  }
-
-
-  for (auto &shape : shapes){
-    if (!shape.deleted){
-      joinedShapes.push_back(shape);
-    }
-  }
-
-
-  return joinedShapes;
-}
-
-
-int maxSubdivision(std::vector<PhysicsShapeData>& shapeData){
-  int maxSize = 0;
-  for (auto &shape : shapeData){
-    if (shape.path.size() > maxSize){
-      maxSize = shape.path.size();
-    }
-  }
-  return maxSize;
-}
 
 struct FinalShapeData {
   OctreeShape* shape;

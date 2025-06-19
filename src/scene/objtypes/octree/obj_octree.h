@@ -7,6 +7,7 @@
 #include "../../../resources.h"
 #include "./octree_vector.h"
 #include "./octree_types.h"
+#include "./octree_physics.h"
 
 struct GameObjectOctree {
   std::string map;

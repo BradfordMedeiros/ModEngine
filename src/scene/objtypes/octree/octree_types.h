@@ -62,5 +62,9 @@ struct Faces {
   glm::vec3 center;
 };
 
+glm::ivec3 flatIndexToXYZ(int index);
+int xyzIndexToFlatIndex(glm::ivec3 index);
+
+glm::vec3 offsetForFlatIndex(int index, float subdivisionSize, glm::vec3 rootPos);
 
 #endif
