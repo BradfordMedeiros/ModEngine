@@ -64,24 +64,22 @@ struct Faces {
 std::optional<AtlasDimensions> atlasDimensions = AtlasDimensions {
   .textureNames = {
     resources::GRID_TEXTURE,
-    "../gameresources/build/textures/clean/tunnel_road.jpg", 
-    "../gameresources/build/textures/clean/grass.jpg", 
-    "../gameresources/build/textures/clean/pebbles2.png", 
+    resources::TUNNELROAD_TEXTURE,  
+    resources::TEXTURE_GRASS, 
+    resources::TEXTURE_PEBBLES, 
+    resources::TEXTURE_METALGRID, 
+    resources::TEXTURE_DRYFOREST, 
+    resources::TEXTURE_FOLIAGE, 
+    resources::TEXTURE_METAL_SCIFI,
 
-    "../gameresources/build/textures/clean/metalgrid.jpg" , 
-    "../gameresources/build/textures/clean/dryforestground.jpg", 
-    "../gameresources/build/textures/clean/foliage2.png", 
-    "../gameresources/build/textures/clean/metal_scifi.png",
-
-    "../gameresources/build/textures/clean/tex_Ice.jpg", 
-    "../gameresources/build/textures/clean/tex_Ice.jpg", 
-    "../gameresources/build/textures/clean/tex_Ice.jpg", 
-    "../gameresources/build/textures/clean/tex_Ice.jpg", 
-
-    "../gameresources/build/textures/clean/tex_Ice.jpg", 
-    "../gameresources/build/textures/clean/tex_Ice.jpg", 
-    "../gameresources/build/textures/clean/tex_Ice.jpg", 
-    "../gameresources/build/textures/clean/tex_Ice.jpg", 
+    resources::TEXTURE_ICE,
+    resources::TEXTURE_ICE,
+    resources::TEXTURE_ICE,
+    resources::TEXTURE_ICE,
+    resources::TEXTURE_ICE,
+    resources::TEXTURE_ICE,
+    resources::TEXTURE_ICE,
+    resources::TEXTURE_ICE,
   },
 };
 
