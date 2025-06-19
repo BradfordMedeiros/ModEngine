@@ -63,7 +63,7 @@ struct Faces {
 
 std::optional<AtlasDimensions> atlasDimensions = AtlasDimensions {
   .textureNames = {
-    "./res/textures/grid.png", 
+    resources::GRID_TEXTURE,
     "../gameresources/build/textures/clean/tunnel_road.jpg", 
     "../gameresources/build/textures/clean/grass.jpg", 
     "../gameresources/build/textures/clean/pebbles2.png", 
@@ -138,7 +138,7 @@ std::string serializeOctree(Octree& octree){
   std::vector<FaceTexture> textures;
   std::vector<OctreeShape*> shapeData;
 
-  std::string str = std::to_string(octree.size) + "\n";
+  std::string str = std::to_string(1.f) + "\n";
   str += serializeOctreeDivision(octree.rootNode, textures, shapeData) + "\n";
 
   std::string textureString = "";
@@ -451,7 +451,6 @@ std::unordered_map<int, int> getTextureMapping(std::vector<std::string>& mapText
 Octree deserializeOctree(std::string& value){
   auto lines = split(value, '\n');
   //modassert(lines.size() == 5, std::string("invalid line size, got: ") + std::to_string(lines.size()));
-  float size = std::atof(lines.at(0).c_str());
 
   auto textures = deserializeTextures(lines.at(2));
   auto shapes = deserializeShapes(lines.at(3));
@@ -470,7 +469,6 @@ Octree deserializeOctree(std::string& value){
   int currentTextureIndex = -1;
   int currentShapeIndex = -1;
   return Octree  {
-    .size = size,
     .rootNode = deserializeOctreeDivision(lines.at(1), textures, &currentTextureIndex, shapes, &currentShapeIndex),
   };
 }
@@ -1586,7 +1584,7 @@ Mesh createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loadMesh){
   std::vector<OctreeVertex> points = {};
 
   std::cout << "adding octree start" << std::endl;
-  addOctreeLevel(octree, points, glm::vec3(0.f, 0.f, 0.f), octree.rootNode, octree.size, 0, {});
+  addOctreeLevel(octree, points, glm::vec3(0.f, 0.f, 0.f), octree.rootNode, 1.f, 0, {});
 
   std::cout << "adding octree end" << std::endl;
 
@@ -1634,7 +1632,6 @@ Mesh* getOctreeMesh(GameObjectOctree& octree){
 }
 
 Octree unsubdividedOctree {
-  .size = 1.f,
   .rootNode = OctreeDivision {
     .fill = FILL_FULL,
     .shape = ShapeBlock{},
@@ -1643,7 +1640,6 @@ Octree unsubdividedOctree {
   },
 };
 Octree subdividedOne {
-  .size = 1.f,
   .rootNode = OctreeDivision {
     .fill = FILL_MIXED,
     .shape = ShapeBlock{},
@@ -1880,7 +1876,7 @@ std::vector<Intersection> subdivisionIntersections(glm::vec3 fromPos, glm::vec3 
 
 void raycastSubdivision(Octree& octree, glm::vec3 fromPos, glm::vec3 toPosDirection, glm::ivec3 offset, int currentSubdivision, int subdivisionDepth, std::vector<RaycastIntersection>& finalIntersections){
   modassert(currentSubdivision <= subdivisionDepth, "current subdivision should not be greater than the target subdivision depth");
-  auto intersections = subdivisionIntersections(fromPos, toPosDirection, octree.size, currentSubdivision, offset);
+  auto intersections = subdivisionIntersections(fromPos, toPosDirection, 1.f, currentSubdivision, offset);
 
   for (auto &intersection : intersections){
     auto xyzIndex = flatIndexToXYZ(intersection.index);
@@ -2148,9 +2144,9 @@ void drawOctreeSelectionGrid(Octree& octree, std::function<void(glm::vec3, glm::
 
   if (selectedIndex.has_value()){
     drawLineModel(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 5.f, 0.f), glm::vec4(1.f, 0.f, 0.f, 1.f));
-    drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, octree.size,  drawLineModel, std::nullopt);
+    drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, 1.f,  drawLineModel, std::nullopt);
     if (selectionDim.value().z > 0){
-      drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z + selectionDim.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, octree.size,  drawLineModel, std::nullopt);
+      drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z + selectionDim.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, 1.f,  drawLineModel, std::nullopt);
     }
     if (line.has_value()){
       drawLineModel(line.value().fromPos, line.value().toPos, glm::vec4(1.f, 0.f, 0.f, 1.f));
@@ -2170,7 +2166,7 @@ void drawOctreeSelectionGrid(Octree& octree, std::function<void(glm::vec3, glm::
     if (drawAllSelectedBlocks){
       for (auto intersection : raycastResult.value().intersections){
         auto xyzIndex = flatIndexToXYZ(intersection.index);
-        drawGridSelectionCube(xyzIndex.x + intersection.blockOffset.x, xyzIndex.y + intersection.blockOffset.y, xyzIndex.z + intersection.blockOffset.z, 1, 1, 1, raycastResult.value().subdivisionDepth, octree.size, drawLineModel, std::nullopt);    
+        drawGridSelectionCube(xyzIndex.x + intersection.blockOffset.x, xyzIndex.y + intersection.blockOffset.y, xyzIndex.z + intersection.blockOffset.z, 1, 1, 1, raycastResult.value().subdivisionDepth, 1.f, drawLineModel, std::nullopt);    
         // draw hit marker on the point
         for (auto &face : intersection.faceIntersections){
           drawLineModel(face.position, face.position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 1.f, 0.f, 1.f));
@@ -2180,7 +2176,7 @@ void drawOctreeSelectionGrid(Octree& octree, std::function<void(glm::vec3, glm::
   }
 
   if (false && closestRaycast.has_value()){
-    drawGridSelectionCube(closestRaycast.value().xyzIndex.x, closestRaycast.value().xyzIndex.y, closestRaycast.value().xyzIndex.z, 1, 1, 1, closestRaycast.value().subdivisionDepth, octree.size, drawLineModel, std::nullopt);    
+    drawGridSelectionCube(closestRaycast.value().xyzIndex.x, closestRaycast.value().xyzIndex.y, closestRaycast.value().xyzIndex.z, 1, 1, 1, closestRaycast.value().subdivisionDepth, 1.f, drawLineModel, std::nullopt);    
     drawLineModel(closestRaycast.value().position, closestRaycast.value().position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 0.f, 1.f, 1.f));
   }
 

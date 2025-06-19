@@ -4,6 +4,7 @@
 #include "../../common/util.h"
 #include "./obj_util.h"
 #include "../common/vectorgfx.h"
+#include "../../resources.h"
 
 struct FaceTexture {
   int textureIndex;
@@ -43,7 +44,6 @@ struct OctreeDivision {
 };
 
 struct Octree {
-  double size;
   OctreeDivision rootNode;
 };
 
