@@ -44,7 +44,6 @@ struct ClosestIntersection {
 std::optional<RaycastResult> raycastResult = std::nullopt;
 std::optional<ClosestIntersection> closestRaycast = std::nullopt;
 
-
 std::optional<AtlasDimensions> atlasDimensions = AtlasDimensions {
   .textureNames = {
     resources::GRID_TEXTURE,
@@ -66,7 +65,6 @@ std::optional<AtlasDimensions> atlasDimensions = AtlasDimensions {
     resources::TEXTURE_ICE,
   },
 };
-
 
 void setAtlasDimensions(AtlasDimensions newAtlasDimensions){
   atlasDimensions = newAtlasDimensions;
@@ -208,7 +206,6 @@ std::vector<std::string> splitBrackets(std::string& value){
   modassert(numBrackets == 0, std::string("invalid balancing to brackets: ") + value + ", " + std::to_string(numBrackets));
   return values;
 }
-
 
 glm::vec2 calcNdiCoordAtlasCoord(glm::vec2 ndiCoord, int imageIndex){
   auto textureDim = calculateAtlasImageDimension(atlasDimensions.value().textureNames.size());
@@ -428,8 +425,6 @@ std::unordered_map<int, int> getTextureMapping(std::vector<std::string>& mapText
   return mapToAtlas;
 }
 
-
-
 Octree deserializeOctree(std::string& value){
   auto lines = split(value, '\n');
   //modassert(lines.size() == 5, std::string("invalid line size, got: ") + std::to_string(lines.size()));
@@ -455,29 +450,6 @@ Octree deserializeOctree(std::string& value){
   };
 }
 
-glm::ivec3 indexForSubdivision(int x, int y, int z, int sourceSubdivision, int targetSubdivision){
-  if (sourceSubdivision < targetSubdivision){ // same formula as other case, just being mindful of integer division
-    int numCells = glm::pow(2, targetSubdivision - sourceSubdivision);
-    return glm::ivec3(x * numCells, y * numCells, z * numCells);
-  }
-  int numCells = glm::pow(2, sourceSubdivision - targetSubdivision);
-  return glm::ivec3(x / numCells, y / numCells, z / numCells);
-}
-glm::ivec3 localIndexForSubdivision(int x, int y, int z, int sourceSubdivision, int targetSubdivision){
-  auto indexs = indexForSubdivision(x, y, z, sourceSubdivision, targetSubdivision);
-  return glm::ivec3(indexs.x % 2, indexs.y % 2, indexs.z % 2);
-}
-
-
-std::vector<glm::ivec3> octreePath(int x, int y, int z, int subdivision){
-  std::vector<glm::ivec3> path;
-  for (int currentSubdivision = 1; currentSubdivision <= subdivision; currentSubdivision++){
-    auto indexs = localIndexForSubdivision(x, y, z, subdivision, currentSubdivision);
-    std::cout << "octree current subdivision index: " << print(indexs) << std::endl;
-    path.push_back(indexs);
-  }
-  return path;
-}
 
 bool allFilledIn(OctreeDivision& octreeDivision, FillType fillType){
   if (octreeDivision.divisions.size() != 8){
@@ -556,7 +528,6 @@ OctreeDivision* getOctreeSubdivisionIfExists(Octree& octree, int x, int y, int z
   }
   return octreeSubdivision;
 }
-
 
 void writeOctreeCellRange(Octree& octree, int x, int y, int z, int width, int height, int depth, int subdivision, bool filled){
   for (int i = 0; i < width; i++){
@@ -956,7 +927,6 @@ void addRamp(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, st
   }
 }
 
-
 void addOctreeLevel(Octree& octree, std::vector<OctreeVertex>& points, glm::vec3 rootPos, OctreeDivision& octreeDivision, float size, int subdivisionLevel, std::vector<int> path){
   std::cout << "addOctreeLevel: " << size << std::endl;
   if (octreeDivision.divisions.size() > 0){
@@ -1058,98 +1028,6 @@ void addOctreeLevel(Octree& octree, std::vector<OctreeVertex>& points, glm::vec3
 1. decompose down to max subdivision levels, but make it sparse
 2*/
 
-
-SparseShape blockToSparseSubdivision(OctreeShape* shape, std::vector<int>& path, int subdivisionSize){
-  modassert(path.size() <= subdivisionSize, "expected path.size() <= subdivisionSize");
-  auto offsetValue = indexForOctreePath(path);
-  modassert(offsetValue.subdivisionLevel == path.size(), "should be equal size");
-  auto newOffset = indexForSubdivision(offsetValue.value.x, offsetValue.value.y, offsetValue.value.z, offsetValue.subdivisionLevel, subdivisionSize);
-  auto size = glm::pow(2, subdivisionSize - path.size());  
-  
-  std::cout << "block to sparse subdivision: size = " << size << ", path = " << print(path) << ", max = " << subdivisionSize << ", maxvalue: " << glm::pow(2, subdivisionSize) << std::endl;
-  SparseShape sparseShape {
-    .shape = shape,
-    .path = path,
-    .deleted = false,
-    .minX = newOffset.x,
-    .maxX = newOffset.x + size,
-    .minY = newOffset.y,
-    .maxY = newOffset.y + size,
-    .minZ = newOffset.z,
-    .maxZ = newOffset.z + size,
-  };
-  std::cout << "sparse shape: " << print(sparseShape) << std::endl;
-
-  return sparseShape;
-}
-
-
-struct FinalShapeData {
-  OctreeShape* shape;
-  glm::vec3 position;
-  glm::vec3 shapeSize;
-};
-
-
-glm::vec3 calculatePosition(std::vector<int>& path){
-  glm::vec3 offset(0.f, 0.f, 0.f);
-  for (int i = 0; i < path.size(); i++){
-    offset = offsetForFlatIndex(path.at(i), glm::pow(0.5f, i + 1), offset);
-  }
-  return offset;
-}
-
-std::vector<FinalShapeData> optimizePhysicsShapeData(std::vector<PhysicsShapeData>& shapeData){
-  std::vector<FinalShapeData> optimizedShapes;
-
-  auto subdivisionSize = maxSubdivision(shapeData);
-  std::vector<SparseShape> sparseShapes;
-  for (auto &shape : shapeData){
-    ShapeBlock* blockShape = std::get_if<ShapeBlock>(shape.shape);
-    ShapeRamp* rampShape = std::get_if<ShapeRamp>(shape.shape);
-    modassert(blockShape || rampShape, "invalid shape type");
-    if (blockShape){
-      auto sparseShape = blockToSparseSubdivision(shape.shape, shape.path, subdivisionSize);
-      sparseShapes.push_back(sparseShape);
-    }else if (rampShape){
-      auto subdivisionLevels = glm::ivec3(shape.path.size());
-      float subdivisionSizeX = glm::pow(0.5f, subdivisionLevels.x);
-      float subdivisionSizeY = glm::pow(0.5f, subdivisionLevels.y);
-      float subdivisionSizeZ = glm::pow(0.5f, subdivisionLevels.z);
-      glm::vec3 shapeSize(subdivisionSizeX, subdivisionSizeY, subdivisionSizeZ);
-
-      optimizedShapes.push_back(FinalShapeData {
-        .shape = shape.shape,
-        .position = calculatePosition(shape.path),
-        .shapeSize = shapeSize,
-      });
-    }
-  }
-
-  auto combinedSparseShapes = joinSparseShapes(sparseShapes);
-  for (auto &sparseShape : combinedSparseShapes){
-    auto subdivisionLevels = glm::ivec3(sparseShape.path.size(), sparseShape.path.size(), sparseShape.path.size());
-    float subdivisionSizeX = glm::pow(0.5f, subdivisionLevels.x);
-    float subdivisionSizeY = glm::pow(0.5f, subdivisionLevels.y);
-    float subdivisionSizeZ = glm::pow(0.5f, subdivisionLevels.z);
-
-    // max - minx is in terms of the smaller subdivisions, but the shapeSize is absolute to 1, so this corrects it
-    float multiplierX = (sparseShape.maxX - sparseShape.minX) / glm::pow(2, subdivisionSize - sparseShape.path.size());
-    float multiplierY = (sparseShape.maxY - sparseShape.minY) / glm::pow(2, subdivisionSize - sparseShape.path.size());
-    float multiplierZ = (sparseShape.maxZ - sparseShape.minZ) / glm::pow(2, subdivisionSize - sparseShape.path.size());
-
-    glm::vec3 adjustedSize(multiplierX * subdivisionSizeX, multiplierY * subdivisionSizeY, multiplierZ * subdivisionSizeZ);
-    //std::cout << "span x: " << spanX << ", maxsub = " << subdivisionSize << ", current size = " << sparseShape.path.size() << ", size = " << print(shapeSize) << ", adjusted = " << print(adjustedSize) << std::endl;
-
-    optimizedShapes.push_back(FinalShapeData {
-      .shape = sparseShape.shape,
-      .position = calculatePosition(sparseShape.path),
-      .shapeSize = adjustedSize,
-    });
-  }
-
-  return optimizedShapes;
-}
 
 void createShapeData(std::vector<FinalShapeData>& shapeData, std::vector<PositionAndScale>& _octreeCubes, std::vector<Transformation>& _rampBlocks){
   for (auto &shape : shapeData){

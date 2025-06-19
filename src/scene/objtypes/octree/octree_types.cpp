@@ -102,3 +102,39 @@ glm::vec3 offsetForFlatIndex(int index, float subdivisionSize, glm::vec3 rootPos
   return glm::vec3(0.f, 0.f, 0.f);
 }
 
+
+glm::ivec3 indexForSubdivision(int x, int y, int z, int sourceSubdivision, int targetSubdivision){
+  if (sourceSubdivision < targetSubdivision){ // same formula as other case, just being mindful of integer division
+    int numCells = glm::pow(2, targetSubdivision - sourceSubdivision);
+    return glm::ivec3(x * numCells, y * numCells, z * numCells);
+  }
+  int numCells = glm::pow(2, sourceSubdivision - targetSubdivision);
+  return glm::ivec3(x / numCells, y / numCells, z / numCells);
+}
+glm::ivec3 localIndexForSubdivision(int x, int y, int z, int sourceSubdivision, int targetSubdivision){
+  auto indexs = indexForSubdivision(x, y, z, sourceSubdivision, targetSubdivision);
+  return glm::ivec3(indexs.x % 2, indexs.y % 2, indexs.z % 2);
+}
+std::vector<glm::ivec3> octreePath(int x, int y, int z, int subdivision){
+  std::vector<glm::ivec3> path;
+  for (int currentSubdivision = 1; currentSubdivision <= subdivision; currentSubdivision++){
+    auto indexs = localIndexForSubdivision(x, y, z, subdivision, currentSubdivision);
+    std::cout << "octree current subdivision index: " << print(indexs) << std::endl;
+    path.push_back(indexs);
+  }
+  return path;
+}
+
+ValueAndSubdivision indexForOctreePath(std::vector<int> path){
+  glm::ivec3 sumIndex(0, 0, 0);
+  int subdivisionLevel = 0;
+  for (int index : path){
+    sumIndex = sumIndex * 2;
+    sumIndex += flatIndexToXYZ(index);;
+    subdivisionLevel++;
+  }
+  return ValueAndSubdivision {
+    .value = sumIndex,
+    .subdivisionLevel = subdivisionLevel,
+  };
+}

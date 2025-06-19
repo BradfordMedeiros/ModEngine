@@ -21,17 +21,15 @@ struct SparseShape {
   int maxZ;
 };
 
-int maxSubdivision(std::vector<PhysicsShapeData>& shapeData);
-std::vector<SparseShape> joinSparseShapes(std::vector<SparseShape>& shapes);
-
 std::string print(SparseShape& sparseShape);
 
-struct ValueAndSubdivision {
-  glm::ivec3 value;
-  int subdivisionLevel;
-};
 
-ValueAndSubdivision indexForOctreePath(std::vector<int> path);
+struct FinalShapeData {
+  OctreeShape* shape;
+  glm::vec3 position;
+  glm::vec3 shapeSize;
+};
+std::vector<FinalShapeData> optimizePhysicsShapeData(std::vector<PhysicsShapeData>& shapeData);
 
 
 #endif

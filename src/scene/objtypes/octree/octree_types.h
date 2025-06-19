@@ -67,4 +67,17 @@ int xyzIndexToFlatIndex(glm::ivec3 index);
 
 glm::vec3 offsetForFlatIndex(int index, float subdivisionSize, glm::vec3 rootPos);
 
+
+glm::ivec3 indexForSubdivision(int x, int y, int z, int sourceSubdivision, int targetSubdivision);
+glm::ivec3 localIndexForSubdivision(int x, int y, int z, int sourceSubdivision, int targetSubdivision);
+std::vector<glm::ivec3> octreePath(int x, int y, int z, int subdivision);
+
+struct ValueAndSubdivision {
+  glm::ivec3 value;
+  int subdivisionLevel;
+};
+
+ValueAndSubdivision indexForOctreePath(std::vector<int> path);
+
+
 #endif
