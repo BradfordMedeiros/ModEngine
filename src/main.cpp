@@ -22,6 +22,7 @@
 #include "./world_tasks.h"
 #include "./shaderstate.h"
 #include "./package.h"
+#include "./resources.h"
 
 #ifdef ADDITIONAL_SRC_HEADER
   #include STR(ADDITIONAL_SRC_HEADER)
@@ -1116,12 +1117,20 @@ int main(int argc, char* argv[]){
       }
     }
 
+    for (auto file : resources::coreResources){
+      std::cout << "validating file: " << file << std::endl;
+      if (!fileExistsFromPackage(file)){
+        missingFiles = true;
+        std::cout << "\033[31mError:  " << " hardcoded resource core reference missing - file = " << file << "\033[0m" << std::endl;
+      }
+    }    
+
     #ifdef ADDITIONAL_SRC_HEADER
       for (auto file : getAdditionalPathsToValidate()){
         std::cout << "validating file: " << file << std::endl;
         if (!fileExistsFromPackage(file)){
           missingFiles = true;
-          std::cout << "\033[31mError:  " << " hardcoded resource reference missing - file = " << file << "\033[0m" << std::endl;
+          std::cout << "\033[31mError:  " << " hardcoded resource additional reference missing - file = " << file << "\033[0m" << std::endl;
         }
       }      
     #endif
@@ -1613,14 +1622,14 @@ int main(int argc, char* argv[]){
   glfwSetWindowIcon(window, 1, images);
 
   std::vector<std::string> defaultMeshesToLoad {
-    "./res/models/ui/node.obj",
+    resources::MODEL_NODE,
     "./res/models/unit_rect/unit_rect.obj",
-    "../gameresources/build/objtypes/camera.gltf",
+    resources::MODEL_CAMERA,
     "./res/models/box/plane.dae",
-    "./res/models/controls/unitxy.obj",  
-    "../gameresources/build/objtypes/emitter.gltf",  
-    "../gameresources/build/objtypes/sound.gltf",
-    "../gameresources/build/objtypes/light.gltf",
+    resources::MODEL_UNITXY,
+    resources::MODEL_EMITTER,
+    resources::MODEL_SOUND,
+    resources::MODEL_LIGHT
   };
 
   std::vector<std::string> allTexturesToLoad = {  "./res/textures/crosshairs/crosshair029.png", "./res/textures/crosshairs/crosshair008.png" };
@@ -1688,15 +1697,15 @@ int main(int argc, char* argv[]){
     .quadVAO3D = loadFullscreenQuadVAO3D(),
     .fontFamily = loadFontMeshes(readFontFile(fontPaths), world.textures.at("./res/textures/wood.jpg").texture),
     .defaultMeshes = DefaultMeshes{
-      .nodeMesh = &world.meshes.at("./res/models/ui/node.obj").mesh,
+      .nodeMesh = &world.meshes.at(resources::MODEL_NODE).mesh,
       .portalMesh = &world.meshes.at("./res/models/box/plane.dae").mesh,
-      .cameraMesh = &world.meshes.at("../gameresources/build/objtypes/camera.gltf").mesh, 
+      .cameraMesh = &world.meshes.at(resources::MODEL_CAMERA).mesh, 
       .voxelCubeMesh = &world.meshes.at("./res/models/unit_rect/unit_rect.obj").mesh,
-      .unitXYRect = &world.meshes.at("./res/models/controls/unitxy.obj").mesh,
-      .soundMesh = &world.meshes.at("../gameresources/build/objtypes/sound.gltf").mesh,
-      .lightMesh = &world.meshes.at("../gameresources/build/objtypes/light.gltf").mesh,
-      .emitter = &world.meshes.at("../gameresources/build/objtypes/emitter.gltf").mesh,
-      .nav = &world.meshes.at("./res/models/ui/node.obj").mesh,
+      .unitXYRect = &world.meshes.at(resources::MODEL_UNITXY).mesh,
+      .soundMesh = &world.meshes.at(resources::MODEL_SOUND).mesh,
+      .lightMesh = &world.meshes.at(resources::MODEL_LIGHT).mesh,
+      .emitter = &world.meshes.at(resources::MODEL_EMITTER).mesh,
+      .nav = &world.meshes.at(resources::MODEL_NODE).mesh,
     }
   };
 

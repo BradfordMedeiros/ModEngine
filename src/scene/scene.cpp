@@ -506,6 +506,9 @@ void loadModelData(World& world, std::string meshpath, int ownerId){
     }
 
     auto realpathToLoad = pathExists ? meshpath : "./res/models/box/pbrsphere.gltf";
+    if (!pathExists){
+      modassert(false, "path does not exist loadModelData");
+    }
     world.modelDatas[meshpath] = ModelDataRef {
       .owners = { ownerId },
       .modelData = loadModelCore(realpathToLoad), 
