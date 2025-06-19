@@ -1996,15 +1996,6 @@ void drawOctreeSelectionGrid(Octree& octree, std::function<void(glm::vec3, glm::
   //drawPhysicsShapes(physicsShapes, drawLine2);
 }
 
-int getNumOctreeNodes(OctreeDivision& octreeDivision){
-  int numNodes = 1;
-  for (auto &subdivision : octreeDivision.divisions){
-    numNodes += getNumOctreeNodes(subdivision);
-  }
-
-  return numNodes;
-}
-
 void makeOctreeCellRamp(Octree& octree, int x, int y, int z, int subdivision, RampDirection rampDirection, float startHeight = 0.f, float endHeight = 1.f, float startDepth = 0.f, float endDepth = 1.f){
   auto octreeDivision = getOctreeSubdivisionIfExists(octree, x, y, z, subdivision);
   if (octreeDivision == NULL){
@@ -2124,7 +2115,6 @@ void makeOctreeCellRamp(GameObjectOctree& gameobjOctree, Octree& octree, std::fu
 
 void handleOctreeScroll(GameObjectOctree& gameobjOctree, Octree& octree, bool upDirection, std::function<Mesh(MeshData&)> loadMesh, bool holdingShift, bool holdingCtrl, OctreeDimAxis axis){
   if (holdingShift && !holdingCtrl){
-    std::cout << "num octree nodes: " << getNumOctreeNodes(octree.rootNode) << std::endl;
     if (axis == OCTREE_NOAXIS){
        if (upDirection){
          selectedIndex.value().z++;
