@@ -1,5 +1,10 @@
 #include "./octree_physics.h"
 
+struct PhysicsShapeData {
+  OctreeShape* shape;
+  std::vector<int> path;
+};
+
 int maxSubdivision(std::vector<PhysicsShapeData>& shapeData){
   int maxSize = 0;
   for (auto &shape : shapeData){
@@ -8,6 +13,25 @@ int maxSubdivision(std::vector<PhysicsShapeData>& shapeData){
     }
   }
   return maxSize;
+}
+
+struct SparseShape {
+  OctreeShape* shape;
+  std::vector<int> path;
+  bool deleted;
+  int minX;
+  int maxX;
+  int minY;
+  int maxY;
+  int minZ;
+  int maxZ;
+};
+
+std::string print(SparseShape& sparseShape){
+  glm::vec3 minValues(sparseShape.minX, sparseShape.minY, sparseShape.minZ);
+  glm::vec3 maxValues(sparseShape.maxX, sparseShape.maxY, sparseShape.maxZ);
+  std::string value = print(minValues) + " | " + print(maxValues);
+  return value;
 }
 
 std::vector<SparseShape> joinSparseShapes(std::vector<SparseShape>& shapes){
@@ -124,11 +148,21 @@ std::vector<SparseShape> joinSparseShapes(std::vector<SparseShape>& shapes){
   return joinedShapes;
 }
 
-std::string print(SparseShape& sparseShape){
-  glm::vec3 minValues(sparseShape.minX, sparseShape.minY, sparseShape.minZ);
-  glm::vec3 maxValues(sparseShape.maxX, sparseShape.maxY, sparseShape.maxZ);
-  std::string value = print(minValues) + " | " + print(maxValues);
-  return value;
+
+void addAllDivisions(std::vector<PhysicsShapeData>& shapeBlocks, OctreeDivision& octreeDivision, std::vector<int> path){
+  if (octreeDivision.fill == FILL_FULL){
+    shapeBlocks.push_back(PhysicsShapeData {
+      .shape = &octreeDivision.shape,
+      .path = path,
+    });
+  }else if (octreeDivision.fill == FILL_MIXED){
+    modassert(octreeDivision.divisions.size() == 8, "expected 8 octree division addAllDivisions");
+    for (int i = 0; i < octreeDivision.divisions.size(); i++){ 
+      std::vector<int> newPath = path;
+      newPath.push_back(i);
+      addAllDivisions(shapeBlocks, octreeDivision.divisions.at(i), newPath);
+    }
+  }
 }
 
 SparseShape blockToSparseSubdivision(OctreeShape* shape, std::vector<int>& path, int subdivisionSize){
@@ -163,6 +197,13 @@ glm::vec3 calculatePosition(std::vector<int>& path){
   }
   return offset;
 }
+
+struct FinalShapeData {
+  OctreeShape* shape;
+  glm::vec3 position;
+  glm::vec3 shapeSize;
+};
+
 std::vector<FinalShapeData> optimizePhysicsShapeData(std::vector<PhysicsShapeData>& shapeData){
   std::vector<FinalShapeData> optimizedShapes;
 
@@ -262,4 +303,75 @@ void createShapeData(std::vector<FinalShapeData>& shapeData, std::vector<Positio
       }
     }
   }
+}
+
+PhysicsShapes getPhysicsShapes(Octree& octree){
+  std::vector<PositionAndScale> octreeCubes;
+
+
+  // ENUMERATE OUT THE REST OF THE VERTS FOR A RAMP
+  std::vector<PositionAndScaleVerts> shapes = {
+    PositionAndScaleVerts {
+      .verts = {
+        // left 
+        glm::vec3(0.f, 0.5f, -0.5f),
+        glm::vec3(0.f, 0.f, -0.5f),
+        glm::vec3(0.f, 0.f, 0.f),
+
+        // right 
+        glm::vec3(0.5f, 0.5f, -0.5f),
+        glm::vec3(0.5f, 0.f, -0.5f),
+        glm::vec3(0.5f, 0.f, 0.f),
+
+        // bottom 
+        glm::vec3(0.f, 0.f, 0.f),
+        glm::vec3(0.f, 0.f, -0.5f),
+        glm::vec3(0.5f, 0.f, 0.f),
+        glm::vec3(0.5f, 0.f, 0.f),
+        glm::vec3(0.f, 0.f, -0.5f),
+        glm::vec3(0.5f, 0.f, -0.5f),
+
+        // back
+        glm::vec3(0.f, 0.f, -0.5f),
+        glm::vec3(0.f, 0.5f, -0.5f),
+        glm::vec3(0.5f, 0.5f, -0.5f),
+
+        glm::vec3(0.5f, 0.5f, -0.5f),
+        glm::vec3(0.f, 0.f, -0.5f),
+        glm::vec3(0.5f, 0.f, -0.5f),
+
+        // main ramp face
+        glm::vec3(0.f, 0.f, 0.f),
+        glm::vec3(0.f, 0.5f, -0.5f),
+        glm::vec3(0.5f, 0.f, 0.f),
+
+        glm::vec3(0.5f, 0.f, 0.f),
+        glm::vec3(0.f, 0.5f, -0.5f),
+        glm::vec3(0.5f, 0.5f, -0.5f),
+      },
+      .centeringOffset = glm::vec3(-0.25, -0.25f, 0.25f),
+      .specialBlocks = {},
+    }
+  };
+
+  std::vector<PhysicsShapeData> shapeDatas;
+  addAllDivisions(shapeDatas, octree.rootNode, {});
+  PhysicsShapes physicsShapes {};
+
+  auto optimizedShapeData = optimizePhysicsShapeData(shapeDatas);
+  createShapeData(optimizedShapeData, octreeCubes, shapes.at(0).specialBlocks /* ramps */);
+
+  physicsShapes.blocks = octreeCubes;
+  physicsShapes.shapes = shapes;
+
+  int numShapes = 0;
+  for (auto &shape : shapes){
+    numShapes += shape.specialBlocks.size();
+  }
+
+  std::cout << "getPhysicsShapes, shape datas size = " << shapeDatas.size() << std::endl;
+  std::cout << "getPhysicsShapes  num shapes: " << numShapes << ", num blocks " << physicsShapes.blocks.size() << std::endl;
+  //modassert((physicsShapes.blocks.size() + numShapes) == shapeDatas.size(), "shape datas should be equal to blocks and numShapes");
+
+  return physicsShapes;
 }

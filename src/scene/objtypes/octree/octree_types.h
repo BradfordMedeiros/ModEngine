@@ -79,5 +79,9 @@ struct ValueAndSubdivision {
 
 ValueAndSubdivision indexForOctreePath(std::vector<int> path);
 
+struct PhysicsShapes {
+  std::vector<PositionAndScale> blocks;
+  std::vector<PositionAndScaleVerts> shapes;
+};
 
 #endif
