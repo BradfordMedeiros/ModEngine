@@ -87,4 +87,31 @@ struct AtlasDimensions {
   std::vector<std::string> textureNames;
 };
 
+struct FaceIntersection {
+  OctreeSelectionFace face;
+  glm::vec3 position;
+};
+struct RaycastIntersection {
+  int index;
+  glm::ivec3 blockOffset;
+  std::vector<FaceIntersection> faceIntersections;
+};
+struct RaycastResult {
+  glm::vec3 fromPos;
+  glm::vec3 toPosDirection;
+  int subdivisionDepth;
+  std::vector<RaycastIntersection> intersections;
+};
+struct ClosestIntersection {
+  OctreeSelectionFace face;
+  glm::vec3 position;
+  glm::ivec3 xyzIndex;
+  int subdivisionDepth;
+};
+
+struct Intersection {
+  int index;
+  std::vector<FaceIntersection> faceIntersections;
+};
+
 #endif

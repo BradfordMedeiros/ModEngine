@@ -1,5 +1,12 @@
 #include "./octree_vector.h"
 
+extern std::optional<glm::ivec3> selectedIndex;
+extern std::optional<glm::ivec3> selectionDim;
+extern int subdivisionLevel;
+extern std::optional<Line> line;
+extern std::optional<RaycastResult> raycastResult;
+extern std::optional<ClosestIntersection> closestRaycast;
+
 void drawPhysicsBlock(PositionAndScale& physicShape, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine){
   auto leftX = physicShape.position.x;
   auto rightX = physicShape.position.x + physicShape.size.x;
@@ -129,4 +136,63 @@ void visualizeFaces(Faces& faces, std::function<void(glm::vec3, glm::vec3, glm::
 
   drawLine(faces.center, faces.XYClosePoint, glm::vec4(1.f, 1.f, 0.f, 1.f));
   drawLine(faces.center, faces.XYFarPoint, glm::vec4(0.f, 1.f, 1.f, 1.f));
+}
+
+bool drawRaycastLine = false;
+bool drawAllSelectedBlocks = false;
+void drawOctreeSelectionGrid(Octree& octree, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine2, glm::mat4 modelMatrix){
+  std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLineModel = [drawLine2, &modelMatrix](glm::vec3 fromPos, glm::vec3 toPos, glm::vec4 color) -> void {
+    glm::vec4 fromPosVec4(fromPos.x, fromPos.y, fromPos.z, 1.f);
+    glm::vec4 toPosVec4(toPos.x, toPos.y, toPos.z, 1.f);
+    auto transformedFrom = modelMatrix * fromPosVec4;
+    auto transformedTo = modelMatrix * toPosVec4;
+
+    drawLine2(
+      glm::vec3(transformedFrom.x, transformedFrom.y, transformedFrom.z), 
+      glm::vec3(transformedTo.x, transformedTo.y, transformedTo.z), 
+      color
+    );
+  };
+
+  if (selectedIndex.has_value()){
+    drawLineModel(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 5.f, 0.f), glm::vec4(1.f, 0.f, 0.f, 1.f));
+    drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, 1.f,  drawLineModel, std::nullopt);
+    if (selectionDim.value().z > 0){
+      drawGridSelectionXY(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z + selectionDim.value().z, selectionDim.value().x, selectionDim.value().y, subdivisionLevel, 1.f,  drawLineModel, std::nullopt);
+    }
+    if (line.has_value()){
+      drawLineModel(line.value().fromPos, line.value().toPos, glm::vec4(1.f, 0.f, 0.f, 1.f));
+    }
+  }
+
+  //auto faces = getFaces(selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, testOctree.size, subdivisionLevel);
+  //visualizeFaces(faces, drawLine);
+
+  if (raycastResult.has_value()){
+    auto dirOffset = glm::normalize(raycastResult.value().toPosDirection);
+    dirOffset.x *= 20;
+    dirOffset.y *= 20;
+    dirOffset.z *= 20;
+    drawLineModel(raycastResult.value().fromPos, raycastResult.value().fromPos + dirOffset, glm::vec4(1.f, 1.f, 1.f, 1.f));
+
+    if (drawAllSelectedBlocks){
+      for (auto intersection : raycastResult.value().intersections){
+        auto xyzIndex = flatIndexToXYZ(intersection.index);
+        drawGridSelectionCube(xyzIndex.x + intersection.blockOffset.x, xyzIndex.y + intersection.blockOffset.y, xyzIndex.z + intersection.blockOffset.z, 1, 1, 1, raycastResult.value().subdivisionDepth, 1.f, drawLineModel, std::nullopt);    
+        // draw hit marker on the point
+        for (auto &face : intersection.faceIntersections){
+          drawLineModel(face.position, face.position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 1.f, 0.f, 1.f));
+        }
+      }
+    }
+  }
+
+  if (false && closestRaycast.has_value()){
+    drawGridSelectionCube(closestRaycast.value().xyzIndex.x, closestRaycast.value().xyzIndex.y, closestRaycast.value().xyzIndex.z, 1, 1, 1, closestRaycast.value().subdivisionDepth, 1.f, drawLineModel, std::nullopt);    
+    drawLineModel(closestRaycast.value().position, closestRaycast.value().position + glm::vec3(0.f, 0.2f, 0.f), glm::vec4(0.f, 0.f, 1.f, 1.f));
+  }
+
+  ////// visualize the physics objects
+  //auto physicsShapes = getPhysicsShapes(octree);
+  //drawPhysicsShapes(physicsShapes, drawLine2);
 }
