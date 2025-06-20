@@ -83,5 +83,8 @@ struct PhysicsShapes {
   std::vector<PositionAndScale> blocks;
   std::vector<PositionAndScaleVerts> shapes;
 };
+struct AtlasDimensions {
+  std::vector<std::string> textureNames;
+};
 
 #endif

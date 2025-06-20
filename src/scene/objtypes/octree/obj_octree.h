@@ -8,6 +8,8 @@
 #include "./octree_vector.h"
 #include "./octree_types.h"
 #include "./octree_physics.h"
+#include "./octree_serialization.h"
+#include "./octree_shapes.h"
 
 struct GameObjectOctree {
   std::string map;
@@ -19,9 +21,7 @@ GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util);
 std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctree& obj, ObjectSerializeUtil& util);
 Mesh* getOctreeMesh(GameObjectOctree& octree);
 
-struct AtlasDimensions {
-  std::vector<std::string> textureNames;
-};
+
 void setAtlasDimensions(AtlasDimensions newAtlasDimensions);
 
 void drawOctreeSelectionGrid(Octree& octree, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine, glm::mat4 modelMatrix);
@@ -49,7 +49,6 @@ void makeOctreeCellRamp(GameObjectOctree& gameobjOctree, Octree& octree, std::fu
 
 void loadOctree(GameObjectOctree& octree, std::function<std::string(std::string)> loadFile, std::function<Mesh(MeshData&)> loadMesh);
 void saveOctree(GameObjectOctree& octree, std::function<void(std::string, std::string&)> saveFile);
-void optimizeOctree(GameObjectOctree& octree, std::function<Mesh(MeshData&)> loadMesh);
 
 PhysicsShapes getPhysicsShapes(Octree& octree);
 std::string debugInfo(PhysicsShapes& physicsShapes);

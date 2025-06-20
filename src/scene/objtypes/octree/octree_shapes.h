@@ -1,6 +1,9 @@
 #ifndef MOD_OBJ_OCTREE_SHAPES
 #define MOD_OBJ_OCTREE_SHAPES
 
-#include "./obj_octree.h"
+#include "./octree_types.h"
+
+extern Octree unsubdividedOctree;
+extern Octree subdividedOne;
 
 #endif
