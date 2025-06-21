@@ -188,6 +188,16 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
   modassert(octreeSubdivision -> divisions.size() == 8 ? octreeSubdivision -> fill == FILL_MIXED : true, "write octree - no divisions, but mixed fill");
 }
 
+void writeOctreeCellRange(Octree& octree, int x, int y, int z, int width, int height, int depth, int subdivision, bool filled){
+  for (int i = 0; i < width; i++){
+    for (int j = 0; j < height; j++){
+      for (int k = 0; k < depth; k++){
+        writeOctreeCell(octree, x + i, y + j, z + k, subdivision, filled);
+      }
+    }
+  }
+}
+
 OctreeDivision* getOctreeSubdivisionIfExists(Octree& octree, int x, int y, int z, int subdivision){
   OctreeDivision* octreeSubdivision = &octree.rootNode;
   auto path = octreePath(x, y, z, subdivision);
@@ -199,16 +209,6 @@ OctreeDivision* getOctreeSubdivisionIfExists(Octree& octree, int x, int y, int z
     octreeSubdivision = &(octreeSubdivision -> divisions.at(index));
   }
   return octreeSubdivision;
-}
-
-void writeOctreeCellRange(Octree& octree, int x, int y, int z, int width, int height, int depth, int subdivision, bool filled){
-  for (int i = 0; i < width; i++){
-    for (int j = 0; j < height; j++){
-      for (int k = 0; k < depth; k++){
-        writeOctreeCell(octree, x + i, y + j, z + k, subdivision, filled);
-      }
-    }
-  }
 }
 
 int textureIndex(OctreeSelectionFace faceOrientation){
@@ -229,40 +229,6 @@ int textureIndex(OctreeSelectionFace faceOrientation){
     modassert(false, "writeOctreeTexture invalid face");
   }
   return index;  
-}
-
-
-
-Mesh* getOctreeMesh(GameObjectOctree& octree){
-  return &octree.mesh;
-}
-
-std::vector<AutoSerialize> octreeAutoserializer {
-  AutoSerializeString {
-    .structOffset = offsetof(GameObjectOctree, map),
-    .field = "map",
-    .defaultValue = "",
-  }
-};
-
-GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util){
-  GameObjectOctree obj {};
-  createAutoSerializeWithTextureLoading((char*)&obj, octreeAutoserializer, attr, util);
-  if (obj.map != ""){
-    auto mapFilePath = util.pathForModLayer(obj.map);
-    auto serializedFileData = readFileOrPackage(mapFilePath);
-    std::cout << "serialized data: " << serializedFileData << std::endl;    
-    if (serializedFileData == ""){
-      obj.octree = unsubdividedOctree;
-    }else{
-      obj.octree = deserializeOctree(serializedFileData);
-    }
-  }else{
-    obj.octree = unsubdividedOctree;
-  }
-
-  obj.mesh = createOctreeMesh(obj.octree, util.loadMesh);
-  return obj;
 }
 
 void makeOctreeCellRamp(Octree& octree, int x, int y, int z, int subdivision, RampDirection rampDirection, float startHeight = 0.f, float endHeight = 1.f, float startDepth = 0.f, float endDepth = 1.f){
@@ -600,6 +566,45 @@ void setOctreeTextureId(int textureId){
     textureId = atlasDimensions.value().textureNames.size() - 1;
   }
   selectedTexture = textureId;
+}
+
+// Editor convenience fns
+////////////////////////////////////////////////////////////////////////////////////
+
+
+
+// Core objtype fns
+////////////////////////////////////////////////////////////////////////////////////
+Mesh* getOctreeMesh(GameObjectOctree& octree){
+  return &octree.mesh;
+}
+
+std::vector<AutoSerialize> octreeAutoserializer {
+  AutoSerializeString {
+    .structOffset = offsetof(GameObjectOctree, map),
+    .field = "map",
+    .defaultValue = "",
+  }
+};
+
+GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util){
+  GameObjectOctree obj {};
+  createAutoSerializeWithTextureLoading((char*)&obj, octreeAutoserializer, attr, util);
+  if (obj.map != ""){
+    auto mapFilePath = util.pathForModLayer(obj.map);
+    auto serializedFileData = readFileOrPackage(mapFilePath);
+    std::cout << "serialized data: " << serializedFileData << std::endl;    
+    if (serializedFileData == ""){
+      obj.octree = unsubdividedOctree;
+    }else{
+      obj.octree = deserializeOctree(serializedFileData);
+    }
+  }else{
+    obj.octree = unsubdividedOctree;
+  }
+
+  obj.mesh = createOctreeMesh(obj.octree, util.loadMesh);
+  return obj;
 }
 
 std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctree& obj, ObjectSerializeUtil& util){
