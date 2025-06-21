@@ -356,6 +356,39 @@ void addRamp(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, st
   }
 }
 
+void addBlockShapeMesh(Octree& octree, std::vector<OctreeVertex>& points, glm::vec3& rootPos, OctreeDivision& octreeDivision, ShapeBlock& shapeBlock,  glm::ivec3& cellAddress, float size, int subdivisionLevel){
+  glm::ivec3 cellToTheFront(cellAddress.x, cellAddress.y, cellAddress.z - 1);
+  if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheFront), FRONT)){
+    addCubePointsFront(points, size, rootPos,  &octreeDivision.faces);
+  }
+
+  glm::ivec3 cellToTheBack(cellAddress.x, cellAddress.y, cellAddress.z + 1);
+  if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheBack), BACK)){  
+    addCubePointsBack(points, size, rootPos, &octreeDivision.faces);
+  }
+  //
+  glm::ivec3 cellToTheLeft(cellAddress.x - 1, cellAddress.y, cellAddress.z);
+  if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheLeft), LEFT)){  
+    addCubePointsLeft(points, size, rootPos,  &octreeDivision.faces);
+  }
+
+  glm::ivec3 cellToTheRight(cellAddress.x + 1, cellAddress.y, cellAddress.z);
+  if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheRight), RIGHT)){  
+    addCubePointsRight(points, size, rootPos,  &octreeDivision.faces);
+  }  
+
+  glm::ivec3 cellToTheTop(cellAddress.x, cellAddress.y + 1, cellAddress.z);
+  if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheTop), UP)){  
+    addCubePointsTop(points, size, rootPos,  &octreeDivision.faces);
+  }  
+
+  glm::ivec3 cellToTheBottom(cellAddress.x, cellAddress.y - 1, cellAddress.z);
+  if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheBottom), DOWN)){  
+    addCubePointsBottom(points, size, rootPos,  &octreeDivision.faces);
+  }      
+}
+
+
 void addOctreeLevel(Octree& octree, std::vector<OctreeVertex>& points, glm::vec3 rootPos, OctreeDivision& octreeDivision, float size, int subdivisionLevel, std::vector<int> path){
   std::cout << "addOctreeLevel: " << size << std::endl;
   if (octreeDivision.divisions.size() > 0){
@@ -407,35 +440,7 @@ void addOctreeLevel(Octree& octree, std::vector<OctreeVertex>& points, glm::vec3
 
     auto blockShape = std::get_if<ShapeBlock>(&octreeDivision.shape);
     if (blockShape){
-      glm::ivec3 cellToTheFront(cellAddress.x, cellAddress.y, cellAddress.z - 1);
-      if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheFront), FRONT)){
-        addCubePointsFront(points, size, rootPos,  &octreeDivision.faces);
-      }
-
-      glm::ivec3 cellToTheBack(cellAddress.x, cellAddress.y, cellAddress.z + 1);
-      if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheBack), BACK)){  
-        addCubePointsBack(points, size, rootPos, &octreeDivision.faces);
-      }
-      //
-      glm::ivec3 cellToTheLeft(cellAddress.x - 1, cellAddress.y, cellAddress.z);
-      if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheLeft), LEFT)){  
-        addCubePointsLeft(points, size, rootPos,  &octreeDivision.faces);
-      }
-
-      glm::ivec3 cellToTheRight(cellAddress.x + 1, cellAddress.y, cellAddress.z);
-      if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheRight), RIGHT)){  
-        addCubePointsRight(points, size, rootPos,  &octreeDivision.faces);
-      }  
-
-      glm::ivec3 cellToTheTop(cellAddress.x, cellAddress.y + 1, cellAddress.z);
-      if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheTop), UP)){  
-        addCubePointsTop(points, size, rootPos,  &octreeDivision.faces);
-      }  
-
-      glm::ivec3 cellToTheBottom(cellAddress.x, cellAddress.y - 1, cellAddress.z);
-      if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheBottom), DOWN)){  
-        addCubePointsBottom(points, size, rootPos,  &octreeDivision.faces);
-      }      
+      addBlockShapeMesh(octree, points, rootPos, octreeDivision,  *blockShape, cellAddress, size, subdivisionLevel);
     }
     auto rampShape = std::get_if<ShapeRamp>(&octreeDivision.shape);
     if (rampShape){

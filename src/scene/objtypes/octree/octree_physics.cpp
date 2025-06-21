@@ -306,6 +306,9 @@ void createShapeData(std::vector<FinalShapeData>& shapeData, std::vector<Positio
 }
 
 PhysicsShapes getPhysicsShapes(Octree& octree){
+  PhysicsShapes empty{};
+  return empty;
+  
   std::vector<PositionAndScale> octreeCubes;
 
 
