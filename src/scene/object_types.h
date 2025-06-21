@@ -16,7 +16,7 @@
 #include "./objtypes/obj_navmesh.h"
 #include "./objtypes/emitter/obj_emitter.h"
 #include "./objtypes/obj_mesh.h"
-#include "./objtypes/obj_octree.h"
+#include "./objtypes/octree/obj_octree.h"
 #include "./objtypes/obj_prefab.h"
 #include "./objtypes/obj_util.h"
 #include "./objtypes/video/obj_video.h"
