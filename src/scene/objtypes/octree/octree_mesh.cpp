@@ -399,63 +399,53 @@ struct OctreeToAdd {
 };
 
 
-void addOctreeLevel(Octree& octree, glm::vec3 rootPos, OctreeDivision& octreeDivision, float size, int subdivisionLevel, std::vector<int> path, std::vector<OctreeToAdd>& allOctreeMeshes){
-  std::cout << "addOctreeLevel: " << size << std::endl;
-  if (octreeDivision.divisions.size() > 0){
-    float subdivisionSize = size * 0.5f; 
+struct OctreeSearch {
+  OctreeDivision* octreeDivision;
+  std::vector<int> path;
+  float size;
+  int subdivisionLevel;
+  glm::vec3 rootPos;
+};
 
-    // -x +y -z
-    auto topLeftFrontPath = path;
-    topLeftFrontPath.push_back(0);
-    addOctreeLevel(octree, offsetForFlatIndex(0, subdivisionSize, rootPos), octreeDivision.divisions.at(0), subdivisionSize, subdivisionLevel + 1, topLeftFrontPath, allOctreeMeshes);
-
-    // +x +y -z
-    auto topRightFrontPath = path;
-    topRightFrontPath.push_back(1);
-    addOctreeLevel(octree, offsetForFlatIndex(1, subdivisionSize, rootPos), octreeDivision.divisions.at(1), subdivisionSize, subdivisionLevel + 1, topRightFrontPath, allOctreeMeshes);
-
-    // -x +y +z
-    auto topLeftBackPath = path;
-    topLeftBackPath.push_back(2);
-    addOctreeLevel(octree, offsetForFlatIndex(2, subdivisionSize, rootPos), octreeDivision.divisions.at(2), subdivisionSize, subdivisionLevel + 1, topLeftBackPath, allOctreeMeshes);
-
-    // +x +y +z
-    auto topRightBackPath = path;
-    topRightBackPath.push_back(3);
-    addOctreeLevel(octree, offsetForFlatIndex(3, subdivisionSize, rootPos), octreeDivision.divisions.at(3), subdivisionSize, subdivisionLevel + 1, topRightBackPath, allOctreeMeshes);
-
-    // -x -y -z
-    auto bottomLeftFrontPath = path;
-    bottomLeftFrontPath.push_back(4);
-    addOctreeLevel(octree, offsetForFlatIndex(4, subdivisionSize, rootPos), octreeDivision.divisions.at(4), subdivisionSize, subdivisionLevel + 1, bottomLeftFrontPath, allOctreeMeshes);
-
-    // +x -y -z
-    auto bottomRightFrontPath = path;
-    bottomRightFrontPath.push_back(5);
-    addOctreeLevel(octree, offsetForFlatIndex(5, subdivisionSize, rootPos), octreeDivision.divisions.at(5), subdivisionSize, subdivisionLevel + 1, bottomRightFrontPath, allOctreeMeshes);
-
-    // -x -y +z
-    auto bottomLeftBackPath = path;
-    bottomLeftBackPath.push_back(6);
-    addOctreeLevel(octree, offsetForFlatIndex(6, subdivisionSize, rootPos), octreeDivision.divisions.at(6), subdivisionSize, subdivisionLevel + 1, bottomLeftBackPath, allOctreeMeshes);
-
-    // +x -y +z
-    auto bottomRightBackPath = path;
-    bottomRightBackPath.push_back(7);
-    addOctreeLevel(octree, offsetForFlatIndex(7, subdivisionSize, rootPos), octreeDivision.divisions.at(7), subdivisionSize, subdivisionLevel + 1, bottomRightBackPath, allOctreeMeshes);
-  }else if (octreeDivision.fill == FILL_FULL){
-    auto cellIndex = indexForOctreePath(path);
-    auto cellAddress = cellIndex.value;
-    modassert(cellIndex.subdivisionLevel == subdivisionLevel, "invalid result for octree path, probably provided incorrect path for subdivisionLevel");
-
-    allOctreeMeshes.push_back(OctreeToAdd{
-      .path = path,
-      .octreeDivision = &octreeDivision,
-      .size = size,
-      .subdivisionLevel = subdivisionLevel,
-      .rootPos = rootPos,
-      .cellAddress = cellAddress,
-    });
+void addOctreeLevel(Octree& octree, glm::vec3 initialRootPos, OctreeDivision& initialOctreeDivision, float initialSize, int initialSubdivisionLevel, std::vector<int> intialPath, std::vector<OctreeToAdd>& allOctreeMeshes){
+  std::queue<OctreeSearch> octreeToSearch;
+  octreeToSearch.push(OctreeSearch{
+    .octreeDivision = &initialOctreeDivision,
+    .path = intialPath,
+    .size = initialSize,
+    .subdivisionLevel = initialSubdivisionLevel,
+    .rootPos = initialRootPos,
+  });
+  while(octreeToSearch.size() > 0){
+    OctreeSearch search =  octreeToSearch.front();
+    octreeToSearch.pop();
+    if (search.octreeDivision -> divisions.size() > 0){
+      float subdivisionSize = search.size * 0.5f; 
+      for (int i = 0; i < 8; i++) {
+        std::vector<int> newPath = search.path;
+        newPath.push_back(i);
+        octreeToSearch.push(OctreeSearch{
+          .octreeDivision = &search.octreeDivision -> divisions.at(i),
+          .path = newPath,
+          .size = subdivisionSize,
+          .subdivisionLevel = search.subdivisionLevel + 1,
+          .rootPos = offsetForFlatIndex(i, subdivisionSize, search.rootPos),
+        });
+      }
+    }else if (search.octreeDivision -> fill == FILL_FULL) {
+      std::cout << "path is: " << print(search.path) << std::endl;
+      auto cellIndex = indexForOctreePath(search.path);
+      auto cellAddress = cellIndex.value;
+      modassert(cellIndex.subdivisionLevel == search.subdivisionLevel, "invalid result for octree path, probably provided incorrect path for subdivisionLevel");
+      allOctreeMeshes.push_back(OctreeToAdd{
+        .path = search.path,
+        .octreeDivision = search.octreeDivision,
+        .size = search.size,
+        .subdivisionLevel = search.subdivisionLevel,
+        .rootPos = search.rootPos,
+        .cellAddress = cellAddress,
+      });
+    }
   }
 }
 
