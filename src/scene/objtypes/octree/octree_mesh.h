@@ -24,6 +24,15 @@ void addCubePointsRight(std::vector<OctreeVertex>& points, float size, glm::vec3
 void addCubePointsTop(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, float height = 1.f);
 void addCubePointsBottom(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, float depth = 1.f, float width = 1.f);
 
+OctreeDivision* getOctreeSubdivisionIfExists2(Octree& octree, int x, int y, int z, int subdivision);
+
+struct FillStatus {
+  FillType fill;
+  std::optional<OctreeDivision*> mixed;
+};
+FillStatus octreeFillStatus(Octree& octree, int subdivisionLevel, glm::ivec3 division);
+bool shouldShowCubeSide(FillStatus fillStatus, OctreeSelectionFace side /*  { FRONT, BACK, LEFT, RIGHT, UP, DOWN }*/);
+
 #endif
 
 

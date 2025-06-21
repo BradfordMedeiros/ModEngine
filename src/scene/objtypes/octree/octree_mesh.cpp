@@ -95,3 +95,134 @@ void addCubePointsBottom(std::vector<OctreeVertex>& points, float size, glm::vec
   points.push_back(OctreeVertex { .position = glm::vec3(width * size, 0.f, 0.f) + offset,   .coord = meshTexTopRight(bottomFace) });
   points.push_back(OctreeVertex { .position = glm::vec3(0.f, 0.f, -size * depth) + offset,  .coord = meshTexBottomLeft(bottomFace) });
 }
+
+// does not account if a larger subdivision exists and is filled
+OctreeDivision* getOctreeSubdivisionIfExists2(Octree& octree, int x, int y, int z, int subdivision){
+  if (x < 0 || y < 0 || z < 0){
+    return NULL;
+  }
+  auto biggestSubdivisionSize = glm::pow(2, subdivision);
+  if (x >= biggestSubdivisionSize || y >= biggestSubdivisionSize || z >= biggestSubdivisionSize){
+    return NULL;
+  }
+  auto path = octreePath(x, y, z, subdivision);
+  OctreeDivision* octreeSubdivision = &octree.rootNode;
+  for (int i = 0; i < path.size(); i++){
+    int index = xyzIndexToFlatIndex(path.at(i));
+    if (octreeSubdivision -> fill == FILL_EMPTY){
+      return NULL;
+    }else if (octreeSubdivision -> fill == FILL_FULL){
+      return octreeSubdivision;
+    }
+    modassert(octreeSubdivision -> divisions.size() == 8, "expected 8 subdivisions");
+    octreeSubdivision = &(octreeSubdivision -> divisions.at(index));
+  }
+  return octreeSubdivision;
+}
+
+FillStatus octreeFillStatus(Octree& octree, int subdivisionLevel, glm::ivec3 division){
+  // this should be looking at the target subdivsiion level, and any level before it 
+
+  auto octreeDivision = getOctreeSubdivisionIfExists2(octree, division.x, division.y, division.z, subdivisionLevel);
+  if (!octreeDivision){
+    return FillStatus { .fill = FILL_EMPTY, .mixed = std::nullopt };
+  }
+
+  auto blockShape = std::get_if<ShapeBlock>(&octreeDivision -> shape);  // depeneding on the side of this, we could hide more faces
+  if (blockShape == NULL){
+    return FillStatus { .fill = FILL_EMPTY, .mixed = std::nullopt };
+  }
+
+  // if this is mixed, then we need to check the corresponding side and see if it's filled 
+  if (octreeDivision -> fill == FILL_MIXED){
+    return FillStatus { .fill = FILL_MIXED, .mixed = octreeDivision };
+  }
+  return FillStatus { .fill = octreeDivision -> fill, .mixed = std::nullopt };
+}
+
+  // -x +y -z 
+  // +x +y -z
+  // -x +y +z
+  // +x +y +z
+  // -x -y -z 
+  // +x -y -z
+  // -x -y +z
+  // +x -y +z
+
+bool isSideFull(OctreeDivision& division, std::vector<int>& divisionIndexs){
+  if (division.fill == FILL_EMPTY){
+    return false;
+  }else if (division.fill == FILL_FULL){
+    return true;
+  }
+
+  std::vector<OctreeDivision*> divisions;
+  for (auto index : divisionIndexs){
+    divisions.push_back(&division.divisions.at(index));
+  }
+  for (auto division : divisions){
+    if (!isSideFull(*division, divisionIndexs)){
+      return false;
+    }
+  }
+  return true;
+}
+
+std::vector<int> topSideIndexs = { 4, 5, 6, 7 };
+bool isTopSideFull(OctreeDivision& division){
+  return isSideFull(division, topSideIndexs);
+}
+
+std::vector<int> downSideIndexs = { 0, 1, 2, 3 };
+bool isDownSideFull(OctreeDivision& division){
+  return isSideFull(division, downSideIndexs);
+}
+
+std::vector<int> leftSideIndexs = { 1, 3, 5, 7 };
+bool isLeftSideFull(OctreeDivision& division){
+  return isSideFull(division, leftSideIndexs);
+}
+
+std::vector<int> rightSideIndexs = { 0, 2, 4, 6 };
+bool isRightSideFull(OctreeDivision& division){
+  return isSideFull(division, rightSideIndexs);
+}
+
+std::vector<int> frontSideIndexs = { 0, 1, 4, 5 };
+bool isFrontSideFull(OctreeDivision& division){
+  return isSideFull(division, frontSideIndexs);
+}
+std::vector<int> backSideIndexs = { 2, 3, 6, 7 };
+bool isBackSideFull(OctreeDivision& division){
+  return isSideFull(division, backSideIndexs);
+}
+
+bool shouldShowCubeSide(FillStatus fillStatus, OctreeSelectionFace side /*  { FRONT, BACK, LEFT, RIGHT, UP, DOWN }*/){
+  // if it's mixed, can still check if some side of it is full 
+  // so need to look at the further divided sections
+  // should be able to be like fullSide(direction, octreeDivision)
+  if (fillStatus.fill == FILL_FULL){
+    return false;
+  }else if (fillStatus.fill == FILL_EMPTY){
+    return true;
+  }
+
+  OctreeDivision* octreeDivision = fillStatus.mixed.value();
+  modassert(octreeDivision != NULL, "mixed should have provided octree division");
+
+  if (side == UP){
+    return !isTopSideFull(*octreeDivision);
+  }else if (side == DOWN){
+    return !isDownSideFull(*octreeDivision);
+  }else if (side == LEFT){
+    return !isLeftSideFull(*octreeDivision);
+  }else if (side == RIGHT){
+    return !isRightSideFull(*octreeDivision);
+  }else if (side == FRONT){
+    return !isFrontSideFull(*octreeDivision);
+  }else if (side == BACK){
+    return !isBackSideFull(*octreeDivision);
+  }
+
+  return true;
+}
