@@ -114,4 +114,7 @@ struct Intersection {
   std::vector<FaceIntersection> faceIntersections;
 };
 
+std::string debugInfo(PhysicsShapes& physicsShapes);
+
+
 #endif

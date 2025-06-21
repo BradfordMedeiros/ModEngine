@@ -10,6 +10,8 @@
 #include "./octree_physics.h"
 #include "./octree_serialization.h"
 #include "./octree_shapes.h"
+#include "./octree_raycast.h"
+#include "./octree_mesh.h"
 
 struct GameObjectOctree {
   std::string map;
@@ -51,7 +53,6 @@ void loadOctree(GameObjectOctree& octree, std::function<std::string(std::string)
 void saveOctree(GameObjectOctree& octree, std::function<void(std::string, std::string&)> saveFile);
 
 PhysicsShapes getPhysicsShapes(Octree& octree);
-std::string debugInfo(PhysicsShapes& physicsShapes);
 void setSelectedOctreeId(std::optional<objid> id);
 std::optional<objid> getSelectedOctreeId();
 Octree deserializeOctree(std::string& value);

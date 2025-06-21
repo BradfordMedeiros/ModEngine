@@ -138,3 +138,13 @@ ValueAndSubdivision indexForOctreePath(std::vector<int> path){
     .subdivisionLevel = subdivisionLevel,
   };
 }
+
+std::string debugInfo(PhysicsShapes& physicsShapes){
+  std::string value = "debug physics\n";
+  value += std::string("blocks, size = ") + std::to_string(physicsShapes.blocks.size()) + "\n";
+  value += std::string("special shapes num types = ") + std::to_string(physicsShapes.shapes.size()) + "\n";
+  for (auto &shape : physicsShapes.shapes){
+    value += std::string("shape type, size = ") + std::to_string(shape.specialBlocks.size()) + "\n";
+  }
+  return value;
+}
