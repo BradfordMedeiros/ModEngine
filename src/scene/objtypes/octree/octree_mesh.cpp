@@ -485,24 +485,10 @@ Vertex createVertex2(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal){
 1. decompose down to max subdivision levels, but make it sparse
 2*/
 
-Mesh createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loadMesh){
+Mesh getTestMesh();
+
+Mesh createMeshFromPoints(std::vector<OctreeVertex>& points, std::function<Mesh(MeshData&)> loadMesh){
   std::vector<Vertex> vertices;
-  std::vector<OctreeVertex> points = {};
-
-  std::vector<OctreeToAdd> allOctreeMeshes;
-  addOctreeLevel(octree, glm::vec3(0.f, 0.f, 0.f), octree.rootNode, 1.f, 0, {}, allOctreeMeshes);
-  for (auto &octreeMesh : allOctreeMeshes){
-    modassert(octreeMesh.octreeDivision -> material == OCTREE_MATERIAL_DEFAULT, "did not expect non default material");
-    auto blockShape = std::get_if<ShapeBlock>(&octreeMesh.octreeDivision -> shape);
-    if (blockShape){
-      addBlockShapeMesh(octree, points, octreeMesh.rootPos, *octreeMesh.octreeDivision,  *blockShape, octreeMesh.cellAddress, octreeMesh.size, octreeMesh.subdivisionLevel);
-    }
-    auto rampShape = std::get_if<ShapeRamp>(&octreeMesh.octreeDivision -> shape);
-    if (rampShape){
-      addRamp(points, octreeMesh.size, octreeMesh.rootPos, &octreeMesh.octreeDivision -> faces, *rampShape);
-    }
-  }
-
   for (int i = 0; i < points.size(); i+=3){
     glm::vec3 vec1 = points.at(i).position - points.at(i + 1).position;
     glm::vec3 vec2 = points.at(i).position - points.at(i + 2).position;
@@ -540,4 +526,37 @@ Mesh createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loadMesh){
     .bones = {},
   };
   return loadMesh(meshData);
+}
+
+OctreeMeshes createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loadMesh){
+  std::vector<OctreeVertex> points = {};
+  std::vector<OctreeVertex> waterPoints = {};
+
+  std::vector<OctreeToAdd> allOctreeMeshes;
+  addOctreeLevel(octree, glm::vec3(0.f, 0.f, 0.f), octree.rootNode, 1.f, 0, {}, allOctreeMeshes);
+  for (auto &octreeMesh : allOctreeMeshes){
+    std::vector<OctreeVertex>* materialPoints = &points;
+    if (octreeMesh.octreeDivision -> material == OCTREE_MATERIAL_DEFAULT){
+      // do nothing
+    }else if (octreeMesh.octreeDivision -> material == OCTREE_MATERIAL_WATER){
+      materialPoints = &waterPoints;
+    }else{
+      modassert(false, "invalid material");
+    }
+
+    auto blockShape = std::get_if<ShapeBlock>(&octreeMesh.octreeDivision -> shape);
+    if (blockShape){
+      addBlockShapeMesh(octree, *materialPoints, octreeMesh.rootPos, *octreeMesh.octreeDivision,  *blockShape, octreeMesh.cellAddress, octreeMesh.size, octreeMesh.subdivisionLevel);
+    }
+    auto rampShape = std::get_if<ShapeRamp>(&octreeMesh.octreeDivision -> shape);
+    if (rampShape){
+      addRamp(*materialPoints, octreeMesh.size, octreeMesh.rootPos, &octreeMesh.octreeDivision -> faces, *rampShape);
+    }
+  }
+
+  OctreeMeshes octreeMeshes {
+    .mesh = createMeshFromPoints(points, loadMesh),
+    .waterMesh =  waterPoints.size() > 0 ? createMeshFromPoints(waterPoints, loadMesh) : std::optional<Mesh>(std::nullopt), 
+  };
+  return octreeMeshes;
 }

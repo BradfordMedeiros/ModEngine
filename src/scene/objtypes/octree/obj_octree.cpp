@@ -253,7 +253,7 @@ void makeOctreeCellMaterial(GameObjectOctree& gameobjOctree, std::function<Mesh(
     }
   }
 
-  gameobjOctree.meshes.mesh = createOctreeMesh(gameobjOctree.octree, loadMesh);
+  gameobjOctree.meshes = createOctreeMesh(gameobjOctree.octree, loadMesh);
 }
 
 
@@ -371,7 +371,7 @@ void makeOctreeCellRamp(GameObjectOctree& gameobjOctree, Octree& octree, std::fu
     }
   }
 
-  gameobjOctree.meshes.mesh = createOctreeMesh(octree, loadMesh);
+  gameobjOctree.meshes = createOctreeMesh(octree, loadMesh);
 }
 
 void handleOctreeScroll(GameObjectOctree& gameobjOctree, Octree& octree, bool upDirection, std::function<Mesh(MeshData&)> loadMesh, bool holdingShift, bool holdingCtrl, OctreeDimAxis axis){
@@ -458,7 +458,7 @@ void handleOctreeScroll(GameObjectOctree& gameobjOctree, Octree& octree, bool up
 
   //writeOctreeCellRange(testOctree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, true);
 
-  gameobjOctree.meshes.mesh = createOctreeMesh(octree, loadMesh);
+  gameobjOctree.meshes = createOctreeMesh(octree, loadMesh);
 }
 
 void handleMoveOctreeSelection(OctreeEditorMove direction){
@@ -517,11 +517,11 @@ void increaseSelectionSize(int width, int height, int depth){
 
 void insertSelectedOctreeNodes(GameObjectOctree& gameobjOctree, Octree& octree, std::function<Mesh(MeshData&)> loadMesh){
   writeOctreeCellRange(octree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, true);
-  gameobjOctree.meshes.mesh = createOctreeMesh(octree, loadMesh);
+  gameobjOctree.meshes = createOctreeMesh(octree, loadMesh);
 }
 void deleteSelectedOctreeNodes(GameObjectOctree& gameobjOctree, Octree& octree, std::function<Mesh(MeshData&)> loadMesh){
   writeOctreeCellRange(octree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, false);
-  gameobjOctree.meshes.mesh = createOctreeMesh(octree, loadMesh);
+  gameobjOctree.meshes = createOctreeMesh(octree, loadMesh);
 }
 
 void writeOctreeTexture(GameObjectOctree& gameobjOctree, Octree& octree, std::function<Mesh(MeshData&)> loadMesh, bool unitTexture, TextureOrientation texOrientation){
@@ -578,7 +578,7 @@ void writeOctreeTexture(GameObjectOctree& gameobjOctree, Octree& octree, std::fu
     }
   }
 
-  gameobjOctree.meshes.mesh = createOctreeMesh(octree, loadMesh);
+  gameobjOctree.meshes = createOctreeMesh(octree, loadMesh);
 }
 
 int getOctreeTextureId(){
@@ -626,7 +626,7 @@ GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util){
     obj.octree = unsubdividedOctree;
   }
 
-  obj.meshes.mesh = createOctreeMesh(obj.octree, util.loadMesh);
+  obj.meshes = createOctreeMesh(obj.octree, util.loadMesh);
   return obj;
 }
 
@@ -647,7 +647,7 @@ void loadOctree(GameObjectOctree& octree, std::function<std::string(std::string)
   modlog("octree", "loading");
   auto serializedData = readFileOrPackage(octree.map);
   octree.octree = deserializeOctree(serializedData);
-  octree.meshes.mesh = createOctreeMesh(octree.octree, loadMesh);
+  octree.meshes = createOctreeMesh(octree.octree, loadMesh);
 }
 
 void saveOctree(GameObjectOctree& octree, std::function<void(std::string, std::string&)> saveFile){

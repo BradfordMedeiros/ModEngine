@@ -487,13 +487,25 @@ int renderObject(
   {
     auto octreeObj = getOctree(objectMapping, id);
     if (octreeObj != NULL){
-      Mesh& octreeMesh = octreeObj -> meshes.mesh;
       MeshUniforms meshUniforms {
         .model = finalModelMatrix,
         .id = id,
       };
-      drawMesh(octreeMesh, shaderProgram, false, meshUniforms);
-      return octreeMesh.numTriangles;
+      drawMesh(octreeObj -> meshes.mesh, shaderProgram, false, meshUniforms);
+
+      MeshUniforms waterUniforms {
+        .model = finalModelMatrix,
+        .tint = glm::vec4(0.f, 0.f, 1.f, 1.f),
+        .id = id,
+      };
+      if (octreeObj -> meshes.waterMesh.has_value()){
+        drawMesh(octreeObj -> meshes.waterMesh.value(), shaderProgram, false, waterUniforms);
+      }
+      auto octreeTriangles = octreeObj -> meshes.mesh.numTriangles;
+      if (octreeObj -> meshes.waterMesh.has_value()){
+        octreeTriangles += octreeObj -> meshes.waterMesh.value().numTriangles;
+      }
+      return octreeTriangles;
     }
   }
 

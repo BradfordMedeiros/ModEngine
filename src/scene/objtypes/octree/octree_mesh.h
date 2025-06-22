@@ -6,7 +6,11 @@
 #include "../../../common/util.h"
 #include "../obj_util.h"
 
-Mesh createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loadMesh);
+struct OctreeMeshes {
+  Mesh mesh;
+  std::optional<Mesh> waterMesh;
+};
+OctreeMeshes createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loadMesh);
 
 #endif
 

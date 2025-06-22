@@ -13,9 +13,6 @@
 #include "./octree_raycast.h"
 #include "./octree_mesh.h"
 
-struct OctreeMeshes {
-  Mesh mesh;
-};
 
 struct GameObjectOctree {
   std::string map;

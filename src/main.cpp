@@ -986,6 +986,10 @@ SelectionResult readSelectionFromBuffer(bool readSelectionShader, glm::vec2 adju
 }
 
 
+Mesh getTestMesh(){
+  return world.meshes.at(resources::MODEL_NODE).mesh;
+}
+
 bool textureLoaded(std::string& texturepath){
   return textureLoaded(world, texturepath);
 }
