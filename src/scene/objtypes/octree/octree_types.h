@@ -27,6 +27,8 @@ struct ShapeRamp {
 };
 typedef std::variant<ShapeBlock, ShapeRamp> OctreeShape;
 
+enum OctreeMaterial { OCTREE_MATERIAL_DEFAULT, OCTREE_MATERIAL_WATER };
+
 struct OctreeDivision {
   // -x +y -z 
   // +x +y -z
@@ -37,6 +39,7 @@ struct OctreeDivision {
   // -x -y +z
   // +x -y +z
   FillType fill;
+  OctreeMaterial material;
   OctreeShape shape;
   std::vector<FaceTexture> faces;
   std::vector<OctreeDivision> divisions;

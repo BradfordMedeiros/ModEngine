@@ -1710,8 +1710,9 @@ std::vector<InputDispatch> inputFns = {
       for (auto &selectedIndex : state.editor.selectedObjs){
         GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
         modassert(octreeObject, "octree object null");
-        makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
-        if (state.rebuildOctreePhysicsOnEdit){
+        //makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
+        makeOctreeCellMaterial(*octreeObject, createScopedLoadMesh(world, selectedIndex), OCTREE_MATERIAL_WATER);
+        if (true || state.rebuildOctreePhysicsOnEdit){
           updatePhysicsBody(world, selectedIndex);
         }
       }

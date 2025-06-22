@@ -487,15 +487,13 @@ int renderObject(
   {
     auto octreeObj = getOctree(objectMapping, id);
     if (octreeObj != NULL){
-      Mesh* octreeMesh = getOctreeMesh(*octreeObj);
-      modassert(octreeMesh, "no octree mesh available");
-  
+      Mesh& octreeMesh = octreeObj -> meshes.mesh;
       MeshUniforms meshUniforms {
         .model = finalModelMatrix,
         .id = id,
       };
-      drawMesh(*octreeMesh, shaderProgram, false, meshUniforms);
-      return octreeMesh -> numTriangles;
+      drawMesh(octreeMesh, shaderProgram, false, meshUniforms);
+      return octreeMesh.numTriangles;
     }
   }
 

@@ -5,6 +5,7 @@ extern std::vector<FaceTexture> defaultTextureCoords;
 Octree unsubdividedOctree {
   .rootNode = OctreeDivision {
     .fill = FILL_FULL,
+    .material = OCTREE_MATERIAL_DEFAULT,
     .shape = ShapeBlock{},
     .faces = defaultTextureCoords,
     .divisions = {},
@@ -14,6 +15,7 @@ Octree unsubdividedOctree {
 Octree subdividedOne {
   .rootNode = OctreeDivision {
     .fill = FILL_MIXED,
+    .material = OCTREE_MATERIAL_DEFAULT,
     .shape = ShapeBlock{},
     .faces = defaultTextureCoords,
     .divisions = {

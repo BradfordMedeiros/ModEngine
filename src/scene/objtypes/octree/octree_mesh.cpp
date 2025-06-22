@@ -492,6 +492,7 @@ Mesh createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loadMesh){
   std::vector<OctreeToAdd> allOctreeMeshes;
   addOctreeLevel(octree, glm::vec3(0.f, 0.f, 0.f), octree.rootNode, 1.f, 0, {}, allOctreeMeshes);
   for (auto &octreeMesh : allOctreeMeshes){
+    modassert(octreeMesh.octreeDivision -> material == OCTREE_MATERIAL_DEFAULT, "did not expect non default material");
     auto blockShape = std::get_if<ShapeBlock>(&octreeMesh.octreeDivision -> shape);
     if (blockShape){
       addBlockShapeMesh(octree, points, octreeMesh.rootPos, *octreeMesh.octreeDivision,  *blockShape, octreeMesh.cellAddress, octreeMesh.size, octreeMesh.subdivisionLevel);

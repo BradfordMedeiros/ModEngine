@@ -152,14 +152,14 @@ void writeOctreeCell(Octree& octree, int x, int y, int z, int subdivision, bool 
     if (octreeSubdivision -> divisions.size() == 0){
       auto defaultFill = octreeSubdivision -> fill;
       octreeSubdivision -> divisions = {
-        OctreeDivision { .fill = defaultFill, .shape = ShapeBlock{}, .faces = octreeSubdivision -> faces },
-        OctreeDivision { .fill = defaultFill, .shape = ShapeBlock{}, .faces = octreeSubdivision -> faces },
-        OctreeDivision { .fill = defaultFill, .shape = ShapeBlock{}, .faces = octreeSubdivision -> faces },
-        OctreeDivision { .fill = defaultFill, .shape = ShapeBlock{}, .faces = octreeSubdivision -> faces },
-        OctreeDivision { .fill = defaultFill, .shape = ShapeBlock{}, .faces = octreeSubdivision -> faces },
-        OctreeDivision { .fill = defaultFill, .shape = ShapeBlock{}, .faces = octreeSubdivision -> faces },
-        OctreeDivision { .fill = defaultFill, .shape = ShapeBlock{}, .faces = octreeSubdivision -> faces },
-        OctreeDivision { .fill = defaultFill, .shape = ShapeBlock{}, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .fill = defaultFill, .material = OCTREE_MATERIAL_DEFAULT, .shape = ShapeBlock{}, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .fill = defaultFill, .material = OCTREE_MATERIAL_DEFAULT, .shape = ShapeBlock{}, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .fill = defaultFill, .material = OCTREE_MATERIAL_DEFAULT, .shape = ShapeBlock{}, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .fill = defaultFill, .material = OCTREE_MATERIAL_DEFAULT, .shape = ShapeBlock{}, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .fill = defaultFill, .material = OCTREE_MATERIAL_DEFAULT, .shape = ShapeBlock{}, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .fill = defaultFill, .material = OCTREE_MATERIAL_DEFAULT, .shape = ShapeBlock{}, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .fill = defaultFill, .material = OCTREE_MATERIAL_DEFAULT, .shape = ShapeBlock{}, .faces = octreeSubdivision -> faces },
+        OctreeDivision { .fill = defaultFill, .material = OCTREE_MATERIAL_DEFAULT, .shape = ShapeBlock{}, .faces = octreeSubdivision -> faces },
       };
     } 
     // check if all filled, then set the divsions = {}, and filled = true
@@ -230,6 +230,32 @@ int textureIndex(OctreeSelectionFace faceOrientation){
   }
   return index;  
 }
+
+void makeOctreeCellMaterial(GameObjectOctree& gameobjOctree, int x, int y, int z, int subdivision, OctreeMaterial material){
+  auto octreeDivision = getOctreeSubdivisionIfExists(gameobjOctree.octree, x, y, z, subdivision);
+  if (octreeDivision == NULL){
+    modlog("octree editor", "octree division does not exist");
+    return;
+  }
+  //modassert(octreeDivision, "octreeDivision does not exist");
+  octreeDivision ->  material = material;
+}
+
+void makeOctreeCellMaterial(GameObjectOctree& gameobjOctree, std::function<Mesh(MeshData&)> loadMesh, OctreeMaterial material){
+  float heightNudge = 0.f;
+  for (int x = 0; x < selectionDim.value().x; x++){
+    for (int y = 0; y < selectionDim.value().y; y++){
+      for (int z = 0; z < selectionDim.value().z; z++){
+        makeOctreeCellMaterial(gameobjOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel, material);
+
+
+      }
+    }
+  }
+
+  gameobjOctree.meshes.mesh = createOctreeMesh(gameobjOctree.octree, loadMesh);
+}
+
 
 void makeOctreeCellRamp(Octree& octree, int x, int y, int z, int subdivision, RampDirection rampDirection, float startHeight = 0.f, float endHeight = 1.f, float startDepth = 0.f, float endDepth = 1.f){
   auto octreeDivision = getOctreeSubdivisionIfExists(octree, x, y, z, subdivision);
@@ -345,7 +371,7 @@ void makeOctreeCellRamp(GameObjectOctree& gameobjOctree, Octree& octree, std::fu
     }
   }
 
-  gameobjOctree.mesh = createOctreeMesh(octree, loadMesh);
+  gameobjOctree.meshes.mesh = createOctreeMesh(octree, loadMesh);
 }
 
 void handleOctreeScroll(GameObjectOctree& gameobjOctree, Octree& octree, bool upDirection, std::function<Mesh(MeshData&)> loadMesh, bool holdingShift, bool holdingCtrl, OctreeDimAxis axis){
@@ -432,7 +458,7 @@ void handleOctreeScroll(GameObjectOctree& gameobjOctree, Octree& octree, bool up
 
   //writeOctreeCellRange(testOctree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, true);
 
-  gameobjOctree.mesh = createOctreeMesh(octree, loadMesh);
+  gameobjOctree.meshes.mesh = createOctreeMesh(octree, loadMesh);
 }
 
 void handleMoveOctreeSelection(OctreeEditorMove direction){
@@ -491,11 +517,11 @@ void increaseSelectionSize(int width, int height, int depth){
 
 void insertSelectedOctreeNodes(GameObjectOctree& gameobjOctree, Octree& octree, std::function<Mesh(MeshData&)> loadMesh){
   writeOctreeCellRange(octree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, true);
-  gameobjOctree.mesh = createOctreeMesh(octree, loadMesh);
+  gameobjOctree.meshes.mesh = createOctreeMesh(octree, loadMesh);
 }
 void deleteSelectedOctreeNodes(GameObjectOctree& gameobjOctree, Octree& octree, std::function<Mesh(MeshData&)> loadMesh){
   writeOctreeCellRange(octree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, selectionDim.value().x, selectionDim.value().y, selectionDim.value().z, subdivisionLevel, false);
-  gameobjOctree.mesh = createOctreeMesh(octree, loadMesh);
+  gameobjOctree.meshes.mesh = createOctreeMesh(octree, loadMesh);
 }
 
 void writeOctreeTexture(GameObjectOctree& gameobjOctree, Octree& octree, std::function<Mesh(MeshData&)> loadMesh, bool unitTexture, TextureOrientation texOrientation){
@@ -552,7 +578,7 @@ void writeOctreeTexture(GameObjectOctree& gameobjOctree, Octree& octree, std::fu
     }
   }
 
-  gameobjOctree.mesh = createOctreeMesh(octree, loadMesh);
+  gameobjOctree.meshes.mesh = createOctreeMesh(octree, loadMesh);
 }
 
 int getOctreeTextureId(){
@@ -575,9 +601,7 @@ void setOctreeTextureId(int textureId){
 
 // Core objtype fns
 ////////////////////////////////////////////////////////////////////////////////////
-Mesh* getOctreeMesh(GameObjectOctree& octree){
-  return &octree.mesh;
-}
+
 
 std::vector<AutoSerialize> octreeAutoserializer {
   AutoSerializeString {
@@ -602,7 +626,7 @@ GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util){
     obj.octree = unsubdividedOctree;
   }
 
-  obj.mesh = createOctreeMesh(obj.octree, util.loadMesh);
+  obj.meshes.mesh = createOctreeMesh(obj.octree, util.loadMesh);
   return obj;
 }
 
@@ -623,7 +647,7 @@ void loadOctree(GameObjectOctree& octree, std::function<std::string(std::string)
   modlog("octree", "loading");
   auto serializedData = readFileOrPackage(octree.map);
   octree.octree = deserializeOctree(serializedData);
-  octree.mesh = createOctreeMesh(octree.octree, loadMesh);
+  octree.meshes.mesh = createOctreeMesh(octree.octree, loadMesh);
 }
 
 void saveOctree(GameObjectOctree& octree, std::function<void(std::string, std::string&)> saveFile){

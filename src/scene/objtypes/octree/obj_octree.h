@@ -13,16 +13,18 @@
 #include "./octree_raycast.h"
 #include "./octree_mesh.h"
 
+struct OctreeMeshes {
+  Mesh mesh;
+};
+
 struct GameObjectOctree {
   std::string map;
-  Mesh mesh;
+  OctreeMeshes meshes;
   Octree octree;
 };
 
 GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util);
 std::vector<std::pair<std::string, std::string>> serializeOctree(GameObjectOctree& obj, ObjectSerializeUtil& util);
-Mesh* getOctreeMesh(GameObjectOctree& octree);
-
 
 void setAtlasDimensions(AtlasDimensions newAtlasDimensions);
 
@@ -47,6 +49,7 @@ void writeOctreeTexture(GameObjectOctree& gameobjOctree, Octree& octree, std::fu
 int getOctreeTextureId();
 void setOctreeTextureId(int textureId);
 
+void makeOctreeCellMaterial(GameObjectOctree& gameobjOctree, std::function<Mesh(MeshData&)> loadMesh, OctreeMaterial material);
 void makeOctreeCellRamp(GameObjectOctree& gameobjOctree, Octree& octree, std::function<Mesh(MeshData&)> loadMesh, RampDirection direction);
 
 void loadOctree(GameObjectOctree& octree, std::function<std::string(std::string)> loadFile, std::function<Mesh(MeshData&)> loadMesh);
