@@ -11,13 +11,13 @@ extern std::optional<AtlasDimensions> atlasDimensions;
 
 // This could easily be optimized by saving this in binary form instead
 // human readable, at least for now, seems nice
-std::string serializeOctreeDivision(OctreeDivision& octreeDivision, std::vector<FaceTexture>& textures, std::vector<OctreeShape*>& shapeData){
+std::string serializeOctreeDivision(OctreeDivision& octreeDivision, std::vector<FaceTexture>& textures, std::vector<OctreeShape*>& shapeData, std::vector<OctreeMaterial>& materials){
   if (octreeDivision.divisions.size() != 0){
     std::string str = "[ ";
     modassert(octreeDivision.divisions.size() == 8, "serialization - unexpected # of octree divisions");
     //modassert(octreeDivision.fill == FILL_MIXED, "octree divisions, but not mixed filled");
     for (int i = 0; i < octreeDivision.divisions.size(); i++){
-      auto value = serializeOctreeDivision(octreeDivision.divisions.at(i), textures, shapeData);
+      auto value = serializeOctreeDivision(octreeDivision.divisions.at(i), textures, shapeData, materials);
       str += value + " ";
     }
     str += "]";
@@ -29,6 +29,7 @@ std::string serializeOctreeDivision(OctreeDivision& octreeDivision, std::vector<
     textures.push_back(face); 
   }
   shapeData.push_back(&octreeDivision.shape);
+  materials.push_back(octreeDivision.material);
 
   return octreeDivision.fill == FILL_FULL ? "1" : "0";
 }
@@ -49,9 +50,10 @@ std::string serializeOctree(Octree& octree){
   // 0.3 0.3|0.4 0.2|0.3 0.4|0.1 0.1,2,1,2,1,2;1,2,3,1,1,1;1,1,1,1,1,1
   std::vector<FaceTexture> textures;
   std::vector<OctreeShape*> shapeData;
-
+  std::vector<OctreeMaterial> materials;
+  
   std::string str = std::to_string(1.f) + "\n";
-  str += serializeOctreeDivision(octree.rootNode, textures, shapeData) + "\n";
+  str += serializeOctreeDivision(octree.rootNode, textures, shapeData, materials) + "\n";
 
   std::string textureString = "";
   for (int i = 0; i < textures.size(); i+=6){
@@ -70,35 +72,56 @@ std::string serializeOctree(Octree& octree){
   std::cout << "num texture coords: " << textures.size() << std::endl;
   str += textureString + "\n";
 
-  std::string shapeString = "";
-  for (int i = 0; i < shapeData.size(); i++){
-    auto shape = shapeData.at(i);
-    auto blockShapePtr = std::get_if<ShapeBlock>(shape);
-    auto rampShapePtr = std::get_if<ShapeRamp>(shape);
-    modassert(blockShapePtr || rampShapePtr, "invalid shape");
-    if (blockShapePtr){
-      shapeString += "b";
-    }else if (rampShapePtr){
-      shapeString += "r|" + std::to_string(rampShapePtr -> startHeight) + "|" + std::to_string(rampShapePtr -> endHeight) + "|" + std::to_string(rampShapePtr -> startDepth) + "|" + std::to_string(rampShapePtr -> endDepth) + "|";
-      if (rampShapePtr -> direction == RAMP_FORWARD){
-        shapeString += "f";
-      }else if (rampShapePtr -> direction == RAMP_BACKWARD){
+  {
+    std::string shapeString = "";
+    for (int i = 0; i < shapeData.size(); i++){
+      auto shape = shapeData.at(i);
+      auto blockShapePtr = std::get_if<ShapeBlock>(shape);
+      auto rampShapePtr = std::get_if<ShapeRamp>(shape);
+      modassert(blockShapePtr || rampShapePtr, "invalid shape");
+      if (blockShapePtr){
         shapeString += "b";
-      }else if (rampShapePtr -> direction == RAMP_LEFT){
-        shapeString += "l";
-      }else if (rampShapePtr -> direction == RAMP_RIGHT){
-        shapeString += "r";
+      }else if (rampShapePtr){
+        shapeString += "r|" + std::to_string(rampShapePtr -> startHeight) + "|" + std::to_string(rampShapePtr -> endHeight) + "|" + std::to_string(rampShapePtr -> startDepth) + "|" + std::to_string(rampShapePtr -> endDepth) + "|";
+        if (rampShapePtr -> direction == RAMP_FORWARD){
+          shapeString += "f";
+        }else if (rampShapePtr -> direction == RAMP_BACKWARD){
+          shapeString += "b";
+        }else if (rampShapePtr -> direction == RAMP_LEFT){
+          shapeString += "l";
+        }else if (rampShapePtr -> direction == RAMP_RIGHT){
+          shapeString += "r";
+        }else{
+          modassert(false, "invalid shape type");
+        }
       }else{
         modassert(false, "invalid shape type");
       }
-    }else{
-      modassert(false, "invalid shape type");
+      if (i != shapeData.size() - 1){
+        shapeString += ";";
+      }
     }
-    if (i != shapeData.size() - 1){
-      shapeString += ";";
-    }
+    str += shapeString + "\n";
   }
-  str += shapeString + "\n";
+
+  {
+    std::string materialString = "";
+    for (int i = 0; i < materials.size(); i++){
+      auto material = materials.at(i);
+      if (material == OCTREE_MATERIAL_DEFAULT){
+        materialString += "d";
+      }else if (material == OCTREE_MATERIAL_WATER){
+        materialString += "w";
+      }else{
+        modassert(false, "invalid material type");
+      }
+      if (i != materials.size() - 1){
+        materialString += ";";
+      }
+    }
+    str += materialString + "\n";
+  }
+
 
   std::string textureNames = "";
   for (int i = 0; i < atlasDimensions.value().textureNames.size(); i++){
@@ -141,10 +164,11 @@ std::vector<std::vector<FaceTexture>> deserializeTextures(std::string& values){
 }
 
 std::vector<OctreeShape> deserializeShapes(std::string& values){
+  std::cout << values << std::endl;
   auto valuesStr = split(values, ';');
   std::vector<OctreeShape> octreeShapes;
   for (auto &valueStr : valuesStr){
-    if (valueStr.at(0) == 'b'){
+    if (valueStr.at(0) == 'd' || valueStr.at(0) == 'b'){
       octreeShapes.push_back(ShapeBlock{});
     }else if (valueStr.at(0) == 'r'){
       auto shapeData = split(valueStr, '|');
@@ -162,7 +186,7 @@ std::vector<OctreeShape> deserializeShapes(std::string& values){
       }else if (shapeData.at(5) == "r"){
         direction = RAMP_RIGHT;
       }else{
-        modassert(false, "invalid shape type");
+        modassert(false, "invalid shape type - bad defined ramp");
       }
       octreeShapes.push_back(ShapeRamp {
         .direction = direction,
@@ -172,11 +196,28 @@ std::vector<OctreeShape> deserializeShapes(std::string& values){
         .endDepth = endDepth,
       });
     }else{
-      modassert(false, "invalid shape type");
+      modassert(false, std::string("invalid shape type: ") + valueStr.at(0));
     }
   }
   return octreeShapes;
 }
+
+
+std::vector<OctreeMaterial> deserializeMaterials(std::string& values){
+  auto valuesStr = split(values, ';');
+  std::vector<OctreeMaterial> materials;
+  for (auto &valueStr : valuesStr){
+    if (valueStr.at(0) == 'd' || valueStr.at(0) == 'b'){
+      materials.push_back(OCTREE_MATERIAL_DEFAULT);
+    }else if (valueStr.at(0) == 'w'){
+      materials.push_back(OCTREE_MATERIAL_WATER);
+    }else{
+      modassert(false, "invalid material type");
+    }
+  }
+  return materials;
+}
+
 
 bool equalOrdered(std::vector<std::string>& mapTextures, std::vector<std::string>& atlasTextures){
   if (mapTextures.size() != atlasTextures.size()){
@@ -230,7 +271,7 @@ std::vector<std::string> splitBrackets(std::string& value){
   return values;
 }
 
-OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::vector<FaceTexture>>& textures, int* currentTextureIndex, std::vector<OctreeShape>& octreeShapes, int* currentShapeIndex){
+OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::vector<FaceTexture>>& textures, int* currentTextureIndex, std::vector<OctreeShape>& octreeShapes, int* currentShapeIndex, std::vector<OctreeMaterial>& materials){
   value = trim(value);
   bool inBrackets = value.size() >= 2 && value.at(0) == '[' && value.at(value.size() -1) == ']';
 
@@ -240,7 +281,7 @@ OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::ve
     std::vector<OctreeDivision> octreeDivisions;
     for (auto &splitValue : splitValues){
       modassert(splitValue.size() > 0, "split value should not be 0 length");
-      octreeDivisions.push_back(deserializeOctreeDivision(splitValue, textures, currentTextureIndex, octreeShapes, currentShapeIndex));
+      octreeDivisions.push_back(deserializeOctreeDivision(splitValue, textures, currentTextureIndex, octreeShapes, currentShapeIndex, materials));
     }
     modassert(octreeDivisions.size() == 8, std::string("invalid division size, got: " + std::to_string(octreeDivisions.size())));
     return OctreeDivision {
@@ -256,6 +297,7 @@ OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::ve
 
   return OctreeDivision {
     .fill = filled ? FILL_FULL : FILL_EMPTY,
+    .material = materials.at(*currentShapeIndex),
     .shape = octreeShapes.at(*currentShapeIndex),
     .faces = textures.at(*currentTextureIndex),
     .divisions = {},
@@ -265,13 +307,15 @@ OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::ve
 
 Octree deserializeOctree(std::string& value){
   auto lines = split(value, '\n');
-  //modassert(lines.size() == 5, std::string("invalid line size, got: ") + std::to_string(lines.size()));
+  modassert(lines.size() == 6, std::string("invalid line size, got: ") + std::to_string(lines.size()));
 
   auto textures = deserializeTextures(lines.at(2));
   auto shapes = deserializeShapes(lines.at(3));
   modassert(shapes.size() == textures.size(), std::string("texture size and shapes sizes disagree: t, s = ") + std::to_string(textures.size()) + ", " + std::to_string(shapes.size()));
 
-  auto textureAtlas = split(lines.at(4), ',');
+  auto materials = deserializeMaterials(lines.at(4));
+
+  auto textureAtlas = split(lines.at(5), ',');
   //modassert(equalOrdered(textureAtlas, atlasDimensions.value().textureNames), "textures changed");
   auto textureMapping = getTextureMapping(textureAtlas, atlasDimensions.value().textureNames, textures);
   modassert(textureMapping.size() == textureAtlas.size(), std::string("does not have a mapping for all textures, textureMapping.size = ") + std::to_string(textureMapping.size()) + ", textureAtlas.size = " + std::to_string(textureAtlas.size()));
@@ -284,6 +328,6 @@ Octree deserializeOctree(std::string& value){
   int currentTextureIndex = -1;
   int currentShapeIndex = -1;
   return Octree  {
-    .rootNode = deserializeOctreeDivision(lines.at(1), textures, &currentTextureIndex, shapes, &currentShapeIndex),
+    .rootNode = deserializeOctreeDivision(lines.at(1), textures, &currentTextureIndex, shapes, &currentShapeIndex, materials),
   };
 }
