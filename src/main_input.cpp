@@ -232,7 +232,9 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
         axis = OCTREE_ZAXIS;
       }
       handleOctreeScroll(*octreeObject, octreeObject -> octree, yoffset > 0, createScopedLoadMesh(world, octreeId.value()), isShiftHeld, isCtrlHeld, axis);
-      updatePhysicsBody(world, octreeId.value());
+      if (state.rebuildOctreePhysicsOnEdit){
+        updatePhysicsBody(world, octreeId.value());
+      }
     }
   }
 }
@@ -1579,6 +1581,23 @@ std::vector<InputDispatch> inputFns = {
 
   InputDispatch{
     .alwaysEnable = false,
+    .sourceKey = '8', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      for (auto &selectedIndex : state.editor.selectedObjs){
+        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
+        if (octreeObject != NULL){
+          updatePhysicsBody(world, selectedIndex);
+        }
+      }
+      //();
+    }
+  },
+
+  InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = '7', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1590,10 +1609,14 @@ std::vector<InputDispatch> inputFns = {
         if (octreeObject != NULL){
           if (isCtrlHeld){
             deleteSelectedOctreeNodes(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex));
-            updatePhysicsBody(world, selectedIndex);
+            if (state.rebuildOctreePhysicsOnEdit){
+              updatePhysicsBody(world, selectedIndex);
+            }
           }else{
             insertSelectedOctreeNodes(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex));
-            updatePhysicsBody(world, selectedIndex);
+            if (state.rebuildOctreePhysicsOnEdit){
+              updatePhysicsBody(world, selectedIndex);
+            }
           }
         }
       }
@@ -1688,7 +1711,9 @@ std::vector<InputDispatch> inputFns = {
         GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
         modassert(octreeObject, "octree object null");
         makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
-        updatePhysicsBody(world, selectedIndex);
+        if (state.rebuildOctreePhysicsOnEdit){
+          updatePhysicsBody(world, selectedIndex);
+        }
       }
     }
   },

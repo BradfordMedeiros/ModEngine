@@ -163,6 +163,7 @@ struct engineState {
 
   std::optional<objid> cullingObject;
   
+  bool rebuildOctreePhysicsOnEdit;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

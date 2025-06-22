@@ -402,8 +402,7 @@ std::vector<ObjectStateMapping> mapping = {
   simpleFloatSerializer("sound", "volume", offsetof(engineState, volume)),
   simpleBoolSerializer("sound", "mute", offsetof(engineState, muteSound)),
   simpleEnumSerializer("editor", "disableinput", { DISABLED, ENABLED, CAMERA_ONLY }, { "true", "false", "camera" }, offsetof(engineState, inputMode)),
-
-
+  simpleBoolSerializer("octree", "rebuild", offsetof(engineState, rebuildOctreePhysicsOnEdit)),
 };  
 
 void setState(engineState& state, ObjectValue& value, float now){
@@ -543,6 +542,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .enableFrustumCulling = false,
     .visualizeFrustum = true,
     .cullingObject = std::nullopt,
+    .rebuildOctreePhysicsOnEdit = true,
 	};
 	return state;
 }

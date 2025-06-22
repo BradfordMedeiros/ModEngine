@@ -38,8 +38,6 @@ std::vector<SparseShape> joinSparseShapes(std::vector<SparseShape>& shapes){
 
   // join along x
 
-  std::vector<SparseShape> joinedShapes;
-
   for (int iterations = 0; iterations < 2; iterations++){
     for (int i = 0; i < shapes.size(); i++){
       for (int j = i + 1; j < shapes.size(); j++){
@@ -137,7 +135,8 @@ std::vector<SparseShape> joinSparseShapes(std::vector<SparseShape>& shapes){
     }
   }
 
-
+  std::vector<SparseShape> joinedShapes;
+  joinedShapes.reserve(shapes.size());
   for (auto &shape : shapes){
     if (!shape.deleted){
       joinedShapes.push_back(shape);
@@ -306,9 +305,9 @@ void createShapeData(std::vector<FinalShapeData>& shapeData, std::vector<Positio
 }
 
 PhysicsShapes getPhysicsShapes(Octree& octree){
-  PhysicsShapes empty{};
-  return empty;
-  
+  //PhysicsShapes empty{};
+  //return empty;
+
   std::vector<PositionAndScale> octreeCubes;
 
 
