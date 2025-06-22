@@ -433,7 +433,6 @@ void addOctreeLevel(Octree& octree, glm::vec3 initialRootPos, OctreeDivision& in
         });
       }
     }else if (search.octreeDivision -> fill == FILL_FULL) {
-      std::cout << "path is: " << print(search.path) << std::endl;
       auto cellIndex = indexForOctreePath(search.path);
       auto cellAddress = cellIndex.value;
       modassert(cellIndex.subdivisionLevel == search.subdivisionLevel, "invalid result for octree path, probably provided incorrect path for subdivisionLevel");
@@ -490,8 +489,6 @@ Mesh createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loadMesh){
   std::vector<Vertex> vertices;
   std::vector<OctreeVertex> points = {};
 
-  std::cout << "adding octree start" << std::endl;
-
   std::vector<OctreeToAdd> allOctreeMeshes;
   addOctreeLevel(octree, glm::vec3(0.f, 0.f, 0.f), octree.rootNode, 1.f, 0, {}, allOctreeMeshes);
   for (auto &octreeMesh : allOctreeMeshes){
@@ -504,8 +501,6 @@ Mesh createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loadMesh){
       addRamp(points, octreeMesh.size, octreeMesh.rootPos, &octreeMesh.octreeDivision -> faces, *rampShape);
     }
   }
-
-  std::cout << "adding octree end" << std::endl;
 
   for (int i = 0; i < points.size(); i+=3){
     glm::vec3 vec1 = points.at(i).position - points.at(i + 1).position;

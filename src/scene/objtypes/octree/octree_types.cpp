@@ -119,7 +119,7 @@ std::vector<glm::ivec3> octreePath(int x, int y, int z, int subdivision){
   std::vector<glm::ivec3> path;
   for (int currentSubdivision = 1; currentSubdivision <= subdivision; currentSubdivision++){
     auto indexs = localIndexForSubdivision(x, y, z, subdivision, currentSubdivision);
-    std::cout << "octree current subdivision index: " << print(indexs) << std::endl;
+    //std::cout << "octree current subdivision index: " << print(indexs) << std::endl;
     path.push_back(indexs);
   }
   return path;

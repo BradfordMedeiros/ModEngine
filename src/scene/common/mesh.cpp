@@ -34,12 +34,12 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
   unsigned int EBO;
   glGenBuffers(1, &EBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * meshData.indices.size(), &(meshData.indices[0]), GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * meshData.indices.size(), &(meshData.indices[0]), GL_DYNAMIC_DRAW);
 
   unsigned int VBO;
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * meshData.vertices.size(), &(meshData.vertices[0]), GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * meshData.vertices.size(), &(meshData.vertices[0]), GL_DYNAMIC_DRAW);
 
   glEnableVertexAttribArray(0);  
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, position));
@@ -101,7 +101,6 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
   }
 
 
-
   
   Mesh mesh = {
     .VAOPointer = VAO,
@@ -126,6 +125,7 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
     .numIndices = meshData.indices.size(),
     //.debugVertexs = meshData.vertices,
   }; 
+  std::cout << "mesh - created a mesh with num vertices = " << mesh.numVertices << std::endl;
 
   return mesh; 
 }

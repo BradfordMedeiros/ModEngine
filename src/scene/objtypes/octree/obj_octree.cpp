@@ -593,7 +593,6 @@ GameObjectOctree createOctree(GameobjAttributes& attr, ObjectTypeUtil& util){
   if (obj.map != ""){
     auto mapFilePath = util.pathForModLayer(obj.map);
     auto serializedFileData = readFileOrPackage(mapFilePath);
-    std::cout << "serialized data: " << serializedFileData << std::endl;    
     if (serializedFileData == ""){
       obj.octree = unsubdividedOctree;
     }else{
