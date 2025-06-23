@@ -265,9 +265,12 @@ void drawMesh(Mesh& mesh, GLint shaderProgram, bool drawPoints, MeshUniforms& me
   glActiveTexture(GL_TEXTURE0 + 2);
   glBindTexture(GL_TEXTURE_2D, opacityTextureId);
 
-  glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasCubemapTexture"), mesh.hasCubemapTexture);
+
+  auto cubemapTextureId = meshUniforms.customCubemapTextureId == -1 ? mesh.cubemapTexture.textureId : meshUniforms.customCubemapTextureId;
+  bool hasCubemapTexture = mesh.hasCubemapTexture || (meshUniforms.customCubemapTextureId != -1);
+  glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasCubemapTexture"), hasCubemapTexture);
   glActiveTexture(GL_TEXTURE0 + 4);
-  glBindTexture(GL_TEXTURE_CUBE_MAP, mesh.cubemapTexture.textureId);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureId);
 
   glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasRoughnessTexture"), mesh.hasRoughnessTexture);
   glActiveTexture(GL_TEXTURE0 + 5);

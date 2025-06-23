@@ -3,6 +3,9 @@
 void shaderLogDebug(const char* str);
 extern RenderObjApi api;
 
+Texture getWaterTexture();
+std::optional<Texture> getTestCubemap();
+
 ObjectMapping getObjectMapping() {
   ObjectMapping objectMapping {
   };
@@ -336,6 +339,7 @@ std::string typeForLookup(ObjTypeLookup& lookup){
   return "bad lookup type";
 }
 
+
 objid selectedId = 0;
 int renderObject(
   GLint shaderProgram,
@@ -351,7 +355,8 @@ int renderObject(
   bool selectionMode,
   bool drawBones,
   glm::mat4& finalModelMatrix,
-  ObjTypeLookup& lookup
+  ObjTypeLookup& lookup,
+  unsigned int waterShader
 ){
 
   if (lookup.type ==  OBJ_MESH){
@@ -493,14 +498,22 @@ int renderObject(
       };
       drawMesh(octreeObj -> meshes.mesh, shaderProgram, false, meshUniforms);
 
+      glUseProgram(waterShader); 
+
+      auto cubemap = getTestCubemap();
       MeshUniforms waterUniforms {
         .model = finalModelMatrix,
-        .tint = glm::vec4(0.f, 0.f, 1.f, 1.f),
+        .customTextureId = getWaterTexture().textureId,
         .id = id,
       };
-      if (octreeObj -> meshes.waterMesh.has_value()){
-        drawMesh(octreeObj -> meshes.waterMesh.value(), shaderProgram, false, waterUniforms);
+      if (cubemap.has_value()){
+        waterUniforms.customCubemapTextureId = cubemap.value().textureId;
       }
+      if (octreeObj -> meshes.waterMesh.has_value()){
+        drawMesh(octreeObj -> meshes.waterMesh.value(), waterShader, false, waterUniforms);
+      }
+       glUseProgram(shaderProgram);
+
       auto octreeTriangles = octreeObj -> meshes.mesh.numTriangles;
       if (octreeObj -> meshes.waterMesh.has_value()){
         octreeTriangles += octreeObj -> meshes.waterMesh.value().numTriangles;

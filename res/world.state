@@ -116,3 +116,5 @@ editor:groupselection:true
 
 sound:volume:0.2
 sound:mute:false
+
+octree:rebuild:false

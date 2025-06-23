@@ -66,6 +66,7 @@ struct ShaderToUpdate {
 };
 std::vector<ShaderToUpdate> extraShadersToUpdate; // TODO STATIC get rid of this, but useful given at render shader loading
 std::unordered_map<unsigned int, std::vector<ShaderTextureBinding>> textureBindings; 
+unsigned int* waterShader = NULL;
 
 // core system 
 NetCode netcode { };
@@ -289,6 +290,7 @@ std::vector<std::string> listOctreeTextures(){
 void loadAllTextures(std::string& textureFolderPath){
   loadTextureWorld(world, "./res/models/box/grid.png", -1);
   loadTextureWorld(world, "./res/textures/wood.jpg", -1);
+
   for (auto texturePath : listFilesWithExtensionsFromPackage(textureFolderPath, { "png", "jpg" })){
     loadTextureWorld(world, texturePath, -1);
   }
@@ -545,7 +547,9 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
         }
     
         shaderSetUniform(newShader, "projview", newProjView);
-        
+
+        shaderSetUniform(*waterShader, "projview", newProjView);
+
         static glm::mat4 scaledModelMatrix(1.f); // copy assignent showed up in profiling, so just using static here so can prevent copy in most cases
         glm::mat4& finalModelMatrix = modelMatrix;
         if (layer.scale){
@@ -591,7 +595,8 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
               textBoundingOnly,
               state.showBones,
               finalModelMatrix,
-              gameobjBuffer.lookup
+              gameobjBuffer.lookup,
+              *waterShader
             );
             numTriangles = numTriangles + trianglesDrawn;
           }
@@ -988,6 +993,18 @@ SelectionResult readSelectionFromBuffer(bool readSelectionShader, glm::vec2 adju
 
 Mesh getTestMesh(){
   return world.meshes.at(resources::MODEL_NODE).mesh;
+}
+
+Texture getWaterTexture(){
+  return world.textures.at(resources::TEXTURE_WATER).texture;
+}
+
+std::optional<Texture> getTestCubemap(){
+  std::cout << "loading cubemap skybox: " << state.skybox << std::endl;
+  if (world.textures.find(state.skybox) == world.textures.end()){
+    return std::nullopt;
+  }
+  return world.textures.at(state.skybox).texture;
 }
 
 bool textureLoaded(std::string& texturepath){
@@ -1636,7 +1653,7 @@ int main(int argc, char* argv[]){
     resources::MODEL_LIGHT
   };
 
-  std::vector<std::string> allTexturesToLoad = {  "./res/textures/crosshairs/crosshair029.png", "./res/textures/crosshairs/crosshair008.png" };
+  std::vector<std::string> allTexturesToLoad = {  "./res/textures/crosshairs/crosshair029.png", "./res/textures/crosshairs/crosshair008.png", resources::TEXTURE_WATER };
 
   bool enableNet = false;
   world = createWorld(
@@ -1680,6 +1697,7 @@ int main(int argc, char* argv[]){
   if (state.skybox != ""){
     loadSkybox(world, state.skybox); 
   }
+
 
   bool fpsFixed = result["fps-fixed"].as<bool>();
   statistics.initialTime = fpsFixed  ? 0 : glfwGetTime();
@@ -1791,6 +1809,8 @@ int main(int argc, char* argv[]){
     std::chrono::milliseconds timeSeconds = std::chrono::duration_cast<std::chrono::milliseconds>(firstFrame - start);
     modlog("loading time first frame (ms)", std::to_string(timeSeconds.count()));
   }
+
+  waterShader = pluginApi.loadShader("water", "./res/shaders/water");
 
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){

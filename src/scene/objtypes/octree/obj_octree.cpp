@@ -25,7 +25,7 @@ std::optional<AtlasDimensions> atlasDimensions = AtlasDimensions {
     resources::TEXTURE_FOLIAGE, 
     resources::TEXTURE_METAL_SCIFI,
 
-    resources::TEXTURE_ICE,
+    resources::TEXTURE_WATER,
     resources::TEXTURE_ICE,
     resources::TEXTURE_ICE,
     resources::TEXTURE_ICE,

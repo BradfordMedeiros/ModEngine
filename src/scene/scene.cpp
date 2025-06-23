@@ -381,6 +381,7 @@ Texture loadSkyboxWorld(World& world, std::string texturepath, objid ownerId){
     return world.textures.at(texturepath).texture;
   }
   Texture texture = loadCubemapTexture(world.interface.modlayerPath(texturepath));
+  std::cout << "load skybox: " << texturepath << std::endl;
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,
@@ -626,8 +627,8 @@ void loadSkybox(World& world, std::string skyboxpath){
     )
   };
   world.meshes.at("skybox").textureRefs = textureRefs;
-
 }
+
 
 extern std::vector<AutoSerialize> meshAutoserializer;
 extern std::vector<AutoSerialize> cameraAutoserializer;

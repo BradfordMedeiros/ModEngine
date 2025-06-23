@@ -61,6 +61,7 @@ struct MeshUniforms {
   glm::vec2 textureOffset = glm::vec2(0.f, 0.f);
   unsigned int customTextureId = -1;
   unsigned int customNormalTextureId = -1;
+  unsigned int customCubemapTextureId = -1;
   unsigned int customOpacityTextureId = -1;
   glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f, 1.f);
   glm::mat4 bonesGroupModel;
