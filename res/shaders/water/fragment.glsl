@@ -143,8 +143,7 @@ vec4 calcWaveOffsetColor(vec3 position){
 }
 
 
-vec2 scrollWater(vec2 coords){
-  float waterSpeed = 0.01;
+vec2 scrollWater(vec2 coords, float waterSpeed){
 	float yOffset = cos(time * waterSpeed);
 	return vec2(coords.x, coords.y + yOffset);
 }
@@ -155,15 +154,17 @@ void main(){
     
 
     vec3 shadowCoord = sshadowCoord.xyz * 0.5 + 0.5;
-    vec2 offsetTexCoord = scrollWater(vec2(TexCoord.x, TexCoord.y)); 
-  
+    vec2 offsetTexCoord = scrollWater(vec2(TexCoord.x, TexCoord.y), 0.01); 
     vec2 adjustedTexCoord = mod(offsetTexCoord * textureTiling, 1) * textureSize + textureOffset;
+
+    vec2 offsetTexCoordNormal = scrollWater(vec2(TexCoord.x, TexCoord.y), 0.03); 
+
 
     vec4 diffuseColor = hasDiffuseTexture ? texture(maintexture, adjustedTexCoord) : vec4(1, 1, 1, 1);
 
     vec3 normal = normalize(Normal);
-    if (hasNormalTexture){
-      vec3 normalTexColor = texture(normalTexture, adjustedTexCoord).rgb ;
+    if (hasNormalTexture ){
+      vec3 normalTexColor = texture(normalTexture, offsetTexCoordNormal).rgb ;
       //normal = normalize(TangentToWorld * vec3(normalTexColor.r * 2 - 1, normalTexColor.g * 2 - 1, normalTexColor.b * 2 - 1));
       normal = normalize(transpose(TangentToWorld) * vec3(normalTexColor.r * 2 - 1, normalTexColor.g * 2 - 1, normalTexColor.b * 2 - 1));
     }
@@ -172,9 +173,9 @@ void main(){
       vec3 viewDir = normalize(FragPos - cameraPosition);
       vec3 reflectDir = reflect(viewDir, normal);
       vec4 cubemap = texture(cubemapTexture, reflectDir);
-      diffuseColor.r = (0 * diffuseColor.r) + (1 * cubemap.r);
-      diffuseColor.g = (0 * diffuseColor.g) + (1 * cubemap.g);
-      diffuseColor.b = (0 * diffuseColor.b) + (1 * cubemap.b);
+      diffuseColor.r = (0.4 * diffuseColor.r) + (0.6 * cubemap.r);
+      diffuseColor.g = (0.4 * diffuseColor.g) + (0.6 * cubemap.g);
+      diffuseColor.b = (0.4 * diffuseColor.b) + (0.6 * cubemap.b);
     }
 
     float closestDepth = texture(lightDepthTexture, shadowCoord.xy).r;
