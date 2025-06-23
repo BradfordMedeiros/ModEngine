@@ -487,7 +487,7 @@ Vertex createVertex2(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal){
 
 Mesh getTestMesh();
 
-Mesh createMeshFromPoints(std::vector<OctreeVertex>& points, std::function<Mesh(MeshData&)> loadMesh){
+Mesh createMeshFromPoints(std::vector<OctreeVertex>& points, std::function<Mesh(MeshData&)> loadMesh, const char* texture, const char* normal){
   std::vector<Vertex> vertices;
   for (int i = 0; i < points.size(); i+=3){
     glm::vec3 vec1 = points.at(i).position - points.at(i + 1).position;
@@ -514,19 +514,20 @@ Mesh createMeshFromPoints(std::vector<OctreeVertex>& points, std::function<Mesh(
   MeshData meshData {
     .vertices = vertices,
     .indices = indices,
-    .diffuseTexturePath = "octree-atlas:main",
+    .diffuseTexturePath = texture,
     .hasDiffuseTexture = true,
     .emissionTexturePath = "",
     .hasEmissionTexture = false,
     .opacityTexturePath = "",
     .hasOpacityTexture = false,
-    .normalTexturePath = "octree-atlas:normal",
+    .normalTexturePath = normal,
     .hasNormalTexture = true,
     .boundInfo = getBounds(vertices),
     .bones = {},
   };
   return loadMesh(meshData);
 }
+
 
 OctreeMeshes createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loadMesh){
   std::vector<OctreeVertex> points = {};
@@ -554,9 +555,10 @@ OctreeMeshes createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loa
     }
   }
 
+
   OctreeMeshes octreeMeshes {
-    .mesh = createMeshFromPoints(points, loadMesh),
-    .waterMesh =  waterPoints.size() > 0 ? createMeshFromPoints(waterPoints, loadMesh) : std::optional<Mesh>(std::nullopt), 
+    .mesh = createMeshFromPoints(points, loadMesh, "octree-atlas:main", "octree-atlas:normal"),
+    .waterMesh =  waterPoints.size() > 0 ? createMeshFromPoints(waterPoints, loadMesh, resources::TEXTURE_WATER, resources::TEXTURE_WATER_NORMAL) : std::optional<Mesh>(std::nullopt), 
   };
   return octreeMeshes;
 }

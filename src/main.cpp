@@ -1000,7 +1000,7 @@ Texture getWaterTexture(){
 }
 
 std::optional<Texture> getTestCubemap(){
-  std::cout << "loading cubemap skybox: " << state.skybox << std::endl;
+  std::cout << "loading cubemap sky: " << state.skybox << std::endl;
   if (world.textures.find(state.skybox) == world.textures.end()){
     return std::nullopt;
   }
@@ -1653,7 +1653,7 @@ int main(int argc, char* argv[]){
     resources::MODEL_LIGHT
   };
 
-  std::vector<std::string> allTexturesToLoad = {  "./res/textures/crosshairs/crosshair029.png", "./res/textures/crosshairs/crosshair008.png", resources::TEXTURE_WATER };
+  std::vector<std::string> allTexturesToLoad = {  "./res/textures/crosshairs/crosshair029.png", "./res/textures/crosshairs/crosshair008.png" };
 
   bool enableNet = false;
   world = createWorld(

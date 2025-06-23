@@ -23,3 +23,5 @@ DEFINE_RESOURCE(TEXTURE_FOLIAGE, "../gameresources/build/textures/clean/foliage2
 DEFINE_RESOURCE(TEXTURE_METAL_SCIFI, "../gameresources/build/textures/clean/metal_scifi.png")
 DEFINE_RESOURCE(TEXTURE_ICE, "../gameresources/build/textures/clean/tex_Ice.jpg")
 DEFINE_RESOURCE(TEXTURE_WATER, "../gameresources/build/textures/water.png")
+
+DEFINE_RESOURCE(TEXTURE_WATER_NORMAL, "../gameresources/build/textures/water.normal.png")

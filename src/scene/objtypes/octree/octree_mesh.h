@@ -5,6 +5,7 @@
 #include "./octree_types.h"
 #include "../../../common/util.h"
 #include "../obj_util.h"
+#include "../../../resources.h"
 
 struct OctreeMeshes {
   Mesh mesh;

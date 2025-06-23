@@ -503,7 +503,7 @@ int renderObject(
       auto cubemap = getTestCubemap();
       MeshUniforms waterUniforms {
         .model = finalModelMatrix,
-        .customTextureId = getWaterTexture().textureId,
+        //.customTextureId = getWaterTexture().textureId,
         .id = id,
       };
       if (cubemap.has_value()){
