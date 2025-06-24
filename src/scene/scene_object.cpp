@@ -369,3 +369,51 @@ RenderStagesDofInfo getDofInfo(World& world, bool* _shouldRender, GameObjectCame
   };  
   return info;
 }
+
+////// octree stuff ///////////////////
+
+void doOctreeRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPos, bool alt){
+  if (!idExists(world.sandbox, id) || (!isOctree(world, id))){
+    return;
+  }
+  auto octreeModelMatrix = fullModelTransform(world.sandbox, id);
+  auto adjustedPosition = glm::inverse(octreeModelMatrix) * glm::vec4(fromPos.x, fromPos.y, fromPos.z, 1.f);
+  auto adjustedToPos = glm::inverse(octreeModelMatrix) * glm::vec4(toPos.x, toPos.y, toPos.z, 1.f);
+  auto adjustedDir = adjustedToPos - adjustedPosition;
+
+  GameObjectOctree* octreeObj = getOctree(world.objectMapping, id);
+  if (octreeObj){
+    modassert(octreeObj, "draw selection grid onFrame not octree type");
+    handleOctreeRaycast(octreeObj -> octree, adjustedPosition, adjustedDir, alt, id);
+    setSelectedOctreeId(id);       
+  }
+}
+void setPrevOctreeTexture(){
+  setOctreeTextureId(getOctreeTextureId() - 1);
+}
+void setNextOctreeTexture(){
+  setOctreeTextureId(getOctreeTextureId() + 1);
+}
+void loadOctree(World& world, objid selectedIndex){
+  GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
+  modassert(octreeObject, "octree object is null");
+  loadOctree(
+    *octreeObject, 
+    [&world](std::string filepath) -> std::string {
+      return world.interface.readFile(filepath);
+    }, 
+    createScopedLoadMesh(world, selectedIndex)
+  );
+  updatePhysicsBody(world, selectedIndex);
+}
+void saveOctree(World& world, objid selectedIndex){
+  GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
+  modassert(octreeObject, "octree object null");
+  saveOctree(*octreeObject, world.interface.saveFile);
+}
+
+void writeOctreeTexture(World& world, objid selectedIndex, bool unitTexture){
+  GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
+  modassert(octreeObject, "octree object is null");
+  writeOctreeTexture(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), unitTexture, TEXTURE_UP);
+}

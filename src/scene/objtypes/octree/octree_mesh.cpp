@@ -614,13 +614,8 @@ void visualizeTags(Octree& octree, std::function<void(glm::vec3, glm::vec3, glm:
   for (auto &octreeMesh : allOctreeMeshes){
     octreeMesh.octreeDivision -> tags;
 
-    drawLine2(octreeMesh.rootPos, octreeMesh.rootPos + glm::vec3(0.f, 10.f, 0.f), glm::vec4(0.f, 0.f, 1.f, 1.f));
-    std::cout << "octree tag: " << print(octreeMesh.rootPos) << std::endl;
-    //std::vector<int> path;
-    //OctreeDivision* octreeDivision;
-    //float size;
-    //int subdivisionLevel;
-    //glm::vec3 rootPos;
-    //glm::ivec3 cellAddress;
+    auto cellAddress = octreeMesh.cellAddress;
+    std::cout << "cell: " << print(cellAddress) << " - sub - " << octreeMesh.subdivisionLevel << ", size = " << octreeMesh.size << std::endl;
+    drawGridSelectionCube(cellAddress.x, cellAddress.y, cellAddress.z, 1, 1, 1, octreeMesh.subdivisionLevel, 1.f, drawLine2, std::nullopt);
   }
 }

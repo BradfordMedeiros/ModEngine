@@ -356,23 +356,6 @@ glm::vec3 getMousePositionWorld(){
 }
 
 
-void doOctreeRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPos){
-  if (!idExists(world.sandbox, id) || (!isOctree(world, id))){
-    return;
-  }
-  auto octreeModelMatrix = fullModelTransform(world.sandbox, id);
-  auto adjustedPosition = glm::inverse(octreeModelMatrix) * glm::vec4(fromPos.x, fromPos.y, fromPos.z, 1.f);
-  auto adjustedToPos = glm::inverse(octreeModelMatrix) * glm::vec4(toPos.x, toPos.y, toPos.z, 1.f);
-  auto adjustedDir = adjustedToPos - adjustedPosition;
-
-  GameObjectOctree* octreeObj = getOctree(world.objectMapping, id);
-  if (octreeObj){
-    modassert(octreeObj, "draw selection grid onFrame not octree type");
-    handleOctreeRaycast(octreeObj -> octree, adjustedPosition, adjustedDir, glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS, id);
-    setSelectedOctreeId(id);       
-  }
-}
-
 bool enableSelectionVisualization = false;
 void onMouseButton(){ 
   glm::vec3 fromPos = defaultResources.defaultCamera.transformation.position;
@@ -384,7 +367,7 @@ void onMouseButton(){
     }
     lineId = addLineNextCycle(fromPos, rayPosition, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
   }
-  doOctreeRaycast(world, state.currentHoverIndex, fromPos, rayPosition);
+  doOctreeRaycast(world, state.currentHoverIndex, fromPos, rayPosition, glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
 }
 
 void drop_callback(GLFWwindow* window, int count, const char** paths){
@@ -1633,9 +1616,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
       for (auto &selectedIndex : state.editor.selectedObjs){
-        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
-        modassert(octreeObject, "octree object is null");
-        writeOctreeTexture(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), isCtrlHeld, TEXTURE_UP);
+        writeOctreeTexture(world, selectedIndex, isCtrlHeld);
       }
     }
   },
@@ -1646,7 +1627,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      setOctreeTextureId(getOctreeTextureId() - 1);
+      setPrevOctreeTexture();
     }
   },
   InputDispatch{
@@ -1656,10 +1637,9 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      setOctreeTextureId(getOctreeTextureId() + 1);
+      setNextOctreeTexture();
     }
   },
-
   InputDispatch{
     .alwaysEnable = false,
     .sourceKey = '2', 
@@ -1668,17 +1648,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       for (auto &selectedIndex : state.editor.selectedObjs){
-        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
-        modassert(octreeObject, "octree object is null");
-        loadOctree(
-          *octreeObject, 
-          [](std::string filepath) -> std::string {
-            auto modpath = modlayerPath(filepath);
-            return readFileOrPackage(modpath);
-          }, 
-          createScopedLoadMesh(world, selectedIndex)
-        );
-        updatePhysicsBody(world, selectedIndex);
+        loadOctree(world, selectedIndex);
       }
     }
   },
@@ -1690,12 +1660,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       for (auto &selectedIndex : state.editor.selectedObjs){
-        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
-        modassert(octreeObject, "octree object null");
-        saveOctree(*octreeObject, [](std::string filepath, std::string& data) -> void {
-          auto modpath = modlayerPath(filepath);
-          realfiles::saveFile(modpath, data);
-        });
+        saveOctree(world, selectedIndex);
       }
     }
   },
@@ -1710,7 +1675,7 @@ std::vector<InputDispatch> inputFns = {
       for (auto &selectedIndex : state.editor.selectedObjs){
         GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
         modassert(octreeObject, "octree object null");
-        //makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
+        makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
         makeOctreeCellMaterial(*octreeObject, createScopedLoadMesh(world, selectedIndex), OCTREE_MATERIAL_WATER);
         if (true || state.rebuildOctreePhysicsOnEdit){
           updatePhysicsBody(world, selectedIndex);

@@ -59,4 +59,13 @@ std::optional<objid> prefabId(World& world, objid id);
 LayerInfo& layerByName(World& world, std::string layername);
 RenderStagesDofInfo getDofInfo(World& world, bool* _shouldRender, GameObjectCamera* activeCameraData, glm::mat4 view);
 
+
+// octree ////////////
+void doOctreeRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPos, bool alt);
+void setPrevOctreeTexture();
+void setNextOctreeTexture();
+void loadOctree(World& world, objid selectedIndex);
+void saveOctree(World& world, objid selectedIndex);
+void writeOctreeTexture(World& world, objid selectedIndex, bool unitTexture);
+
 #endif
