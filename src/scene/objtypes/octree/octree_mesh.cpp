@@ -448,6 +448,49 @@ void addOctreeLevel(Octree& octree, glm::vec3 initialRootPos, OctreeDivision& in
   }
 }
 
+void addOctreeLevelTags(Octree& octree, glm::vec3 initialRootPos, OctreeDivision& initialOctreeDivision, float initialSize, int initialSubdivisionLevel, std::vector<int> intialPath, std::vector<OctreeToAdd>& allOctreeMeshes){
+  std::queue<OctreeSearch> octreeToSearch;
+  octreeToSearch.push(OctreeSearch{
+    .octreeDivision = &initialOctreeDivision,
+    .path = intialPath,
+    .size = initialSize,
+    .subdivisionLevel = initialSubdivisionLevel,
+    .rootPos = initialRootPos,
+  });
+  while(octreeToSearch.size() > 0){
+    OctreeSearch search =  octreeToSearch.front();
+    octreeToSearch.pop();
+    if (search.octreeDivision -> tags.size() > 0) {
+      auto cellIndex = indexForOctreePath(search.path);
+      auto cellAddress = cellIndex.value;
+      modassert(cellIndex.subdivisionLevel == search.subdivisionLevel, "invalid result for octree path, probably provided incorrect path for subdivisionLevel");
+      allOctreeMeshes.push_back(OctreeToAdd{
+        .path = search.path,
+        .octreeDivision = search.octreeDivision,
+        .size = search.size,
+        .subdivisionLevel = search.subdivisionLevel,
+        .rootPos = search.rootPos,
+        .cellAddress = cellAddress,
+      });
+    }
+
+    if (search.octreeDivision -> divisions.size() > 0){
+      float subdivisionSize = search.size * 0.5f; 
+      for (int i = 0; i < 8; i++) {
+        std::vector<int> newPath = search.path;
+        newPath.push_back(i);
+        octreeToSearch.push(OctreeSearch{
+          .octreeDivision = &search.octreeDivision -> divisions.at(i),
+          .path = newPath,
+          .size = subdivisionSize,
+          .subdivisionLevel = search.subdivisionLevel + 1,
+          .rootPos = offsetForFlatIndex(i, subdivisionSize, search.rootPos),
+        });
+      }
+    }
+  }
+}
+
 
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-13-normal-mapping/#computing-the-tangents-and-bitangents
 glm::vec3 computeTangent(Vertex v0, Vertex v1, Vertex v2){
@@ -561,4 +604,23 @@ OctreeMeshes createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loa
     .waterMesh =  waterPoints.size() > 0 ? createMeshFromPoints(waterPoints, loadMesh, resources::TEXTURE_WATER, resources::TEXTURE_WATER_NORMAL) : std::optional<Mesh>(std::nullopt), 
   };
   return octreeMeshes;
+}
+
+void visualizeTags(Octree& octree, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine2){
+  std::vector<OctreeToAdd> allOctreeMeshes;
+  addOctreeLevelTags(octree, glm::vec3(0.f, 0.f, 0.f), octree.rootNode, 1.f, 0, {}, allOctreeMeshes);
+  
+  std::cout << "octree tags: " << allOctreeMeshes.size() << std::endl;
+  for (auto &octreeMesh : allOctreeMeshes){
+    octreeMesh.octreeDivision -> tags;
+
+    drawLine2(octreeMesh.rootPos, octreeMesh.rootPos + glm::vec3(0.f, 10.f, 0.f), glm::vec4(0.f, 0.f, 1.f, 1.f));
+    std::cout << "octree tag: " << print(octreeMesh.rootPos) << std::endl;
+    //std::vector<int> path;
+    //OctreeDivision* octreeDivision;
+    //float size;
+    //int subdivisionLevel;
+    //glm::vec3 rootPos;
+    //glm::ivec3 cellAddress;
+  }
 }

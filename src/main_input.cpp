@@ -1721,6 +1721,25 @@ std::vector<InputDispatch> inputFns = {
 
   InputDispatch{
     .alwaysEnable = false,
+    .sourceKey = '1', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      for (auto &selectedIndex : state.editor.selectedObjs){
+        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
+        modassert(octreeObject, "octree object null");
+        //makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
+        addZone(*octreeObject, getSymbol("wow") );
+     
+      }
+    }
+  },
+
+
+
+  InputDispatch{
+    .alwaysEnable = false,
     .sourceKey = '[', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 

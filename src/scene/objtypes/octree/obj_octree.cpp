@@ -242,13 +242,10 @@ void makeOctreeCellMaterial(GameObjectOctree& gameobjOctree, int x, int y, int z
 }
 
 void makeOctreeCellMaterial(GameObjectOctree& gameobjOctree, std::function<Mesh(MeshData&)> loadMesh, OctreeMaterial material){
-  float heightNudge = 0.f;
   for (int x = 0; x < selectionDim.value().x; x++){
     for (int y = 0; y < selectionDim.value().y; y++){
       for (int z = 0; z < selectionDim.value().z; z++){
         makeOctreeCellMaterial(gameobjOctree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel, material);
-
-
       }
     }
   }
@@ -666,4 +663,27 @@ std::optional<objid> getSelectedOctreeId(){
 std::optional<AttributeValuePtr> getOctreeAttribute(GameObjectOctree& obj, const char* field){
   //modassert(false, "getOctreeAttribute not yet implemented");
   return std::nullopt;
+}
+
+void addZone(GameObjectOctree& gameobjOctree, int symbol){
+//  std::vector<int> tags;
+  for (int x = 0; x < selectionDim.value().x; x++){
+    for (int y = 0; y < selectionDim.value().y; y++){
+      for (int z = 0; z < selectionDim.value().z; z++){
+        auto octreeDivision = getOctreeSubdivisionIfExists(gameobjOctree.octree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel);
+        octreeDivision -> tags = { symbol };
+      }
+    }
+  }
+}
+void removeZone(GameObjectOctree& gameobjOctree, int symbol){
+//   std::vector<int> tags;
+  for (int x = 0; x < selectionDim.value().x; x++){
+    for (int y = 0; y < selectionDim.value().y; y++){
+      for (int z = 0; z < selectionDim.value().z; z++){
+        auto octreeDivision = getOctreeSubdivisionIfExists(gameobjOctree.octree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel);
+        octreeDivision -> tags = {  };
+      }
+    }
+  }
 }

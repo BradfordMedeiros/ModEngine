@@ -1711,6 +1711,8 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       GameObjectOctree* octreeObj = getOctree(world.objectMapping, selectedOctree.value());
       modassert(octreeObj, "draw selection grid onFrame not octree type");
       drawOctreeSelectionGrid(octreeObj -> octree, world.interface.drawLine, transform);
+
+      visualizeTags(octreeObj -> octree, world.interface.drawLine);
     }    
   }
 }

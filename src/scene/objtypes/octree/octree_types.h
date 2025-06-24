@@ -43,6 +43,7 @@ struct OctreeDivision {
   OctreeShape shape;
   std::vector<FaceTexture> faces;
   std::vector<OctreeDivision> divisions;
+  std::vector<int> tags;
 };
 
 struct Octree {
