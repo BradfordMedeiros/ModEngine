@@ -15,6 +15,7 @@
 #include "./sprites/sprites.h"
 #include "./common/util/meshgen.h"
 #include "./scene_sandbox.h"
+#include "../common/symbols.h"
 
 struct World {
   physicsEnv physicsEnvironment;

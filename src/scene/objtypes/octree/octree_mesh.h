@@ -14,7 +14,7 @@ struct OctreeMeshes {
 };
 OctreeMeshes createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loadMesh);
 
-void visualizeTags(Octree& octree, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine2);
+void visualizeTags(Octree& octree, int tag, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine2);
 
 #endif
 

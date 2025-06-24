@@ -606,16 +606,23 @@ OctreeMeshes createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loa
   return octreeMeshes;
 }
 
-void visualizeTags(Octree& octree, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine2){
+void visualizeTags(Octree& octree, int tag, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine2){
   std::vector<OctreeToAdd> allOctreeMeshes;
   addOctreeLevelTags(octree, glm::vec3(0.f, 0.f, 0.f), octree.rootNode, 1.f, 0, {}, allOctreeMeshes);
   
   std::cout << "octree tags: " << allOctreeMeshes.size() << std::endl;
   for (auto &octreeMesh : allOctreeMeshes){
-    octreeMesh.octreeDivision -> tags;
-
-    auto cellAddress = octreeMesh.cellAddress;
-    std::cout << "cell: " << print(cellAddress) << " - sub - " << octreeMesh.subdivisionLevel << ", size = " << octreeMesh.size << std::endl;
-    drawGridSelectionCube(cellAddress.x, cellAddress.y, cellAddress.z, 1, 1, 1, octreeMesh.subdivisionLevel, 1.f, drawLine2, std::nullopt);
+    bool foundTag = false;
+    for (auto divisionTag : octreeMesh.octreeDivision -> tags){
+      if (tag == divisionTag){
+        foundTag = true;
+        break;
+      }
+    }
+    if (foundTag){
+      auto cellAddress = octreeMesh.cellAddress;
+      std::cout << "cell: " << print(cellAddress) << " - sub - " << octreeMesh.subdivisionLevel << ", size = " << octreeMesh.size << std::endl;
+      drawGridSelectionCube(cellAddress.x, cellAddress.y, cellAddress.z, 1, 1, 1, octreeMesh.subdivisionLevel, 1.f, drawLine2, std::nullopt);      
+    }
   }
 }

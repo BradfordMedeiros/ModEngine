@@ -1715,11 +1715,11 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       auto octreeModelMatrix = fullModelTransform(world.sandbox, selectedOctree.value());
       GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedOctree.value());
       modassert(octreeObject, "octree object is null");
-      visualizeTags(octreeObject -> octree, [&world, &octreeModelMatrix](glm::vec3 fromPos, glm::vec3 toPos, glm::vec4 tint) -> void {
+      visualizeTags(octreeObject -> octree, getSymbol("audio"), [&world, &octreeModelMatrix](glm::vec3 fromPos, glm::vec3 toPos, glm::vec4 tint) -> void {
         auto newPosFrom = octreeModelMatrix * glm::vec4(fromPos.x, fromPos.y, fromPos.z, 1.f);
         auto newPosTo = octreeModelMatrix * glm::vec4(toPos.x, toPos.y, toPos.z, 1.f);
 
-        world.interface.drawLine(glm::vec3(newPosFrom.x, newPosFrom.y, newPosFrom.z), glm::vec3(newPosTo.x, newPosTo.y, newPosTo.z), tint);
+        world.interface.drawLine(glm::vec3(newPosFrom.x, newPosFrom.y, newPosFrom.z), glm::vec3(newPosTo.x, newPosTo.y, newPosTo.z), glm::vec4(0.f, 1.f, 0.f, 1.f));
       });
     }    
   }

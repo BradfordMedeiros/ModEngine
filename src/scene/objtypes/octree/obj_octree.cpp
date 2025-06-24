@@ -671,7 +671,15 @@ void addZone(GameObjectOctree& gameobjOctree, int symbol){
     for (int y = 0; y < selectionDim.value().y; y++){
       for (int z = 0; z < selectionDim.value().z; z++){
         auto octreeDivision = getOctreeSubdivisionIfExists(gameobjOctree.octree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel);
-        octreeDivision -> tags = { symbol };
+        bool hasTag = false;
+        for (auto tag : octreeDivision -> tags){
+          if (tag == symbol){
+            hasTag = true;
+          }
+        }
+        if (!hasTag){
+          octreeDivision -> tags.push_back(symbol);
+        }
       }
     }
   }

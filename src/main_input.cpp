@@ -1695,7 +1695,10 @@ std::vector<InputDispatch> inputFns = {
         GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
         modassert(octreeObject, "octree object null");
         //makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
-        addZone(*octreeObject, getSymbol("wow") );
+        
+        static int zoneType = 0;
+        zoneType++;
+        addZone(*octreeObject, (zoneType % 2) ? getSymbol("audio") : getSymbol("other") );
      
       }
     }
