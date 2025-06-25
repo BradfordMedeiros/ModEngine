@@ -418,19 +418,25 @@ void writeOctreeTexture(World& world, objid selectedIndex, bool unitTexture){
   writeOctreeTexture(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), unitTexture, TEXTURE_UP);
 }
 
-GameObjectOctree* getMainOctree(World& world){
+GameObjectOctree* getMainOctree(World& world, objid* id){
+  *id = 0;
   GameObjectOctree* mainOctree = NULL;
-  for (auto &[id, octree] : world.objectMapping.octree){
+  for (auto &[octreeId, octree] : world.objectMapping.octree){
+    *id = octreeId;
     modassert(mainOctree == NULL, "more than one octree");
     return &octree;
   }
   return NULL;
 }
 std::vector<TagInfo> getTag(World& world, int tag, glm::vec3 position){
-  GameObjectOctree* octreeObject = getMainOctree(world);
+  objid id = 0;
+  GameObjectOctree* octreeObject = getMainOctree(world, &id);
   if (!octreeObject){
     return {};
   }
-  //modassert(octreeObject, "getTag octree object is null")
-  return getTag(octreeObject -> octree, tag, position, 10); // subdivision 10 is stupid, this should just retrieve to relevant depth
+
+  auto octreeModelMatrix = fullModelTransform(world.sandbox, id);
+  auto octreeSpaceCamPos = glm::inverse(octreeModelMatrix) * glm::vec4(position.x, position.y, position.z, 1.f);
+
+  return getTag(octreeObject -> octree, tag, glm::vec3(octreeSpaceCamPos.x, octreeSpaceCamPos.y, octreeSpaceCamPos.z), 10); // subdivision 10 is stupid, this should just retrieve to relevant depth
 }

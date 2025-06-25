@@ -109,26 +109,35 @@ void addCubePointsBottom(std::vector<OctreeVertex>& points, float size, glm::vec
 }
 
 std::vector<OctreeDivision*> getOctreeSubdivisions(Octree& octree, int x, int y, int z, int subdivision){
+  std::cout << "tags getOctreeSubdivisions" << std::endl;
   std::vector<OctreeDivision*> tags;
   if (x < 0 || y < 0 || z < 0){
     return tags;
   }
   auto biggestSubdivisionSize = glm::pow(2, subdivision);
   if (x >= biggestSubdivisionSize || y >= biggestSubdivisionSize || z >= biggestSubdivisionSize){
+    std::cout << "returning tags" << std::endl;
     return tags;
   }
   auto path = octreePath(x, y, z, subdivision);
+  std::cout << "tags path size: " << path.size() << std::endl;
+
   OctreeDivision* octreeSubdivision = &octree.rootNode;
   tags.push_back(octreeSubdivision);
+
   for (int i = 0; i < path.size(); i++){
     int index = xyzIndexToFlatIndex(path.at(i));
     if (octreeSubdivision -> fill == FILL_EMPTY){
+      std::cout << "returning tags empty" << std::endl;
       return tags;
     }else if (octreeSubdivision -> fill == FILL_FULL){
+      std::cout << "returning tags full" << std::endl;
       return tags;
     }
     modassert(octreeSubdivision -> divisions.size() == 8, "expected 8 subdivisions");
     octreeSubdivision = &(octreeSubdivision -> divisions.at(index));
+    std::cout << "searching more tags: going to subdivision " << index  << std::endl;
+    tags.push_back(octreeSubdivision);
   }
   return tags;
 }
@@ -658,19 +667,24 @@ glm::ivec3 positionToCell(glm::vec3 position, int subdivision){
   // sub3 - 0-3 [4]
 
   auto numBlocks = glm::pow(2, subdivision);
-  int xIndex = position.x / numBlocks;
-  int yIndex = position.y / numBlocks;
-  int zIndex = position.z / numBlocks;
+  auto widthPerBlock = 1.f / numBlocks;
+  int xIndex = position.x / widthPerBlock;
+  int yIndex = position.y / widthPerBlock;
+  int zIndex = -1 * position.z / widthPerBlock;
   return glm::ivec3(xIndex, yIndex, zIndex);
 }
 
 std::vector<TagInfo> getTag(Octree& octree, int tag, glm::vec3 position, int subdivision){
+
   std::vector<OctreeToAdd> allOctreeMeshes;
 
   auto cellAddress = positionToCell(position, subdivision);
   auto subdivisions = getOctreeSubdivisions(octree, cellAddress.x, cellAddress.y, cellAddress.z, subdivision);
 
   std::vector<TagInfo> tags;
+
+  std::cout << "tags game get tag from octree, localpos = " << print(position) << ", celladdress = " << print(cellAddress) << ", subdivision in = " << subdivision <<  ",  subdivisions size = " << subdivisions.size()  << std::endl;
+
   for (auto subdivision : subdivisions){
     bool foundTag = false;
     for (auto tagInSubdivision : subdivision -> tags){
