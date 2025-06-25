@@ -1698,7 +1698,7 @@ std::vector<InputDispatch> inputFns = {
         
         static int zoneType = 0;
         zoneType++;
-        addZone(*octreeObject, (zoneType % 2) ? getSymbol("audio") : getSymbol("other") );
+        addTag(*octreeObject, (zoneType % 2) ? getSymbol("audio") : getSymbol("other") );
      
       }
     }

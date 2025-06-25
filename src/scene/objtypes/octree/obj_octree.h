@@ -60,7 +60,7 @@ Octree deserializeOctree(std::string& value);
 std::optional<AttributeValuePtr> getOctreeAttribute(GameObjectOctree& obj, const char* field);
 
 
-void addZone(GameObjectOctree& gameobjOctree, int symbol);
-void removeZone(GameObjectOctree& gameobjOctree, int symbol);
+void addTag(GameObjectOctree& gameobjOctree, int symbol);
+void removeTag(GameObjectOctree& gameobjOctree, int symbol);
 
 #endif

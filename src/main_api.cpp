@@ -1188,3 +1188,7 @@ void depthAtCoordAsync(float ndix, float ndiy, std::function<void(float)> afterF
     .afterFrame = afterFrame,
   });
 }
+
+std::vector<TagInfo> getTag(int tag, glm::vec3 position){
+  return getTag(world, tag, position);
+}

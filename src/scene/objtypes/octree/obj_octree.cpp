@@ -665,7 +665,7 @@ std::optional<AttributeValuePtr> getOctreeAttribute(GameObjectOctree& obj, const
   return std::nullopt;
 }
 
-void addZone(GameObjectOctree& gameobjOctree, int symbol){
+void addTag(GameObjectOctree& gameobjOctree, int symbol){
 //  std::vector<int> tags;
   for (int x = 0; x < selectionDim.value().x; x++){
     for (int y = 0; y < selectionDim.value().y; y++){
@@ -684,7 +684,7 @@ void addZone(GameObjectOctree& gameobjOctree, int symbol){
     }
   }
 }
-void removeZone(GameObjectOctree& gameobjOctree, int symbol){
+void removeTag(GameObjectOctree& gameobjOctree, int symbol){
 //   std::vector<int> tags;
   for (int x = 0; x < selectionDim.value().x; x++){
     for (int y = 0; y < selectionDim.value().y; y++){

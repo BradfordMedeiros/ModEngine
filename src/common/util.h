@@ -494,4 +494,9 @@ enum CONSOLE_COLOR { CONSOLE_COLOR_GREEN, CONSOLE_COLOR_RED, CONSOLE_COLOR_BLUE,
 void printColor(std::string str, std::optional<CONSOLE_COLOR> color);
 std::string inColor(std::string str, std::optional<CONSOLE_COLOR> color);
 
+struct TagInfo {
+  int key;
+  //int value;
+};
+
 #endif

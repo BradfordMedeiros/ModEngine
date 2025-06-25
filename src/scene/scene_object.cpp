@@ -385,7 +385,7 @@ void doOctreeRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPos,
   if (octreeObj){
     modassert(octreeObj, "draw selection grid onFrame not octree type");
     handleOctreeRaycast(octreeObj -> octree, adjustedPosition, adjustedDir, alt, id);
-    setSelectedOctreeId(id);       
+    setSelectedOctreeId(id);    
   }
 }
 void setPrevOctreeTexture(){
@@ -416,4 +416,21 @@ void writeOctreeTexture(World& world, objid selectedIndex, bool unitTexture){
   GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
   modassert(octreeObject, "octree object is null");
   writeOctreeTexture(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), unitTexture, TEXTURE_UP);
+}
+
+GameObjectOctree* getMainOctree(World& world){
+  GameObjectOctree* mainOctree = NULL;
+  for (auto &[id, octree] : world.objectMapping.octree){
+    modassert(mainOctree == NULL, "more than one octree");
+    return &octree;
+  }
+  return NULL;
+}
+std::vector<TagInfo> getTag(World& world, int tag, glm::vec3 position){
+  GameObjectOctree* octreeObject = getMainOctree(world);
+  if (!octreeObject){
+    return {};
+  }
+  //modassert(octreeObject, "getTag octree object is null")
+  return getTag(octreeObject -> octree, tag, position, 10); // subdivision 10 is stupid, this should just retrieve to relevant depth
 }

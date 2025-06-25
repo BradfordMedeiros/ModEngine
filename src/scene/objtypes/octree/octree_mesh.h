@@ -16,6 +16,9 @@ OctreeMeshes createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loa
 
 void visualizeTags(Octree& octree, int tag, std::function<void(glm::vec3, glm::vec3, glm::vec4)> drawLine2);
 
+
+std::vector<TagInfo> getTag(Octree& octree, int tag, glm::vec3 position, int subdivision);
+
 #endif
 
 

@@ -162,6 +162,7 @@ struct CustomApiBindings {
   bool (*loadState)(std::string);
 
   VoxelLightingData& (*getVoxelLightingData)();
+  std::vector<TagInfo> (*getTag)(int tag, glm::vec3 position);
 
   std::string (*dumpDebugInfo)(bool);
   //std::vector<func_t> registerGuileFns

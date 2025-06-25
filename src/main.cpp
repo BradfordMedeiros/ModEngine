@@ -1602,6 +1602,8 @@ int main(int argc, char* argv[]){
     .loadState = loadState,
 
     .getVoxelLightingData = getVoxelLightingData,
+    .getTag = getTag,
+    
     .dumpDebugInfo = dumpDebugInfo,
   };
 
