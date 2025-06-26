@@ -497,6 +497,7 @@ std::string inColor(std::string str, std::optional<CONSOLE_COLOR> color);
 struct TagInfo {
   int key;
   //int value;
+  std::string value; // this should be a union type
 };
 
 #endif

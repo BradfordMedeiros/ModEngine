@@ -665,7 +665,7 @@ std::optional<AttributeValuePtr> getOctreeAttribute(GameObjectOctree& obj, const
   return std::nullopt;
 }
 
-void addTag(GameObjectOctree& gameobjOctree, int symbol){
+void addTag(GameObjectOctree& gameobjOctree, int symbol, std::string value){
 //  std::vector<int> tags;
   for (int x = 0; x < selectionDim.value().x; x++){
     for (int y = 0; y < selectionDim.value().y; y++){
@@ -673,12 +673,16 @@ void addTag(GameObjectOctree& gameobjOctree, int symbol){
         auto octreeDivision = getOctreeSubdivisionIfExists(gameobjOctree.octree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel);
         bool hasTag = false;
         for (auto tag : octreeDivision -> tags){
-          if (tag == symbol){
+          if (tag.key == symbol){
+            tag.value = value;
             hasTag = true;
           }
         }
         if (!hasTag){
-          octreeDivision -> tags.push_back(symbol);
+          octreeDivision -> tags.push_back(TagInfo {
+            .key = symbol,
+            .value = value,
+          });
         }
       }
     }

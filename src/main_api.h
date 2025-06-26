@@ -258,5 +258,7 @@ struct DepthAtCoord {
 void depthAtCoordAsync(float ndix, float ndiy, std::function<void(float)> afterFrame);
 
 std::vector<TagInfo> getTag(int tag, glm::vec3 position);
+std::vector<TagInfo> getAllTags(int tag);
+std::optional<objid> getMainOctreeId();
 
 #endif

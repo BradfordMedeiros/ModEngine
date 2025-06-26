@@ -1603,6 +1603,8 @@ int main(int argc, char* argv[]){
 
     .getVoxelLightingData = getVoxelLightingData,
     .getTag = getTag,
+    .getAllTags = getAllTags,
+    .getMainOctreeId = getMainOctreeId,
     
     .dumpDebugInfo = dumpDebugInfo,
   };

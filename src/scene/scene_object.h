@@ -68,5 +68,7 @@ void loadOctree(World& world, objid selectedIndex);
 void saveOctree(World& world, objid selectedIndex);
 void writeOctreeTexture(World& world, objid selectedIndex, bool unitTexture);
 std::vector<TagInfo> getTag(World& world, int tag, glm::vec3 position);
+std::vector<TagInfo> getAllTags(World& world, int tag);
+GameObjectOctree* getMainOctree(World& world, objid* id);
 
 #endif

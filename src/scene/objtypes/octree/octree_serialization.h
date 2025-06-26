@@ -5,7 +5,7 @@
 #include "./octree_types.h"
 #include "../../../common/util.h"
 #include "../obj_util.h"
-
+#include "../../../common/symbols.h"
 
 std::string serializeOctree(Octree& octree);
 Octree deserializeOctree(std::string& value);

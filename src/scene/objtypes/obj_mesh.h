@@ -14,6 +14,7 @@ struct GameObjectMesh {
   bool isDisabled;
   TextureInformation texture;
   TextureLoadingData normalTexture;
+
   float discardAmount;
   glm::vec3 emissionAmount;
   glm::vec4 tint;

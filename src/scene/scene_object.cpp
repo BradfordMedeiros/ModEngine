@@ -440,3 +440,29 @@ std::vector<TagInfo> getTag(World& world, int tag, glm::vec3 position){
 
   return getTag(octreeObject -> octree, tag, glm::vec3(octreeSpaceCamPos.x, octreeSpaceCamPos.y, octreeSpaceCamPos.z), 10); // subdivision 10 is stupid, this should just retrieve to relevant depth
 }
+
+std::vector<TagInfo> getAllTags(World& world, int tag){
+  objid id = 0;
+  GameObjectOctree* octreeObject = getMainOctree(world, &id);
+  if (!octreeObject){
+    return {};
+  }
+
+  return {
+    TagInfo {
+      .key = tag,
+      .value = "../gameresources/sound/rain.wav",
+    },
+    TagInfo {
+      .key = tag,
+      .value = "../gameresources/sound/busy_cyberworld.wav",
+    },
+  };
+}
+
+
+
+
+  int key;
+  //int value;
+  std::string value; // this should be a union type

@@ -1192,3 +1192,16 @@ void depthAtCoordAsync(float ndix, float ndiy, std::function<void(float)> afterF
 std::vector<TagInfo> getTag(int tag, glm::vec3 position){
   return getTag(world, tag, position);
 }
+
+std::vector<TagInfo> getAllTags(int tag){
+  return getAllTags(world, tag);;
+}
+
+std::optional<objid> getMainOctreeId(){
+  objid id = 0;
+  GameObjectOctree* octreeObject = getMainOctree(world, &id);
+  if (id == 0){
+    return std::nullopt;
+  }
+  return id;
+}

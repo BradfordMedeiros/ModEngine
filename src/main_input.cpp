@@ -1642,31 +1642,6 @@ std::vector<InputDispatch> inputFns = {
   },
   InputDispatch{
     .alwaysEnable = false,
-    .sourceKey = '2', 
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = []() -> void {
-      for (auto &selectedIndex : state.editor.selectedObjs){
-        loadOctree(world, selectedIndex);
-      }
-    }
-  },
-  InputDispatch{
-    .alwaysEnable = false,
-    .sourceKey = '3', 
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = []() -> void {
-      for (auto &selectedIndex : state.editor.selectedObjs){
-        saveOctree(world, selectedIndex);
-      }
-    }
-  },
-
-  InputDispatch{
-    .alwaysEnable = false,
     .sourceKey = '1', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1695,17 +1670,25 @@ std::vector<InputDispatch> inputFns = {
         GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
         modassert(octreeObject, "octree object null");
         //makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
-        
-        static int zoneType = 0;
-        zoneType++;
-        addTag(*octreeObject, getSymbol("audio"));
-     
+        addTag(*octreeObject, getSymbol("audio"), "testaudio");
       }
     }
   },
-
-
-
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = '2', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      for (auto &selectedIndex : state.editor.selectedObjs){
+        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
+        modassert(octreeObject, "octree object null");
+        //makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
+        removeTag(*octreeObject, getSymbol("audio"));
+      }
+    }
+  },
   InputDispatch{
     .alwaysEnable = false,
     .sourceKey = '[', 

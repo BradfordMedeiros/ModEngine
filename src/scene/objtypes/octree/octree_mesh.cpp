@@ -648,7 +648,7 @@ void visualizeTags(Octree& octree, int tag, std::function<void(glm::vec3, glm::v
   for (auto &octreeMesh : allOctreeMeshes){
     bool foundTag = false;
     for (auto divisionTag : octreeMesh.octreeDivision -> tags){
-      if (tag == divisionTag){
+      if (tag == divisionTag.key){
         foundTag = true;
         break;
       }
@@ -665,7 +665,6 @@ glm::ivec3 positionToCell(glm::vec3 position, int subdivision){
   // sub0 - 1   [1]
   // sub1 - 0-1 [2]
   // sub3 - 0-3 [4]
-
   auto numBlocks = glm::pow(2, subdivision);
   auto widthPerBlock = 1.f / numBlocks;
   int xIndex = position.x / widthPerBlock;
@@ -675,31 +674,21 @@ glm::ivec3 positionToCell(glm::vec3 position, int subdivision){
 }
 
 std::vector<TagInfo> getTag(Octree& octree, int tag, glm::vec3 position, int subdivision){
-
   std::vector<OctreeToAdd> allOctreeMeshes;
-
   auto cellAddress = positionToCell(position, subdivision);
   auto subdivisions = getOctreeSubdivisions(octree, cellAddress.x, cellAddress.y, cellAddress.z, subdivision);
-
+  //std::cout << "tags game get tag from octree, localpos = " << print(position) << ", celladdress = " << print(cellAddress) << ", subdivision in = " << subdivision <<  ",  subdivisions size = " << subdivisions.size()  << std::endl;
   std::vector<TagInfo> tags;
-
-  std::cout << "tags game get tag from octree, localpos = " << print(position) << ", celladdress = " << print(cellAddress) << ", subdivision in = " << subdivision <<  ",  subdivisions size = " << subdivisions.size()  << std::endl;
-
   for (auto subdivision : subdivisions){
-    bool foundTag = false;
     for (auto tagInSubdivision : subdivision -> tags){
-      if (tagInSubdivision == tag){
-        foundTag = true;
-        break;
+      if (tagInSubdivision.key == tag){
+        tags.push_back(TagInfo {
+          .key = tagInSubdivision.key,
+          .value = tagInSubdivision.value,
+        });
+        break;     
       }
     }
-    if (foundTag){
-      tags.push_back(TagInfo {
-        .key = tag,
-        //.value = subdivision -> tags.at(0);
-      });      
-    }
-
   }
   return tags;
 }
