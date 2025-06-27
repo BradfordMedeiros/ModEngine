@@ -356,7 +356,8 @@ int renderObject(
   bool drawBones,
   glm::mat4& finalModelMatrix,
   ObjTypeLookup& lookup,
-  unsigned int waterShader
+  unsigned int waterShader,
+  bool isTransparencyLayer
 ){
 
   if (lookup.type ==  OBJ_MESH){
@@ -492,32 +493,34 @@ int renderObject(
   {
     auto octreeObj = getOctree(objectMapping, id);
     if (octreeObj != NULL){
-      MeshUniforms meshUniforms {
-        .model = finalModelMatrix,
-        .id = id,
-      };
-      drawMesh(octreeObj -> meshes.mesh, shaderProgram, false, meshUniforms);
-
-      glUseProgram(waterShader); 
-
-      auto cubemap = getTestCubemap();
-      MeshUniforms waterUniforms {
-        .model = finalModelMatrix,
-        //.customTextureId = getWaterTexture().textureId,
-        .id = id,
-      };
-      if (cubemap.has_value()){
-        waterUniforms.customCubemapTextureId = cubemap.value().textureId;
+      auto octreeTriangles = 0;
+      if (!isTransparencyLayer){
+        MeshUniforms meshUniforms {
+          .model = finalModelMatrix,
+          .id = id,
+        };
+        drawMesh(octreeObj -> meshes.mesh, shaderProgram, false, meshUniforms);
+        octreeTriangles += octreeObj -> meshes.mesh.numTriangles;
       }
-      if (octreeObj -> meshes.waterMesh.has_value()){
-        drawMesh(octreeObj -> meshes.waterMesh.value(), waterShader, false, waterUniforms);
-      }
-       glUseProgram(shaderProgram);
 
-      auto octreeTriangles = octreeObj -> meshes.mesh.numTriangles;
-      if (octreeObj -> meshes.waterMesh.has_value()){
-        octreeTriangles += octreeObj -> meshes.waterMesh.value().numTriangles;
+      if (isTransparencyLayer){
+        glUseProgram(waterShader); 
+        auto cubemap = getTestCubemap();
+        MeshUniforms waterUniforms {
+          .model = finalModelMatrix,
+          //.customTextureId = getWaterTexture().textureId,
+          .id = id,
+        };
+        if (cubemap.has_value()){
+          waterUniforms.customCubemapTextureId = cubemap.value().textureId;
+        }
+        if (isTransparencyLayer && octreeObj -> meshes.waterMesh.has_value()){
+          drawMesh(octreeObj -> meshes.waterMesh.value(), waterShader, false, waterUniforms);
+          octreeTriangles += octreeObj -> meshes.waterMesh.value().numTriangles;
+        }
+        glUseProgram(shaderProgram);        
       }
+
       return octreeTriangles;
     }
   }

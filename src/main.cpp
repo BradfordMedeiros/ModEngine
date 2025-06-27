@@ -84,6 +84,9 @@ std::vector<IdAtCoords> idCoordsToGet;
 std::vector<DepthAtCoord> depthsAtCoords;
 std::string dataPath;
 
+int transparencyLayer = -1;
+
+
 bool showCrashInfo = false;
 float lastReloadTime = 0.f;
 
@@ -472,6 +475,8 @@ bool sameLayer(std::string& layer1, std::string& layer2){
   return layer1 == layer2;
 }
 
+
+
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
   glUseProgram(shaderProgram);
   int numTriangles = 0;
@@ -501,14 +506,18 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   }
   modassert(i == world.sandbox.mainScene.idToDirectIndex.size(), "unexpect size mismatch");
 
+
+  auto mainOctreeId = getMainOctreeId();
   for (auto& layer : world.sandbox.layers){      // @TODO could organize this before to not require pass on each frame
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
     auto newProjView = (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view);
 
+    bool isTransparencyLayer = layer.symbol == transparencyLayer;
     for (auto& data : datum){
       auto& gameobjBuffer = world.sandbox.mainScene.gameobjects.at(data.directIndex);
       GameObject& gameobject = gameobjBuffer.gameobj; 
-      if (gameobject.layerSymbol == layer.symbol){  // TODO PERF rm this string comparison 
+
+      if (gameobject.layerSymbol == layer.symbol || (isTransparencyLayer && mainOctreeId.has_value() &&  mainOctreeId.value() == data.id)) {  // TODO PERF rm this string comparison 
         int32_t id = data.id; 
         glm::mat4& modelMatrix = data.modelMatrix; 
         std::string& shader = gameobject.shader;
@@ -596,7 +605,8 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
               state.showBones,
               finalModelMatrix,
               gameobjBuffer.lookup,
-              *waterShader
+              *waterShader,
+              isTransparencyLayer
             );
             numTriangles = numTriangles + trianglesDrawn;
           }
@@ -1279,6 +1289,14 @@ int main(int argc, char* argv[]){
   }
 
   auto layers = parseLayerInfo(result["layers"].as<std::string>(), interface.readFile);
+
+  for (auto &layer : layers){
+    if (layer.name == "transparency"){
+      transparencyLayer = layer.symbol;
+    }
+  }
+  modassert(transparencyLayer != -1, "could not find transparency layer");
+
   auto rawScenes = result["rawscene"].as<std::vector<std::string>>();
 
   keyMapper = readMapping(result["mapping"].as<std::string>(), inputFns, interface.readFile);
