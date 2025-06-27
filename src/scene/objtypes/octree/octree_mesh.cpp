@@ -542,6 +542,7 @@ Vertex createVertex2(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal){
     .position = position,
     .normal = normal,
     .tangent = glm::vec3(0.f, 0.f, 0.f), //  invalid value needs to be computed in context of triangle
+    .color = glm::vec3(0.f, 0.f, 0.f),
     .texCoords = texCoords,
   };
   for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){

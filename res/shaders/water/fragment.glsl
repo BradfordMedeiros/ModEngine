@@ -6,6 +6,7 @@ in vec2 TexCoord;
 in mat3 TangentToWorld;
 in vec4 sshadowCoord;
 in vec3 ambientVoxelColor;
+flat in vec3 vertColor;
 
 layout (location = 0) out vec4 FragColor;
 layout (location = 1) out vec4 BloomColor;
@@ -114,7 +115,7 @@ void getLights(out int lights[ $LIGHTS_PER_VOXEL ]){
 }
 
 vec3 lookupAmbientLight(){
-  return ambientAmount;
+  return ambientAmount + vertColor;
 }
 
 int getNumLights(){
@@ -173,9 +174,9 @@ void main(){
       vec3 viewDir = normalize(FragPos - cameraPosition);
       vec3 reflectDir = reflect(viewDir, normal);
       vec4 cubemap = texture(cubemapTexture, reflectDir);
-      diffuseColor.r = (0.4 * diffuseColor.r) + (0.6 * cubemap.r);
-      diffuseColor.g = (0.4 * diffuseColor.g) + (0.6 * cubemap.g);
-      diffuseColor.b = (0.4 * diffuseColor.b) + (0.6 * cubemap.b);
+      diffuseColor.r = 1 * (0.6 * diffuseColor.r) + (0.4 * cubemap.r);
+      diffuseColor.g = 1 * (0.6 * diffuseColor.g) + (0.4 * cubemap.g);
+      diffuseColor.b = 1 * (0.6 * diffuseColor.b) + (0.4 * cubemap.b);
     }
 
     float closestDepth = texture(lightDepthTexture, shadowCoord.xy).r;
@@ -213,7 +214,7 @@ void main(){
 
 
     if (enableLighting){
-      FragColor = (tint * ( calcWaveOffsetColor(FragPos) + vec4(color.xyz * shadowDelta, color.w)));
+      FragColor = (tint * ( calcWaveOffsetColor(FragPos) + vec4(color.xyz * shadowDelta, 0.9)));
     }else{
       FragColor = tint * texColor * 0;
     }

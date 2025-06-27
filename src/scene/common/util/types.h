@@ -14,6 +14,7 @@ struct Vertex {
   glm::vec3 position;
   glm::vec3 normal;
   glm::vec3 tangent;
+  glm::vec3 color;
   glm::vec2 texCoords;
   int32_t boneIndexes[NUM_BONES_PER_VERTEX]; // hardcoded limit of 4 per vertex
   float boneWeights[NUM_BONES_PER_VERTEX]; 

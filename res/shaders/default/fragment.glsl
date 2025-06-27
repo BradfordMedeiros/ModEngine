@@ -6,6 +6,8 @@ in vec2 TexCoord;
 in mat3 TangentToWorld;
 in vec4 sshadowCoord;
 in vec3 ambientVoxelColor;
+flat in vec3 vertColor;
+
 flat in int instanceId;
 
 layout (location = 0) out vec4 FragColor;
@@ -125,7 +127,7 @@ void getLights(out int lights[ $LIGHTS_PER_VOXEL ]){
 }
 
 vec3 lookupAmbientLight(){
-  return ambientAmount;
+  return ambientAmount + vertColor;
 }
 
 int getNumLights(){

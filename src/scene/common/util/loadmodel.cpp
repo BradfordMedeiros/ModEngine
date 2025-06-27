@@ -347,6 +347,7 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
      vertex.position = glm::vec3(mesh -> mVertices[i].x, mesh -> mVertices[i].y, mesh -> mVertices[i].z);
      vertex.normal = glm::vec3(mesh -> mNormals[i].x, mesh -> mNormals[i].y, mesh -> mNormals[i].z); 
      vertex.tangent = glm::vec3(mesh -> mTangents[i].x, mesh -> mTangents[i].y, mesh -> mTangents[i].z);
+     vertex.color = glm::vec3(0.f, 0.f, 0.f);
      setDefaultBoneIndexesAndWeights(boneInfo.vertexBoneWeight, i, vertex.boneIndexes, vertex.boneWeights, NUM_BONES_PER_VERTEX);
 
      // load one layer of texture coordinates for now
