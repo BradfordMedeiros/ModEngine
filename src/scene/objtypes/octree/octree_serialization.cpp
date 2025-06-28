@@ -11,13 +11,13 @@ extern std::optional<AtlasDimensions> atlasDimensions;
 
 // This could easily be optimized by saving this in binary form instead
 // human readable, at least for now, seems nice
-std::string serializeOctreeDivision(OctreeDivision& octreeDivision, std::vector<FaceTexture>& textures, std::vector<OctreeShape*>& shapeData, std::vector<OctreeMaterial>& materials, std::vector<std::vector<TagInfo>>& tags){
+std::string serializeOctreeDivision(OctreeDivision& octreeDivision, std::vector<FaceTexture>& textures, std::vector<OctreeShape*>& shapeData, std::vector<OctreeMaterial>& materials, std::vector<std::vector<TagInfo>>& tags, std::vector<glm::vec3>& colors){
   if (octreeDivision.divisions.size() != 0){
     std::string str = "[ ";
     modassert(octreeDivision.divisions.size() == 8, "serialization - unexpected # of octree divisions");
     //modassert(octreeDivision.fill == FILL_MIXED, "octree divisions, but not mixed filled");
     for (int i = 0; i < octreeDivision.divisions.size(); i++){
-      auto value = serializeOctreeDivision(octreeDivision.divisions.at(i), textures, shapeData, materials, tags);
+      auto value = serializeOctreeDivision(octreeDivision.divisions.at(i), textures, shapeData, materials, tags, colors);
       str += value + " ";
     }
     str += "]";
@@ -31,6 +31,7 @@ std::string serializeOctreeDivision(OctreeDivision& octreeDivision, std::vector<
   shapeData.push_back(&octreeDivision.shape);
   materials.push_back(octreeDivision.material);
   tags.push_back(octreeDivision.tags);
+  colors.push_back(octreeDivision.color);
 
   return octreeDivision.fill == FILL_FULL ? "1" : "0";
 }
@@ -64,9 +65,10 @@ std::string serializeOctree(Octree& octree){
   std::vector<OctreeShape*> shapeData;
   std::vector<OctreeMaterial> materials;
   std::vector<std::vector<TagInfo>> tags;
+  std::vector<glm::vec3> colors;
 
   std::string str = std::to_string(1.f) + "\n";
-  str += serializeOctreeDivision(octree.rootNode, textures, shapeData, materials, tags) + "\n";
+  str += serializeOctreeDivision(octree.rootNode, textures, shapeData, materials, tags, colors) + "\n";
 
   std::string textureString = "";
   for (int i = 0; i < textures.size(); i+=6){
@@ -135,6 +137,7 @@ std::string serializeOctree(Octree& octree){
     str += materialString + "\n";
   }
 
+
   {
     std::string tagString = "";
     for (int i = 0; i < tags.size(); i++){
@@ -148,6 +151,17 @@ std::string serializeOctree(Octree& octree){
     str += tagString + "\n";
   }
 
+  {
+    std::string colorString = "";
+    for (int i = 0; i < colors.size(); i++){
+      auto color = colors.at(i);;
+      colorString += serializeVec(color);
+      if (i != tags.size() - 1){
+        colorString += ";";
+      }
+    }
+    str += colorString + "\n";
+  }
 
   std::string textureNames = "";
   for (int i = 0; i < atlasDimensions.value().textureNames.size(); i++){
@@ -315,7 +329,7 @@ std::vector<std::string> splitBrackets(std::string& value){
   return values;
 }
 
-OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::vector<FaceTexture>>& textures, int* currentTextureIndex, std::vector<OctreeShape>& octreeShapes, int* currentShapeIndex, std::vector<OctreeMaterial>& materials, std::vector<std::vector<TagInfo>>& tags){
+OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::vector<FaceTexture>>& textures, int* currentTextureIndex, std::vector<OctreeShape>& octreeShapes, int* currentShapeIndex, std::vector<OctreeMaterial>& materials, std::vector<std::vector<TagInfo>>& tags, std::vector<glm::vec3>& colors){
   value = trim(value);
   bool inBrackets = value.size() >= 2 && value.at(0) == '[' && value.at(value.size() -1) == ']';
 
@@ -325,7 +339,7 @@ OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::ve
     std::vector<OctreeDivision> octreeDivisions;
     for (auto &splitValue : splitValues){
       modassert(splitValue.size() > 0, "split value should not be 0 length");
-      octreeDivisions.push_back(deserializeOctreeDivision(splitValue, textures, currentTextureIndex, octreeShapes, currentShapeIndex, materials, tags));
+      octreeDivisions.push_back(deserializeOctreeDivision(splitValue, textures, currentTextureIndex, octreeShapes, currentShapeIndex, materials, tags, colors));
     }
     modassert(octreeDivisions.size() == 8, std::string("invalid division size, got: " + std::to_string(octreeDivisions.size())));
     return OctreeDivision {
@@ -343,6 +357,7 @@ OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::ve
     .fill = filled ? FILL_FULL : FILL_EMPTY,
     .material = materials.at(*currentShapeIndex),
     .shape = octreeShapes.at(*currentShapeIndex),
+    .color = colors.at(*currentShapeIndex),
     .faces = textures.at(*currentTextureIndex),
     .divisions = {},
     .tags = tags.at(*currentShapeIndex),
@@ -350,9 +365,19 @@ OctreeDivision deserializeOctreeDivision(std::string& value, std::vector<std::ve
 }
 
 
+std::vector<glm::vec3> deserializeColors(std::string& colors){
+  auto valuesStr = split(colors, ';'); // denotes each octree division
+
+  std::vector<glm::vec3> colorVecs;
+  for (auto &value : valuesStr){
+    colorVecs.push_back(parseVec3(value));
+  }
+  return colorVecs;
+}
+
 Octree deserializeOctree(std::string& value){
   auto lines = split(value, '\n');
-  modassert(lines.size() == 7, std::string("invalid line size, got: ") + std::to_string(lines.size()));
+  modassert(lines.size() == 8, std::string("invalid line size, got: ") + std::to_string(lines.size()));
 
   auto textures = deserializeTextures(lines.at(2));
   auto shapes = deserializeShapes(lines.at(3));
@@ -362,7 +387,12 @@ Octree deserializeOctree(std::string& value){
 
   auto tags = deserializeTags(lines.at(5));
 
-  auto textureAtlas = split(lines.at(6), ',');
+  auto colors = deserializeColors(lines.at(6));
+  for (auto &tag : tags){
+    colors.push_back(glm::vec3(0.f, 1.f, 1.f));
+  }
+
+  auto textureAtlas = split(lines.at(7), ',');
   //modassert(equalOrdered(textureAtlas, atlasDimensions.value().textureNames), "textures changed");
   auto textureMapping = getTextureMapping(textureAtlas, atlasDimensions.value().textureNames, textures);
   modassert(textureMapping.size() == textureAtlas.size(), std::string("does not have a mapping for all textures, textureMapping.size = ") + std::to_string(textureMapping.size()) + ", textureAtlas.size = " + std::to_string(textureAtlas.size()));
@@ -375,6 +405,6 @@ Octree deserializeOctree(std::string& value){
   int currentTextureIndex = -1;
   int currentShapeIndex = -1;
   return Octree  {
-    .rootNode = deserializeOctreeDivision(lines.at(1), textures, &currentTextureIndex, shapes, &currentShapeIndex, materials, tags),
+    .rootNode = deserializeOctreeDivision(lines.at(1), textures, &currentTextureIndex, shapes, &currentShapeIndex, materials, tags, colors),
   };
 }

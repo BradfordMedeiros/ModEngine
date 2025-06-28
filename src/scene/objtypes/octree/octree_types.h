@@ -41,6 +41,7 @@ struct OctreeDivision {
   FillType fill;
   OctreeMaterial material;
   OctreeShape shape;
+  glm::vec3 color = glm::vec3(0.f, 0.f, 0.f);
   std::vector<FaceTexture> faces;
   std::vector<OctreeDivision> divisions;
   std::vector<TagInfo> tags;

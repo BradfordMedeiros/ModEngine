@@ -1650,8 +1650,11 @@ std::vector<InputDispatch> inputFns = {
       for (auto &selectedIndex : state.editor.selectedObjs){
         GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
         modassert(octreeObject, "octree object null");
-        makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
-        makeOctreeCellMaterial(*octreeObject, createScopedLoadMesh(world, selectedIndex), OCTREE_MATERIAL_WATER);
+        //makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
+        //makeOctreeCellMaterial(*octreeObject, createScopedLoadMesh(world, selectedIndex), OCTREE_MATERIAL_WATER);
+
+        setColor(*octreeObject, glm::vec3(0.f, 0.f, 0.2f));
+
         if (true || state.rebuildOctreePhysicsOnEdit){
           updatePhysicsBody(world, selectedIndex);
         }
@@ -1670,7 +1673,7 @@ std::vector<InputDispatch> inputFns = {
         GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
         modassert(octreeObject, "octree object null");
         //makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
-        addTag(*octreeObject, getSymbol("audio"), "testaudio");
+        //addTag(*octreeObject, getSymbol("audio"), "testaudio");
       }
     }
   },

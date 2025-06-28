@@ -63,4 +63,8 @@ std::optional<AttributeValuePtr> getOctreeAttribute(GameObjectOctree& obj, const
 void addTag(GameObjectOctree& gameobjOctree, int symbol, std::string value);
 void removeTag(GameObjectOctree& gameobjOctree, int symbol);
 
+glm::vec3 getColor(GameObjectOctree& gameobjOctree);
+void setColor(GameObjectOctree& gameobjOctree, glm::vec3 color);
+
+
 #endif

@@ -32,6 +32,7 @@ glm::vec2 meshTexTopRight(FaceTexture& faceTexture){
 struct OctreeVertex {
   glm::vec3 position;
   glm::vec2 coord;
+  glm::vec3 color;
 };
 
 void addCubePointsFront(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, float height = 1.f);
@@ -537,12 +538,12 @@ glm::vec3 computeTangent(Vertex v0, Vertex v1, Vertex v2){
   return tangent;
 }
 
-Vertex createVertex2(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal){
+Vertex createVertex2(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal, glm::vec3 color){
   Vertex vertex {
     .position = position,
     .normal = normal,
     .tangent = glm::vec3(0.f, 0.f, 0.f), //  invalid value needs to be computed in context of triangle
-    .color = glm::vec3(0.f, 0.f, 0.f),
+    .color = color,
     .texCoords = texCoords,
   };
   for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
@@ -571,9 +572,9 @@ Mesh createMeshFromPoints(std::vector<OctreeVertex>& points, std::function<Mesh(
     glm::vec3 vec1 = points.at(i).position - points.at(i + 1).position;
     glm::vec3 vec2 = points.at(i).position - points.at(i + 2).position;
     auto normal = glm::cross(vec1, vec2); // think about sign better, i think this is right 
-    vertices.push_back(createVertex2(points.at(i).position, points.at(i).coord, normal));  // maybe the tex coords should just be calculated as a ratio to a fix texture
-    vertices.push_back(createVertex2(points.at(i + 1).position, points.at(i + 1).coord, normal));
-    vertices.push_back(createVertex2(points.at(i + 2).position, points.at(i + 2).coord, normal));
+    vertices.push_back(createVertex2(points.at(i).position, points.at(i).coord, normal, points.at(i).color));  // maybe the tex coords should just be calculated as a ratio to a fix texture
+    vertices.push_back(createVertex2(points.at(i + 1).position, points.at(i + 1).coord, normal, points.at(i + 1).color));
+    vertices.push_back(createVertex2(points.at(i + 2).position, points.at(i + 2).coord, normal, points.at(i + 2).color));
 
     Vertex& v1 = vertices.at(vertices.size() - 3);
     Vertex& v2 = vertices.at(vertices.size() - 2);
@@ -613,6 +614,7 @@ OctreeMeshes createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loa
 
   std::vector<OctreeToAdd> allOctreeMeshes;
   addOctreeLevel(octree, glm::vec3(0.f, 0.f, 0.f), octree.rootNode, 1.f, 0, {}, allOctreeMeshes);
+
   for (auto &octreeMesh : allOctreeMeshes){
     std::vector<OctreeVertex>* materialPoints = &points;
     if (octreeMesh.octreeDivision -> material == OCTREE_MATERIAL_DEFAULT){
@@ -623,6 +625,8 @@ OctreeMeshes createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loa
       modassert(false, "invalid material");
     }
 
+    int startingIndex = materialPoints -> size();
+
     auto blockShape = std::get_if<ShapeBlock>(&octreeMesh.octreeDivision -> shape);
     if (blockShape){
       addBlockShapeMesh(octree, *materialPoints, octreeMesh.rootPos, *octreeMesh.octreeDivision,  *blockShape, octreeMesh.cellAddress, octreeMesh.size, octreeMesh.subdivisionLevel);
@@ -630,6 +634,11 @@ OctreeMeshes createOctreeMesh(Octree& octree, std::function<Mesh(MeshData&)> loa
     auto rampShape = std::get_if<ShapeRamp>(&octreeMesh.octreeDivision -> shape);
     if (rampShape){
       addRamp(*materialPoints, octreeMesh.size, octreeMesh.rootPos, &octreeMesh.octreeDivision -> faces, *rampShape);
+    }
+
+    int endingIndex = materialPoints -> size();
+    for (int i = startingIndex; i < endingIndex; i++){
+      materialPoints -> at(i).color = octreeMesh.octreeDivision -> color;
     }
   }
 

@@ -699,3 +699,20 @@ void removeTag(GameObjectOctree& gameobjOctree, int symbol){
     }
   }
 }
+
+glm::vec3 getColor(GameObjectOctree& gameobjOctree){
+  auto octreeDivision = getOctreeSubdivisionIfExists(gameobjOctree.octree, selectedIndex.value().x, selectedIndex.value().y, selectedIndex.value().z, subdivisionLevel);
+  return octreeDivision -> color;
+}
+
+// Maybe should get the suboctree's here too 
+void setColor(GameObjectOctree& gameobjOctree, glm::vec3 color){
+  for (int x = 0; x < selectionDim.value().x; x++){
+    for (int y = 0; y < selectionDim.value().y; y++){
+      for (int z = 0; z < selectionDim.value().z; z++){
+        auto octreeDivision = getOctreeSubdivisionIfExists(gameobjOctree.octree, selectedIndex.value().x + x, selectedIndex.value().y + y, selectedIndex.value().z + z, subdivisionLevel);
+        octreeDivision -> color = color;
+      }
+    }
+  }
+}
