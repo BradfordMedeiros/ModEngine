@@ -475,7 +475,13 @@ bool sameLayer(std::string& layer1, std::string& layer2){
   return layer1 == layer2;
 }
 
+Mesh getTestMesh(){
+  return world.meshes.at(resources::MODEL_NODE).mesh;
+}
 
+Texture getWaterTexture(){
+  return world.textures.at(resources::TEXTURE_WATER).texture;
+}
 
 int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
   glUseProgram(shaderProgram);
@@ -590,6 +596,15 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
           }
      
           if (shouldDraw){
+            if (false && world.textures.find(resources::TEXTURE_WATER) != world.textures.end()){
+              glActiveTexture(GL_TEXTURE0 + 7);
+              glBindTexture(GL_TEXTURE_2D, getWaterTexture().textureId);
+            }else{
+              glActiveTexture(GL_TEXTURE0 + 7);
+              glBindTexture(GL_TEXTURE_2D,  world.textures.at("./res/textures/wood.jpg").texture.textureId);
+            }
+
+
             auto trianglesDrawn = renderObject(  // slow 
               newShader, 
               newShader == *renderStages.selection.shader,
@@ -1000,14 +1015,6 @@ SelectionResult readSelectionFromBuffer(bool readSelectionShader, glm::vec2 adju
   return selectionResult;
 }
 
-
-Mesh getTestMesh(){
-  return world.meshes.at(resources::MODEL_NODE).mesh;
-}
-
-Texture getWaterTexture(){
-  return world.textures.at(resources::TEXTURE_WATER).texture;
-}
 
 std::optional<Texture> getTestCubemap(){
   std::cout << "loading cubemap sky: " << state.skybox << std::endl;

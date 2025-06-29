@@ -1,5 +1,5 @@
 
-vec3 calculatePhongLight(vec3 normal){
+vec3 calculatePhongLight(vec3 normal, out vec3 lightPos, out bool hasLight){
   vec3 ambient = lookupAmbientLight();   
   vec3 totalDiffuse  = vec3(0, 0, 0);     
   vec3 totalSpecular = vec3(0, 0, 0);     
@@ -7,6 +7,7 @@ vec3 calculatePhongLight(vec3 normal){
   int voxelLights[ $LIGHTS_PER_VOXEL ];
   getLights(voxelLights);
 
+  hasLight = false;
   for (int x = 0; x < $LIGHTS_PER_VOXEL; x++){
     int lightIndex = voxelLights[x];
     if (lightIndex == -1){
@@ -16,6 +17,8 @@ vec3 calculatePhongLight(vec3 normal){
       totalDiffuse += vec3(0, 1, 0);
       continue;
     }
+
+    hasLight = true;
 
     vec3 lightPos = lights[lightIndex];
     vec3 lightDir = lightsisdir[lightIndex] ?  lightsdir[lightIndex] : normalize(lightPos - FragPos);
@@ -46,5 +49,6 @@ vec3 calculatePhongLight(vec3 normal){
   vec3 diffuseValue = enableDiffuse ? totalDiffuse : vec3(0, 0, 0);
   vec3 specularValue = enableSpecular ? totalSpecular : vec3(0, 0, 0);
   vec3 color = ambient + diffuseValue + specularValue;
+
   return color;
 }

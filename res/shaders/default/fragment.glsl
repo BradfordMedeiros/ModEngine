@@ -6,7 +6,7 @@ in vec2 TexCoord;
 in mat3 TangentToWorld;
 in vec4 sshadowCoord;
 in vec3 ambientVoxelColor;
-flat in vec3 vertColor;
+in vec3 vertColor;
 
 flat in int instanceId;
 
@@ -24,6 +24,7 @@ uniform sampler2D lightDepthTexture;
 uniform samplerCube cubemapTexture;
 uniform sampler2D roughnessTexture;
 uniform sampler2D normalTexture;
+uniform sampler2D lightTexture;
 uniform vec4 tint;
 
 uniform bool hasDiffuseTexture;
@@ -40,6 +41,7 @@ uniform float discardTexAmount;  // this is rare and should just be done as a sp
 
 uniform vec4 encodedid;
 uniform int textureid;
+uniform float time;
 
 
 // per frame
@@ -79,6 +81,7 @@ uniform vec4 instanceColors[4];
 int numCellsDim = $NUM_CELLS_DIM;
 uniform int voxelcellwidth;
 uniform bool enableVoxelLighting;
+uniform vec3 voxelOffset;
 
 layout(std140, binding = 0) uniform LargeBlock {
   int voxelindexs2[ $VOXEL_ARR_SIZE ];  // vec4 alignment....could pack better probably then
@@ -94,19 +97,20 @@ int xyzToIndex(int x, int y, int z){
 int calcLightIndex(){
   bool outOfRange = false;
 
-  float newValueXFloat = convertBase(FragPos.x, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
+  vec3 voxelSamplingPosition = FragPos;
+  float newValueXFloat = convertBase(voxelSamplingPosition.x, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
   int newValueX = int(newValueXFloat);
   if (newValueXFloat >= numCellsDim || newValueXFloat < 0){
     outOfRange = true;
   }
 
-  float newValueYFloat = convertBase(FragPos.y, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
+  float newValueYFloat = convertBase(voxelSamplingPosition.y, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
   int newValueY = int(newValueYFloat);
   if (newValueYFloat >= numCellsDim || newValueYFloat < 0){
     outOfRange = true;
   }
 
-  float newValueZFloat = convertBase(FragPos.z, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
+  float newValueZFloat = convertBase(voxelSamplingPosition.z, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
   int newValueZ = int(newValueZFloat);
   if (newValueZFloat >= numCellsDim || newValueZFloat < 0){
     outOfRange = true; 
@@ -197,8 +201,29 @@ void main(){
     }*/
 //    texColor = texture(normalTexture, adjustedTexCoord).rgba;
     
- 
-    vec4 color  = enablePBR ? calculateCookTorrence(normal, texColor.rgb, 0.2, 0.5) : vec4(calculatePhongLight(normal), 1.0) * texColor;
+  
+    vec3 lightPosition = vec3(0, 0, 0);
+    bool hasLight = false;
+    vec4 color  = enablePBR ? calculateCookTorrence(normal, texColor.rgb, 0.2, 0.5) : vec4(calculatePhongLight(normal, lightPosition, hasLight), 1.0) * texColor;
+
+    if (hasLight){
+
+      vec3 dir = normalize(FragPos - lightPosition);  // Light-to-fragment direction
+
+      float azimuth = atan(dir.z, dir.x);         // [-π, π]
+      float elevation = acos(clamp(dir.y, -1.0, 1.0)); // [0, π]
+
+      // Convert to [0,1] range
+      float u = (azimuth + 3.1416) / (2.0 * 3.1416);
+      float v = elevation / PI;
+      vec2 baseUV = vec2(u, v);  // These are your texture coordinates
+      vec2 uv = baseUV + (0.1 * time) * vec2(0.1, 0.2); // tweak speeds
+
+      vec4 lightTextureColor = texture(lightTexture, uv) ;
+  
+      color = color + vec4(0.4 * lightTextureColor.rgb, 0);      
+    }
+
 
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
     float shadowDelta = (enableShadows && inShadow) ? shadowIntensity : 1.0;

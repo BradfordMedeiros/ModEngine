@@ -35,7 +35,7 @@ flat out int instanceId;
 
 out vec4 glFragPos;
 flat out vec4 overcolor;
-flat out vec3 vertColor;
+out vec3 vertColor;
 
 uniform bool useInstancing;
 uniform vec3 instanceOffsets[100]; // for now...this would be nicer as an array buffer but code should all be the same besides making the buffer

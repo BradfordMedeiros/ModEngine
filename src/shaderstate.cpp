@@ -53,6 +53,12 @@ void initDefaultShader(unsigned int shader){
     },
   });
   uniformData.push_back(UniformData {
+    .name = "lightTexture",
+    .value = Sampler2D {
+      .textureUnitId = 7,
+    },
+  });
+  uniformData.push_back(UniformData {
     .name = "enableLighting",
     .value = true,
   });
@@ -62,9 +68,9 @@ void initDefaultShader(unsigned int shader){
 	 	"bones[0]", "hasBones", "cameraPosition", "discardTexAmount", "emissionAmount", "enableAttenutation", "enableDiffuse",
 	 	"enableLighting", "enablePBR", "enableShadows", "enableSpecular",
  		"model", "numlights", "shadowIntensity", "useBoneTransform",
-    "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture",
+    "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture", "lightTexture",
     "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "voxelcellwidth",
-    "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview", "realtime", "time",
+    "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview", "realtime", "time", 
 
     "encodedid", "textureid",
     "forceTint", // selection shader only
@@ -201,7 +207,7 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
     "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth",
     "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview",
 
-    "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture",
+    "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture", "lightTexture",
     
     "cameraPosition", "projview", "numlights", "enableLighting",
     "forceTint", // selection shader only

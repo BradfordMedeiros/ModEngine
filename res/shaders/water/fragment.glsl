@@ -21,6 +21,7 @@ uniform sampler2D lightDepthTexture;
 uniform samplerCube cubemapTexture;
 uniform sampler2D roughnessTexture;
 uniform sampler2D normalTexture;
+uniform sampler2D lightTexture;
 
 uniform vec4 tint;
 uniform vec3 cameraPosition;
@@ -177,6 +178,14 @@ void main(){
       diffuseColor.r = 1 * (0.6 * diffuseColor.r) + (0.4 * cubemap.r);
       diffuseColor.g = 1 * (0.6 * diffuseColor.g) + (0.4 * cubemap.g);
       diffuseColor.b = 1 * (0.6 * diffuseColor.b) + (0.4 * cubemap.b);
+
+      vec3 viewDir2 = normalize(cameraPosition - FragPos);
+
+      float fresnel = pow(1.0 - dot(viewDir2, normal), 5);
+      diffuseColor.r += 0.0001 * fresnel;
+      diffuseColor.g += 0.0001 * fresnel;
+      diffuseColor.b += 0.0001 * fresnel;
+
     }
 
     float closestDepth = texture(lightDepthTexture, shadowCoord.xy).r;
@@ -206,18 +215,50 @@ void main(){
     }*/
 //    texColor = texture(normalTexture, adjustedTexCoord).rgba;
     
- 
-    vec4 color  = vec4(calculatePhongLight(normal), 1.0) * texColor;
+
+    vec3 lightPosition = vec3(0, 0, 0);
+    bool hasLight = false;
+
+    vec4 color  = vec4(calculatePhongLight(normal, lightPosition, hasLight), 1.0) * texColor;
+
+
 
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
     float shadowDelta = (enableShadows && inShadow) ? shadowIntensity : 1.0;
 
 
     if (enableLighting){
-      FragColor = (tint * ( calcWaveOffsetColor(FragPos) + vec4(color.xyz * shadowDelta, 0.9)));
+      FragColor = (tint * ( calcWaveOffsetColor(FragPos) + vec4(color.xyz * shadowDelta, 0.6)));
     }else{
       FragColor = tint * texColor * 0;
     }
+
+
+    if (hasLight){
+
+      vec3 dir = normalize(FragPos - lightPosition);  // Light-to-fragment direction
+
+      float azimuth = atan(dir.z, dir.x);         // [-π, π]
+      float elevation = acos(clamp(dir.y, -1.0, 1.0)); // [0, π]
+
+      // Convert to [0,1] range
+      float u = (azimuth + 3.1416) / (2.0 * 3.1416);
+      float v = elevation / PI;
+      vec2 baseUV = vec2(u, v);  // These are your texture coordinates
+
+      vec2 uv = baseUV + (0.1 * time) * vec2(0.1, 0.2); // tweak speeds
+
+      vec4 lightTextureColor = texture(lightTexture, uv) / (0.2 * distance(FragPos, lightPosition)) ;
+  
+      FragColor = FragColor + (lightTextureColor * 1.0);      
+    }
+
+
+
+    //if (FragColor.r > 0.2 || FragColor.g > 0.2 || FragColor.b > 0.2){
+    //  FragColor *= 1.5;
+    //  FragColor.w = 1;
+    //}
 
     // TODO -> what would be a better thesholding function? 
     float brightness = FragColor.r + FragColor.g + FragColor.b;
