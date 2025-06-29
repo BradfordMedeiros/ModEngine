@@ -164,6 +164,7 @@ struct CustomApiBindings {
   VoxelLightingData& (*getVoxelLightingData)();
   std::vector<TagInfo> (*getTag)(int tag, glm::vec3 position);
   std::vector<TagInfo> (*getAllTags)(int tag);
+  std::optional<OctreeMaterial> (*getMaterial)(glm::vec3 position);
   std::optional<objid> (*getMainOctreeId)();
 
   std::string (*dumpDebugInfo)(bool);

@@ -499,5 +499,6 @@ struct TagInfo {
   //int value;
   std::string value; // this should be a union type
 };
+enum OctreeMaterial { OCTREE_MATERIAL_DEFAULT, OCTREE_MATERIAL_WATER };
 
 #endif

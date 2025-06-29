@@ -1197,6 +1197,10 @@ std::vector<TagInfo> getAllTags(int tag){
   return getAllTags(world, tag);;
 }
 
+std::optional<OctreeMaterial> getMaterial(glm::vec3 position){
+  return getMaterial(world, position);
+}
+
 std::optional<objid> getMainOctreeId(){
   objid id = 0;
   GameObjectOctree* octreeObject = getMainOctree(world, &id);

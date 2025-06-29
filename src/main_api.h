@@ -260,5 +260,6 @@ void depthAtCoordAsync(float ndix, float ndiy, std::function<void(float)> afterF
 std::vector<TagInfo> getTag(int tag, glm::vec3 position);
 std::vector<TagInfo> getAllTags(int tag);
 std::optional<objid> getMainOctreeId();
+std::optional<OctreeMaterial> getMaterial(glm::vec3 position);
 
 #endif

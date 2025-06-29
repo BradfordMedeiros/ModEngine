@@ -1622,6 +1622,7 @@ int main(int argc, char* argv[]){
     .getVoxelLightingData = getVoxelLightingData,
     .getTag = getTag,
     .getAllTags = getAllTags,
+    .getMaterial = getMaterial,
     .getMainOctreeId = getMainOctreeId,
     
     .dumpDebugInfo = dumpDebugInfo,

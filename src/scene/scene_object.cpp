@@ -461,8 +461,14 @@ std::vector<TagInfo> getAllTags(World& world, int tag){
 }
 
 
+std::optional<OctreeMaterial> getMaterial(World& world, glm::vec3 position){
+  objid id = 0;
+  GameObjectOctree* octreeObject = getMainOctree(world, &id);
+  if (!octreeObject){
+    return {};
+  }
 
-
-  int key;
-  //int value;
-  std::string value; // this should be a union type
+  auto octreeModelMatrix = fullModelTransform(world.sandbox, id);
+  auto octreeSpaceCamPos = glm::inverse(octreeModelMatrix) * glm::vec4(position.x, position.y, position.z, 1.f);
+  return getMaterial(octreeObject -> octree, glm::vec3(octreeSpaceCamPos.x, octreeSpaceCamPos.y, octreeSpaceCamPos.z), 10); // subdivision 10 is stupid, this should just retrieve to relevant depth
+}

@@ -19,6 +19,8 @@ void visualizeTags(Octree& octree, int tag, std::function<void(glm::vec3, glm::v
 
 std::vector<TagInfo> getTag(Octree& octree, int tag, glm::vec3 position, int subdivision);
 
+std::optional<OctreeMaterial> getMaterial(Octree& octree, glm::vec3 position, int subdivision);
+
 #endif
 
 

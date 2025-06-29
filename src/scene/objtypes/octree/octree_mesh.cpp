@@ -702,3 +702,20 @@ std::vector<TagInfo> getTag(Octree& octree, int tag, glm::vec3 position, int sub
   }
   return tags;
 }
+
+std::optional<OctreeMaterial> getMaterial(Octree& octree, glm::vec3 position, int subdivision){
+  std::vector<OctreeToAdd> allOctreeMeshes;
+  auto cellAddress = positionToCell(position, subdivision);
+  auto subdivisions = getOctreeSubdivisions(octree, cellAddress.x, cellAddress.y, cellAddress.z, subdivision);
+  //std::cout << "tags game get tag from octree, localpos = " << print(position) << ", celladdress = " << print(cellAddress) << ", subdivision in = " << subdivision <<  ",  subdivisions size = " << subdivisions.size()  << std::endl;
+ 
+  if (subdivisions.size() == 0){
+    return std::nullopt;
+  }
+  OctreeDivision* division = subdivisions.at(subdivisions.size() - 1); 
+
+  if (division -> fill != FILL_FULL){  // not sure i like this condition, kind of feels like an inconsistent data strucutre
+    return std::nullopt;
+  }
+  return division -> material;
+}
