@@ -170,6 +170,7 @@ OctreeDivision* getOctreeSubdivisionIfExists2(Octree& octree, int x, int y, int 
 struct FillStatus {
   FillType fill;
   std::optional<OctreeDivision*> mixed;
+  OctreeMaterial material;
 };
 
 FillStatus octreeFillStatus(Octree& octree, int subdivisionLevel, glm::ivec3 division){
@@ -177,19 +178,19 @@ FillStatus octreeFillStatus(Octree& octree, int subdivisionLevel, glm::ivec3 div
 
   auto octreeDivision = getOctreeSubdivisionIfExists2(octree, division.x, division.y, division.z, subdivisionLevel);
   if (!octreeDivision){
-    return FillStatus { .fill = FILL_EMPTY, .mixed = std::nullopt };
+    return FillStatus { .fill = FILL_EMPTY, .mixed = std::nullopt, .material = OCTREE_MATERIAL_DEFAULT };
   }
 
   auto blockShape = std::get_if<ShapeBlock>(&octreeDivision -> shape);  // depeneding on the side of this, we could hide more faces
   if (blockShape == NULL){
-    return FillStatus { .fill = FILL_EMPTY, .mixed = std::nullopt };
+    return FillStatus { .fill = FILL_EMPTY, .mixed = octreeDivision, .material = octreeDivision -> material };
   }
 
   // if this is mixed, then we need to check the corresponding side and see if it's filled 
   if (octreeDivision -> fill == FILL_MIXED){
-    return FillStatus { .fill = FILL_MIXED, .mixed = octreeDivision };
+    return FillStatus { .fill = FILL_MIXED, .mixed = octreeDivision, .material = octreeDivision -> material };
   }
-  return FillStatus { .fill = octreeDivision -> fill, .mixed = std::nullopt };
+  return FillStatus { .fill = octreeDivision -> fill, .mixed = octreeDivision, .material = octreeDivision -> material };
 }
 
   // -x +y -z 
@@ -201,10 +202,13 @@ FillStatus octreeFillStatus(Octree& octree, int subdivisionLevel, glm::ivec3 div
   // -x -y +z
   // +x -y +z
 
-bool isSideFull(OctreeDivision& division, std::vector<int>& divisionIndexs){
+bool isSideFull(OctreeDivision& division, std::vector<int>& divisionIndexs, FillStatus& fillStatus){
   if (division.fill == FILL_EMPTY){
     return false;
   }else if (division.fill == FILL_FULL){
+    if (division.material == OCTREE_MATERIAL_WATER && fillStatus.material != OCTREE_MATERIAL_WATER){
+      return false;
+    }
     return true;
   }
 
@@ -213,7 +217,7 @@ bool isSideFull(OctreeDivision& division, std::vector<int>& divisionIndexs){
     divisions.push_back(&division.divisions.at(index));
   }
   for (auto division : divisions){
-    if (!isSideFull(*division, divisionIndexs)){
+    if (!isSideFull(*division, divisionIndexs, fillStatus)){
       return false;
     }
   }
@@ -221,32 +225,32 @@ bool isSideFull(OctreeDivision& division, std::vector<int>& divisionIndexs){
 }
 
 std::vector<int> topSideIndexs = { 4, 5, 6, 7 };
-bool isTopSideFull(OctreeDivision& division){
-  return isSideFull(division, topSideIndexs);
+bool isTopSideFull(OctreeDivision& division, FillStatus& fillStatus){
+  return isSideFull(division, topSideIndexs, fillStatus);
 }
 
 std::vector<int> downSideIndexs = { 0, 1, 2, 3 };
-bool isDownSideFull(OctreeDivision& division){
-  return isSideFull(division, downSideIndexs);
+bool isDownSideFull(OctreeDivision& division, FillStatus& fillStatus){
+  return isSideFull(division, downSideIndexs, fillStatus);
 }
 
 std::vector<int> leftSideIndexs = { 1, 3, 5, 7 };
-bool isLeftSideFull(OctreeDivision& division){
-  return isSideFull(division, leftSideIndexs);
+bool isLeftSideFull(OctreeDivision& division, FillStatus& fillStatus){
+  return isSideFull(division, leftSideIndexs, fillStatus);
 }
 
 std::vector<int> rightSideIndexs = { 0, 2, 4, 6 };
-bool isRightSideFull(OctreeDivision& division){
-  return isSideFull(division, rightSideIndexs);
+bool isRightSideFull(OctreeDivision& division, FillStatus& fillStatus){
+  return isSideFull(division, rightSideIndexs, fillStatus);
 }
 
 std::vector<int> frontSideIndexs = { 0, 1, 4, 5 };
-bool isFrontSideFull(OctreeDivision& division){
-  return isSideFull(division, frontSideIndexs);
+bool isFrontSideFull(OctreeDivision& division, FillStatus& fillStatus){
+  return isSideFull(division, frontSideIndexs, fillStatus);
 }
 std::vector<int> backSideIndexs = { 2, 3, 6, 7 };
-bool isBackSideFull(OctreeDivision& division){
-  return isSideFull(division, backSideIndexs);
+bool isBackSideFull(OctreeDivision& division, FillStatus& fillStatus){
+  return isSideFull(division, backSideIndexs, fillStatus);
 }
 
 bool shouldShowCubeSide(FillStatus fillStatus, OctreeSelectionFace side /*  { FRONT, BACK, LEFT, RIGHT, UP, DOWN }*/){
@@ -254,6 +258,9 @@ bool shouldShowCubeSide(FillStatus fillStatus, OctreeSelectionFace side /*  { FR
   // so need to look at the further divided sections
   // should be able to be like fullSide(direction, octreeDivision)
   if (fillStatus.fill == FILL_FULL){
+    //if (fillStatus.mixed.has_value() && fillStatus.mixed.value() -> material == OCTREE_MATERIAL_WATER){
+    //  return true;
+    //}
     return false;
   }else if (fillStatus.fill == FILL_EMPTY){
     return true;
@@ -263,17 +270,17 @@ bool shouldShowCubeSide(FillStatus fillStatus, OctreeSelectionFace side /*  { FR
   modassert(octreeDivision != NULL, "mixed should have provided octree division");
 
   if (side == UP){
-    return !isTopSideFull(*octreeDivision);
+    return !isTopSideFull(*octreeDivision, fillStatus);
   }else if (side == DOWN){
-    return !isDownSideFull(*octreeDivision);
+    return !isDownSideFull(*octreeDivision, fillStatus);
   }else if (side == LEFT){
-    return !isLeftSideFull(*octreeDivision);
+    return !isLeftSideFull(*octreeDivision, fillStatus);
   }else if (side == RIGHT){
-    return !isRightSideFull(*octreeDivision);
+    return !isRightSideFull(*octreeDivision, fillStatus);
   }else if (side == FRONT){
-    return !isFrontSideFull(*octreeDivision);
+    return !isFrontSideFull(*octreeDivision, fillStatus);
   }else if (side == BACK){
-    return !isBackSideFull(*octreeDivision);
+    return !isBackSideFull(*octreeDivision, fillStatus);
   }
 
   return true;
