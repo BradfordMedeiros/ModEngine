@@ -131,6 +131,8 @@ struct RecordingOptionResumeAtTime{
 typedef std::variant<RecordingOptionResume, RecordingOptionResumeAtTime> PlayRecordingOption;*/
 
 void playRecording(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type,  std::optional<PlayRecordingOption> recordingOption){
+  modlog("playRecording", recordingPath);
+
   bool resumeFromCurrent = false;
   std::optional<float> elapsedTime;
   if (recordingOption.has_value()){
@@ -206,15 +208,19 @@ void tickRecordings(float time){
 
   std::vector<objid> recordingsToRemove;
   for (auto &[id, recording] : playingRecordings){
+    auto objIdExists = idExists(world.sandbox, id);
     bool isComplete = false;
     auto interpolatedProperties = recordingPropertiesInterpolated(recording.recording, time, interpolateAttribute, recording.startTime, recording.type, recording.playInReverse, &isComplete);
-    if (isComplete || recording.type == RECORDING_SETONLY){
-      modassert(recording.type != RECORDING_PLAY_LOOP, "recording playback - got complete loop type");
-      modassert(recording.type != RECORDING_PLAY_LOOP_REVERSE, "recording playback - got complete loop type");
+    if (isComplete || recording.type == RECORDING_SETONLY || !objIdExists){
+      modassert(!objIdExists || recording.type != RECORDING_PLAY_LOOP, "recording playback - got complete loop type");
+      modassert(!objIdExists || recording.type != RECORDING_PLAY_LOOP_REVERSE, "recording playback - got complete loop type");
       recordingsToRemove.push_back(id);
     }
-    for (auto &property: interpolatedProperties){
-      setSingleGameObjectAttr(world, id, property.propertyName.c_str(), property.value);
+
+    if (objIdExists){
+      for (auto &property: interpolatedProperties){
+        setSingleGameObjectAttr(world, id, property.propertyName.c_str(), property.value);
+      }
     }
   }
   for (auto id : recordingsToRemove){
