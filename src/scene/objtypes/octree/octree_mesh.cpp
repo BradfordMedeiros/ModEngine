@@ -202,12 +202,15 @@ FillStatus octreeFillStatus(Octree& octree, int subdivisionLevel, glm::ivec3 div
   // -x -y +z
   // +x -y +z
 
-bool isSideFull(OctreeDivision& division, std::vector<int>& divisionIndexs, FillStatus& fillStatus){
+bool isSideFull(OctreeDivision& division, std::vector<int>& divisionIndexs, FillStatus& fillStatus, bool* hasWater){
   if (division.fill == FILL_EMPTY){
     return false;
   }else if (division.fill == FILL_FULL){
-    if (division.material == OCTREE_MATERIAL_WATER && fillStatus.material != OCTREE_MATERIAL_WATER){
-      return false;
+    //if (division.material == OCTREE_MATERIAL_WATER && fillStatus.material != OCTREE_MATERIAL_WATER){
+    //  return false;
+    //}
+    if (division.material == OCTREE_MATERIAL_WATER){
+      *hasWater = true;
     }
     return true;
   }
@@ -217,73 +220,68 @@ bool isSideFull(OctreeDivision& division, std::vector<int>& divisionIndexs, Fill
     divisions.push_back(&division.divisions.at(index));
   }
   for (auto division : divisions){
-    if (!isSideFull(*division, divisionIndexs, fillStatus)){
+    if (!isSideFull(*division, divisionIndexs, fillStatus, hasWater)){
       return false;
     }
   }
   return true;
 }
 
-std::vector<int> topSideIndexs = { 4, 5, 6, 7 };
-bool isTopSideFull(OctreeDivision& division, FillStatus& fillStatus){
-  return isSideFull(division, topSideIndexs, fillStatus);
+std::vector<int> topSideIndexs = { 0, 1, 2, 3 };
+bool isTopSideFull(OctreeDivision& division, FillStatus& fillStatus, bool* hasWater){
+  return isSideFull(division, topSideIndexs, fillStatus, hasWater);
 }
 
-std::vector<int> downSideIndexs = { 0, 1, 2, 3 };
-bool isDownSideFull(OctreeDivision& division, FillStatus& fillStatus){
-  return isSideFull(division, downSideIndexs, fillStatus);
+std::vector<int> downSideIndexs = { 4, 5, 6, 7 };
+bool isDownSideFull(OctreeDivision& division, FillStatus& fillStatus, bool* hasWater){
+  return isSideFull(division, downSideIndexs, fillStatus, hasWater);
 }
 
-std::vector<int> leftSideIndexs = { 1, 3, 5, 7 };
-bool isLeftSideFull(OctreeDivision& division, FillStatus& fillStatus){
-  return isSideFull(division, leftSideIndexs, fillStatus);
+std::vector<int> leftSideIndexs = { 0, 2, 4, 6 };
+bool isLeftSideFull(OctreeDivision& division, FillStatus& fillStatus, bool* hasWater){
+  return isSideFull(division, leftSideIndexs, fillStatus, hasWater);
 }
 
-std::vector<int> rightSideIndexs = { 0, 2, 4, 6 };
-bool isRightSideFull(OctreeDivision& division, FillStatus& fillStatus){
-  return isSideFull(division, rightSideIndexs, fillStatus);
+std::vector<int> rightSideIndexs = { 1, 3, 5, 7 };
+bool isRightSideFull(OctreeDivision& division, FillStatus& fillStatus, bool* hasWater){
+  return isSideFull(division, rightSideIndexs, fillStatus, hasWater);
 }
 
-std::vector<int> frontSideIndexs = { 0, 1, 4, 5 };
-bool isFrontSideFull(OctreeDivision& division, FillStatus& fillStatus){
-  return isSideFull(division, frontSideIndexs, fillStatus);
+std::vector<int> frontSideIndexs = { 2, 3, 6, 7 };
+bool isFrontSideFull(OctreeDivision& division, FillStatus& fillStatus, bool* hasWater){
+  return isSideFull(division, frontSideIndexs, fillStatus, hasWater);
 }
-std::vector<int> backSideIndexs = { 2, 3, 6, 7 };
-bool isBackSideFull(OctreeDivision& division, FillStatus& fillStatus){
-  return isSideFull(division, backSideIndexs, fillStatus);
+std::vector<int> backSideIndexs = { 0, 1, 4, 5 };
+bool isBackSideFull(OctreeDivision& division, FillStatus& fillStatus, bool* hasWater){
+  return isSideFull(division, backSideIndexs, fillStatus, hasWater);
 }
 
-bool shouldShowCubeSide(FillStatus fillStatus, OctreeSelectionFace side /*  { FRONT, BACK, LEFT, RIGHT, UP, DOWN }*/){
+bool isFaceFull(FillStatus fillStatus, OctreeSelectionFace side /*  { FRONT, BACK, LEFT, RIGHT, UP, DOWN }*/, bool* neighborHasWater){
   // if it's mixed, can still check if some side of it is full 
   // so need to look at the further divided sections
   // should be able to be like fullSide(direction, octreeDivision)
-  if (fillStatus.fill == FILL_FULL){
-    //if (fillStatus.mixed.has_value() && fillStatus.mixed.value() -> material == OCTREE_MATERIAL_WATER){
-    //  return true;
-    //}
-    return false;
-  }else if (fillStatus.fill == FILL_EMPTY){
-    return true;
-  }
 
+
+  if (!fillStatus.mixed.has_value()){
+    return false;
+  }
   OctreeDivision* octreeDivision = fillStatus.mixed.value();
   modassert(octreeDivision != NULL, "mixed should have provided octree division");
 
-  if (side == UP){
-    return !isTopSideFull(*octreeDivision, fillStatus);
-  }else if (side == DOWN){
-    return !isDownSideFull(*octreeDivision, fillStatus);
-  }else if (side == LEFT){
-    return !isLeftSideFull(*octreeDivision, fillStatus);
+  if (side == DOWN){
+    return isDownSideFull(*octreeDivision, fillStatus, neighborHasWater);
+  }else if (side == UP){
+    return isTopSideFull(*octreeDivision, fillStatus, neighborHasWater);
   }else if (side == RIGHT){
-    return !isRightSideFull(*octreeDivision, fillStatus);
-  }else if (side == FRONT){
-    return !isFrontSideFull(*octreeDivision, fillStatus);
+    return isRightSideFull(*octreeDivision, fillStatus, neighborHasWater);
+  }else if (side == LEFT){
+    return isLeftSideFull(*octreeDivision, fillStatus, neighborHasWater);
   }else if (side == BACK){
-    return !isBackSideFull(*octreeDivision, fillStatus);
+    return isBackSideFull(*octreeDivision, fillStatus, neighborHasWater);
+  }else if (side == FRONT){
+    return isFrontSideFull(*octreeDivision, fillStatus, neighborHasWater);
   }
-
-  return true;
+  return false;
 }
 
 void addRamp(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, std::vector<FaceTexture>* faces, ShapeRamp& shapeRamp){
@@ -399,35 +397,75 @@ void addRamp(std::vector<OctreeVertex>& points, float size, glm::vec3 offset, st
 }
 
 void addBlockShapeMesh(Octree& octree, std::vector<OctreeVertex>& points, glm::vec3& rootPos, OctreeDivision& octreeDivision, ShapeBlock& shapeBlock,  glm::ivec3& cellAddress, float size, int subdivisionLevel){
-  glm::ivec3 cellToTheFront(cellAddress.x, cellAddress.y, cellAddress.z - 1);
-  if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheFront), FRONT)){
-    addCubePointsFront(points, size, rootPos,  &octreeDivision.faces);
+  
+  auto cellIsWater = octreeDivision.material == OCTREE_MATERIAL_WATER;
+  {
+    bool sideHasWater = false;
+    glm::ivec3 cellToTheFront(cellAddress.x, cellAddress.y, cellAddress.z - 1);
+    auto isFull = isFaceFull(octreeFillStatus(octree, subdivisionLevel, cellToTheFront), BACK, &sideHasWater);
+    bool shouldShow = (!isFull && !(cellIsWater && sideHasWater)) || (!cellIsWater && sideHasWater) ;
+    if (shouldShow){
+      addCubePointsFront(points, size, rootPos,  &octreeDivision.faces);
+    }    
   }
 
-  glm::ivec3 cellToTheBack(cellAddress.x, cellAddress.y, cellAddress.z + 1);
-  if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheBack), BACK)){  
-    addCubePointsBack(points, size, rootPos, &octreeDivision.faces);
+  {
+    bool sideHasWater = false;
+    glm::ivec3 cellToTheBack(cellAddress.x, cellAddress.y, cellAddress.z + 1);
+    auto isFull = isFaceFull(octreeFillStatus(octree, subdivisionLevel, cellToTheBack), FRONT, &sideHasWater);
+    bool shouldShow = (!isFull && !(cellIsWater && sideHasWater)) || (!cellIsWater && sideHasWater) ;
+    if (shouldShow){  
+      addCubePointsBack(points, size, rootPos, &octreeDivision.faces);
+    }
   }
+
   //
-  glm::ivec3 cellToTheLeft(cellAddress.x - 1, cellAddress.y, cellAddress.z);
-  if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheLeft), LEFT)){  
-    addCubePointsLeft(points, size, rootPos,  &octreeDivision.faces);
+
+  {
+    bool sideHasWater = false;
+    glm::ivec3 cellToTheLeft(cellAddress.x - 1, cellAddress.y, cellAddress.z);
+    auto isFull = isFaceFull(octreeFillStatus(octree, subdivisionLevel, cellToTheLeft), RIGHT, &sideHasWater);
+    bool shouldShow = (!isFull && !(cellIsWater && sideHasWater)) || (!cellIsWater && sideHasWater) ;
+    if (shouldShow){  
+      addCubePointsLeft(points, size, rootPos,  &octreeDivision.faces);
+    }    
   }
 
-  glm::ivec3 cellToTheRight(cellAddress.x + 1, cellAddress.y, cellAddress.z);
-  if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheRight), RIGHT)){  
-    addCubePointsRight(points, size, rootPos,  &octreeDivision.faces);
-  }  
+  {
+    bool sideHasWater = false;
+    glm::ivec3 cellToTheRight(cellAddress.x + 1, cellAddress.y, cellAddress.z);
+    auto isFull = isFaceFull(octreeFillStatus(octree, subdivisionLevel, cellToTheRight), LEFT, &sideHasWater);
+    bool shouldShow = (!isFull && !(cellIsWater && sideHasWater)) || (!cellIsWater && sideHasWater) ;
+    if (shouldShow){  
+      addCubePointsRight(points, size, rootPos,  &octreeDivision.faces);
+    }      
+  }
 
-  glm::ivec3 cellToTheTop(cellAddress.x, cellAddress.y + 1, cellAddress.z);
-  if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheTop), UP)){  
-    addCubePointsTop(points, size, rootPos,  &octreeDivision.faces);
-  }  
+  {
+    bool sideHasWater = false;
+    glm::ivec3 cellToTheTop(cellAddress.x, cellAddress.y + 1, cellAddress.z);
+    auto isFull = isFaceFull(octreeFillStatus(octree, subdivisionLevel, cellToTheTop), DOWN, &sideHasWater);
+    bool shouldShow = (!isFull && !(cellIsWater && sideHasWater)) || (!cellIsWater && sideHasWater) ;
+    if (shouldShow){  
+      addCubePointsTop(points, size, rootPos,  &octreeDivision.faces);
+    }  
+  }
 
-  glm::ivec3 cellToTheBottom(cellAddress.x, cellAddress.y - 1, cellAddress.z);
-  if (shouldShowCubeSide(octreeFillStatus(octree, subdivisionLevel, cellToTheBottom), DOWN)){  
-    addCubePointsBottom(points, size, rootPos,  &octreeDivision.faces);
-  }      
+  {
+    bool sideHasWater = false;
+    glm::ivec3 cellToTheBottom(cellAddress.x, cellAddress.y - 1, cellAddress.z);
+    auto isFull = isFaceFull(octreeFillStatus(octree, subdivisionLevel, cellToTheBottom), UP, &sideHasWater);
+    bool shouldShow = (!isFull && !(cellIsWater && sideHasWater)) || (!cellIsWater && sideHasWater) ;
+    if (shouldShow){  
+      addCubePointsBottom(points, size, rootPos,  &octreeDivision.faces);
+    }    
+  }
+
+
+
+
+
+  
 }
 
 
