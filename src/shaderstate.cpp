@@ -111,8 +111,8 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
     for (auto &lightUpdate : lightUpdates){
       //std::cout << "voxel lighting : " << lightUpdate.index << std::endl;
       int lightArrayIndex = getLightsArrayIndex(lights, lightUpdate.lightIndex);
-      modassert(lightUpdate.index < 512, "lightUpdate.index too large");
-      updateBufferData(renderingResources.voxelLighting , sizeof(glm::vec4) * lightUpdate.index, sizeof(int), &lightArrayIndex);
+      modassert(lightUpdate.index < glm::pow(getLightingNumCellsDim(), 3), "lightUpdate.index too large");
+      updateBufferData(renderingResources.voxelLighting , sizeof(int) * lightUpdate.index, sizeof(int), &lightArrayIndex);
     }
   
     shaderSetUniformInt(shader, "voxelcellwidth", getLightingCellWidth());

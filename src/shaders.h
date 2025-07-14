@@ -49,11 +49,11 @@ void shaderSetTextureName(const char* name, unsigned int textureId);
 
 
 // https://learnopengl.com/Advanced-OpenGL/Advanced-GLSL
-struct UniformBuffer {
+struct ShaderStorageBuffer {
   GLuint ubo;
 };
-UniformBuffer generateUniformBuffer(size_t size);
-void freeBuffer(UniformBuffer& uniformBuffer);
-void updateBufferData(UniformBuffer& uniformBuffer, size_t offsetIntoBuffer, size_t sizeToWrite, void* data);
+ShaderStorageBuffer generateShaderStorageBuffer(size_t size);
+void freeBuffer(ShaderStorageBuffer& uniformBuffer);
+void updateBufferData(ShaderStorageBuffer& uniformBuffer, size_t offsetIntoBuffer, size_t sizeToWrite, void* data);
 
 #endif 

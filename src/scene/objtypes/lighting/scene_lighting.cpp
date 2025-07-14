@@ -90,7 +90,11 @@ std::optional<int> lightingPositionToIndex(glm::vec3 position, glm::ivec3 offset
 	return index;
 }
 
-void addVoxelLight(objid lightIndex, glm::vec3 position, int radius){
+void addVoxelLight(objid lightIndex, glm::vec3 position, int requestedRadius){
+	int radius = requestedRadius;
+	//if (radius <= 0){
+	//	radius = 100; // max size 
+	//}
 	glm::vec3 color(1.f, 1.f, 1.f);
 
 	//modlog("voxel lighting add: ", std::to_string(lightIndex));
@@ -134,6 +138,9 @@ int getLightingCellWidth(){
 	return lightingData.voxelCellWidth;
 }
 
+int getLightingNumCellsDim(){
+	return lightingData.numCellsDim;
+}
 
 // should make not update all lights every frame only those that change
 std::vector<LightingUpdate> getLightUpdates(){

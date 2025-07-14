@@ -606,25 +606,25 @@ void shaderLogDebug(const char* str){
 }
 
 //////////////////////
-UniformBuffer generateUniformBuffer(size_t size){
+ShaderStorageBuffer generateShaderStorageBuffer(size_t size){
   modlog("generateUniformBuffer creating buffer size", std::to_string(size));
   unsigned int ubo;
   glGenBuffers(1, &ubo);
 
-  glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-  glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_STATIC_DRAW);
-  glBindBufferRange(GL_UNIFORM_BUFFER, 0 /* binding port, aka layout in the uniform block in glsl*/, ubo, 0, size);
-  glBindBuffer(GL_UNIFORM_BUFFER, 0);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, ubo);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, size, NULL, GL_STATIC_DRAW);
+  glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 0 /* binding port, aka layout in the uniform block in glsl*/, ubo, 0, size);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
   
-  return UniformBuffer {
+  return ShaderStorageBuffer {
     .ubo = ubo,
   };
 }
-void freeBuffer(UniformBuffer& uniformBuffer){
+void freeBuffer(ShaderStorageBuffer& uniformBuffer){
   glDeleteBuffers(1, &uniformBuffer.ubo);
 }
-void updateBufferData(UniformBuffer& uniformBuffer, size_t offsetIntoBuffer, size_t sizeToWrite, void* data){
-  glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer.ubo);
-  glBufferSubData(GL_UNIFORM_BUFFER, offsetIntoBuffer, sizeToWrite, data);
-  glBindBuffer(GL_UNIFORM_BUFFER, 0);  
+void updateBufferData(ShaderStorageBuffer& uniformBuffer, size_t offsetIntoBuffer, size_t sizeToWrite, void* data){
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, uniformBuffer.ubo);
+  glBufferSubData(GL_SHADER_STORAGE_BUFFER, offsetIntoBuffer, sizeToWrite, data);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);  
 }

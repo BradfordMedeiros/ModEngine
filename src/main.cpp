@@ -1371,15 +1371,16 @@ int main(int argc, char* argv[]){
   glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
   setActiveDepthTexture(renderingResources.framebuffers.fbo, &renderingResources.framebuffers.depthTextures.at(0), 0);
 
-  renderingResources.voxelLighting = generateUniformBuffer(sizeof(glm::vec4) * 512);
+  int numCellsDim = getLightingNumCellsDim();
+  renderingResources.voxelLighting = generateShaderStorageBuffer(sizeof(int) * (numCellsDim * numCellsDim * numCellsDim));
   {
     int zeroBuffer[512] = {};
-    for (int i = 0; i < 512; i++){
+    for (int i = 0; i < numCellsDim; i++){
       zeroBuffer[i] = -1;
     }
    // std::cout << "voxel lighting light : ";
-    for (int i = 0; i < 512; i++){
-      updateBufferData(renderingResources.voxelLighting, sizeof(glm::vec4) * i, sizeof(int), &zeroBuffer[i]);
+    for (int i = 0; i < numCellsDim; i++){
+      updateBufferData(renderingResources.voxelLighting, sizeof(int) * i, sizeof(int), &zeroBuffer[i]);
     //  std::cout << zeroBuffer[i] << " ";
     }
     //std::cout << std::endl;

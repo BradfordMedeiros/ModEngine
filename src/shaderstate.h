@@ -9,7 +9,7 @@ struct RenderingResources {
   unsigned int* framebufferProgram;
   unsigned int* uiShaderProgram;
   Framebuffers framebuffers;
-  UniformBuffer voxelLighting;
+  ShaderStorageBuffer voxelLighting;
 };
 
 void initDefaultShader(unsigned int shader);

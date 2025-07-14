@@ -83,8 +83,8 @@ uniform int voxelcellwidth;
 uniform bool enableVoxelLighting;
 uniform vec3 voxelOffset;
 
-layout(std140, binding = 0) uniform LargeBlock {
-  int voxelindexs2[ $VOXEL_ARR_SIZE ];  // vec4 alignment....could pack better probably then
+layout(std430, binding = 0) buffer LargeBlock {
+  int voxelindexs2[];  // vec4 alignment....could pack better probably then
 };
 
 float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBaseLow, float toBaseHigh){
