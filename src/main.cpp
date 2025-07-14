@@ -1372,9 +1372,9 @@ int main(int argc, char* argv[]){
   setActiveDepthTexture(renderingResources.framebuffers.fbo, &renderingResources.framebuffers.depthTextures.at(0), 0);
 
   int numCellsDim = getLightingNumCellsDim();
-  renderingResources.voxelLighting = generateShaderStorageBuffer(sizeof(int) * (numCellsDim * numCellsDim * numCellsDim));
+  renderingResources.voxelLighting = generateShaderStorageBuffer(sizeof(int) * getLightingNumCellsTotal());
   {
-    int zeroBuffer[512] = {};
+    int* zeroBuffer = static_cast<int*>(malloc(sizeof(int) * getLightingNumCellsTotal()));
     for (int i = 0; i < numCellsDim; i++){
       zeroBuffer[i] = -1;
     }
@@ -1383,6 +1383,7 @@ int main(int argc, char* argv[]){
       updateBufferData(renderingResources.voxelLighting, sizeof(int) * i, sizeof(int), &zeroBuffer[i]);
     //  std::cout << zeroBuffer[i] << " ";
     }
+    free(zeroBuffer);
     //std::cout << std::endl;
   }
 

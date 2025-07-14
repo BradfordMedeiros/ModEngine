@@ -142,6 +142,10 @@ int getLightingNumCellsDim(){
 	return lightingData.numCellsDim;
 }
 
+int getLightingNumCellsTotal(){
+	return lightingData.numCellsDim * lightingData.numCellsDim * lightingData.numCellsDim;
+}
+
 // should make not update all lights every frame only those that change
 std::vector<LightingUpdate> getLightUpdates(){
 	//modlog("voxel lighting updates size = : ", std::to_string(lightingData.cells.size()));
