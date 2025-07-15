@@ -9,6 +9,7 @@
 
 struct LightingCell {
   objid lightIndex;
+  int needsUpdateFrame;
 };
 struct VoxelLightingData {
   int lightsPerVoxel;

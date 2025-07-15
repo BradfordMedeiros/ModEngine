@@ -31,6 +31,7 @@ uniform bool enableAttenutation;
 uniform bool enableShadows;
 uniform bool enableDiffuse;
 uniform bool enableSpecular;
+uniform bool visualizeVoxelLighting;
 uniform bool enablePBR;
 uniform bool hasDiffuseTexture;
 uniform bool hasEmissionTexture;
@@ -69,8 +70,8 @@ int numCellsDim = $NUM_CELLS_DIM;
 uniform int voxelcellwidth;
 uniform bool enableVoxelLighting;
 
-layout(std140, binding = 0) uniform LargeBlock {
-  int voxelindexs2[ $VOXEL_ARR_SIZE ];  // vec4 alignment....could pack better probably then
+layout(std430, binding = 0) buffer LargeBlock {
+  int voxelindexs2[];  // vec4 alignment....could pack better probably then
 };
 
 float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBaseLow, float toBaseHigh){
@@ -80,30 +81,40 @@ int xyzToIndex(int x, int y, int z){
   return x + (numCellsDim * y) + (numCellsDim * numCellsDim * z);
 }
 
-int calcLightIndex(){
-  bool outOfRange = false;
+ivec3 calcLightIndexValues(out bool outOfRange){
+  outOfRange = false;
 
-  float newValueXFloat = convertBase(FragPos.x, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
+  vec3 voxelSamplingPosition = FragPos;
+  float newValueXFloat = convertBase(voxelSamplingPosition.x, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
   int newValueX = int(newValueXFloat);
   if (newValueXFloat >= numCellsDim || newValueXFloat < 0){
     outOfRange = true;
   }
 
-  float newValueYFloat = convertBase(FragPos.y, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
+  float newValueYFloat = convertBase(voxelSamplingPosition.y, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
   int newValueY = int(newValueYFloat);
   if (newValueYFloat >= numCellsDim || newValueYFloat < 0){
     outOfRange = true;
   }
 
-  float newValueZFloat = convertBase(FragPos.z, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
+  float newValueZFloat = convertBase(voxelSamplingPosition.z, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
   int newValueZ = int(newValueZFloat);
   if (newValueZFloat >= numCellsDim || newValueZFloat < 0){
     outOfRange = true; 
   }
   if (outOfRange){  // maybe i should clamp this instead? 
+    return ivec3(0, 0, 0);
+  }
+  return ivec3(newValueX, newValueY, newValueZ);
+}
+
+int calcLightIndex(){
+  bool outOfRange = false;
+  ivec3 indexs = calcLightIndexValues(outOfRange);
+  if (outOfRange){  // maybe i should clamp this instead? 
     return -1;
   }
-  int finalIndex2 = xyzToIndex(newValueX, newValueY, newValueZ);
+  int finalIndex2 = xyzToIndex(indexs.x, indexs.y, indexs.z);
   int lightIndex = voxelindexs2[finalIndex2];
   return lightIndex;
 }
@@ -219,7 +230,7 @@ void main(){
     vec3 lightPosition = vec3(0, 0, 0);
     bool hasLight = false;
 
-    vec4 color  = vec4(calculatePhongLight(normal, lightPosition, hasLight), 1.0) * texColor;
+    vec4 color  = vec4(calculatePhongLight(normal, lightPosition, hasLight, visualizeVoxelLighting), 1.0) * texColor;
 
 
 

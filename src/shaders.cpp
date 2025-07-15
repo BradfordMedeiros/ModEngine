@@ -628,3 +628,8 @@ void updateBufferData(ShaderStorageBuffer& uniformBuffer, size_t offsetIntoBuffe
   glBufferSubData(GL_SHADER_STORAGE_BUFFER, offsetIntoBuffer, sizeToWrite, data);
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);  
 }
+
+void readBufferData(ShaderStorageBuffer& uniformBuffer, size_t sizeToRead, void* _data){
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, uniformBuffer.ubo);
+  glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeToRead, _data);
+}

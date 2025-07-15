@@ -66,7 +66,7 @@ void initDefaultShader(unsigned int shader){
   setUniformData(shader, uniformData, { 
   	"ambientAmount", "bloomThreshold",
 	 	"bones[0]", "hasBones", "cameraPosition", "discardTexAmount", "emissionAmount", "enableAttenutation", "enableDiffuse",
-	 	"enableLighting", "enablePBR", "enableShadows", "enableSpecular",
+	 	"enableLighting", "enablePBR", "enableShadows", "enableSpecular", "visualizeVoxelLighting",
  		"model", "numlights", "shadowIntensity", "useBoneTransform",
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture", "lightTexture",
     "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "voxelcellwidth",
@@ -107,13 +107,29 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
       shaderSetUniform(shader, "lightsprojview", lightMatrixs.at(0)); // TODO we only use one of the light depth textures in the shader right now 
     }
 
+    int numUpdates = 0;
     auto lightUpdates = getLightUpdates();
-    for (auto &lightUpdate : lightUpdates){
+    for (auto& lightUpdate : lightUpdates){
+      numUpdates++;
       //std::cout << "voxel lighting : " << lightUpdate.index << std::endl;
       int lightArrayIndex = getLightsArrayIndex(lights, lightUpdate.lightIndex);
       modassert(lightUpdate.index < glm::pow(getLightingNumCellsDim(), 3), "lightUpdate.index too large");
       updateBufferData(renderingResources.voxelLighting , sizeof(int) * lightUpdate.index, sizeof(int), &lightArrayIndex);
+
+      if (lightUpdate.index == 292){
+        modlog("shaderstate light lightUpdate.index = ", std::to_string(lightUpdate.index));
+        modlog("shaderstate light lightArrayIndex = ", std::to_string(lightArrayIndex));        
+      }
+
+
+
     }
+
+
+    if (numUpdates > 0){
+      modlog("shaderstate light updates num = ", std::to_string(numUpdates));
+    }
+
   
     shaderSetUniformInt(shader, "voxelcellwidth", getLightingCellWidth());
 
@@ -169,6 +185,10 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
   uniformData.push_back(UniformData {
     .name = "enableVoxelLighting",
     .value = state.enableVoxelLighting,
+  });
+  uniformData.push_back(UniformData {
+    .name = "visualizeVoxelLighting",
+    .value = state.visualizeVoxelLightingCells,
   });
   uniformData.push_back(UniformData {
     .name = "ambientAmount",

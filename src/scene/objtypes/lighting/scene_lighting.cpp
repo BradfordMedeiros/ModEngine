@@ -1,6 +1,8 @@
 #include "./scene_lighting.h"
 
-int voxelCellWidth = 8;
+extern int currentTick;
+
+int voxelCellWidth = 16;
 int numCellsDim = 8;
 
 int xyzToIndex(int x , int y, int z){
@@ -14,6 +16,7 @@ std::vector<LightingCell> generateLightingCells(int size, int lightIndex = -1){
       for (int z = 0; z < size; z++){
       	cells.push_back(LightingCell {
           .lightIndex = lightIndex,
+          .needsUpdateFrame = currentTick,
         });
       }
     }
@@ -32,12 +35,14 @@ std::vector<LightingCell> generateLightingCellsDebug(int size){
   		auto farIndex = xyzToIndex(x, y, (size - 1));
   		cells.at(nearIndex).lightIndex = -2;
    		cells.at(farIndex).lightIndex = -2;
+   		cells.at(farIndex).needsUpdateFrame = currentTick;
   	}
   	for (int z = 0; z < size ; z++){
   		auto nearIndex = xyzToIndex(0, y, z);
    		auto farIndex = xyzToIndex((size - 1), y, z);
   		cells.at(nearIndex).lightIndex = -2;
    		cells.at(farIndex).lightIndex = -2;
+   		cells.at(farIndex).needsUpdateFrame = currentTick;
   	}
   }
   return cells;
@@ -92,9 +97,9 @@ std::optional<int> lightingPositionToIndex(glm::vec3 position, glm::ivec3 offset
 
 void addVoxelLight(objid lightIndex, glm::vec3 position, int requestedRadius){
 	int radius = requestedRadius;
-	//if (radius <= 0){
-	//	radius = 100; // max size 
-	//}
+	if (true || radius <= 0){
+		radius = 1; // max size 
+	}
 	glm::vec3 color(1.f, 1.f, 1.f);
 
 	//modlog("voxel lighting add: ", std::to_string(lightIndex));
@@ -110,17 +115,21 @@ void addVoxelLight(objid lightIndex, glm::vec3 position, int requestedRadius){
 				modassert(index >= 0 && index < lightingData.cells.size(), std::string("Invalid light index, got = ") + std::to_string(index));
 				lightingData.cells.at(index) = LightingCell {
 					.lightIndex = lightIndex,
+					.needsUpdateFrame = currentTick,
 				};
 			}
 		}
 	}
+
 	//std::cout << "voxel lighting lighting data: " << print(printDebugVoxelLighting()) << std::endl;
 }
 void removeVoxelLight(objid lightIndex){
 	modlog("voxel lighting remove: ", std::to_string(lightIndex));
-	for (auto &cell : lightingData.cells){
+	for (int i = 0 ; i < lightingData.cells.size(); i++){
+		LightingCell& cell = lightingData.cells.at(i);
 		if (cell.lightIndex == lightIndex){
 			cell.lightIndex = -1;
+			cell.needsUpdateFrame = currentTick;
 		}
 	}
 	//std::cout << "voxel lighting lighting data: " << print(printDebugVoxelLighting()) << std::endl;
@@ -152,10 +161,13 @@ std::vector<LightingUpdate> getLightUpdates(){
 
   std::vector<LightingUpdate> lightUpdates;
   for (int i = 0; i < lightingData.cells.size(); i++){
-    lightUpdates.push_back(LightingUpdate {
-      .index = i,
-      .lightIndex = lightingData.cells.at(i).lightIndex,
-    });
+  	LightingCell& lightingCell = lightingData.cells.at(i);
+  	if (lightingCell.needsUpdateFrame >=  currentTick){
+    	lightUpdates.push_back(LightingUpdate {
+    	  .index = i,
+    	  .lightIndex = lightingCell.lightIndex,
+    	});
+  	}
   }
   return lightUpdates;
 }

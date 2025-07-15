@@ -55,5 +55,6 @@ struct ShaderStorageBuffer {
 ShaderStorageBuffer generateShaderStorageBuffer(size_t size);
 void freeBuffer(ShaderStorageBuffer& uniformBuffer);
 void updateBufferData(ShaderStorageBuffer& uniformBuffer, size_t offsetIntoBuffer, size_t sizeToWrite, void* data);
+void readBufferData(ShaderStorageBuffer& uniformBuffer, size_t sizeToRead, void* _data);
 
 #endif 

@@ -20,6 +20,7 @@
 #include "./modlayer.h"
 #include "./world_tasks.h"
 #include "./common/symbols.h"
+#include "./shaderstate.h"
 
 struct JoyStickInfo {
   int index;

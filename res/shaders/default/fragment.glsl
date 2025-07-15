@@ -64,6 +64,8 @@ uniform bool enableShadows;
 uniform bool enableDiffuse;
 uniform bool enableSpecular;
 uniform bool enablePBR;
+uniform bool visualizeVoxelLighting;
+
 uniform float shadowIntensity;
 
 uniform vec3 ambientAmount;
@@ -94,8 +96,8 @@ int xyzToIndex(int x, int y, int z){
   return x + (numCellsDim * y) + (numCellsDim * numCellsDim * z);
 }
 
-int calcLightIndex(){
-  bool outOfRange = false;
+ivec3 calcLightIndexValues(out bool outOfRange){
+  outOfRange = false;
 
   vec3 voxelSamplingPosition = FragPos;
   float newValueXFloat = convertBase(voxelSamplingPosition.x, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
@@ -116,9 +118,18 @@ int calcLightIndex(){
     outOfRange = true; 
   }
   if (outOfRange){  // maybe i should clamp this instead? 
+    return ivec3(0, 0, 0);
+  }
+  return ivec3(newValueX, newValueY, newValueZ);
+}
+
+int calcLightIndex(){
+  bool outOfRange = false;
+  ivec3 indexs = calcLightIndexValues(outOfRange);
+  if (outOfRange){  // maybe i should clamp this instead? 
     return -1;
   }
-  int finalIndex2 = xyzToIndex(newValueX, newValueY, newValueZ);
+  int finalIndex2 = xyzToIndex(indexs.x, indexs.y, indexs.z);
   int lightIndex = voxelindexs2[finalIndex2];
   return lightIndex;
 }
@@ -204,7 +215,7 @@ void main(){
   
     vec3 lightPosition = vec3(0, 0, 0);
     bool hasLight = false;
-    vec4 color  = enablePBR ? calculateCookTorrence(normal, texColor.rgb, 0.2, 0.5) : vec4(calculatePhongLight(normal, lightPosition, hasLight), 1.0) * texColor;
+    vec4 color  = enablePBR ? calculateCookTorrence(normal, texColor.rgb, 0.2, 0.5) : vec4(calculatePhongLight(normal, lightPosition, hasLight, visualizeVoxelLighting), 1.0) * texColor;
 
     if (hasLight){
 

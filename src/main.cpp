@@ -85,7 +85,7 @@ std::vector<DepthAtCoord> depthsAtCoords;
 std::string dataPath;
 
 int transparencyLayer = -1;
-
+int currentTick = 0;
 
 bool showCrashInfo = false;
 float lastReloadTime = 0.f;
@@ -662,13 +662,6 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
   if (state.showDebug && numChunkingGridCells > 0){
     float offset = ((numChunkingGridCells % 2) == 0) ? (dynamicLoading.mappingInfo.chunkSize / 2) : 0;
     auto lines = drawGrid3D(numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
-    for (auto &line : lines){
-      addLineNextCycle(line.fromPos, line.toPos, false, -1, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, std::nullopt);
-    }
-  }
-
-  if (state.visualizeVoxelLightingCells){
-    auto lines = drawGrid3D(4, getLightingCellWidth(), 0.f, 0.f, 0.f);
     for (auto &line : lines){
       addLineNextCycle(line.fromPos, line.toPos, false, -1, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, std::nullopt);
     }
@@ -2023,6 +2016,7 @@ int main(int argc, char* argv[]){
     updateUiShaderPerFrame(*renderingResources.uiShaderProgram);
 
 
+
     RenderContext renderContext {
       .view = view,
       .portals = portals,
@@ -2249,6 +2243,8 @@ int main(int argc, char* argv[]){
     std::cout << "frame time: " << (glfwGetTime() - statistics.now) << std::endl;
     std::cout << "frame draw calls: " << numberOfDrawCallsThisFrame << std::endl;
     glfwSwapBuffers(window);
+    currentTick++;
+    
   )})
 
   modlog("lifecycle", "program exiting");

@@ -16,8 +16,22 @@ extern GLFWwindow* window;
 extern LineData lineData;
 extern ManipulatorTools tools;
 extern TimePlayback timePlayback;
+extern RenderingResources renderingResources;
 
 std::string readFileOrPackage(std::string filepath);
+
+std::string debugLightingInfo(){
+  auto numCells = getVoxelLightingData().cells.size();
+  int* lightingData = static_cast<int*>(malloc(sizeof(int) * numCells));
+  readBufferData(renderingResources.voxelLighting, sizeof(int) * numCells, lightingData);
+  //updateBufferData(renderingResources.voxelLighting , sizeof(int) * lightUpdate.index, sizeof(int), &lightArrayIndex);
+  std::string content;
+  for (int i = 0; i < numCells; i++){
+    content += std::to_string(lightingData[i]) + " ";
+  }
+  free(lightingData);
+  return content;
+}
 
 std::string dumpDebugInfo(bool fullInfo){
   // this line is commented out b/c was segfaulting, probably should be written in a way that assumes the structure might be invalid
@@ -30,6 +44,7 @@ std::string dumpDebugInfo(bool fullInfo){
   auto animationInfo = debugAnimations(world.animations);
   auto physicsInfo = debugPhysicsInfo(world.rigidbodys);
   auto sceneInfo = debugSceneInfo(world.sandbox);
+  auto lightingData = debugLightingInfo();
 
   auto benchmarkingContent = benchmarkResult(benchmark);
   auto profilingInfo = fullInfo ? dumpProfiling() : "" ;
@@ -42,7 +57,8 @@ std::string dumpDebugInfo(bool fullInfo){
       "mesh cache\n" + meshInfo + "\n" + 
       "animation cache\n" + animationInfo + "\n" +
       "physics info\n" + physicsInfo + "\n" + 
-      "scene info\n" + sceneInfo + "\n";
+      "scene info\n" + sceneInfo + "\n" + 
+      "voxel lighting\n" + lightingData + "\n";
 //    sceneInfo +  benchmarkingContent + "\n" + profilingInfo;
   return content;
 

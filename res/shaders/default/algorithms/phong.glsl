@@ -1,5 +1,5 @@
 
-vec3 calculatePhongLight(vec3 normal, out vec3 lightPos, out bool hasLight){
+vec3 calculatePhongLight(vec3 normal, out vec3 lightPos, out bool hasLight, bool visualizeLights){\
   vec3 ambient = lookupAmbientLight();   
   vec3 totalDiffuse  = vec3(0, 0, 0);     
   vec3 totalSpecular = vec3(0, 0, 0);     
@@ -50,5 +50,15 @@ vec3 calculatePhongLight(vec3 normal, out vec3 lightPos, out bool hasLight){
   vec3 specularValue = enableSpecular ? totalSpecular : vec3(0, 0, 0);
   vec3 color = ambient + diffuseValue + specularValue;
 
+  if (visualizeLights){
+    bool outOfRange = false;
+    ivec3 indexs = calcLightIndexValues(outOfRange);
+    int sum = indexs.x + indexs.y + indexs.z;
+    if ((sum & 1) == 0) {
+        return vec3(color.r, color.g + 0.5, color.b + 0.5); // Light red
+    } else {
+        return vec3(color.r + 0.5, color.g + 0.5, color.b); // Light blue
+    }
+  }
   return color;
 }
