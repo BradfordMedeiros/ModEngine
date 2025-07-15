@@ -97,7 +97,7 @@ std::optional<int> lightingPositionToIndex(glm::vec3 position, glm::ivec3 offset
 
 void addVoxelLight(objid lightIndex, glm::vec3 position, int requestedRadius){
 	int radius = requestedRadius;
-	if (true || radius <= 0){
+	if (radius <= 0){
 		radius = 1; // max size 
 	}
 	glm::vec3 color(1.f, 1.f, 1.f);
