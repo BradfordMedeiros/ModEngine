@@ -97,8 +97,6 @@ std::optional<int> lightingPositionToIndex(glm::vec3 position, glm::ivec3 offset
 }
 
 void addVoxelLight(objid lightIndex, glm::vec3 position, int requestedRadius){
-	lightingData.defaultLightIndex = lightIndex; // hack for now
-
 	modlog("voxel lighting add: ", std::to_string(lightIndex));
 	int radius = requestedRadius;
 	if (radius <= 0){
@@ -181,4 +179,8 @@ std::vector<LightingUpdate> getLightUpdates(){
 
 VoxelLightingData& getVoxelLightingData(){
 	return lightingData;
+}
+
+void setGlobalLight(objid id){
+	getVoxelLightingData().defaultLightIndex = id;
 }

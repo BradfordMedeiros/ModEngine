@@ -33,5 +33,6 @@ void removeVoxelLight(objid lightIndex);
 void updateVoxelLightPosition(objid lightIndex, glm::vec3 position, int radius);
 
 VoxelLightingData& getVoxelLightingData();
+void setGlobalLight(objid);
 
 #endif

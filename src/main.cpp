@@ -1622,6 +1622,7 @@ int main(int argc, char* argv[]){
     .loadState = loadState,
 
     .getVoxelLightingData = getVoxelLightingData,
+    .setGlobalLight = setGlobalLight,
     .getTag = getTag,
     .getAllTags = getAllTags,
     .getMaterial = getMaterial,
