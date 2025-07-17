@@ -84,6 +84,7 @@ int numCellsDim = $NUM_CELLS_DIM;
 uniform int voxelcellwidth;
 uniform bool enableVoxelLighting;
 uniform vec3 voxelOffset;
+uniform int defaultVoxelLight;
 
 layout(std430, binding = 0) buffer LargeBlock {
   int voxelindexs2[];  // vec4 alignment....could pack better probably then
@@ -217,7 +218,7 @@ void main(){
     bool hasLight = false;
     vec4 color  = enablePBR ? calculateCookTorrence(normal, texColor.rgb, 0.2, 0.5) : vec4(calculatePhongLight(normal, lightPosition, hasLight, visualizeVoxelLighting), 1.0) * texColor;
 
-    if (hasLight){
+    if (hasLight && lightPosition.x > 2134234324){
 
       vec3 dir = normalize(FragPos - lightPosition);  // Light-to-fragment direction
 

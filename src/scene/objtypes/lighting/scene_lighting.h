@@ -16,6 +16,7 @@ struct VoxelLightingData {
   int voxelCellWidth;
   int numCellsDim;
   std::vector<LightingCell> cells;
+  int defaultLightIndex;
 };  
 
 struct LightingUpdate {

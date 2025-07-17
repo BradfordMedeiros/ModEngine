@@ -69,7 +69,7 @@ void initDefaultShader(unsigned int shader){
 	 	"enableLighting", "enablePBR", "enableShadows", "enableSpecular", "visualizeVoxelLighting",
  		"model", "numlights", "shadowIntensity", "useBoneTransform",
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture", "lightTexture",
-    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "voxelcellwidth",
+    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "voxelcellwidth", "defaultVoxelLight",
     "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview", "realtime", "time", 
 
     "encodedid", "textureid",
@@ -120,10 +120,14 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
         modlog("shaderstate light lightUpdate.index = ", std::to_string(lightUpdate.index));
         modlog("shaderstate light lightArrayIndex = ", std::to_string(lightArrayIndex));        
       }
-
-
-
     }
+
+    int lightArrayIndex = getLightsArrayIndex(lights, getVoxelLightingData().defaultLightIndex);
+    uniformData.push_back(UniformData { 
+      .name = "defaultVoxelLight", 
+      .value = static_cast<int>(lightArrayIndex), 
+    });
+
 
 
     if (numUpdates > 0){
@@ -154,6 +158,8 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
       .name = "numlights", 
       .value = static_cast<int>(lights.size()) 
     });
+
+
   }
 
 

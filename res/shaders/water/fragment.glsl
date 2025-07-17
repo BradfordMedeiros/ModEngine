@@ -69,6 +69,7 @@ uniform float bloomThreshold;
 int numCellsDim = $NUM_CELLS_DIM;
 uniform int voxelcellwidth;
 uniform bool enableVoxelLighting;
+uniform int defaultVoxelLight;
 
 layout(std430, binding = 0) buffer LargeBlock {
   int voxelindexs2[];  // vec4 alignment....could pack better probably then

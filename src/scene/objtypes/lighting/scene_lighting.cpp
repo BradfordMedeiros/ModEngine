@@ -54,6 +54,7 @@ VoxelLightingData lightingData {
   .voxelCellWidth = voxelCellWidth,
   .numCellsDim = numCellsDim,
   .cells = generateLightingCells(numCellsDim),  // this is hardcoded in the shader
+  .defaultLightIndex = 0,
 };
 
 std::string printDebugVoxelLighting(){
@@ -96,6 +97,9 @@ std::optional<int> lightingPositionToIndex(glm::vec3 position, glm::ivec3 offset
 }
 
 void addVoxelLight(objid lightIndex, glm::vec3 position, int requestedRadius){
+	lightingData.defaultLightIndex = lightIndex; // hack for now
+
+	modlog("voxel lighting add: ", std::to_string(lightIndex));
 	int radius = requestedRadius;
 	if (radius <= 0){
 		radius = 1; // max size 
@@ -131,6 +135,9 @@ void removeVoxelLight(objid lightIndex){
 			cell.lightIndex = -1;
 			cell.needsUpdateFrame = currentTick;
 		}
+	}
+	if (lightingData.defaultLightIndex == lightIndex){
+		lightingData.defaultLightIndex = 0;
 	}
 	//std::cout << "voxel lighting lighting data: " << print(printDebugVoxelLighting()) << std::endl;
 }
