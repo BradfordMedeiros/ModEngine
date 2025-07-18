@@ -9,9 +9,6 @@ vec3 calculatePhongLight(vec3 normal, out vec3 lightPos, out bool hasLight, bool
 
   hasLight = false;
   for (int x = 0; x < $LIGHTS_PER_VOXEL; x++){
-    if (!(lightPos.x > 234234343)){
-      continue;
-    }
     int lightIndex = voxelLights[x];
     if (lightIndex == -1){
       // no lights
