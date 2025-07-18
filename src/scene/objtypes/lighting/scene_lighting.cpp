@@ -97,6 +97,9 @@ std::optional<int> lightingPositionToIndex(glm::vec3 position, glm::ivec3 offset
 }
 
 void addVoxelLight(objid lightIndex, glm::vec3 position, int requestedRadius){
+	if (lightIndex == lightingData.defaultLightIndex){
+		return;
+	}
 	modlog("voxel lighting add: ", std::to_string(lightIndex));
 	int radius = requestedRadius;
 	if (radius <= 0){
@@ -125,7 +128,7 @@ void addVoxelLight(objid lightIndex, glm::vec3 position, int requestedRadius){
 
 	//std::cout << "voxel lighting lighting data: " << print(printDebugVoxelLighting()) << std::endl;
 }
-void removeVoxelLight(objid lightIndex){
+void removeVoxelLight(objid lightIndex, bool removeDefaultLight){
 	modlog("voxel lighting remove: ", std::to_string(lightIndex));
 	for (int i = 0 ; i < lightingData.cells.size(); i++){
 		LightingCell& cell = lightingData.cells.at(i);
@@ -134,7 +137,7 @@ void removeVoxelLight(objid lightIndex){
 			cell.needsUpdateFrame = currentTick;
 		}
 	}
-	if (lightingData.defaultLightIndex == lightIndex){
+	if (removeDefaultLight && lightingData.defaultLightIndex == lightIndex){
 		lightingData.defaultLightIndex = 0;
 	}
 	//std::cout << "voxel lighting lighting data: " << print(printDebugVoxelLighting()) << std::endl;
@@ -144,7 +147,7 @@ void removeVoxelLight(objid lightIndex){
 // eg could keep a mapping of cell ids to shortcut to them
 void updateVoxelLightPosition(objid lightIndex, glm::vec3 position, int radius){
 	//modlog("update voxel light position", print(position));
-	removeVoxelLight(lightIndex);
+	removeVoxelLight(lightIndex, false);
 	addVoxelLight(lightIndex, position, radius);
 }
 

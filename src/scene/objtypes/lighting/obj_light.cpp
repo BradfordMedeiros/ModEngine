@@ -77,7 +77,7 @@ GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){
 }
 
 void removeLight(GameObjectLight& lightObj, ObjectRemoveUtil& util){
-  removeVoxelLight(util.id);
+  removeVoxelLight(util.id, true);
 }
 
 std::optional<AttributeValuePtr> getLightAttribute(GameObjectLight& obj, const char* field){
