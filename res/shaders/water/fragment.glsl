@@ -49,6 +49,7 @@ uniform int numlights;
 uniform vec3 lights[ $LIGHT_BUFFER_SIZE ];
 uniform vec3 lightscolor[ $LIGHT_BUFFER_SIZE ];
 uniform vec3 lightsdir[ $LIGHT_BUFFER_SIZE ];
+uniform mat4 lightsdirmat[ $LIGHT_BUFFER_SIZE ];
 uniform vec3 lightsatten[ $LIGHT_BUFFER_SIZE ];
 uniform float lightsmaxangle[ $LIGHT_BUFFER_SIZE ];
 uniform float lightsangledelta[ $LIGHT_BUFFER_SIZE ];
@@ -230,8 +231,9 @@ void main(){
 
     vec3 lightPosition = vec3(0, 0, 0);
     bool hasLight = false;
+    mat4 lightRot = mat4(1.f);
 
-    vec4 color  = vec4(calculatePhongLight(normal, lightPosition, hasLight, visualizeVoxelLighting), 1.0) * texColor;
+    vec4 color  = vec4(calculatePhongLight(normal, lightPosition, hasLight, visualizeVoxelLighting, lightRot), 1.0) * texColor;
 
 
 
@@ -247,8 +249,9 @@ void main(){
 
 
     if (hasLight){
-
       vec3 dir = normalize(FragPos - lightPosition);  // Light-to-fragment direction
+      vec4 newDir = lightRot * vec4(dir.xyz, 1.0);
+      dir = newDir.xyz;
 
       float azimuth = atan(dir.z, dir.x);         // [-π, π]
       float elevation = acos(clamp(dir.y, -1.0, 1.0)); // [0, π]

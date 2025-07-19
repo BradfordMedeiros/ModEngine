@@ -8,8 +8,12 @@ std::vector<LightInfo> getLightInfo(World& world){
     auto lightObject = getLight(world.objectMapping, objectId);
     modassert(lightObject, "getLightInfo - not a light");
     auto lightTransform = fullTransformation(world.sandbox, objectId, "getLightInfo");
+
+    auto rotateMatrix = matrixFromComponents(glm::mat4(1.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), lightTransform.rotation);
+
     LightInfo light {
       .transform = lightTransform,
+      .transformMatrix = rotateMatrix,
       .light = *lightObject,
       .id = objectId,
     };

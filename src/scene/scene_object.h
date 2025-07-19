@@ -5,6 +5,7 @@
 
 struct LightInfo {
   Transformation transform;
+  glm::mat4 transformMatrix;
   GameObjectLight light;
   objid id;
 };

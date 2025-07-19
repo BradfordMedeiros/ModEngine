@@ -1,5 +1,5 @@
 
-vec3 calculatePhongLight(vec3 normal, out vec3 lightPos, out bool hasLight, bool visualizeLights){\
+vec3 calculatePhongLight(vec3 normal, out vec3 lightPos, out bool hasLight, bool visualizeLights, out mat4 lightRot){
   vec3 ambient = lookupAmbientLight();   
   vec3 totalDiffuse  = vec3(0, 0, 0);     
   vec3 totalSpecular = vec3(0, 0, 0);     
@@ -20,8 +20,9 @@ vec3 calculatePhongLight(vec3 normal, out vec3 lightPos, out bool hasLight, bool
 
     hasLight = true;
 
-    vec3 lightPos = lights[lightIndex];
+    lightPos = lights[lightIndex];
     vec3 lightDir = lightsisdir[lightIndex] ?  lightsdir[lightIndex] : normalize(lightPos - FragPos);
+    lightRot = lightsdirmat[lightIndex];
 
     float angle = dot(lightDir, normalize(-lightsdir[lightIndex]));
 
@@ -56,8 +57,10 @@ vec3 calculatePhongLight(vec3 normal, out vec3 lightPos, out bool hasLight, bool
     }else{
       hasLight = true;
 
-      vec3 lightPos = lights[lightIndex];
+      lightPos = lights[lightIndex];
+
       vec3 lightDir = lightsisdir[lightIndex] ?  lightsdir[lightIndex] : normalize(lightPos - FragPos);
+      lightRot = lightsdirmat[lightIndex];
 
       float angle = dot(lightDir, normalize(-lightsdir[lightIndex]));
 

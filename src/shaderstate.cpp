@@ -69,7 +69,7 @@ void initDefaultShader(unsigned int shader){
 	 	"enableLighting", "enablePBR", "enableShadows", "enableSpecular", "visualizeVoxelLighting",
  		"model", "numlights", "shadowIntensity", "useBoneTransform",
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture", "lightTexture",
-    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "voxelcellwidth", "defaultVoxelLight",
+    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscoord[0]", "lightscolor[0]", "lightsdir[0]", "lightsdirmat[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "voxelcellwidth", "defaultVoxelLight",
     "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview", "realtime", "time", 
 
     "encodedid", "textureid",
@@ -147,7 +147,11 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
         shaderSetUniform(shader, ("lightscolor[" + std::to_string(i) + "]").c_str(), glm::vec3(0.f, 0.f, 0.f));
       }
       shaderSetUniform(shader, ("lightsdir[" + std::to_string(i) + "]").c_str(), directionFromQuat(light.transform.rotation));
+      shaderSetUniform(shader, ("lightsdirmat[" + std::to_string(i) + "]").c_str(), light.transformMatrix);
+
       shaderSetUniform(shader, ("lightsatten[" + std::to_string(i) + "]").c_str(), light.light.attenuation);
+      //shaderSetUniform(shader, ("lightscoord[" + std::to_string(i) + "]").c_str(), glm::vec4(0.f, 0.f, 1.f, 1.f));
+
       shaderSetUniform(shader,  ("lightsmaxangle[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_SPOTLIGHT ? light.light.maxangle : -10.f);
       shaderSetUniform(shader,  ("lightsangledelta[" + std::to_string(i) + "]").c_str(), light.light.angledelta);
       shaderSetUniformBool(shader,  ("lightsisdir[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_DIRECTIONAL);
@@ -230,7 +234,7 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
     "textureid", "bones[0]", "encodedid", "hasBones", "model", "discardTexAmount", 
     "emissionAmount", 
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture",
-    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscolor[0]", "lightsdir[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth",
+    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscoord[0]", "lightscolor[0]", "lightsdir[0]", "lightsdirmat[0]", "lightsisdir[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth",
     "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview",
 
     "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture", "lightTexture",

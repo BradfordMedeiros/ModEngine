@@ -50,6 +50,7 @@ uniform int numlights;
 uniform vec3 lights[ $LIGHT_BUFFER_SIZE ];
 uniform vec3 lightscolor[ $LIGHT_BUFFER_SIZE ];
 uniform vec3 lightsdir[ $LIGHT_BUFFER_SIZE ];
+uniform mat4 lightsdirmat[ $LIGHT_BUFFER_SIZE ];
 uniform vec3 lightsatten[ $LIGHT_BUFFER_SIZE ];
 uniform float lightsmaxangle[ $LIGHT_BUFFER_SIZE ];
 uniform float lightsangledelta[ $LIGHT_BUFFER_SIZE ];
@@ -216,11 +217,17 @@ void main(){
   
     vec3 lightPosition = vec3(0, 0, 0);
     bool hasLight = false;
-    vec4 color  = enablePBR ? calculateCookTorrence(normal, texColor.rgb, 0.2, 0.5) : vec4(calculatePhongLight(normal, lightPosition, hasLight, visualizeVoxelLighting), 1.0) * texColor;
 
-    if (hasLight && lightPosition.x > 2134234324){
+    mat4 lightRot = mat4(1.f);
+    vec4 color  = enablePBR ? calculateCookTorrence(normal, texColor.rgb, 0.2, 0.5) : vec4(calculatePhongLight(normal, lightPosition, hasLight, visualizeVoxelLighting, lightRot), 1.0) * texColor;
 
-      vec3 dir = normalize(FragPos - lightPosition);  // Light-to-fragment direction
+    if (hasLight){
+
+      vec3 dir = normalize(FragPos - lightPosition) ;  // Light-to-fragment direction
+      //dir = normalize(dir + normalize(lightRot));
+
+      dir = (inverse(lightRot) * vec4(dir.xyz, 1.0)).xyz;
+
 
       float azimuth = atan(dir.z, dir.x);         // [-π, π]
       float elevation = acos(clamp(dir.y, -1.0, 1.0)); // [0, π]
@@ -228,12 +235,20 @@ void main(){
       // Convert to [0,1] range
       float u = (azimuth + 3.1416) / (2.0 * 3.1416);
       float v = elevation / PI;
-      vec2 baseUV = vec2(u, v);  // These are your texture coordinates
-      vec2 uv = baseUV + (0.1 * time) * vec2(0.1, 0.2); // tweak speeds
 
-      vec4 lightTextureColor = texture(lightTexture, uv) ;
+      // u goes between 0 an d 1
+
+      float size = 0.25;
+      float offset = 2;
+
+      vec2 baseUV = vec2((u * size) + (size * offset), (v * size) + (size * offset));  // These are your texture coordinates
+      vec2 uv = baseUV + vec2(cos(time * 0.02), sin(time * 0.02));
+
+      vec4 lightTextureColor = texture(lightTexture, uv);
   
-      color = color + vec4(0.4 * lightTextureColor.rgb, 0);      
+      //color = color + vec4(lightTextureColor.rgb, 0);      
+      color = color * vec4(lightTextureColor.rgb, 1);      
+
     }
 
 
