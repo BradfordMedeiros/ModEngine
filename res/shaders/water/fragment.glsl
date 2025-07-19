@@ -250,7 +250,7 @@ void main(){
 
     if (hasLight){
       vec3 dir = normalize(FragPos - lightPosition);  // Light-to-fragment direction
-      vec4 newDir = lightRot * vec4(dir.xyz, 1.0);
+      vec4 newDir = inverse(lightRot) * vec4(dir.xyz, 1.0);
       dir = newDir.xyz;
 
       float azimuth = atan(dir.z, dir.x);         // [-π, π]

@@ -238,16 +238,20 @@ void main(){
 
       // u goes between 0 an d 1
 
-      float size = 0.25;
-      float offset = 2;
+      // this is for an atlas based one
+      //float size = 0.25;
+      //float offset = 2;
+      //vec2 baseUV = vec2((u * size) + (size * offset), (v * size) + (size * offset));  // These are your texture coordinates
 
-      vec2 baseUV = vec2((u * size) + (size * offset), (v * size) + (size * offset));  // These are your texture coordinates
-      vec2 uv = baseUV + vec2(cos(time * 0.02), sin(time * 0.02));
+      vec2 baseUV = vec2(u, v);
+      
+
+      vec2 uv = baseUV; // + vec2(cos(time * 0.002), sin(time * 0.002));
 
       vec4 lightTextureColor = texture(lightTexture, uv);
   
       //color = color + vec4(lightTextureColor.rgb, 0);      
-      color = color * vec4(lightTextureColor.rgb, 1);      
+      color = color * vec4(0.2 + lightTextureColor.r, 0.2 + lightTextureColor.g, 0.2 + lightTextureColor.b, 1);      
 
     }
 
