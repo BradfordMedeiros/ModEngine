@@ -222,7 +222,8 @@ void main(){
     mat4 lightRot = mat4(1.f);
     vec4 color  = enablePBR ? calculateCookTorrence(normal, texColor.rgb, 0.2, 0.5) : vec4(calculatePhongLight(normal, lightPosition, hasLight, visualizeVoxelLighting, lightRot), 1.0) * texColor;
 
-    if (hasLight){
+    vec4 lightTex = lightstexindex[0];
+    if (hasLight && lightTex.x > -1){
 
       vec3 dir = normalize(FragPos - lightPosition) ;  // Light-to-fragment direction
       //dir = normalize(dir + normalize(lightRot));
@@ -238,7 +239,6 @@ void main(){
       float v = elevation / PI;
       // u goes between 0 an d 1
 
-      vec4 lightTex = lightstexindex[0];
 
       vec2 baseUV = vec2((u * lightTex.z) + lightTex.x, (v * lightTex.w) + lightTex.y);  // These are your texture coordinates
 

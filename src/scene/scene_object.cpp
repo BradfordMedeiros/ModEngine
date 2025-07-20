@@ -1,5 +1,7 @@
 #include "./scene_object.h"
 
+std::vector<std::string> listLightTextures();
+
 std::vector<LightInfo> getLightInfo(World& world){
   auto lightsIndexs = getAllLightsIndexs(world.objectMapping);
   std::vector<LightInfo> lights;
@@ -11,12 +13,32 @@ std::vector<LightInfo> getLightInfo(World& world){
 
     auto rotateMatrix = matrixFromComponents(glm::mat4(1.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), lightTransform.rotation);
 
+    static auto lightTextures = listLightTextures();
+    int lightTextureIndex = -1;
+    for (int i = 0; i < lightTextures.size(); i++){
+      if (lightObject -> texture == lightTextures.at(i)){
+        lightTextureIndex = i;
+      }
+    }
+
+    float width = 0.25f;
+    float height = 0.25f;
+    int xIndex = lightTextureIndex % 4;
+    int yIndex = lightTextureIndex / 4;
+
+    float xOffset = xIndex * width;
+    float yOffset = yIndex * height;
+
+    if (lightTextureIndex == -1){
+      xOffset = -5.f;
+    }
+
     LightInfo light {
       .transform = lightTransform,
       .transformMatrix = rotateMatrix,
       .light = *lightObject,
       .id = objectId,
-      .textureCoords = glm::vec4(0.f, 0.f, 0.25f, 0.25f),
+      .textureCoords = glm::vec4(xOffset, yOffset, 0.25f, 0.25f),
     };
     lights.push_back(light);
   }

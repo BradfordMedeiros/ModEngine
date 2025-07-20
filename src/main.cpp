@@ -288,6 +288,35 @@ std::vector<std::string> listOctreeTextures(){
   return octreeTextures;
 }
 
+std::vector<std::string> listLightTextures(){
+  std::vector<std::string> lightTextures { 
+    "./res/textures/grid.png", 
+    "../gameresources/build/textures/arcade/invaders/background.png",
+
+    "../gameresources/build/textures/clean/grass.jpg", 
+    "../gameresources/build/textures/iguana.jpg", 
+
+    "../gameresources/build/textures/clean/metalgrid.jpg",
+    "../gameresources/build/textures/clean/foliage2.png",
+    "../gameresources/build/textures/clean/hardwood.jpg",
+
+    "../gameresources/build/textures/clean/stonydirt.jpg",
+    "../gameresources/build/textures/clean/metal_scifi.png",
+    "../gameresources/build/textures/clean/tex_Ice.jpg",
+
+    "../gameresources/build/textures/clean/stonewall.jpg",
+    "../gameresources/build/textures/metal_grating.jpg",
+    "../gameresources/build/textures/moonman.jpg",
+
+    "../gameresources/build/uncategorized/bluetransparent.png",
+    "../gameresources/build/textures/const_fence.png",
+
+    "./res/textures/wood.jpg",
+
+  };
+  return lightTextures; 
+}
+
 // This is wasteful, as obviously I shouldn't be loading in all the textures on load, but ok for now. 
 // This shoiuld really just be creating a list of names, and then the cycle above should cycle between possible textures to load, instead of what is loaded 
 void loadAllTextures(std::string& textureFolderPath){
@@ -318,8 +347,11 @@ void loadAllTextures(std::string& textureFolderPath){
     }
   }
 
+  std::vector<std::string> lightTextures = listLightTextures();
+
   PROFILE("TEXTURES-LOAD-OCTREEATLAS",
     auto start = std::chrono::steady_clock::now();
+    loadTextureAtlasWorld(world, "light-atlas", lightTextures, getRuntimePath("light_textures_atlas.png"), -1);
     loadTextureAtlasWorld(world, "octree-atlas:normal", normalTextures, getRuntimePath("test_atlas_normal.png"), -1);
     loadTextureAtlasWorld(world, "octree-atlas:main",   octreeTextures, getRuntimePath("test_atlas.png"), -1);
     setAtlasDimensions(AtlasDimensions {
@@ -601,7 +633,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
               glBindTexture(GL_TEXTURE_2D, getWaterTexture().textureId);
             }else{
               glActiveTexture(GL_TEXTURE0 + 7);
-              glBindTexture(GL_TEXTURE_2D,  world.textures.at("./res/textures/wood.jpg").texture.textureId);
+              glBindTexture(GL_TEXTURE_2D,  world.textures.at("light-atlas").texture.textureId);
             }
 
 
