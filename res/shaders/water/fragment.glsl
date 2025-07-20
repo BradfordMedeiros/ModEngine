@@ -54,6 +54,7 @@ uniform vec3 lightsatten[ $LIGHT_BUFFER_SIZE ];
 uniform float lightsmaxangle[ $LIGHT_BUFFER_SIZE ];
 uniform float lightsangledelta[ $LIGHT_BUFFER_SIZE ];
 uniform bool lightsisdir[ $LIGHT_BUFFER_SIZE ];
+uniform vec4 lightstexindex[ $LIGHT_BUFFER_SIZE ];
 
 uniform vec3 ambientAmount;
 uniform vec3 emissionAmount;
@@ -233,8 +234,10 @@ void main(){
     bool hasLight = false;
     mat4 lightRot = mat4(1.f);
 
+    if (lightstexindex[0].x == 0){
+      hasLight = true;
+    }
     vec4 color  = vec4(calculatePhongLight(normal, lightPosition, hasLight, visualizeVoxelLighting, lightRot), 1.0) * texColor;
-
 
 
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;

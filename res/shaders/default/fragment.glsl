@@ -55,6 +55,7 @@ uniform vec3 lightsatten[ $LIGHT_BUFFER_SIZE ];
 uniform float lightsmaxangle[ $LIGHT_BUFFER_SIZE ];
 uniform float lightsangledelta[ $LIGHT_BUFFER_SIZE ];
 uniform bool lightsisdir[ $LIGHT_BUFFER_SIZE ];
+uniform vec4 lightstexindex[ $LIGHT_BUFFER_SIZE ];
 
 
 
@@ -235,15 +236,15 @@ void main(){
       // Convert to [0,1] range
       float u = (azimuth + 3.1416) / (2.0 * 3.1416);
       float v = elevation / PI;
-
       // u goes between 0 an d 1
 
-      // this is for an atlas based one
-      //float size = 0.25;
-      //float offset = 2;
-      //vec2 baseUV = vec2((u * size) + (size * offset), (v * size) + (size * offset));  // These are your texture coordinates
+      vec4 lightTex = lightstexindex[0];
 
-      vec2 baseUV = vec2(u, v);
+      vec2 baseUV = vec2((u * lightTex.z) + lightTex.x, (v * lightTex.w) + lightTex.y);  // These are your texture coordinates
+
+      //vec2 baseUV = lightstexindex[0].xy;
+
+      //vec2 baseUV = vec2(u, v);
       
 
       vec2 uv = baseUV; // + vec2(cos(time * 0.002), sin(time * 0.002));
