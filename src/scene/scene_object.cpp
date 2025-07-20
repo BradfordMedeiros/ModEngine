@@ -16,6 +16,7 @@ std::vector<LightInfo> getLightInfo(World& world){
       .transformMatrix = rotateMatrix,
       .light = *lightObject,
       .id = objectId,
+      .textureCoords = glm::vec4(0.f, 0.f, 0.25f, 0.25f),
     };
     lights.push_back(light);
   }

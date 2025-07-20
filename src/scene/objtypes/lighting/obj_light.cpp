@@ -66,7 +66,13 @@ std::vector<AutoSerialize> lightAutoserializer {
     .onString = "true",
     .offString = "false",
     .defaultValue = false,
-  },  
+  },
+  AutoSerializeString {
+    .structOffset = offsetof(GameObjectLight, texture),
+    .field = "texture",
+    .defaultValue = "",
+  },
+
 };
 
 GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){

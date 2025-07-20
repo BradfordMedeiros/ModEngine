@@ -8,6 +8,7 @@ struct LightInfo {
   glm::mat4 transformMatrix;
   GameObjectLight light;
   objid id;
+  glm::vec4 textureCoords;
 };
 std::vector<LightInfo> getLightInfo(World& world);
 int getLightsArrayIndex(std::vector<LightInfo>& lights, objid lightId);

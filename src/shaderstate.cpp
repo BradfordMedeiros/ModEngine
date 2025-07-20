@@ -156,7 +156,7 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
       shaderSetUniform(shader,  ("lightsangledelta[" + std::to_string(i) + "]").c_str(), light.light.angledelta);
       shaderSetUniformBool(shader,  ("lightsisdir[" + std::to_string(i) + "]").c_str(), light.light.type == LIGHT_DIRECTIONAL);
     
-      shaderSetUniform(shader, ("lightstexindex[" + std::to_string(i) + "]").c_str(), glm::vec4(0.f, 0.75f, 0.25f, 0.25f));
+      shaderSetUniform(shader, ("lightstexindex[" + std::to_string(i) + "]").c_str(), light.textureCoords);
     }    
 
 

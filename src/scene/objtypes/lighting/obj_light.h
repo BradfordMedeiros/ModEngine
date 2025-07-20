@@ -14,6 +14,7 @@ struct GameObjectLight {
   glm::vec3 attenuation;
   int voxelSize;
   bool disabled;
+  std::string texture;
 };
 
 GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util);
