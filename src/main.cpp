@@ -295,22 +295,6 @@ std::vector<std::string> listLightTextures(){
 
     "../gameresources/build/textures/clean/grass.jpg", 
     "../gameresources/build/textures/iguana.jpg", 
-
-    "../gameresources/build/textures/clean/metalgrid.jpg",
-    "../gameresources/build/textures/clean/foliage2.png",
-    "../gameresources/build/textures/clean/hardwood.jpg",
-
-    "../gameresources/build/textures/clean/stonydirt.jpg",
-    "../gameresources/build/textures/clean/metal_scifi.png",
-    "../gameresources/build/textures/clean/tex_Ice.jpg",
-
-    "../gameresources/build/textures/clean/stonewall.jpg",
-    "../gameresources/build/textures/metal_grating.jpg",
-    "../gameresources/build/textures/moonman.jpg",
-
-    "../gameresources/build/uncategorized/bluetransparent.png",
-    "../gameresources/build/textures/const_fence.png",
-
     "./res/textures/wood.jpg",
 
   };
