@@ -23,8 +23,11 @@ std::vector<LightInfo> getLightInfo(World& world){
 
     float width = 0.25f;
     float height = 0.25f;
-    int xIndex = lightTextureIndex % 4;
-    int yIndex = lightTextureIndex / 4;
+
+    int numImagesWide = calculateAtlasImageDimension(lightTextures.size());
+
+    int xIndex = lightTextureIndex % numImagesWide;
+    int yIndex = lightTextureIndex / numImagesWide;
 
     float xOffset = xIndex * width;
     float yOffset = yIndex * height;
