@@ -66,7 +66,7 @@ void initDefaultShader(unsigned int shader){
   setUniformData(shader, uniformData, { 
   	"ambientAmount", "bloomThreshold",
 	 	"bones[0]", "hasBones", "cameraPosition", "discardTexAmount", "emissionAmount", "enableAttenutation", "enableDiffuse",
-	 	"enableLighting", "enablePBR", "enableShadows", "enableSpecular", "visualizeVoxelLighting",
+	 	"enableLighting", "enableShadows", "enableSpecular", "visualizeVoxelLighting",
  		"model", "numlights", "shadowIntensity", "useBoneTransform",
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture", "lightTexture",
     "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscoord[0]", "lightscolor[0]", "lightsdir[0]", "lightsdirmat[0]", "lightsisdir[0]", "lightstexindex[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "voxelcellwidth", "voxelOffset", "defaultVoxelLight",
@@ -187,10 +187,6 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
   uniformData.push_back(UniformData {
     .name = "enableDiffuse",
     .value = state.enableDiffuse,
-  });
-  uniformData.push_back(UniformData {
-    .name = "enablePBR",
-    .value = state.enablePBR,
   });
   uniformData.push_back(UniformData {
     .name = "enableSpecular",

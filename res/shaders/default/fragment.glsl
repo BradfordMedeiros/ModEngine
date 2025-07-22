@@ -65,7 +65,6 @@ uniform bool enableAttenutation;
 uniform bool enableShadows;
 uniform bool enableDiffuse;
 uniform bool enableSpecular;
-uniform bool enablePBR;
 uniform bool visualizeVoxelLighting;
 
 uniform float shadowIntensity;
@@ -165,8 +164,6 @@ float calcAttenutation(int lightNumber){
 
 
 #include "./res/shaders/default/algorithms/phong.glsl"
-#include "./res/shaders/default/algorithms/cooktorrence.glsl"
-
 
 void main(){
     EncodeId = vec4(encodedid.x, encodedid.y, encodedid.z, encodedid.w);
@@ -220,7 +217,7 @@ void main(){
     bool hasLight = false;
 
     mat4 lightRot = mat4(1.f);
-    vec4 color  = enablePBR ? calculateCookTorrence(normal, texColor.rgb, 0.2, 0.5) : vec4(calculatePhongLight(normal, lightPosition, hasLight, visualizeVoxelLighting, lightRot), 1.0) * texColor;
+    vec4 color  =  vec4(calculatePhongLight(normal, lightPosition, hasLight, visualizeVoxelLighting, lightRot), 1.0) * texColor;
 
     vec4 lightTex = lightstexindex[0];
     if (hasLight && lightTex.x > -1){

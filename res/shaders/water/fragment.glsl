@@ -150,7 +150,6 @@ float calcAttenutation(int lightNumber){
 
 
 #include "./res/shaders/default/algorithms/phong.glsl"
-#include "./res/shaders/default/algorithms/cooktorrence.glsl"
 
 uniform float time;
 

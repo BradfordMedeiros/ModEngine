@@ -65,7 +65,6 @@ struct engineState {
 
   bool enableDiffuse;
   bool enableSpecular;
-  bool enablePBR;
   bool enableAttenuation;
   bool enableVoxelLighting;
   bool visualizeVoxelLightingCells;

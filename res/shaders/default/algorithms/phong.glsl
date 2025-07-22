@@ -1,4 +1,6 @@
 
+const float PI = 3.14159265359;
+
 vec3 calculatePhongLight(vec3 normal, out vec3 lightPos, out bool hasLight, bool visualizeLights, out mat4 lightRot){
   vec3 ambient = lookupAmbientLight();   
   vec3 totalDiffuse  = vec3(0, 0, 0);     

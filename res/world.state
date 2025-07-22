@@ -22,26 +22,25 @@ editor:showbones:false
 physics:enabled:true
 physics:debug:false
 
-world:paused:false  # true / false
+world:paused:true  # true / false
 
-diffuse:enabled:true
-specular:enabled:true
+#diffuse:enabled:false
+#specular:enabled:false
 bloom:enabled:false
 bloom:amount:20
 bloom:threshold:2
 bloomblur:amount:10
 #exposure:amount:0.8
-pbr:enabled:false
 shadows:enabled:false
 shadows:intensity:0.4
-attenuation:enabled:true
+#attenuation:enabled:false
 voxellighting:enabled:true
-#voxellighting:visualize:true
+voxellighting:visualize:true
 
 exposure:enabled:false
 gamma:enabled:false
 
-light:amount:0.6 0.6 0.6
+light:amount:0.2 0.2 0.2
 
 ###############################
 
