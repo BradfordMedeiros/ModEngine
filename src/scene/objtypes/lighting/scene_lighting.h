@@ -17,6 +17,7 @@ struct VoxelLightingData {
   int numCellsDim;
   std::vector<LightingCell> cells;
   int defaultLightIndex;
+  glm::vec3 offset;
 };  
 
 struct LightingUpdate {
@@ -34,5 +35,6 @@ void updateVoxelLightPosition(objid lightIndex, glm::vec3 position, int radius);
 
 VoxelLightingData& getVoxelLightingData();
 void setGlobalLight(objid);
+void setVoxelLighting(int voxelCellWidth, glm::vec3 worldOffset);
 
 #endif

@@ -102,7 +102,7 @@ int xyzToIndex(int x, int y, int z){
 ivec3 calcLightIndexValues(out bool outOfRange){
   outOfRange = false;
 
-  vec3 voxelSamplingPosition = FragPos;
+  vec3 voxelSamplingPosition = FragPos + voxelOffset;
   float newValueXFloat = convertBase(voxelSamplingPosition.x, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
   int newValueX = int(newValueXFloat);
   if (newValueXFloat >= numCellsDim || newValueXFloat < 0){

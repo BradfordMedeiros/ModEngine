@@ -163,6 +163,7 @@ struct CustomApiBindings {
 
   VoxelLightingData& (*getVoxelLightingData)();
   void (*setGlobalLight)(objid);
+  void (*setVoxelLighting)(int voxelCellWidth, glm::vec3 worldOffset);
   std::vector<TagInfo> (*getTag)(int tag, glm::vec3 position);
   std::vector<TagInfo> (*getAllTags)(int tag);
   std::optional<OctreeMaterial> (*getMaterial)(glm::vec3 position);

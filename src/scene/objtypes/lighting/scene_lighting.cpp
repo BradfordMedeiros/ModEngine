@@ -55,6 +55,7 @@ VoxelLightingData lightingData {
   .numCellsDim = numCellsDim,
   .cells = generateLightingCells(numCellsDim),  // this is hardcoded in the shader
   .defaultLightIndex = 0,
+  .offset = glm::vec3(0.f, 0.f, 0.f),
 };
 
 std::string printDebugVoxelLighting(){
@@ -186,4 +187,9 @@ VoxelLightingData& getVoxelLightingData(){
 
 void setGlobalLight(objid id){
 	getVoxelLightingData().defaultLightIndex = id;
+}
+
+void setVoxelLighting(int voxelCellWidth, glm::vec3 worldOffset){
+	getVoxelLightingData().voxelCellWidth = voxelCellWidth;
+	getVoxelLightingData().offset = worldOffset;
 }

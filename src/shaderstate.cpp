@@ -69,7 +69,7 @@ void initDefaultShader(unsigned int shader){
 	 	"enableLighting", "enablePBR", "enableShadows", "enableSpecular", "visualizeVoxelLighting",
  		"model", "numlights", "shadowIntensity", "useBoneTransform",
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture", "lightTexture",
-    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscoord[0]", "lightscolor[0]", "lightsdir[0]", "lightsdirmat[0]", "lightsisdir[0]", "lightstexindex[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "voxelcellwidth", "defaultVoxelLight",
+    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscoord[0]", "lightscolor[0]", "lightsdir[0]", "lightsdirmat[0]", "lightsisdir[0]", "lightstexindex[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "voxelcellwidth", "voxelOffset", "defaultVoxelLight",
     "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview", "realtime", "time", 
 
     "encodedid", "textureid",
@@ -134,9 +134,6 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
       modlog("shaderstate light updates num = ", std::to_string(numUpdates));
     }
 
-  
-    shaderSetUniformInt(shader, "voxelcellwidth", getLightingCellWidth());
-
     for (int i = 0; i < lights.size(); i++){
       glm::vec3 position = lights.at(i).transform.position;
       auto& light = lights.at(i); 
@@ -159,12 +156,17 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
       shaderSetUniform(shader, ("lightstexindex[" + std::to_string(i) + "]").c_str(), light.textureCoords);
     }    
 
-
     uniformData.push_back(UniformData { 
       .name = "numlights", 
       .value = static_cast<int>(lights.size()) 
     });
 
+    shaderSetUniformInt(shader, "voxelcellwidth", getLightingCellWidth());
+    
+    uniformData.push_back(UniformData { 
+      .name = "voxelOffset", 
+      .value = getVoxelLightingData().offset,
+    });
 
   }
 
@@ -236,7 +238,7 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
     "textureid", "bones[0]", "encodedid", "hasBones", "model", "discardTexAmount", 
     "emissionAmount", 
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture",
-    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscoord[0]", "lightscolor[0]", "lightsdir[0]", "lightsdirmat[0]", "lightsisdir[0]", "lightstexindex[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth",
+    "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscoord[0]", "lightscolor[0]", "lightsdir[0]", "lightsdirmat[0]", "lightsisdir[0]", "lightstexindex[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth", "voxelOffset",
     "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview",
 
     "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture", "lightTexture",
