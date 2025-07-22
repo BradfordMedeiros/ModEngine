@@ -62,6 +62,28 @@ int getLightsArrayIndex(std::vector<LightInfo>& lights, objid lightId){
   return -1;
 }
 
+void recalculateLighting(World& world){
+  std::vector<LightUpdate> updates;
+  updates.push_back(LightUpdate{
+    .lightIndex = 0,
+    .position = glm::vec3(0.f, 0.f, 0.f),
+    .radius = 2,
+  });
+
+  auto lightIndexs = getAllLightsIndexs(world.objectMapping);
+  for (auto id : lightIndexs){
+    auto lightObject = getLight(world.objectMapping, id);
+    auto lightTransform = fullTransformation(world.sandbox, id, "recalculateLighting");
+    updates.push_back(LightUpdate{
+      .lightIndex = id,
+      .position = lightTransform.position,
+      .radius = lightObject -> voxelSize,
+    });
+  }
+
+  recalculateLights(updates);
+}
+
 
 std::optional<PortalInfo> getPortalInfo(World& world, objid id){
   auto portalObject = getPortal(world.objectMapping, id);

@@ -68,17 +68,17 @@ std::string printDebugVoxelLighting(){
 
 std::optional<int> lightingPositionToIndex(glm::vec3 position, glm::ivec3 offset){
 	auto x = offset.x + static_cast<int>(convertBase(
-		position.x, 
+		position.x + (1 * lightingData.offset.x), 
 		lightingData.voxelCellWidth * numCellsDim * -0.5, lightingData.voxelCellWidth * numCellsDim * 0.5, 
 		0, numCellsDim
 	));
 	auto y = offset.y + static_cast<int>(convertBase(
-		position.y, 
+		position.y + (1 * lightingData.offset.y), 
 		lightingData.voxelCellWidth * numCellsDim * -0.5, lightingData.voxelCellWidth * numCellsDim * 0.5, 
 		0, numCellsDim
 	));
 	auto z = offset.z + static_cast<int>(convertBase(
-		position.z, 
+		position.z + (1 * lightingData.offset.z), 
 		lightingData.voxelCellWidth * numCellsDim * -0.5, lightingData.voxelCellWidth * numCellsDim * 0.5, 
 		0, numCellsDim
 	));
@@ -150,6 +150,13 @@ void updateVoxelLightPosition(objid lightIndex, glm::vec3 position, int radius){
 	//modlog("update voxel light position", print(position));
 	removeVoxelLight(lightIndex, false);
 	addVoxelLight(lightIndex, position, radius);
+}
+
+void recalculateLights(std::vector<LightUpdate>& allUpdates){
+	lightingData.cells = generateLightingCells(numCellsDim);
+	for (auto &update : allUpdates){
+		addVoxelLight(update.lightIndex, update.position, update.radius);
+	}
 }
 
 int getLightingCellWidth(){

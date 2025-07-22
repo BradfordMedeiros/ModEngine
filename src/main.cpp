@@ -296,6 +296,7 @@ std::vector<std::string> listLightTextures(){
     "../gameresources/build/textures/clean/grass.jpg", 
     "../gameresources/build/textures/iguana.jpg", 
     "./res/textures/wood.jpg",
+    "../gameresources/textures/backgrounds/test3.png",
 
   };
   return lightTextures; 
@@ -1037,6 +1038,12 @@ bool textureLoaded(std::string& texturepath){
   return textureLoaded(world, texturepath);
 }
 
+void setVoxelLighting2(int voxelCellWidth, glm::vec3 worldOffset){
+  setVoxelLighting(voxelCellWidth, worldOffset);
+  recalculateLighting(world);
+}
+
+
 void onGLFWEerror(int error, const char* description){
   std::cerr << "Error: " << description << std::endl;
 }
@@ -1639,7 +1646,7 @@ int main(int argc, char* argv[]){
 
     .getVoxelLightingData = getVoxelLightingData,
     .setGlobalLight = setGlobalLight,
-    .setVoxelLighting = setVoxelLighting,
+    .setVoxelLighting = setVoxelLighting2,
     .getTag = getTag,
     .getAllTags = getAllTags,
     .getMaterial = getMaterial,

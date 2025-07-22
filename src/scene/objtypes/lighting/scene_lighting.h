@@ -33,6 +33,13 @@ void addVoxelLight(objid lightIndex, glm::vec3 position, int radius);
 void removeVoxelLight(objid lightIndex, bool removeDefaultLight);
 void updateVoxelLightPosition(objid lightIndex, glm::vec3 position, int radius);
 
+struct LightUpdate { 
+  objid lightIndex;
+  glm::vec3 position;
+  int radius;
+};
+void recalculateLights(std::vector<LightUpdate>& allUpdates);
+
 VoxelLightingData& getVoxelLightingData();
 void setGlobalLight(objid);
 void setVoxelLighting(int voxelCellWidth, glm::vec3 worldOffset);

@@ -12,6 +12,7 @@ struct LightInfo {
 };
 std::vector<LightInfo> getLightInfo(World& world);
 int getLightsArrayIndex(std::vector<LightInfo>& lights, objid lightId);
+void recalculateLighting(World& world);
 
 struct PortalInfo {
   Transformation cameraTransform;
@@ -73,5 +74,6 @@ std::vector<TagInfo> getTag(World& world, int tag, glm::vec3 position);
 std::vector<TagInfo> getAllTags(World& world, int tag);
 GameObjectOctree* getMainOctree(World& world, objid* id);
 std::optional<OctreeMaterial> getMaterial(World& world, glm::vec3 position);
+
 
 #endif
