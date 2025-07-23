@@ -96,10 +96,14 @@ vec3 calculatePhongLight(vec3 normal, out vec3 lightPos, out bool hasLight, bool
     bool outOfRange = false;
     ivec3 indexs = calcLightIndexValues(outOfRange);
     int sum = indexs.x + indexs.y + indexs.z;
+
+    if (hasLight){
+      return vec3(1, 0, 0);
+    }
     if ((sum & 1) == 0) {
-        return vec3(color.r, color.g + 0.5, color.b + 0.5); // Light red
+        return vec3(color.r, color.g + 0.5, color.b + 0.5);
     } else {
-        return vec3(color.r + 0.5, color.g + 0.5, color.b); // Light blue
+        return vec3(color.r + 0.5, color.g + 0.5, color.b);
     }
   }
   return color;

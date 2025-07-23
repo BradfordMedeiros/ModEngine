@@ -2054,6 +2054,7 @@ int main(int argc, char* argv[]){
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
 
+    getVoxelLightingData().needsUpdate = {};
 
     SelectionResult uiSelectionResult{};
     PROFILE("SELECTION",

@@ -2,11 +2,11 @@
 
 extern int currentTick;
 
-//int voxelCellWidth = 4;
-//int numCellsDim = 128;
+int voxelCellWidth = 4;
+int numCellsDim = 128;
 
-int voxelCellWidth = 16;
-int numCellsDim = 8;
+//int voxelCellWidth = 16;
+//int numCellsDim = 8;
 
 int xyzToIndex(int x , int y, int z){
 	return x + (numCellsDim * y) + (numCellsDim * numCellsDim * z);
@@ -19,7 +19,6 @@ std::vector<LightingCell> generateLightingCells(int size, int lightIndex = -1){
       for (int z = 0; z < size; z++){
       	cells.push_back(LightingCell {
           .lightIndex = lightIndex,
-          .needsUpdateFrame = currentTick,
         });
       }
     }
@@ -38,19 +37,30 @@ std::vector<LightingCell> generateLightingCellsDebug(int size){
   		auto farIndex = xyzToIndex(x, y, (size - 1));
   		cells.at(nearIndex).lightIndex = -2;
    		cells.at(farIndex).lightIndex = -2;
-   		cells.at(farIndex).needsUpdateFrame = currentTick;
   	}
   	for (int z = 0; z < size ; z++){
   		auto nearIndex = xyzToIndex(0, y, z);
    		auto farIndex = xyzToIndex((size - 1), y, z);
   		cells.at(nearIndex).lightIndex = -2;
    		cells.at(farIndex).lightIndex = -2;
-   		cells.at(farIndex).needsUpdateFrame = currentTick;
   	}
   }
   return cells;
 }
 
+std::set<objid> allCells(int size){
+	std::set<objid> ids;
+	int index = 0;
+  for (int x = 0; x < size; x++){
+    for (int y = 0; y < size; y++){
+      for (int z = 0; z < size; z++){
+      	ids.insert(index);
+      	index++;
+      }
+    }
+  }
+  return ids;
+}
 
 VoxelLightingData lightingData {
 	.lightsPerVoxel = 1,
@@ -59,6 +69,8 @@ VoxelLightingData lightingData {
   .cells = generateLightingCells(numCellsDim),  // this is hardcoded in the shader
   .defaultLightIndex = 0,
   .offset = glm::vec3(0.f, 0.f, 0.f),
+  .lastLightPosition = {},
+  .needsUpdate = allCells(numCellsDim),
 };
 
 std::string printDebugVoxelLighting(){
@@ -125,8 +137,8 @@ void addVoxelLight(objid lightIndex, glm::vec3 position, int requestedRadius){
 				modassert(index >= 0 && index < lightingData.cells.size(), std::string("Invalid light index, got = ") + std::to_string(index));
 				lightingData.cells.at(index) = LightingCell {
 					.lightIndex = lightIndex,
-					.needsUpdateFrame = currentTick,
 				};
+				lightingData.needsUpdate.insert(index);
 			}
 		}
 	}
@@ -141,7 +153,7 @@ void removeVoxelLight(objid lightIndex, bool removeDefaultLight){
 		LightingCell& cell = lightingData.cells.at(i);
 		if (cell.lightIndex == lightIndex){
 			cell.lightIndex = -1;
-			cell.needsUpdateFrame = currentTick;
+			lightingData.needsUpdate.insert(i);
 		}
 	}
 	if (removeDefaultLight && lightingData.defaultLightIndex == lightIndex){
@@ -192,18 +204,14 @@ int getLightingNumCellsTotal(){
 
 // should make not update all lights every frame only those that change
 std::vector<LightingUpdate> getLightUpdates(){
-	//modlog("voxel lighting updates size = : ", std::to_string(lightingData.cells.size()));
-
   std::vector<LightingUpdate> lightUpdates;
-  for (int i = 0; i < lightingData.cells.size(); i++){
-  	LightingCell& lightingCell = lightingData.cells.at(i);
-  	if (lightingCell.needsUpdateFrame >=  currentTick){
-    	lightUpdates.push_back(LightingUpdate {
-    	  .index = i,
-    	  .lightIndex = lightingCell.lightIndex,
-    	});
-  	}
-  }
+	for (auto cellIndex : lightingData.needsUpdate){
+  	LightingCell& lightingCell = lightingData.cells.at(cellIndex);
+    lightUpdates.push_back(LightingUpdate {
+     	.index = cellIndex,
+     	.lightIndex = lightingCell.lightIndex,
+    });
+	}
   return lightUpdates;
 }
 
