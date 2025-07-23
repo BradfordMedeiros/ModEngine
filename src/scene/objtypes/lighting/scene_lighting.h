@@ -18,6 +18,8 @@ struct VoxelLightingData {
   std::vector<LightingCell> cells;
   int defaultLightIndex;
   glm::vec3 offset;
+
+  std::unordered_map<objid, glm::vec3> lastLightPosition;  
 };  
 
 struct LightingUpdate {

@@ -2,6 +2,9 @@
 
 extern int currentTick;
 
+//int voxelCellWidth = 4;
+//int numCellsDim = 128;
+
 int voxelCellWidth = 16;
 int numCellsDim = 8;
 
@@ -68,17 +71,17 @@ std::string printDebugVoxelLighting(){
 
 std::optional<int> lightingPositionToIndex(glm::vec3 position, glm::ivec3 offset){
 	auto x = offset.x + static_cast<int>(convertBase(
-		position.x + (1 * lightingData.offset.x), 
+		position.x + lightingData.offset.x, 
 		lightingData.voxelCellWidth * numCellsDim * -0.5, lightingData.voxelCellWidth * numCellsDim * 0.5, 
 		0, numCellsDim
 	));
 	auto y = offset.y + static_cast<int>(convertBase(
-		position.y + (1 * lightingData.offset.y), 
+		position.y + lightingData.offset.y, 
 		lightingData.voxelCellWidth * numCellsDim * -0.5, lightingData.voxelCellWidth * numCellsDim * 0.5, 
 		0, numCellsDim
 	));
 	auto z = offset.z + static_cast<int>(convertBase(
-		position.z + (1 * lightingData.offset.z), 
+		position.z + lightingData.offset.z, 
 		lightingData.voxelCellWidth * numCellsDim * -0.5, lightingData.voxelCellWidth * numCellsDim * 0.5, 
 		0, numCellsDim
 	));
@@ -98,6 +101,7 @@ std::optional<int> lightingPositionToIndex(glm::vec3 position, glm::ivec3 offset
 }
 
 void addVoxelLight(objid lightIndex, glm::vec3 position, int requestedRadius){
+	lightingData.lastLightPosition[lightIndex] = position;
 	if (lightIndex == lightingData.defaultLightIndex){
 		return;
 	}
@@ -130,6 +134,8 @@ void addVoxelLight(objid lightIndex, glm::vec3 position, int requestedRadius){
 	//std::cout << "voxel lighting lighting data: " << print(printDebugVoxelLighting()) << std::endl;
 }
 void removeVoxelLight(objid lightIndex, bool removeDefaultLight){
+	lightingData.lastLightPosition.erase(lightIndex);
+
 	modlog("voxel lighting remove: ", std::to_string(lightIndex));
 	for (int i = 0 ; i < lightingData.cells.size(); i++){
 		LightingCell& cell = lightingData.cells.at(i);
@@ -147,7 +153,20 @@ void removeVoxelLight(objid lightIndex, bool removeDefaultLight){
 // obviously this could be more efficient
 // eg could keep a mapping of cell ids to shortcut to them
 void updateVoxelLightPosition(objid lightIndex, glm::vec3 position, int radius){
-	//modlog("update voxel light position", print(position));
+
+	// This is necessary because eg the light can rotate or sway. 
+	// Expensive still if it's going to move out of the cell it is in originally.
+	// Theoretically could bring down the cost eg if move by one cell, imagine a swinging light, but not sure I have that use case
+	if (lightingData.lastLightPosition.find(lightIndex) != lightingData.lastLightPosition.end()){
+		auto oldPosition = lightingData.lastLightPosition.at(lightIndex);
+		auto oldIndex = lightingPositionToIndex(oldPosition, glm::ivec3(0.f, 0.f, 0.f));
+		auto newIndex = lightingPositionToIndex(position, glm::ivec3(0.f, 0.f, 0.f));
+		if (oldIndex == newIndex){
+			return; 
+		}
+	}
+
+	modlog("update voxel light position", std::to_string(lightIndex) + ", " + print(position));
 	removeVoxelLight(lightIndex, false);
 	addVoxelLight(lightIndex, position, radius);
 }
