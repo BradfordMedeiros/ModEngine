@@ -141,7 +141,12 @@ unsigned int* loadShaderIntoCache(std::string shaderString, std::string vertexSh
     .vertexShader = vertexShaderFilepath,
     .fragmentShader = fragmentShaderFilepath,
   };
-  modlog("loading shader into cache", shaderString + std::string(" ") + std::to_string(shaderId));
+
+  std::ostringstream oss;
+  unsigned int* ptr = &shaderstringToId.at(shaderString).programId;
+  oss << ptr;
+  std::string addr = oss.str();
+  modlog("loading shader into cache", shaderString + std::string(" ") + addr);
   return &shaderstringToId.at(shaderString).programId;
 }
 
@@ -153,6 +158,13 @@ void reloadShaders(std::function<std::string(std::string)> readFile, std::unorde
       glDeleteProgram(shaderInfo.programId);
       shaderInfo.programId = shaderId.value();
     }
+
+    std::ostringstream oss;
+    unsigned int* ptr = &shaderstringToId.at(shaderString).programId;
+    oss << ptr;
+    std::string addr = oss.str();
+    modlog("reloading shader into cache", shaderString + std::string(" ")  + addr);
+
   }
 }
 
@@ -185,7 +197,7 @@ ShaderStringVals parseShaderString(std::string& shaderString){
   };
 }
 
-unsigned int getShaderByShaderString(std::string& shaderString, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile, std::function<std::unordered_map<std::string, std::string>&()> getArgs, bool* loadedNewShader){
+unsigned int* getShaderByShaderString(std::string& shaderString, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile, std::function<std::unordered_map<std::string, std::string>&()> getArgs, bool* loadedNewShader){
   modassert(shaderString.size() != 0, "getShaderByShaderString shader string size is 0");
   if (loadedNewShader){
     *loadedNewShader = false;
@@ -200,7 +212,7 @@ unsigned int getShaderByShaderString(std::string& shaderString, std::string& sha
       *loadedNewShader = true;
     }
   }
-  return shaderstringToId.at(shaderString).programId;
+  return &shaderstringToId.at(shaderString).programId;
 }
 
 std::optional<unsigned int> shaderByName(std::string name){

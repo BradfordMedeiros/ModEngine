@@ -61,8 +61,9 @@ glm::mat4 view;
 glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);  
 
 struct ShaderToUpdate {
-  unsigned int shader; // shouldnt this be a pointer if reload? 
+  unsigned int* shader; // TODO reload shouldnt this be a pointer if reload? 
   bool isUiShader;
+  std::string name;
 };
 std::vector<ShaderToUpdate> extraShadersToUpdate; // TODO STATIC get rid of this, but useful given at render shader loading
 std::unordered_map<unsigned int, std::vector<ShaderTextureBinding>> textureBindings; 
@@ -500,8 +501,8 @@ Texture getWaterTexture(){
   return world.textures.at(resources::TEXTURE_WATER).texture;
 }
 
-int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
-  glUseProgram(shaderProgram);
+int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
+  glUseProgram(*shaderProgram);
   int numTriangles = 0;
 
   auto viewFrustum = cameraToViewFrustum(world.sandbox.layers.at(0), state.viewportSize);
@@ -559,12 +560,14 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
         }
 
         bool loadedNewShader = false;
-        auto newShader = (shader == "" || !allowShaderOverride) ? shaderProgram : getShaderByShaderString(shader, shaderFolderPath, interface.readFile, getTemplateValues, &loadedNewShader);
+        auto newShaderPtr = (shader == "" || !allowShaderOverride) ? shaderProgram : getShaderByShaderString(shader, shaderFolderPath, interface.readFile, getTemplateValues, &loadedNewShader);
+        auto newShader = *newShaderPtr;
         if (loadedNewShader){
           auto isUiShader = checkIfUiShader(shader);
           extraShadersToUpdate.push_back(ShaderToUpdate {
-            .shader = newShader,
+            .shader = newShaderPtr,
             .isUiShader = checkIfUiShader(shader),
+            .name = shader,
           });
           if(isUiShader){
             initUiShader(newShader);
@@ -903,7 +906,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     if (renderStep.renderWorld){
       // important - redundant call to glUseProgram
       glm::mat4* projection = context.projection.has_value() ? &context.projection.value() : NULL;
-      auto worldTriangles = renderWorld(world, *renderStep.shader, renderStep.allowShaderOverride, projection, context.view, context.portals, renderStep.textBoundingOnly);
+      auto worldTriangles = renderWorld(world, renderStep.shader, renderStep.allowShaderOverride, projection, context.view, context.portals, renderStep.textBoundingOnly);
       triangles += worldTriangles;
     }
 
@@ -1512,8 +1515,9 @@ int main(int argc, char* argv[]){
 
       auto isUiShader = checkIfUiShader(name);
       extraShadersToUpdate.push_back(ShaderToUpdate {
-        .shader = *shader,
+        .shader = shader,
         .isUiShader = isUiShader,
+        .name = name,
       });
       if (isUiShader){
         initUiShader(*shader);
@@ -1526,7 +1530,7 @@ int main(int argc, char* argv[]){
     .unloadShader = [](unsigned int shader){
       std::vector<ShaderToUpdate> remainingsShaders;
       for (auto &shaderToUpdate : extraShadersToUpdate){
-        if (shaderToUpdate.shader == shader){
+        if (*shaderToUpdate.shader == shader){
           continue;
         }
         remainingsShaders.push_back(shaderToUpdate);
@@ -1878,7 +1882,16 @@ int main(int argc, char* argv[]){
     registerStatistics();
     if (shouldReloadShaders && ((getTotalTime() - lastReloadTime) > 5.f)){
       reloadShaders(interface.readFile, getTemplateValues());
+      
+      initDefaultShader(*shaderProgram);
+      initFramebufferShader(*renderingResources.framebufferProgram);
+      initDepthShader(*depthProgram);
+      initUiShader(*renderingResources.uiShaderProgram);
+      initSelectionShader(*selectionProgram);
+      initBlurShader(*blurProgram);
+
       lastReloadTime = getTotalTime();
+
     }
 
     for (auto &idCoordToGet : idCoordsToGet){
@@ -2027,17 +2040,23 @@ int main(int argc, char* argv[]){
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
     std::vector<glm::mat4> lightMatrixs = calcShadowMapViews(lights);
-
+    
+    std::cout << "updateDefaultShaderPerFrame: main" << std::endl;
     updateDefaultShaderPerFrame(*mainShaders.shaderProgram, lights, false, viewTransform.position, lightMatrixs);
     modlog("shader to update size", std::to_string(extraShadersToUpdate.size()));
     for (auto shader : extraShadersToUpdate){
       if (shader.isUiShader){
-        updateUiShaderPerFrame(shader.shader);
+        updateUiShaderPerFrame(*shader.shader);
       }else{
-        updateDefaultShaderPerFrame(shader.shader, lights, false, viewTransform.position, lightMatrixs);
+        std::cout << "updateDefaultShaderPerFrame2 extraShadersToUpdate: " << shader.name << std::endl;
+        updateDefaultShaderPerFrame(*shader.shader, lights, false, viewTransform.position, lightMatrixs);
       }
     }
+
+    std::cout << "updateDefaultShaderPerFrame: selection" << std::endl;
     updateSelectionShaderPerFrame(*mainShaders.selectionProgram, lights, viewTransform.position, lightMatrixs);
+
+    std::cout << "updateDefaultShaderPerFrame: ui" << std::endl;
     updateUiShaderPerFrame(*renderingResources.uiShaderProgram);
 
 

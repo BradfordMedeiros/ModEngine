@@ -204,6 +204,7 @@ int getLightingNumCellsTotal(){
 
 // should make not update all lights every frame only those that change
 std::vector<LightingUpdate> getLightUpdates(){
+	//modlog("voxel lighting updates size = : ", std::to_string(lightingData.cells.size()));
   std::vector<LightingUpdate> lightUpdates;
 	for (auto cellIndex : lightingData.needsUpdate){
   	LightingCell& lightingCell = lightingData.cells.at(cellIndex);
