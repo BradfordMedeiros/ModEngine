@@ -150,13 +150,25 @@ unsigned int* loadShaderIntoCache(std::string shaderString, std::string vertexSh
   return &shaderstringToId.at(shaderString).programId;
 }
 
+std::vector<UniformData> queryUniforms(unsigned int program);
+
 void reloadShaders(std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args){
   modlog("shaders", "reloading");
   for (auto &[shaderString, shaderInfo] : shaderstringToId){
+    auto uniforms = queryUniforms(shaderInfo.programId);
+
     auto shaderId = loadShader(shaderInfo.vertexShader, shaderInfo.fragmentShader, readFile, args);
+
+
     if (shaderId.has_value()){
       glDeleteProgram(shaderInfo.programId);
       shaderInfo.programId = shaderId.value();
+    }
+
+    std::cout << "reloading: " << shaderString << std::endl;
+    for (auto &uniform : uniforms){
+      std::cout << "reloading uniform name = " << uniform.name << std::endl;
+      setUniformData(*shaderId, uniform);
     }
 
     std::ostringstream oss;
@@ -164,6 +176,8 @@ void reloadShaders(std::function<std::string(std::string)> readFile, std::unorde
     oss << ptr;
     std::string addr = oss.str();
     modlog("reloading shader into cache", shaderString + std::string(" ")  + addr);
+
+
 
   }
 }

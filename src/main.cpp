@@ -1883,13 +1883,6 @@ int main(int argc, char* argv[]){
     if (shouldReloadShaders && ((getTotalTime() - lastReloadTime) > 5.f)){
       reloadShaders(interface.readFile, getTemplateValues());
       
-      initDefaultShader(*shaderProgram);
-      initFramebufferShader(*renderingResources.framebufferProgram);
-      initDepthShader(*depthProgram);
-      initUiShader(*renderingResources.uiShaderProgram);
-      initSelectionShader(*selectionProgram);
-      initBlurShader(*blurProgram);
-
       lastReloadTime = getTotalTime();
 
     }
