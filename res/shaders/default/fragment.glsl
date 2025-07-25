@@ -101,7 +101,7 @@ int xyzToIndex(int x, int y, int z){
 ivec3 calcLightIndexValues(out bool outOfRange){
   outOfRange = false;
 
-  vec3 voxelSamplingPosition = FragPos + voxelOffset;
+  vec3 voxelSamplingPosition = FragPos + voxelOffset + (normalize(Normal) * 0.0001);  // this bias is so things aligned to the edge sample the interior they are facing.
   float newValueXFloat = convertBase(voxelSamplingPosition.x, voxelcellwidth * numCellsDim * -0.5, voxelcellwidth * numCellsDim * 0.5, 0, numCellsDim);
   int newValueX = int(newValueXFloat);
   if (newValueXFloat >= numCellsDim || newValueXFloat < 0){

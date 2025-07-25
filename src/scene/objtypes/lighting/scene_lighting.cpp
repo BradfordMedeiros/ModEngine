@@ -2,7 +2,7 @@
 
 extern int currentTick;
 
-int voxelCellWidth = 4;
+int voxelCellWidth = 8;
 int numCellsDim = 128;
 
 //int voxelCellWidth = 16;
