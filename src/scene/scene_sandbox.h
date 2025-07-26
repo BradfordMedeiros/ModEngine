@@ -24,7 +24,12 @@ struct GameObjectH {
   std::optional<objid> prefabId;
 
   int updateFrame = -1;
+  
   int updateAbsoluteFrame = -1;
+  int updateAbsolutePosition = -1;
+  int updateAbsoluteScale = -1;
+  int updateAbsoluteRotation = -1;
+
 };
 
 struct TransformCacheElement {

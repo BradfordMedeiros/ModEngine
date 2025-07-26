@@ -1,6 +1,6 @@
 #include "./scene_sandbox.h"
 
-const bool enableTransformLogging = false;
+const bool enableTransformLogging = true;
 bool transformLoggingEnabled(){
   return enableTransformLogging;
 }
@@ -625,13 +625,50 @@ void updateNodes(SceneSandbox& sandbox, int directIndex){
     if (objh.updateFrame == currentFrameTick){
       continue;
     }
+
+    // This is wrong because the absolute update rotation will preserve the old location
+    // set setAbsoluteRotation inherits the old location
     bool isAbsoluteUpdate = objh.updateAbsoluteFrame == currentFrameTick;
     auto& gameobj = getGameObjectDirectIndex(sandbox, directIndex);
 
+    bool isRotationUpdate = objh.updateAbsoluteRotation == currentFrameTick;
+    bool isScaleUpdate = objh.updateAbsoluteScale == currentFrameTick;
+    bool isPositionUpdate = objh.updateAbsolutePosition == currentFrameTick;
+    bool fullTransformUpdate = isRotationUpdate && isScaleUpdate && isPositionUpdate;
     if (isAbsoluteUpdate){
+
       numAbsolute++;
-      auto oldRelativeTransform = calcRelativeTransform(sandbox, idToVisit);
-      gameobj.transformation = oldRelativeTransform;
+
+      if (fullTransformUpdate){
+        auto oldRelativeTransform = calcRelativeTransform(sandbox, idToVisit);
+        gameobj.transformation = oldRelativeTransform;   
+      }else {
+        // Conceptually
+        // Calculate new absolute values based upon the relative
+        // Then apply the absolute locations based upon the the new updated abs values only for relevant update type
+        // Then save the new absolute update
+        // and then restore the relevative location
+        auto parentDirectIndex = objh.parentDirectIndex;
+        auto newTransform = parentId == 0 ? gameobj.transformation : calcAbsoluteTransformDirectIndex(sandbox, parentDirectIndex, gameobj.transformation);
+        auto absoluteTransformNew = getAbsoluteByDirectIndex(sandbox, directIndex);
+
+        if (isRotationUpdate){
+          newTransform.rotation = absoluteTransformNew.transform.rotation;
+        }
+        if (isScaleUpdate){
+          newTransform.scale = absoluteTransformNew.transform.scale;
+        }
+        if (isPositionUpdate){
+          newTransform.position = absoluteTransformNew.transform.position;
+        }
+
+        sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform.transform = newTransform;
+        sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform.matrix = matrixFromComponents(newTransform);
+
+        auto oldRelativeTransform = calcRelativeTransform(sandbox, idToVisit);
+        gameobj.transformation = oldRelativeTransform;   
+      }
+
     }else{
       numRelative++;
       auto parentDirectIndex = objh.parentDirectIndex;
@@ -640,6 +677,7 @@ void updateNodes(SceneSandbox& sandbox, int directIndex){
       sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform.matrix = matrixFromComponents(newTransform);
     }
     objh.updateFrame = currentFrameTick;
+
 
     for (int childDirectIndex : objh.childrenDirectIndex){
       idsToVisit.push(childDirectIndex);
@@ -731,7 +769,29 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
 
     if (!update.relative){
       gameobjh.updateAbsoluteFrame = currentFrameTick;
+
+      if (update.hasPosition){
+        gameobjh.updateAbsolutePosition = currentFrameTick;
+      }
+      if (update.hasScale){
+        gameobjh.updateAbsoluteScale = currentFrameTick;
+      }
+      if (update.hasRotation){
+        gameobjh.updateAbsoluteRotation = currentFrameTick;
+      }
     }
+  }
+
+  {
+    std::cout << "------------------updatedebug------------------: " << std::endl;
+    std::set<objid> alreadyUpdated;
+    for (auto &update : updates){
+      if (alreadyUpdated.count(update.id) > 0){
+        std::cout << "updatedebug: " << update.id << " - " << getGameObject(sandbox, update.id).name << std::endl;
+      }
+      alreadyUpdated.insert(update.id);
+    }
+    std::cout << "------------------updatedebug------------------: " << std::endl;
   }
 
   {
@@ -867,7 +927,7 @@ glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id, const char* hint){
 }
 glm::mat4 fullModelTransformDirect(SceneSandbox& sandbox, objid directIndex, const char* hint){
   if (enableTransformLogging){
-    modassert(false, "enableTransformLogging not implemented for fullModelTransformDirect");
+    //modassert(false, "enableTransformLogging not implemented for fullModelTransformDirect");
     //bool indirect = false;
     //auto stale = isStale(sandbox, id, &indirect);
     //std::cout << inColor("hint - readTransform", CONSOLE_COLOR_GREEN) << ": [" << id << ", " << inColor(getGameObject(sandbox, id).name, CONSOLE_COLOR_BLUE) << "]" " " << (hint ? hint : "[no hint]") << (stale ? inColor("  WARNING - STALE READ", CONSOLE_COLOR_RED) : "") << ((stale && indirect) ? inColor(" - INDIRECT ", CONSOLE_COLOR_RED) : "") << std::endl;
@@ -1095,7 +1155,7 @@ void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation,
     .hint = hint,
   };
   updateValue.hasRotation = true;
-  updateValue.transform.rotation = rotation;;
+  updateValue.transform.rotation = rotation;
   updates.push_back(updateValue);    
 }
 void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation, Hint hint){
