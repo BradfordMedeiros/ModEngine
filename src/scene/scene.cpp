@@ -1683,10 +1683,6 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       updateObjectPositions(world.objectMapping, id, absolutePosition, viewTransform);      
     }
   }
-  for (auto &[id, videoObj] : world.objectMapping.video){
-    onVideoObjFrame(videoObj, timeElapsed, viewTransform);
-  }
-
 
   for (auto id : world.entitiesToUpdate){
     if (id == getGroupId(world.sandbox, id)){ // why? 
@@ -1695,9 +1691,13 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   }
 
 
+  world.entitiesToUpdate.clear();
+
   updateBonesForAnimation(world);
 
-  world.entitiesToUpdate.clear();
+  for (auto &[id, videoObj] : world.objectMapping.video){
+    onVideoObjFrame(videoObj, timeElapsed, viewTransform);
+  }
 
   if (showVisualizations){
     // move this into on object frame

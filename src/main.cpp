@@ -1929,8 +1929,18 @@ int main(int argc, char* argv[]){
       setVolume(state.muteSound ? 0.f : state.volume);
     }
 
+
+    if (state.enablePhysicsDebug){
+      debuggerDrawer -> setDebugMode(0);
+    }
+
     onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, state.enablePhysics, state.worldpaused, viewTransform, state.inputMode == ENABLED);
     cBindings.onFrameAfterUpdate();
+    
+    if (state.enablePhysicsDebug){
+      debuggerDrawer -> setDebugMode(1);
+    }
+    onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, false, state.worldpaused, viewTransform, state.inputMode == ENABLED);
 
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
     if (useChunkingSystem){

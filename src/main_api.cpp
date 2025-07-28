@@ -557,11 +557,12 @@ void playAnimation(int32_t id, std::string animationToPlay, AnimationType animat
   //  return;
   //}
   modassert(idExists(world.sandbox, id), std::string("play animation, id does not exist: " + std::to_string(id)));
-  modlog("animation", std::string("play animation: ") + animationToPlay + ", for id = " + std::to_string(id));
+  modlog("animation binding", std::string("play animation: ") + animationToPlay + ", for id = " + std::to_string(id));
   addAnimation(world, timings, id, animationToPlay, timeSeconds(false), animationType);
 }
 
 void stopAnimation(int32_t id){
+  modlog("animation binding", std::string("stop animation: ") + std::to_string(id));
   removeAnimation(world, timings, id);
 }
 
