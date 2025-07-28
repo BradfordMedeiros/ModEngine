@@ -17,7 +17,7 @@ WorldTiming createWorldTiming(float initialTime){
 
 
 
-bool enableBlending = true;
+bool enableBlending = false;
 float blendingWindow = 0.25f;  // this should be able to be specified by the animation most likely
 
 void setPoses(World& world, std::set<objid>& disableIds, objid idScene, std::vector<AnimationPose>& poses){

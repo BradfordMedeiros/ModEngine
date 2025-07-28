@@ -354,13 +354,13 @@ void checkCollisions(physicsEnv& env){
   env.collisionCache.onObjectsCollide(collisionPairs);
 }
 
-void stepPhysicsSimulation(physicsEnv& env, float timestep, bool paused, bool enablePhysics){
+void stepPhysicsSimulation(physicsEnv& env, float timestep, bool paused, bool enablePhysics, bool drawOnly){
   MODTODO("step physics simulation substeps should have consideration");
-  if (enablePhysics && !paused){
+  if (!drawOnly && (enablePhysics && !paused)){
     env.dynamicsWorld -> stepSimulation(timestep, 0);  
     checkCollisions(env);
   }
-  if (env.hasDebugDrawer){
+  if (drawOnly && env.hasDebugDrawer){
     env.dynamicsWorld -> debugDrawWorld();
   }
 }

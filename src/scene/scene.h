@@ -94,7 +94,7 @@ void physicsLocalTransformSet(World& world, objid index, Transformation& transfo
 
 void updatePhysicsBody(World& world, objid id);
 
-void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool paused, Transformation& viewTransform, bool showVisualizations);
+void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool paused, Transformation& viewTransform, bool showVisualizations, bool lateUpdate);
 
 std::optional<objid> getGameObjectByNamePrefix(World& world, std::string name, objid sceneId);
 GameObject& getGameObject(World& world, objid id);
