@@ -1930,16 +1930,8 @@ int main(int argc, char* argv[]){
     }
 
 
-    if (state.enablePhysicsDebug){
-      debuggerDrawer -> setDebugMode(0);
-    }
-
     onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, state.enablePhysics, state.worldpaused, viewTransform, state.inputMode == ENABLED, false);
     cBindings.onFrameAfterUpdate();
-    
-    if (state.enablePhysicsDebug){
-      debuggerDrawer -> setDebugMode(1);
-    }
     onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, false, state.worldpaused, viewTransform, state.inputMode == ENABLED, true);
 
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
