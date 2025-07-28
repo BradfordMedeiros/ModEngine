@@ -1598,8 +1598,8 @@ void updateBonesForAnimation(World& world){
   std::cout << "num bones: " << numBones << std::endl;
 }
 
-void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool paused, Transformation& viewTransform, bool showVisualizations){
-  if (!paused){
+void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool paused, Transformation& viewTransform, bool showVisualizations, bool lateUpdate){
+  if (!lateUpdate && !paused){
     updateEmitters(
       getEmitterSystem(), 
       timeElapsed,
@@ -1666,11 +1666,14 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     );  
   }
   
-  //std::cout << "on world frame physics: " << enablePhysics << std::endl;
-  stepPhysicsSimulation(world.physicsEnvironment, timestep, paused, enablePhysics);
-  updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);  
 
-  updateLookAt(world, viewTransform);
+  //std::cout << "on world frame physics: " << enablePhysics << std::endl;
+  stepPhysicsSimulation(world.physicsEnvironment, timestep, paused, enablePhysics, lateUpdate);
+
+  if (!lateUpdate){
+    updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);  
+    updateLookAt(world, viewTransform);    
+  }
 
   auto updatedIds = updatePhysicsFromSandbox(world);
   for (auto updatedId : updatedIds){
@@ -1690,8 +1693,12 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     }
   }
 
-
   world.entitiesToUpdate.clear();
+
+  if (lateUpdate){
+    return;
+  }
+
 
   updateBonesForAnimation(world);
 

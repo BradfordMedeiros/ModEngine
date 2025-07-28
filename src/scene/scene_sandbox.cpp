@@ -1,6 +1,6 @@
 #include "./scene_sandbox.h"
 
-const bool enableTransformLogging = true;
+const bool enableTransformLogging = false;
 bool transformLoggingEnabled(){
   return enableTransformLogging;
 }
