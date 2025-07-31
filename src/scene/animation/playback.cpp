@@ -71,6 +71,7 @@ std::vector<AnimationPose> combineAnimationPoses(std::vector<AnimationPose>& pos
 
       finalChannelPoses.push_back(AnimationPose {
         .targetId = channel.targetId,
+        .directIndex = channel.directIndex,
         .pose = interpolated,
       });  
     }
