@@ -1375,12 +1375,12 @@ std::vector<InputDispatch> inputFns = {
   },
   InputDispatch{
     .alwaysEnable = false,
-    .sourceKey = 'D', 
+    .sourceKey = 'L', 
     .sourceType = BUTTON_PRESS,
-    .prereqKey = 'L', 
-    .hasPreq = true,
+    .prereqKey = 0, 
+    .hasPreq = false,
     .fn = []() -> void {
-      //offlineDeleteScene("./build/testscene.rawscene");
+      downloadFile("127.0.0.1:8085/video/space.webm", "./build/video/space.webm");
     }
   },
   InputDispatch{

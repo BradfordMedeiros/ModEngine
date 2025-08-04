@@ -21,6 +21,7 @@
 #include "./world_tasks.h"
 #include "./common/symbols.h"
 #include "./shaderstate.h"
+#include "./common/http.h"
 
 struct JoyStickInfo {
   int index;

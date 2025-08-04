@@ -17,7 +17,7 @@ WorldTiming createWorldTiming(float initialTime){
 
 
 
-bool enableBlending = false;
+bool enableBlending = true;
 float blendingWindow = 0.25f;  // this should be able to be specified by the animation most likely
 
 void setPoses(World& world, std::set<objid>& disableIds, objid idScene, std::vector<AnimationPose>& poses){
@@ -36,6 +36,7 @@ void tickAnimation(World& world, std::set<objid>& disableAnimationIds, Animation
     // if afactor > 1.f or something like that, could get rid of the old animation value
     //modassert(false, "blend not yet supported");
 
+    modlog("tickAnimation", std::to_string(aFactor) + ", " + std::to_string(timeElapsedBlendStart));
     auto newPoses = playbackAnimationBlend(
       playback.animation,
       playback.blendData.value().animation, 

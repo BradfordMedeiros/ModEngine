@@ -83,3 +83,7 @@ ffmpeg
 
 make -j$(nproc)
 make install
+
+
+for curl
+sudo apt install libcurl4-openssl-dev

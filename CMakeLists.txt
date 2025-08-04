@@ -113,8 +113,10 @@ else()
   add_executable(${PROJECT_NAME} ${source_list})
 endif()
 
+find_package(CURL REQUIRED)
+
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
-target_link_libraries(${PROJECT_NAME} "stdc++fs")
+target_link_libraries(${PROJECT_NAME} "stdc++fs" CURL::libcurl)
 
 # GLFW Library - window management 
 if (NOT NO_INCLUDE_GLFW)
@@ -289,3 +291,4 @@ if (NOT NO_INCLUDE_VIDEO)
 else()
   message("MODBUILD - Not Including WEBM AND VPX")
 endif()
+

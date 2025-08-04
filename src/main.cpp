@@ -298,6 +298,7 @@ std::vector<std::string> listLightTextures(){
     "../gameresources/build/textures/iguana.jpg", 
     "./res/textures/wood.jpg",
     "../gameresources/textures/backgrounds/test3.png",
+    "../gameresources/textures/backgrounds/stainedglass.jpg",
 
   };
   return lightTextures; 
@@ -1644,7 +1645,8 @@ int main(int argc, char* argv[]){
     .setLogEndpoint = setLogEndpoint,
     .getClipboardString = getClipboardString,
     .setClipboardString = setClipboardString,
-
+    .downloadFile = downloadFile,
+    
     .saveState = saveState,
     .loadState = loadState,
 

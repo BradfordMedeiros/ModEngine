@@ -157,6 +157,8 @@ struct CustomApiBindings {
   void(*setLogEndpoint)(std::optional<std::function<void(std::string&)>>);
   const char*(*getClipboardString)();
   void (*setClipboardString)(const char*);
+  bool (*downloadFile)(std::string urlStr, std::string outputFile);
+
 
   bool (*saveState)(std::string);
   bool (*loadState)(std::string);
