@@ -1380,7 +1380,16 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      downloadFile("127.0.0.1:8085/video/space.webm", "./build/video/space.webm");
+      //downloadFile("127.0.0.1:8085/video/space.webm", "./build/video/space.webm");
+      //downloadFile("127.0.0.1:8085/game/game.txt", "./build/video/game.txt");
+    
+      bool success = false;
+      auto content = downloadFileInMemory("127.0.0.1:8085/game/game.txt", &success);
+      if (content.has_value()){
+        std::cout << "download file content: " << content.value() << ", success = " << success << std::endl;
+      }else{
+        std::cout << "download file content failure " << std::endl;
+      }
     }
   },
   InputDispatch{

@@ -1,38 +1,81 @@
 #include "./http.h"
 
-bool downloadFile(std::string urlStr, std::string outputFile){
-    CURL *curl = curl_easy_init();
-    if (!curl) {
-        modlog("curl init", "init failure");
-        return false;
-    }
+// TODO add timeouts and size limits and stuff like that here
 
-    FILE *fp = fopen(outputFile.c_str(), "wb");
-    if (!fp) {
-        modlog("curl", "failed opening output file");
-        curl_easy_cleanup(curl);
-        return false;
-    }
+size_t writeCallback(char* data, size_t size, size_t nmemb, void* dataPtr){
+  std::string* buffer = static_cast<std::string*>(dataPtr);
+  size_t totalSize = size * nmemb;
+  buffer -> append(static_cast<char*>(data), totalSize);
+  return totalSize;
+}
+ 
+bool downloadFileRaw(std::string urlStr, std::optional<std::string> outputFile, std::optional<std::string*> inMemoryBuffer){
+	bool inMemory = !outputFile.has_value();
+	if (inMemory && !inMemoryBuffer.has_value()){
+		modassert(inMemoryBuffer.has_value(), "invalid arguments to downloadFileRaw");
+	}
+  CURL *curl = curl_easy_init();
+  if (!curl) {
+    modlog("curl init", "init failure");
+    return false;
+  }
 
-    bool success = true;
+  bool success = true;
+  curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+  curl_easy_setopt(curl, CURLOPT_URL, urlStr.c_str());
 
-    curl_easy_setopt(curl, CURLOPT_URL, urlStr.c_str());
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+  FILE* fp = NULL;
 
-    CURLcode res = curl_easy_perform(curl);
-    if (res != CURLE_OK) {
-        modlog("curl error downloading file", curl_easy_strerror(res));
-        success = false;
-    }
+  if (!inMemory){
+  	fp = fopen(outputFile.value().c_str(), "wb");
+  	if (!fp) {
+  	  modlog("curl", "failed opening output file");
+  	  curl_easy_cleanup(curl);
+  	  return false;
+  	}
+  	curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+  }else{
+  	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)inMemoryBuffer.value());
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+  }
 
-    fclose(fp);
-    curl_easy_cleanup(curl);
-    return success;
+  CURLcode res = curl_easy_perform(curl);
+  if (res != CURLE_OK) {
+    modlog("curl error downloading file", curl_easy_strerror(res));
+    success = false;
+  }
+
+  if (fp){
+		fclose(fp);
+  }
+  curl_easy_cleanup(curl);
+  if (success){
+  	modlog("curl", std::string("download success: ") + urlStr);
+  }else{
+  	modlog("curl", std::string("download failure: ") + urlStr);
+  }
+
+  return success;
 }
 
-std::optional<std::string> downloadFileInMemory(std::string urlStr, std::string outputFile){
-	return std::nullopt;
+
+bool downloadFile(std::string urlStr, std::string outputFile){
+	return downloadFileRaw(urlStr, outputFile, std::nullopt);
+}
+
+std::optional<std::string> downloadFileInMemory(std::string urlStr,  bool* isSuccess){
+ 	std::string data;
+	bool success = downloadFileRaw(urlStr, std::nullopt, &data);
+	*isSuccess = success;
+	if (success){
+		std::cout << "file content: " << data << std::endl;
+	}else{
+		std::cout << "file content download failure" << std::endl;
+	}
+	if (!success){
+		return std::nullopt;
+	}
+	return data;
 }
 
 bool isServerOnline(std::string url){
