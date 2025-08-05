@@ -1645,8 +1645,13 @@ int main(int argc, char* argv[]){
     .setLogEndpoint = setLogEndpoint,
     .getClipboardString = getClipboardString,
     .setClipboardString = setClipboardString,
+
     .downloadFile = downloadFile,
-    
+    .downloadFileInMemory = downloadFileInMemory,
+    .isServerOnline = isServerOnline,
+    .getServerConfig = getServerConfig,
+    .getProperty = getProperty,
+
     .saveState = saveState,
     .loadState = loadState,
 

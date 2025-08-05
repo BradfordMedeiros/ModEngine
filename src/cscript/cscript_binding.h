@@ -12,6 +12,7 @@
 #include "../scene/objtypes/lighting/scene_lighting.h"
 #include "../scene/common/util/types.h"
 #include "../scene/scene_sandbox.h"
+#include "../common/http.h"
 
 struct CustomApiBindings {
   int32_t (*listSceneId)(int32_t objid);
@@ -157,7 +158,12 @@ struct CustomApiBindings {
   void(*setLogEndpoint)(std::optional<std::function<void(std::string&)>>);
   const char*(*getClipboardString)();
   void (*setClipboardString)(const char*);
+
   bool (*downloadFile)(std::string urlStr, std::string outputFile);
+  std::optional<std::string> (*downloadFileInMemory)(std::string urlStr, bool* isSuccess);
+  bool (*isServerOnline)(std::string urlStr);
+  std::optional<ServerConfigProperties> (*getServerConfig)(std::string urlStr,  bool* isSuccess);
+  std::optional<std::string> (*getProperty)(ServerConfigProperties& config, std::string target, std::string attribute);
 
 
   bool (*saveState)(std::string);

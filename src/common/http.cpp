@@ -1,6 +1,9 @@
 #include "./http.h"
 
 // TODO add timeouts and size limits and stuff like that here
+// TODO ssl
+
+std::vector<Token> parseFormat(std::string content);
 
 size_t writeCallback(char* data, size_t size, size_t nmemb, void* dataPtr){
   std::string* buffer = static_cast<std::string*>(dataPtr);
@@ -96,3 +99,26 @@ bool isServerOnline(std::string url){
     return isOnline;
 }
 
+
+
+std::optional<ServerConfigProperties> getServerConfig(std::string urlStr,  bool* isSuccess){
+  auto fileContent = downloadFileInMemory(urlStr, isSuccess);
+  if (!fileContent.has_value()){
+    return std::nullopt;
+  }
+
+  // TODO I probably shouldn't let a bad config over the network crash the program!
+  auto properties = parseFormat(fileContent.value());
+  
+  return ServerConfigProperties {
+    .properties = properties,
+  };
+}
+std::optional<std::string> getProperty(ServerConfigProperties& config, std::string target, std::string attribute){
+  for (auto &property : config.properties){
+    if (property.target == target && property.attribute == attribute){
+      return property.payload;
+    }
+  };
+  return std::nullopt;
+}
