@@ -1620,6 +1620,7 @@ int main(int argc, char* argv[]){
     .installMod = installMod,
     .uninstallMod = uninstallMod,
     .listMods = listMods,
+    .mountPackage = mountPackage,
     .compileSqlQuery = sql::compileSqlQuery,
     .executeSqlQuery = executeSqlQuery,
     .selected = []() -> std::vector<objid> {

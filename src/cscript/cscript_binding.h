@@ -136,6 +136,7 @@ struct CustomApiBindings {
   void (*installMod)(std::string layer);
   void (*uninstallMod)(std::string layer);
   std::vector<std::string> (*listMods)();
+  void (*mountPackage)(const char* path);
 
   sql::SqlQuery (*compileSqlQuery)(std::string queryString, std::vector<std::string> bindValues);
   std::vector<std::vector<std::string>> (*executeSqlQuery)(sql::SqlQuery& query, bool* valid);

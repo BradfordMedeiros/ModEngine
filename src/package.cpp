@@ -183,18 +183,21 @@ bool fileExists(Package& package, const char* file){
 }
 
 std::optional<Package> mountedPackage;
-void mountPackage(const char* path){
-   if (mountedPackage.has_value()){
-      modassert(false, "package is already mounted");
-   }
-   mountedPackage = loadPackage(path);
-}
 void unmountPackage(){
    if (mountedPackage.has_value()){
+      modlog("package unmount", "success");
       closePackage(mountedPackage.value());
    }
    mountedPackage = std::nullopt;
 }
+void mountPackage(const char* path){
+   if (mountedPackage.has_value()){
+      unmountPackage();
+   }
+   modlog("package mount", path);
+   mountedPackage = loadPackage(path);
+}
+
 
 std::string readPackageFile(const char* file){
    return readFile(mountedPackage.value(), file);
