@@ -170,7 +170,7 @@ void main(){
     UVCoords = vec4(TexCoord.x, TexCoord.y, textureid, 0);
 
     if (hasCubemapTexture){
-      FragColor = tint * texture(cubemapTexture, FragPos);
+      FragColor = tint * texture(cubemapTexture, normalize(vec3(FragPos.x, FragPos.y, -1 * FragPos.z)));
       return;
     }
 
