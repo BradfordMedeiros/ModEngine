@@ -135,10 +135,15 @@ Texture loadCubemapTextureData(std::vector<unsigned char*> data, std::vector<int
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
   
-  for (int i = 0; i < data.size(); i++){
-    GLint format = GL_RGB;
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, textureWidth.at(i), textureHeight.at(i), 0, format, GL_UNSIGNED_BYTE, data.at(i));
-  } 
+  modassert(data.size() == 6, "invalid cubemap texture size");
+  GLint format = GL_RGB;
+
+  glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, format, textureWidth.at(0), textureHeight.at(0), 0, format, GL_UNSIGNED_BYTE, data.at(0));
+  glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, format, textureWidth.at(1), textureHeight.at(1), 0, format, GL_UNSIGNED_BYTE, data.at(1));
+  glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, format, textureWidth.at(2), textureHeight.at(2), 0, format, GL_UNSIGNED_BYTE, data.at(2));
+  glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, format, textureWidth.at(3), textureHeight.at(3), 0, format, GL_UNSIGNED_BYTE, data.at(3));
+  glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, format, textureWidth.at(4), textureHeight.at(4), 0, format, GL_UNSIGNED_BYTE, data.at(4));
+  glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, format, textureWidth.at(5), textureHeight.at(5), 0, format, GL_UNSIGNED_BYTE, data.at(5));
 
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); 
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
