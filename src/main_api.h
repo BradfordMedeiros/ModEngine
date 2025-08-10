@@ -141,6 +141,7 @@ void setAnimationPose(int32_t id, std::string animationToPlay, float time);
 std::vector<std::string> listSounds(int32_t id);
 void playSound(std::string sound);
 void stopSoundState(std::string source, objid sceneId);
+void stopSoundStateById(objid id);
 
 std::vector<std::string> listResources(std::string resourceType);
 
@@ -149,7 +150,7 @@ void sendAlert(std::string message);
 
 double timeSeconds(bool realtime);
 double timeElapsed();
-
+int currentFrame();
 
 std::vector<HitObject> raycastW(glm::vec3 pos, glm::quat direction, float maxDistance);
 std::vector<HitObject> contactTest(objid id);

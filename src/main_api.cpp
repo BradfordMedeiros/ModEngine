@@ -22,6 +22,7 @@ extern std::string sqlDirectory;
 extern std::vector<IdAtCoords> idCoordsToGet;
 extern std::vector<DepthAtCoord> depthsAtCoords;
 extern std::unordered_map<unsigned int, std::vector<ShaderTextureBinding>> textureBindings; 
+extern int currentTick;
 
 float getTotalTime(){
   return statistics.now - statistics.initialTime;
@@ -675,6 +676,10 @@ double timeElapsed(){
   return statistics.deltaTime;
 }
 
+int currentFrame(){
+  return currentTick;
+}
+
 std::vector<HitObject> raycastW(glm::vec3 pos, glm::quat direction, float maxDistance){
   return raycast(world, pos, direction, maxDistance);
 }
@@ -924,6 +929,9 @@ void stopSoundState(std::string source, objid sceneId){
     std::cout << "ERROR: no source named: " << source << " in scene: " << sceneId << std::endl;
     //assert(false);
   }
+}
+void stopSoundStateById(objid id){
+  stopSoundState(world.objectMapping, id); 
 }
 
 std::string activeTextureName(int activeTextureIndex, std::unordered_map<std::string, TextureRef> worldTextures){

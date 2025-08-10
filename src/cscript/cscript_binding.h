@@ -88,12 +88,14 @@ struct CustomApiBindings {
   void (*playClip)(std::string, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
   void (*playClipById)(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
   void (*stopClip)(std::string source, objid sceneId);
+  void (*stopClipById)(objid id);
 
   ///////////
   std::vector<std::string> (*listResources)(std::string);
   void (*sendNotifyMessage)(std::string message, std::any value);
   double (*timeSeconds)(bool realtime);
   double (*timeElapsed)();
+  int (*currentFrame)();
   bool (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename);
   std::unordered_map<std::string, std::string> (*listServers)();
   std::string (*connectServer)(std::string server);

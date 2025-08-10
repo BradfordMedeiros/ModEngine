@@ -87,7 +87,6 @@ std::string dataPath;
 
 int transparencyLayer = -1;
 int currentTick = 0;
-
 bool showCrashInfo = false;
 float lastReloadTime = 0.f;
 
@@ -1575,10 +1574,12 @@ int main(int argc, char* argv[]){
     .playClip = playSoundState,
     .playClipById = playSoundState,
     .stopClip = stopSoundState,
+    .stopClipById = stopSoundStateById,
     .listResources = listResources,
     .sendNotifyMessage = sendNotifyMessage,
     .timeSeconds = timeSeconds,
     .timeElapsed = timeElapsed,
+    .currentFrame = currentFrame,
     .saveScene = saveScene,
     .listServers = listServers,
     .connectServer = connectServer,
