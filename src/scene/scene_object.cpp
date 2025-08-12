@@ -494,24 +494,39 @@ std::vector<TagInfo> getTag(World& world, int tag, glm::vec3 position){
   return getTag(octreeObject -> octree, tag, glm::vec3(octreeSpaceCamPos.x, octreeSpaceCamPos.y, octreeSpaceCamPos.z), 10); // subdivision 10 is stupid, this should just retrieve to relevant depth
 }
 
-// TODO - incomplete code wtf
 std::vector<TagInfo> getAllTags(World& world, int tag){
   objid id = 0;
   GameObjectOctree* octreeObject = getMainOctree(world, &id);
   if (!octreeObject){
     return {};
   }
+  
+  std::set<std::string> tagValues;
+  OctreeDivision& rootNode = octreeObject -> octree.rootNode;
+  std::deque<OctreeDivision*> divisions;
+  divisions.push_back(&rootNode);
+  while(divisions.size() > 0){
+    OctreeDivision* node = divisions.front();
+    divisions.pop_front();
+    for (auto &divisionTag : node -> tags){
+      if (divisionTag.key == tag){
+        tagValues.insert(divisionTag.value);
+      }
+    }
 
-  return {
-    TagInfo {
+    for (OctreeDivision& division : node -> divisions){
+      divisions.push_back(&division);
+    }
+  }
+
+  std::vector<TagInfo> allTags;
+  for (auto& tagValue : tagValues){
+    allTags.push_back(TagInfo{
       .key = tag,
-      .value = "../gameresources/sound/rain.wav",
-    },
-    TagInfo {
-      .key = tag,
-      .value = "../gameresources/sound/busy_cyberworld.wav",
-    },
-  };
+      .value =  tagValue,
+    });
+  }
+  return allTags;
 }
 
 
