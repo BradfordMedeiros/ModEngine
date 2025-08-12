@@ -78,12 +78,14 @@ struct CustomApiBindings {
   std::optional<ModAABB> (*getModAABB)(int32_t index);
   std::optional<ModAABB2> (*getModAABBModel)(int32_t index);
   std::optional<PhysicsInfo> (*getPhysicsInfo)(int32_t index);
+  
   std::set<std::string> (*listAnimations)(int32_t id);
   void (*playAnimation)(int32_t id, std::string animationToPlay, AnimationType animationType);
   void (*stopAnimation)(int32_t id);
   void (*disableAnimationIds)(std::set<objid>& ids);
-
   void (*setAnimationPose)(int32_t id, std::string animationToPlay, float time);
+  std::optional<float> (*animationLength)(int32_t id, std::string animationToPlay);
+
   std::vector<std::string>(*listClips)();
   void (*playClip)(std::string, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
   void (*playClipById)(objid id, std::optional<float> volume, std::optional<glm::vec3> position);

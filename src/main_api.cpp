@@ -574,7 +574,9 @@ void disableAnimationIds(std::set<objid>& ids){
 void setAnimationPose(int32_t id, std::string animationToPlay, float time){
   setAnimationPose(world, id, animationToPlay, time);
 }
-
+std::optional<float> animationLength(int32_t id, std::string animationToPlay){
+  return animationLengthSeconds(world, id, animationToPlay);
+}
 
 bool objIdInVector(std::vector<objid> ids, objid id){
   for (auto compareId : ids){

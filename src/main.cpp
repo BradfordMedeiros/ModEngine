@@ -1570,6 +1570,7 @@ int main(int argc, char* argv[]){
     .stopAnimation = stopAnimation,
     .disableAnimationIds = disableAnimationIds,
     .setAnimationPose = setAnimationPose,
+    .animationLength = animationLength,
     .listClips = listSounds,
     .playClip = playSoundState,
     .playClipById = playSoundState,

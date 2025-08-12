@@ -207,3 +207,14 @@ void setAnimationPose(World& world, objid id, std::string animationToPlay, float
   auto newPoses = playbackAnimation(animation, time, idScene);
   setPoses(world, emptySet, idScene, newPoses);
 }
+
+
+std::optional<float> animationLengthSeconds(World& world, objid id, std::string& animationToPlay){
+  auto groupId = getGroupId(world.sandbox, id);
+  auto animation = getAnimation(world, groupId, animationToPlay);
+  if (!animation.has_value()){
+    return std::nullopt;
+  }
+  float animLength = animationLengthSeconds(animation.value().animation);
+  return animLength;
+}
