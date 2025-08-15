@@ -434,7 +434,7 @@ int renderObject(
         api.drawLine(boneTransform.position, parentTransform.position, getAlternatingColor(0));
       }
       //api.drawSphere(boneTransform.position);
-      auto model = glm::translate(glm::mat4(1.f), transform.position);
+      auto model = glm::scale(glm::translate(glm::mat4(1.f), transform.position), boneTransform.scale);
       return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh, model, id);
     }
   
