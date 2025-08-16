@@ -601,6 +601,54 @@ int getDirectIndexForId(SceneSandbox& sandbox, objid id){
   return sandbox.mainScene.idToDirectIndex.at(id);
 }
 
+
+float snapToEpsilon(float value) {
+  static float epsilon = 0.0001f;  // 0.0001f is kind of arbitrary but seems to work ok
+  float newValue = roundf(value / epsilon) * epsilon;
+  std::cout << "snapToEpsilon: " << newValue << " | " << value << std::endl;
+  return newValue;
+}
+void updateVec3FixPrecision(glm::vec3* _vec, glm::vec3& vec){
+  _vec -> x = snapToEpsilon(vec.x);
+  _vec -> y = snapToEpsilon(vec.y);
+  _vec -> z = snapToEpsilon(vec.z);
+}
+
+void updatePositionFixPrecision(glm::vec3* _pos, glm::vec3& pos){
+  updateVec3FixPrecision(_pos, pos);
+}
+
+void updateScaleFixPrecision(glm::vec3* _scale, glm::vec3& scale){
+  updateVec3FixPrecision(_scale, scale);
+}
+void updateRotationFixPrecision(glm::quat* _rotation, glm::quat& rot){
+  *_rotation = rot;
+  return;
+
+  glm::quat fixedQuat = glm::normalize(rot);  // ensures unit length
+    // Optional: clamp tiny values to zero to reduce floating-point noise
+  const float epsilon = 1e-6f;
+  if (fabs(fixedQuat.x) < epsilon){
+    fixedQuat.x = 0.0f;
+  }
+  if (fabs(fixedQuat.y) < epsilon){
+    fixedQuat.y = 0.0f;
+  }
+  if (fabs(fixedQuat.z) < epsilon){ 
+    fixedQuat.z = 0.0f;
+  };
+  if (fabs(fixedQuat.w) < epsilon){
+    fixedQuat.w = 0.0f;
+  }
+  *_rotation = fixedQuat;
+}
+
+void updateTransformFixPrecision(Transformation* _transform, Transformation& update){
+  updatePositionFixPrecision(&(_transform -> position), update.position);
+  updateRotationFixPrecision(&(_transform -> rotation), update.rotation);
+  updateScaleFixPrecision(&(_transform -> scale), update.scale);
+}
+
 std::vector<TransformUpdate2> updates;
 int currentFrameTick = 0;
 
@@ -641,7 +689,7 @@ void updateNodes(SceneSandbox& sandbox, int directIndex){
 
       if (fullTransformUpdate){
         auto oldRelativeTransform = calcRelativeTransform(sandbox, idToVisit);
-        gameobj.transformation = oldRelativeTransform;   
+        updateTransformFixPrecision(&gameobj.transformation, oldRelativeTransform);  
       }else {
         // Conceptually
         // Calculate new absolute values based upon the relative
@@ -653,27 +701,27 @@ void updateNodes(SceneSandbox& sandbox, int directIndex){
         auto absoluteTransformNew = getAbsoluteByDirectIndex(sandbox, directIndex);
 
         if (isRotationUpdate){
-          newTransform.rotation = absoluteTransformNew.transform.rotation;
+          updateRotationFixPrecision(&newTransform.rotation, absoluteTransformNew.transform.rotation);
         }
         if (isScaleUpdate){
-          newTransform.scale = absoluteTransformNew.transform.scale;
+          updateScaleFixPrecision(&newTransform.scale, absoluteTransformNew.transform.scale);
         }
         if (isPositionUpdate){
-          newTransform.position = absoluteTransformNew.transform.position;
+          updatePositionFixPrecision(&newTransform.position, absoluteTransformNew.transform.position);
         }
 
         sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform.transform = newTransform;
         sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform.matrix = matrixFromComponents(newTransform);
 
         auto oldRelativeTransform = calcRelativeTransform(sandbox, idToVisit);
-        gameobj.transformation = oldRelativeTransform;   
+        updateTransformFixPrecision(&gameobj.transformation, oldRelativeTransform);
       }
 
     }else{
       numRelative++;
       auto parentDirectIndex = objh.parentDirectIndex;
       auto newTransform = parentId == 0 ? gameobj.transformation : calcAbsoluteTransformDirectIndex(sandbox, parentDirectIndex, gameobj.transformation);
-      sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform.transform = newTransform;
+      updateTransformFixPrecision(&sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform.transform, newTransform);
       sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform.matrix = matrixFromComponents(newTransform);
     }
     objh.updateFrame = currentFrameTick;
@@ -709,13 +757,13 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
 
       auto& gameobj = getGameObjectDirectIndex(sandbox, update.directIndex.value());
       if (update.hasPosition){
-        gameobj.transformation.position = update.transform.position;
+        updatePositionFixPrecision(&gameobj.transformation.position, update.transform.position);
       }
       if (update.hasScale){
-        gameobj.transformation.scale = update.transform.scale;
+        updatePositionFixPrecision(&gameobj.transformation.scale, update.transform.scale);
       }
       if (update.hasRotation){
-        gameobj.transformation.rotation = update.transform.rotation;
+        updateRotationFixPrecision(&gameobj.transformation.rotation, update.transform.rotation);
       }
 
       if (enableTransformLogging){
@@ -739,19 +787,18 @@ std::set<objid> updateSandbox(SceneSandbox& sandbox){
 
       Transformation& newAbsoluteTransform = getAbsoluteByDirectIndex(sandbox, directIndex).transform;
       if (update.hasPosition){
-        newAbsoluteTransform.position = update.transform.position;
+        updatePositionFixPrecision(&newAbsoluteTransform.position, update.transform.position);
       }
       if (update.hasScale){
-        newAbsoluteTransform.scale = update.transform.scale;
+        updatePositionFixPrecision(&newAbsoluteTransform.scale, update.transform.scale);
       }
       if (update.hasRotation){
-        newAbsoluteTransform.rotation = update.transform.rotation;
+        updateRotationFixPrecision(&newAbsoluteTransform.rotation, update.transform.rotation);
       }
 
-      sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform = TransformCacheElement {
-        .transform =  newAbsoluteTransform,
-        .matrix = matrixFromComponents(newAbsoluteTransform),
-      };
+      TransformCacheElement& cacheElement = sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform;
+      updateTransformFixPrecision(&cacheElement.transform, newAbsoluteTransform);
+      cacheElement.matrix = matrixFromComponents(cacheElement.transform);
 
       //if (enableTransformLogging){
       //  std::cout << "updateAbsoluteTransform hint        new rel: " <<  print(getGameObject(sandbox, id).transformation) << std::endl;
