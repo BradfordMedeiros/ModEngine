@@ -27,25 +27,28 @@ void setPoses(World& world, objid idScene, std::vector<AnimationPose>& poses){
   }
 }
 void tickAnimation(World& world, AnimationData& playback, float currentTime){
-  auto elapsedTime = currentTime - playback.layer.initTime;
-  if (enableBlending && playback.layer.blendData.has_value()){
-    float timeElapsedBlendStart = currentTime - playback.layer.blendData.value().blendStartTime;
+  auto elapsedTime = currentTime - playback.layer.at(0).initTime;
+  if (enableBlending && playback.layer.at(0).blendData.has_value()){
+    float timeElapsedBlendStart = currentTime - playback.layer.at(0).blendData.value().blendStartTime;
     float aFactor = glm::min(1.f, timeElapsedBlendStart / blendingWindow);
     // if afactor > 1.f or something like that, could get rid of the old animation value
     //modassert(false, "blend not yet supported");
 
     modlog("tickAnimation", std::to_string(aFactor) + ", " + std::to_string(timeElapsedBlendStart));
+
+    modlog("tickAnimation 1", std::to_string(playback.layer.size()));
+
     auto newPoses = playbackAnimationBlend(
-      playback.layer.animation,
-      playback.layer.blendData.value().animation, 
+      playback.layer.at(0).animation,
+      playback.layer.at(0).blendData.value().animation, 
       elapsedTime,
-      currentTime - playback.layer.blendData.value().oldAnimationInit, 
+      currentTime - playback.layer.at(0).blendData.value().oldAnimationInit, 
       aFactor,
       playback.idScene
     );
     setPoses(world, playback.idScene, newPoses);
   }else{
-    auto newPoses = playbackAnimation(playback.layer.animation, elapsedTime, playback.idScene);
+    auto newPoses = playbackAnimation(playback.layer.at(0).animation, elapsedTime, playback.idScene);
     setPoses(world, playback.idScene, newPoses);
   }
 }
@@ -66,16 +69,16 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
 
 
   for (auto &[id, playback] : timings.animations.playbacks){
-    float timeElapsed = currentTime - playback.layer.initTime;
-    if (timeElapsed > playback.layer.animLength){
+    float timeElapsed = currentTime - playback.layer.at(0).initTime;
+    if (timeElapsed > playback.layer.at(0).animLength){
       modlog("animation", "on animation finish");
-      if (playback.layer.animationType == ONESHOT){
+      if (playback.layer.at(0).animationType == ONESHOT){
         timings.playbacksToRemove.push_back(playback.groupId);
         continue;
-      }else if (playback.layer.animationType == LOOP){
-        playback.layer.initTime = currentTime;
+      }else if (playback.layer.at(0).animationType == LOOP){
+        playback.layer.at(0).initTime = currentTime;
         continue;
-      }else if (playback.layer.animationType == FORWARDS){
+      }else if (playback.layer.at(0).animationType == FORWARDS){
         // do nothing
         continue;
       }
@@ -140,17 +143,44 @@ void invalidatePlaybackToRemove(WorldTiming& timing, objid groupId){
   timing.playbacksToRemove = playbacksToRemoveNew;
 }
 
-void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay, float initialTime, AnimationType animationType, std::optional<std::set<objid>>& mask){
+void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay, float initialTime, AnimationType animationType, std::optional<std::set<objid>>& mask, int zIndex){
   auto groupId = getGroupId(world.sandbox, id);
   auto rootname = getGameObject(world, groupId).name;
   auto idScene = sceneId(world.sandbox, groupId);
+
+  int numAnimations = 0;
+  {
+    if(timings.animations.playbacks.find(groupId) != timings.animations.playbacks.end()){
+      auto currAnimations = timings.animations.playbacks.at(groupId).layer.size();
+      numAnimations += currAnimations;
+    }
+  }
+  std::optional<int> currentIndex;
+  {
+    if (timings.animations.playbacks.find(groupId) != timings.animations.playbacks.end()){
+      AnimationData& animationData = timings.animations.playbacks.at(groupId);
+      std::vector<AnimationLayer>& layers = animationData.layer;
+      for (int i = 0; i < layers.size(); i++){
+        auto sameZIndex = layers.at(i).zIndex == zIndex;
+        if (sameZIndex){
+          currentIndex = i;
+          break;
+        }
+      }
+    }
+  }
+
+  modlog("animation zIndex", std::to_string(zIndex) + ", " + std::to_string(numAnimations) + ", " + print(currentIndex));
+  ///////////////////////
+
+
 
   std::optional<BlendAnimationData> blendData = std::nullopt;
   if (timings.animations.playbacks.find(groupId) != timings.animations.playbacks.end()){
     modlog("animation", std::string("removing playback: ") + std::to_string(groupId));
 
-    auto& oldAnimation = timings.animations.playbacks.at(groupId).layer.animation;
-    auto oldInit = timings.animations.playbacks.at(groupId).layer.initTime;
+    auto& oldAnimation = timings.animations.playbacks.at(groupId).layer.at(0).animation;
+    auto oldInit = timings.animations.playbacks.at(groupId).layer.at(0).initTime;
 
     blendData = BlendAnimationData {
       .oldAnimationInit = oldInit,
@@ -162,22 +192,26 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
     invalidatePlaybackToRemove(timings, groupId);
   }
 
-  auto animation = getAnimation(world, groupId, animationToPlay, mask.has_value() ? mask.value() : timings.disableAnimationIds).value();
+  auto animation = getAnimation(world, groupId, animationToPlay, mask.has_value() ? mask.value() : timings.disableAnimationIds);
+  modassert(animation.has_value(), std::string("animation does not exist: ") + animationToPlay);
 
-  std::string& animationname = animation.animation.name;
-  float animLength = animationLengthSeconds(animation.animation);
-  modlog("animation", std::string("adding animation: ") + animationname + ", length = " + std::to_string(animLength) + ", numticks = " + std::to_string(animation.animation.duration) + ", ticks/s = " + std::to_string(animation.animation.ticksPerSecond) + ", groupId = " + std::to_string(groupId));
+  std::string& animationname = animation.value().animation.name;
+  float animLength = animationLengthSeconds(animation.value().animation);
+  modlog("animation", std::string("adding animation: ") + animationname + ", length = " + std::to_string(animLength) + ", numticks = " + std::to_string(animation.value().animation.duration) + ", ticks/s = " + std::to_string(animation.value().animation.ticksPerSecond) + ", groupId = " + std::to_string(groupId));
 
   timings.animations.playbacks[groupId] = AnimationData {
     .groupId = groupId,
     .idScene = idScene,
     .rootname = rootname,
-    .layer = AnimationLayer {
-      .animation = animation,
-      .animationType = animationType,
-      .animLength = animLength,
-      .initTime = initialTime,
-      .blendData = blendData,
+    .layer = {
+      AnimationLayer {
+        .zIndex = zIndex,
+        .animation = animation.value(),
+        .animationType = animationType,
+        .animLength = animLength,
+        .initTime = initialTime,
+        .blendData = blendData,
+      }
     },
   };
 }

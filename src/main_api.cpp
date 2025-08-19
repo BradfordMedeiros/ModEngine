@@ -553,13 +553,13 @@ std::set<std::string> listAnimations(int32_t id){
   return animationNames;
 }
 
-void playAnimation(int32_t id, std::string animationToPlay, AnimationType animationType, std::optional<std::set<objid>> mask){
+void playAnimation(int32_t id, std::string animationToPlay, AnimationType animationType, std::optional<std::set<objid>> mask, int zIndex){
   //if (!idExists(world.sandbox, id)){
   //  return;
   //}
   modassert(idExists(world.sandbox, id), std::string("play animation, id does not exist: " + std::to_string(id)));
   modlog("animation binding", std::string("play animation: ") + animationToPlay + ", for id = " + std::to_string(id));
-  addAnimation(world, timings, id, animationToPlay, timeSeconds(false), animationType, mask);
+  addAnimation(world, timings, id, animationToPlay, timeSeconds(false), animationType, mask, zIndex);
 }
 
 void stopAnimation(int32_t id){

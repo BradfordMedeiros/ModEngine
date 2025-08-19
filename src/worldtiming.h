@@ -14,6 +14,7 @@ struct BlendAnimationData {
   std::optional<std::set<objid>> mask;
 };
 struct AnimationLayer {
+  int zIndex;
   AnimationWithIds animation;
   AnimationType animationType;
   float animLength;
@@ -25,7 +26,7 @@ struct AnimationData {
   objid groupId;
   objid idScene;
   std::string rootname;
-  AnimationLayer layer;
+  std::vector<AnimationLayer> layer;
 };
 
 struct AnimationState {
@@ -42,7 +43,7 @@ struct WorldTiming {
 WorldTiming createWorldTiming(float initialTime);
 void tickAnimations(World& world, WorldTiming& timings, float currentTime);
 
-void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay, float initialTime, AnimationType animationType, std::optional<std::set<objid>>& mask);
+void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay, float initialTime, AnimationType animationType, std::optional<std::set<objid>>& mask, int zIndex);
 void removeAnimation(World& world, WorldTiming& timings, objid id);
 void disableAnimationIds(World& world, WorldTiming& timings, std::set<objid>& ids);
 void setAnimationPose(World& world, objid id, std::string animationToPlay, float time);
