@@ -35,16 +35,16 @@ void tickAnimation(World& world, AnimationData& playback, float currentTime){
 
     modlog("tickAnimation", std::to_string(aFactor) + ", " + std::to_string(timeElapsedBlendStart));
     auto newPoses = playbackAnimationBlend(
-      playback.animation,
+      playback.layer.animation,
       playback.blendData.value().animation, 
-      currentTime - playback.initTime,
+      currentTime - playback.layer.initTime,
       currentTime - playback.blendData.value().oldAnimationInit, 
       aFactor,
       playback.idScene
     );
     setPoses(world, playback.idScene, newPoses);
   }else{
-    auto newPoses = playbackAnimation(playback.animation, currentTime - playback.initTime, playback.idScene);
+    auto newPoses = playbackAnimation(playback.layer.animation, currentTime - playback.layer.initTime, playback.idScene);
     setPoses(world, playback.idScene, newPoses);
   }
 }
@@ -65,16 +65,16 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
 
 
   for (auto &[id, playback] : timings.animations.playbacks){
-    float timeElapsed = currentTime - playback.initTime;
-    if (timeElapsed > playback.animLength){
+    float timeElapsed = currentTime - playback.layer.initTime;
+    if (timeElapsed > playback.layer.animLength){
       modlog("animation", "on animation finish");
-      if (playback.animationType == ONESHOT){
+      if (playback.layer.animationType == ONESHOT){
         timings.playbacksToRemove.push_back(playback.groupId);
         continue;
-      }else if (playback.animationType == LOOP){
-        playback.initTime = currentTime;
+      }else if (playback.layer.animationType == LOOP){
+        playback.layer.initTime = currentTime;
         continue;
-      }else if (playback.animationType == FORWARDS){
+      }else if (playback.layer.animationType == FORWARDS){
         // do nothing
         continue;
       }
@@ -148,8 +148,8 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
   if (timings.animations.playbacks.find(groupId) != timings.animations.playbacks.end()){
     modlog("animation", std::string("removing playback: ") + std::to_string(groupId));
 
-    auto oldAnimation = timings.animations.playbacks.at(groupId).animation;
-    auto oldInit = timings.animations.playbacks.at(groupId).initTime;
+    auto& oldAnimation = timings.animations.playbacks.at(groupId).layer.animation;
+    auto oldInit = timings.animations.playbacks.at(groupId).layer.initTime;
 
     blendData = BlendAnimationData {
       .oldAnimationInit = oldInit,
@@ -171,10 +171,12 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
     .groupId = groupId,
     .idScene = idScene,
     .rootname = rootname,
-    .animation = animation,
-    .animLength = animLength,
-    .animationType = animationType,
-    .initTime = initialTime,
+    .layer = AnimationLayer {
+      .animation = animation,
+      .animationType = animationType,
+      .animLength = animLength,
+      .initTime = initialTime,
+    },
     .blendData = blendData,
   };
 }
