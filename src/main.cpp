@@ -1747,6 +1747,7 @@ int main(int argc, char* argv[]){
         netObjectDelete(id, isNet, netcode, bootStrapperMode);
       }
       cBindings.onObjectRemoved(id);
+      timings.disableAnimationIds.erase(id);
       freeTexture(id);
     }, 
     debuggerDrawer, 

@@ -91,6 +91,13 @@ std::vector<AnimationPose> animationPosesAtTime(float currentTime, objid sceneId
 
   for (int i = 0; i < animation.channels.size(); i++){
     auto targetId = animationWithIds.channelObjIds.at(i);
+    if (animationWithIds.mask.has_value() && animationWithIds.mask.value().count(targetId) > 0){
+      modlog("animationPosesAtTime disable entity", std::to_string(targetId));
+      continue;
+    }
+    if (animationWithIds.mask.has_value()){
+      modlog("animationPosesAtTime disable entity", print(animationWithIds.mask.value()));
+    }
     auto directIndex = animationWithIds.channelObjDirectIds.at(i);
     auto& channel = animation.channels.at(i);
     auto& lookup = animationWithIds.lookup.at(i);

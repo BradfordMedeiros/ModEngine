@@ -133,7 +133,7 @@ void drawRect(float centerX, float centerY, float width, float height, bool perm
 void drawLine2D(glm::vec3 fromPos, glm::vec3 toPos, bool perma, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<objid> selectionId, std::optional<std::string> texture, std::optional<ShapeOptions> shaderId);
 
 std::set<std::string> listAnimations(int32_t id);
-void playAnimation(int32_t id, std::string animationToPlay, AnimationType animationType);
+void playAnimation(int32_t id, std::string animationToPlay, AnimationType animationType, std::optional<std::set<objid>> mask);
 void stopAnimation(int32_t id);
 void disableAnimationIds(std::set<objid>& ids);
 void setAnimationPose(int32_t id, std::string animationToPlay, float time);

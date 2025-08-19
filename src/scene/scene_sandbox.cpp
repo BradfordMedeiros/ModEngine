@@ -605,7 +605,7 @@ int getDirectIndexForId(SceneSandbox& sandbox, objid id){
 float snapToEpsilon(float value) {
   static float epsilon = 0.0001f;  // 0.0001f is kind of arbitrary but seems to work ok
   float newValue = roundf(value / epsilon) * epsilon;
-  std::cout << "snapToEpsilon: " << newValue << " | " << value << std::endl;
+  //std::cout << "snapToEpsilon: " << newValue << " | " << value << std::endl;
   return newValue;
 }
 void updateVec3FixPrecision(glm::vec3* _vec, glm::vec3& vec){
