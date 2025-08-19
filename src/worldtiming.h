@@ -13,19 +13,19 @@ struct BlendAnimationData {
   AnimationWithIds animation;
   std::optional<std::set<objid>> mask;
 };
-
 struct AnimationLayer {
   AnimationWithIds animation;
   AnimationType animationType;
   float animLength;
   float initTime;
+  std::optional<BlendAnimationData> blendData;
 };
+
 struct AnimationData {
   objid groupId;
   objid idScene;
   std::string rootname;
   AnimationLayer layer;
-  std::optional<BlendAnimationData> blendData;
 };
 
 struct AnimationState {

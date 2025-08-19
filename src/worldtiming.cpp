@@ -27,8 +27,9 @@ void setPoses(World& world, objid idScene, std::vector<AnimationPose>& poses){
   }
 }
 void tickAnimation(World& world, AnimationData& playback, float currentTime){
-  if (enableBlending && playback.blendData.has_value()){
-    float timeElapsedBlendStart = currentTime - playback.blendData.value().blendStartTime;
+  auto elapsedTime = currentTime - playback.layer.initTime;
+  if (enableBlending && playback.layer.blendData.has_value()){
+    float timeElapsedBlendStart = currentTime - playback.layer.blendData.value().blendStartTime;
     float aFactor = glm::min(1.f, timeElapsedBlendStart / blendingWindow);
     // if afactor > 1.f or something like that, could get rid of the old animation value
     //modassert(false, "blend not yet supported");
@@ -36,15 +37,15 @@ void tickAnimation(World& world, AnimationData& playback, float currentTime){
     modlog("tickAnimation", std::to_string(aFactor) + ", " + std::to_string(timeElapsedBlendStart));
     auto newPoses = playbackAnimationBlend(
       playback.layer.animation,
-      playback.blendData.value().animation, 
-      currentTime - playback.layer.initTime,
-      currentTime - playback.blendData.value().oldAnimationInit, 
+      playback.layer.blendData.value().animation, 
+      elapsedTime,
+      currentTime - playback.layer.blendData.value().oldAnimationInit, 
       aFactor,
       playback.idScene
     );
     setPoses(world, playback.idScene, newPoses);
   }else{
-    auto newPoses = playbackAnimation(playback.layer.animation, currentTime - playback.layer.initTime, playback.idScene);
+    auto newPoses = playbackAnimation(playback.layer.animation, elapsedTime, playback.idScene);
     setPoses(world, playback.idScene, newPoses);
   }
 }
@@ -176,8 +177,8 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
       .animationType = animationType,
       .animLength = animLength,
       .initTime = initialTime,
+      .blendData = blendData,
     },
-    .blendData = blendData,
   };
 }
 
