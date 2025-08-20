@@ -33,10 +33,14 @@ struct AnimationState {
   std::unordered_map<int32_t, AnimationData> playbacks;
 };
 
+struct PlaybackToRemove {
+  int32_t id;
+  //int layer;
+};
 struct WorldTiming {
   AnimationState animations;
   std::set<objid> disableAnimationIds;
-  std::vector<int32_t> playbacksToRemove;
+  std::vector<PlaybackToRemove> playbacksToRemove;
   float initialTime;
 };
 

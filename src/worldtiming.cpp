@@ -4,7 +4,7 @@ std::optional<objid> getGameObjectByName(std::string name, objid sceneId);
 
 WorldTiming createWorldTiming(float initialTime){
   AnimationState animations;
-  std::vector<int32_t> playbacksToRemove;
+  std::vector<PlaybackToRemove> playbacksToRemove;
 
   WorldTiming timing {
     .animations = animations,
@@ -59,7 +59,11 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
     // might be better to not have this check here and instead just assume obj exists,
     // remove animation when del object, but for now!
     if (!idExists(world.sandbox, playback.groupId)){  // why are we doing this check here?
-      timings.playbacksToRemove.push_back(playback.groupId);
+      timings.playbacksToRemove.push_back(
+        PlaybackToRemove {
+          .id = playback.groupId,
+        }
+      );
       modlog("animation", std::string("removed playbacks because of internal group id: ") + std::to_string(playback.groupId));
     }else{
       tickAnimation(world, playback, currentTime);
@@ -73,7 +77,9 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
     if (timeElapsed > playback.layer.at(0).animLength){
       modlog("animation", "on animation finish");
       if (playback.layer.at(0).animationType == ONESHOT){
-        timings.playbacksToRemove.push_back(playback.groupId);
+        timings.playbacksToRemove.push_back(PlaybackToRemove {
+          .id = playback.groupId,
+        });
         continue;
       }else if (playback.layer.at(0).animationType == LOOP){
         playback.layer.at(0).initTime = currentTime;
@@ -86,8 +92,8 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
     }
   }
   //std::cout << "num playbacks: " << timings.animations.playbacks.size() << std::endl;
-  for (auto groupId : timings.playbacksToRemove){
-    timings.animations.playbacks.erase(groupId);
+  for (auto& playback : timings.playbacksToRemove){
+    timings.animations.playbacks.erase(playback.id);
     //modlog("animation", std::string("playbacks to remove, removing: ") + std::to_string(groupId));
   }
   timings.playbacksToRemove.clear();
@@ -134,10 +140,10 @@ std::optional<AnimationWithIds> getAnimation(World& world, int32_t groupId, std:
 }
 
 void invalidatePlaybackToRemove(WorldTiming& timing, objid groupId){
-  std::vector<int32_t> playbacksToRemoveNew;
-  for (auto id : timing.playbacksToRemove){
-    if (id != groupId){
-      playbacksToRemoveNew.push_back(id);
+  std::vector<PlaybackToRemove> playbacksToRemoveNew;
+  for (auto playback : timing.playbacksToRemove){
+    if (playback.id != groupId){
+      playbacksToRemoveNew.push_back(playback);
     }
   }
   timing.playbacksToRemove = playbacksToRemoveNew;
@@ -170,13 +176,13 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
     }
   }
 
-  modlog("animation zIndex", std::to_string(zIndex) + ", " + std::to_string(numAnimations) + ", " + print(currentIndex));
+  modlog("animation zIndex = ", std::to_string(zIndex) + ", numAnimations = " + std::to_string(numAnimations) + ", currentIndex = " + print(currentIndex));
   ///////////////////////
 
 
 
   std::optional<BlendAnimationData> blendData = std::nullopt;
-  if (timings.animations.playbacks.find(groupId) != timings.animations.playbacks.end()){
+  if (currentIndex.has_value()){
     modlog("animation", std::string("removing playback: ") + std::to_string(groupId));
 
     auto& oldAnimation = timings.animations.playbacks.at(groupId).layer.at(0).animation;
@@ -225,7 +231,11 @@ void removeAnimation(World& world, WorldTiming& timings, objid id){
     return;
   }
   modlog("animation", std::string("removing animation for obj: ") + std::to_string(id));
-  timings.playbacksToRemove.push_back(groupId);
+  timings.playbacksToRemove.push_back(
+    PlaybackToRemove { 
+      .id = groupId,
+    }
+  );
 }
 
 void disableAnimationIds(World& world, WorldTiming& timings, std::set<objid>& ids){
