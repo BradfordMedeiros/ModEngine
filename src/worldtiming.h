@@ -35,7 +35,7 @@ struct AnimationState {
 
 struct PlaybackToRemove {
   int32_t id;
-  //int layer;
+  int zIndex;
 };
 struct WorldTiming {
   AnimationState animations;
