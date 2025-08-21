@@ -49,6 +49,7 @@ struct AnimationWithIds {
   std::vector<objid> channelObjDirectIds;
   std::vector<KeyInfoLookup> lookup;
   std::optional<std::set<objid>> mask;
+  bool invertMask;
 };
 
 struct ModelData {

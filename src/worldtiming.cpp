@@ -44,7 +44,14 @@ void setPoses(World& world, objid idScene, std::vector<AnimationPose>& poses){
     //printMatrixInformation(pose.pose, std::string("SET_CHANNEL:") + pose.channelName);
   }
 }
+
 void tickAnimation(World& world, AnimationData& playback, float currentTime){
+  std::cout << "debug1 tickAnimation -----------------------_" << std::endl << "debug1 ";
+  for (auto& layer : playback.layer){
+    std::cout << layer.zIndex << " ";
+  }
+  std::cout << "\ndebug1tickAnimation end-----------------------_" << std::endl;
+
   for (auto& layer : playback.layer){
     auto elapsedTime = currentTime - layer.initTime;
     if (enableBlending && layer.blendData.has_value()){
@@ -118,14 +125,13 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
   }
   //std::cout << "num playbacks: " << timings.animations.playbacks.size() << std::endl;
   for (auto& playback : timings.playbacksToRemove){
-    // TODO ACTUALLY REMOVE THE PLAYBACKS HERE
     removePlayback(timings, playback.id, playback.zIndex);
     //modlog("animation", std::string("playbacks to remove, removing: ") + std::to_string(groupId));
   }
   timings.playbacksToRemove.clear();
 }
 
-AnimationWithIds resolveAnimationIds(World& world, Animation& animation, objid sceneId, std::optional<std::set<objid>> mask) {
+AnimationWithIds resolveAnimationIds(World& world, Animation& animation, objid sceneId, std::optional<std::set<objid>> mask, bool invertMask) {
   std::vector<objid> channelObjIds;
   std::vector<objid> channelObjDirectIds;
   std::vector<KeyInfoLookup> lookup;
@@ -143,17 +149,18 @@ AnimationWithIds resolveAnimationIds(World& world, Animation& animation, objid s
     .channelObjDirectIds = channelObjDirectIds,
     .lookup = lookup,
     .mask = mask,
+    .invertMask = invertMask,
   };
 }
 
-std::optional<AnimationWithIds> getAnimation(World& world, int32_t groupId, std::string animationToPlay, std::optional<std::set<objid>> mask){  
+std::optional<AnimationWithIds> getAnimation(World& world, int32_t groupId, std::string animationToPlay, std::optional<std::set<objid>> mask, bool invertMask){  
   if (world.animations.find(groupId) == world.animations.end()){
     return std::nullopt;
   }
   for (auto& animation :  world.animations.at(groupId)){
     if (animation.name == animationToPlay){
       auto idForScene = sceneId(world.sandbox, groupId);
-      return resolveAnimationIds(world, animation, idForScene, mask);
+      return resolveAnimationIds(world, animation, idForScene, mask, invertMask);
     }
   }
   std::cout << "ERROR: no animation found named: " << animationToPlay << std::endl;
@@ -190,7 +197,13 @@ bool hasAnimationLayer(WorldTiming& timings, objid groupId, int zIndex){
   return false;
 }
 
-void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay, float initialTime, AnimationType animationType, std::optional<std::set<objid>>& mask, int zIndex){
+void sortAnimationLayers(std::vector<AnimationLayer>& layers){
+  std::sort(layers.begin(), layers.end(), [](AnimationLayer& layer1, AnimationLayer& layer2) -> bool { 
+    return layer1.zIndex <= layer2.zIndex; 
+  });
+}
+
+void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay, float initialTime, AnimationType animationType, std::optional<std::set<objid>>& mask, int zIndex, bool invertMask){
   auto groupId = getGroupId(world.sandbox, id);
   auto rootname = getGameObject(world, groupId).name;
   auto idScene = sceneId(world.sandbox, groupId);
@@ -239,7 +252,7 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
     invalidatePlaybackToRemove(timings, groupId, zIndex);
   }
 
-  auto animation = getAnimation(world, groupId, animationToPlay, mask.has_value() ? mask.value() : timings.disableAnimationIds);
+  auto animation = getAnimation(world, groupId, animationToPlay, mask.has_value() ? mask.value() : timings.disableAnimationIds, invertMask);
   modassert(animation.has_value(), std::string("animation does not exist: ") + animationToPlay);
 
   std::string& animationname = animation.value().animation.name;
@@ -268,6 +281,8 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
         .blendData = blendData,
     }
   );
+
+  sortAnimationLayers(layers);
 }
 
 void removeAnimation(World& world, WorldTiming& timings, objid id){
@@ -297,7 +312,7 @@ void disableAnimationIds(World& world, WorldTiming& timings, std::set<objid>& id
 
 void setAnimationPose(World& world, objid id, std::string animationToPlay, float time){
   auto groupId = getGroupId(world.sandbox, id);
-  auto animation = getAnimation(world, groupId, animationToPlay, std::nullopt).value();
+  auto animation = getAnimation(world, groupId, animationToPlay, std::nullopt, false).value();
   auto idScene = sceneId(world.sandbox, groupId);
   auto newPoses = playbackAnimation(animation, time, idScene);
   setPoses(world, idScene, newPoses);
@@ -306,7 +321,7 @@ void setAnimationPose(World& world, objid id, std::string animationToPlay, float
 
 std::optional<float> animationLengthSeconds(World& world, objid id, std::string& animationToPlay){
   auto groupId = getGroupId(world.sandbox, id);
-  auto animation = getAnimation(world, groupId, animationToPlay, std::nullopt);
+  auto animation = getAnimation(world, groupId, animationToPlay, std::nullopt, false);
   if (!animation.has_value()){
     return std::nullopt;
   }
