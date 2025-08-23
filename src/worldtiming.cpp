@@ -46,7 +46,7 @@ void setPoses(World& world, objid idScene, std::vector<AnimationPose>& poses){
 }
 
 std::vector<float> computeLayerWeights(AnimationData& playback, float currentTime){
-  float blendTime = 2.f;
+  float blendTime = 0.2f;
 
   float totalWeightUsed = 0.f;
 
@@ -72,6 +72,87 @@ std::vector<float> computeLayerWeights(AnimationData& playback, float currentTim
   return weights;
 }
 
+Transformation blendTransforms(std::vector<Transformation>& transforms, std::vector<float>& weights){
+    modassert(transforms.size() > 0, "no transforms");
+    Transformation result = transforms.at(0);
+    float accumulatedWeight = weights.at(0);
+    for (size_t i = 1; i < transforms.size(); ++i) {
+        float w = weights.at(i);
+        float blendAmount = w / (accumulatedWeight + w); // relative weight
+
+        result.position = glm::lerp(result.position, transforms[i].position, blendAmount);
+        result.scale = glm::lerp(result.scale,    transforms[i].scale,    blendAmount);
+
+        result.rotation = glm::slerp(result.rotation, transforms[i].rotation, blendAmount);
+        accumulatedWeight += w;
+    }
+    return result;
+}
+
+AnimationPose calculateCombinedPose(std::vector<AnimationPose*> poses, std::vector<float>& layerWeights){
+  bool allNullPoses = true;
+  for (auto& pose : poses){
+    if (pose != NULL){
+      allNullPoses = false;
+      break;
+    }
+  }
+  modassert(!allNullPoses, "all poses were null");
+
+  AnimationPose basePose{};
+  for (auto& pose : poses){
+    if (pose != NULL){
+      basePose.targetId = pose -> targetId;
+      basePose.directIndex = pose -> directIndex;
+      break;
+    }
+  }
+  std::vector<Transformation> transforms;
+  std::vector<float> channelWeights;
+  for (int i = 0; i < poses.size(); i++){
+    auto& pose = poses.at(i);
+    if (pose != NULL){
+      transforms.push_back(pose -> pose);
+      channelWeights.push_back(layerWeights.at(i));
+    }
+  }
+  basePose.pose = blendTransforms(transforms, channelWeights);
+
+  return basePose;
+}
+
+// TODO - probably slow, could precompute stuff
+std::vector<AnimationPose> blendPoses(std::vector<std::vector<AnimationPose>>& layers, std::vector<float>& layerWeights){
+  std::unordered_set<objid> ids;
+  for (auto &layer : layers){
+    for (auto& pose : layer){
+      ids.insert(pose.targetId);
+    }
+  }
+
+  std::vector<AnimationPose> finalPose;
+
+  for (auto targetId : ids){
+    std::vector<AnimationPose*> poseForLayer;
+    for (auto &layer : layers){
+      bool foundLayer = false;
+      for (auto& pose : layer){
+        if (pose.targetId == targetId){
+          foundLayer = true;
+          poseForLayer.push_back(&pose);
+          break;
+        }
+      }
+      if (!foundLayer){
+        poseForLayer.push_back(NULL);
+      }
+      modassert(poseForLayer.size() > 0, "zero poses for layer");
+    }    
+    finalPose.push_back(calculateCombinedPose(poseForLayer, layerWeights));
+  }
+  return finalPose;
+}
+
 void tickAnimation(World& world, AnimationData& playback, float currentTime){
   std::cout << "debug1 tickAnimation -----------------------_" << std::endl << "debug1 ";
   for (auto& layer : playback.layer){
@@ -81,6 +162,10 @@ void tickAnimation(World& world, AnimationData& playback, float currentTime){
 
   auto layerWeights = computeLayerWeights(playback, currentTime);
   std::cout << "layerWeights: " << print(layerWeights) << std::endl;
+  std::vector<std::vector<AnimationPose>> layerPoses;
+
+  bool shouldBlendPoses = false;
+
   for (auto& layer : playback.layer){ // These are sorted
     auto elapsedTime = currentTime - layer.initTime;
     if (enableBlending && layer.blendData.has_value()){
@@ -98,12 +183,26 @@ void tickAnimation(World& world, AnimationData& playback, float currentTime){
         aFactor,
         playback.idScene
       );
-      setPoses(world, playback.idScene, newPoses);
+      if (shouldBlendPoses){
+        layerPoses.push_back(newPoses);
+      }else{
+        setPoses(world, playback.idScene, newPoses);    
+      }
     }else{
       auto newPoses = playbackAnimation(layer.animation, elapsedTime, playback.idScene);
-      setPoses(world, playback.idScene, newPoses);
+      if (shouldBlendPoses){
+        layerPoses.push_back(newPoses);
+      }else{
+        setPoses(world, playback.idScene, newPoses);    
+      }
     }    
   }
+
+  if (shouldBlendPoses){
+    auto blendedPoses = blendPoses(layerPoses, layerWeights);
+    setPoses(world, playback.idScene, blendedPoses);    
+  }
+
 }
 
 void tickAnimations(World& world, WorldTiming& timings, float currentTime){
