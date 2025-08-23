@@ -45,6 +45,33 @@ void setPoses(World& world, objid idScene, std::vector<AnimationPose>& poses){
   }
 }
 
+std::vector<float> computeLayerWeights(AnimationData& playback, float currentTime){
+  float blendTime = 2.f;
+
+  float totalWeightUsed = 0.f;
+
+  std::vector<float> weights(playback.layer.size(), 0.f);
+  for (int i = (playback.layer.size() - 1); i >= 0; i--){
+    float weight = 1.f;
+    if (i != 0){
+      float elapsedTime = currentTime - playback.layer.at(i).initTime;
+      weight = elapsedTime / blendTime;
+      if (weight > 1.f){
+        weight = 1.f;
+      }
+    }
+    float remainingWeight = 1.f - totalWeightUsed;
+    modassert(remainingWeight >= 0.f, "remaining weight should be bigger");
+    if (weight > remainingWeight){
+      weight = remainingWeight;
+    }
+
+    weights[i] = weight;
+    totalWeightUsed += weight;
+  }
+  return weights;
+}
+
 void tickAnimation(World& world, AnimationData& playback, float currentTime){
   std::cout << "debug1 tickAnimation -----------------------_" << std::endl << "debug1 ";
   for (auto& layer : playback.layer){
@@ -52,7 +79,9 @@ void tickAnimation(World& world, AnimationData& playback, float currentTime){
   }
   std::cout << "\ndebug1tickAnimation end-----------------------_" << std::endl;
 
-  for (auto& layer : playback.layer){
+  auto layerWeights = computeLayerWeights(playback, currentTime);
+  std::cout << "layerWeights: " << print(layerWeights) << std::endl;
+  for (auto& layer : playback.layer){ // These are sorted
     auto elapsedTime = currentTime - layer.initTime;
     if (enableBlending && layer.blendData.has_value()){
       float timeElapsedBlendStart = currentTime - layer.blendData.value().blendStartTime;

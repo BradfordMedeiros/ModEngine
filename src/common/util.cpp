@@ -195,6 +195,15 @@ std::string print(std::vector<bool>& values){
   return strValue;
 }
 
+std::string print(std::vector<float>& values){
+  std::string strValue = "[";
+  for (float value : values){
+    strValue += " " + std::to_string(value);
+  }
+  strValue += " ]";
+  return strValue; 
+}
+
 std::string print(std::set<objid>& values){
   std::string strValue = "[";
   for (auto value : values){
@@ -279,6 +288,7 @@ std::string print(void* data){
   oss << data;
   return oss.str();
 }
+
 
 
 bool maybeParseFloat(std::string value, float& _number){
@@ -1255,4 +1265,5 @@ std::string inColor(std::string str, std::optional<CONSOLE_COLOR> color){
   }else{
     modassert(false, "invalid color");
   }
+  return "";
 }
