@@ -84,6 +84,7 @@ struct CustomApiBindings {
   void (*stopAnimation)(int32_t id);
   void (*disableAnimationIds)(std::set<objid>& ids);
   void (*setAnimationPose)(int32_t id, std::string animationToPlay, float time);
+  void (*clearAnimationPose)(int32_t id);
   std::optional<float> (*animationLength)(int32_t id, std::string animationToPlay);
 
   std::vector<std::string>(*listClips)();

@@ -37,7 +37,6 @@ void removePlayback(WorldTiming& timings, objid groupId, int zIndex){
   }
 }
 
-
 void setPoses(World& world, objid idScene, std::vector<AnimationPose>& poses){
   for (auto& pose : poses){
     physicsLocalTransformSet(world, pose.targetId, pose.pose, pose.directIndex);
@@ -147,9 +146,12 @@ std::vector<AnimationPose> blendPoses(std::vector<std::vector<AnimationPose>>& l
         poseForLayer.push_back(NULL);
       }
       modassert(poseForLayer.size() > 0, "zero poses for layer");
-    }    
+    } 
     finalPose.push_back(calculateCombinedPose(poseForLayer, layerWeights));
   }
+
+  // shoudln't the layer weights be normalized again here since some can have missing channels?
+
   return finalPose;
 }
 
@@ -164,7 +166,7 @@ void tickAnimation(World& world, AnimationData& playback, float currentTime){
   std::cout << "layerWeights: " << print(layerWeights) << std::endl;
   std::vector<std::vector<AnimationPose>> layerPoses;
 
-  bool shouldBlendPoses = false;
+  bool shouldBlendPoses = true;
 
   for (auto& layer : playback.layer){ // These are sorted
     auto elapsedTime = currentTime - layer.initTime;
@@ -311,7 +313,6 @@ void invalidatePlaybackToRemove(WorldTiming& timing, objid groupId, int zIndex){
   timing.playbacksToRemove = playbacksToRemoveNew;
 }
 
-
 bool hasAnimationLayer(WorldTiming& timings, objid groupId, int zIndex){
   if (timings.animations.playbacks.find(groupId) == timings.animations.playbacks.end()){
     return false;
@@ -446,6 +447,9 @@ void setAnimationPose(World& world, objid id, std::string animationToPlay, float
   setPoses(world, idScene, newPoses);
 }
 
+void clearAnimationPose(World& world, objid id){
+  modassert(false, "clear posed not yet implemented");
+}
 
 std::optional<float> animationLengthSeconds(World& world, objid id, std::string& animationToPlay){
   auto groupId = getGroupId(world.sandbox, id);

@@ -574,6 +574,10 @@ void disableAnimationIds(std::set<objid>& ids){
 void setAnimationPose(int32_t id, std::string animationToPlay, float time){
   setAnimationPose(world, id, animationToPlay, time);
 }
+void clearAnimationPose(int32_t id){
+  clearAnimationPose(world, id);
+}
+
 std::optional<float> animationLength(int32_t id, std::string animationToPlay){
   return animationLengthSeconds(world, id, animationToPlay);
 }

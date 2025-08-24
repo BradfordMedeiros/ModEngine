@@ -51,6 +51,7 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
 void removeAnimation(World& world, WorldTiming& timings, objid id);
 void disableAnimationIds(World& world, WorldTiming& timings, std::set<objid>& ids);
 void setAnimationPose(World& world, objid id, std::string animationToPlay, float time);
+void clearAnimationPose(World& world, objid id);
 std::optional<float> animationLengthSeconds(World& world, objid id, std::string& animationToPlay);
 
 #endif
