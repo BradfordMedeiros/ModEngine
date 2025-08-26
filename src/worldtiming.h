@@ -19,6 +19,7 @@ struct AnimationLayer {
   AnimationType animationType;
   float animLength;
   float initTime;
+  float animHoldLength; 
   std::optional<BlendAnimationData> blendData;
 };
 

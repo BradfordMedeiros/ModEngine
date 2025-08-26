@@ -54,7 +54,17 @@ std::vector<float> computeLayerWeights(AnimationData& playback, float currentTim
     float weight = 1.f;
     if (i != 0){
       float elapsedTime = currentTime - playback.layer.at(i).initTime;
-      weight = elapsedTime / blendTime;
+      float holdTime = elapsedTime - playback.layer.at(i).animLength;
+      float percentageHold =  holdTime / playback.layer.at(i).animHoldLength;
+      std::cout << "layerWeights holdTime: " << holdTime << ", " << percentageHold << std::endl;
+      if (holdTime < 0){
+        weight = elapsedTime / blendTime;
+      }else{
+        weight = (1.f - percentageHold);
+      }
+      if (weight < 0.f){
+        weight = 0.f;
+      }
       if (weight > 1.f){
         weight = 1.f;
       }
@@ -235,12 +245,14 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
     for (auto& layer : playback.layer){
       float timeElapsed = currentTime - layer.initTime;
       if (timeElapsed > layer.animLength){
-        modlog("animation", "on animation finish");
         if (layer.animationType == ONESHOT){
-          timings.playbacksToRemove.push_back(PlaybackToRemove {
-            .id = playback.groupId,
-            .zIndex = layer.zIndex,
-          });
+          if (timeElapsed > (layer.animLength + layer.animHoldLength)){
+            modlog("animation", "on animation finish");
+            timings.playbacksToRemove.push_back(PlaybackToRemove {
+              .id = playback.groupId,
+              .zIndex = layer.zIndex,
+            });
+          }
           continue;
         }else if (layer.animationType == LOOP){
           layer.initTime = currentTime;
@@ -365,6 +377,11 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
 
 
   std::optional<BlendAnimationData> blendData = std::nullopt;
+
+  float actualInitTime = initialTime;
+  bool useOldInit = true;
+
+
   if (currentIndex.has_value()){
     modlog("animation", std::string("removing playback: ") + std::to_string(groupId));
 
@@ -376,6 +393,10 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
       .blendStartTime = initialTime,
       .animation = oldAnimation,
     };
+
+    if (useOldInit){
+      actualInitTime = oldInit;
+    }
 
     removePlayback(timings, groupId, zIndex);
     invalidatePlaybackToRemove(timings, groupId, zIndex);
@@ -399,6 +420,18 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
     };  
   }
 
+  auto elapsedTime = initialTime - actualInitTime;
+  if (elapsedTime > animLength){
+    float timeIntoHold = elapsedTime - animLength;
+    float percentageHold = timeIntoHold / 2.f;
+    float startTimeOffset = (1.f - percentageHold) * animLength;
+    actualInitTime = initialTime - startTimeOffset;
+
+    if (currentIndex.has_value() && currentIndex.value() == 1){
+      std::cout << "on animation: elapsedTime = " << elapsedTime << ", timeIntoHold = " << timeIntoHold << ", percentageHold = " << percentageHold << ", startTimeOffset = " << startTimeOffset << ", duration = " << animLength << ", init time = " << initialTime << ", actualInitTime = " << actualInitTime << std::endl;
+    }
+  }
+
   auto& layers = timings.animations.playbacks.at(groupId).layer;
   layers.push_back(
     AnimationLayer {
@@ -406,7 +439,8 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
         .animation = animation.value(),
         .animationType = animationType,
         .animLength = animLength,
-        .initTime = initialTime,
+        .initTime = actualInitTime,
+        .animHoldLength = 2.f,
         .blendData = blendData,
     }
   );
@@ -448,7 +482,32 @@ void setAnimationPose(World& world, objid id, std::string animationToPlay, float
 }
 
 void clearAnimationPose(World& world, objid id){
-  modassert(false, "clear posed not yet implemented");
+  auto allIds = getIdsInGroupByObjId(world.sandbox, id);
+  for (auto id : allIds){
+    auto& meshes = getMeshesForId(world.objectMapping, id, getObjTypeLookup(world.sandbox, id));
+    for (auto &mesh : meshes){
+      for (auto& bone : mesh.bones){
+        auto boneId = getGameObjectByName(bone.name, sceneId(world.sandbox, id)).value();  // i should really be updating the transform here, not the offset matrix
+        //auto& gameobj = getGameObject(world, boneId);
+        auto directIndex = getDirectIndexForId(world.sandbox, boneId);
+
+        /*auto forward = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
+        Transformation fakeTransform {
+          .position = glm::vec3(0.f, 5.f, 0.f),
+          .scale = glm::vec3(1.f, 1.f, 1.f),
+          .rotation = forward,
+        };
+
+        // this needs to be relative to teh parent 
+        // kind of just shitty, maybe should just save this into the bone 
+        auto initialPose = glm::inverse(bone.initialBonePoseInverse);
+        auto initialTransform = getTransformationFromMatrix(initialPose);*/
+
+        std::cout << "set bone: " << boneId << ", " << print(bone.initialLocalTransform) << std::endl;
+        physicsLocalTransformSet(world, boneId, bone.initialLocalTransform, directIndex);
+      }      
+    }
+  }
 }
 
 std::optional<float> animationLengthSeconds(World& world, objid id, std::string& animationToPlay){

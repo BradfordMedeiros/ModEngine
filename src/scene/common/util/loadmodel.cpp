@@ -153,6 +153,7 @@ BoneInfo processBones(aiMesh* mesh){
       .name = bone -> mName.C_Str(),
       .offsetMatrix = glm::mat4(1.f),
       .initialBonePoseInverse = glm::mat4(1.f),  // this gets populated in setInitialBonePoses since needs lookup
+      .initialLocalTransform = getTransformationFromMatrix(glm::mat4(1.f)),  // same here
     };
 
     printMatrix(meshBone.name, bone -> mOffsetMatrix, meshBone.initialBonePoseInverse);
@@ -218,13 +219,15 @@ std::optional<int32_t> getNodeId(ModelData& data, std::string nodename){
   return std::nullopt;
 }
 
-void setInitialBonePoses(ModelData& data, std::unordered_map<int32_t, glm::mat4>& fullnodeTransform){
+void setInitialBonePoses(ModelData& data, std::unordered_map<int32_t, glm::mat4>& fullnodeTransform, std::unordered_map<int32_t, Transformation>& localTransforms){
   for (auto &[id, transform] : fullnodeTransform){
     printMatrixInformation(transform, std::string("initialbone - ") + std::to_string(id));
   }
   for (auto &[id, meshdata] : data.meshIdToMeshData){
     for (auto &bone : meshdata.bones){
       bone.initialBonePoseInverse = glm::inverse(fullnodeTransform.at(getNodeId(data, bone.name).value()));
+      bone.initialLocalTransform = localTransforms.at(getNodeId(data, bone.name).value());
+      std::cout << "set bone initial: " << print(bone.initialLocalTransform) << std::endl;
       printMatrixInformation(bone.initialBonePoseInverse, std::string("offsetmatrix - " + bone.name));
     }
   }
@@ -718,7 +721,7 @@ ModelDataCore loadModelCore(std::string modelPath){
    };
 
    // pass in full transforms, and bones, then set initialoffset to full transform of bone
-   setInitialBonePoses(coreModelData.modelData, fullnodeTransform); 
+   setInitialBonePoses(coreModelData.modelData, fullnodeTransform, nodeTransform); 
    printDebugModelData(coreModelData.modelData, modelPath);
 
    return coreModelData;

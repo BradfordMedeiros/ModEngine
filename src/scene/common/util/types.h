@@ -25,6 +25,7 @@ struct Bone {
   std::string shortName;
   glm::mat4 offsetMatrix;
   glm::mat4 initialBonePoseInverse;
+  Transformation initialLocalTransform;
 };
 
 struct MeshData {
