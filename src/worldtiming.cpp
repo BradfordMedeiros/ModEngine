@@ -55,7 +55,8 @@ std::vector<float> computeLayerWeights(AnimationData& playback, float currentTim
     if (i != 0){
       float elapsedTime = currentTime - playback.layer.at(i).initTime;
       float holdTime = elapsedTime - playback.layer.at(i).animLength;
-      float percentageHold =  holdTime / playback.layer.at(i).animHoldLength;
+      float holdLength = playback.layer.at(i).animHoldLength;
+      float percentageHold =  holdTime / holdLength;
       std::cout << "layerWeights holdTime: " << holdTime << ", " << percentageHold << std::endl;
       if (holdTime < 0){
         weight = elapsedTime / blendTime;
@@ -344,7 +345,7 @@ void sortAnimationLayers(std::vector<AnimationLayer>& layers){
   });
 }
 
-void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay, float initialTime, AnimationType animationType, std::optional<std::set<objid>>& mask, int zIndex, bool invertMask){
+void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay, float initialTime, AnimationType animationType, std::optional<std::set<objid>>& mask, int zIndex, bool invertMask, std::optional<float> holdTime){
   auto groupId = getGroupId(world.sandbox, id);
   auto rootname = getGameObject(world, groupId).name;
   auto idScene = sceneId(world.sandbox, groupId);
@@ -421,9 +422,9 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
   }
 
   auto elapsedTime = initialTime - actualInitTime;
-  if (elapsedTime > animLength){
+  if (elapsedTime > animLength && holdTime.has_value()){
     float timeIntoHold = elapsedTime - animLength;
-    float percentageHold = timeIntoHold / 2.f;
+    float percentageHold = timeIntoHold / holdTime.value();
     float startTimeOffset = (1.f - percentageHold) * animLength;
     actualInitTime = initialTime - startTimeOffset;
 
@@ -440,7 +441,7 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
         .animationType = animationType,
         .animLength = animLength,
         .initTime = actualInitTime,
-        .animHoldLength = 2.f,
+        .animHoldLength = holdTime.has_value() ? holdTime.value() : 0.f,
         .blendData = blendData,
     }
   );

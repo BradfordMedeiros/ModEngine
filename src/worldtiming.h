@@ -48,7 +48,7 @@ struct WorldTiming {
 WorldTiming createWorldTiming(float initialTime);
 void tickAnimations(World& world, WorldTiming& timings, float currentTime);
 
-void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay, float initialTime, AnimationType animationType, std::optional<std::set<objid>>& mask, int zIndex, bool invertMask);
+void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay, float initialTime, AnimationType animationType, std::optional<std::set<objid>>& mask, int zIndex, bool invertMask, std::optional<float> holdTime);
 void removeAnimation(World& world, WorldTiming& timings, objid id);
 void disableAnimationIds(World& world, WorldTiming& timings, std::set<objid>& ids);
 void setAnimationPose(World& world, objid id, std::string animationToPlay, float time);

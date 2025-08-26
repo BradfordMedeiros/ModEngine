@@ -80,7 +80,7 @@ struct CustomApiBindings {
   std::optional<PhysicsInfo> (*getPhysicsInfo)(int32_t index);
   
   std::set<std::string> (*listAnimations)(int32_t id);
-  void (*playAnimation)(int32_t id, std::string animationToPlay, AnimationType animationType, std::optional<std::set<objid>> mask, int zIndex, bool invertMask);
+  void (*playAnimation)(int32_t id, std::string animationToPlay, AnimationType animationType, std::optional<std::set<objid>> mask, int zIndex, bool invertMask, std::optional<float> holdTime);
   void (*stopAnimation)(int32_t id);
   void (*disableAnimationIds)(std::set<objid>& ids);
   void (*setAnimationPose)(int32_t id, std::string animationToPlay, float time);

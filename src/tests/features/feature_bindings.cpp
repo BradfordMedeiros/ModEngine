@@ -165,7 +165,7 @@ CScriptBinding cscriptCreateAnimationBinding(CustomApiBindings& api){
 
       auto ids = addNObjects(api, 0, x, y, z, "../gameresources/build/characters/plaguerobot.gltf");
       for (auto id : ids){
-        api.playAnimation(id, "walk", LOOP, {}, 0, false);
+        api.playAnimation(id, "walk", LOOP, {}, 0, false, std::nullopt);
       }
     }
 
