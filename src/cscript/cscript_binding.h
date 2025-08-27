@@ -185,6 +185,9 @@ struct CustomApiBindings {
 
   std::string (*dumpDebugInfo)(bool);
   //std::vector<func_t> registerGuileFns
+
+
+  void (*createPhysicsBody)(objid id);
 };
 
 

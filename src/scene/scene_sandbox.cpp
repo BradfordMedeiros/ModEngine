@@ -674,6 +674,8 @@ void updateNodes(SceneSandbox& sandbox, int directIndex){
       continue;
     }
 
+    sandbox.updatedIds.insert(idToVisit);
+
     // This is wrong because the absolute update rotation will preserve the old location
     // set setAbsoluteRotation inherits the old location
     bool isAbsoluteUpdate = objh.updateAbsoluteFrame == currentFrameTick;

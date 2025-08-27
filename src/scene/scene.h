@@ -122,4 +122,6 @@ void loadSkybox(World& world, std::string skyboxpath);
 void freeTextureRefsIdByOwner(World& world, int ownerId, std::optional<int> id);
 void freeTextureRefsByOwner(World& world, int ownerId);
 
+void createPhysicsBody(World& world, objid id);
+
 #endif

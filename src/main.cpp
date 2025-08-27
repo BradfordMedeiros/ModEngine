@@ -1668,6 +1668,8 @@ int main(int argc, char* argv[]){
     .getMainOctreeId = getMainOctreeId,
     
     .dumpDebugInfo = dumpDebugInfo,
+
+    .createPhysicsBody = createPhysicsBody,
   };
 
 

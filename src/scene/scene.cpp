@@ -117,11 +117,11 @@ std::vector<glm::vec3> vertsForId(World& world, objid id){
 PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   auto physicsOptions = getGameObject(world.sandbox, id).physicsOptions;
   if (!physicsOptions.enabled){
-    return PhysicsValue { .body = NULL, .offset = std::nullopt };
+    return PhysicsValue { .body = NULL, .offset = std::nullopt, .customManaged = false };
   }
   auto physicsInfoOpt = getPhysicsInfoForGameObject(world, id, true);
   if (!physicsInfoOpt.has_value()){
-    return PhysicsValue { .body = NULL, .offset = std::nullopt };
+    return PhysicsValue { .body = NULL, .offset = std::nullopt, .customManaged = false };
   }
 
   PhysicsInfo& physicsInfo = physicsInfoOpt.value();
@@ -223,7 +223,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   }else if (physicsOptions.shape == CONVEXHULL){
     auto verts = vertsForId(world, id);
     if (verts.size() == 0){
-       return PhysicsValue { .body = NULL, .offset = std::nullopt };
+       return PhysicsValue { .body = NULL, .offset = std::nullopt, .customManaged = false };
     }
     // This is a hack, but it should be ok.  UpdatePhysicsBody really only need to apply for [voxels - octrees?] and heightmaps as of writing this
     // I don't have easy scope to the list of verts here, so I'd rather not reload the model (or really keep them in mem for no reason) just 
@@ -244,7 +244,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   }else if (physicsOptions.shape == SHAPE_EXACT){
     auto verts = vertsForId(world, id);
     if (verts.size() == 0){
-       return PhysicsValue { .body = NULL, .offset = std::nullopt };
+       return PhysicsValue { .body = NULL, .offset = std::nullopt, .customManaged = false };
     }
     modlog("2 physics", std::string("num verts: ") + std::to_string(verts.size()));
     assert(initialLoad);
@@ -285,6 +285,12 @@ void rmRigidBodyWorld(World& world, objid id){
 void updatePhysicsBody(World& world, objid id){
   bool hasRigidBody = world.rigidbodys.find(id) != world.rigidbodys.end();
   if (hasRigidBody){
+    bool customManaged = world.rigidbodys.at(id).customManaged;
+    if (customManaged){
+      modlog("updatePhysicsBody", "returning customManaged");
+      return;
+    }
+
     auto rigidBody = world.rigidbodys.at(id).body;
     assert(rigidBody != NULL);
     rmRigidBodyWorld(world, id);
@@ -873,6 +879,7 @@ void postUpdatePhysicsRotateSet(World& world, objid index){
   }
 }
 
+// TODO custom
 std::set<objid> updatePhysicsFromSandbox(World& world){
   auto updatedIds = updateSandbox(world.sandbox);  
   
@@ -887,7 +894,12 @@ std::set<objid> updatePhysicsFromSandbox(World& world){
 
 
   for (auto index : updatedIds){
+    if (idExists(world.sandbox, index)){
+      std::cout << "Custom updating 3: " << getGameObject(world, index).name << std::endl;
+    }
+
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+      std::cout << "Custom updating: " << getGameObject(world, index).name << std::endl;
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body =  phys.body;
       auto& fullTransform = fullTransformation(world.sandbox, index, "read back transform for rigid body position");
@@ -1508,11 +1520,13 @@ bool hasRotUpdate(World& world, objid idToCheck){
   return false;
 }
 
-
+// TODO custom
 void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<objid, PhysicsValue>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     GameObject& gameobj = getGameObject(world, i);
-    if (!gameobj.physicsOptions.isStatic){
+    std::cout << "Custom updating 2 updatePhysicsPositionsAndClampVelocity: " << gameobj.name << std::endl;
+    bool customManaged = rigidBody.customManaged;
+    if (!gameobj.physicsOptions.isStatic ){
       auto rotation = getRotation(rigidBody.body);
       auto posUpdate = hasPosUpdate(world, i);
       auto rotUpdate = hasRotUpdate(world, i);
@@ -1688,6 +1702,10 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   }
 
   for (auto id : world.entitiesToUpdate){
+    if (!idExists(world.sandbox, id)){
+      modlog("entities to update missing", std::to_string(id));
+      continue;
+    }
     if (id == getGroupId(world.sandbox, id)){ // why? 
       world.onObjectUpdate(id);
     }
@@ -1772,4 +1790,38 @@ Transformation gameobjectTransformation(World& world, objid id, bool isWorld, co
 
 int getNumberOfRigidBodies(World& world){
   return world.rigidbodys.size();
+}
+
+void createPhysicsBody(World& world, objid id){
+  if (world.rigidbodys.find(id) != world.rigidbodys.end()){
+    modassert(false, std::string("rigid body already exists on this:  customManaged = ") + (world.rigidbodys.at(id).customManaged ? "true" : "false"));
+  }
+
+  glm::vec3 pos(0.f, 0.f, 0.f);
+  float radius = 10.f;
+  bool isStatic = true;
+  bool hasCollision = true;
+  glm::vec3 scaling(1.f, 1.f, 1.f);
+
+  rigidBodyOpts opts {
+    .linear = glm::vec3(1.f, 1.f, 1.f),
+    .angular = glm::vec3(0.f, 0.f, 0.f),
+    .gravity = glm::vec3(0.f, -9.81f, 0.f),
+    .friction = 1.f,
+    .restitution = 1.f,
+    .mass = 1.f,
+    .layer = 2,
+    .velocity = std::nullopt,
+    .angularVelocity = std::nullopt,
+    .linearDamping = 0.f,
+  };
+
+  auto dir = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
+  auto rigidBody = addRigidBodySphere(world.physicsEnvironment, pos, radius, dir, isStatic, hasCollision, scaling, opts);
+  PhysicsValue phys {
+    .body = rigidBody,
+    .offset = std::nullopt,
+    .customManaged = true,
+  };
+  world.rigidbodys[id] = phys;
 }
