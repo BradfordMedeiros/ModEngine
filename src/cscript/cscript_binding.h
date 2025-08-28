@@ -12,6 +12,8 @@
 #include "../scene/objtypes/lighting/scene_lighting.h"
 #include "../scene/common/util/types.h"
 #include "../scene/scene_sandbox.h"
+#include "../scene/physics_common.h"
+
 #include "../common/http.h"
 
 struct CustomApiBindings {
@@ -188,6 +190,8 @@ struct CustomApiBindings {
 
 
   void (*createPhysicsBody)(objid id);
+  void (*setPhysicsOptions)(objid id, rigidBodyOpts& opts);
+
 };
 
 

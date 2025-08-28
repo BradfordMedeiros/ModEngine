@@ -1798,9 +1798,9 @@ void createPhysicsBody(World& world, objid id){
   }
 
   glm::vec3 pos(0.f, 0.f, 0.f);
-  float radius = 10.f;
+  float radius = 0.2f;
   bool isStatic = true;
-  bool hasCollision = true;
+  bool hasCollision = false;
   glm::vec3 scaling(1.f, 1.f, 1.f);
 
   rigidBodyOpts opts {
@@ -1825,3 +1825,11 @@ void createPhysicsBody(World& world, objid id){
   };
   world.rigidbodys[id] = phys;
 }
+
+void setPhysicsOptions(World& world, objid id, rigidBodyOpts& opts){
+  modassert(world.rigidbodys.find(id) != world.rigidbodys.end(), "invalid rigid body");
+  PhysicsValue& phyicsValue = world.rigidbodys.at(id);
+  modassert(phyicsValue.customManaged, "cannot set physics option if not custom managed");
+  setPhysicsOptions(phyicsValue.body, opts);
+}
+

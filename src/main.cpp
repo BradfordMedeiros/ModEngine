@@ -1670,6 +1670,7 @@ int main(int argc, char* argv[]){
     .dumpDebugInfo = dumpDebugInfo,
 
     .createPhysicsBody = createPhysicsBody,
+    .setPhysicsOptions = setPhysicsOptions,
   };
 
 

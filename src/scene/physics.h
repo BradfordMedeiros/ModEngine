@@ -41,18 +41,6 @@ physicsEnv initPhysics(collisionPairPosFn onObjectEnter,  collisionPairFn onObje
 void deinitPhysics(physicsEnv env);
 void stepPhysicsSimulation(physicsEnv& env, float timestep, bool paused, bool enablePhysics, bool drawOnly);
 
-struct rigidBodyOpts {
-  glm::vec3 linear;
-  glm::vec3 angular;
-  glm::vec3 gravity;
-  float friction;
-  float restitution;
-  float mass;
-  int layer;
-  std::optional<glm::vec3> velocity;
-  std::optional<glm::vec3> angularVelocity;
-  float linearDamping;
-};
 
 btRigidBody* addRigidBodyRect(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts);
 btRigidBody* addRigidBodySphere(physicsEnv& env, glm::vec3 pos, float radius, glm::quat rotation, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts);
@@ -63,6 +51,8 @@ btRigidBody* addRigidBodyExact(physicsEnv& env, std::vector<glm::vec3>& verts, g
 btRigidBody* addRigidBodyVoxel(physicsEnv& env, glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts);
 btRigidBody* addRigidBodyHeightmap(physicsEnv& env, glm::vec3 pos, glm::quat rotation, bool isStatic, rigidBodyOpts opts, float* data, int width, int height, glm::vec3 scaling, float minHeight, float maxHeight);
 btRigidBody* addRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, bool isStatic, bool hasCollision, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks, std::vector<PositionAndScaleVerts>& shapes);
+
+void setPhysicsOptions(btRigidBody* body, rigidBodyOpts& opts);
 
 void rmRigidBody(physicsEnv& env, btRigidBody* body);
 

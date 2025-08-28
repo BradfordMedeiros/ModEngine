@@ -266,5 +266,6 @@ std::optional<objid> getMainOctreeId();
 std::optional<OctreeMaterial> getMaterial(glm::vec3 position);
 
 void createPhysicsBody(objid id);
+void setPhysicsOptions(objid id, rigidBodyOpts& opts);
 
 #endif

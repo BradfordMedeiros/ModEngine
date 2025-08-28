@@ -1228,3 +1228,7 @@ std::optional<objid> getMainOctreeId(){
 void createPhysicsBody(objid id){
   createPhysicsBody(world, id);
 }
+
+void setPhysicsOptions(objid id, rigidBodyOpts& opts){
+  setPhysicsOptions(world, id, opts);
+}
