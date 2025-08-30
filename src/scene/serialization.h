@@ -22,8 +22,6 @@ struct physicsOpts {
   glm::vec3 linearFactor;
   glm::vec3 angularFactor;
   glm::vec3 gravity;
-  glm::vec3 velocity;
-  glm::vec3 angularVelocity;
   float linearDamping;
   float friction;
   float restitution;

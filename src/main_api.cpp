@@ -385,6 +385,16 @@ void setSingleGameObjectAttr(int32_t id, const char* field, AttributeValue value
   setSingleGameObjectAttr(world, id, field, value);
 }
 
+glm::vec3 getPhysicsVelocity(int32_t id){
+  auto body = world.rigidbodys.at(id).body;
+  return btToGlm(body -> getLinearVelocity());
+}
+void setPhysicsVelocity(int32_t id, glm::vec3 velocity){
+  auto body = world.rigidbodys.at(id).body;
+  body -> setLinearVelocity(glmToBt(velocity));
+  body -> activate(true);
+}
+
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld, const char* hint){
   return gameobjectPosition(world, index, isWorld, hint);
 }

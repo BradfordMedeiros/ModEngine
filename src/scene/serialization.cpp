@@ -149,18 +149,6 @@ std::vector<AutoSerialize> gameobjSerializer {
     .field = "physics_gravity",
     .defaultValue = glm::vec3(0.f, -9.81f, 0.f),
   },
-  AutoSerializeVec3 {
-    .structOffset = offsetof(GameObject, physicsOptions.velocity),
-    .structOffsetFiller = std::nullopt,
-    .field = "physics_velocity",
-    .defaultValue = glm::vec3(0.f, 0.f, 0.f),
-  },
-  AutoSerializeVec3 {
-    .structOffset = offsetof(GameObject, physicsOptions.angularVelocity),
-    .structOffsetFiller = std::nullopt,
-    .field = "physics_avelocity",
-    .defaultValue = glm::vec3(0.f, 0.f, 0.f),
-  },
   AutoSerializeBool {
     .structOffset = offsetof(GameObject, lookat),
     .field = "lookat",

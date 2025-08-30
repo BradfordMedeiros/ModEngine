@@ -142,8 +142,6 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
     .restitution = physicsOptions.restitution,
     .mass = physicsOptions.mass,
     .layer = physicsOptions.layer,
-    .velocity = physicsOptions.velocity,
-    .angularVelocity = physicsOptions.angularVelocity,
     .linearDamping = physicsOptions.linearDamping,
   };
 
@@ -1364,7 +1362,6 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool veloci
       .restitution = gameobj.physicsOptions.restitution,
       .mass = gameobj.physicsOptions.mass,
       .layer = gameobj.physicsOptions.layer,
-      .velocity = velocitySet ? std::optional(gameobj.physicsOptions.velocity) : std::nullopt,    // velocity is not updated so this will reset the vel
       .linearDamping = gameobj.physicsOptions.linearDamping,
     };
     updateRigidBodyOpts(world.physicsEnvironment, body, opts);
@@ -1532,8 +1529,6 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<obj
         modassert(false, "updatePhysicsPositionsAndClampVelocity invalid case");
       }
 
-      gameobj.physicsOptions.velocity = getVelocity(rigidBody.body);
-      gameobj.physicsOptions.angularVelocity = getAngularVelocity(rigidBody.body);
       clampMaxVelocity(rigidBody.body, gameobj.physicsOptions.maxspeed);
     }
   }
