@@ -32,52 +32,46 @@ physicsEnv initPhysics(collisionPairPosFn onObjectEnter,  collisionPairFn onObje
   return env;
 }
 
-btRigidBody* createRigidBody(glm::vec3 pos, btCollisionShape* shape, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
+btRigidBody* createRigidBody(glm::vec3 pos, btCollisionShape* shape, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts){
   btTransform transform;
   transform.setIdentity();
   transform.setOrigin(glmToBt(pos));   
   transform.setRotation(glmToBt(rot));
 
-  btScalar mass = isStatic ? btScalar(0.f) : btScalar(opts.mass);
   btDefaultMotionState* motionState = new btDefaultMotionState(transform);
 
   btVector3 inertia(0, 0, 0);
-  if (!isStatic){
+  btScalar mass = opts.isStatic ? btScalar(0.f) : btScalar(opts.mass);
+  if (!opts.isStatic){
     shape -> calculateLocalInertia(mass, inertia);
   }
   shape -> setLocalScaling(glmToBt(scaling));
 
   auto constructionInfo = btRigidBody::btRigidBodyConstructionInfo(mass, motionState, shape, inertia);
   auto body  = new btRigidBody(constructionInfo);
-  if (!hasCollision){
-    body -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-  }
-  if (isStatic){
-    body -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-    body -> setActivationState(DISABLE_DEACTIVATION);
-  }
+
   return body;
 }
-btRigidBody* createRigidBodyRect(glm::vec3 pos, float width, float height, float depth, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
+btRigidBody* createRigidBodyRect(glm::vec3 pos, float width, float height, float depth, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts){
   btCollisionShape* shape = new btBoxShape(btVector3(btScalar(width * 1.f / 2 ), btScalar(height * 1.f / 2), btScalar(depth * 1.f / 2)));
-  return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling, opts);
+  return createRigidBody(pos, shape, rot, scaling, opts);
 }
-btRigidBody* createRigidBodySphere(glm::vec3 pos, float radius, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
+btRigidBody* createRigidBodySphere(glm::vec3 pos, float radius, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts){
   btCollisionShape* shape = new btSphereShape(radius); 
     shape -> setMargin(0.1); // TODO check if this margin makes sense
 
-  return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling, opts);
+  return createRigidBody(pos, shape, rot, scaling, opts);
 }
-btRigidBody* createRigidBodyCapsule(physicsEnv& env, float radius, float height, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
+btRigidBody* createRigidBodyCapsule(physicsEnv& env, float radius, float height, glm::vec3 pos, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts){
   btCollisionShape* shape = new btCapsuleShape(radius, height);
-  return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling, opts);
+  return createRigidBody(pos, shape, rot, scaling, opts);
 };
-btRigidBody* createRigidBodyCylinder(physicsEnv& env, float radius, float height, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
+btRigidBody* createRigidBodyCylinder(physicsEnv& env, float radius, float height, glm::vec3 pos, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts){
   btCollisionShape* shape = new btCylinderShape(btVector3(radius, radius, height));
-  return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling, opts);
+  return createRigidBody(pos, shape, rot, scaling, opts);
 }
 
-btRigidBody* createRigidBodyHull(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
+btRigidBody* createRigidBodyHull(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts){
   modassert(verts.size() % 3 == 0, "verts must be % 3 = 0");
   btTriangleMesh* trimesh = new btTriangleMesh();
   for (int i = 0; i < verts.size(); i+=3){
@@ -89,11 +83,11 @@ btRigidBody* createRigidBodyHull(physicsEnv& env, std::vector<glm::vec3>& verts,
   hullBuilder.buildHull(0);
 
   std::cout << "physics createRigidBodyHull, created, allocated: 2 elements" << std::endl;
-  return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling, opts);
+  return createRigidBody(pos, shape, rot, scaling, opts);
 }
 
-btRigidBody* createRigidBodyExact(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
-  modassert(isStatic, "physics - bullet limitation - cannot create non-static exact");
+btRigidBody* createRigidBodyExact(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts){
+  modassert(opts.isStatic, "physics - bullet limitation - cannot create non-static exact");
   modassert(verts.size() % 3 == 0, std::string("create rigid body exact, verts not multiple of 3, got  ") + std::to_string(verts.size()));
   modassert(verts.size() >= 3, std::string("create rigid body exact, not enough verts, got  ") + std::to_string(verts.size()));
   modlog("ridig body exact, added verts number", std::to_string((int)verts.size()));
@@ -107,10 +101,10 @@ btRigidBody* createRigidBodyExact(physicsEnv& env, std::vector<glm::vec3>& verts
   btTriangleMeshShape* shape = new btBvhTriangleMeshShape(trimesh, true);  
   shape -> setMargin(0.4); // TODO check if this margin makes sense
 
-  return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling, opts);
+  return createRigidBody(pos, shape, rot, scaling, opts);
 }
 
-btRigidBody* createRigidBodyCompound(glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
+btRigidBody* createRigidBodyCompound(glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, glm::vec3 scaling, rigidBodyOpts opts){
   btCompoundShape* shape = new btCompoundShape();
   for (auto body: bodies){
     btCollisionShape* cshape1 = new btBoxShape(btVector3(btScalar(0.5f), btScalar(0.5f), btScalar(0.5f)));
@@ -119,18 +113,8 @@ btRigidBody* createRigidBodyCompound(glm::vec3 pos, glm::quat rotation, std::vec
     position.setOrigin(glmToBt(body.position + glm::vec3(0.5f, 0.5f, 0.5f)));
     shape -> addChildShape(position, cshape1);
   }
-  return createRigidBody(pos, shape, rotation, isStatic, hasCollision, scaling, opts);
+  return createRigidBody(pos, shape, rotation, scaling, opts);
 }
-
-float MIN_HEIGHTMAP_HEIGHT = -2000.f;
-float MAX_HEIGHTMAP_HEIGHT =  2000.f;
-btRigidBody* createRigidBodyHeightmap(glm::vec3 pos, glm::quat rotation, bool isStatic, rigidBodyOpts opts, float* data, int width, int height, glm::vec3 scaling, float minHeight, float maxHeight){
-  assert(minHeight >= MIN_HEIGHTMAP_HEIGHT);
-  assert(maxHeight <= MAX_HEIGHTMAP_HEIGHT); 
-  btHeightfieldTerrainShape * shape = new btHeightfieldTerrainShape(width, height, data, 1, MIN_HEIGHTMAP_HEIGHT, MAX_HEIGHTMAP_HEIGHT, 1, PHY_FLOAT, false);
-  return createRigidBody(pos, shape, rotation, isStatic, true, scaling, opts);
-}
-
 
 void cleanupRigidBody(btRigidBody* body){
   delete body -> getMotionState();
@@ -162,6 +146,9 @@ void cleanupRigidBody(btRigidBody* body){
 
 // Due to bullet weirdness, this seems like it has to be called after adding rigid body to world (for the gravity part)
 void setPhysicsOptions(btRigidBody* body, rigidBodyOpts& opts){
+  modlog("physics", "setPhysicsOptions");
+  //printBacktrace();
+
   body -> setLinearFactor(glmToBt(opts.linear));
   body -> setAngularFactor(glmToBt(opts.angular));
   body -> setGravity(glmToBt(opts.gravity));
@@ -181,48 +168,58 @@ void setPhysicsOptions(btRigidBody* body, rigidBodyOpts& opts){
     body -> setAngularVelocity(glmToBt(opts.angularVelocity.value()));
   }
   body -> getBroadphaseHandle() -> m_collisionFilterMask = opts.layer;
+
+  if (!opts.hasCollision){
+    body -> setCollisionFlags(body -> getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+  }else{
+    body -> setCollisionFlags(body->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
+  }
+  if (opts.isStatic){
+    body -> setCollisionFlags(body -> getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+    body -> setActivationState(DISABLE_DEACTIVATION);
+  }else{
+    body -> setCollisionFlags(body->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
+    body -> setActivationState(ACTIVE_TAG);
+    body -> activate(true);
+
+  }
 }
 btRigidBody* addBodyToWorld(physicsEnv& env, btRigidBody* rigidBodyPtr, rigidBodyOpts& opts){
   env.dynamicsWorld -> addRigidBody(rigidBodyPtr, 1, opts.layer);
   setPhysicsOptions(rigidBodyPtr, opts);
   return rigidBodyPtr;
 }
-btRigidBody* addRigidBodyRect(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){  
-  auto rigidBodyPtr = createRigidBodyRect(pos, width, height, depth, rotation, isStatic, hasCollision, scaling, opts);
+btRigidBody* addRigidBodyRect(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, glm::vec3 scaling, rigidBodyOpts opts){  
+  auto rigidBodyPtr = createRigidBodyRect(pos, width, height, depth, rotation, scaling, opts);
   return addBodyToWorld(env, rigidBodyPtr, opts);
 }
-btRigidBody* addRigidBodySphere(physicsEnv& env, glm::vec3 pos, float radius, glm::quat rotation, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
-  auto rigidBodyPtr = createRigidBodySphere(pos, radius, rotation, isStatic, hasCollision, scaling, opts);
+btRigidBody* addRigidBodySphere(physicsEnv& env, glm::vec3 pos, float radius, glm::quat rotation, glm::vec3 scaling, rigidBodyOpts opts){
+  auto rigidBodyPtr = createRigidBodySphere(pos, radius, rotation, scaling, opts);
   return addBodyToWorld(env, rigidBodyPtr, opts);
 }
-btRigidBody* addRigidBodyCapsule(physicsEnv& env, float radius, float height, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
-  auto rigidBodyPtr = createRigidBodyCapsule(env, radius, height, pos, rot, isStatic, hasCollision, scaling, opts);
+btRigidBody* addRigidBodyCapsule(physicsEnv& env, float radius, float height, glm::vec3 pos, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts){
+  auto rigidBodyPtr = createRigidBodyCapsule(env, radius, height, pos, rot, scaling, opts);
   return addBodyToWorld(env, rigidBodyPtr, opts);
 }
-btRigidBody* addRigidBodyCylinder(physicsEnv& env, float radius, float height, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
-  auto rigidBodyPtr = createRigidBodyCylinder(env, radius, height, pos, rot, isStatic, hasCollision, scaling, opts);
+btRigidBody* addRigidBodyCylinder(physicsEnv& env, float radius, float height, glm::vec3 pos, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts){
+  auto rigidBodyPtr = createRigidBodyCylinder(env, radius, height, pos, rot, scaling, opts);
   return addBodyToWorld(env, rigidBodyPtr, opts);
 }
-btRigidBody* addRigidBodyHull(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
-  auto rigidBodyPtr = createRigidBodyHull(env, verts, pos, rot, isStatic, hasCollision, scaling, opts);
+btRigidBody* addRigidBodyHull(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts){
+  auto rigidBodyPtr = createRigidBodyHull(env, verts, pos, rot, scaling, opts);
   return addBodyToWorld(env, rigidBodyPtr, opts);
 }
-btRigidBody* addRigidBodyExact(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
-  auto rigidBodyPtr = createRigidBodyExact(env, verts, pos, rot, isStatic, hasCollision, scaling, opts);
+btRigidBody* addRigidBodyExact(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts){
+  auto rigidBodyPtr = createRigidBodyExact(env, verts, pos, rot, scaling, opts);
   return addBodyToWorld(env, rigidBodyPtr, opts);
 }
-btRigidBody* addRigidBodyVoxel(physicsEnv& env, glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
-  auto rigidBodyPtr = createRigidBodyCompound(pos, rotation, bodies, isStatic, hasCollision, scaling, opts);
-  return addBodyToWorld(env, rigidBodyPtr, opts);
-}
-
-btRigidBody* addRigidBodyHeightmap(physicsEnv& env, glm::vec3 pos, glm::quat rotation, bool isStatic, rigidBodyOpts opts, float* data, int width, int height, glm::vec3 scaling, float minHeight, float maxHeight){
-  auto rigidBodyPtr = createRigidBodyHeightmap(pos, rotation, isStatic, opts, data, width, height, scaling, minHeight, maxHeight);
+btRigidBody* addRigidBodyVoxel(physicsEnv& env, glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, glm::vec3 scaling, rigidBodyOpts opts){
+  auto rigidBodyPtr = createRigidBodyCompound(pos, rotation, bodies, scaling, opts);
   return addBodyToWorld(env, rigidBodyPtr, opts);
 }
 
 
-btRigidBody* createRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, bool isStatic, bool hasCollision, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks, std::vector<PositionAndScaleVerts>& shapes){
+btRigidBody* createRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks, std::vector<PositionAndScaleVerts>& shapes){
   btCompoundShape* shape = new btCompoundShape();
   for (auto &block : blocks){
     modassert(block.size.x >= 0 && block.size.y >= 0 && block.size.z >= 0, "negative block size createRigidBodyOctree");
@@ -274,12 +271,12 @@ btRigidBody* createRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rot
 
   }
 
-  return createRigidBody(pos, shape, rotation, isStatic, hasCollision, scaling, opts);
+  return createRigidBody(pos, shape, rotation, scaling, opts);
 }
 
 
-btRigidBody* addRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, bool isStatic, bool hasCollision, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks, std::vector<PositionAndScaleVerts>& shapes){
-  auto rigidBodyPtr = createRigidBodyOctree(env, pos, rotation, scaling, isStatic, hasCollision, opts, blocks, shapes);
+btRigidBody* addRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks, std::vector<PositionAndScaleVerts>& shapes){
+  auto rigidBodyPtr = createRigidBodyOctree(env, pos, rotation, scaling, opts, blocks, shapes);
   return addBodyToWorld(env, rigidBodyPtr, opts);
 }
 
@@ -357,7 +354,7 @@ void checkCollisions(physicsEnv& env){
 void stepPhysicsSimulation(physicsEnv& env, float timestep, bool paused, bool enablePhysics, bool drawOnly){
   MODTODO("step physics simulation substeps should have consideration");
   if (!drawOnly && (enablePhysics && !paused)){
-    env.dynamicsWorld -> stepSimulation(timestep, 0);  
+    env.dynamicsWorld -> stepSimulation(timestep, 20, 0.001);  
     checkCollisions(env);
   }
   if (drawOnly && env.hasDebugDrawer){
@@ -556,9 +553,11 @@ std::vector<HitObject> contactTestShape(physicsEnv& env, std::unordered_map<obji
     .velocity = glm::vec3(1.f, 1.f, 1.f),
     .angularVelocity = glm::vec3(1.f, 1.f, 1.f),
     .linearDamping = 0.f,
+    .isStatic = true,
+    .hasCollision = true,
   };
 
-  auto body = addRigidBodySphere(env, pos, 1.f, orientation, true, true, scale, opts);
+  auto body = addRigidBodySphere(env, pos, 1.f, orientation, scale, opts);
   auto originalId = getIdForRigidBody(rigidbodys, body);
 
 

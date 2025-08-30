@@ -1546,6 +1546,8 @@ int main(int argc, char* argv[]){
     .getGameObjNameForId = getGameObjectName,
     .setGameObjectAttr = setGameObjectAttr,
     .setSingleGameObjectAttr = setSingleGameObjectAttr,
+    .setPhysicsVelocity = setPhysicsVelocity,
+    .getPhysicsVelocity = getPhysicsVelocity,
     .getGameObjectPos = getGameObjectPosition,
     .setGameObjectPosition = setGameObjectPosition,
     .getGameObjectRotation = getGameObjectRotation,

@@ -14,6 +14,7 @@ struct PhysicsValue {
   btRigidBody* body;
   std::optional<glm::vec3> offset;
   bool customManaged;
+  bool customManagedDynamic;
 };
 
 struct rigidBodyOpts {
@@ -27,6 +28,9 @@ struct rigidBodyOpts {
   std::optional<glm::vec3> velocity;
   std::optional<glm::vec3> angularVelocity;
   float linearDamping;
+
+  bool isStatic;
+  bool hasCollision;
 };
 
 #endif

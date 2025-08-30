@@ -117,11 +117,11 @@ std::vector<glm::vec3> vertsForId(World& world, objid id){
 PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   auto physicsOptions = getGameObject(world.sandbox, id).physicsOptions;
   if (!physicsOptions.enabled){
-    return PhysicsValue { .body = NULL, .offset = std::nullopt, .customManaged = false };
+    return PhysicsValue { .body = NULL, .offset = std::nullopt, .customManaged = false, .customManagedDynamic = false };
   }
   auto physicsInfoOpt = getPhysicsInfoForGameObject(world, id, true);
   if (!physicsInfoOpt.has_value()){
-    return PhysicsValue { .body = NULL, .offset = std::nullopt, .customManaged = false };
+    return PhysicsValue { .body = NULL, .offset = std::nullopt, .customManaged = false, .customManagedDynamic = false };
   }
 
   PhysicsInfo& physicsInfo = physicsInfoOpt.value();
@@ -145,12 +145,14 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
     .velocity = physicsOptions.velocity,
     .angularVelocity = physicsOptions.angularVelocity,
     .linearDamping = physicsOptions.linearDamping,
+    .isStatic = physicsOptions.isStatic,
+    .hasCollision = physicsOptions.hasCollisions,
   };
 
   if (isOctree){
     auto physicsShapes = getPhysicsShapes(octreeObj -> octree);
     std::cout << debugInfo(physicsShapes) << std::endl;
-    rigidBody = addRigidBodyOctree(world.physicsEnvironment, physicsInfo.transformation.position, physicsInfo.transformation.rotation, physicsInfo.transformation.scale, physicsOptions.isStatic, physicsOptions.hasCollisions, opts, physicsShapes.blocks, physicsShapes.shapes);
+    rigidBody = addRigidBodyOctree(world.physicsEnvironment, physicsInfo.transformation.position, physicsInfo.transformation.rotation, physicsInfo.transformation.scale, opts, physicsShapes.blocks, physicsShapes.shapes);
   }else if (physicsOptions.shape == BOX || physicsOptions.shape == AUTOSHAPE){
     std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ")" << std::endl;
     rigidBody = addRigidBodyRect(
@@ -160,8 +162,6 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin, 
       physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin,
       physicsInfo.transformation.rotation,
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions,
       physicsInfo.transformation.scale, 
       opts
     );
@@ -181,8 +181,6 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
         )
       ),                             
       physicsInfo.transformation.rotation,
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions,
       physicsInfo.transformation.scale,
       opts
     );
@@ -198,8 +196,6 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) ,
       calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
       physicsInfo.transformation.rotation,
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions,
       physicsInfo.transformation.scale,
       opts
     );
@@ -215,15 +211,13 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin),
       calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
       physicsInfo.transformation.rotation,
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions,
       physicsInfo.transformation.scale,
       opts
     );
   }else if (physicsOptions.shape == CONVEXHULL){
     auto verts = vertsForId(world, id);
     if (verts.size() == 0){
-       return PhysicsValue { .body = NULL, .offset = std::nullopt, .customManaged = false };
+       return PhysicsValue { .body = NULL, .offset = std::nullopt, .customManaged = false, .customManagedDynamic = false };
     }
     // This is a hack, but it should be ok.  UpdatePhysicsBody really only need to apply for [voxels - octrees?] and heightmaps as of writing this
     // I don't have easy scope to the list of verts here, so I'd rather not reload the model (or really keep them in mem for no reason) just 
@@ -236,15 +230,13 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       verts,
       calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
       physicsInfo.transformation.rotation,
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions,
       physicsInfo.transformation.scale,
       opts
     );
   }else if (physicsOptions.shape == SHAPE_EXACT){
     auto verts = vertsForId(world, id);
     if (verts.size() == 0){
-       return PhysicsValue { .body = NULL, .offset = std::nullopt, .customManaged = false };
+       return PhysicsValue { .body = NULL, .offset = std::nullopt, .customManaged = false, .customManagedDynamic = false };
     }
     modlog("2 physics", std::string("num verts: ") + std::to_string(verts.size()));
     assert(initialLoad);
@@ -256,8 +248,6 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       verts,
       calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
       physicsInfo.transformation.rotation,
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions,
       physicsInfo.transformation.scale,
       opts
     );
@@ -1378,6 +1368,8 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool veloci
       .layer = gameobj.physicsOptions.layer,
       .velocity = velocitySet ? std::optional(gameobj.physicsOptions.velocity) : std::nullopt,    // velocity is not updated so this will reset the vel
       .linearDamping = gameobj.physicsOptions.linearDamping,
+      .isStatic = gameobj.physicsOptions.isStatic,
+      .hasCollision = gameobj.physicsOptions.hasCollisions,
     };
     updateRigidBodyOpts(world.physicsEnvironment, body, opts);
   }
@@ -1412,6 +1404,8 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
   bool setObjectAttr = false;
 
   setCoreAttr = setAttribute(gameobj, field, value, util);
+
+  // TODO - why do I need to do this here? 
   bool physicsObjectNeedsRebuild = gameobj.physicsOptions.enabled != physicsEnableInitial;
   physicsObjectNeedsRebuild = physicsObjectNeedsRebuild || (gameobj.physicsOptions.isStatic != physicsStaticInitial) || (gameobj.physicsOptions.hasCollisions != physicsHasCollisionsInitial);
 
@@ -1526,7 +1520,7 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<obj
     GameObject& gameobj = getGameObject(world, i);
     std::cout << "Custom updating 2 updatePhysicsPositionsAndClampVelocity: " << gameobj.name << std::endl;
     bool customManaged = rigidBody.customManaged;
-    if (!gameobj.physicsOptions.isStatic ){
+    if (!gameobj.physicsOptions.isStatic || rigidBody.customManagedDynamic){
       auto rotation = getRotation(rigidBody.body);
       auto posUpdate = hasPosUpdate(world, i);
       auto rotUpdate = hasRotUpdate(world, i);
@@ -1546,7 +1540,7 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<obj
         modassert(false, "updatePhysicsPositionsAndClampVelocity invalid case");
       }
 
-      gameobj.physicsOptions.velocity = getVelocity(rigidBody.body);
+      //gameobj.physicsOptions.velocity = getVelocity(rigidBody.body);
       gameobj.physicsOptions.angularVelocity = getAngularVelocity(rigidBody.body);
       clampMaxVelocity(rigidBody.body, gameobj.physicsOptions.maxspeed);
     }
@@ -1799,14 +1793,12 @@ void createPhysicsBody(World& world, objid id){
 
   glm::vec3 pos(0.f, 0.f, 0.f);
   float radius = 0.2f;
-  bool isStatic = true;
-  bool hasCollision = false;
   glm::vec3 scaling(1.f, 1.f, 1.f);
 
   rigidBodyOpts opts {
     .linear = glm::vec3(1.f, 1.f, 1.f),
     .angular = glm::vec3(0.f, 0.f, 0.f),
-    .gravity = glm::vec3(0.f, -9.81f, 0.f),
+    .gravity = glm::vec3(0.f, -1.f, 0.f),
     .friction = 1.f,
     .restitution = 1.f,
     .mass = 1.f,
@@ -1814,14 +1806,18 @@ void createPhysicsBody(World& world, objid id){
     .velocity = std::nullopt,
     .angularVelocity = std::nullopt,
     .linearDamping = 0.f,
+    .isStatic = false,
+    .hasCollision = true,
+
   };
 
   auto dir = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
-  auto rigidBody = addRigidBodySphere(world.physicsEnvironment, pos, radius, dir, isStatic, hasCollision, scaling, opts);
+  auto rigidBody = addRigidBodySphere(world.physicsEnvironment, pos, radius, dir, scaling, opts);
   PhysicsValue phys {
     .body = rigidBody,
     .offset = std::nullopt,
     .customManaged = true,
+    .customManagedDynamic = !opts.isStatic,
   };
   world.rigidbodys[id] = phys;
 }
@@ -1830,6 +1826,14 @@ void setPhysicsOptions(World& world, objid id, rigidBodyOpts& opts){
   modassert(world.rigidbodys.find(id) != world.rigidbodys.end(), "invalid rigid body");
   PhysicsValue& phyicsValue = world.rigidbodys.at(id);
   modassert(phyicsValue.customManaged, "cannot set physics option if not custom managed");
+  world.rigidbodys.at(id).customManagedDynamic = !opts.isStatic;
+  
   setPhysicsOptions(phyicsValue.body, opts);
+
+  world.physicsEnvironment.dynamicsWorld-> removeRigidBody(phyicsValue.body);
+  world.physicsEnvironment.dynamicsWorld-> addRigidBody(phyicsValue.body, 1, opts.layer);
+
+  //dynamicsWorld -> addRigidBody(rigidBodyPtr, 1, opts.layer);
+
 }
 
