@@ -324,6 +324,15 @@ void setTransform(physicsEnv& env, btRigidBody* body, glm::vec3 pos, glm::vec3 s
   setScale(env, body, scale.x, scale.y, scale.z);
   setRotation(body, rotation);
 }
+
+void setVelocity(btRigidBody* body, glm::vec3 velocity){
+  body -> setLinearVelocity(glmToBt(velocity));
+  body -> activate(true);
+}
+void setAngularVelocity(btRigidBody* body, glm::vec3 angularVelocity){
+  body -> setAngularVelocity(glmToBt(angularVelocity));
+  body -> activate(true);
+}
     
 void checkCollisions(physicsEnv& env){   
   auto dispatcher = env.dynamicsWorld -> getDispatcher();

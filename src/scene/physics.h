@@ -76,6 +76,9 @@ void setScale(physicsEnv& env, btRigidBody* body, float width, float height, flo
 glm::vec3 getScale(btRigidBody* body);
 void setTransform(physicsEnv& env, btRigidBody* body, glm::vec3 pos, glm::vec3 scale, glm::quat rotation);
 
+void setVelocity(btRigidBody* body, glm::vec3 velocity);
+void setAngularVelocity(btRigidBody* body, glm::vec3 angularVelocity);
+
 void applyImpulse(btRigidBody* body, glm::vec3 force);
 void clearImpulse(btRigidBody* body);
 void applyForce(btRigidBody* body, glm::vec3 force);

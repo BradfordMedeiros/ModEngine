@@ -1341,7 +1341,7 @@ std::optional<AttributeValue> getObjectAttribute(World& world, objid id, const c
   return std::nullopt;
 }
 
-void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool velocitySet, bool physicsEnableChanged){
+void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool physicsEnableChanged){
   //std::cout << "rigid bodies old: " << world.rigidbodys.size() << std::endl;
   if (physicsEnableChanged){
     modlog("physics", std::string("rebuilding for: ") + gameobj.name);
@@ -1412,8 +1412,7 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
     mergeAttributes(gameobj.additionalAttr, attr);
   }
 
-  bool fieldIsVelocity = std::string(field) == "physics_velocity";
-  afterAttributesSet(world, id, gameobj, fieldIsVelocity, physicsObjectNeedsRebuild);
+  afterAttributesSet(world, id, gameobj, physicsObjectNeedsRebuild);
 }
 
 void applyAttributeDelta(World& world, objid id, std::string field, AttributeValue delta, float timestep){
@@ -1486,6 +1485,32 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
     std::cout << "physics scale set physics: " << index << " - " << print(scale) << std::endl;
   }
   world.entitiesToUpdate.insert(index);
+}
+
+
+glm::vec3 physicsVelocityGet(World& world, objid index){
+  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    auto body = world.rigidbodys.at(index).body;
+    return btToGlm(body -> getLinearVelocity());
+  }
+  modassert(false, "not a physics object");
+  return glm::vec3(0.f, 0.f, 0.f);
+}
+void physicsVelocitySet(World& world, objid index, glm::vec3 velocity){
+  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    auto body = world.rigidbodys.at(index).body;
+    setVelocity(body, velocity);
+  }else{
+    modassert(false, " not a physics object");
+  }
+}
+
+
+void physicsAngularVelocitySet(World& world, objid index, glm::vec3 angularVelocity){
+  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    auto body = world.rigidbodys.at(index).body;
+    setAngularVelocity(body, angularVelocity);
+  }
 }
 
 bool hasPosUpdate(World& world, objid idToCheck){
@@ -1604,12 +1629,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
         } 
         std::cout << "INFO: emitter: creating particle from emitter: " << getGameObject(world.sandbox, emitterNodeId).name << std::endl;
         attributes.attr["position"] = particleOpts.position.has_value() ?  particleOpts.position.value() : fullTransformation(world.sandbox, emitterNodeId, "emitter - get position").position;
-        if (particleOpts.velocity.has_value()){
-          attributes.attr["physics_velocity"] = particleOpts.velocity.value();
-        }
-        if (particleOpts.angularVelocity.has_value()){
-          attributes.attr["physics_avelocity"] = particleOpts.angularVelocity.value();
-        }
+
         AttrChildrenPair attrChildren {
           .attr = attributes,
           .children = {},
@@ -1626,6 +1646,12 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
         objid objectAdded = addObjectToScene(world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, newName, attrChildren, submodelAttributesFixedPath);
         if (particleOpts.orientation.has_value()){
           physicsRotateSet(world, objectAdded, particleOpts.orientation.value(), true, Hint { .hint = "updateEmitters - orientation" });
+        }
+        if (particleOpts.velocity.has_value()){
+          physicsVelocitySet(world, objectAdded, particleOpts.velocity.value());
+        }
+        if (particleOpts.angularVelocity.has_value()){
+          physicsAngularVelocitySet(world, objectAdded, particleOpts.angularVelocity.value());
         }
 
         auto oldTransformation = gameobjectTransformation(world, objectAdded, true, "update emitters");

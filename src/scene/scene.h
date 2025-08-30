@@ -92,6 +92,12 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
 void physicsScaleSet(World& world, objid index, glm::vec3 scale);
 void physicsLocalTransformSet(World& world, objid index, Transformation& transform, std::optional<int> directIndex);
 
+
+glm::vec3 physicsVelocityGet(World& world, objid id);
+void physicsVelocitySet(World& world, objid id, glm::vec3 velocity);
+void physicsAngularVelocitySet(World& world, objid id, glm::vec3 angularVelocity);
+
+
 void updatePhysicsBody(World& world, objid id);
 
 void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool paused, Transformation& viewTransform, bool showVisualizations, bool lateUpdate);
