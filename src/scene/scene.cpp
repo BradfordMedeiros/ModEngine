@@ -143,12 +143,14 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
     .mass = physicsOptions.mass,
     .layer = physicsOptions.layer,
     .linearDamping = physicsOptions.linearDamping,
+    .isStatic = physicsOptions.isStatic,
+    .hasCollisions = physicsOptions.hasCollisions,
   };
 
   if (isOctree){
     auto physicsShapes = getPhysicsShapes(octreeObj -> octree);
     std::cout << debugInfo(physicsShapes) << std::endl;
-    rigidBody = addRigidBodyOctree(world.physicsEnvironment, physicsInfo.transformation.position, physicsInfo.transformation.rotation, physicsInfo.transformation.scale, physicsOptions.isStatic, physicsOptions.hasCollisions, opts, physicsShapes.blocks, physicsShapes.shapes);
+    rigidBody = addRigidBodyOctree(world.physicsEnvironment, physicsInfo.transformation.position, physicsInfo.transformation.rotation, physicsInfo.transformation.scale, opts, physicsShapes.blocks, physicsShapes.shapes);
   }else if (physicsOptions.shape == BOX || physicsOptions.shape == AUTOSHAPE){
     std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ")" << std::endl;
     rigidBody = addRigidBodyRect(
@@ -158,8 +160,6 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin, 
       physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin,
       physicsInfo.transformation.rotation,
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions,
       physicsInfo.transformation.scale, 
       opts
     );
@@ -179,8 +179,6 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
         )
       ),                             
       physicsInfo.transformation.rotation,
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions,
       physicsInfo.transformation.scale,
       opts
     );
@@ -196,8 +194,6 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) ,
       calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
       physicsInfo.transformation.rotation,
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions,
       physicsInfo.transformation.scale,
       opts
     );
@@ -213,8 +209,6 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin),
       calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
       physicsInfo.transformation.rotation,
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions,
       physicsInfo.transformation.scale,
       opts
     );
@@ -234,8 +228,6 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       verts,
       calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
       physicsInfo.transformation.rotation,
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions,
       physicsInfo.transformation.scale,
       opts
     );
@@ -254,8 +246,6 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       verts,
       calcOffsetFromRotation(physicsInfo.transformation.position, physicsInfo.offset, physicsInfo.transformation.rotation),
       physicsInfo.transformation.rotation,
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions,
       physicsInfo.transformation.scale,
       opts
     );
@@ -1363,6 +1353,8 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool physic
       .mass = gameobj.physicsOptions.mass,
       .layer = gameobj.physicsOptions.layer,
       .linearDamping = gameobj.physicsOptions.linearDamping,
+      .isStatic = gameobj.physicsOptions.isStatic,
+      .hasCollisions = gameobj.physicsOptions.hasCollisions,
     };
     updateRigidBodyOpts(world.physicsEnvironment, body, opts);
   }

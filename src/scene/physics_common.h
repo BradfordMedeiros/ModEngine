@@ -26,6 +26,8 @@ struct rigidBodyOpts {
   std::optional<glm::vec3> velocity;
   std::optional<glm::vec3> angularVelocity;
   float linearDamping;
+  bool isStatic;
+  bool hasCollisions;
 };
 
 #endif
