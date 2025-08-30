@@ -1788,9 +1788,40 @@ int getNumberOfRigidBodies(World& world){
 }
 
 void createPhysicsBody(World& world, objid id){
-  modassert(false, "createPhysicsBody not yet implemented");
+  if (world.rigidbodys.find(id) != world.rigidbodys.end()){
+    //modassert(false, std::string("rigid body already exists on this:  customManaged = ") + (world.rigidbodys.at(id).customManaged ? "true" : "false"));
+    modassert(false, std::string("rigid body already exists on this"));
+  }
+
+  rigidBodyOpts opts {
+    .linear = glm::vec3(1.f, 1.f, 1.f),
+    .angular = glm::vec3(0.f, 0.f, 0.f),
+    .gravity = glm::vec3(0.f, -1.f, 0.f),
+    .friction = 1.f,
+    .restitution = 1.f,
+    .mass = 1.f,
+    .layer = 2,
+    .velocity = std::nullopt,
+    .angularVelocity = std::nullopt,
+    .linearDamping = 0.f,
+    .isStatic = true,
+    .hasCollisions = true,
+  };
+  auto dir = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
+
+  glm::vec3 pos(0.f, 0.f, 0.f);
+  float radius = 0.2f;
+  glm::vec3 scaling(1.f, 1.f, 1.f);
+  auto rigidBody = addRigidBodySphere(world.physicsEnvironment, pos, radius, dir, scaling, opts);
+  PhysicsValue phys {
+    .body = rigidBody,
+    .offset = std::nullopt,
+    //.customManaged = true,
+    //.customManagedDynamic = !opts.isStatic,
+  };
+  world.rigidbodys[id] = phys;
 }
 
 void setPhysicsOptions(World& world, objid id, rigidBodyOpts& opts){
-  modassert(false, "setPhysicsOptions not yet implemented");
+  updateRigidBodyOpts(world.physicsEnvironment, world.rigidbodys.at(id).body, opts);
 }

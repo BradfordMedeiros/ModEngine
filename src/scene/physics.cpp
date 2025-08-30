@@ -283,7 +283,15 @@ void rmRigidBody(physicsEnv& env, btRigidBody* body){
 }
 
 void updateRigidBodyOpts(physicsEnv& env, btRigidBody* body, rigidBodyOpts opts){
-  setPhysicsOptions(body, opts);
+  bool removedBody = false;
+  if (!opts.isStatic){
+    removedBody = true;
+    env.dynamicsWorld -> removeRigidBody(body);
+  }
+  setPhysicsOptions(body, opts, true);
+  if (removedBody){
+    env.dynamicsWorld -> addRigidBody(body, 1, opts.layer);
+  }
 }
 
 glm::vec3 getPosition(btRigidBody* body){
