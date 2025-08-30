@@ -1670,7 +1670,10 @@ int main(int argc, char* argv[]){
     .getAllTags = getAllTags,
     .getMaterial = getMaterial,
     .getMainOctreeId = getMainOctreeId,
-    
+
+     .createPhysicsBody = createPhysicsBody,
+     .setPhysicsOptions = setPhysicsOptions,
+
     .dumpDebugInfo = dumpDebugInfo,
   };
 

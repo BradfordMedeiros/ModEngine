@@ -1794,3 +1794,11 @@ Transformation gameobjectTransformation(World& world, objid id, bool isWorld, co
 int getNumberOfRigidBodies(World& world){
   return world.rigidbodys.size();
 }
+
+void createPhysicsBody(World& world, objid id){
+  modassert(false, "createPhysicsBody not yet implemented");
+}
+
+void setPhysicsOptions(World& world, objid id, rigidBodyOpts& opts){
+  modassert(false, "setPhysicsOptions not yet implemented");
+}

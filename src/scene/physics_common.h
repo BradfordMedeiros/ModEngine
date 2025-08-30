@@ -15,4 +15,17 @@ struct PhysicsValue {
   std::optional<glm::vec3> offset;
 };
 
+struct rigidBodyOpts {
+  glm::vec3 linear;
+  glm::vec3 angular;
+  glm::vec3 gravity;
+  float friction;
+  float restitution;
+  float mass;
+  int layer;
+  std::optional<glm::vec3> velocity;
+  std::optional<glm::vec3> angularVelocity;
+  float linearDamping;
+};
+
 #endif

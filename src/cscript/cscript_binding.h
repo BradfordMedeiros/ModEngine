@@ -11,6 +11,7 @@
 #include "../perf/benchstats.h"
 #include "../scene/objtypes/lighting/scene_lighting.h"
 #include "../scene/common/util/types.h"
+#include "../scene/physics_common.h"
 #include "../scene/scene_sandbox.h"
 #include "../common/http.h"
 
@@ -186,6 +187,9 @@ struct CustomApiBindings {
   std::vector<TagInfo> (*getAllTags)(int tag);
   std::optional<OctreeMaterial> (*getMaterial)(glm::vec3 position);
   std::optional<objid> (*getMainOctreeId)();
+
+  void (*createPhysicsBody)(objid id);
+  void (*setPhysicsOptions)(objid id, rigidBodyOpts& opts);
 
   std::string (*dumpDebugInfo)(bool);
   //std::vector<func_t> registerGuileFns
