@@ -1485,7 +1485,7 @@ glm::vec3 physicsVelocityGet(World& world, objid index){
     auto body = world.rigidbodys.at(index).body;
     return btToGlm(body -> getLinearVelocity());
   }
-  modassert(false, "not a physics object");
+  //modassert(false, std::string("not a physics object: ") + getGameObject(world, index).name);
   return glm::vec3(0.f, 0.f, 0.f);
 }
 void physicsVelocitySet(World& world, objid index, glm::vec3 velocity){
@@ -1493,7 +1493,7 @@ void physicsVelocitySet(World& world, objid index, glm::vec3 velocity){
     auto body = world.rigidbodys.at(index).body;
     setVelocity(body, velocity);
   }else{
-    modassert(false, " not a physics object");
+    //modassert(false, std::string("not a physics object: ") + getGameObject(world, index).name);
   }
 }
 
