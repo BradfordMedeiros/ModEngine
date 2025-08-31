@@ -1822,7 +1822,7 @@ void createPhysicsBody(World& world, objid id){
   rigidBodyOpts opts {
     .linear = glm::vec3(1.f, 1.f, 1.f),
     .angular = glm::vec3(0.f, 0.f, 0.f),
-    .gravity = glm::vec3(0.f, -1.f, 0.f),
+    .gravity = glm::vec3(0.f, 0.f, 0.f),
     .friction = 1.f,
     .restitution = 1.f,
     .mass = 1.f,
@@ -1842,10 +1842,10 @@ void createPhysicsBody(World& world, objid id){
   float radius = 0.2f;
   glm::vec3 scaling(1.f, 1.f, 1.f);
 
-  //btRigidBody* rigidBody = addRigidBodyRect(world.physicsEnvironment, pos, 5.f, 5.f, 5.f, dir, scaling, opts);
+  btRigidBody* rigidBody = addRigidBodyRect(world.physicsEnvironment, pos, 5.f, 5.f, 5.f, dir, scaling, opts);
 
 
-  auto rigidBody = addRigidBodySphere(world.physicsEnvironment, pos, radius, dir, scaling, opts);
+  //auto rigidBody = addRigidBodySphere(world.physicsEnvironment, pos, radius, dir, scaling, opts);
   PhysicsValue phys {
     .body = rigidBody,
     .offset = std::nullopt,
@@ -1860,28 +1860,13 @@ void setPhysicsOptions(World& world, objid id, rigidBodyOpts& opts){
 }
 
 void createFixedConstraint(World& world, objid idOne, objid idTwo){
-  std::cout << "createFixedConstraint start" << std::endl;
   modassert(world.rigidbodys.find(idOne) != world.rigidbodys.end(), "rigidBody for idOne does not exist");
   modassert(world.rigidbodys.find(idTwo) != world.rigidbodys.end(), "rigidBody for idTwo does not exist");
-
 
   auto bodyOne = world.rigidbodys.at(idOne).body;
   auto bodyTwo = world.rigidbodys.at(idTwo).body;
   bodyOne -> activate(true);
   bodyTwo -> activate(true);
-
-  auto onePosition = getPosition(bodyOne);
-  auto twoPosition = getPosition(bodyTwo);
-  auto attemptOffset = glm::vec3(20.f, 0.f, 0.f);
-
-  setPosition(bodyTwo, onePosition + attemptOffset);
-  auto newPosition = getPosition(bodyTwo);
-  auto offset = newPosition - onePosition;
-  // auto newPositionTwo = getPosition(bodyTwo);
-  //auto massOne = bodyOne -> getInvMass();
-  //auto massTwo = bodyTwo -> getInvMass();
-  //std::cout << "fixed constraint: " << massOne << ", " << massTwo << std::endl;
-
 
   btTransform frameOne;
   frameOne.setIdentity();
@@ -1889,11 +1874,8 @@ void createFixedConstraint(World& world, objid idOne, objid idTwo){
 
   btTransform frameTwo;
   frameTwo.setIdentity();
-  //frameTwo.setOrigin(glmToBt(offset + tinyOffset));
-  frameTwo.setOrigin(bodyTwo -> getWorldTransform().getOrigin() - bodyOne -> getWorldTransform().getOrigin());
+  frameTwo.setOrigin(bodyOne -> getWorldTransform().getOrigin() - bodyTwo -> getWorldTransform().getOrigin());
 
-  //frameTwo.setOrigin(glmToBt(offset));
-    
   btTypedConstraint* fixed = new btFixedConstraint(*bodyOne, *bodyTwo, frameOne, frameTwo);  // TODO leak - need to maintain and delete this
   world.physicsEnvironment.dynamicsWorld -> addConstraint(fixed, true /* disable collision between these bodies */); 
 
@@ -1901,10 +1883,49 @@ void createFixedConstraint(World& world, objid idOne, objid idTwo){
     .ids = { idOne, idTwo },
     .constraint = fixed,
   });
+}
 
-  std::cout << "createFixedConstraint end" << std::endl;
+void createPointConstraint(World& world, objid idOne, objid idTwo){
+  modassert(world.rigidbodys.find(idOne) != world.rigidbodys.end(), "rigidBody for idOne does not exist");
+  modassert(world.rigidbodys.find(idTwo) != world.rigidbodys.end(), "rigidBody for idTwo does not exist");
 
+  auto bodyOne = world.rigidbodys.at(idOne).body;
+  auto bodyTwo = world.rigidbodys.at(idTwo).body;
+  bodyOne -> activate(true);
+  bodyTwo -> activate(true);
 
-  //world.physicsEnvironment.dynamicsWorld -> removeConstraint(fixed);
-  //delete fixed;
+  btVector3 frameOne = glmToBt(glm::vec3(0.f, 0.f, 0.f));
+  btVector3 frameTwo = bodyOne -> getWorldTransform().getOrigin() - bodyTwo -> getWorldTransform().getOrigin();
+
+  btTypedConstraint* fixed = new btPoint2PointConstraint(*bodyOne, *bodyTwo, frameOne, frameTwo);  // TODO leak - need to maintain and delete this
+  world.physicsEnvironment.dynamicsWorld -> addConstraint(fixed, true /* disable collision between these bodies */); 
+
+  world.constraints.push_back(Constraint{
+    .ids = { idOne, idTwo },
+    .constraint = fixed,
+  });
+}
+
+void createHingeConstraint(World& world, objid idOne, objid idTwo){
+  modassert(world.rigidbodys.find(idOne) != world.rigidbodys.end(), "rigidBody for idOne does not exist");
+  modassert(world.rigidbodys.find(idTwo) != world.rigidbodys.end(), "rigidBody for idTwo does not exist");
+
+  auto bodyOne = world.rigidbodys.at(idOne).body;
+  auto bodyTwo = world.rigidbodys.at(idTwo).body;
+  bodyOne -> activate(true);
+  bodyTwo -> activate(true);
+
+  btVector3 frameOne = glmToBt(glm::vec3(0.f, 0.f, 0.f));
+  btVector3 frameTwo = bodyOne -> getWorldTransform().getOrigin() - bodyTwo -> getWorldTransform().getOrigin();
+
+  btVector3 axisInA(0.0f, 1.0f, 0.0f);
+  btVector3 axisInB(0.0f, 1.0f, 0.0f);
+
+  btTypedConstraint* fixed = new btHingeConstraint(*bodyOne, *bodyTwo, frameOne, frameTwo, axisInA, axisInB);  // TODO leak - need to maintain and delete this
+  world.physicsEnvironment.dynamicsWorld -> addConstraint(fixed, true /* disable collision between these bodies */); 
+
+  world.constraints.push_back(Constraint{
+    .ids = { idOne, idTwo },
+    .constraint = fixed,
+  });
 }

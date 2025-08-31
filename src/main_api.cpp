@@ -1243,3 +1243,11 @@ void setPhysicsOptions(objid id, rigidBodyOpts& opts){
 void createFixedConstraint(objid idOne, objid idTwo){
   createFixedConstraint(world, idOne, idTwo);
 }
+
+void createPointConstraint(objid idOne, objid idTwo){
+  createPointConstraint(world, idOne, idTwo);
+}
+
+void createHingeConstraint(objid idOne, objid idTwo){
+  createHingeConstraint(world, idOne, idTwo);
+}

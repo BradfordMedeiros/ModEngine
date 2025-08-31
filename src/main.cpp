@@ -1674,6 +1674,8 @@ int main(int argc, char* argv[]){
     .createPhysicsBody = createPhysicsBody,
     .setPhysicsOptions = setPhysicsOptions,
     .createFixedConstraint = createFixedConstraint,
+    .createPointConstraint = createPointConstraint,
+    .createHingeConstraint = createHingeConstraint,
 
     .dumpDebugInfo = dumpDebugInfo,
   };

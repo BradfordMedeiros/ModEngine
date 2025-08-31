@@ -46,7 +46,7 @@ btRigidBody* createRigidBody(glm::vec3 pos, btCollisionShape* shape, glm::quat r
   auto body  = new btRigidBody(constructionInfo);
   return body;
 }
-// Due to bullet weirdness, this seems like it has to be called after adding rigid body to world (for the gravity part)
+
 void setPhysicsOptions(btRigidBody* body, rigidBodyOpts& opts, bool skipCollisionMask = false){
   body -> setLinearFactor(glmToBt(opts.linear));
   body -> setAngularFactor(glmToBt(opts.angular));
@@ -179,10 +179,11 @@ void cleanupRigidBody(btRigidBody* body){
 
 btRigidBody* addBodyToWorld(physicsEnv& env, btRigidBody* rigidBodyPtr, rigidBodyOpts& opts){
   setPhysicsOptions(rigidBodyPtr, opts, true); /* this can be true because opts.layer in next line*/
-  // set physics options should come first otherwise when toggling static to non-static you have to add/rm
-  // I would rather the creation of the body be minhimal logic and just do this in setPHysicsOptions to be consistent 
   env.dynamicsWorld -> addRigidBody(rigidBodyPtr, 1, opts.layer);
   rigidBodyPtr -> getBroadphaseHandle() -> m_collisionFilterMask = opts.layer;
+
+  rigidBodyPtr -> setGravity(glmToBt(opts.gravity)); // kind of lame, has to be done after added rigid body
+
   return rigidBodyPtr;
 }
 btRigidBody* addRigidBodyRect(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, glm::vec3 scaling, rigidBodyOpts opts){  
@@ -292,6 +293,7 @@ void updateRigidBodyOpts(physicsEnv& env, btRigidBody* body, rigidBodyOpts opts)
   if (removedBody){
     env.dynamicsWorld -> addRigidBody(body, 1, opts.layer);
   }
+  body -> setGravity(glmToBt(opts.gravity)); // kind of lame, has to be done after added rigid body
 }
 
 glm::vec3 getPosition(btRigidBody* body){
