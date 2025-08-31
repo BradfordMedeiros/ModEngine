@@ -2,6 +2,7 @@
 
 BulletDebugDrawer::BulletDebugDrawer(int32_t(*drawLine)(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, int32_t owner)){
   this -> setDebugMode(btIDebugDraw::DBG_DrawWireframe );
+  
   this -> debugDrawLine = drawLine; 
 }
 BulletDebugDrawer::~BulletDebugDrawer(){}

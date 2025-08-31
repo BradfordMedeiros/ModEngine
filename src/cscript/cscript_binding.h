@@ -190,6 +190,7 @@ struct CustomApiBindings {
 
   void (*createPhysicsBody)(objid id);
   void (*setPhysicsOptions)(objid id, rigidBodyOpts& opts);
+  void (*createFixedConstraint)(objid idOne, objid idTwo);
 
   std::string (*dumpDebugInfo)(bool);
   //std::vector<func_t> registerGuileFns

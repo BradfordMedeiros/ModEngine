@@ -1239,3 +1239,7 @@ void createPhysicsBody(objid id){
 void setPhysicsOptions(objid id, rigidBodyOpts& opts){
   setPhysicsOptions(world, id, opts);
 }
+
+void createFixedConstraint(objid idOne, objid idTwo){
+  createFixedConstraint(world, idOne, idTwo);
+}

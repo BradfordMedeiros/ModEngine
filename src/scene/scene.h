@@ -130,6 +130,6 @@ void freeTextureRefsByOwner(World& world, int ownerId);
 
 void createPhysicsBody(World& world, objid id);
 void setPhysicsOptions(World& world, objid id, rigidBodyOpts& opts);
-
+void createFixedConstraint(World& world, objid idOne, objid idTwo);
 
 #endif

@@ -270,6 +270,6 @@ std::optional<OctreeMaterial> getMaterial(glm::vec3 position);
 
 void createPhysicsBody(objid id);
 void setPhysicsOptions(objid id, rigidBodyOpts& opts);
-
+void createFixedConstraint(objid idOne, objid idTwo);
 
 #endif

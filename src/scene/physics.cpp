@@ -76,7 +76,7 @@ void setPhysicsOptions(btRigidBody* body, rigidBodyOpts& opts, bool skipCollisio
 
   btCollisionShape* shape = body -> getCollisionShape(); 
   shape -> calculateLocalInertia(mass, inertia);
-  body -> setMassProps(mass, body -> getLocalInertia());
+  body -> setMassProps(mass, inertia);
   body -> updateInertiaTensor();
 
   if (!skipCollisionMask){
@@ -303,6 +303,7 @@ void setPosition(btRigidBody* rigid, glm::vec3 pos){
   transform.setOrigin(glmToBt(pos));
   rigid -> getMotionState() -> setWorldTransform(transform);
   rigid -> setWorldTransform(transform);
+  rigid -> activate(true); 
 }
 glm::quat getRotation(btRigidBody* body){
   return btToGlm(body -> getWorldTransform().getRotation());
@@ -563,8 +564,6 @@ std::vector<HitObject> contactTestShape(physicsEnv& env, std::unordered_map<obji
     .restitution = 1.f,
     .mass = 1.f,
     .layer = 1,
-    .velocity = glm::vec3(1.f, 1.f, 1.f),
-    .angularVelocity = glm::vec3(1.f, 1.f, 1.f),
     .linearDamping = 0.f,
     .isStatic = true,
     .hasCollisions = true,

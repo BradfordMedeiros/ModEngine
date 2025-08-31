@@ -1671,8 +1671,9 @@ int main(int argc, char* argv[]){
     .getMaterial = getMaterial,
     .getMainOctreeId = getMainOctreeId,
 
-     .createPhysicsBody = createPhysicsBody,
-     .setPhysicsOptions = setPhysicsOptions,
+    .createPhysicsBody = createPhysicsBody,
+    .setPhysicsOptions = setPhysicsOptions,
+    .createFixedConstraint = createFixedConstraint,
 
     .dumpDebugInfo = dumpDebugInfo,
   };
