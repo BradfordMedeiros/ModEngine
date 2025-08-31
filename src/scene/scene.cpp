@@ -1836,6 +1836,7 @@ void setPhysicsOptions(World& world, objid id, rigidBodyOpts& opts){
 }
 
 void createFixedConstraint(World& world, objid idOne, objid idTwo){
+  modassert(false, "need to not leak mem");
   std::cout << "createFixedConstraint start" << std::endl;
   modassert(world.rigidbodys.find(idOne) != world.rigidbodys.end(), "rigidBody for idOne does not exist");
   modassert(world.rigidbodys.find(idTwo) != world.rigidbodys.end(), "rigidBody for idTwo does not exist");
