@@ -279,6 +279,7 @@ void rmRigidBodyWorld(World& world, objid id){
     }
   }
   for (auto constraint : constraintsToDelete){
+    world.physicsEnvironment.dynamicsWorld -> removeConstraint(constraint);
     delete constraint;
   }
   world.constraints = remainingConstraints;
@@ -290,7 +291,7 @@ void rmRigidBodyWorld(World& world, objid id){
   modlog("rigidbody", std::string("rm rigid body: ") + std::to_string(id) + ", " + print((void*)rigidBodyPtr));
   world.rigidbodys.erase(id);
 
-  
+
 }
 
 void updatePhysicsBody(World& world, objid id){
