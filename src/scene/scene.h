@@ -17,9 +17,16 @@
 #include "./scene_sandbox.h"
 #include "../common/symbols.h"
 
+struct Constraint {
+  std::vector<objid> ids;
+  btTypedConstraint* constraint;
+};
+
 struct World {
   physicsEnv physicsEnvironment;
   std::unordered_map<objid, PhysicsValue> rigidbodys;
+  std::vector<Constraint> constraints;
+
   ObjectMapping objectMapping;
   std::unordered_map<std::string, ModelDataRef> modelDatas;
   std::unordered_map<std::string, MeshRef> meshes;

@@ -263,11 +263,34 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   return phys;
 }
 void rmRigidBodyWorld(World& world, objid id){
+  std::vector<Constraint> remainingConstraints;
+  std::vector<btTypedConstraint*> constraintsToDelete;
+  for (auto &constraint : world.constraints){
+    bool matchingConstraint = false;
+    for (auto constraintId : constraint.ids){
+      if (id == constraintId){
+        matchingConstraint = true;
+        constraintsToDelete.push_back(constraint.constraint);
+        break;
+      }
+    }
+    if (!matchingConstraint){
+      remainingConstraints.push_back(constraint);
+    }
+  }
+  for (auto constraint : constraintsToDelete){
+    delete constraint;
+  }
+  world.constraints = remainingConstraints;
+
+
   auto rigidBodyPtr = world.rigidbodys.at(id).body;
   assert(rigidBodyPtr != NULL);
   rmRigidBody(world.physicsEnvironment, rigidBodyPtr);
   modlog("rigidbody", std::string("rm rigid body: ") + std::to_string(id) + ", " + print((void*)rigidBodyPtr));
   world.rigidbodys.erase(id);
+
+  
 }
 
 void updatePhysicsBody(World& world, objid id){
@@ -1836,7 +1859,6 @@ void setPhysicsOptions(World& world, objid id, rigidBodyOpts& opts){
 }
 
 void createFixedConstraint(World& world, objid idOne, objid idTwo){
-  modassert(false, "need to not leak mem");
   std::cout << "createFixedConstraint start" << std::endl;
   modassert(world.rigidbodys.find(idOne) != world.rigidbodys.end(), "rigidBody for idOne does not exist");
   modassert(world.rigidbodys.find(idTwo) != world.rigidbodys.end(), "rigidBody for idTwo does not exist");
@@ -1859,8 +1881,6 @@ void createFixedConstraint(World& world, objid idOne, objid idTwo){
   //auto massTwo = bodyTwo -> getInvMass();
   //std::cout << "fixed constraint: " << massOne << ", " << massTwo << std::endl;
 
-  glm::vec3 tinyOffset(0.01f, 0.f, 0.f);
-
 
   btTransform frameOne;
   frameOne.setIdentity();
@@ -1873,8 +1893,13 @@ void createFixedConstraint(World& world, objid idOne, objid idTwo){
 
   //frameTwo.setOrigin(glmToBt(offset));
     
-  auto fixed = new btFixedConstraint(*bodyOne, *bodyTwo, frameOne, frameTwo);  // TODO leak - need to maintain and delete this
+  btTypedConstraint* fixed = new btFixedConstraint(*bodyOne, *bodyTwo, frameOne, frameTwo);  // TODO leak - need to maintain and delete this
   world.physicsEnvironment.dynamicsWorld -> addConstraint(fixed, true /* disable collision between these bodies */); 
+
+  world.constraints.push_back(Constraint{
+    .ids = { idOne, idTwo },
+    .constraint = fixed,
+  });
 
   std::cout << "createFixedConstraint end" << std::endl;
 
