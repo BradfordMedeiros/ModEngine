@@ -262,7 +262,8 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   }
   return phys;
 }
-void rmRigidBodyWorld(World& world, objid id){
+
+void removeConstraints(World& world, objid id){
   std::vector<Constraint> remainingConstraints;
   std::vector<btTypedConstraint*> constraintsToDelete;
   for (auto &constraint : world.constraints){
@@ -283,15 +284,16 @@ void rmRigidBodyWorld(World& world, objid id){
     delete constraint;
   }
   world.constraints = remainingConstraints;
-
+  //std::cout << "num constraints: " << world.constraints.size() << std::endl;
+}
+void rmRigidBodyWorld(World& world, objid id){
+  removeConstraints(world, id);
 
   auto rigidBodyPtr = world.rigidbodys.at(id).body;
   assert(rigidBodyPtr != NULL);
   rmRigidBody(world.physicsEnvironment, rigidBodyPtr);
   modlog("rigidbody", std::string("rm rigid body: ") + std::to_string(id) + ", " + print((void*)rigidBodyPtr));
   world.rigidbodys.erase(id);
-
-
 }
 
 void updatePhysicsBody(World& world, objid id){
@@ -1862,6 +1864,9 @@ void createFixedConstraint(World& world, objid idOne, objid idTwo){
   modassert(world.rigidbodys.find(idOne) != world.rigidbodys.end(), "rigidBody for idOne does not exist");
   modassert(world.rigidbodys.find(idTwo) != world.rigidbodys.end(), "rigidBody for idTwo does not exist");
 
+  removeConstraints(world, idOne);
+  removeConstraints(world, idTwo);
+
   auto bodyOne = world.rigidbodys.at(idOne).body;
   auto bodyTwo = world.rigidbodys.at(idTwo).body;
   bodyOne -> activate(true);
@@ -1888,6 +1893,9 @@ void createPointConstraint(World& world, objid idOne, objid idTwo){
   modassert(world.rigidbodys.find(idOne) != world.rigidbodys.end(), "rigidBody for idOne does not exist");
   modassert(world.rigidbodys.find(idTwo) != world.rigidbodys.end(), "rigidBody for idTwo does not exist");
 
+  removeConstraints(world, idOne);
+  removeConstraints(world, idTwo);
+
   auto bodyOne = world.rigidbodys.at(idOne).body;
   auto bodyTwo = world.rigidbodys.at(idTwo).body;
   bodyOne -> activate(true);
@@ -1908,6 +1916,9 @@ void createPointConstraint(World& world, objid idOne, objid idTwo){
 void createHingeConstraint(World& world, objid idOne, objid idTwo){
   modassert(world.rigidbodys.find(idOne) != world.rigidbodys.end(), "rigidBody for idOne does not exist");
   modassert(world.rigidbodys.find(idTwo) != world.rigidbodys.end(), "rigidBody for idTwo does not exist");
+
+  removeConstraints(world, idOne);
+  removeConstraints(world, idTwo);
 
   auto bodyOne = world.rigidbodys.at(idOne).body;
   auto bodyTwo = world.rigidbodys.at(idTwo).body;
