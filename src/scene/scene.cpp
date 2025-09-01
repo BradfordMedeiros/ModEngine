@@ -1551,7 +1551,9 @@ bool hasRotUpdate(World& world, objid idToCheck){
 void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<objid, PhysicsValue>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     GameObject& gameobj = getGameObject(world, i);
-    if (!gameobj.physicsOptions.isStatic){
+    auto isStatic = rigidBody.body -> getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT;
+
+    if (!isStatic){
       auto rotation = getRotation(rigidBody.body);
       auto posUpdate = hasPosUpdate(world, i);
       auto rotUpdate = hasRotUpdate(world, i);
