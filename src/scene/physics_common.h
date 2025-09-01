@@ -4,6 +4,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <btBulletDynamicsCommon.h>
 #include <optional>
+#include <variant>
 
 glm::vec3 btToGlm(btVector3 pos);
 btVector3 glmToBt(glm::vec3 pos);
@@ -28,5 +29,16 @@ struct rigidBodyOpts {
   bool isStatic;
   bool hasCollisions;
 };
+
+struct PhysicsCreateSphere {
+  float radius;
+};
+struct PhysicsCreateRect {
+  float width;
+  float height;
+  float depth;
+};
+typedef std::variant<PhysicsCreateSphere, PhysicsCreateRect> ShapeCreateType;
+
 
 #endif

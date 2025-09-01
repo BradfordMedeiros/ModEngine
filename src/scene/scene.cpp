@@ -1814,13 +1814,17 @@ int getNumberOfRigidBodies(World& world){
   return world.rigidbodys.size();
 }
 
-
-bool firstTime = false;
-void createPhysicsBody(World& world, objid id){
+void createPhysicsBody(World& world, objid id, ShapeCreateType option){
   if (world.rigidbodys.find(id) != world.rigidbodys.end()){
     //modassert(false, std::string("rigid body already exists on this:  customManaged = ") + (world.rigidbodys.at(id).customManaged ? "true" : "false"));
     modassert(false, std::string("rigid body already exists on this"));
   }
+
+  auto gameobjTransform = fullTransformation(world.sandbox, id);
+  float radius = 0.2f;
+  float width = radius;
+  float height = radius;
+  float depth = radius;
 
   rigidBodyOpts opts {
     .linear = glm::vec3(1.f, 1.f, 1.f),
@@ -1834,26 +1838,21 @@ void createPhysicsBody(World& world, objid id){
     .isStatic = true,
     .hasCollisions = true,
   };
-  auto dir = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f));
 
-  glm::vec3 pos(0.f, 0.f, 0.f);
-  firstTime = false;
-  if (!firstTime){
-    pos.x += 10.f;
+  PhysicsCreateRect* createRect = std::get_if<PhysicsCreateRect>(&option);
+  PhysicsCreateSphere* createSphere = std::get_if<PhysicsCreateSphere>(&option);
+
+  btRigidBody* rigidBody = NULL;
+
+  if (createRect){
+    rigidBody = addRigidBodyRect(world.physicsEnvironment, gameobjTransform.position, createRect -> width, createRect -> height, createRect -> depth, gameobjTransform.rotation, gameobjTransform.scale, opts);
+  }else if (createSphere){
+    rigidBody = addRigidBodySphere(world.physicsEnvironment, gameobjTransform.position, createSphere -> radius, gameobjTransform.rotation, gameobjTransform.scale, opts);
   }
 
-  float radius = 0.2f;
-  glm::vec3 scaling(1.f, 1.f, 1.f);
-
-  btRigidBody* rigidBody = addRigidBodyRect(world.physicsEnvironment, pos, 5.f, 5.f, 5.f, dir, scaling, opts);
-
-
-  //auto rigidBody = addRigidBodySphere(world.physicsEnvironment, pos, radius, dir, scaling, opts);
   PhysicsValue phys {
     .body = rigidBody,
     .offset = std::nullopt,
-    //.customManaged = true,
-    //.customManagedDynamic = !opts.isStatic,
   };
   world.rigidbodys[id] = phys;
 }

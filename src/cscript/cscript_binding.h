@@ -188,7 +188,7 @@ struct CustomApiBindings {
   std::optional<OctreeMaterial> (*getMaterial)(glm::vec3 position);
   std::optional<objid> (*getMainOctreeId)();
 
-  void (*createPhysicsBody)(objid id);
+  void (*createPhysicsBody)(objid id, ShapeCreateType option);
   void (*setPhysicsOptions)(objid id, rigidBodyOpts& opts);
   void (*createFixedConstraint)(objid idOne, objid idTwo);
   void (*createPointConstraint)(objid idOne, objid idTwo);
