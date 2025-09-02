@@ -1821,10 +1821,6 @@ void createPhysicsBody(World& world, objid id, ShapeCreateType option){
   }
 
   auto gameobjTransform = fullTransformation(world.sandbox, id);
-  float radius = 0.2f;
-  float width = radius;
-  float height = radius;
-  float depth = radius;
 
   rigidBodyOpts opts {
     .linear = glm::vec3(1.f, 1.f, 1.f),
@@ -1836,7 +1832,7 @@ void createPhysicsBody(World& world, objid id, ShapeCreateType option){
     .layer = 2,
     .linearDamping = 0.f,
     .isStatic = true,
-    .hasCollisions = true,
+    .hasCollisions = false,
   };
 
   PhysicsCreateRect* createRect = std::get_if<PhysicsCreateRect>(&option);
@@ -1854,6 +1850,8 @@ void createPhysicsBody(World& world, objid id, ShapeCreateType option){
     .body = rigidBody,
     .offset = std::nullopt,
   };
+
+  modassert(rigidBody != NULL, "rigid body was null invalid shape type probably");
   world.rigidbodys[id] = phys;
 }
 

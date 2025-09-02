@@ -171,8 +171,8 @@ std::optional<ModAABB2> getModAABBModel(int32_t id){
   return aabb;
 }
 
-std::optional<PhysicsInfo> getPhysicsInfo(int32_t index){
-  return getPhysicsInfoForGameObject(world, index, true);
+std::optional<PhysicsInfo> getPhysicsInfo(int32_t index, bool group){
+  return getPhysicsInfoForGameObject(world, index, group);
 }
 
 

@@ -134,7 +134,7 @@ void drawAABB(objid id){
 }
 
 void drawBounding(objid id){
-  auto physicsInfo = mainApi -> getPhysicsInfo(id);
+  auto physicsInfo = mainApi -> getPhysicsInfo(id, true);
   auto position = mainApi -> getGameObjectPos(id, true, "tools - drawBounding");
   if (physicsInfo.has_value()){
     if (physicsInfo.value().offset.has_value()){
