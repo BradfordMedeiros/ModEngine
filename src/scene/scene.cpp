@@ -867,16 +867,33 @@ std::vector<objid> physicsPosToUpdate;
 std::vector<objid> physicsRotToUpdate;
 
 void postUpdatePhysicsTranslateSet(World& world, objid index){
-  PhysicsValue& phys = world.rigidbodys.at(index);
-  auto body =  phys.body;
+  if (world.rigidbodys.find(index) == world.rigidbodys.end()){
+    return;
+  }
+  PhysicsValue& rigidBody = world.rigidbodys.at(index);
+  auto body =  rigidBody.body;
+  //auto isStatic = rigidBody.body -> getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT;
+  //if (isStatic){
+  //  return;
+  //}
+
   auto& transform = fullTransformation(world.sandbox, index, "physicsTranslateSet - read back to set physics position");
-  setPosition(body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation));
+  setPosition(body, calcOffsetFromRotation(transform.position, rigidBody.offset, transform.rotation));
   if (transformLoggingEnabled()){
     std::cout << inColor("hint - physics setPosition", CONSOLE_COLOR_YELLOW) << ": [" << std::to_string(index) + " " + getGameObject(world, index).name + "] " << "postUpdatePhysicsTranslateSet" << " " << inColor(print(transform), CONSOLE_COLOR_YELLOW) << std::endl;
   }
 }
 void postUpdatePhysicsRotateSet(World& world, objid index){
+  if (world.rigidbodys.find(index) == world.rigidbodys.end()){
+    return;
+  }
   auto rigidBody = world.rigidbodys.at(index);
+  
+  //auto isStatic = rigidBody.body -> getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT;
+  //if (isStatic){
+  //  return;
+  //}
+
   auto body =  rigidBody.body;
   auto& transform = fullTransformation(world.sandbox, index, "postUpdatePhysicsRotateSet - read back to set physics pos/rotn");
   auto rot = transform.rotation;
@@ -904,8 +921,14 @@ std::set<objid> updatePhysicsFromSandbox(World& world){
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body =  phys.body;
+  
+      auto isStatic = body -> getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT;
+      if (!isStatic){
+      //  continue;
+      }
+
       auto& fullTransform = fullTransformation(world.sandbox, index, "read back transform for rigid body position");
-      setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
+      setTransform(world.physicsEnvironment, body, fullTransform.position, fullTransform.scale, fullTransform.rotation);
       std::cout << inColor("hint - physics setTransform", CONSOLE_COLOR_YELLOW) << ": [" << std::to_string(index) + " " + getGameObject(world, index).name + "] " << "setTransform" << " " << inColor(print(fullTransform), CONSOLE_COLOR_YELLOW) <<  std::endl;
     }
   }
@@ -971,7 +994,6 @@ void addObjectToWorld(
     auto loadScene = [&world, id, sceneId](std::string sceneFile, std::vector<Token>& addedTokens) -> objid {
       modlog("prefab load scene", std::to_string(id));
       auto newSceneId = addSceneToWorld(world, sceneFile, addedTokens, std::nullopt, std::nullopt, std::nullopt, id, id);
-      updatePhysicsFromSandbox(world);
       return newSceneId;
     };
 
@@ -1358,6 +1380,12 @@ std::optional<AttributeValue> getObjectAttribute(World& world, objid id, const c
 }
 
 void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool physicsEnableChanged){
+  if (world.rigidbodys.find(id) != world.rigidbodys.end()){
+    if (world.rigidbodys.at(id).customManaged){
+      return;
+    }
+  }
+
   //std::cout << "rigid bodies old: " << world.rigidbodys.size() << std::endl;
   if (physicsEnableChanged){
     modlog("physics", std::string("rebuilding for: ") + gameobj.name);
@@ -1416,7 +1444,6 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
 
   setCoreAttr = setAttribute(gameobj, field, value, util);
   bool physicsObjectNeedsRebuild = gameobj.physicsOptions.enabled != physicsEnableInitial;
-
 
   if (!setCoreAttr){
     SetAttrFlags setAttrFlags { .rebuildPhysics = false };
@@ -1849,6 +1876,7 @@ void createPhysicsBody(World& world, objid id, ShapeCreateType option){
   PhysicsValue phys {
     .body = rigidBody,
     .offset = std::nullopt,
+    .customManaged = true,
   };
 
   modassert(rigidBody != NULL, "rigid body was null invalid shape type probably");

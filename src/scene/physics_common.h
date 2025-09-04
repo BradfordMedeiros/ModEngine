@@ -14,6 +14,7 @@ btQuaternion glmToBt(glm::quat rotation);
 struct PhysicsValue {
   btRigidBody* body;
   std::optional<glm::vec3> offset;
+  bool customManaged = false;
 };
 
 struct rigidBodyOpts {
