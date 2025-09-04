@@ -428,7 +428,8 @@ glm::quat parseQuat(glm::vec4 vecXYZRotation){
 }
 
 float angleFromQuat(glm::quat rotation){
-  return glm::acos(rotation.w) * 2.f;
+    float w = glm::clamp(rotation.w, -1.0f, 1.0f);
+    return glm::acos(w) * 2.f;
 }
 
 // Fails serialization by .04 degrees... which is probably ok...but why, remnant of just float ops?  
@@ -450,10 +451,7 @@ glm::vec3 quatToVec(glm::quat quat){
   return quat * glm::vec3(0.f, 0.f, -1.f);    // rotate the forward direction by the quat. 
 }
 glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
-  // @TODO consider extracting a better up direction from current orientation
-  // https://stackoverflow.com/questions/18151845/converting-glmlookat-matrix-to-quaternion-and-back/29992778
-  // This feels like a really bad hack, but if an object is just straight up, this returns NaN. 
-  // Should look more into the math!  How to pick up vector properly? 
+
   if (fromPos.x == targetPosition.x && fromPos.z == targetPosition.z && !(fromPos.y == targetPosition.y)){   
     if (fromPos.y < targetPosition.y){
       return  glm::quat(glm::vec3(glm::radians(90.f), 0, 0));
