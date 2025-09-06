@@ -928,7 +928,7 @@ std::set<objid> updatePhysicsFromSandbox(World& world){
       }
 
       auto& fullTransform = fullTransformation(world.sandbox, index, "read back transform for rigid body position");
-      setTransform(world.physicsEnvironment, body, fullTransform.position, fullTransform.scale, fullTransform.rotation);
+      setTransform(world.physicsEnvironment, body,  calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
       std::cout << inColor("hint - physics setTransform", CONSOLE_COLOR_YELLOW) << ": [" << std::to_string(index) + " " + getGameObject(world, index).name + "] " << "setTransform" << " " << inColor(print(fullTransform), CONSOLE_COLOR_YELLOW) <<  std::endl;
     }
   }
@@ -1415,6 +1415,7 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool physic
 }
 
 void setSingleGameObjectAttr(World& world, objid id, const char* field, AttributeValue value){
+  std::cout << "setSingleGameObjectAttr: " << getGameObject(world.sandbox, id).name << std::endl;
   GameObject& gameobj = getGameObject(world, id);
   bool physicsEnableInitial = gameobj.physicsOptions.enabled;
   bool physicsStaticInitial = gameobj.physicsOptions.isStatic;
@@ -1747,12 +1748,12 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     world.entitiesToUpdate.insert(updatedId);
   }
 
-  for (auto id : world.entitiesToUpdate){
-    if (idExists(world.sandbox, id)){  // why do i need this check?
-      auto absolutePosition = fullTransformation(world.sandbox, id, "object type position updates").position;
-      updateObjectPositions(world.objectMapping, id, absolutePosition, viewTransform);      
-    }
-  }
+  //for (auto id : world.entitiesToUpdate){
+  //  if (idExists(world.sandbox, id)){  // why do i need this check?
+  //    auto absolutePosition = fullTransformation(world.sandbox, id, "object type position updates").position;
+  //    updateObjectPositions(world.objectMapping, id, absolutePosition, viewTransform);      
+  //  }
+  //}
 
   for (auto id : world.entitiesToUpdate){
     if (id == getGroupId(world.sandbox, id)){ // why? 
@@ -1847,6 +1848,7 @@ void createPhysicsBody(World& world, objid id, ShapeCreateType option){
     modassert(false, std::string("rigid body already exists on this"));
   }
 
+  glm::vec3 offset(0.f, 0.f, 0.f);
   auto gameobjTransform = fullTransformation(world.sandbox, id);
 
   rigidBodyOpts opts {
@@ -1856,7 +1858,7 @@ void createPhysicsBody(World& world, objid id, ShapeCreateType option){
     .friction = 1.f,
     .restitution = 1.f,
     .mass = 1.f,
-    .layer = 2,
+    .layer = 0,
     .linearDamping = 0.f,
     .isStatic = true,
     .hasCollisions = false,
@@ -1868,14 +1870,14 @@ void createPhysicsBody(World& world, objid id, ShapeCreateType option){
   btRigidBody* rigidBody = NULL;
 
   if (createRect){
-    rigidBody = addRigidBodyRect(world.physicsEnvironment, gameobjTransform.position, createRect -> width, createRect -> height, createRect -> depth, gameobjTransform.rotation, gameobjTransform.scale, opts);
+    rigidBody = addRigidBodyRect(world.physicsEnvironment, gameobjTransform.position + offset, createRect -> width, createRect -> height, createRect -> depth, gameobjTransform.rotation, gameobjTransform.scale, opts);
   }else if (createSphere){
-    rigidBody = addRigidBodySphere(world.physicsEnvironment, gameobjTransform.position, createSphere -> radius, gameobjTransform.rotation, gameobjTransform.scale, opts);
+    rigidBody = addRigidBodySphere(world.physicsEnvironment, gameobjTransform.position + offset, createSphere -> radius, gameobjTransform.rotation, gameobjTransform.scale, opts);
   }
 
   PhysicsValue phys {
     .body = rigidBody,
-    .offset = std::nullopt,
+    .offset = offset,
     .customManaged = true,
   };
 

@@ -1,10 +1,44 @@
 #include "./physics.h"
 
+bool MyContactAddedCallback(
+    btManifoldPoint& cp,
+    const btCollisionObjectWrapper* colObj0Wrap,
+    int partId0,
+    int index0,
+    const btCollisionObjectWrapper* colObj1Wrap,
+    int partId1,
+    int index1)
+{
+    const btCollisionObject* obj0 = colObj0Wrap->getCollisionObject();
+    const btCollisionObject* obj1 = colObj1Wrap->getCollisionObject();
+
+    bool hasNoContactObj0 = (obj0 -> getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE) != 0;
+    bool hasNoContactObj1 = (obj1 -> getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE) != 0;
+
+    if (obj0 -> getBroadphaseHandle() -> m_collisionFilterMask == 0){
+      cp.m_appliedImpulse = 0.f;  
+      return false;
+    }
+    if (obj1 -> getBroadphaseHandle() -> m_collisionFilterMask == 0){
+      cp.m_appliedImpulse = 0.f;  
+      return false;
+    }    
+
+    if (hasNoContactObj0 || hasNoContactObj1){
+      //cp.m_startPenetrating = false;  // prevents solver from pushing objects apart
+      modassert(false, "dont want to add callback");
+      cp.m_appliedImpulse = 0.f;  
+      return false;
+    }
+
+    modlog("MyContactAddedCallback", "added contact");
+    return true;
+}
 
 physicsEnv initPhysics(collisionPairPosFn onObjectEnter,  collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer){
   std::cout << "INFO: INIT: physics system" << std::endl;
   auto colConfig = new btDefaultCollisionConfiguration();  
-  auto dispatcher = new btCollisionDispatcher(colConfig);  
+  auto dispatcher = new btGhostLayerCollisionDispatcher(colConfig);  
   auto broadphase = new btDbvtBroadphase();
   auto constraintSolver = new btSequentialImpulseConstraintSolver();
   auto dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, constraintSolver, colConfig);
@@ -26,6 +60,8 @@ physicsEnv initPhysics(collisionPairPosFn onObjectEnter,  collisionPairFn onObje
   };
 
   env.dynamicsWorld -> getPairCache() -> setOverlapFilterCallback(filterCallback);
+    gContactAddedCallback = MyContactAddedCallback;
+
   if (env.hasDebugDrawer){
     env.dynamicsWorld -> setDebugDrawer(debugDrawer);
   }
@@ -54,6 +90,8 @@ void setPhysicsOptions(btRigidBody* body, rigidBodyOpts& opts, bool skipCollisio
   body -> setFriction(opts.friction);
   body -> setRestitution(opts.restitution);
   body -> setDamping(0.1f, 0.6f);
+
+  body -> setCollisionFlags(body -> getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 
   if (!opts.hasCollisions){
     body -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
@@ -179,6 +217,7 @@ void cleanupRigidBody(btRigidBody* body){
 
 btRigidBody* addBodyToWorld(physicsEnv& env, btRigidBody* rigidBodyPtr, rigidBodyOpts& opts){
   setPhysicsOptions(rigidBodyPtr, opts, true); /* this can be true because opts.layer in next line*/
+
   env.dynamicsWorld -> addRigidBody(rigidBodyPtr, 1, opts.layer);
   rigidBodyPtr -> getBroadphaseHandle() -> m_collisionFilterMask = opts.layer;
 
@@ -305,7 +344,7 @@ void setPosition(btRigidBody* rigid, glm::vec3 pos){
   transform.setOrigin(glmToBt(pos));
   rigid -> getMotionState() -> setWorldTransform(transform);
   rigid -> setWorldTransform(transform);
-  rigid -> activate(true); 
+  //rigid -> activate(true); 
 }
 glm::quat getRotation(btRigidBody* body){
   return btToGlm(body -> getWorldTransform().getRotation());
@@ -319,7 +358,7 @@ void setRotation(btRigidBody* body, glm::quat rotation){
 }
 void setScale(physicsEnv& env, btRigidBody* body, float width, float height, float depth){
   body -> getCollisionShape() -> setLocalScaling(btVector3(width, height, depth));
-  env.dynamicsWorld -> updateSingleAabb(body);
+ // env.dynamicsWorld -> updateSingleAabb(body);
 
   // this use to be instead of update singleaabb see ff6d5292f275e725e37cf527e89a28e09c4ef241
   //env.dynamicsWorld -> removeRigidBody(body);   // if we don't add or remove it just gets stuck in the air...
@@ -350,7 +389,7 @@ void checkCollisions(physicsEnv& env){
   for (int i = 0; i < dispatcher -> getNumManifolds(); i++) {
     btPersistentManifold* contactManifold = dispatcher -> getManifoldByIndexInternal(i);
 
-    if (contactManifold -> getNumContacts() > 0){
+    if (contactManifold -> getNumContacts() > 0 || true){
       /// @NOTE Internally there can be more than one contact point, but it's simpler to just report one of them (maybe expose more in future)
       btManifoldPoint& point = contactManifold -> getContactPoint(0);
       btVector3 median = (point.getPositionWorldOnA() + point.getPositionWorldOnB()) / 2.f;

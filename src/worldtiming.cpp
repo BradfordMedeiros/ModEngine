@@ -39,6 +39,7 @@ void removePlayback(WorldTiming& timings, objid groupId, int zIndex){
 
 void setPoses(World& world, objid idScene, std::vector<AnimationPose>& poses){
   for (auto& pose : poses){
+    std::cout << "setPoses: " << getGameObject(world.sandbox, pose.targetId).name << std::endl;
     physicsLocalTransformSet(world, pose.targetId, pose.pose, pose.directIndex);
     //printMatrixInformation(pose.pose, std::string("SET_CHANNEL:") + pose.channelName);
   }

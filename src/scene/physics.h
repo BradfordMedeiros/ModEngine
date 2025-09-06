@@ -20,11 +20,40 @@
 
 // Semi modified contract:   We just expose a single int as a layer mask 
 // And then that gets used.  Nice and simple to reason about
-struct SimpleMaskFilterCallback : public btOverlapFilterCallback{
+
+struct SimpleMaskFilterCallback : public btOverlapFilterCallback {
   virtual bool needBroadphaseCollision(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1) const {
+    if (proxy0 -> m_collisionFilterMask == 0 || proxy1 -> m_collisionFilterMask == 0){
+      return false;
+    }
     return !(proxy0 -> m_collisionFilterMask & proxy1 -> m_collisionFilterMask) || (proxy0 -> m_collisionFilterMask == proxy1 -> m_collisionFilterMask);
   }
 };
+
+class btGhostLayerCollisionDispatcher : public btCollisionDispatcher {
+public:
+    btGhostLayerCollisionDispatcher(btCollisionConfiguration* config) : btCollisionDispatcher(config) {}
+
+    bool needsCollision(const btCollisionObject* body0, const btCollisionObject* body1) override {
+        // First respect the default rules (like groups/masks)
+        if (!btCollisionDispatcher::needsCollision(body0, body1)){
+          return false;
+        }
+
+        bool hasNoContactObj0 = (body0 -> getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE) != 0;
+        bool hasNoContactObj1 = (body1 -> getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE) != 0;
+        if (hasNoContactObj0 || hasNoContactObj1){
+          return false;
+          
+        }
+        if ((body0 -> getBroadphaseHandle() -> m_collisionFilterMask == 0) || (body1 -> getBroadphaseHandle() -> m_collisionFilterMask == 0)){
+          return false;
+        }
+
+        return true;
+    }
+};
+
 
 struct physicsEnv {
   btDefaultCollisionConfiguration* colConfig;
