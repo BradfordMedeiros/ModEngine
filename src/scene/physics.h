@@ -71,8 +71,8 @@ void applyForce(btCollisionObject* colObject, glm::vec3 force);
 void applyTorque(btCollisionObject* colObject, glm::vec3 torque);
 
 void clampMaxVelocity(btCollisionObject* colObject, float maxspeed);
-glm::vec3 getVelocity(btRigidBody* body);
-glm::vec3 getAngularVelocity(btRigidBody* body);
+glm::vec3 getVelocity(btCollisionObject* colObject);
+glm::vec3 getAngularVelocity(btCollisionObject* colObject);
 
 ModAABB getModAABB(btCollisionObject* body);
 

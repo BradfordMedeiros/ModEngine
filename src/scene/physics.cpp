@@ -427,13 +427,23 @@ void clampMaxVelocity(btCollisionObject* colObject, float maxspeed){
   }
 }
 
-glm::vec3 getVelocity(btRigidBody* body){
-  auto velocity = body -> getLinearVelocity();
-  return btToGlm(velocity);
+glm::vec3 getVelocity(btCollisionObject* colObject){
+  auto body = btRigidBody::upcast(colObject);
+  if (body){
+    auto velocity = body -> getLinearVelocity();
+    return btToGlm(velocity);    
+  }
+  modassert(false, "not a rigidbody");
+  return glm::vec3(0.f, 0.f, 0.f);
 }
-glm::vec3 getAngularVelocity(btRigidBody* body){
-  auto velocity = body -> getAngularVelocity();
-  return btToGlm(velocity);
+glm::vec3 getAngularVelocity(btCollisionObject* colObject){
+  auto body = btRigidBody::upcast(colObject);
+  if (body){
+    auto velocity = body -> getAngularVelocity();
+    return btToGlm(velocity);    
+  }
+  modassert(false, "not a rigidbody");
+  return glm::vec3(0.f, 0.f, 0.f); 
 }
 
 
