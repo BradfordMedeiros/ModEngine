@@ -335,13 +335,19 @@ void setTransform(physicsEnv& env, btRigidBody* body, glm::vec3 pos, glm::vec3 s
   setRotation(body, rotation);
 }
 
-void setVelocity(btRigidBody* body, glm::vec3 velocity){
-  body -> setLinearVelocity(glmToBt(velocity));
-  body -> activate(true);
+void setVelocity(btCollisionObject* obj, glm::vec3 velocity){
+  btRigidBody* body = btRigidBody::upcast(obj);
+  if (body){
+    body -> setLinearVelocity(glmToBt(velocity));
+    body -> activate(true);    
+  }
 }
-void setAngularVelocity(btRigidBody* body, glm::vec3 angularVelocity){
-  body -> setAngularVelocity(glmToBt(angularVelocity));
-  body -> activate(true);
+void setAngularVelocity(btCollisionObject* obj, glm::vec3 angularVelocity){
+  btRigidBody* body = btRigidBody::upcast(obj);
+  if (body){
+    body -> setAngularVelocity(glmToBt(angularVelocity));
+    body -> activate(true);    
+  }
 }
     
 void checkCollisions(physicsEnv& env){   

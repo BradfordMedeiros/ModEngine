@@ -1525,8 +1525,8 @@ void physicsVelocitySet(World& world, objid index, glm::vec3 velocity){
 
 void physicsAngularVelocitySet(World& world, objid index, glm::vec3 angularVelocity){
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    auto body = world.rigidbodys.at(index).body;
-    setAngularVelocity(body, angularVelocity);
+    btCollisionObject* obj = world.rigidbodys.at(index).body;
+    setAngularVelocity(obj, angularVelocity);
   }
 }
 
