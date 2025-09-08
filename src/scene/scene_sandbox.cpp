@@ -725,7 +725,8 @@ void updateNodes(SceneSandbox& sandbox, int directIndex){
       sandbox.mainScene.gameobjects.at(directIndex).absoluteTransform.matrix = matrixFromComponents(newTransform);
     }
     objh.updateFrame = currentFrameTick;
-
+    
+    sandbox.updatedIds.insert(idToVisit);
 
     for (int childDirectIndex : objh.childrenDirectIndex){
       idsToVisit.push(childDirectIndex);

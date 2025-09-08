@@ -1821,6 +1821,7 @@ void createPhysicsBody(World& world, objid id, ShapeCreateType option){
   }
 
   auto gameobjTransform = fullTransformation(world.sandbox, id);
+  std::optional<glm::vec3> offset = glm::vec3(0.f, 2.f, 0.f);
 
   rigidBodyOpts opts {
     .linear = glm::vec3(1.f, 1.f, 1.f),
@@ -1841,14 +1842,14 @@ void createPhysicsBody(World& world, objid id, ShapeCreateType option){
   btRigidBody* rigidBody = NULL;
 
   if (createRect){
-    rigidBody = addRigidBodyRect(world.physicsEnvironment, gameobjTransform.position, createRect -> width, createRect -> height, createRect -> depth, gameobjTransform.rotation, gameobjTransform.scale, opts);
+    rigidBody = addRigidBodyRect(world.physicsEnvironment, gameobjTransform.position + (offset.has_value() ? offset.value() : glm::vec3(0.f, 0.f, 0.f)), createRect -> width, createRect -> height, createRect -> depth, gameobjTransform.rotation, gameobjTransform.scale, opts);
   }else if (createSphere){
-    rigidBody = addRigidBodySphere(world.physicsEnvironment, gameobjTransform.position, createSphere -> radius, gameobjTransform.rotation, gameobjTransform.scale, opts);
+    rigidBody = addRigidBodySphere(world.physicsEnvironment, gameobjTransform.position + (offset.has_value() ? offset.value() : glm::vec3(0.f, 0.f, 0.f)), createSphere -> radius, gameobjTransform.rotation, gameobjTransform.scale, opts);
   }
 
   PhysicsValue phys {
     .body = rigidBody,
-    .offset = std::nullopt,
+    .offset = offset,
   };
 
   modassert(rigidBody != NULL, "rigid body was null invalid shape type probably");
