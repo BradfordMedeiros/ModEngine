@@ -57,17 +57,24 @@ std::optional<objid> getGameObjectByName(std::string name, objid sceneId){
 }
 
 
-btRigidBody* getRigidBody(int32_t index){
-  return world.rigidbodys.find(index) == world.rigidbodys.end() ? NULL : world.rigidbodys.at(index).body;
+btCollisionObject* getCollisionObject(int32_t index, bool shouldBeRigidBody){
+  btCollisionObject* obj = world.rigidbodys.find(index) == world.rigidbodys.end() ? NULL : world.rigidbodys.at(index).body;
+  if (shouldBeRigidBody){
+    btRigidBody* body = btRigidBody::upcast(obj);
+    if (body == NULL){
+      modassert(false, "not a btRigidBody, btCollisionObject");
+    }
+  }
+  return obj;
 }
 void applyImpulse(int32_t index, glm::vec3 impulse){
-  auto rigidBody = getRigidBody(index);
+  auto rigidBody = getCollisionObject(index, true);
   if (rigidBody != NULL){
     applyImpulse(rigidBody, impulse);
   }
 }
 void applyImpulseRel(int32_t index, glm::vec3 impulse){
-  auto rigidBody = getRigidBody(index);
+  auto rigidBody = getCollisionObject(index, true);
   if (rigidBody != NULL){
     auto relativeRotation = gameobjectRotation(world, index, false, "applyImpulseRel");
     glm::vec3 relativeImpulse = calculateRelativeOffset(relativeRotation, impulse, true);
@@ -76,27 +83,27 @@ void applyImpulseRel(int32_t index, glm::vec3 impulse){
 }
 
 void clearImpulse(int32_t index){
-  auto rigidBody = getRigidBody(index);
+  auto rigidBody = getCollisionObject(index, true);
   if (rigidBody != NULL){
     clearImpulse(rigidBody);
   }
 }
 
 void applyForce(int32_t index, glm::vec3 force){
-  auto rigidBody = getRigidBody(index);
+  auto rigidBody = getCollisionObject(index, true);
   if (rigidBody != NULL){
     applyForce(rigidBody, force);
   }
 }
 void applyTorque(int32_t index, glm::vec3 torque){
-  auto rigidBody = getRigidBody(index);
+  auto rigidBody = getCollisionObject(index, true);
   if (rigidBody != NULL){
     applyTorque(rigidBody, torque);
   }
 }
 
 std::optional<ModAABB> getModAABB(int32_t index){
-  auto rigidBody = getRigidBody(index);
+  auto rigidBody = getCollisionObject(index, false);
   if (rigidBody == NULL){
     return std::nullopt;
   }
