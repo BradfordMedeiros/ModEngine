@@ -47,42 +47,47 @@ btRigidBody* createRigidBody(glm::vec3 pos, btCollisionShape* shape, glm::quat r
   return body;
 }
 
-void setPhysicsOptions(btRigidBody* body, rigidBodyOpts& opts, bool skipCollisionMask = false){
-  body -> setLinearFactor(glmToBt(opts.linear));
-  body -> setAngularFactor(glmToBt(opts.angular));
-  body -> setGravity(glmToBt(opts.gravity));
-  body -> setFriction(opts.friction);
-  body -> setRestitution(opts.restitution);
-  body -> setDamping(0.1f, 0.6f);
-
+void setPhysicsOptions(btCollisionObject* colObject, rigidBodyOpts& opts, bool skipCollisionMask = false){
+  btRigidBody* body = btRigidBody::upcast(colObject);
+  if (body){
+    body -> setLinearFactor(glmToBt(opts.linear));
+    body -> setAngularFactor(glmToBt(opts.angular));
+    body -> setGravity(glmToBt(opts.gravity));
+    body -> setFriction(opts.friction);
+    body -> setRestitution(opts.restitution);
+    body -> setDamping(0.1f, 0.6f);
+  }
   if (!opts.hasCollisions){
-    body -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+    colObject -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
   }else{
-    body -> setCollisionFlags(body->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
-    body -> forceActivationState(ACTIVE_TAG);
-    body -> activate(true);   
+    colObject -> setCollisionFlags(body->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
+    colObject -> forceActivationState(ACTIVE_TAG);
+    colObject -> activate(true);   
   }
 
   if (opts.isStatic){
-    body -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-    body -> setActivationState(DISABLE_DEACTIVATION);
+    colObject -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+    colObject -> setActivationState(DISABLE_DEACTIVATION);
   }else{
-    body -> setCollisionFlags(body->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
-    body -> activate(true);
+    colObject -> setCollisionFlags(body->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
+    colObject -> activate(true);
   }
 
-  btScalar mass = opts.isStatic ? btScalar(0.f) : btScalar(opts.mass);
-  btVector3 inertia(0, 0, 0);
+  if (body){
+    btScalar mass = opts.isStatic ? btScalar(0.f) : btScalar(opts.mass);
+    btVector3 inertia(0, 0, 0);
 
-  btCollisionShape* shape = body -> getCollisionShape(); 
-  shape -> calculateLocalInertia(mass, inertia);
-  body -> setMassProps(mass, inertia);
-  body -> updateInertiaTensor();
+    btCollisionShape* shape = colObject -> getCollisionShape(); 
+    shape -> calculateLocalInertia(mass, inertia);
+    body -> setMassProps(mass, inertia);
+    body -> updateInertiaTensor();
+  }
 
   if (!skipCollisionMask){
-    modassert(body -> getBroadphaseHandle() != NULL, "null broadphase handle");
-    body -> getBroadphaseHandle() -> m_collisionFilterMask = opts.layer;
-  }
+    modassert(colObject -> getBroadphaseHandle() != NULL, "null broadphase handle");
+    colObject -> getBroadphaseHandle() -> m_collisionFilterMask = opts.layer;
+  }    
+
 }
 
 btRigidBody* createRigidBodyRect(glm::vec3 pos, float width, float height, float depth, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts){
@@ -283,17 +288,27 @@ void rmRigidBody(physicsEnv& env, btRigidBody* body){
   cleanupRigidBody(body);
 }
 
-void updateRigidBodyOpts(physicsEnv& env, btRigidBody* body, rigidBodyOpts opts){
+void updateRigidBodyOpts(physicsEnv& env, btCollisionObject* colObject, rigidBodyOpts opts){
   bool removedBody = false;
   if (!opts.isStatic){
     removedBody = true;
-    env.dynamicsWorld -> removeCollisionObject(body);
+    env.dynamicsWorld -> removeCollisionObject(colObject);
   }
-  setPhysicsOptions(body, opts, true);
+  setPhysicsOptions(colObject, opts, true);
   if (removedBody){
-    env.dynamicsWorld -> addRigidBody(body, 1, opts.layer);
+    btRigidBody* body = btRigidBody::upcast(colObject);
+    if (body){
+      env.dynamicsWorld -> addRigidBody(body, 1, opts.layer);
+    }else{
+      env.dynamicsWorld -> addCollisionObject(body, 1, opts.layer);
+    }
   }
-  body -> setGravity(glmToBt(opts.gravity)); // kind of lame, has to be done after added rigid body
+
+  btRigidBody* body = btRigidBody::upcast(colObject);
+  if (body){
+    body -> setGravity(glmToBt(opts.gravity)); // kind of lame, has to be done after added rigid body
+  }
+
 }
 
 glm::vec3 getPosition(btRigidBody* body){
