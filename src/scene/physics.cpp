@@ -91,7 +91,7 @@ btRigidBody* createRigidBodyRect(glm::vec3 pos, float width, float height, float
 }
 btRigidBody* createRigidBodySphere(glm::vec3 pos, float radius, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts){
   btCollisionShape* shape = new btSphereShape(radius); 
-    shape -> setMargin(0.1); // TODO check if this margin makes sense
+  shape -> setMargin(0.1); // TODO check if this margin makes sense
 
   return createRigidBody(pos, shape, rot, scaling);
 }
@@ -279,7 +279,7 @@ btRigidBody* addRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotati
 
 void rmRigidBody(physicsEnv& env, btRigidBody* body){
   env.collisionCache.rmObject(body);
-  env.dynamicsWorld -> removeRigidBody(body);
+  env.dynamicsWorld -> removeCollisionObject(body);
   cleanupRigidBody(body);
 }
 
@@ -287,7 +287,7 @@ void updateRigidBodyOpts(physicsEnv& env, btRigidBody* body, rigidBodyOpts opts)
   bool removedBody = false;
   if (!opts.isStatic){
     removedBody = true;
-    env.dynamicsWorld -> removeRigidBody(body);
+    env.dynamicsWorld -> removeCollisionObject(body);
   }
   setPhysicsOptions(body, opts, true);
   if (removedBody){
@@ -469,7 +469,7 @@ bool AllHitsRayResultCallbackCustomFilter::needsCollision(btBroadphaseProxy* pro
 }
 
 
-std::optional<objid> getIdForRigidBody(std::unordered_map<objid, PhysicsValue>& rigidbodys, const btCollisionObject* obj){
+std::optional<objid> getIdForCollisionObject(std::unordered_map<objid, PhysicsValue>& rigidbodys, const btCollisionObject* obj){
   for (auto &[id, physicsObj] : rigidbodys){
     if (physicsObj.body == obj){
       return id;
@@ -491,7 +491,7 @@ std::vector<HitObject> raycast(physicsEnv& env, std::unordered_map<objid, Physic
     const btCollisionObject* obj = result.m_collisionObjects[i];
     auto hitPoint = btPosFrom.lerp(btPosTo, result.m_hitFractions[i]);
     auto hitNormal = result.m_hitNormalWorld[i];
-    auto id = getIdForRigidBody(rigidbodys, obj).value();
+    auto id = getIdForCollisionObject(rigidbodys, obj).value();
     hitobjects.push_back(
       HitObject {
         .id = id,
@@ -546,13 +546,13 @@ public:
     btCollisionObject* testCollisionObj;
 };
 
-std::vector<HitObject> contactTest(physicsEnv& env, std::unordered_map<objid, PhysicsValue>& rigidbodys, btRigidBody* body){
+std::vector<HitObject> contactTest(physicsEnv& env, std::unordered_map<objid, PhysicsValue>& rigidbodys, btCollisionObject* body){
   auto contactCallback = ContactResultCallback(body);
   std::vector<HitObject> hitobjects = {};
-  auto originalId = getIdForRigidBody(rigidbodys, body);
+  auto originalId = getIdForCollisionObject(rigidbodys, body);
 
   contactCallback.callback = [&rigidbodys, &hitobjects, body, originalId](const btCollisionObject* obj, glm::vec3 pos, glm::quat normal) -> void {
-    auto id = getIdForRigidBody(rigidbodys, obj).value();
+    auto id = getIdForCollisionObject(rigidbodys, obj).value();
     //modlog("contact test id: ", std::to_string(id) + std::string(", original id: ") + std::to_string(originalId.value()));
     modassert(id != originalId, "id and original id are the same");
     hitobjects.push_back(HitObject {
@@ -588,8 +588,7 @@ std::vector<HitObject> contactTestShape(physicsEnv& env, std::unordered_map<obji
   };
 
   auto body = addRigidBodySphere(env, pos, 1.f, orientation, scale, opts);
-  auto originalId = getIdForRigidBody(rigidbodys, body);
-
+  auto originalId = getIdForCollisionObject(rigidbodys, body);
 
   setPosition(body, pos);
   setRotation(body, orientation);
@@ -599,7 +598,7 @@ std::vector<HitObject> contactTestShape(physicsEnv& env, std::unordered_map<obji
   auto contactCallback = ContactResultCallback(body);
   contactCallback.callback = [&rigidbodys, &hitobjects, body](const btCollisionObject* obj, glm::vec3 pos, glm::quat normal) -> void {
     modassert(obj != body, "contactTest - made contact with itself");
-    auto id = getIdForRigidBody(rigidbodys, obj);
+    auto id = getIdForCollisionObject(rigidbodys, obj);
     hitobjects.push_back(HitObject {
       .id = id.value(),
       .mask = obj -> getBroadphaseHandle() -> m_collisionFilterMask,

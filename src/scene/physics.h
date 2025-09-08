@@ -79,7 +79,7 @@ ModAABB getModAABB(btCollisionObject* body);
 void printRigidBodyInfo(btRigidBody* body);
 
 std::vector<HitObject> raycast(physicsEnv& env, std::unordered_map<objid, PhysicsValue>& rigidbodys, glm::vec3 posFrom, glm::quat direction, float maxDistance);
-std::vector<HitObject> contactTest(physicsEnv& env, std::unordered_map<objid, PhysicsValue>& rigidbodys, btRigidBody* body);
+std::vector<HitObject> contactTest(physicsEnv& env, std::unordered_map<objid, PhysicsValue>& rigidbodys, btCollisionObject* body);
 std::vector<HitObject> contactTestShape(physicsEnv& env, std::unordered_map<objid, PhysicsValue>& rigidbodys, glm::vec3 pos, glm::quat orientation, glm::vec3 scale);
 
 float calculateRadiusForScale(glm::vec3 scale);
