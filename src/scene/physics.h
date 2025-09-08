@@ -65,16 +65,16 @@ void setTransform(physicsEnv& env, btRigidBody* body, glm::vec3 pos, glm::vec3 s
 void setVelocity(btRigidBody* body, glm::vec3 velocity);
 void setAngularVelocity(btRigidBody* body, glm::vec3 angularVelocity);
 
-void applyImpulse(btRigidBody* body, glm::vec3 force);
-void clearImpulse(btRigidBody* body);
-void applyForce(btRigidBody* body, glm::vec3 force);
-void applyTorque(btRigidBody* body, glm::vec3 torque);
+void applyImpulse(btCollisionObject* colObject, glm::vec3 force);
+void clearImpulse(btCollisionObject* colObject);
+void applyForce(btCollisionObject* colObject, glm::vec3 force);
+void applyTorque(btCollisionObject* colObject, glm::vec3 torque);
 
-void clampMaxVelocity(btRigidBody* body, float maxspeed);
+void clampMaxVelocity(btCollisionObject* colObject, float maxspeed);
 glm::vec3 getVelocity(btRigidBody* body);
 glm::vec3 getAngularVelocity(btRigidBody* body);
 
-ModAABB getModAABB(btRigidBody* body);
+ModAABB getModAABB(btCollisionObject* body);
 
 void printRigidBodyInfo(btRigidBody* body);
 

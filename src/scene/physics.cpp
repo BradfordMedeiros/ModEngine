@@ -382,29 +382,45 @@ void printRigidBodyInfo(btRigidBody* body){
   std::cout << "position: (" << origin.x << " , " << origin.y << " , " << origin.z << " )" << std::endl;
 }
 
-void applyImpulse(btRigidBody* body, glm::vec3 force){
-  body -> applyCentralImpulse(btVector3(force.x, force.y, force.z));
+void applyImpulse(btCollisionObject* colObject, glm::vec3 force){
+  auto body = btRigidBody::upcast(colObject);
+  if (body){
+    body -> applyCentralImpulse(btVector3(force.x, force.y, force.z));
+  }
 }
-void clearImpulse(btRigidBody* body){
-  body -> applyCentralImpulse(btVector3(0.f, 0.f, 0.f));
+void clearImpulse(btCollisionObject* colObject){
+  auto body = btRigidBody::upcast(colObject);
+  if (body){
+    body -> applyCentralImpulse(btVector3(0.f, 0.f, 0.f));
+  }
 }
-void applyForce(btRigidBody* body, glm::vec3 force){
-  body -> applyCentralForce(btVector3(force.x, force.y, force.z));
+void applyForce(btCollisionObject* colObject, glm::vec3 force){
+  auto body = btRigidBody::upcast(colObject);
+  if (body){
+    body -> applyCentralForce(btVector3(force.x, force.y, force.z));
+  }
 }
-void applyTorque(btRigidBody* body, glm::vec3 torque){
-  body -> applyTorque(btVector3(torque.x, torque.y, torque.z));
+void applyTorque(btCollisionObject* colObject, glm::vec3 torque){
+  auto body = btRigidBody::upcast(colObject);
+  if (body){
+    body -> applyTorque(btVector3(torque.x, torque.y, torque.z));
+  }
 }
 
-void clampMaxVelocity(btRigidBody* body, float maxspeed){
+void clampMaxVelocity(btCollisionObject* colObject, float maxspeed){
   if (maxspeed <= 0){
     return;
   }
-  auto velocity = body -> getLinearVelocity();
-  auto xVelocity = fmax(-maxspeed, fmin(maxspeed, velocity.getX()));
-  auto yVelocity = fmax(-maxspeed, fmin(maxspeed, velocity.getY()));
-  auto zVelocity = fmax(-maxspeed, fmin(maxspeed, velocity.getZ()));
-  body -> setLinearVelocity(btVector3(xVelocity, yVelocity, zVelocity));
+  auto body = btRigidBody::upcast(colObject);
+  if (body){
+    auto velocity = body -> getLinearVelocity();
+    auto xVelocity = fmax(-maxspeed, fmin(maxspeed, velocity.getX()));
+    auto yVelocity = fmax(-maxspeed, fmin(maxspeed, velocity.getY()));
+    auto zVelocity = fmax(-maxspeed, fmin(maxspeed, velocity.getZ()));
+    body -> setLinearVelocity(btVector3(xVelocity, yVelocity, zVelocity));    
+  }
 }
+
 glm::vec3 getVelocity(btRigidBody* body){
   auto velocity = body -> getLinearVelocity();
   return btToGlm(velocity);
@@ -415,7 +431,7 @@ glm::vec3 getAngularVelocity(btRigidBody* body){
 }
 
 
-ModAABB getModAABB(btRigidBody* body){
+ModAABB getModAABB(btCollisionObject* body){
   auto transform = body -> getWorldTransform();
 
   btVector3 vec1(0, 0, 0);
