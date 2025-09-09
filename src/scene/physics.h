@@ -23,6 +23,12 @@
 // And then that gets used.  Nice and simple to reason about
 struct SimpleMaskFilterCallback : public btOverlapFilterCallback{
   virtual bool needBroadphaseCollision(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1) const {
+    if (proxy0 -> m_collisionFilterMask == 0){
+      return false;
+    }
+    if (proxy1 -> m_collisionFilterMask == 0){
+      return false;
+    }
     return !(proxy0 -> m_collisionFilterMask & proxy1 -> m_collisionFilterMask) || (proxy0 -> m_collisionFilterMask == proxy1 -> m_collisionFilterMask);
   }
 };
@@ -83,5 +89,9 @@ std::vector<HitObject> contactTest(physicsEnv& env, std::unordered_map<objid, Ph
 std::vector<HitObject> contactTestShape(physicsEnv& env, std::unordered_map<objid, PhysicsValue>& rigidbodys, glm::vec3 pos, glm::quat orientation, glm::vec3 scale);
 
 float calculateRadiusForScale(glm::vec3 scale);
+
+
+bool staticallyUpdated(btCollisionObject* collisionObj);
+
 
 #endif 

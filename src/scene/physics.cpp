@@ -26,6 +26,9 @@ physicsEnv initPhysics(collisionPairPosFn onObjectEnter,  collisionPairFn onObje
   };
 
   env.dynamicsWorld -> getPairCache() -> setOverlapFilterCallback(filterCallback);
+
+  env.dynamicsWorld -> getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback()); 
+
   if (env.hasDebugDrawer){
     env.dynamicsWorld -> setDebugDrawer(debugDrawer);
   }
@@ -42,6 +45,10 @@ btCollisionObject* createRigidBody(glm::vec3 pos, btCollisionShape* shape, glm::
   if (ghost){
     btGhostObject* ghost = new btGhostObject();
     ghost -> setCollisionShape(shape);
+    ghost -> setWorldTransform(transform);
+    ghost -> setCollisionFlags(ghost -> getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+    //ghost -> setCollisionFlags(ghost -> getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
+
     return ghost;
   }
 
@@ -62,24 +69,23 @@ void setPhysicsOptions(btCollisionObject* colObject, rigidBodyOpts& opts, bool s
     body -> setFriction(opts.friction);
     body -> setRestitution(opts.restitution);
     body -> setDamping(0.1f, 0.6f);
-  }
-  if (!opts.hasCollisions){
-    colObject -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-  }else{
-    colObject -> setCollisionFlags(body->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
-    colObject -> forceActivationState(ACTIVE_TAG);
-    colObject -> activate(true);   
-  }
 
-  if (opts.isStatic){
-    colObject -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-    colObject -> setActivationState(DISABLE_DEACTIVATION);
-  }else{
-    colObject -> setCollisionFlags(body->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
-    colObject -> activate(true);
-  }
+    if (!opts.hasCollisions){
+      colObject -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+    }else{
+      colObject -> setCollisionFlags(body->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
+      colObject -> forceActivationState(ACTIVE_TAG);
+      //colObject -> activate(true);   
+    }
 
-  if (body){
+    if (opts.isStatic){
+      colObject -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+      colObject -> setActivationState(DISABLE_DEACTIVATION);
+    }else{
+      colObject -> setCollisionFlags(body->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
+      //colObject -> activate(true);
+    }
+
     btScalar mass = opts.isStatic ? btScalar(0.f) : btScalar(opts.mass);
     btVector3 inertia(0, 0, 0);
 
@@ -88,6 +94,7 @@ void setPhysicsOptions(btCollisionObject* colObject, rigidBodyOpts& opts, bool s
     body -> setMassProps(mass, inertia);
     body -> updateInertiaTensor();
   }
+
 
   if (!skipCollisionMask){
     modassert(colObject -> getBroadphaseHandle() != NULL, "null broadphase handle");
@@ -292,6 +299,7 @@ void rmRigidBody(physicsEnv& env, btCollisionObject* colObject){
 }
 
 void updateRigidBodyOpts(physicsEnv& env, btCollisionObject* colObject, rigidBodyOpts opts){
+  std::cout << "updateRigidBodyOpts called" << std::endl;
   bool removedBody = false;
   if (!opts.isStatic){
     removedBody = true;
@@ -317,49 +325,44 @@ void updateRigidBodyOpts(physicsEnv& env, btCollisionObject* colObject, rigidBod
 glm::vec3 getPosition(btCollisionObject* body){
   return btToGlm(body -> getWorldTransform().getOrigin());
 }
-void setPosition(btCollisionObject* collisionObj, glm::vec3 pos){
-  btRigidBody* body = btRigidBody::upcast(collisionObj);
-
-  btTransform transform; 
-  if (body){
-    body -> getMotionState() -> getWorldTransform(transform);
-  }else{
-    transform = collisionObj -> getWorldTransform();
-  }
-  transform.setOrigin(glmToBt(pos));    
- 
-  if (body){
-    body -> getMotionState() -> setWorldTransform(transform);
-  }
-  collisionObj -> setWorldTransform(transform);
-  collisionObj -> activate(true); 
+void setPosition(btCollisionObject* obj, glm::vec3 pos) {
+    btRigidBody* body = btRigidBody::upcast(obj);
+    btTransform t;
+    if (body) {
+        // teleport rigid body
+        body->getMotionState()->getWorldTransform(t);
+        t.setOrigin(glmToBt(pos));
+        body->setWorldTransform(t);
+        body->getMotionState()->setWorldTransform(t);
+        // optional: body->activate(true); // only if dynamic
+    } else {
+        // ghost object
+        t = obj->getWorldTransform();
+        t.setOrigin(glmToBt(pos));
+        obj->setWorldTransform(t);
+    }
 }
-
 
 glm::quat getRotation(btCollisionObject* body){
   return btToGlm(body -> getWorldTransform().getRotation());
 }
-void setRotation(btCollisionObject* collisionObj, glm::quat rotation){
-  btRigidBody* body = btRigidBody::upcast(collisionObj);
-
-  btTransform transform; 
-  if (body){
-    body -> getMotionState() -> getWorldTransform(transform);
-  }else{
-    transform = collisionObj -> getWorldTransform();
-  }
-  transform.setRotation(glmToBt(rotation));    
- 
-  if (body){
-    body -> getMotionState() -> setWorldTransform(transform);
-  }
-  collisionObj -> setWorldTransform(transform);
-  collisionObj -> activate(true); 
-
+void setRotation(btCollisionObject* obj, glm::quat rot) {
+    btRigidBody* body = btRigidBody::upcast(obj);
+    btTransform t;
+    if (body) {
+        body->getMotionState()->getWorldTransform(t);
+        t.setRotation(glmToBt(rot));
+        body->setWorldTransform(t);
+        body->getMotionState()->setWorldTransform(t);
+    } else {
+        t = obj->getWorldTransform();
+        t.setRotation(glmToBt(rot));
+        obj->setWorldTransform(t);
+    }
 }
 void setScale(physicsEnv& env, btCollisionObject* body, float width, float height, float depth){
-  body -> getCollisionShape() -> setLocalScaling(btVector3(width, height, depth));
-  env.dynamicsWorld -> updateSingleAabb(body);
+ // body -> getCollisionShape() -> setLocalScaling(btVector3(width, height, depth));
+ //env.dynamicsWorld -> updateSingleAabb(body);
 
   // this use to be instead of update singleaabb see ff6d5292f275e725e37cf527e89a28e09c4ef241
   //env.dynamicsWorld -> removeRigidBody(body);   // if we don't add or remove it just gets stuck in the air...
@@ -371,22 +374,23 @@ glm::vec3 getScale(btCollisionObject* body){
 
 void setTransform(physicsEnv& env, btCollisionObject* body, glm::vec3 pos, glm::vec3 scale, glm::quat rotation){
   setPosition(body, pos);
-  setScale(env, body, scale.x, scale.y, scale.z);
+  //setScale(env, body, scale.x, scale.y, scale.z);
   setRotation(body, rotation);
 }
 
 void setVelocity(btCollisionObject* obj, glm::vec3 velocity){
   btRigidBody* body = btRigidBody::upcast(obj);
   if (body){
+    std::cout << "setVelocity" << print(velocity) << std::endl;
     body -> setLinearVelocity(glmToBt(velocity));
-    body -> activate(true);    
+    //body -> activate(true);    
   }
 }
 void setAngularVelocity(btCollisionObject* obj, glm::vec3 angularVelocity){
   btRigidBody* body = btRigidBody::upcast(obj);
   if (body){
     body -> setAngularVelocity(glmToBt(angularVelocity));
-    body -> activate(true);    
+    //body -> activate(true);    
   }
 }
     
@@ -673,4 +677,13 @@ std::vector<HitObject> contactTestShape(physicsEnv& env, std::unordered_map<obji
 
 float calculateRadiusForScale(glm::vec3 scale){
   return (maxvalue(scale.y, scale.y, scale.y) / 2.f);
+}
+
+bool staticallyUpdated(btCollisionObject* collisionObj){
+  btRigidBody* rigidBody = btRigidBody::upcast(collisionObj);
+  if (rigidBody == NULL){
+    return true;
+  }
+  auto isStatic = rigidBody -> getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT;
+  return isStatic;
 }

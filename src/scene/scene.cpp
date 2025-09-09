@@ -1557,7 +1557,7 @@ bool hasRotUpdate(World& world, objid idToCheck){
 void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<objid, PhysicsValue>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     GameObject& gameobj = getGameObject(world, i);
-    auto isStatic = rigidBody.collisionObj -> getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT;
+    auto isStatic = staticallyUpdated(rigidBody.collisionObj);
 
     if (!isStatic){
       auto rotation = getRotation(rigidBody.collisionObj);
@@ -1827,7 +1827,7 @@ void createPhysicsBody(World& world, objid id, ShapeCreateType option){
   }
 
   auto gameobjTransform = fullTransformation(world.sandbox, id);
-  std::optional<glm::vec3> offset;
+  std::optional<glm::vec3> offset = glm::vec3(0.f, 0.f, 0.f);
 
   rigidBodyOpts opts {
     .linear = glm::vec3(1.f, 1.f, 1.f),
@@ -1846,11 +1846,12 @@ void createPhysicsBody(World& world, objid id, ShapeCreateType option){
   PhysicsCreateSphere* createSphere = std::get_if<PhysicsCreateSphere>(&option);
 
   btCollisionObject* collisionObj = NULL;
+  bool isGhost = true;
 
   if (createRect){
-    collisionObj = addRigidBodyRect(world.physicsEnvironment, gameobjTransform.position + (offset.has_value() ? offset.value() : glm::vec3(0.f, 0.f, 0.f)), createRect -> width, createRect -> height, createRect -> depth, gameobjTransform.rotation, gameobjTransform.scale, opts, false);
+    collisionObj = addRigidBodyRect(world.physicsEnvironment, gameobjTransform.position + (offset.has_value() ? offset.value() : glm::vec3(0.f, 0.f, 0.f)), createRect -> width, createRect -> height, createRect -> depth, gameobjTransform.rotation, gameobjTransform.scale, opts, isGhost);
   }else if (createSphere){
-    collisionObj = addRigidBodySphere(world.physicsEnvironment, gameobjTransform.position + (offset.has_value() ? offset.value() : glm::vec3(0.f, 0.f, 0.f)), createSphere -> radius, gameobjTransform.rotation, gameobjTransform.scale, opts, false);
+    collisionObj = addRigidBodySphere(world.physicsEnvironment, gameobjTransform.position + (offset.has_value() ? offset.value() : glm::vec3(0.f, 0.f, 0.f)), createSphere -> radius, gameobjTransform.rotation, gameobjTransform.scale, opts, isGhost);
   }
 
   PhysicsValue phys {
