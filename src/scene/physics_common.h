@@ -12,7 +12,7 @@ glm::quat btToGlm(btQuaternion rotation);
 btQuaternion glmToBt(glm::quat rotation);
 
 struct PhysicsValue {
-  btRigidBody* body;
+  btCollisionObject* collisionObj;
   std::optional<glm::vec3> offset;
 };
 

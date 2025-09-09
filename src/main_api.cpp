@@ -58,7 +58,7 @@ std::optional<objid> getGameObjectByName(std::string name, objid sceneId){
 
 
 btCollisionObject* getCollisionObject(int32_t index, bool shouldBeRigidBody){
-  btCollisionObject* obj = world.rigidbodys.find(index) == world.rigidbodys.end() ? NULL : world.rigidbodys.at(index).body;
+  btCollisionObject* obj = world.rigidbodys.find(index) == world.rigidbodys.end() ? NULL : world.rigidbodys.at(index).collisionObj;
   if (shouldBeRigidBody){
     btRigidBody* body = btRigidBody::upcast(obj);
     if (body == NULL){

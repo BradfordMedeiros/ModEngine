@@ -117,11 +117,11 @@ std::vector<glm::vec3> vertsForId(World& world, objid id){
 PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   auto physicsOptions = getGameObject(world.sandbox, id).physicsOptions;
   if (!physicsOptions.enabled){
-    return PhysicsValue { .body = NULL, .offset = std::nullopt };
+    return PhysicsValue { .collisionObj = NULL, .offset = std::nullopt };
   }
   auto physicsInfoOpt = getPhysicsInfoForGameObject(world, id, true);
   if (!physicsInfoOpt.has_value()){
-    return PhysicsValue { .body = NULL, .offset = std::nullopt };
+    return PhysicsValue { .collisionObj = NULL, .offset = std::nullopt };
   }
 
   PhysicsInfo& physicsInfo = physicsInfoOpt.value();
@@ -129,7 +129,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   //std::cout << "physics info bound: " << print(physicsInfo.boundInfo) << std::endl;
   //std::cout << std::endl << std::endl;
 
-  btRigidBody* rigidBody = NULL;
+  btCollisionObject* rigidBody = NULL;
 
   GameObjectOctree* octreeObj = getOctree(world.objectMapping, id);
   bool isOctree = octreeObj != NULL;
@@ -161,7 +161,8 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin,
       physicsInfo.transformation.rotation,
       physicsInfo.transformation.scale, 
-      opts
+      opts,
+      false
     );
   }else if (physicsOptions.shape == SPHERE){
     std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
@@ -180,7 +181,8 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
       ),                             
       physicsInfo.transformation.rotation,
       physicsInfo.transformation.scale,
-      opts
+      opts,
+      false
     );
   }else if (physicsOptions.shape == CAPSULE){
     std::cout << "INFO: PHYSICS: ADDING CAPSULE RIGID BODY" << std::endl;
@@ -215,7 +217,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   }else if (physicsOptions.shape == CONVEXHULL){
     auto verts = vertsForId(world, id);
     if (verts.size() == 0){
-       return PhysicsValue { .body = NULL, .offset = std::nullopt };
+       return PhysicsValue { .collisionObj = NULL, .offset = std::nullopt };
     }
     // This is a hack, but it should be ok.  UpdatePhysicsBody really only need to apply for [voxels - octrees?] and heightmaps as of writing this
     // I don't have easy scope to the list of verts here, so I'd rather not reload the model (or really keep them in mem for no reason) just 
@@ -234,7 +236,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   }else if (physicsOptions.shape == SHAPE_EXACT){
     auto verts = vertsForId(world, id);
     if (verts.size() == 0){
-       return PhysicsValue { .body = NULL, .offset = std::nullopt };
+       return PhysicsValue { .collisionObj = NULL, .offset = std::nullopt };
     }
     modlog("2 physics", std::string("num verts: ") + std::to_string(verts.size()));
     assert(initialLoad);
@@ -252,11 +254,11 @@ PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad){
   }
 
   PhysicsValue phys {
-    .body = NULL,
+    .collisionObj = NULL,
     .offset = physicsInfo.offset,
   };
   if (rigidBody != NULL){
-    phys.body = rigidBody;
+    phys.collisionObj = rigidBody;
     world.rigidbodys[id] = phys;
     modlog("rigidbody", std::string("added rigid body: ") + std::to_string(id) + ", " + print((void*)rigidBody));
   }
@@ -289,7 +291,7 @@ void removeConstraints(World& world, objid id){
 void rmRigidBodyWorld(World& world, objid id){
   removeConstraints(world, id);
 
-  auto rigidBodyPtr = world.rigidbodys.at(id).body;
+  auto rigidBodyPtr = world.rigidbodys.at(id).collisionObj;
   assert(rigidBodyPtr != NULL);
   rmRigidBody(world.physicsEnvironment, rigidBodyPtr);
   modlog("rigidbody", std::string("rm rigid body: ") + std::to_string(id) + ", " + print((void*)rigidBodyPtr));
@@ -299,7 +301,7 @@ void rmRigidBodyWorld(World& world, objid id){
 void updatePhysicsBody(World& world, objid id){
   bool hasRigidBody = world.rigidbodys.find(id) != world.rigidbodys.end();
   if (hasRigidBody){
-    auto rigidBody = world.rigidbodys.at(id).body;
+    auto rigidBody = world.rigidbodys.at(id).collisionObj;
     assert(rigidBody != NULL);
     rmRigidBodyWorld(world, id);
   }
@@ -868,7 +870,7 @@ std::vector<objid> physicsRotToUpdate;
 
 void postUpdatePhysicsTranslateSet(World& world, objid index){
   PhysicsValue& phys = world.rigidbodys.at(index);
-  auto body =  phys.body;
+  auto body =  phys.collisionObj;
   auto& transform = fullTransformation(world.sandbox, index, "physicsTranslateSet - read back to set physics position");
   setPosition(body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation));
   if (transformLoggingEnabled()){
@@ -877,7 +879,7 @@ void postUpdatePhysicsTranslateSet(World& world, objid index){
 }
 void postUpdatePhysicsRotateSet(World& world, objid index){
   auto rigidBody = world.rigidbodys.at(index);
-  auto body =  rigidBody.body;
+  auto body =  rigidBody.collisionObj;
   auto& transform = fullTransformation(world.sandbox, index, "postUpdatePhysicsRotateSet - read back to set physics pos/rotn");
   auto rot = transform.rotation;
   auto newPositionOffset = calcOffsetFromRotation(transform.position, rigidBody.offset, rot);
@@ -903,7 +905,7 @@ std::set<objid> updatePhysicsFromSandbox(World& world){
   for (auto index : updatedIds){
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       PhysicsValue& phys = world.rigidbodys.at(index);
-      auto body =  phys.body;
+      auto body = phys.collisionObj;
       auto& fullTransform = fullTransformation(world.sandbox, index, "read back transform for rigid body position");
       setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
       std::cout << inColor("hint - physics setTransform", CONSOLE_COLOR_YELLOW) << ": [" << std::to_string(index) + " " + getGameObject(world, index).name + "] " << "setTransform" << " " << inColor(print(fullTransform), CONSOLE_COLOR_YELLOW) <<  std::endl;
@@ -1013,9 +1015,9 @@ void addSerialObjectsToWorld(
 
   for (auto &id : idsAdded){
     auto phys = addPhysicsBody(world, id, true); 
-    if (phys.body != NULL){   // why do I need this?
+    if (phys.collisionObj != NULL){   // why do I need this?
       auto& transform = fullTransformation(world.sandbox, id, "addSerialObjectsToWorld");
-      setTransform(world.physicsEnvironment, phys.body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation), transform.scale, transform.rotation);
+      setTransform(world.physicsEnvironment, phys.collisionObj, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation), transform.scale, transform.rotation);
     }  
   }
 
@@ -1367,9 +1369,9 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool physic
 
   //auto transformation = gameobjectTransformation(world, id, false);
   //physicsLocalTransformSet(world, id, gameobj.transformation);
-  btRigidBody* body = world.rigidbodys.find(id) != world.rigidbodys.end() ? world.rigidbodys.at(id).body : NULL;
+  btCollisionObject* collisionObj = world.rigidbodys.find(id) != world.rigidbodys.end() ? world.rigidbodys.at(id).collisionObj : NULL;
 
-  if (body != NULL){
+  if (collisionObj != NULL){
     rigidBodyOpts opts {
       .linear = gameobj.physicsOptions.linearFactor,
       .angular = gameobj.physicsOptions.angularFactor,
@@ -1382,7 +1384,7 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool physic
       .isStatic = gameobj.physicsOptions.isStatic,
       .hasCollisions = gameobj.physicsOptions.hasCollisions,
     };
-    updateRigidBodyOpts(world.physicsEnvironment, body, opts);
+    updateRigidBodyOpts(world.physicsEnvironment, collisionObj, opts);
   }
 }
 
@@ -1466,7 +1468,7 @@ void physicsLocalTransformSet(World& world, objid index, Transformation& transfo
   updateRelativeTransform(world.sandbox, index, transform, Hint{ .hint = "physicsLocalTransformSet" }, directIndex);
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     PhysicsValue& phys = world.rigidbodys.at(index);
-    auto body = phys.body;
+    auto body = phys.collisionObj;
     auto& fullTransform = fullTransformation(world.sandbox, index, "physicsLocalTransformSet");
     setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
   }
@@ -1497,7 +1499,7 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
     //auto collisionInfo = getPhysicsInfoForGameObject(world, index).transformation.scale;
     //auto newScale = collisionInfo;
     auto newScale = scale;             // this should be reconsidered how this relates to transformation.scale
-    auto body =  world.rigidbodys.at(index).body;
+    auto body =  world.rigidbodys.at(index).collisionObj;
     setScale(world.physicsEnvironment, body, newScale.x, newScale.y, newScale.z);
     std::cout << "physics scale set physics: " << index << " - " << print(scale) << std::endl;
   }
@@ -1507,7 +1509,11 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
 
 glm::vec3 physicsVelocityGet(World& world, objid index){
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    auto body = world.rigidbodys.at(index).body;
+    auto collisionObj = world.rigidbodys.at(index).collisionObj;
+    btRigidBody* body = btRigidBody::upcast(collisionObj);
+    if (body == NULL){
+      return glm::vec3(0.f, 0.f, 0.f);
+    }
     return btToGlm(body -> getLinearVelocity());
   }
   //modassert(false, std::string("not a physics object: ") + getGameObject(world, index).name);
@@ -1515,7 +1521,7 @@ glm::vec3 physicsVelocityGet(World& world, objid index){
 }
 void physicsVelocitySet(World& world, objid index, glm::vec3 velocity){
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    auto body = world.rigidbodys.at(index).body;
+    auto body = world.rigidbodys.at(index).collisionObj;
     setVelocity(body, velocity);
   }else{
     //modassert(false, std::string("not a physics object: ") + getGameObject(world, index).name);
@@ -1525,7 +1531,7 @@ void physicsVelocitySet(World& world, objid index, glm::vec3 velocity){
 
 void physicsAngularVelocitySet(World& world, objid index, glm::vec3 angularVelocity){
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    btCollisionObject* obj = world.rigidbodys.at(index).body;
+    btCollisionObject* obj = world.rigidbodys.at(index).collisionObj;
     setAngularVelocity(obj, angularVelocity);
   }
 }
@@ -1551,29 +1557,29 @@ bool hasRotUpdate(World& world, objid idToCheck){
 void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<objid, PhysicsValue>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     GameObject& gameobj = getGameObject(world, i);
-    auto isStatic = rigidBody.body -> getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT;
+    auto isStatic = rigidBody.collisionObj -> getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT;
 
     if (!isStatic){
-      auto rotation = getRotation(rigidBody.body);
+      auto rotation = getRotation(rigidBody.collisionObj);
       auto posUpdate = hasPosUpdate(world, i);
       auto rotUpdate = hasRotUpdate(world, i);
       if (!posUpdate && !rotUpdate){
-        auto position = calcOffsetFromRotationReverse(getPosition(rigidBody.body), rigidBody.offset, rotation);
+        auto position = calcOffsetFromRotationReverse(getPosition(rigidBody.collisionObj), rigidBody.offset, rotation);
         updateAbsoluteTransform(world.sandbox, i, Transformation {
           .position = position,
-          .scale = getScale(rigidBody.body),
+          .scale = getScale(rigidBody.collisionObj),
           .rotation = rotation,
         }, Hint { .hint = "updatePhysicsPositionsAndClampVelocity" });        
       }else if (posUpdate){
         updateAbsoluteRotation(world.sandbox, i, rotation,  Hint { .hint = "updatePhysicsPositionsAndClampVelocity posUpdate case" });
       }else if (rotUpdate){
-        auto position = calcOffsetFromRotationReverse(getPosition(rigidBody.body), rigidBody.offset, rotation);
+        auto position = calcOffsetFromRotationReverse(getPosition(rigidBody.collisionObj), rigidBody.offset, rotation);
         updateAbsolutePosition(world.sandbox, i, position,  Hint { .hint = "updatePhysicsPositionsAndClampVelocity rotUpdate case" });
       }else{
         modassert(false, "updatePhysicsPositionsAndClampVelocity invalid case");
       }
 
-      clampMaxVelocity(rigidBody.body, gameobj.physicsOptions.maxspeed);
+      clampMaxVelocity(rigidBody.collisionObj, gameobj.physicsOptions.maxspeed);
     }
   }
 }
@@ -1839,25 +1845,25 @@ void createPhysicsBody(World& world, objid id, ShapeCreateType option){
   PhysicsCreateRect* createRect = std::get_if<PhysicsCreateRect>(&option);
   PhysicsCreateSphere* createSphere = std::get_if<PhysicsCreateSphere>(&option);
 
-  btRigidBody* rigidBody = NULL;
+  btCollisionObject* collisionObj = NULL;
 
   if (createRect){
-    rigidBody = addRigidBodyRect(world.physicsEnvironment, gameobjTransform.position + (offset.has_value() ? offset.value() : glm::vec3(0.f, 0.f, 0.f)), createRect -> width, createRect -> height, createRect -> depth, gameobjTransform.rotation, gameobjTransform.scale, opts);
+    collisionObj = addRigidBodyRect(world.physicsEnvironment, gameobjTransform.position + (offset.has_value() ? offset.value() : glm::vec3(0.f, 0.f, 0.f)), createRect -> width, createRect -> height, createRect -> depth, gameobjTransform.rotation, gameobjTransform.scale, opts, false);
   }else if (createSphere){
-    rigidBody = addRigidBodySphere(world.physicsEnvironment, gameobjTransform.position + (offset.has_value() ? offset.value() : glm::vec3(0.f, 0.f, 0.f)), createSphere -> radius, gameobjTransform.rotation, gameobjTransform.scale, opts);
+    collisionObj = addRigidBodySphere(world.physicsEnvironment, gameobjTransform.position + (offset.has_value() ? offset.value() : glm::vec3(0.f, 0.f, 0.f)), createSphere -> radius, gameobjTransform.rotation, gameobjTransform.scale, opts, false);
   }
 
   PhysicsValue phys {
-    .body = rigidBody,
+    .collisionObj = collisionObj,
     .offset = offset,
   };
 
-  modassert(rigidBody != NULL, "rigid body was null invalid shape type probably");
+  modassert(collisionObj != NULL, "rigid body was null invalid shape type probably");
   world.rigidbodys[id] = phys;
 }
 
 void setPhysicsOptions(World& world, objid id, rigidBodyOpts& opts){
-  updateRigidBodyOpts(world.physicsEnvironment, world.rigidbodys.at(id).body, opts);
+  updateRigidBodyOpts(world.physicsEnvironment, world.rigidbodys.at(id).collisionObj, opts);
 }
 
 void createFixedConstraint(World& world, objid idOne, objid idTwo){
@@ -1867,10 +1873,10 @@ void createFixedConstraint(World& world, objid idOne, objid idTwo){
   removeConstraints(world, idOne);
   removeConstraints(world, idTwo);
 
-  auto bodyOne = world.rigidbodys.at(idOne).body;
-  auto bodyTwo = world.rigidbodys.at(idTwo).body;
-  bodyOne -> activate(true);
-  bodyTwo -> activate(true);
+  auto bodyOneObj = world.rigidbodys.at(idOne).collisionObj;
+  auto bodyTwoObj = world.rigidbodys.at(idTwo).collisionObj;
+  bodyOneObj -> activate(true);
+  bodyTwoObj -> activate(true);
 
   btTransform frameOne;
   frameOne.setIdentity();
@@ -1878,7 +1884,12 @@ void createFixedConstraint(World& world, objid idOne, objid idTwo){
 
   btTransform frameTwo;
   frameTwo.setIdentity();
-  frameTwo.setOrigin(bodyOne -> getWorldTransform().getOrigin() - bodyTwo -> getWorldTransform().getOrigin());
+  frameTwo.setOrigin(bodyOneObj -> getWorldTransform().getOrigin() - bodyTwoObj -> getWorldTransform().getOrigin());
+
+  btRigidBody* bodyOne = btRigidBody::upcast(bodyOneObj);
+  btRigidBody* bodyTwo = btRigidBody::upcast(bodyTwoObj);
+  modassert(bodyOne != NULL, "bodyOne is null");
+  modassert(bodyTwo != NULL, "bodyTwo is null");
 
   btTypedConstraint* fixed = new btFixedConstraint(*bodyOne, *bodyTwo, frameOne, frameTwo);  // TODO leak - need to maintain and delete this
   world.physicsEnvironment.dynamicsWorld -> addConstraint(fixed, true /* disable collision between these bodies */); 
@@ -1896,13 +1907,18 @@ void createPointConstraint(World& world, objid idOne, objid idTwo){
   removeConstraints(world, idOne);
   removeConstraints(world, idTwo);
 
-  auto bodyOne = world.rigidbodys.at(idOne).body;
-  auto bodyTwo = world.rigidbodys.at(idTwo).body;
-  bodyOne -> activate(true);
-  bodyTwo -> activate(true);
+  auto bodyOneObj = world.rigidbodys.at(idOne).collisionObj;
+  auto bodyTwoObj = world.rigidbodys.at(idTwo).collisionObj;
+  bodyOneObj -> activate(true);
+  bodyTwoObj -> activate(true);
 
   btVector3 frameOne = glmToBt(glm::vec3(0.f, 0.f, 0.f));
-  btVector3 frameTwo = bodyOne -> getWorldTransform().getOrigin() - bodyTwo -> getWorldTransform().getOrigin();
+  btVector3 frameTwo = bodyOneObj -> getWorldTransform().getOrigin() - bodyTwoObj -> getWorldTransform().getOrigin();
+
+  btRigidBody* bodyOne = btRigidBody::upcast(bodyOneObj);
+  btRigidBody* bodyTwo = btRigidBody::upcast(bodyTwoObj);
+  modassert(bodyOne != NULL, "bodyOne is null");
+  modassert(bodyTwo != NULL, "bodyTwo is null");
 
   btTypedConstraint* fixed = new btPoint2PointConstraint(*bodyOne, *bodyTwo, frameOne, frameTwo);  // TODO leak - need to maintain and delete this
   world.physicsEnvironment.dynamicsWorld -> addConstraint(fixed, true /* disable collision between these bodies */); 
@@ -1920,16 +1936,21 @@ void createHingeConstraint(World& world, objid idOne, objid idTwo){
   removeConstraints(world, idOne);
   removeConstraints(world, idTwo);
 
-  auto bodyOne = world.rigidbodys.at(idOne).body;
-  auto bodyTwo = world.rigidbodys.at(idTwo).body;
-  bodyOne -> activate(true);
-  bodyTwo -> activate(true);
+  auto bodyOneObj = world.rigidbodys.at(idOne).collisionObj;
+  auto bodyTwoObj = world.rigidbodys.at(idTwo).collisionObj;
+  bodyOneObj -> activate(true);
+  bodyTwoObj -> activate(true);
 
   btVector3 frameOne = glmToBt(glm::vec3(0.f, 0.f, 0.f));
-  btVector3 frameTwo = bodyOne -> getWorldTransform().getOrigin() - bodyTwo -> getWorldTransform().getOrigin();
+  btVector3 frameTwo = bodyOneObj -> getWorldTransform().getOrigin() - bodyTwoObj -> getWorldTransform().getOrigin();
 
   btVector3 axisInA(0.0f, 1.0f, 0.0f);
   btVector3 axisInB(0.0f, 1.0f, 0.0f);
+
+  btRigidBody* bodyOne = btRigidBody::upcast(bodyOneObj);
+  btRigidBody* bodyTwo = btRigidBody::upcast(bodyTwoObj);
+  modassert(bodyOne != NULL, "bodyOne is null");
+  modassert(bodyTwo != NULL, "bodyTwo is null");
 
   btTypedConstraint* fixed = new btHingeConstraint(*bodyOne, *bodyTwo, frameOne, frameTwo, axisInA, axisInB);  // TODO leak - need to maintain and delete this
   world.physicsEnvironment.dynamicsWorld -> addConstraint(fixed, true /* disable collision between these bodies */); 

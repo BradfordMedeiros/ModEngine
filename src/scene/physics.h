@@ -9,6 +9,7 @@
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
+#include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
 
 #include "./collision_cache.h"
@@ -41,8 +42,8 @@ physicsEnv initPhysics(collisionPairPosFn onObjectEnter,  collisionPairFn onObje
 void deinitPhysics(physicsEnv env);
 void stepPhysicsSimulation(physicsEnv& env, float timestep, bool paused, bool enablePhysics, bool drawOnly);
 
-btRigidBody* addRigidBodyRect(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, glm::vec3 scaling, rigidBodyOpts opts);
-btRigidBody* addRigidBodySphere(physicsEnv& env, glm::vec3 pos, float radius, glm::quat rotation, glm::vec3 scaling, rigidBodyOpts opts);
+btCollisionObject* addRigidBodyRect(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, glm::vec3 scaling, rigidBodyOpts opts, bool ghost);
+btRigidBody* addRigidBodySphere(physicsEnv& env, glm::vec3 pos, float radius, glm::quat rotation, glm::vec3 scaling, rigidBodyOpts opts, bool ghost);
 btRigidBody* addRigidBodyCapsule(physicsEnv& env, float radius, float height,  glm::vec3 pos, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts);
 btRigidBody* addRigidBodyCylinder(physicsEnv& env, float radius, float height,  glm::vec3 pos, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts);
 btRigidBody* addRigidBodyHull(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts);
@@ -50,17 +51,17 @@ btRigidBody* addRigidBodyExact(physicsEnv& env, std::vector<glm::vec3>& verts, g
 btRigidBody* addRigidBodyVoxel(physicsEnv& env, glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, glm::vec3 scaling, rigidBodyOpts opts);
 btRigidBody* addRigidBodyOctree(physicsEnv& env, glm::vec3 pos, glm::quat rotation, glm::vec3 scaling, rigidBodyOpts opts, std::vector<PositionAndScale>& blocks, std::vector<PositionAndScaleVerts>& shapes);
 
-void rmRigidBody(physicsEnv& env, btRigidBody* body);
+void rmRigidBody(physicsEnv& env, btCollisionObject* colObject);
 
 void updateRigidBodyOpts(physicsEnv& env, btCollisionObject* colObject, rigidBodyOpts opts);
 
-void setPosition(btRigidBody* body, glm::vec3);
-glm::vec3 getPosition(btRigidBody* rigidbody);
-void setRotation(btRigidBody* body, glm::quat rotation);
-glm::quat getRotation(btRigidBody* body);
-void setScale(physicsEnv& env, btRigidBody* body, float width, float height, float depth);
-glm::vec3 getScale(btRigidBody* body);
-void setTransform(physicsEnv& env, btRigidBody* body, glm::vec3 pos, glm::vec3 scale, glm::quat rotation);
+void setPosition(btCollisionObject* body, glm::vec3);
+glm::vec3 getPosition(btCollisionObject* rigidbody);
+void setRotation(btCollisionObject* body, glm::quat rotation);
+glm::quat getRotation(btCollisionObject* body);
+void setScale(physicsEnv& env, btCollisionObject* body, float width, float height, float depth);
+glm::vec3 getScale(btCollisionObject* body);
+void setTransform(physicsEnv& env, btCollisionObject* body, glm::vec3 pos, glm::vec3 scale, glm::quat rotation);
 
 void setVelocity(btCollisionObject* obj, glm::vec3 velocity);
 void setAngularVelocity(btCollisionObject* obj, glm::vec3 angularVelocity);

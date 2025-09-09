@@ -204,7 +204,7 @@ std::vector<HitObject> contactTest(World& world, objid id){
     modlog("contact test", "warning - contact test on a non-rigidbody");
     return {};
   }
-  return contactTest(world.physicsEnvironment, world.rigidbodys, world.rigidbodys.at(id).body);
+  return contactTest(world.physicsEnvironment, world.rigidbodys, world.rigidbodys.at(id).collisionObj);
 }
 
 std::optional<Texture> textureForId(World& world, objid id){
@@ -232,7 +232,7 @@ void setObjectDimensions(World& world, std::vector<objid>& ids, float width, flo
 
 std::optional<objid> getIdForCollisionObject(World& world, const btCollisionObject* body){
   for (auto const&[id, physicsObj] : world.rigidbodys){
-    if (physicsObj.body == body){
+    if (physicsObj.collisionObj == body){
       modassert(idExists(world.sandbox, id), "get id for collision, id does not exist: " + std::to_string(id) + " but the rigid body still does");
       return id;
     }
