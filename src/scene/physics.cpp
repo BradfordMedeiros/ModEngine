@@ -47,7 +47,7 @@ btRigidBody* createRigidBody(glm::vec3 pos, btCollisionShape* shape, glm::quat r
   return body;
 }
 
-void setPhysicsOptions(btRigidBody* body, rigidBodyOpts& opts, bool skipCollisionMask = false){
+void setPhysicsOptions(btRigidBody* body, rigidBodyOpts& opts, bool skipCollisionMask){
   body -> setLinearFactor(glmToBt(opts.linear));
   body -> setAngularFactor(glmToBt(opts.angular));
   body -> setGravity(glmToBt(opts.gravity));
@@ -294,6 +294,7 @@ void updateRigidBodyOpts(physicsEnv& env, btRigidBody* body, rigidBodyOpts opts)
     env.dynamicsWorld -> addRigidBody(body, 1, opts.layer);
   }
   body -> setGravity(glmToBt(opts.gravity)); // kind of lame, has to be done after added rigid body
+  body -> getBroadphaseHandle() -> m_collisionFilterMask = opts.layer;
 }
 
 glm::vec3 getPosition(btRigidBody* body){

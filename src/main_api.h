@@ -273,5 +273,6 @@ void setPhysicsOptions(objid id, rigidBodyOpts& opts);
 void createFixedConstraint(objid idOne, objid idTwo);
 void createPointConstraint(objid idOne, objid idTwo);
 void createHingeConstraint(objid idOne, objid idTwo);
+std::optional<int> physicsLayer(objid id);
 
 #endif

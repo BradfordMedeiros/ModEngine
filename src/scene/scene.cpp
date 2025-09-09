@@ -1830,7 +1830,7 @@ void createPhysicsBody(World& world, objid id, ShapeCreateType option){
     .friction = 1.f,
     .restitution = 1.f,
     .mass = 1.f,
-    .layer = 2,
+    .layer = 0,
     .linearDamping = 0.f,
     .isStatic = true,
     .hasCollisions = false,
@@ -1938,4 +1938,12 @@ void createHingeConstraint(World& world, objid idOne, objid idTwo){
     .ids = { idOne, idTwo },
     .constraint = fixed,
   });
+}
+
+std::optional<int> physicsLayer(World& world, objid id){
+  if (world.rigidbodys.find(id) == world.rigidbodys.end()){
+    return std::nullopt;
+  }
+  btRigidBody* obj = world.rigidbodys.at(id).body;
+  return obj -> getBroadphaseHandle() -> m_collisionFilterMask;
 }

@@ -194,6 +194,8 @@ struct CustomApiBindings {
   void (*createPointConstraint)(objid idOne, objid idTwo);
   void (*createHingeConstraint)(objid idOne, objid idTwo);
 
+  std::optional<int> (*physicsLayer)(objid id);
+
   std::string (*dumpDebugInfo)(bool);
   //std::vector<func_t> registerGuileFns
 };

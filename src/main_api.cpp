@@ -1251,3 +1251,7 @@ void createPointConstraint(objid idOne, objid idTwo){
 void createHingeConstraint(objid idOne, objid idTwo){
   createHingeConstraint(world, idOne, idTwo);
 }
+
+std::optional<int> physicsLayer(objid id){
+  return physicsLayer(world, id);
+}
