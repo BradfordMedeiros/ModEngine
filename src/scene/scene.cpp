@@ -1821,7 +1821,7 @@ void createPhysicsBody(World& world, objid id, ShapeCreateType option){
   }
 
   auto gameobjTransform = fullTransformation(world.sandbox, id);
-  std::optional<glm::vec3> offset = glm::vec3(0.f, 2.f, 0.f);
+  std::optional<glm::vec3> offset;
 
   rigidBodyOpts opts {
     .linear = glm::vec3(1.f, 1.f, 1.f),
