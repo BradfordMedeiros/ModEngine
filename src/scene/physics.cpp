@@ -184,15 +184,19 @@ btRigidBody* toRigidBody(btCollisionObject* collisionObject){
   return body;
 }
 
-btRigidBody* addBodyToWorld(physicsEnv& env, btCollisionObject* collisionObj, rigidBodyOpts& opts){
-  auto rigidBodyPtr = toRigidBody(collisionObj);
-  setPhysicsOptions(rigidBodyPtr, opts, true); /* this can be true because opts.layer in next line*/
-  env.dynamicsWorld -> addRigidBody(rigidBodyPtr, 1, opts.layer);
-  rigidBodyPtr -> getBroadphaseHandle() -> m_collisionFilterMask = opts.layer;
-
-  rigidBodyPtr -> setGravity(glmToBt(opts.gravity)); // kind of lame, has to be done after added rigid body
-
-  return rigidBodyPtr;
+btCollisionObject* addBodyToWorld(physicsEnv& env, btCollisionObject* collisionObj, rigidBodyOpts& opts){
+  setPhysicsOptions(collisionObj, opts, true); /* this can be true because opts.layer in next line*/
+  btRigidBody* body = btRigidBody::upcast(collisionObj);
+  if (body){
+    env.dynamicsWorld -> addRigidBody(body, 1, opts.layer);
+  }else{
+    env.dynamicsWorld -> addCollisionObject(collisionObj, 1, opts.layer);
+  }
+  collisionObj -> getBroadphaseHandle() -> m_collisionFilterMask = opts.layer;
+  if (body){
+    body -> setGravity(glmToBt(opts.gravity)); // kind of lame, has to be done after added rigid body
+  }
+  return collisionObj;
 }
 btCollisionObject* addRigidBodyRect(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, glm::vec3 scaling, rigidBodyOpts opts, bool ghost){  
   auto rigidBodyPtr = createRigidBodyRect(pos, width, height, depth, rotation, scaling, opts, ghost);
