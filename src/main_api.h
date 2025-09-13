@@ -157,7 +157,7 @@ double timeSeconds(bool realtime);
 double timeElapsed();
 int currentFrame();
 
-std::vector<HitObject> raycastW(glm::vec3 pos, glm::quat direction, float maxDistance);
+std::vector<HitObject> raycastW(glm::vec3 pos, glm::quat direction, float maxDistance, std::optional<int> mask);
 std::vector<HitObject> contactTest(objid id);
 std::vector<HitObject> contactTestShape(glm::vec3 pos, glm::quat orientation, glm::vec3 scale);
 glm::vec3 moveRelative(glm::vec3, glm::quat orientation, float distance);

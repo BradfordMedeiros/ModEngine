@@ -119,7 +119,7 @@ struct CustomApiBindings {
   std::optional<objid> (*makeObjectAttr)(objid sceneId, std::string name, GameobjAttributes& attr, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes);
   void (*makeParent)(objid child, objid parent);
   std::optional<objid> (*getParent)(objid id);
-  std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance);
+  std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance, std::optional<int> mask);
   std::vector<HitObject> (*contactTest)(objid id);
   std::vector<HitObject> (*contactTestShape)(glm::vec3 pos, glm::quat orientation, glm::vec3 scale);
   void (*saveScreenshot)(std::string);

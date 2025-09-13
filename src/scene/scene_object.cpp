@@ -144,7 +144,7 @@ GameObjectCamera& getCamera(World& world, objid id){
 
 std::optional<glm::vec3> aiNavigate(World& world, objid id, glm::vec3 target, std::function<void(glm::vec3, glm::vec3)> drawLine){
   auto raycastWorld = [&world] (glm::vec3 posFrom, glm::quat direction, float maxDistance) -> std::vector<HitObject> {
-    return raycast(world, posFrom, direction, maxDistance);
+    return raycast(world, posFrom, direction, maxDistance, std::nullopt);
   };
   auto isNavmeshWorld = [&world](objid id) -> bool{ 
     return isNavmesh(world.objectMapping, id);
@@ -195,8 +195,8 @@ simpleMoveTo:
   return aiNavPosition(id, target, position, raycastWorld, isNavmeshWorld);
 }
 
-std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance){
-  return raycast(world.physicsEnvironment, world.rigidbodys, posFrom, direction, maxDistance);
+std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance, std::optional<int> mask){
+  return raycast(world.physicsEnvironment, world.rigidbodys, posFrom, direction, maxDistance, mask);
 }
 
 std::vector<HitObject> contactTest(World& world, objid id){

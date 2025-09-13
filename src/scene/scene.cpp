@@ -1826,7 +1826,7 @@ void createPhysicsBody(World& world, objid id, ShapeCreateType option){
   rigidBodyOpts opts {
     .linear = glm::vec3(1.f, 1.f, 1.f),
     .angular = glm::vec3(0.f, 0.f, 0.f),
-    .gravity = glm::vec3(0.f, 0.f, 0.f),
+    .gravity = glm::vec3(0.f, -9.f, 0.f),
     .friction = 1.f,
     .restitution = 1.f,
     .mass = 1.f,

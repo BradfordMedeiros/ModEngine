@@ -693,8 +693,8 @@ int currentFrame(){
   return currentTick;
 }
 
-std::vector<HitObject> raycastW(glm::vec3 pos, glm::quat direction, float maxDistance){
-  return raycast(world, pos, direction, maxDistance);
+std::vector<HitObject> raycastW(glm::vec3 pos, glm::quat direction, float maxDistance, std::optional<int> mask){
+  return raycast(world, pos, direction, maxDistance, mask);
 }
 
 std::vector<HitObject> contactTest(objid id){

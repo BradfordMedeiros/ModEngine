@@ -463,7 +463,7 @@ std::optional<objid> getIdForRigidBody(std::unordered_map<objid, PhysicsValue>& 
   return std::nullopt;
 }
 
-std::vector<HitObject> raycast(physicsEnv& env, std::unordered_map<objid, PhysicsValue>& rigidbodys, glm::vec3 posFrom, glm::quat direction, float maxDistance){
+std::vector<HitObject> raycast(physicsEnv& env, std::unordered_map<objid, PhysicsValue>& rigidbodys, glm::vec3 posFrom, glm::quat direction, float maxDistance, std::optional<int> mask){
   std::vector<HitObject> hitobjects;
   AllHitsRayResultCallbackCustomFilter result(glmToBt(posFrom),glmToBt(posFrom));
  
@@ -477,16 +477,18 @@ std::vector<HitObject> raycast(physicsEnv& env, std::unordered_map<objid, Physic
     auto hitPoint = btPosFrom.lerp(btPosTo, result.m_hitFractions[i]);
     auto hitNormal = result.m_hitNormalWorld[i];
     auto id = getIdForRigidBody(rigidbodys, obj).value();
-    hitobjects.push_back(
-      HitObject {
-        .id = id,
-        .mask = obj -> getBroadphaseHandle() -> m_collisionFilterMask,
-        .point = btToGlm(hitPoint),  
-        .normal = quatFromDirection(btToGlm(hitNormal)),
-      }
-    );    
+    auto collisionMask = obj -> getBroadphaseHandle() -> m_collisionFilterMask;
+    if (!mask.has_value() || ((mask.value() & collisionMask) == 0)){
+      hitobjects.push_back(
+        HitObject {
+          .id = id,
+          .mask = collisionMask,
+          .point = btToGlm(hitPoint),  
+          .normal = quatFromDirection(btToGlm(hitNormal)),
+        }
+      );   
+    } 
   } 
-  assert(hitobjects.size() == result.m_hitFractions.size());
   return hitobjects;
 }
 
