@@ -24,7 +24,7 @@ void moveCameraTo(objid cameraId, glm::vec3 position, std::optional<float> durat
   requestMovingObjects[cameraId] = RequestMovingObject {
     .initialPos = getGameObjectPosition(cameraId, true, "moveCameraTo"),
     .finalPos = position,
-    .initialTime = timePlayback.currentTime,
+    .initialTime = timePlayback.getCurrentTime(),
     .duration = duration.value(),
   };
 }
@@ -54,7 +54,7 @@ void schedule(objid id, bool realtime, float delayTimeMs, void* data, std::funct
     .ownerId = id,
     .fn = fn,
     .realtime = realtime,
-    .time = (realtime ? (statistics.now * 1000 + delayTimeMs) : (timePlayback.currentTime * 1000 + delayTimeMs)),
+    .time = (realtime ? (statistics.now * 1000 + delayTimeMs) : (timePlayback.getCurrentTime() * 1000 + delayTimeMs)),
     .data = data,
   });
 }
@@ -91,7 +91,7 @@ void tickScheduledTasks(){
   for (int i = 0; i < scheduledTasks.size(); i++){
     ScheduledTask& task = scheduledTasks.at(i);
     //std::cout << "task time: " << task.time << ", currTime = " << currTime << std::endl;
-    auto shouldExecuteTask = task.realtime ? (currTime > task.time) : ((timePlayback.currentTime * 1000) > task.time);
+    auto shouldExecuteTask = task.realtime ? (currTime > task.time) : ((timePlayback.getCurrentTime() * 1000) > task.time);
     if (!shouldExecuteTask){
       continue;
     }

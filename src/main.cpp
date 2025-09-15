@@ -1894,6 +1894,7 @@ int main(int argc, char* argv[]){
   while (!glfwWindowShouldClose(window)){
   PROFILE("FRAME",
     std::cout << inColor("hint - START FRAME", CONSOLE_COLOR_YELLOW) << std::endl;
+
     auto shouldExit = updateTime(fpsFixed, fixedDelta, state.engineSpeed, timetoexit, hasFramelimit, minDeltaTime, fpsLag);
     if (shouldExit || shouldQuitControl){
       goto cleanup;
@@ -1923,7 +1924,7 @@ int main(int argc, char* argv[]){
 
     if (!state.worldpaused){
       timePlayback.setTime(statistics.now);  // tick animations here
-      tickAnimations(world, timings, timePlayback.currentTime);
+      tickAnimations(world, timings, timePlayback.getCurrentTime());
     }
 
     if (state.updateSkybox){
@@ -1932,7 +1933,7 @@ int main(int argc, char* argv[]){
     }
     tickRecordings(getTotalTimeGame());
     tickScheduledTasks();
-    handleMovingObjects(timePlayback.currentTime);
+    handleMovingObjects(timePlayback.getCurrentTime());
 
     glfwPollEvents();
     handleInput(window);
@@ -1954,9 +1955,9 @@ int main(int argc, char* argv[]){
     }
 
 
-    onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, state.enablePhysics, state.worldpaused, viewTransform, state.inputMode == ENABLED, false);
+    onWorldFrame(world, timePlayback.getDeltaTime(), timePlayback.getCurrentTime(), state.enablePhysics, state.worldpaused, viewTransform, state.inputMode == ENABLED, false);
     cBindings.onFrameAfterUpdate();
-    onWorldFrame(world, statistics.deltaTime, timePlayback.currentTime, false, state.worldpaused, viewTransform, state.inputMode == ENABLED, true);
+    onWorldFrame(world, timePlayback.getDeltaTime(), timePlayback.getCurrentTime(), false, state.worldpaused, viewTransform, state.inputMode == ENABLED, true);
 
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
     if (useChunkingSystem){

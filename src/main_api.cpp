@@ -29,7 +29,7 @@ float getTotalTime(){
 }
 
 float getTotalTimeGame(){
-  return timePlayback.currentTime - statistics.initialTime;
+  return timePlayback.getCurrentTime() - statistics.initialTime;
 }
 
 std::vector<objid> objectsQueuedForRemoval = {};  // TODO STATIC
@@ -682,11 +682,11 @@ double timeSeconds(bool realtime){
   if (realtime){
     return statistics.now;
   }
-  return timePlayback.currentTime;
+  return timePlayback.getCurrentTime();
 }
 
 double timeElapsed(){
-  return statistics.deltaTime;
+  return timePlayback.getDeltaTime();
 }
 
 int currentFrame(){

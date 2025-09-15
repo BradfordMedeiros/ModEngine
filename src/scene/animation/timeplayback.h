@@ -10,15 +10,23 @@
 class TimePlayback {
   private:
     bool paused;
+    float internalDelay;
+
+    float currentTime;
+    float lastTime;
 
   public:
-    float currentTime;
+
     TimePlayback(float currentTime); 
     TimePlayback(){ };  // Do not use, just to satisfy maps 
     void play();
     void pause();
     void setTime(float elapsedTime);
     bool isPaused();
+
+    float getCurrentTime();
+    float getLastTime();
+    float getDeltaTime();
 };
 
 #endif
