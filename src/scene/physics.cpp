@@ -75,7 +75,9 @@ void setPhysicsOptions(btRigidBody* body, rigidBodyOpts& opts, bool skipCollisio
   btVector3 inertia(0, 0, 0);
 
   btCollisionShape* shape = body -> getCollisionShape(); 
-  shape -> calculateLocalInertia(mass, inertia);
+  if (!opts.isStatic){
+    shape -> calculateLocalInertia(mass, inertia);
+  }
   body -> setMassProps(mass, inertia);
   body -> updateInertiaTensor();
 
