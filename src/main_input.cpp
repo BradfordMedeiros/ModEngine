@@ -1679,9 +1679,9 @@ std::vector<InputDispatch> inputFns = {
         GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
         modassert(octreeObject, "octree object null");
         //makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
-        //makeOctreeCellMaterial(*octreeObject, createScopedLoadMesh(world, selectedIndex), OCTREE_MATERIAL_WATER);
+        makeOctreeCellMaterial(*octreeObject, createScopedLoadMesh(world, selectedIndex), OCTREE_MATERIAL_WATER);
 
-        setColor(*octreeObject, glm::vec3(0.f, 0.f, 0.2f));
+        //setColor(*octreeObject, glm::vec3(0.f, 0.f, 0.2f));
 
         if (true || state.rebuildOctreePhysicsOnEdit){
           updatePhysicsBody(world, selectedIndex);

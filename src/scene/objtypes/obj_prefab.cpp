@@ -20,6 +20,9 @@ std::vector<Token> prefabAdditionalTokens(GameobjAttributes& attributes){
   		modassert(payload -> at(0) == '|', std::string("payload needs | prefix: ") + attribute);
   		auto payloadValue = payload -> substr(1, payload -> size());
 
+  		std::cout << "token target: " << tokenTarget << std::endl;
+  		std::cout << "token payloadValue: " << payloadValue << std::endl;
+  		
   		addTokens.push_back(Token {
   			.target = objectAndAttribute.at(0),
   			.attribute = objectAndAttribute.at(1),

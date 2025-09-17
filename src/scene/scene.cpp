@@ -867,7 +867,13 @@ std::vector<objid> physicsPosToUpdate;
 std::vector<objid> physicsRotToUpdate;
 
 void postUpdatePhysicsTranslateSet(World& world, objid index){
-  PhysicsValue& phys = world.rigidbodys.at(index);
+  auto rigidBodyPtr =  world.rigidbodys.find(index);
+  if (rigidBodyPtr == world.rigidbodys.end()) {
+      return;
+  }
+
+  auto phys = rigidBodyPtr -> second;
+  
   auto body =  phys.body;
   auto& transform = fullTransformation(world.sandbox, index, "physicsTranslateSet - read back to set physics position");
   setPosition(body, calcOffsetFromRotation(transform.position, phys.offset, transform.rotation));
@@ -876,7 +882,12 @@ void postUpdatePhysicsTranslateSet(World& world, objid index){
   }
 }
 void postUpdatePhysicsRotateSet(World& world, objid index){
-  auto rigidBody = world.rigidbodys.at(index);
+  auto rigidBodyPtr =  world.rigidbodys.find(index);
+  if (rigidBodyPtr == world.rigidbodys.end()) {
+      return;
+  }
+
+  auto rigidBody = rigidBodyPtr -> second;
   auto body =  rigidBody.body;
   auto& transform = fullTransformation(world.sandbox, index, "postUpdatePhysicsRotateSet - read back to set physics pos/rotn");
   auto rot = transform.rotation;

@@ -23,8 +23,16 @@ float blendingWindow = 0.25f;  // this should be able to be specified by the ani
 // Probably the keyframes shouldn't be stored in the playback and then 
 // the copying doesnt matter
 void removePlayback(WorldTiming& timings, objid groupId, int zIndex){
+
+  auto playbackPtr =  timings.animations.playbacks.find(groupId);
+  if (playbackPtr == NULL){
+    modlog("removePlayback", "tried to remove groupId that was not there");
+    return;
+  }
+
+  AnimationData& playbacks = playbackPtr -> second;
   std::vector<AnimationLayer> newLayers;
-  for (auto &layer : timings.animations.playbacks.at(groupId).layer){
+  for (auto &layer : playbacks.layer){
     if (!layer.zIndex == zIndex){
       newLayers.push_back(layer);
     }
