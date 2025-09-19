@@ -26,6 +26,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
   message("CMAKE - ModEngine Release")
 endif()
 
+
 #Source files
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
@@ -229,6 +230,10 @@ if (NOT NO_INCLUDE_ASSIMP)
   target_link_libraries(${PROJECT_NAME} "assimp")
   target_include_directories(${PROJECT_NAME} PRIVATE "${ASSIMP_DIR}/include")
   target_include_directories(${PROJECT_NAME} PRIVATE "${ASSIMP_BUILD_DIR}/include")
+  
+  # Some bullshit to make ASSIMP not fuck up with rapidjson included elsewhere (it uses it too)
+  add_definitions(-DRAPIDJSON_HAS_STDSTRING=1)
+  add_definitions(-DRAPIDJSON_NOMEMBERITERATORCLASS)
 
 else()
   message("MODBUILD - Not Including ASSIMP")
