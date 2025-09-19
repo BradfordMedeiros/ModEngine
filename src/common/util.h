@@ -1,6 +1,9 @@
 #ifndef MOD_UTIL
 #define MOD_UTIL
 
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
 #include <string>
 #include <algorithm>
 #include <fstream>
@@ -501,5 +504,9 @@ struct TagInfo {
   std::string value; // this should be a union type
 };
 enum OctreeMaterial { OCTREE_MATERIAL_DEFAULT, OCTREE_MATERIAL_WATER };
+
+
+std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& allValues);
+std::unordered_map<std::string, std::unordered_map<std::string, std::string>> loadFromJson(std::string& fileContent, bool* success);
 
 #endif

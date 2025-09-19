@@ -275,4 +275,8 @@ void createPointConstraint(objid idOne, objid idTwo);
 void createHingeConstraint(objid idOne, objid idTwo);
 std::optional<int> physicsLayer(objid id);
 
+
+void saveToJsonFile(std::string file, std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& allValues);
+std::unordered_map<std::string, std::unordered_map<std::string, std::string>> loadFromJsonFile(std::string file, bool* success);
+
 #endif

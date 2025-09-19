@@ -1265,3 +1265,61 @@ std::string inColor(std::string str, std::optional<CONSOLE_COLOR> color){
   }
   return "";
 }
+
+std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& allValues){
+  rapidjson::Document doc;
+  doc.SetObject();
+  rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+
+  for (auto &[scope, values] : allValues){
+    rapidjson::Value innerMap(rapidjson::kObjectType);
+    for(auto& [key, value] : values){
+      rapidjson::Value jsonKey(key.c_str(), allocator);
+      rapidjson::Value jsonValue(value.c_str(), allocator);
+      innerMap.AddMember(jsonKey, jsonValue, allocator);
+    }
+
+    rapidjson::Value outerKey(scope.c_str(), allocator);
+    doc.AddMember(
+        rapidjson::Value(outerKey, allocator),
+        innerMap,
+        allocator
+    );
+  }
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  doc.Accept(writer);
+
+  return buffer.GetString();
+}
+
+std::unordered_map<std::string, std::unordered_map<std::string, std::string>> loadFromJson(std::string& fileContent, bool* success){
+  rapidjson::Document doc;
+  rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
+  if (doc.HasParseError()){
+    *success = false;
+    modlog("loadValuesFromStr", "invalid json document");
+    return {};
+  }
+
+  *success = true;
+
+  std::unordered_map<std::string, std::unordered_map<std::string, std::string>> mapData;
+  for (auto obj = doc.MemberBegin(); obj != doc.MemberEnd(); obj++) {
+    std::string key = obj -> name.GetString();
+    mapData[key] = {};
+    if (obj -> value.IsObject()){
+      for (auto innerObj = obj -> value.MemberBegin(); innerObj != obj -> value.MemberEnd(); innerObj++) {
+        std::string innerKey = innerObj -> name.GetString();
+        std::string innerVal = innerObj -> value.GetString();
+        mapData.at(key)[innerKey] = innerVal;
+      }
+    }else{
+      modlog("loadValuesFromStr not an object", key);
+      *success = false;
+    }
+  }
+
+  return mapData;
+}

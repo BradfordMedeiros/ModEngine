@@ -1255,3 +1255,13 @@ void createHingeConstraint(objid idOne, objid idTwo){
 std::optional<int> physicsLayer(objid id){
   return physicsLayer(world, id);
 }
+
+void saveToJsonFile(std::string file, std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& allValues){
+  auto serializedData = saveToJson(allValues);
+  realfiles::saveFile(file, serializedData);
+}
+std::unordered_map<std::string, std::unordered_map<std::string, std::string>> loadFromJsonFile(std::string file, bool* success){
+  auto fileContent = realfiles::doLoadFile(file);
+  auto values = loadFromJson(fileContent, success);
+  return values;
+}

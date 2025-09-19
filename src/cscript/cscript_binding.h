@@ -196,6 +196,9 @@ struct CustomApiBindings {
 
   std::optional<int> (*physicsLayer)(objid id);
 
+  void (*saveToJsonFile)(std::string file, std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& allValues);
+  std::unordered_map<std::string, std::unordered_map<std::string, std::string>> (*loadFromJsonFile)(std::string file, bool* success);
+
   std::string (*dumpDebugInfo)(bool);
   //std::vector<func_t> registerGuileFns
 };

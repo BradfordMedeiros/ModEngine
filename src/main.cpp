@@ -1679,6 +1679,9 @@ int main(int argc, char* argv[]){
 
     .physicsLayer = physicsLayer,
     
+    .saveToJsonFile = saveToJsonFile,
+    .loadFromJsonFile = loadFromJsonFile,
+
     .dumpDebugInfo = dumpDebugInfo,
   };
 
