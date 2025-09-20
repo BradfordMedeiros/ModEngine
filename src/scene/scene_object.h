@@ -75,5 +75,6 @@ std::vector<TagInfo> getAllTags(World& world, int tag);
 GameObjectOctree* getMainOctree(World& world, objid* id);
 std::optional<OctreeMaterial> getMaterial(World& world, glm::vec3 position);
 
+void setMeshEnabled(World&, int32_t id, bool enabled);
 
 #endif

@@ -1549,7 +1549,8 @@ int main(int argc, char* argv[]){
     
     .getPhysicsVelocity = getPhysicsVelocity,
     .setPhysicsVelocity = setPhysicsVelocity,
-    
+    .setMeshEnabled = setMeshEnabled,
+
     .getGameObjectPos = getGameObjectPosition,
     .setGameObjectPosition = setGameObjectPosition,
     .getGameObjectRotation = getGameObjectRotation,

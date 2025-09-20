@@ -392,6 +392,11 @@ void setPhysicsVelocity(int32_t id, glm::vec3 velocity){
   physicsVelocitySet(world, id, velocity);
 }
 
+
+void setMeshEnabled(int32_t id, bool enabled){
+  setMeshEnabled(world, id, enabled);
+}
+
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld, const char* hint){
   return gameobjectPosition(world, index, isWorld, hint);
 }

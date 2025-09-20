@@ -63,6 +63,7 @@ struct CustomApiBindings {
   
   glm::vec3 (*getPhysicsVelocity)(int32_t id);
   void (*setPhysicsVelocity)(int32_t id, glm::vec3);
+  void (*setMeshEnabled)(int32_t id, bool enabled);
 
   glm::vec3 (*getGameObjectPos)(int32_t index, bool world, const char* hint);
   void (*setGameObjectPosition)(int32_t index, glm::vec3 pos, bool world, Hint hint);

@@ -100,6 +100,7 @@ void setSingleGameObjectAttr(int32_t id, const char* field, AttributeValue value
 
 glm::vec3 getPhysicsVelocity(int32_t id);
 void setPhysicsVelocity(int32_t id, glm::vec3 velocity);
+void setMeshEnabled(int32_t id, bool enabled);
 
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld, const char* hint);
 void setGameObjectPosition(int32_t index, glm::vec3 pos, bool isWorld, Hint hint);
