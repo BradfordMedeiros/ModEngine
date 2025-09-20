@@ -1266,7 +1266,7 @@ std::string inColor(std::string str, std::optional<CONSOLE_COLOR> color){
   return "";
 }
 
-std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& allValues){
+std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& allValues){
   rapidjson::Document doc;
   doc.SetObject();
   rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
@@ -1275,8 +1275,18 @@ std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::s
     rapidjson::Value innerMap(rapidjson::kObjectType);
     for(auto& [key, value] : values){
       rapidjson::Value jsonKey(key.c_str(), allocator);
-      rapidjson::Value jsonValue(value.c_str(), allocator);
-      innerMap.AddMember(jsonKey, jsonValue, allocator);
+
+      std::string* strValue = std::get_if<std::string>(&value);
+      bool* boolValue = std::get_if<bool>(&value);
+      if (strValue){
+        rapidjson::Value jsonValue(strValue -> c_str(), allocator);
+        innerMap.AddMember(jsonKey, jsonValue, allocator);
+      }else if (boolValue){
+        innerMap.AddMember(jsonKey, *boolValue, allocator);
+      }else{
+        modassert(strValue != NULL, "saveToJson only string or bool values supported");
+      }
+
     }
 
     rapidjson::Value outerKey(scope.c_str(), allocator);
@@ -1294,7 +1304,7 @@ std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::s
   return buffer.GetString();
 }
 
-std::unordered_map<std::string, std::unordered_map<std::string, std::string>> loadFromJson(std::string& fileContent, bool* success){
+std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadFromJson(std::string& fileContent, bool* success){
   rapidjson::Document doc;
   rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
   if (doc.HasParseError()){
@@ -1305,15 +1315,22 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::string>> lo
 
   *success = true;
 
-  std::unordered_map<std::string, std::unordered_map<std::string, std::string>> mapData;
+  std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> mapData;
   for (auto obj = doc.MemberBegin(); obj != doc.MemberEnd(); obj++) {
     std::string key = obj -> name.GetString();
     mapData[key] = {};
     if (obj -> value.IsObject()){
       for (auto innerObj = obj -> value.MemberBegin(); innerObj != obj -> value.MemberEnd(); innerObj++) {
         std::string innerKey = innerObj -> name.GetString();
-        std::string innerVal = innerObj -> value.GetString();
-        mapData.at(key)[innerKey] = innerVal;
+        if(innerObj -> value.IsString()){
+          std::string innerVal = innerObj -> value.GetString();
+          mapData.at(key)[innerKey] = innerVal;
+        }else if (innerObj -> value.IsBool()){
+          bool innerVal = innerObj -> value.GetBool();
+          mapData.at(key)[innerKey] = innerVal;
+        }else{
+          modassert(false, "only string type or bool supported to be loaded");
+        }
       }
     }else{
       modlog("loadValuesFromStr not an object", key);
