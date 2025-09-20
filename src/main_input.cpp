@@ -1728,9 +1728,6 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       state.rampDirection = (state.rampDirection ==  RAMP_FORWARD) ? RAMP_BACKWARD : RAMP_FORWARD;
-      for (auto &selectedIndex : state.editor.selectedObjs){
-        setTexture(selectedIndex, "./res/texturevideotexture");
-      }
     }
   },
   InputDispatch{
