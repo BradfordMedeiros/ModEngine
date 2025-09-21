@@ -659,6 +659,12 @@ std::string print(AttributeValue& value){
   if (attrVec4Value != NULL){
     return print(*attrVec4Value) + "[vec4]";
   }
+
+
+  auto boolValue = std::get_if<bool>(&value);
+  if (boolValue != NULL){
+    return std::string(*boolValue ? "true" : " false") + "[bool]";
+  }
   modassert(false, "invalid attribute type");
   return "";
 }

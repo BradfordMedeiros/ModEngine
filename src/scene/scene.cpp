@@ -1354,7 +1354,7 @@ std::optional<AttributeValue> getObjectAttribute(World& world, objid id, const c
 
   auto boolPtr = std::get_if<bool*>(&attrPtr.value());
   if (boolPtr){
-    modassert(false, "boolPtr not yet implemented");
+    return **boolPtr;
   }
 
 

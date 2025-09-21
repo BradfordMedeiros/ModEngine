@@ -611,6 +611,13 @@ bool autoserializerSetAttr(char* structAddress, AutoSerialize& value, const char
   if (boolValue != NULL){
     bool* address = (bool*)(((char*)structAddress) + boolValue -> structOffset);
     if (attributeValue.has_value()){
+      bool* boolPtr = std::get_if<bool>(&attributeValue.value());
+      if (boolPtr){
+        *address = *boolPtr;
+        return true;
+      }
+
+
       auto value = unwrapAttr<std::string>(attributeValue.value());
       if (value == boolValue -> onString){
          *address = true;

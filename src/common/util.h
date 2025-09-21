@@ -129,7 +129,7 @@ int maxvalue(int x, int y, int z);
 
 struct DeleteAttribute{};
 enum AttributeValueType { ATTRIBUTE_VEC2, ATTRIBUTE_VEC3, ATTRIBUTE_VEC4, ATTRIBUTE_STRING, ATTRIBUTE_ARR_STRING, ATTRIBUTE_FLOAT };
-typedef std::variant<glm::vec2, glm::vec3, glm::vec4, std::string, std::vector<std::string>, float, DeleteAttribute> AttributeValue;
+typedef std::variant<glm::vec2, glm::vec3, glm::vec4, std::string, std::vector<std::string>, float, bool, DeleteAttribute> AttributeValue;
 typedef std::variant<glm::vec2*, glm::vec3*, glm::vec4*, std::string*, float*, bool*, int*, uint*, glm::quat*> AttributeValuePtr;
 std::string attributeTypeStr(AttributeValueType type);
 AttributeValue timeAdjustedAttribute(AttributeValue delta, float timestep);
