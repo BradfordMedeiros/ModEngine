@@ -44,6 +44,13 @@ struct StateBoolSerializer {
 std::function<void(engineState& state, AttributeValue value, float now)> getSetAttr(StateBoolSerializer serializer){
   return [serializer](engineState& state, AttributeValue value, float now) -> void { 
     bool* boolValue = (bool*)(((char*)&state) + serializer.structOffset);
+
+    auto boolPtr = std::get_if<bool>(&value);
+    if (boolPtr){
+      *boolValue = *boolPtr;
+      return;
+    }
+
     auto enabledStr = std::get_if<std::string>(&value);
     if (enabledStr != NULL){
       if (*enabledStr == serializer.enabledValue){
@@ -55,7 +62,7 @@ std::function<void(engineState& state, AttributeValue value, float now)> getSetA
       }
       return;
     }
-    modassert(false, "invalid type");
+    modassert(false, "invalid type getSetAttr");
   };
 }
 
@@ -70,7 +77,7 @@ ObjectStateMapping simpleBoolSerializer(std::string object, std::string attribut
     ),
     .getAttr = [offset, enabledValue, disabledValue](engineState& state) -> AttributeValue {
       bool* value = (bool*)(((char*)&state) + offset);
-      return *value ? enabledValue : disabledValue;
+      return *value;
     },
     .object = object,
     .attribute = attribute,
