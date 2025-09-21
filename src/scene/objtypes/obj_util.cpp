@@ -577,7 +577,10 @@ std::optional<AttributeValuePtr> autoserializerGetAttrPtr(char* structAddress, A
   AutoSerializeEnums* enumsValue = std::get_if<AutoSerializeEnums>(&value);
   if (enumsValue != NULL){
     int* address = (int*)(((char*)structAddress) + enumsValue -> structOffset);
-    return address;
+
+    int enumIndex = *address;
+    std::string* strAddress = &(enumsValue -> enumStrings.at(enumIndex));
+    return strAddress;
   }
 
   AutoSerializeCustom* customValue = std::get_if<AutoSerializeCustom>(&value);
