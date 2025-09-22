@@ -26,10 +26,13 @@
 
 void printBacktrace();
 void assertWithBacktrace(bool isTrue, std::string message);
+void assertWithBacktraceWarn(bool isTrue, std::string message);
 void assertTodo(std::string message);
 
 #ifdef MODDEBUG
   #define modassert(m,x) do { if(!(m)) { assertWithBacktrace(m, x); } } while(0) ;  // the while loop thing is just for sanitization purposes of syntax.  
+  #define modassertwarn(m,x) do { if(!(m)) { assertWithBacktraceWarn(m, x); } } while(0) ;  // the while loop thing is just for sanitization purposes of syntax.  
+
   #ifdef ASSERT_TODOS
     #define MODTODO(m) assertTodo(m);
   #else
@@ -37,6 +40,7 @@ void assertTodo(std::string message);
   #endif
 #else
   #define modassert(m,x) ;
+  #define modassertwarn(m, x) ;
   #define MODTODO(m) ;
 #endif
 

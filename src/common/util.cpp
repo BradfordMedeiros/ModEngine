@@ -23,6 +23,13 @@ void assertWithBacktrace(bool isTrue, std::string message){
   }
 }
 
+void assertWithBacktraceWarn(bool isTrue, std::string message){
+  if (!isTrue){
+    std::cout << message << std::endl;
+  }
+}
+
+
 void assertTodo(std::string message){
   assertWithBacktrace(false, "TODO hit: " + message);
 }
