@@ -412,7 +412,10 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
   }
 
   auto animation = getAnimation(world, groupId, animationToPlay, mask.has_value() ? mask.value() : timings.disableAnimationIds, invertMask);
-  modassert(animation.has_value(), std::string("animation does not exist: ") + animationToPlay);
+  modassertwarn(animation.has_value(), std::string("animation does not exist: ") + animationToPlay);
+  if (!animation.has_value()){
+    return;
+  }
 
   std::string& animationname = animation.value().animation.name;
   float animLength = animationLengthSeconds(animation.value().animation);

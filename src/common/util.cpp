@@ -25,7 +25,7 @@ void assertWithBacktrace(bool isTrue, std::string message){
 
 void assertWithBacktraceWarn(bool isTrue, std::string message){
   if (!isTrue){
-    std::cout << message << std::endl;
+    std::cout << "WARN: " << inColor(message, CONSOLE_COLOR_YELLOW) << std::endl;
   }
 }
 
