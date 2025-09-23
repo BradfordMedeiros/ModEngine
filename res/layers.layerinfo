@@ -18,6 +18,7 @@
 
 ### default name override the default view layer.
 
+
 transparency:zindex:1
 transparency:depth:0
 
@@ -37,8 +38,7 @@ scale:selection:-4  # tied to manipulator lol
 basicui:zindex:3
 basicui:view:false
 basicui:ortho:true
-basicui:!enableLighting:false
-basicui:?enableLighting:bool
+basicui:lighting:false
 basicui:selection:-2
 
 basicui2:zindex:0
@@ -50,3 +50,6 @@ basicui2:selection:-2
 
 
 noselect:selection:-1
+
+nolighting:lighting:false
+nolighting:depth:2

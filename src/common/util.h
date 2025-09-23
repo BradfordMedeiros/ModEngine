@@ -261,6 +261,7 @@ struct LayerInfo {
   std::string name;
   int symbol;
   int zIndex;
+  bool lighting;
   bool orthographic;
   bool scale;
   bool disableViewTransform;

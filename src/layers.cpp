@@ -53,6 +53,15 @@ void setLayerOption(LayerInfo& layer, std::string& attribute, std::string& paylo
     layer.zIndex = std::atoi(payload.c_str());
   }else if (attribute == "depth"){
     layer.depthBufferLayer = std::atoi(payload.c_str());
+  }else if (attribute == "lighting"){
+    if (payload == "true"){
+      layer.lighting = true;
+    }else if (payload == "false"){
+      layer.lighting = false;
+    }else{
+      std::cout << "WARNING: layers: lighting" << payload << " is not a valid option" << std::endl;
+      assert(false);     
+    }
   }else if (attribute == "ortho"){
     if (payload == "true"){
       layer.orthographic = true;
@@ -128,6 +137,7 @@ std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::strin
         .name = layerName,
         .symbol = getSymbol(layerName),
         .zIndex = 0,
+        .lighting = true,
         .orthographic = false,
         .scale = false,
         .disableViewTransform = false,
@@ -160,6 +170,7 @@ std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::strin
       .name = "",
       .symbol = getSymbol(""),
       .zIndex = 0,
+      .lighting = true,
       .orthographic = false,
       .scale = false,
       .disableViewTransform = false,

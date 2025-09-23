@@ -578,9 +578,11 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
         if (!lastShaderId.has_value() || newShader != lastShaderId.value()){
           lastShaderId = newShader;
           glUseProgram(newShader);
+
           setRenderUniformData(newShader, layer.uniforms);
         }
-    
+        glProgramUniform1i(newShader, glGetUniformLocation(newShader, "enableLighting"), layer.lighting); // TODO - add type safety and stuff to this
+
         shaderSetUniform(newShader, "projview", newProjView);
 
         shaderSetUniform(*waterShader, "projview", newProjView);
@@ -1320,6 +1322,8 @@ int main(int argc, char* argv[]){
     if (layer.name == "transparency"){
       transparencyLayer = layer.symbol;
     }
+
+    std::cout << "parse layer: " << layer.name << ", lighting = " << layer.lighting << std::endl;
   }
   modassert(transparencyLayer != -1, "could not find transparency layer");
 

@@ -100,6 +100,8 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
   });
 */
 
+  glProgramUniform1i(shader, glGetUniformLocation(shader, "enableLighting"), true); // TODO - add type safety and stuff to this
+
   shaderSetUniform(shader, "cameraPosition", cameraPosition);
 
   if (!isSelection){
