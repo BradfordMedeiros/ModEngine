@@ -1266,6 +1266,10 @@ void saveToJsonFile(std::string file, std::unordered_map<std::string, std::unord
   realfiles::saveFile(file, serializedData);
 }
 std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadFromJsonFile(std::string file, bool* success){
+  if (!realfiles::fileExists(file)){
+    *success = false;
+    return {};
+  }
   auto fileContent = realfiles::doLoadFile(file);
   auto values = loadFromJson(fileContent, success);
   return values;

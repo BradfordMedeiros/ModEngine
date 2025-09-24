@@ -1292,6 +1292,7 @@ std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::s
       std::string* strValue = std::get_if<std::string>(&value);
       bool* boolValue = std::get_if<bool>(&value);
       int* intValue = std::get_if<int>(&value);
+      float* floatValue = std::get_if<float>(&value);
       if (strValue){
         rapidjson::Value jsonValue(strValue -> c_str(), allocator);
         innerMap.AddMember(jsonKey, jsonValue, allocator);
@@ -1299,6 +1300,8 @@ std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::s
         innerMap.AddMember(jsonKey, *boolValue, allocator);
       }else if (intValue){
         innerMap.AddMember(jsonKey, *intValue, allocator);
+      }else if (floatValue){
+        innerMap.AddMember(jsonKey, *floatValue, allocator);
       }else{
         modassert(strValue != NULL, "saveToJson only string, bool, int supported");
       }
@@ -1346,6 +1349,9 @@ std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadF
           mapData.at(key)[innerKey] = innerVal;
         }else if (innerObj -> value.IsInt()){
           int innerVal = innerObj -> value.GetInt();
+          mapData.at(key)[innerKey] = innerVal;
+        }else if (innerObj -> value.IsFloat()){
+          float innerVal = innerObj -> value.GetFloat();
           mapData.at(key)[innerKey] = innerVal;
         }else{
           modassert(false, "only string type or bool supported to be loaded");

@@ -511,7 +511,7 @@ struct TagInfo {
 enum OctreeMaterial { OCTREE_MATERIAL_DEFAULT, OCTREE_MATERIAL_WATER };
 
 
-typedef std::variant<std::string, bool, int> JsonType;
+typedef std::variant<std::string, bool, int, float> JsonType;
 std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& allValues);
 std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadFromJson(std::string& fileContent, bool* success);
 
