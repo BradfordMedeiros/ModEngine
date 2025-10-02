@@ -91,6 +91,7 @@ bool showCrashInfo = false;
 float lastReloadTime = 0.f;
 
 TimePlayback timePlayback(statistics.initialTime); 
+std::vector<ViewportSettings> viewports;
 
 
 std::unordered_map<std::string, std::string>& getTemplateValues(){
@@ -393,7 +394,7 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
   };
 
 
-  auto angles = calcFovAngles(world.sandbox.layers.at(0), state.viewportSize);
+  auto angles = calcFovAngles(world.sandbox.layers.at(0), calcViewportSize());
 
 
   auto position = viewTransform.position;  // viewFrustum
@@ -505,7 +506,7 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
   glUseProgram(*shaderProgram);
   int numTriangles = 0;
 
-  auto viewFrustum = cameraToViewFrustum(world.sandbox.layers.at(0), state.viewportSize);
+  auto viewFrustum = cameraToViewFrustum(world.sandbox.layers.at(0), calcViewportSize());
 
   if (state.cullingObject.has_value() && state.visualizeFrustum){
     visualizeFrustum(viewFrustum, cullingViewTransform);
@@ -1049,6 +1050,16 @@ void setVoxelLighting2(int voxelCellWidth, glm::vec3 worldOffset){
 }
 
 
+void onFramebufferSizeChange(GLFWwindow* window, int width, int height){
+  std::cout << "EVENT: framebuffer resized:  new size-  " << "width("<< width << ")" << " height(" << height << ")" << std::endl;
+  state.currentScreenWidth = width;
+  state.currentScreenHeight = height;
+  if (state.nativeResolution){
+    state.resolution = glm::ivec2(width, height);
+  }
+  updateFramebufferWindowSizeChange(renderingResources.framebuffers, state.resolution.x, state.resolution.y);
+}; 
+
 void onGLFWEerror(int error, const char* description){
   std::cerr << "Error: " << description << std::endl;
 }
@@ -1353,6 +1364,8 @@ int main(int argc, char* argv[]){
 
   setInitialState(state, "./res/world.state", statistics.now, interface.readFile, result["noinput"].as<bool>()); 
 
+  createViewport(0, state.viewportoffsetNdi.x, state.viewportoffsetNdi.y, state.viewportSizeNdi.x, state.viewportSizeNdi.y);
+
   auto glfwInitReturn = glfwInit();
   if (glfwInitReturn != GLFW_TRUE){
     modlog("glfw", "glfw did not initialize successfully");
@@ -1415,19 +1428,6 @@ int main(int argc, char* argv[]){
     std::cerr << "ERROR: framebuffer incomplete" << std::endl;
     return -1;
   }
-
-  auto onFramebufferSizeChange = [](GLFWwindow* window, int width, int height) -> void {
-     std::cout << "EVENT: framebuffer resized:  new size-  " << "width("<< width << ")" << " height(" << height << ")" << std::endl;
-     state.currentScreenWidth = width;
-     state.currentScreenHeight = height;
-     if (state.nativeViewport){
-       state.viewportSize = glm::ivec2(width, height);
-     }
-     if (state.nativeResolution){
-       state.resolution = glm::ivec2(width, height);
-     }
-     updateFramebufferWindowSizeChange(renderingResources.framebuffers, state.resolution.x, state.resolution.y);
-  }; 
 
   onFramebufferSizeChange(window, state.currentScreenWidth, state.currentScreenHeight);
   glfwSetFramebufferSizeCallback(window, onFramebufferSizeChange); 
@@ -1686,6 +1686,9 @@ int main(int argc, char* argv[]){
     
     .saveToJsonFile = saveToJsonFile,
     .loadFromJsonFile = loadFromJsonFile,
+
+    .createViewport = createViewport,
+    .removeViewport = removeViewport,
 
     .dumpDebugInfo = dumpDebugInfo,
   };
@@ -1994,7 +1997,7 @@ int main(int argc, char* argv[]){
       }
     }
 
-    auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
+    auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, calcViewportSize(), calcViewportOffset(), state.resolution);
     state.adjustedCoords = adjustedCoords;
 
     bool selectItemCalledThisFrame = selectItemCalled;
@@ -2167,8 +2170,6 @@ int main(int argc, char* argv[]){
     state.hoveredColor = glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b);
 
 
-
-
     PROFILE("BLOOM-RENDERING",
       renderWithProgram(renderContext, renderStages.bloom1);
       renderWithProgram(renderContext, renderStages.bloom2);
@@ -2219,7 +2220,7 @@ int main(int argc, char* argv[]){
 
       glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(0));
-      glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
+      glViewport(calcViewportOffset().x, calcViewportOffset().y, calcViewportSize().x, calcViewportSize().y);
       glBindVertexArray(defaultResources.quadVAO);
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -2285,7 +2286,7 @@ int main(int argc, char* argv[]){
     }else if (state.renderMode == RENDER_TEXTURE){
        glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-ingame-ui-texture-test").texture.textureId);  
     }
-    glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
+    glViewport(calcViewportOffset().x, calcViewportOffset().y, calcViewportSize().x, calcViewportSize().y);
     glBindVertexArray(defaultResources.quadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 

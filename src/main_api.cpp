@@ -23,6 +23,7 @@ extern std::vector<IdAtCoords> idCoordsToGet;
 extern std::vector<DepthAtCoord> depthsAtCoords;
 extern std::unordered_map<unsigned int, std::vector<ShaderTextureBinding>> textureBindings; 
 extern int currentTick;
+extern std::vector<ViewportSettings> viewports;
 
 float getTotalTime(){
   return statistics.now - statistics.initialTime;
@@ -1273,4 +1274,52 @@ std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadF
   auto fileContent = realfiles::doLoadFile(file);
   auto values = loadFromJson(fileContent, success);
   return values;
+}
+
+
+
+std::optional<ViewportSettings*> getViewport(int index){
+  for (auto &viewport : viewports){
+    if (viewport.index == index){
+      return &viewport;
+    }
+  }
+  return std::nullopt;
+}
+
+void createViewport(int viewportIndex, float x, float y, float widthNdi, float heightNdi){
+  auto viewport = getViewport(viewportIndex);
+  if (!viewport.has_value()){
+    viewports.push_back(ViewportSettings {
+      .index = viewportIndex,
+      .x = x,
+      .y = y,
+      .widthNdi = widthNdi,
+      .heightNdi = heightNdi,
+    });
+    viewport = getViewport(viewportIndex);
+    modassert(viewport.has_value(), "just added viewport but did not retrieve it");
+  }
+
+  ViewportSettings& viewportSettings = *viewport.value();
+  viewportSettings.x = x;
+  viewportSettings.y = y;
+  viewportSettings.widthNdi = widthNdi;
+  viewportSettings.heightNdi = heightNdi;
+}
+
+void removeViewport(int viewportIndex){
+  std::vector<ViewportSettings> newViewports;
+  for (auto& viewport : viewports){
+    if (viewport.index != viewportIndex){
+      newViewports.push_back(viewport);
+    }
+  }
+  viewports = newViewports;
+}
+
+ViewportSettings& getDefaultViewport(){
+  auto viewport = getViewport(0);
+  modassert(viewport.has_value(), "no default viewport");
+  return *viewport.value();
 }

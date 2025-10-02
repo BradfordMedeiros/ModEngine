@@ -121,10 +121,9 @@ struct engineState {
   // Rendering options 
   int swapInterval; // this is vsync
   bool fullscreen;
-  bool nativeViewport;
   bool nativeResolution;
-  glm::ivec2 viewportSize;
-  glm::ivec2 viewportoffset;
+  glm::vec2 viewportSizeNdi;
+  glm::vec2 viewportoffsetNdi;
   glm::ivec2 resolution;
   glm::ivec4 savedWindowsize;
   std::string borderTexture;

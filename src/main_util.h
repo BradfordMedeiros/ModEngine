@@ -20,5 +20,7 @@ std::optional<unsigned int> getTextureId(std::string& texture);
 float exposureAmount();
 glm::vec3 positionToNdi(glm::vec3 position);
 
+glm::ivec2 calcViewportSize();
+glm::ivec2 calcViewportOffset();
 
 #endif

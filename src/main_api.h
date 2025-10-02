@@ -280,4 +280,15 @@ std::optional<int> physicsLayer(objid id);
 void saveToJsonFile(std::string file, std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& allValues);
 std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadFromJsonFile(std::string file, bool* success);
 
+struct ViewportSettings {
+  int index;
+  float x;
+  float y;
+  float widthNdi;
+  float heightNdi;
+};
+void createViewport(int viewportIndex, float x, float y, float widthNdi, float heightNdi);
+void removeViewport(int viewportIndex);
+ViewportSettings& getDefaultViewport();
+
 #endif

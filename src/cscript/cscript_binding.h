@@ -200,6 +200,9 @@ struct CustomApiBindings {
   void (*saveToJsonFile)(std::string file, std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& allValues);
   std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> (*loadFromJsonFile)(std::string file, bool* success);
 
+  void (*createViewport)(int viewportIndex, float x, float y, float widthNdi, float heightNdi);
+  void (*removeViewport)(int viewportIndex);
+
   std::string (*dumpDebugInfo)(bool);
   //std::vector<func_t> registerGuileFns
 };
