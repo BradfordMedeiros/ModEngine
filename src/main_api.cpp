@@ -1287,11 +1287,13 @@ std::optional<ViewportSettings*> getViewport(int index){
   return std::nullopt;
 }
 
-void createViewport(int viewportIndex, float x, float y, float widthNdi, float heightNdi){
+void createViewport(int viewportIndex, float x, float y, float widthNdi, float heightNdi, ViewportBindingOption bindingOption){
   auto viewport = getViewport(viewportIndex);
   if (!viewport.has_value()){
     viewports.push_back(ViewportSettings {
       .index = viewportIndex,
+      .cameraBinding = std::nullopt,
+      .bindingOption = bindingOption,
       .x = x,
       .y = y,
       .widthNdi = widthNdi,

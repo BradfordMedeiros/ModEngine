@@ -16,6 +16,7 @@ uniform float maxcuttoff;
 uniform float exposure;
 uniform bool enableGammaCorrection;
 uniform bool enableExposure;
+uniform bool enableDepthVisualization;
 
 void calculateFogEffect(in float depthAmount, out vec4 fogAmount){
   if (depthAmount < mincutoff || depthAmount > maxcuttoff){
@@ -31,6 +32,15 @@ void calculateFogEffect(in float depthAmount, out vec4 fogAmount){
 }
 
 void main(){
+  if (enableDepthVisualization){
+    float depth  = texture(depthTexture, TexCoords).r;
+    float z = depth * 2.0 - 1.0; 
+    float depthAmount  = ((2.0 * near * far) / (far + near - z * (far - near))) / far;  // fraction of near/far
+    FragColor = vec4(depthAmount, depthAmount, depthAmount, 1);
+    return;
+  }
+
+
   float depth  = texture(depthTexture, TexCoords).r;
   float z = depth * 2.0 - 1.0; 
   float depthAmount  = ((2.0 * near * far) / (far + near - z * (far - near))) / far;  // fraction of near/far

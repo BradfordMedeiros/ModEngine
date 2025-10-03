@@ -360,6 +360,7 @@ void initFramebufferShader(unsigned int shader){
   	"exposure",
   	"enableGammaCorrection",
   	"enableExposure",
+    "enableDepthVisualization",
   });
 }
 
@@ -376,6 +377,10 @@ void updateFramebufferShaderFrame(unsigned int shader, float near, float far){
   uniformData.push_back(UniformData {
     .name = "enableExposure",
     .value = state.enableExposure,
+  });
+  uniformData.push_back(UniformData {
+    .name = "enableDepthVisualization",
+    .value = false,
   });
   uniformData.push_back(UniformData {
     .name = "exposure",

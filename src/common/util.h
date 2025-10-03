@@ -515,4 +515,15 @@ typedef std::variant<std::string, bool, int, float> JsonType;
 std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& allValues);
 std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadFromJson(std::string& fileContent, bool* success);
 
+enum ViewportBindingOption { 
+  DEFAULT_BINDING_OPTION,
+  BLOOM_BINDING_OPTION,
+  PORTAL_BINDING_OPTION,
+  TEXTURE_BINDING_OPTION,
+  DEPTH_BINDING_OPTION,
+  USER_TEXTURE_OPTION,
+  UNKNOWN_1_BINDING_OPTION,
+  UNKNOWN_2_BINDING_OPTION,
+};
+
 #endif

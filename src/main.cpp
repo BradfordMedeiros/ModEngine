@@ -309,6 +309,7 @@ std::vector<std::string> listLightTextures(){
 void loadAllTextures(std::string& textureFolderPath){
   loadTextureWorld(world, "./res/models/box/grid.png", -1);
   loadTextureWorld(world, "./res/textures/wood.jpg", -1);
+  loadTextureWorld(world, resources::GRID_TEXTURE, -1);
 
   for (auto texturePath : listFilesWithExtensionsFromPackage(textureFolderPath, { "png", "jpg" })){
     loadTextureWorld(world, texturePath, -1);
@@ -394,7 +395,7 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
   };
 
 
-  auto angles = calcFovAngles(world.sandbox.layers.at(0), calcViewportSize());
+  auto angles = calcFovAngles(world.sandbox.layers.at(0), calcViewportSize(getDefaultViewport()));
 
 
   auto position = viewTransform.position;  // viewFrustum
@@ -506,7 +507,7 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
   glUseProgram(*shaderProgram);
   int numTriangles = 0;
 
-  auto viewFrustum = cameraToViewFrustum(world.sandbox.layers.at(0), calcViewportSize());
+  auto viewFrustum = cameraToViewFrustum(world.sandbox.layers.at(0), calcViewportSize(getDefaultViewport()));
 
   if (state.cullingObject.has_value() && state.visualizeFrustum){
     visualizeFrustum(viewFrustum, cullingViewTransform);
@@ -800,7 +801,6 @@ void renderDebugUi(Color pixelColor){
   drawTextNdi(std::string("num gameobjects: ") + std::to_string(unwrapStat<int>(statValue(statistics.numObjectsStat))), uiXOffset, uiYOffset + offsetPerLine * 17, state.fontsize);
   drawTextNdi(std::string("num rigidbodys: ") + std::to_string(unwrapStat<int>(statValue(statistics.rigidBodiesStat))), uiXOffset, uiYOffset + offsetPerLine * 18, state.fontsize);
   drawTextNdi(std::string("num scenes loaded: ") + std::to_string(unwrapStat<int>(statValue(statistics.scenesLoadedStat))), uiXOffset, uiYOffset + offsetPerLine * 19, state.fontsize);
-  drawTextNdi(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + offsetPerLine * 20, state.fontsize);
   drawTextNdi(std::string("time: ") + std::to_string(timeSeconds(false)), uiXOffset, uiYOffset + offsetPerLine * 21, state.fontsize);
   drawTextNdi(std::string("realtime: ") + std::to_string(timeSeconds(true)), uiXOffset, uiYOffset + offsetPerLine * 22, state.fontsize);
 }
@@ -1364,7 +1364,11 @@ int main(int argc, char* argv[]){
 
   setInitialState(state, "./res/world.state", statistics.now, interface.readFile, result["noinput"].as<bool>()); 
 
-  createViewport(0, state.viewportoffsetNdi.x, state.viewportoffsetNdi.y, state.viewportSizeNdi.x, state.viewportSizeNdi.y);
+  createViewport(0, state.viewportoffsetNdi.x, state.viewportoffsetNdi.y, state.viewportSizeNdi.x, state.viewportSizeNdi.y, DEFAULT_BINDING_OPTION);
+
+  //createViewport(0, 0.f, 0.f, 1.f, 0.5f, 5);
+  //createViewport(1, 0.f, 0.5f, 0.5f, 0.5f, 0);
+  //createViewport(2, 0.5f, 0.5f, 0.5f, 0.5f, 0);
 
   auto glfwInitReturn = glfwInit();
   if (glfwInitReturn != GLFW_TRUE){
@@ -1997,7 +2001,7 @@ int main(int argc, char* argv[]){
       }
     }
 
-    auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, calcViewportSize(), calcViewportOffset(), state.resolution);
+    auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, calcViewportSize(getDefaultViewport()), calcViewportOffset(getDefaultViewport()), state.resolution);
     state.adjustedCoords = adjustedCoords;
 
     bool selectItemCalledThisFrame = selectItemCalled;
@@ -2220,7 +2224,7 @@ int main(int argc, char* argv[]){
 
       glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(0));
-      glViewport(calcViewportOffset().x, calcViewportOffset().y, calcViewportSize().x, calcViewportSize().y);
+      glViewport(calcViewportOffset(getDefaultViewport()).x, calcViewportOffset(getDefaultViewport()).y, calcViewportSize(getDefaultViewport()).x, calcViewportSize(getDefaultViewport()).y);
       glBindVertexArray(defaultResources.quadVAO);
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -2239,7 +2243,9 @@ int main(int argc, char* argv[]){
     /////////////////////////////////////
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    auto finalProgram = (state.renderMode == RENDER_DEPTH) ? *depthProgram : *renderingResources.framebufferProgram;
+    //auto finalProgram = (state.renderMode == RENDER_DEPTH) ? *depthProgram : *renderingResources.framebufferProgram;
+    auto finalProgram = *renderingResources.framebufferProgram;
+
     glUseProgram(finalProgram); 
     glClearColor(0.f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -2262,39 +2268,52 @@ int main(int argc, char* argv[]){
       glClear(GL_DEPTH_BUFFER_BIT);
     }
 
-    if (state.renderMode == RENDER_FINAL){
-      glBindTexture(GL_TEXTURE_2D, finalRenderingTexture(renderStages));
-    }else if (state.renderMode == RENDER_PORTAL){
-      assert(state.textureIndex <= renderingResources.framebuffers.portalTextures.size() && state.textureIndex >= 0);
-      glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.portalTextures.at(state.textureIndex));  
-    }else if (state.renderMode == RENDER_SELECTION){
-      glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture4);  
-    }else if (state.renderMode == RENDER_PAINT){
-      //glBindTexture(GL_TEXTURE_2D, textureToPaint);
-      glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-scenegraph_selection_texture").texture.textureId);
-    }else if (state.renderMode == RENDER_DEPTH){
-      assert(state.textureIndex <=  renderingResources.framebuffers.depthTextures.size() && state.textureIndex >= 0);
-      glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(state.textureIndex));
-    }else if (state.renderMode == RENDER_BLOOM){
-      glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture2);
-    }else if (state.renderMode == RENDER_GRAPHS){
-      if (screenspaceTextureIds.size() > state.textureIndex && state.textureIndex >= 0){
-        glBindTexture(GL_TEXTURE_2D, screenspaceTextureIds.at(state.textureIndex).id);
+
+    modlog("viewports num: ", std::to_string(viewports.size()));
+    for (auto& viewport : viewports){
+      shaderSetUniformBool(finalProgram, "enableDepthVisualization", viewport.bindingOption == DEPTH_BINDING_OPTION ? true : false);
+      if (!viewport.cameraBinding.has_value()){
+        if (viewport.bindingOption == DEFAULT_BINDING_OPTION){
+          glBindTexture(GL_TEXTURE_2D, finalRenderingTexture(renderStages));
+        }else if (viewport.bindingOption == PORTAL_BINDING_OPTION){ // portal
+          assert(state.textureIndex <= renderingResources.framebuffers.portalTextures.size() && state.textureIndex >= 0);
+          glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.portalTextures.at(state.textureIndex));  
+        }else if (viewport.bindingOption == UNKNOWN_1_BINDING_OPTION){
+          glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture4);  
+        }else if (viewport.bindingOption == TEXTURE_BINDING_OPTION){ // texture
+          //glBindTexture(GL_TEXTURE_2D, textureToPaint);
+          glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-scenegraph_selection_texture").texture.textureId);
+        }else if (viewport.bindingOption == DEPTH_BINDING_OPTION){ // depth 
+          assert(state.textureIndex <=  renderingResources.framebuffers.depthTextures.size() && state.textureIndex >= 0);
+          glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(state.textureIndex));
+        }else if (viewport.bindingOption == BLOOM_BINDING_OPTION){ // bloom
+          glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture2);
+        }else if (viewport.bindingOption == USER_TEXTURE_OPTION){ // user textures
+          if (screenspaceTextureIds.size() > state.textureIndex && state.textureIndex >= 0){
+            glBindTexture(GL_TEXTURE_2D, screenspaceTextureIds.at(state.textureIndex).id);
+          }else{
+            modlog("rendering", (std::string("cannot display graph texture index: ") + std::to_string(state.textureIndex)).c_str());
+          }
+        }else if (viewport.bindingOption == UNKNOWN_2_BINDING_OPTION){ 
+           glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-ingame-ui-texture-test").texture.textureId);  
+        }else{
+          modassert(false, "invalid binding option");
+        }
       }else{
-        modlog("rendering", (std::string("cannot display graph texture index: ") + std::to_string(state.textureIndex)).c_str());
+        glBindTexture(GL_TEXTURE_2D, world.textures.at(resources::GRID_TEXTURE).texture.textureId);  
       }
-    }else if (state.renderMode == RENDER_TEXTURE){
-       glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-ingame-ui-texture-test").texture.textureId);  
+
+      glViewport(calcViewportOffset(viewport).x, calcViewportOffset(viewport).y, calcViewportSize(viewport).x, calcViewportSize(viewport).y);
+      glBindVertexArray(defaultResources.quadVAO);
+      glDrawArrays(GL_TRIANGLES, 0, 6);
     }
-    glViewport(calcViewportOffset().x, calcViewportOffset().y, calcViewportSize().x, calcViewportSize().y);
-    glBindVertexArray(defaultResources.quadVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+
 
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
   
-    if (state.renderMode == RENDER_FINAL){
+    {
       renderDebugUi(pixelColor);
 
       // below and render screepspace lines can probably be consoliated

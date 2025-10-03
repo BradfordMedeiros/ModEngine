@@ -7,7 +7,7 @@ extern Stats statistics;
 
 glm::mat4 projectionFromLayer(LayerInfo& layer){
   // this means that as the window is dragged wider (say 2560x1980) you simply see more
-  auto viewportSize = calcViewportSize();
+  auto viewportSize = calcViewportSize(getDefaultViewport());
   return glm::perspective(glm::radians(layer.fov), (float)viewportSize.x / (float)viewportSize.y, layer.nearplane, layer.farplane); 
 
   // this would show a constant amount in the screen, but then just stretch it, which might be more "fair" for a  multiplayer game, but looks super shitty
@@ -94,9 +94,7 @@ glm::vec3 positionToNdi(glm::vec3 position){
   return glm::vec3(dividedValue.x, dividedValue.y, dividedValue.w);
 }
 
-glm::ivec2 calcViewportSize(){
-  auto& viewport = getDefaultViewport();
-
+glm::ivec2 calcViewportSize(ViewportSettings& viewport){
   float width = state.currentScreenWidth;
   float height = state.currentScreenHeight;
   int actualWidth = static_cast<int>(viewport.widthNdi* width);
@@ -104,9 +102,7 @@ glm::ivec2 calcViewportSize(){
   return glm::ivec2(actualWidth, actualHeight);
 }
 
-glm::ivec2 calcViewportOffset(){
-  auto& viewport = getDefaultViewport();
-
+glm::ivec2 calcViewportOffset(ViewportSettings& viewport){
   float width = state.currentScreenWidth;
   float height = state.currentScreenHeight;
   int actualWidth = static_cast<int>(viewport.x * width);

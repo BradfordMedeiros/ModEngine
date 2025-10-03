@@ -282,12 +282,14 @@ std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadF
 
 struct ViewportSettings {
   int index;
+  std::optional<int> cameraBinding;
+  ViewportBindingOption bindingOption;
   float x;
   float y;
   float widthNdi;
   float heightNdi;
 };
-void createViewport(int viewportIndex, float x, float y, float widthNdi, float heightNdi);
+void createViewport(int viewportIndex, float x, float y, float widthNdi, float heightNdi, ViewportBindingOption bindingOption);
 void removeViewport(int viewportIndex);
 ViewportSettings& getDefaultViewport();
 

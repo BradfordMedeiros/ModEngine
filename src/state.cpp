@@ -2,32 +2,6 @@
 
 extern btIDebugDraw* debuggerDrawer;
 
-std::string renderModeAsStr(RENDER_MODE mode){
-  if (mode == RENDER_FINAL){
-    return "final";
-  }
-  if (mode == RENDER_PORTAL){
-    return "portal";
-  }
-  if (mode == RENDER_PAINT){
-    return "paint";
-  }
-  if (mode == RENDER_DEPTH){
-    return "depth";
-  }
-  if (mode == RENDER_BLOOM){
-    return "bloom";
-  }
-  if (mode == RENDER_GRAPHS){
-    return "graphs";
-  }
-  if (mode == RENDER_SELECTION){
-    return "selection";
-  }
-  modassert(false, "invalid render mode");
-  return "";
-}
-
 struct ObjectStateMapping {
   std::function<void(engineState& state, AttributeValue, float)> attr;
   std::function<AttributeValue(engineState& state)> getAttr;
@@ -501,7 +475,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .editor = EditorContent{},
     .isRecording = false,
     .recordingIndex = -1,
-    .renderMode = RENDER_FINAL,
     .snappingMode = SNAP_RELATIVE,
     .drawPoints = false,
     .moveUp = false,

@@ -9,9 +9,6 @@
 #include "./easyuse/manipulator.h"
 #include "./scene/scene.h"
 
-enum RENDER_MODE { RENDER_FINAL, RENDER_PORTAL, RENDER_PAINT, RENDER_DEPTH, RENDER_BLOOM, RENDER_GRAPHS, RENDER_SELECTION, RENDER_TEXTURE };
-std::string renderModeAsStr(RENDER_MODE mode);
-
 enum ANTIALIASING_TYPE { ANTIALIASING_NONE, ANTIALIASING_MSAA };
 enum CURSOR_TYPE { CURSOR_NORMAL, CURSOR_CAPTURE, CURSOR_HIDDEN, CURSOR_DEFAULT };
 enum INPUT_MODE { DISABLED, ENABLED, CAMERA_ONLY };
@@ -97,7 +94,6 @@ struct engineState {
   EditorContent editor;
   bool isRecording;
   objid recordingIndex;
-  RENDER_MODE renderMode;
   SNAPPING_MODE snappingMode;
   bool drawPoints;
   bool moveUp;
