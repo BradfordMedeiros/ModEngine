@@ -1320,6 +1320,7 @@ void createViewport(int viewportIndex, float x, float y, float widthNdi, float h
   viewportSettings.y = y;
   viewportSettings.widthNdi = widthNdi;
   viewportSettings.heightNdi = heightNdi;
+  viewportSettings.bindingOption = bindingOption;
 }
 
 void removeViewport(int viewportIndex){
