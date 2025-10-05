@@ -46,11 +46,33 @@ objid listSceneId(int32_t id);
 Transformation getCameraTransform();
 Transformation getCullingTransform();
 void maybeResetCamera(int32_t id);
-void setActiveCamera(std::optional<int32_t> cameraId);
-std::optional<objid> getActiveCamera();
+void setActiveCamera(std::optional<int32_t> cameraId, std::optional<int> viewportIndex);
+std::optional<objid> getActiveCamera(std::optional<int> viewportIndex);
 Transformation getView();
 
-void nextCamera();
+struct ViewportSettings {
+  int index;
+  float x;
+  float y;
+  float widthNdi;
+  float heightNdi;
+
+
+  std::optional<ViewportOption> bindingOption;
+  std::optional<objid> activeCameraObj;
+  GameObjectCamera* activeCameraData;
+};
+
+
+void createViewport(int viewportIndex, float x, float y, float widthNdi, float heightNdi, ViewportOption bindingOption);
+void removeViewport(int viewportIndex);
+std::vector<int> listViewports();
+
+ViewportSettings& getDefaultViewport();
+ViewportSettings& getViewport(int index);
+
+
+void nextCamera(ViewportSettings& viewport);
 void moveCamera(glm::vec3 offset);
 void rotateCamera(float xoffset, float yoffset);
 void setCameraRotation(glm::quat orientation);
@@ -280,17 +302,5 @@ std::optional<int> physicsLayer(objid id);
 void saveToJsonFile(std::string file, std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& allValues);
 std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadFromJsonFile(std::string file, bool* success);
 
-struct ViewportSettings {
-  int index;
-  std::optional<int> cameraBinding;
-  ViewportBindingOption bindingOption;
-  float x;
-  float y;
-  float widthNdi;
-  float heightNdi;
-};
-void createViewport(int viewportIndex, float x, float y, float widthNdi, float heightNdi, ViewportBindingOption bindingOption);
-void removeViewport(int viewportIndex);
-ViewportSettings& getDefaultViewport();
 
 #endif

@@ -25,13 +25,15 @@ struct KeyAxisConfiguration {
 };
 
 enum DispatchType { BUTTON_PRESS, BUTTON_RELEASE, BUTTON_HOLD };
+
+struct ViewportSettings;
 struct InputDispatch {
   bool alwaysEnable;
   int sourceKey;
   DispatchType sourceType;
   int prereqKey;
   bool hasPreq;
-  std::function<void()> fn;
+  std::function<void(ViewportSettings& viewport)> fn;
 };
 
 struct KeyRemapper {

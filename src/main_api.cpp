@@ -823,13 +823,14 @@ objid listSceneId(int32_t id){
 }
 
 Transformation getCameraTransform(){
-  if (state.useDefaultCamera || !state.activeCameraObj.has_value()){
+  auto& viewport = getDefaultViewport();
+  if (state.useDefaultCamera || !viewport.activeCameraObj.has_value()){
     return defaultResources.defaultCamera.transformation;
   }
 
-  auto cameraExists = idExists(world.sandbox, state.activeCameraObj.value());
-  modassert(cameraExists, std::string("camera does not exist: ") + std::to_string(state.activeCameraObj.value()));
-  return gameobjectTransformation(world, state.activeCameraObj.value(), true, "getCameraTransform");
+  auto cameraExists = idExists(world.sandbox, viewport.activeCameraObj.value());
+  modassert(cameraExists, std::string("camera does not exist: ") + std::to_string(viewport.activeCameraObj.value()));
+  return gameobjectTransformation(world, viewport.activeCameraObj.value(), true, "getCameraTransform");
 }
 
 Transformation getCullingTransform(){
@@ -840,16 +841,21 @@ Transformation getCullingTransform(){
 }
 
 void maybeResetCamera(int32_t id){
-  if (state.activeCameraObj.has_value() &&  id == state.activeCameraObj.value()){
-    state.activeCameraObj = std::nullopt;
-    state.activeCameraData = NULL;
+  auto& viewport = getDefaultViewport();
+
+  if (viewport.activeCameraObj.has_value() &&  id == viewport.activeCameraObj.value()){
+    viewport.activeCameraObj = std::nullopt;
+    viewport.activeCameraData = NULL;
     std::cout << "active camera reset" << std::endl;
   }
 }
-void setActiveCamera(std::optional<int32_t> cameraIdOpt){
+void setActiveCamera(std::optional<int32_t> cameraIdOpt, std::optional<int> viewportIndex){
+  auto index = viewportIndex.has_value() ? viewportIndex.value() : getDefaultViewport().index;
+  auto& viewport = getViewport(index);
+
   if (!cameraIdOpt.has_value()){
-    if (state.activeCameraObj.has_value()){
-      auto currCameraId = state.activeCameraObj.value();
+    if (viewport.activeCameraObj.has_value()){
+      auto currCameraId = viewport.activeCameraObj.value();
       maybeResetCamera(currCameraId);
     }
     return;
@@ -870,56 +876,64 @@ void setActiveCamera(std::optional<int32_t> cameraIdOpt){
 
 
   state.useDefaultCamera = false;
-  state.activeCameraObj = cameraId;
-  state.activeCameraData = &getCamera(world, cameraId);
+  viewport.activeCameraObj = cameraId;
+
+  viewport.activeCameraData = &getCamera(world, cameraId);
   //cBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
   std::cout << "set active camera to id: " << cameraId << std::endl;
-  std::cout << "camera data: " << state.activeCameraData -> enableDof << ", " << state.activeCameraData -> minBlurDistance << ", " << state.activeCameraData -> maxBlurDistance << std::endl;
+  std::cout << "camera data: " << viewport.activeCameraData -> enableDof << ", " << viewport.activeCameraData -> minBlurDistance << ", " << viewport.activeCameraData -> maxBlurDistance << std::endl;
 }
 
-std::optional<objid> getActiveCamera(){
-  return state.activeCameraObj;;
+std::optional<objid> getActiveCamera(std::optional<int> viewportIndex){
+  auto& viewport = getViewport(viewportIndex.has_value() ? viewportIndex.value() : 0);
+  return viewport.activeCameraObj;;
 }
 
 Transformation getView(){
   return viewTransform;
 }
 
-void nextCamera(){
+void nextCamera(ViewportSettings& viewport){
   auto cameraIndexs = getAllCameraIndexs(world.objectMapping);
   if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
-    state.activeCameraObj = std::nullopt;
-    state.activeCameraData = NULL;
+    viewport.activeCameraObj = std::nullopt;
+    viewport.activeCameraData = NULL;
     return;
   }
 
   state.activeCamera = (state.activeCamera + 1) % cameraIndexs.size();
   int32_t activeCameraId = cameraIndexs.at(state.activeCamera);
-  setActiveCamera(activeCameraId);
+  setActiveCamera(activeCameraId, viewport.index);
 }
 
 void moveCamera(glm::vec3 offset){
-  if (!state.activeCameraObj.has_value()){
+  auto& viewport = getDefaultViewport();
+
+  if (!viewport.activeCameraObj.has_value()){
     defaultResources.defaultCamera.transformation.position = moveRelative(defaultResources.defaultCamera.transformation.position, defaultResources.defaultCamera.transformation.rotation, glm::vec3(offset), false);
   }else{
-    auto cameraLocalTransform = gameobjectTransformation(world, state.activeCameraObj.value(), false, "move camera");
-    setGameObjectPosition(state.activeCameraObj.value(), moveRelative(cameraLocalTransform.position, cameraLocalTransform.rotation, glm::vec3(offset), false), true, Hint{ .hint = "moveCamera" });
+    auto cameraLocalTransform = gameobjectTransformation(world, viewport.activeCameraObj.value(), false, "move camera");
+    setGameObjectPosition(viewport.activeCameraObj.value(), moveRelative(cameraLocalTransform.position, cameraLocalTransform.rotation, glm::vec3(offset), false), true, Hint{ .hint = "moveCamera" });
   }
 }
 
 void rotateCamera(float xoffset, float yoffset){
-  if (!state.activeCameraObj.has_value()){
+  auto& viewport = getDefaultViewport();
+
+  if (!viewport.activeCameraObj.has_value()){
     defaultResources.defaultCamera.transformation.rotation = setFrontDelta(defaultResources.defaultCamera.transformation.rotation, xoffset, yoffset, 0, 0.1);
   }else{
-    auto cameraRelativeRotation = gameobjectRotation(world, state.activeCameraObj.value(), false, "rotate camera");
-    setGameObjectRotation(state.activeCameraObj.value(), setFrontDelta(cameraRelativeRotation, xoffset, yoffset, 0, 0.1), true, Hint { .hint = "mainApi - rotateCamera" });
+    auto cameraRelativeRotation = gameobjectRotation(world, viewport.activeCameraObj.value(), false, "rotate camera");
+    setGameObjectRotation(viewport.activeCameraObj.value(), setFrontDelta(cameraRelativeRotation, xoffset, yoffset, 0, 0.1), true, Hint { .hint = "mainApi - rotateCamera" });
   }
 }
 void setCameraRotation(glm::quat orientation){
-  if (!state.activeCameraObj.has_value()){
+  auto& viewport = getDefaultViewport();
+
+  if (!viewport.activeCameraObj.has_value()){
     defaultResources.defaultCamera.transformation.rotation = orientation;
   }else{
-    setGameObjectRotation(state.activeCameraObj.value(), orientation, true, Hint { .hint = "mainApi - setCameraRotation" });
+    setGameObjectRotation(viewport.activeCameraObj.value(), orientation, true, Hint { .hint = "mainApi - setCameraRotation" });
   }
 }
 
@@ -1278,7 +1292,7 @@ std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadF
 
 
 
-std::optional<ViewportSettings*> getViewport(int index){
+std::optional<ViewportSettings*> getViewportInternal(int index){
   for (auto &viewport : viewports){
     if (viewport.index == index){
       return &viewport;
@@ -1287,19 +1301,21 @@ std::optional<ViewportSettings*> getViewport(int index){
   return std::nullopt;
 }
 
-void createViewport(int viewportIndex, float x, float y, float widthNdi, float heightNdi, ViewportBindingOption bindingOption){
-  auto viewport = getViewport(viewportIndex);
+void createViewport(int viewportIndex, float x, float y, float widthNdi, float heightNdi, ViewportOption bindingOption){
+  auto viewport = getViewportInternal(viewportIndex);
   if (!viewport.has_value()){
     viewports.push_back(ViewportSettings {
       .index = viewportIndex,
-      .cameraBinding = std::nullopt,
-      .bindingOption = bindingOption,
       .x = x,
       .y = y,
       .widthNdi = widthNdi,
       .heightNdi = heightNdi,
+      .bindingOption = bindingOption,
+
+      .activeCameraObj = std::nullopt,
+      .activeCameraData = NULL,
     });
-    viewport = getViewport(viewportIndex);
+    viewport = getViewportInternal(viewportIndex);
     modassert(viewport.has_value(), "just added viewport but did not retrieve it");
   }
 
@@ -1320,8 +1336,22 @@ void removeViewport(int viewportIndex){
   viewports = newViewports;
 }
 
+std::vector<int> listViewports(){
+  std::vector<int> viewportIndexs;
+  for (auto& viewport : viewports){
+    viewportIndexs.push_back(viewport.index);
+  }
+  return viewportIndexs;
+}
+
 ViewportSettings& getDefaultViewport(){
-  auto viewport = getViewport(0);
+  auto viewport = getViewportInternal(0);
   modassert(viewport.has_value(), "no default viewport");
+  return *viewport.value();
+}
+
+ViewportSettings& getViewport(int index){
+  auto viewport = getViewportInternal(index);
+  modassert(viewport.has_value(), "no viewport");
   return *viewport.value();
 }

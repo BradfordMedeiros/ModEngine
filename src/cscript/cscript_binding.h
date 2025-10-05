@@ -38,8 +38,8 @@ struct CustomApiBindings {
   void (*removeObjectById)(int32_t id);
   void (*removeByGroupId)(int32_t id);
   std::vector<int32_t> (*getObjectsByAttr)(std::string, std::optional<AttributeValue>, std::optional<int32_t>);
-  void (*setActiveCamera)(std::optional<int32_t> cameraId);
-  std::optional<objid> (*getActiveCamera)();
+  void (*setActiveCamera)(std::optional<int32_t> cameraId, std::optional<int> viewportIndex);
+  std::optional<objid> (*getActiveCamera)(std::optional<int> viewportIndex);
   Transformation (*getView)();
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId, std::optional<float> maxWidthNdi, std::optional<ShapeOptions> shaderId);
   void (*getTextDimensionsNdi)(std::string word, float fontSizeNdi, bool ndi, std::optional<std::string> fontFamily, float* _width, float* _height);
@@ -200,8 +200,9 @@ struct CustomApiBindings {
   void (*saveToJsonFile)(std::string file, std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& allValues);
   std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> (*loadFromJsonFile)(std::string file, bool* success);
 
-  void (*createViewport)(int viewportIndex, float x, float y, float widthNdi, float heightNdi, ViewportBindingOption bindingOption);
+  void (*createViewport)(int viewportIndex, float x, float y, float widthNdi, float heightNdi, ViewportOption bindingOption);
   void (*removeViewport)(int viewportIndex);
+  std::vector<int> (*listViewports)();
 
   std::string (*dumpDebugInfo)(bool);
   //std::vector<func_t> registerGuileFns

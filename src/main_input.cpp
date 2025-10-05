@@ -424,7 +424,7 @@ void handleInput(GLFWwindow* window){
     glfwSetWindowShouldClose(window, true);
   }
   processControllerInput(keyMapper, moveCamera, statistics.deltaTime, keyCharCallback, onJoystick);
-  processKeyBindings(window, keyMapper);
+  processKeyBindings(window, keyMapper, getDefaultViewport().index);
 }
 
 void printControllerDebug(const unsigned char* buttons, int buttonCount){
@@ -496,7 +496,9 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
   //printAxisDebug(axises, count);
 }
 
-void processKeyBindings(GLFWwindow *window, KeyRemapper& remapper){
+void processKeyBindings(GLFWwindow *window, KeyRemapper& remapper, int viewportIndex){
+  auto& viewport = getViewport(viewportIndex);
+
   std::unordered_map<int, bool> lastFrameDown = {};
   for (auto inputFn : remapper.inputFns){
     if (state.inputMode == DISABLED && !inputFn.alwaysEnable){
@@ -513,15 +515,15 @@ void processKeyBindings(GLFWwindow *window, KeyRemapper& remapper){
     if (prereqOk){
       if (inputFn.sourceType == BUTTON_PRESS){
         if (mainKeyPressed && !remapper.lastFrameDown[inputFn.sourceKey]){
-          inputFn.fn();
+          inputFn.fn(viewport);
         }
       }else if (inputFn.sourceType == BUTTON_RELEASE){
         if (!mainKeyPressed && remapper.lastFrameDown[inputFn.sourceKey]){
-          inputFn.fn();
+          inputFn.fn(viewport);
         }
       }else if (inputFn.sourceType == BUTTON_HOLD){
         if (mainKeyPressed){
-          inputFn.fn();
+          inputFn.fn(viewport);
         }
       }
     }
@@ -551,14 +553,14 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0,
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.useDefaultCamera = !state.useDefaultCamera;
       std::cout << "Camera option: " << (state.useDefaultCamera ? "default" : "new") << std::endl;
       if (state.useDefaultCamera){
-        state.activeCameraObj = NULL;
-        state.activeCameraData = NULL;
+        viewport.activeCameraObj = NULL;
+        viewport.activeCameraData = NULL;
       }else{
-        nextCamera();
+        nextCamera(viewport);
       }
     }
   }, 
@@ -568,9 +570,9 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0,
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       if (!state.useDefaultCamera){
-        nextCamera();
+        nextCamera(viewport);
       }
     }
   },
@@ -580,7 +582,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0,
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       auto ids = state.editor.selectedObjs;
       if (ids.size() > 0){
         state.cullingObject = ids.at(0);
@@ -595,7 +597,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     //.prereqKey = 341,  // ctrl,
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       std::cout << "mode set to translate" << std::endl;
       state.manipulatorMode = TRANSLATE;
       sendAlert("mode: translate");
@@ -607,7 +609,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     //.prereqKey = 341,  // ctrl,
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       std::cout << "mode set to rotate" << std::endl;
       state.manipulatorMode = ROTATE;
       sendAlert("mode: rotate");
@@ -619,7 +621,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     //.prereqKey = 341,  // ctrl,
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       std::cout << "mode set to scale" << std::endl;
       state.manipulatorMode = SCALE;
       sendAlert("mode: scale");
@@ -631,7 +633,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       handleClipboardSelect();
     }
   }, 
@@ -641,7 +643,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       handleCopy();
     }
   }, 
@@ -651,7 +653,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.multiselect = true;
     }
   },
@@ -661,7 +663,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_RELEASE,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.multiselect = false;
     }
   },  
@@ -671,7 +673,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_HOLD,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       if (state.inputMode != ENABLED && state.inputMode != CAMERA_ONLY){
         return;
       }
@@ -686,7 +688,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_HOLD,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       if (state.inputMode != ENABLED && state.inputMode != CAMERA_ONLY){
         return;
       }
@@ -699,7 +701,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_HOLD,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       if (state.inputMode != ENABLED && state.inputMode != CAMERA_ONLY){
         return;
       }
@@ -714,7 +716,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_HOLD,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       if (state.inputMode != ENABLED && state.inputMode != CAMERA_ONLY){
         return;
       }
@@ -727,7 +729,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       std::cout << "setting snap absolute" << std::endl;
       state.snappingMode = SNAP_ABSOLUTE;
     }
@@ -738,7 +740,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       std::cout << "setting snap continuous" << std::endl;
       state.snappingMode = SNAP_CONTINUOUS;
     }
@@ -749,7 +751,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       std::cout << "setting snap relative" << std::endl;
       state.snappingMode = SNAP_RELATIVE;
     }
@@ -760,7 +762,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       for (auto id : state.editor.selectedObjs){
         handleSnapEasy(id, true);
       }
@@ -772,7 +774,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       for (auto id : state.editor.selectedObjs){
         handleSnapEasy(id, false);
       }
@@ -784,7 +786,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.cameraFast = !state.cameraFast;
       std::cout << "camera fast: " << state.cameraFast << std::endl;
       cameraSpeed = state.cameraFast ? 1.f : 0.1f;
@@ -796,7 +798,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.cameraFast = !state.cameraFast;
       std::cout << "camera fast: " << state.cameraFast << std::endl;
       cameraSpeed = state.cameraFast ? 1.f : 0.1f;
@@ -809,7 +811,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_RELEASE,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.cameraFast = !state.cameraFast;
       std::cout << "camera fast: " << state.cameraFast << std::endl;
       cameraSpeed = state.cameraFast ? 1.f : 0.1f;
@@ -821,7 +823,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       for (auto id : state.editor.selectedObjs){
         std::cout << "delete object id: " << id << std::endl;
         removeByGroupId(id);
@@ -835,7 +837,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.showDebug = !state.showDebug;
     }
   },
@@ -857,7 +859,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,, 
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       snapCameraDown(setCameraRotation);
       sendAlert("snap camera: -y");
     }
@@ -868,7 +870,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT, 
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_DOWN);
       sendAlert("set orientation: -y");
     }
@@ -879,7 +881,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,, 
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       snapCameraLeft(setCameraRotation);
       sendAlert("snap camera: -x");
     }
@@ -890,7 +892,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT, 
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_LEFT);
       sendAlert("set orientation: -x");
     }
@@ -901,7 +903,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,, 
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       snapCameraRight(setCameraRotation);
       sendAlert("snap camera: +x");
     }
@@ -912,7 +914,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT,  // ctrl,, 
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_RIGHT);
       sendAlert("set orientation: +x");
     }
@@ -923,7 +925,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,, 
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       snapCameraForward(setCameraRotation);
       sendAlert("snap camera: -z");
     }
@@ -934,7 +936,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT,  // ctrl,, 
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_FORWARD);
       sendAlert("set orientation: -z");
     }
@@ -945,7 +947,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,, 
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       snapCameraUp(setCameraRotation);
       sendAlert("snap camera: +y");
     }
@@ -956,7 +958,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT,  // ctrl,, 
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_UP);
       sendAlert("set orientation: +y");
     }
@@ -967,7 +969,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,, 
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       snapCameraBackward(setCameraRotation);
       sendAlert("snap camera: +z");
     }
@@ -978,7 +980,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT,
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_BACK);
       sendAlert("set orientation: +z");
     }
@@ -989,7 +991,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       std::cout << dumpDebugInfo(false) << std::endl;
       modassert(false, "-");
       //std::cout << dumpProfiling() << std::endl;
@@ -1002,7 +1004,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.printKeyStrokes = !state.printKeyStrokes;
       std::cout << "print key strokes: " << state.printKeyStrokes << std::endl;
     }
@@ -1013,7 +1015,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.cullEnabled = !state.cullEnabled;
       setCulling(state.cullEnabled);
     }
@@ -1024,7 +1026,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       if (state.manipulatorMode == TRANSLATE){
         if (state.manipulatorPositionMode == SNAP_CONTINUOUS){
           state.manipulatorPositionMode = SNAP_RELATIVE;
@@ -1059,7 +1061,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       if (state.manipulatorMode == TRANSLATE){
       }else if (state.manipulatorMode == SCALE){
         state.preserveRelativeScale = !state.preserveRelativeScale;
@@ -1074,7 +1076,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       if (state.manipulatorMode == TRANSLATE){
       }else if (state.manipulatorMode == SCALE){
         if (state.scalingGroup == INDIVIDUAL_SCALING){
@@ -1094,7 +1096,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.enableDiffuse = !state.enableDiffuse;
       std::cout << "diffuse: " << state.enableDiffuse << std::endl;
       sendAlert(std::string("diffuse: ") + (state.enableDiffuse ? "enabled" : "disabled"));
@@ -1106,7 +1108,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.enableSpecular = !state.enableSpecular;
       std::cout << "specular: " << state.enableSpecular << std::endl;
       sendAlert(std::string("specular: ") + (state.enableSpecular ? "enabled" : "disabled"));
@@ -1118,7 +1120,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.useBoneTransform = !state.useBoneTransform;
       std::cout << "state: use bone transform: " << state.useBoneTransform << std::endl;
     }
@@ -1129,7 +1131,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.showBoneWeight = !state.showBoneWeight;
       std::cout << "state: show bone weight " << state.showBoneWeight << std::endl;
     }
@@ -1140,7 +1142,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.manipulatorAxis = XAXIS;
       sendAlert("axis: XAXIS");
     }
@@ -1151,7 +1153,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.manipulatorAxis = YAXIS;
       sendAlert("axis: YAXIS");
     }
@@ -1162,7 +1164,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.manipulatorAxis = ZAXIS;
       sendAlert("axis: ZAXIS");
     }
@@ -1173,7 +1175,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       onArrowKey(GLFW_KEY_RIGHT);
     }
   },
@@ -1183,7 +1185,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       onArrowKey(GLFW_KEY_LEFT);
     }
   },
@@ -1193,7 +1195,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       onArrowKey(GLFW_KEY_UP);
     }
   },
@@ -1203,7 +1205,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       onArrowKey(GLFW_KEY_DOWN);
     }
   },
@@ -1213,7 +1215,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.moveRelativeEnabled = !state.moveRelativeEnabled;
       std::cout << "move relative: " << state.moveRelativeEnabled << std::endl;
     }
@@ -1224,7 +1226,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       if (timePlayback.isPaused()){
         timePlayback.play();
       }else{
@@ -1240,7 +1242,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       if (!enableDebugCommands()){
         return;
       }
@@ -1256,7 +1258,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 'L', 
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       //offlineNewScene("./build/testscene.rawscene");
 
       printNavmeshDebug();
@@ -1291,7 +1293,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       //downloadFile("127.0.0.1:8085/video/space.webm", "./build/video/space.webm");
       //downloadFile("127.0.0.1:8085/game/game.txt", "./build/video/game.txt");
     
@@ -1313,7 +1315,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 'L', 
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       //offlineCopyScene("./build/testscene.rawscene", "./build/testscene2.rawscene", interface.readFile);
     }
   },
@@ -1323,7 +1325,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 'L', 
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       //offlineRemoveElement("./build/testscene.rawscene", "someitem", interface.readFile);
     }
   },
@@ -1333,7 +1335,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 'L', 
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
      // offlineSetElementAttributes("./build/testscene.rawscene", "someitem", { {"one", "1" }, {"two", "2" }, {"3", "three"}}, interface.readFile);
     }
   },
@@ -1343,7 +1345,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT,
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.fullscreen = !state.fullscreen;
       toggleFullScreen(state.fullscreen);
     }
@@ -1354,7 +1356,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT,
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       if (state.cursorBehavior == CURSOR_NORMAL){
         state.cursorBehavior = CURSOR_CAPTURE;
       }else if (state.cursorBehavior == CURSOR_CAPTURE){
@@ -1379,7 +1381,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = GLFW_KEY_LEFT_ALT,
     .hasPreq = true,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       std::cout << renderStagesToString(renderStages) << std::endl;
     }
   },
@@ -1389,7 +1391,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0,
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.selectionDisabled = true;
     }
   },
@@ -1399,7 +1401,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_RELEASE,
     .prereqKey = 0,
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.selectionDisabled = false;
     }
   },
@@ -1410,7 +1412,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_RELEASE,
     .prereqKey = 0,
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       handleChangeSubdivisionLevel(getCurrentSubdivisionLevel() + 1);
     }
   },
@@ -1420,7 +1422,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_RELEASE,
     .prereqKey = 0,
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       handleChangeSubdivisionLevel(getCurrentSubdivisionLevel() - 1);
     }
   },
@@ -1431,7 +1433,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
       if (isCtrlHeld){
         increaseSelectionSize(1, 0, 0);
@@ -1446,7 +1448,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
       if (isCtrlHeld){
         increaseSelectionSize(-1, 0, 0);
@@ -1461,7 +1463,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
       if (isCtrlHeld){
         if (state.manipulatorAxis == ZAXIS){
@@ -1484,7 +1486,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
       if (isCtrlHeld){
         if (state.manipulatorAxis == ZAXIS){
@@ -1508,7 +1510,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       for (auto &selectedIndex : state.editor.selectedObjs){
         GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
         if (octreeObject != NULL){
@@ -1525,7 +1527,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
       for (auto &selectedIndex : state.editor.selectedObjs){
         GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
@@ -1553,7 +1555,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
       for (auto &selectedIndex : state.editor.selectedObjs){
         writeOctreeTexture(world, selectedIndex, isCtrlHeld);
@@ -1566,7 +1568,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       setPrevOctreeTexture();
     }
   },
@@ -1576,7 +1578,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       setNextOctreeTexture();
     }
   },
@@ -1586,7 +1588,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       for (auto &selectedIndex : state.editor.selectedObjs){
         GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
         modassert(octreeObject, "octree object null");
@@ -1608,7 +1610,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       for (auto &selectedIndex : state.editor.selectedObjs){
         GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
         modassert(octreeObject, "octree object null");
@@ -1623,7 +1625,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       for (auto &selectedIndex : state.editor.selectedObjs){
         GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
         modassert(octreeObject, "octree object null");
@@ -1638,7 +1640,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.rampDirection = (state.rampDirection ==  RAMP_FORWARD) ? RAMP_BACKWARD : RAMP_FORWARD;
     }
   },
@@ -1648,7 +1650,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       state.rampDirection = (state.rampDirection ==  RAMP_LEFT) ? RAMP_RIGHT : RAMP_LEFT;
     }
   },
@@ -1661,7 +1663,7 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = []() -> void {
+    .fn = [](ViewportSettings& viewport) -> void {
       setWorldState({
         ObjectValue {
           .object = "physics",

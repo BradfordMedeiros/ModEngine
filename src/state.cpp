@@ -483,8 +483,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .printKeyStrokes = false,
     .cullEnabled = true,
     .groupSelection = true,
-    .activeCameraObj = std::nullopt,
-    .activeCameraData = NULL,
     .skybox = "",
     .updateSkybox = true,
     .skyboxcolor = glm::vec3(1.f, 1.f, 1.f),

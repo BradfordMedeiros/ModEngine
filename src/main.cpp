@@ -1364,7 +1364,7 @@ int main(int argc, char* argv[]){
 
   setInitialState(state, "./res/world.state", statistics.now, interface.readFile, result["noinput"].as<bool>()); 
 
-  createViewport(0, state.viewportoffsetNdi.x, state.viewportoffsetNdi.y, state.viewportSizeNdi.x, state.viewportSizeNdi.y, DEFAULT_BINDING_OPTION);
+  createViewport(0, state.viewportoffsetNdi.x, state.viewportoffsetNdi.y, state.viewportSizeNdi.x, state.viewportSizeNdi.y, DefaultBindingOption{});
 
   //createViewport(0, 0.f, 0.f, 1.f, 0.5f, 5);
   //createViewport(1, 0.f, 0.5f, 0.5f, 0.5f, 0);
@@ -1693,6 +1693,7 @@ int main(int argc, char* argv[]){
 
     .createViewport = createViewport,
     .removeViewport = removeViewport,
+    .listViewports = listViewports,
 
     .dumpDebugInfo = dumpDebugInfo,
   };
@@ -2103,7 +2104,9 @@ int main(int argc, char* argv[]){
     };
 
     bool depthEnabled = false;
-    auto dofInfo = getDofInfo(world, &depthEnabled, state.activeCameraData, view);
+
+    auto& viewport = getDefaultViewport();
+    auto dofInfo = getDofInfo(world, &depthEnabled, viewport.activeCameraData, view);
     updateRenderStages(renderStages, dofInfo);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
@@ -2269,32 +2272,53 @@ int main(int argc, char* argv[]){
     }
 
 
+    auto defaultCameraObj = getDefaultViewport().activeCameraObj;
+
     modlog("viewports num: ", std::to_string(viewports.size()));
     for (auto& viewport : viewports){
-      shaderSetUniformBool(finalProgram, "enableDepthVisualization", viewport.bindingOption == DEPTH_BINDING_OPTION ? true : false);
-      if (!viewport.cameraBinding.has_value()){
-        if (viewport.bindingOption == DEFAULT_BINDING_OPTION){
+      glClear(GL_DEPTH_BUFFER_BIT);  // just disable depth test here? 
+
+      bool shouldRender = viewport.activeCameraObj == defaultCameraObj;
+      
+      static ViewportOption defaultOption = DefaultBindingOption{};
+      ViewportOption* bindingOption = viewport.bindingOption.has_value() ? &viewport.bindingOption.value() : &defaultOption;
+
+      DefaultBindingOption* defaultBindingOption = std::get_if<DefaultBindingOption>(bindingOption);
+      BloomBindingOption* bloomBindingOption = std::get_if<BloomBindingOption>(bindingOption);
+      PortalBindingOption* portalBindingOption = std::get_if<PortalBindingOption>(bindingOption);
+      TextureBindingOption* textureBindingOption = std::get_if<TextureBindingOption>(bindingOption);
+      UserTextureBindingOption* userTextureBindingOption = std::get_if<UserTextureBindingOption>(bindingOption);
+      Unknown1BindingOption* unknown1BindingOption = std::get_if<Unknown1BindingOption>(bindingOption);
+      Unknown2BindingOption* unknown2BindingOption = std::get_if<Unknown2BindingOption>(bindingOption);
+      DepthBindingOption* depthBindingOption = std::get_if<DepthBindingOption>(bindingOption);
+        
+      shaderSetUniformBool(finalProgram, "enableDepthVisualization", shouldRender && (depthBindingOption != NULL) ? true : false);
+      if (shouldRender) {
+        if (defaultBindingOption){
           glBindTexture(GL_TEXTURE_2D, finalRenderingTexture(renderStages));
-        }else if (viewport.bindingOption == PORTAL_BINDING_OPTION){ // portal
+        }else if (portalBindingOption){ // portal
           assert(state.textureIndex <= renderingResources.framebuffers.portalTextures.size() && state.textureIndex >= 0);
           glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.portalTextures.at(state.textureIndex));  
-        }else if (viewport.bindingOption == UNKNOWN_1_BINDING_OPTION){
+        }else if (unknown1BindingOption){
           glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture4);  
-        }else if (viewport.bindingOption == TEXTURE_BINDING_OPTION){ // texture
-          //glBindTexture(GL_TEXTURE_2D, textureToPaint);
-          glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-scenegraph_selection_texture").texture.textureId);
-        }else if (viewport.bindingOption == DEPTH_BINDING_OPTION){ // depth 
+        }else if (textureBindingOption){ // texture
+          if (world.textures.find(textureBindingOption -> texture) != world.textures.end()){
+            glBindTexture(GL_TEXTURE_2D, world.textures.at(textureBindingOption -> texture).texture.textureId);
+          }else{
+            glBindTexture(GL_TEXTURE_2D, world.textures.at(resources::GRID_TEXTURE).texture.textureId);
+          }
+        }else if (depthBindingOption){ // depth 
           assert(state.textureIndex <=  renderingResources.framebuffers.depthTextures.size() && state.textureIndex >= 0);
           glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(state.textureIndex));
-        }else if (viewport.bindingOption == BLOOM_BINDING_OPTION){ // bloom
+        }else if (bloomBindingOption){ // bloom
           glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture2);
-        }else if (viewport.bindingOption == USER_TEXTURE_OPTION){ // user textures
+        }else if (userTextureBindingOption){ // user textures
           if (screenspaceTextureIds.size() > state.textureIndex && state.textureIndex >= 0){
             glBindTexture(GL_TEXTURE_2D, screenspaceTextureIds.at(state.textureIndex).id);
           }else{
             modlog("rendering", (std::string("cannot display graph texture index: ") + std::to_string(state.textureIndex)).c_str());
           }
-        }else if (viewport.bindingOption == UNKNOWN_2_BINDING_OPTION){ 
+        }else if (unknown2BindingOption){ 
            glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-ingame-ui-texture-test").texture.textureId);  
         }else{
           modassert(false, "invalid binding option");
