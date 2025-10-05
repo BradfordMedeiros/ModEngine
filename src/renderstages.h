@@ -54,7 +54,6 @@ struct RenderStages {
   RenderStep bloom2;
   RenderStep dof1;
   RenderStep dof2;
-  std::vector<RenderStep> additionalRenderSteps;
 
   // dependent data
   unsigned int* portalTextures;
@@ -79,7 +78,6 @@ void updateRenderStages(RenderStages& stages, RenderStagesDofInfo& dofInfo);
 void renderStagesSetPortal(RenderStages& stages, unsigned int portalNumber);
 void renderStagesSetShadowmap(RenderStages& stages, unsigned int shadowmapNumber);
 
-void setRenderStageState(RenderStages& stages, ObjectValue& value);
 
 unsigned int finalRenderingTexture(RenderStages& stages);
 std::string renderStagesToString(RenderStages& stages);

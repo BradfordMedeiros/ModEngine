@@ -177,64 +177,6 @@ std::vector<DeserializedRenderStage> filterEnabledShaders(std::vector<Deserializ
   return shaders;
 }
 
-std::vector<RenderStep> parseAdditionalRenderSteps(
-  std::string postprocessingFile,
-  unsigned int fbo,
-  unsigned int framebufferTexture, 
-  unsigned int framebufferTexture2,
-  std::function<std::string(std::string)> readFile,
-  std::unordered_map<std::string, std::string>& args
-){
-  auto tokens = parseFormat(readFile(postprocessingFile));
-  auto additionalShaders = parseRenderStages(tokens, framebufferTexture, framebufferTexture2);
-  for (auto &additionalShader : additionalShaders){
-    if (additionalShader.shader == ""){
-      std::cout << "render stages: must specify a shader for: " << additionalShader.name << std::endl;
-      assert(false);
-    }
-  }
-
-  additionalShaders = filterEnabledShaders(additionalShaders);
-
-  std::vector<RenderStep> additionalRenderSteps;
-  for (int i  = 0; i < additionalShaders.size(); i++){
-    auto additionalShader = additionalShaders.at(i);
-    auto shaderPath = additionalShader.shader;
-    unsigned int* shaderProgram = loadShaderIntoCache(shaderPath, shaderPath + "/vertex.glsl", shaderPath + "/fragment.glsl", readFile, args);
-    bool isEvenIndex = (i % 2) == 0;
-    RenderStep renderStep {
-      .name = additionalShader.name,
-      .enable = additionalShader.enable,
-      .fbo = fbo,
-      .colorAttachment0 = isEvenIndex ? framebufferTexture2 : framebufferTexture,
-      .colorAttachment1 = std::nullopt,
-      .colorAttachment2 = std::nullopt,
-      .depthTextureIndex = 0,
-      .shader = shaderProgram,
-      .quadTexture = isEvenIndex ? framebufferTexture : framebufferTexture2,
-      .renderWorld = false,
-      .renderSkybox = false,
-      .renderQuad = true,
-      .renderQuad3D = false,
-      .blend = true,
-      .enableStencil = false,
-      .allowShaderOverride = false,
-      .textBoundingOnly = false,
-      .uniforms {
-        .intUniforms = additionalShader.intUniforms,
-        .floatUniforms = additionalShader.floatUniforms,
-        .floatArrUniforms = additionalShader.floatArrUniforms,
-        .vec3Uniforms = additionalShader.vec3Uniforms,
-      },
-      .textures = additionalShader.textures,
-    };
-    additionalRenderSteps.push_back(renderStep);
-  }
-  return additionalRenderSteps;
-}
-
-
-
 // These steps generally assume more knowledge about the pipeline state than would like
 // Should make all rendering steps use stages and specify ordering in this
 RenderStages loadRenderStages(
@@ -482,8 +424,6 @@ RenderStages loadRenderStages(
   dof2.uniforms.intUniforms.at(0).value = false;
   dof2.textures.at(0).framebufferTextureId = framebufferTexture3;
 
-  auto additionalRenderSteps = parseAdditionalRenderSteps("./res/postprocessing", fbo, framebufferTexture, framebufferTexture2, readFile, args);
-
   RenderStages stages {
     .selection = selectionRender,
     .shadowmap = shadowMapRender,
@@ -493,7 +433,6 @@ RenderStages loadRenderStages(
     .bloom2 = bloomStep2,
     .dof1 = dof1,
     .dof2 = dof2,
-    .additionalRenderSteps = additionalRenderSteps,
     .portalTextures = portalTextures,
     .numPortalTextures = numPortalTextures,
     .numDepthTextures = numDepthTextures,
@@ -523,60 +462,7 @@ void renderStagesSetShadowmap(RenderStages& stages, unsigned int shadowmapNumber
   stages.shadowmap.depthTextureIndex = shadowmapNumber + 1;
 }
 
-void setRenderStageState(RenderStages& stages, ObjectValue& value){
-  RenderStep* step = NULL;
-  for (auto &stage : stages.additionalRenderSteps){
-    if (stage.name == value.object){
-      step = &stage;
-      break;
-    }
-  } 
-  if (step != NULL){
-    for (auto &uniform : step -> uniforms.floatUniforms){
-      if (value.attribute == uniform.uniformName){
-        auto floatValue = std::get_if<float>(&value.value);
-        assert(floatValue != NULL);
-        uniform.value = *floatValue;
-        return;
-      }
-    }
-    for (auto &uniform : step -> uniforms.intUniforms){
-      if (value.attribute == uniform.uniformName){
-        auto floatValue = std::get_if<float>(&value.value);
-        assert(floatValue != NULL);
-        auto intvalue = static_cast<int>(*floatValue);
-        uniform.value = intvalue;
-        return;
-      }      
-    }
-    for (auto &uniform : step -> uniforms.floatArrUniforms){
-      if (value.attribute == uniform.uniformName){
-        auto strValue = std::get_if<std::string>(&value.value);
-        assert(strValue != NULL);
-        uniform.value = parseFloatVec(*strValue);
-        return;
-      }      
-    }
-    for (auto &uniform : step -> uniforms.vec3Uniforms){
-      if (value.attribute == uniform.uniformName){
-        auto vec3Value = std::get_if<glm::vec3>(&value.value);
-        assert(vec3Value != NULL);
-        uniform.value = *vec3Value;
-        return;
-      }     
-    }
-    std::cout << "No uniform named: " << value.attribute << std::endl;
-    assert(false);
-  }else{
-    std::cout << "could not find stage name: " << value.object << std::endl;
-    assert(false);
-  }
-}
-
-unsigned int finalRenderingTexture(RenderStages& stages){   // additional render steps ping pong result between framebufferTexture and framebufferTexture2
-  if (stages.additionalRenderSteps.size() % 2 == 1){
-    return stages.main.colorAttachment1.value();  
-  }
+unsigned int finalRenderingTexture(RenderStages& stages){
   return stages.main.colorAttachment0;   
 }
 
@@ -606,20 +492,6 @@ std::string renderStagesToString(RenderStages& stages){
   renderingSystem = renderingSystem + "\"" + renderStageToString(stages.dof1) + "\" -> \"?\" \n";
   renderingSystem = renderingSystem + "\"" + renderStageToString(stages.dof2) + "\" -> \"?\" \n";
 
-  for (int i = 0; i < stages.additionalRenderSteps.size(); i++){
-    auto& additionalStep = stages.additionalRenderSteps.at(i);
-    RenderStep* nextStep = NULL;
-    if (i < (stages.additionalRenderSteps.size() - 1)){
-      nextStep = &stages.additionalRenderSteps.at(i+1);
-    }
-
-    auto leftSide = std::string("\"") + renderStageToString(additionalStep) + " \"" ;
-    auto hasRightSide = nextStep != NULL;
-    auto rightSide = !hasRightSide ? "" : (std::string("\"") + renderStageToString(*nextStep) + " \"");
-    auto fullLine = !hasRightSide ? leftSide : (leftSide + " -> " + rightSide);
-    renderingSystem = renderingSystem + fullLine + "\n";
-
-  }
   renderingSystem = renderingSystem + "}";
   return renderingSystem;
 }

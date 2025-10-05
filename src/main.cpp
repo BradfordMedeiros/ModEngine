@@ -2196,10 +2196,6 @@ int main(int argc, char* argv[]){
         renderWithProgram(renderContext, renderStages.dof2);
       )
     }
-    for (auto &renderStep : renderStages.additionalRenderSteps){ // probably should be the final render
-      renderWithProgram(renderContext, renderStep);
-    }
-
 
     LayerInfo& layerInfo = layerByName(world, "");
     float near = layerInfo.nearplane;

@@ -794,10 +794,6 @@ void setWorldState(std::vector<ObjectValue> values){
     }
   }
 
-  for (auto &renderStagesValue : renderStagesValues){
-    setRenderStageState(renderStages, renderStagesValue);
-  }
-  
   auto oldFullScreen = state.fullscreen;
   auto oldCullEnabled = state.cullEnabled;
   setState(state, otherValues, statistics.now);
