@@ -2095,6 +2095,19 @@ int main(int argc, char* argv[]){
     std::cout << "updateDefaultShaderPerFrame: ui" << std::endl;
     updateUiShaderPerFrame(*renderingResources.uiShaderProgram);
 
+    auto screenspaceTextureIds = textureIdsToRender();
+    PROFILE("USER-TEXTURES",
+      for (auto userTexture : screenspaceTextureIds){
+        Texture tex {
+          .textureId = userTexture.id,
+        };
+        Texture tex2 {
+          .textureId = userTexture.selectionTextureId,
+        };
+        renderScreenspaceShapes(tex, tex2, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor, userTexture.clearTextureId);
+      }
+      markUserTexturesCleared();  // not really rendering, should pull this out
+    )
 
 
     RenderContext renderContext {
@@ -2109,7 +2122,6 @@ int main(int argc, char* argv[]){
     auto dofInfo = getDofInfo(world, &depthEnabled, viewport.activeCameraData, view);
     updateRenderStages(renderStages, dofInfo);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
-
 
     getVoxelLightingData().needsUpdate = {};
 
@@ -2126,7 +2138,6 @@ int main(int argc, char* argv[]){
       uiSelectionResult = readSelectionFromBuffer(true, adjustedCoords);
     )
     
-
     // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
     if (state.enableShadows){
       PROFILE(
@@ -2169,8 +2180,6 @@ int main(int argc, char* argv[]){
       idCoordsToGet.at(i).resultUv = selectionResult.uvResults.at(i).value().resultUv;
     }
 
-
-
     renderVector(view, numChunkingGridCells);
 
     Color pixelColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
@@ -2190,24 +2199,6 @@ int main(int argc, char* argv[]){
     for (auto &renderStep : renderStages.additionalRenderSteps){ // probably should be the final render
       renderWithProgram(renderContext, renderStep);
     }
-
-
-    // TODO this should be moved before the main render otherwise there's a frame of lag 
-
-    auto screenspaceTextureIds = textureIdsToRender();
-    PROFILE("USER-TEXTURES",
-      for (auto userTexture : screenspaceTextureIds){
-        Texture tex {
-          .textureId = userTexture.id,
-        };
-        Texture tex2 {
-          .textureId = userTexture.selectionTextureId,
-        };
-        renderScreenspaceShapes(tex, tex2, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor, userTexture.clearTextureId);
-      }
-      markUserTexturesCleared();  // not really rendering, should pull this out
-    )
-    ///////////////////////
 
 
     LayerInfo& layerInfo = layerByName(world, "");
