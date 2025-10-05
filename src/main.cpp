@@ -2253,16 +2253,9 @@ int main(int argc, char* argv[]){
 
     glActiveTexture(GL_TEXTURE0);
 
-    if (state.borderTexture != ""){
-      glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
-      glBindTexture(GL_TEXTURE_2D, world.textures.at(state.borderTexture).texture.textureId);
-      glDrawArrays(GL_TRIANGLES, 0, 6);
-      glClear(GL_DEPTH_BUFFER_BIT);
-    }
-
-
     modlog("viewports num: ", std::to_string(viewports.size()));
     for (auto& viewport : viewports){
+      std::cout << "viewport: " << print(viewport.activeCameraObj) << std::endl;
       glClear(GL_DEPTH_BUFFER_BIT);  // just disable depth test here? 
 
       bool shouldRender = viewport.activeCameraObj == defaultViewport.activeCameraObj;
@@ -2313,6 +2306,7 @@ int main(int argc, char* argv[]){
           modassert(false, "invalid binding option");
         }
       }else{
+        std::cout << "viewport: not yet supported rendering from another camera" << std::endl;
         glBindTexture(GL_TEXTURE_2D, world.textures.at(resources::GRID_TEXTURE).texture.textureId);  
       }
 

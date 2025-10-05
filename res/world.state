@@ -16,11 +16,11 @@ editor:debug:false
 #editor:debugmask:126  # this & the above number determines if the debug object should show
 
 editor:debugmask:8
-editor:showbones:false
+#editor:showbones:true
 
 
 physics:enabled:true
-physics:debug:false
+#physics:debug:true
 
 world:paused:true  # true / false
 
@@ -33,9 +33,9 @@ bloomblur:amount:10
 #exposure:amount:0.8
 shadows:enabled:false
 shadows:intensity:0.4
-#attenuation:enabled:false
+attenuation:enabled:false
 voxellighting:enabled:true
-voxellighting:visualize:true
+#voxellighting:visualize:true
 
 exposure:enabled:false
 gamma:enabled:false
@@ -63,9 +63,8 @@ skybox:enable:true
 
 ### Window/Rendering ###
 #rendering:swapinterval:1  # 1 = vsync enabled, 0 disabled
-#rendering:viewport:1000 500
-#rendering:viewportoffset:1220 300
-#rendering:border:./res/textures/wood.jpg
+#rendering:viewport:1 1
+#rendering:viewportoffset:0.5 0.5
 #rendering:resolution:100 100
 #rendering:fullscreen:true
 rendering:antialiasing:msaa
