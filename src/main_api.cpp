@@ -818,7 +818,7 @@ objid listSceneId(int32_t id){
   return sceneId(world.sandbox, id);
 }
 
-Transformation getCameraTransform(){
+Transformation getCameraTransform(int viewportIndex){
   auto& viewport = getDefaultViewport();
   if (state.useDefaultCamera || !viewport.activeCameraObj.has_value()){
     return defaultResources.defaultCamera.transformation;
@@ -829,11 +829,11 @@ Transformation getCameraTransform(){
   return gameobjectTransformation(world, viewport.activeCameraObj.value(), true, "getCameraTransform");
 }
 
-Transformation getCullingTransform(){
+Transformation getCullingTransform(int viewportIndex){
   if (state.cullingObject.has_value()){
     return gameobjectTransformation(world, state.cullingObject.value(), true, "culling transform");
   }
-  return getCameraTransform();
+  return getCameraTransform(viewportIndex);
 }
 
 void maybeResetCamera(int32_t id){
@@ -1304,6 +1304,7 @@ void createViewport(int viewportIndex, float x, float y, float widthNdi, float h
       .index = viewportIndex,
       .x = x,
       .y = y,
+
       .widthNdi = widthNdi,
       .heightNdi = heightNdi,
       .bindingOption = bindingOption,

@@ -18,7 +18,7 @@ RotationDirection getCursorInfoWorld(float ndix, float ndiy);
 std::vector<ParsedLoadScene> parseSceneArgs(std::vector<std::string>& rawScenes);
 std::optional<unsigned int> getTextureId(std::string& texture);
 float exposureAmount();
-glm::vec3 positionToNdi(glm::vec3 position);
+glm::vec3 positionToNdi(glm::vec3 position, int viewportIndex);
 
 glm::ivec2 calcViewportSize(ViewportSettings& viewport);
 glm::ivec2 calcViewportOffset(ViewportSettings& viewport);

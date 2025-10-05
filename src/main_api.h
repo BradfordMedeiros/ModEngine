@@ -43,8 +43,8 @@ NetworkPacket toNetworkPacket(UdpPacket& packet);
 
 objid listSceneId(int32_t id);
 
-Transformation getCameraTransform();
-Transformation getCullingTransform();
+Transformation getCameraTransform(int viewportIndex);
+Transformation getCullingTransform(int viewportIndex);
 void maybeResetCamera(int32_t id);
 void setActiveCamera(std::optional<int32_t> cameraId, std::optional<int> viewportIndex);
 std::optional<objid> getActiveCamera(std::optional<int> viewportIndex);

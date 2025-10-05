@@ -2069,9 +2069,12 @@ int main(int argc, char* argv[]){
     }
 
     //////////////////////// rendering code below ///////////////////////
+    auto& defaultViewport = getDefaultViewport();
+
+
     std::vector<LightInfo> lights = getLightInfo(world);
-    viewTransform = getCameraTransform();
-    cullingViewTransform = getCullingTransform();
+    viewTransform = getCameraTransform(defaultViewport.index);
+    cullingViewTransform = getCullingTransform(defaultViewport.index);
     view = renderView(viewTransform.position, viewTransform.rotation);
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
@@ -2118,7 +2121,6 @@ int main(int argc, char* argv[]){
 
     bool depthEnabled = false;
 
-    auto& defaultViewport = getDefaultViewport();
     auto dofInfo = getDofInfo(world, &depthEnabled, defaultViewport.activeCameraData, view);
     updateRenderStages(renderStages, dofInfo);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);

@@ -31,7 +31,7 @@ struct CustomApiBindings {
   void (*sendLoadScene)(int32_t id);
   void (*createScene)(std::string scenename);
   void (*deleteScene)(std::string scenename);
-  Transformation (*getCameraTransform)();
+  Transformation (*getCameraTransform)(int viewportIndex);
   void (*moveCameraTo)(objid id, glm::vec3 pos, std::optional<float> duration);  // this should be deleted - move through normal methods instead
   std::vector<objid> (*idsInGroupById)(int32_t);
   objid (*groupId)(int32_t);
@@ -165,7 +165,7 @@ struct CustomApiBindings {
   bool (*gameobjExists)(objid id);
   std::optional<objid> (*prefabId)(objid id);
 
-  glm::vec3 (*positionToNdi)(glm::vec3 position);
+  glm::vec3 (*positionToNdi)(glm::vec3 position, int viewportIndex);
 
   void(*setLogEndpoint)(std::optional<std::function<void(std::string&)>>);
   const char*(*getClipboardString)();

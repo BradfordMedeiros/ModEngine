@@ -82,8 +82,8 @@ float exposureAmount(){
 }
 
 
-glm::vec3 positionToNdi(glm::vec3 position){
-  auto viewTransform = getCameraTransform();
+glm::vec3 positionToNdi(glm::vec3 position, int viewportIndex){
+  auto viewTransform = getCameraTransform(viewportIndex);
   auto view = renderView(viewTransform.position, viewTransform.rotation);
   auto projection = projectionFromLayer(world.sandbox.layers.at(0));
   auto transformedValue = projection * view * glm::vec4(position.x, position.y, position.z, 1.f);
