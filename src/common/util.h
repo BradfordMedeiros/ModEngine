@@ -519,6 +519,7 @@ struct DefaultBindingOption {};
 struct BloomBindingOption {};
 struct PortalBindingOption {};
 struct TextureBindingOption { 
+  bool flipCoords = false;
   std::string texture; 
 };
 struct DepthBindingOption {};

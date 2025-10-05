@@ -2292,7 +2292,7 @@ int main(int argc, char* argv[]){
       Unknown2BindingOption* unknown2BindingOption = std::get_if<Unknown2BindingOption>(bindingOption);
       DepthBindingOption* depthBindingOption = std::get_if<DepthBindingOption>(bindingOption);
 
-      shaderSetUniformBool(finalProgram, "flipCoords", false);
+      shaderSetUniformBool(finalProgram, "flipCoords", shouldRender && textureBindingOption != NULL && textureBindingOption -> flipCoords ? true : false);
       shaderSetUniformBool(finalProgram, "enableDepthVisualization", shouldRender && (depthBindingOption != NULL) ? true : false);
       if (shouldRender) {
         if (defaultBindingOption){
@@ -2303,8 +2303,7 @@ int main(int argc, char* argv[]){
         }else if (unknown1BindingOption){
           glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture4);  
         }else if (textureBindingOption){ // texture
-          shaderSetUniformBool(finalProgram, "flipCoords", true);
-
+          shaderSetUniformBool(finalProgram, "flipCoords", textureBindingOption -> flipCoords);
           if (world.textures.find(textureBindingOption -> texture) != world.textures.end()){
             glBindTexture(GL_TEXTURE_2D, world.textures.at(textureBindingOption -> texture).texture.textureId);
           }else{
