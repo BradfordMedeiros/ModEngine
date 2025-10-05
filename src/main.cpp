@@ -385,7 +385,7 @@ bool checkIfUiShader(std::string& value){
 }
 
 
-void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
+void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform, ViewportSettings& viewport){
   auto nearPlanePoint = viewTransform.position + viewFrustum.near.point;
   auto farPlanePoint = viewTransform.position + viewFrustum.far.point;
 
@@ -395,7 +395,7 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform){
   };
 
 
-  auto angles = calcFovAngles(world.sandbox.layers.at(0), calcViewportSize(getDefaultViewport()));
+  auto angles = calcFovAngles(world.sandbox.layers.at(0), calcViewportSize(viewport));
 
 
   auto position = viewTransform.position;  // viewFrustum
@@ -503,14 +503,14 @@ Texture getWaterTexture(){
   return world.textures.at(resources::TEXTURE_WATER).texture;
 }
 
-int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly){
+int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly, ViewportSettings& viewport){
   glUseProgram(*shaderProgram);
   int numTriangles = 0;
 
-  auto viewFrustum = cameraToViewFrustum(world.sandbox.layers.at(0), calcViewportSize(getDefaultViewport()));
+  auto viewFrustum = cameraToViewFrustum(world.sandbox.layers.at(0), calcViewportSize(viewport));
 
   if (state.cullingObject.has_value() && state.visualizeFrustum){
-    visualizeFrustum(viewFrustum, cullingViewTransform);
+    visualizeFrustum(viewFrustum, cullingViewTransform, viewport);
   }
 
   std::optional<GLint> lastShaderId = std::nullopt;
@@ -835,7 +835,7 @@ struct RenderContext {
   std::optional<glm::mat4> projection;
 };
 
-int renderWithProgram(RenderContext& context, RenderStep& renderStep){
+int renderWithProgram(RenderContext& context, RenderStep& renderStep, ViewportSettings& viewport){
   int triangles = 0;
   PROFILE(
   renderStep.name.c_str(),
@@ -909,7 +909,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     if (renderStep.renderWorld){
       // important - redundant call to glUseProgram
       glm::mat4* projection = context.projection.has_value() ? &context.projection.value() : NULL;
-      auto worldTriangles = renderWorld(world, renderStep.shader, renderStep.allowShaderOverride, projection, context.view, context.portals, renderStep.textBoundingOnly);
+      auto worldTriangles = renderWorld(world, renderStep.shader, renderStep.allowShaderOverride, projection, context.view, context.portals, renderStep.textBoundingOnly, viewport);
       triangles += worldTriangles;
     }
 
@@ -925,7 +925,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   return triangles;
 }
 
-std::unordered_map<objid, unsigned int> renderPortals(RenderContext& context, Transformation cameraTransform){
+std::unordered_map<objid, unsigned int> renderPortals(RenderContext& context, Transformation cameraTransform, ViewportSettings& viewport){
   std::unordered_map<objid, unsigned int> nextPortalCache;
   for (int i = 0; i < context.portals.size(); i++){
     auto portal = context.portals.at(i);
@@ -937,7 +937,7 @@ std::unordered_map<objid, unsigned int> renderPortals(RenderContext& context, Tr
       .projection = context.projection,
     };
     //std::cout << "portal transform:  " << i << " " << print(portal.cameraTransform.position) << std::endl;
-    renderWithProgram(portalRenderContext, renderStages.portal);
+    renderWithProgram(portalRenderContext, renderStages.portal, viewport);
     nextPortalCache[portal.id] = renderStages.portal.colorAttachment0;
   }
   //std::cout << std::endl;
@@ -957,7 +957,7 @@ std::vector<glm::mat4> calcShadowMapViews(std::vector<LightInfo>& lights){
 }
 
 
-void renderShadowMaps(RenderContext& context, std::vector<LightInfo>& lights){
+void renderShadowMaps(RenderContext& context, std::vector<LightInfo>& lights, ViewportSettings& viewport){
   for (int i = 0; i < lights.size(); i++){
     auto light = lights.at(i);
     auto lightView = renderView(light.transform.position, light.transform.rotation);
@@ -970,7 +970,7 @@ void renderShadowMaps(RenderContext& context, std::vector<LightInfo>& lights){
       .projection = lightProjection,
     };
     renderStagesSetShadowmap(renderStages, i);
-    renderWithProgram(lightRenderContext, renderStages.shadowmap);
+    renderWithProgram(lightRenderContext, renderStages.shadowmap, viewport);
   }
 }
 
@@ -2118,8 +2118,8 @@ int main(int argc, char* argv[]){
 
     bool depthEnabled = false;
 
-    auto& viewport = getDefaultViewport();
-    auto dofInfo = getDofInfo(world, &depthEnabled, viewport.activeCameraData, view);
+    auto& defaultViewport = getDefaultViewport();
+    auto dofInfo = getDofInfo(world, &depthEnabled, defaultViewport.activeCameraData, view);
     updateRenderStages(renderStages, dofInfo);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
@@ -2128,7 +2128,7 @@ int main(int argc, char* argv[]){
     SelectionResult uiSelectionResult{};
     PROFILE("SELECTION",
     // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
-      renderWithProgram(renderContext, renderStages.selection);
+      renderWithProgram(renderContext, renderStages.selection, defaultViewport);
 
       shaderSetUniform(*renderStages.selection.shader, "projview", ndiOrtho);
       glDisable(GL_DEPTH_TEST);
@@ -2142,17 +2142,17 @@ int main(int argc, char* argv[]){
     if (state.enableShadows){
       PROFILE(
         "RENDERING-SHADOWMAPS",
-        renderShadowMaps(renderContext, lights);
+        renderShadowMaps(renderContext, lights, defaultViewport);
       )
     }
 
     assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
     PROFILE("PORTAL_RENDERING", 
-      portalIdCache = renderPortals(renderContext, viewTransform);
+      portalIdCache = renderPortals(renderContext, viewTransform, defaultViewport);
     )
     //std::cout << "cache size: " << portalIdCache.size() << std::endl;
 
-    statistics.numTriangles = renderWithProgram(renderContext, renderStages.main);
+    statistics.numTriangles = renderWithProgram(renderContext, renderStages.main, defaultViewport);
 
     auto selectionResult = readSelectionFromBuffer(false, adjustedCoords);
     if (uiSelectionResult.id.has_value()){
@@ -2185,15 +2185,17 @@ int main(int argc, char* argv[]){
     Color pixelColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
     state.hoveredColor = glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b);
 
+    if (state.enableBloom){
+      PROFILE("BLOOM-RENDERING",
+        renderWithProgram(renderContext, renderStages.bloom1, defaultViewport);
+        renderWithProgram(renderContext, renderStages.bloom2, defaultViewport);
+      )      
+    }
 
-    PROFILE("BLOOM-RENDERING",
-      renderWithProgram(renderContext, renderStages.bloom1);
-      renderWithProgram(renderContext, renderStages.bloom2);
-    )
     if (depthEnabled){
       PROFILE("DOF-RENDERING",
-        renderWithProgram(renderContext, renderStages.dof1);
-        renderWithProgram(renderContext, renderStages.dof2);
+        renderWithProgram(renderContext, renderStages.dof1, defaultViewport);
+        renderWithProgram(renderContext, renderStages.dof2, defaultViewport);
       )
     }
 
@@ -2214,7 +2216,7 @@ int main(int argc, char* argv[]){
 
       glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(0));
-      glViewport(calcViewportOffset(getDefaultViewport()).x, calcViewportOffset(getDefaultViewport()).y, calcViewportSize(getDefaultViewport()).x, calcViewportSize(getDefaultViewport()).y);
+      glViewport(calcViewportOffset(defaultViewport).x, calcViewportOffset(defaultViewport).y, calcViewportSize(defaultViewport).x, calcViewportSize(defaultViewport).y);
       glBindVertexArray(defaultResources.quadVAO);
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -2259,13 +2261,11 @@ int main(int argc, char* argv[]){
     }
 
 
-    auto defaultCameraObj = getDefaultViewport().activeCameraObj;
-
     modlog("viewports num: ", std::to_string(viewports.size()));
     for (auto& viewport : viewports){
       glClear(GL_DEPTH_BUFFER_BIT);  // just disable depth test here? 
 
-      bool shouldRender = viewport.activeCameraObj == defaultCameraObj;
+      bool shouldRender = viewport.activeCameraObj == defaultViewport.activeCameraObj;
       
       static ViewportOption defaultOption = DefaultBindingOption{};
       ViewportOption* bindingOption = viewport.bindingOption.has_value() ? &viewport.bindingOption.value() : &defaultOption;
