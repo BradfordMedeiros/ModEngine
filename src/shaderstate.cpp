@@ -361,6 +361,7 @@ void initFramebufferShader(unsigned int shader){
   	"enableGammaCorrection",
   	"enableExposure",
     "enableDepthVisualization",
+    "flipCoords",
   });
 }
 
@@ -415,6 +416,6 @@ void updateFramebufferShaderFrame(unsigned int shader, float near, float far){
     .value = state.fogMaxCutoff,
   });
 
-  setUniformData(shader, uniformData, { "framebufferTexture", "bloomTexture", "depthTexture" });
+  setUniformData(shader, uniformData, { "framebufferTexture", "bloomTexture", "depthTexture", "flipCoords" });
 }
 
