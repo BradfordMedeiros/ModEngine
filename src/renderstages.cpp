@@ -167,16 +167,6 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::vector<Token>& token
   return additionalShaders; 
 }
 
-std::vector<DeserializedRenderStage> filterEnabledShaders(std::vector<DeserializedRenderStage> & unfilteredShaders){
-  std::vector<DeserializedRenderStage> shaders;
-  for (auto &shader : unfilteredShaders){
-    if (shader.enable){
-      shaders.push_back(shader);
-    }
-  }
-  return shaders;
-}
-
 // These steps generally assume more knowledge about the pipeline state than would like
 // Should make all rendering steps use stages and specify ordering in this
 RenderStages loadRenderStages(
