@@ -1766,7 +1766,9 @@ int main(int argc, char* argv[]){
     },
     [enableNet](objid id, bool isNet) -> void {
       std::cout << "deleted obj id: " << id << std::endl;
-      maybeResetCamera(id);
+      for (auto& viewport : viewports){
+        maybeResetCamera(id, viewport);
+      }
       unsetSelectedIndex(state.editor, id, true);
       if (getSelectedOctreeId().has_value() && getSelectedOctreeId().value() == id){
         setSelectedOctreeId(std::nullopt);
@@ -2099,238 +2101,241 @@ int main(int argc, char* argv[]){
 
     //////////////////////// below is now viewport dependent
 
-    auto& defaultViewport = getDefaultViewport();
+    //auto& defaultViewport = getDefaultViewport();
 
-    std::vector<LightInfo> lights = getLightInfo(world);
-    viewTransform = getCameraTransform(defaultViewport.index);
-    cullingViewTransform = getCullingTransform(defaultViewport.index);
-    view = renderView(viewTransform.position, viewTransform.rotation);
-    std::vector<PortalInfo> portals = getPortalInfo(world);
-    assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
-    std::vector<glm::mat4> lightMatrixs = calcShadowMapViews(lights);
+    for (auto& viewport : viewports){
+      std::vector<LightInfo> lights = getLightInfo(world);
+      viewTransform = getCameraTransform(viewport.index);
+      cullingViewTransform = getCullingTransform(viewport.index);
+      view = renderView(viewTransform.position, viewTransform.rotation);
+      std::vector<PortalInfo> portals = getPortalInfo(world);
+      assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
+      std::vector<glm::mat4> lightMatrixs = calcShadowMapViews(lights);
 
-    std::cout << "updateDefaultShaderPerFrame: main" << std::endl;
-    updateDefaultShaderPerFrame(*mainShaders.shaderProgram, lights, false, viewTransform.position, lightMatrixs);
-
-    for (auto shader : extraShadersToUpdate){
-      if (!shader.isUiShader){
-        std::cout << "updateDefaultShaderPerFrame2 extraShadersToUpdate: " << shader.name << std::endl;
-        updateDefaultShaderPerFrame(*shader.shader, lights, false, viewTransform.position, lightMatrixs);
-      }
-    }
-
-    std::cout << "updateDefaultShaderPerFrame: selection" << std::endl;
-    updateSelectionShaderPerFrame(*mainShaders.selectionProgram, lights, viewTransform.position, lightMatrixs);
-
-
-    RenderContext renderContext {
-      .view = view,
-      .portals = portals,
-      .projection = std::nullopt,
-    };
-
-    bool depthEnabled = false;
-
-    auto dofInfo = getDofInfo(world, &depthEnabled, defaultViewport.activeCameraData, view);
-    updateRenderStages(renderStages, dofInfo);
-    glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
-
-    getVoxelLightingData().needsUpdate = {};
-
-    SelectionResult uiSelectionResult{};
-    PROFILE("SELECTION",
-    // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
-      renderWithProgram(renderContext, renderStages.selection, defaultViewport);
-
-      shaderSetUniform(*renderStages.selection.shader, "projview", ndiOrtho);
-      glDisable(GL_DEPTH_TEST);
-      drawShapeData(lineData, *renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
-      glEnable(GL_DEPTH_TEST);
-
-      uiSelectionResult = readSelectionFromBuffer(true, adjustedCoords);
-    )
-    
-    // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
-    if (state.enableShadows){
-      PROFILE(
-        "RENDERING-SHADOWMAPS",
-        renderShadowMaps(renderContext, lights, defaultViewport);
-      )
-    }
-
-    assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
-    PROFILE("PORTAL_RENDERING", 
-      portalIdCache = renderPortals(renderContext, viewTransform, defaultViewport);
-    )
-    //std::cout << "cache size: " << portalIdCache.size() << std::endl;
-
-    statistics.numTriangles = renderWithProgram(renderContext, renderStages.main, defaultViewport);
-
-    auto selectionResult = readSelectionFromBuffer(false, adjustedCoords);
-    if (uiSelectionResult.id.has_value()){
-      selectionResult.id = uiSelectionResult.id;
-      selectionResult.color = uiSelectionResult.color;
-      std::cout << "selection result: " << uiSelectionResult.id.value() << std::endl;
-    }
-    for (int i = 0; i < selectionResult.uvResults.size(); i++){
-      if (uiSelectionResult.uvResults.at(i).has_value()){
-        selectionResult.uvResults.at(i) = uiSelectionResult.uvResults.at(i);
-      }
-    }
-
-    if (selectionResult.id.has_value()){
-      state.lastHoverIndex = state.currentHoverIndex; // stateupdate
-      state.currentHoverIndex = selectionResult.id.value(); // 
-      auto hoveredItemColor = selectionResult.color.value();
-      state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate     
-    }
-    for (int i = 0; i < selectionResult.uvResults.size(); i++){
-      if (!selectionResult.uvResults.at(i).has_value()){
-        continue;
-      }
-      idCoordsToGet.at(i).result = selectionResult.uvResults.at(i).value().result;
-      idCoordsToGet.at(i).resultUv = selectionResult.uvResults.at(i).value().resultUv;
-    }
-
-    renderVector(view, numChunkingGridCells);
-
-    Color pixelColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
-    state.hoveredColor = glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b);
-
-    if (state.enableBloom){
-      PROFILE("BLOOM-RENDERING",
-        renderWithProgram(renderContext, renderStages.bloom1, defaultViewport);
-        renderWithProgram(renderContext, renderStages.bloom2, defaultViewport);
-      )      
-    }
-
-    if (depthEnabled){
-      PROFILE("DOF-RENDERING",
-        renderWithProgram(renderContext, renderStages.dof1, defaultViewport);
-        renderWithProgram(renderContext, renderStages.dof2, defaultViewport);
-      )
-    }
-
-    LayerInfo& layerInfo = layerByName(world, "");
-    float near = layerInfo.nearplane;
-    float far = layerInfo.farplane;
+      std::cout << "updateDefaultShaderPerFrame: main" << std::endl;
+      updateDefaultShaderPerFrame(*mainShaders.shaderProgram, lights, false, viewTransform.position, lightMatrixs);
     
 
-    // depth buffer pass 
-    // why does this require drawing this?  Couldn't I just read it from the attachment directly? Does it matter?
-    {
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
-      glUseProgram(*depthProgram); 
-      glClearColor(0.f, 0.0f, 0.0f, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      for (auto shader : extraShadersToUpdate){
+        if (!shader.isUiShader){
+          std::cout << "updateDefaultShaderPerFrame2 extraShadersToUpdate: " << shader.name << std::endl;
+          updateDefaultShaderPerFrame(*shader.shader, lights, false, viewTransform.position, lightMatrixs);
+        }
+      }
+
+
+      std::cout << "updateDefaultShaderPerFrame: selection" << std::endl;
+      updateSelectionShaderPerFrame(*mainShaders.selectionProgram, lights, viewTransform.position, lightMatrixs);
+
+
+      RenderContext renderContext {
+        .view = view,
+        .portals = portals,
+        .projection = std::nullopt,
+      };
+
+      bool depthEnabled = false;
+
+      auto dofInfo = getDofInfo(world, &depthEnabled, viewport.activeCameraData, view);
+      updateRenderStages(renderStages, dofInfo);
+      glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
+
+      getVoxelLightingData().needsUpdate = {};
+
+      SelectionResult uiSelectionResult{};
+      PROFILE("SELECTION",
+      // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
+        renderWithProgram(renderContext, renderStages.selection, viewport);
+  
+        shaderSetUniform(*renderStages.selection.shader, "projview", ndiOrtho);
+        glDisable(GL_DEPTH_TEST);
+        drawShapeData(lineData, *renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);
+        glEnable(GL_DEPTH_TEST);
+  
+        uiSelectionResult = readSelectionFromBuffer(true, adjustedCoords);
+      )
+    
+      // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
+      if (state.enableShadows){
+        PROFILE(
+          "RENDERING-SHADOWMAPS",
+          renderShadowMaps(renderContext, lights, viewport);
+        )
+      }
+
+      assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
+      PROFILE("PORTAL_RENDERING", 
+        portalIdCache = renderPortals(renderContext, viewTransform, viewport);
+      )
+      //std::cout << "cache size: " << portalIdCache.size() << std::endl;
+
+      statistics.numTriangles = renderWithProgram(renderContext, renderStages.main, viewport);
+
+      auto selectionResult = readSelectionFromBuffer(false, adjustedCoords);
+      if (uiSelectionResult.id.has_value()){
+        selectionResult.id = uiSelectionResult.id;
+        selectionResult.color = uiSelectionResult.color;
+        std::cout << "selection result: " << uiSelectionResult.id.value() << std::endl;
+      }
+      for (int i = 0; i < selectionResult.uvResults.size(); i++){
+        if (uiSelectionResult.uvResults.at(i).has_value()){
+          selectionResult.uvResults.at(i) = uiSelectionResult.uvResults.at(i);
+        }
+      }
+
+      if (selectionResult.id.has_value()){
+        state.lastHoverIndex = state.currentHoverIndex; // stateupdate
+        state.currentHoverIndex = selectionResult.id.value(); // 
+        auto hoveredItemColor = selectionResult.color.value();
+        state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate     
+      }
+      for (int i = 0; i < selectionResult.uvResults.size(); i++){
+        if (!selectionResult.uvResults.at(i).has_value()){
+          continue;
+        }
+        idCoordsToGet.at(i).result = selectionResult.uvResults.at(i).value().result;
+        idCoordsToGet.at(i).resultUv = selectionResult.uvResults.at(i).value().resultUv;
+      }
+
+      renderVector(view, numChunkingGridCells);
+
+      Color pixelColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
+      state.hoveredColor = glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b);
+
+      if (state.enableBloom){
+        PROFILE("BLOOM-RENDERING",
+          renderWithProgram(renderContext, renderStages.bloom1, viewport);
+          renderWithProgram(renderContext, renderStages.bloom2, viewport);
+        )      
+      }
+
+      if (depthEnabled){
+        PROFILE("DOF-RENDERING",
+          renderWithProgram(renderContext, renderStages.dof1, viewport);
+          renderWithProgram(renderContext, renderStages.dof2, viewport);
+        )
+      }
+
+      LayerInfo& layerInfo = layerByName(world, "");
+      float near = layerInfo.nearplane;
+      float far = layerInfo.farplane;
+    
+
+      // depth buffer pass 
+      // why does this require drawing this?  Couldn't I just read it from the attachment directly? Does it matter?
+      {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glUseProgram(*depthProgram); 
+        //glClearColor(0.f, 0.0f, 0.0f, 1.0f);
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       
-      updateDepthShaderPerFrame(*depthProgram, near, far);
+        updateDepthShaderPerFrame(*depthProgram, near, far);
+
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(0));
+        glViewport(calcViewportOffset(viewport).x, calcViewportOffset(viewport).y, calcViewportSize(viewport).x, calcViewportSize(viewport).y);
+        glBindVertexArray(defaultResources.quadVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        // The depth here doesn't seem to have really tight resolution. 
+        Color hoveredItemColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
+        float distance = (hoveredItemColor.r * (far - near)) + near;
+        std::cout << "depth: " << distance << ", near = " << near << ", far = " << far << std::endl;
+        state.currentCursorDepth = distance;
+        for (auto &depthCoord : depthsAtCoords){
+          Color hoveredItemColor = getPixelColorAttachment0(depthCoord.ndix, depthCoord.ndiy);
+          float distance = (hoveredItemColor.r * (far - near)) + near;
+          depthCoord.resultDepth = distance;
+        }
+      }
+      /////////////////////////////////////
+
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      //auto finalProgram = (state.renderMode == RENDER_DEPTH) ? *depthProgram : *renderingResources.framebufferProgram;
+      auto finalProgram = *renderingResources.framebufferProgram;
+
+      glUseProgram(finalProgram); 
+
+
+
+      state.exposure = exposureAmount();
+      updateFramebufferShaderFrame(finalProgram, near, far);
 
       glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(0));
-      glViewport(calcViewportOffset(defaultViewport).x, calcViewportOffset(defaultViewport).y, calcViewportSize(defaultViewport).x, calcViewportSize(defaultViewport).y);
-      glBindVertexArray(defaultResources.quadVAO);
-      glDrawArrays(GL_TRIANGLES, 0, 6);
 
-      // The depth here doesn't seem to have really tight resolution. 
-      Color hoveredItemColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
-      float distance = (hoveredItemColor.r * (far - near)) + near;
-      std::cout << "depth: " << distance << ", near = " << near << ", far = " << far << std::endl;
-      state.currentCursorDepth = distance;
-      for (auto &depthCoord : depthsAtCoords){
-        Color hoveredItemColor = getPixelColorAttachment0(depthCoord.ndix, depthCoord.ndiy);
-        float distance = (hoveredItemColor.r * (far - near)) + near;
-        depthCoord.resultDepth = distance;
-      }
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture2);
 
-    }
-    /////////////////////////////////////
+      glActiveTexture(GL_TEXTURE0);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    //auto finalProgram = (state.renderMode == RENDER_DEPTH) ? *depthProgram : *renderingResources.framebufferProgram;
-    auto finalProgram = *renderingResources.framebufferProgram;
 
-    glUseProgram(finalProgram); 
-    glClearColor(0.f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    state.exposure = exposureAmount();
-    updateFramebufferShaderFrame(finalProgram, near, far);
-
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(0));
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture2);
-
-    glActiveTexture(GL_TEXTURE0);
-
-    modlog("viewports num: ", std::to_string(viewports.size()));
-    for (auto& viewport : viewports){
-      std::cout << "viewport: " << print(viewport.activeCameraObj) << std::endl;
-      glClear(GL_DEPTH_BUFFER_BIT);  // just disable depth test here? 
-
-      bool shouldRender = viewport.activeCameraObj == defaultViewport.activeCameraObj;
+      modlog("viewports num: ", std::to_string(viewports.size()));
       
-      static ViewportOption defaultOption = DefaultBindingOption{};
-      ViewportOption* bindingOption = viewport.bindingOption.has_value() ? &viewport.bindingOption.value() : &defaultOption;
+      {
+        std::cout << "viewport: " << print(viewport.activeCameraObj) << ", name = " << (!viewport.activeCameraObj.has_value() ? std::string("no value") : getGameObjectName(viewport.activeCameraObj.value()).value()) <<  std::endl;
+        glClear(GL_DEPTH_BUFFER_BIT);  // just disable depth test here? 
 
-      DefaultBindingOption* defaultBindingOption = std::get_if<DefaultBindingOption>(bindingOption);
-      BloomBindingOption* bloomBindingOption = std::get_if<BloomBindingOption>(bindingOption);
-      PortalBindingOption* portalBindingOption = std::get_if<PortalBindingOption>(bindingOption);
-      TextureBindingOption* textureBindingOption = std::get_if<TextureBindingOption>(bindingOption);
-      UserTextureBindingOption* userTextureBindingOption = std::get_if<UserTextureBindingOption>(bindingOption);
-      Unknown1BindingOption* unknown1BindingOption = std::get_if<Unknown1BindingOption>(bindingOption);
-      Unknown2BindingOption* unknown2BindingOption = std::get_if<Unknown2BindingOption>(bindingOption);
-      DepthBindingOption* depthBindingOption = std::get_if<DepthBindingOption>(bindingOption);
+        bool shouldRender = true;
+      
+        static ViewportOption defaultOption = DefaultBindingOption{};
+        ViewportOption* bindingOption = viewport.bindingOption.has_value() ? &viewport.bindingOption.value() : &defaultOption;
 
-      shaderSetUniformBool(finalProgram, "flipCoords", shouldRender && textureBindingOption != NULL && textureBindingOption -> flipCoords ? true : false);
-      shaderSetUniformBool(finalProgram, "enableDepthVisualization", shouldRender && (depthBindingOption != NULL) ? true : false);
-      if (shouldRender) {
-        if (defaultBindingOption){
-          glBindTexture(GL_TEXTURE_2D, finalRenderingTexture(renderStages));
-        }else if (portalBindingOption){ // portal
-          assert(state.textureIndex <= renderingResources.framebuffers.portalTextures.size() && state.textureIndex >= 0);
-          glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.portalTextures.at(state.textureIndex));  
-        }else if (unknown1BindingOption){
-          glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture4);  
-        }else if (textureBindingOption){ // texture
-          shaderSetUniformBool(finalProgram, "flipCoords", textureBindingOption -> flipCoords);
-          if (world.textures.find(textureBindingOption -> texture) != world.textures.end()){
-            glBindTexture(GL_TEXTURE_2D, world.textures.at(textureBindingOption -> texture).texture.textureId);
+        DefaultBindingOption* defaultBindingOption = std::get_if<DefaultBindingOption>(bindingOption);
+        BloomBindingOption* bloomBindingOption = std::get_if<BloomBindingOption>(bindingOption);
+        PortalBindingOption* portalBindingOption = std::get_if<PortalBindingOption>(bindingOption);
+        TextureBindingOption* textureBindingOption = std::get_if<TextureBindingOption>(bindingOption);
+        UserTextureBindingOption* userTextureBindingOption = std::get_if<UserTextureBindingOption>(bindingOption);
+        Unknown1BindingOption* unknown1BindingOption = std::get_if<Unknown1BindingOption>(bindingOption);
+        Unknown2BindingOption* unknown2BindingOption = std::get_if<Unknown2BindingOption>(bindingOption);
+        DepthBindingOption* depthBindingOption = std::get_if<DepthBindingOption>(bindingOption);
+
+        shaderSetUniformBool(finalProgram, "flipCoords", shouldRender && textureBindingOption != NULL && textureBindingOption -> flipCoords ? true : false);
+        shaderSetUniformBool(finalProgram, "enableDepthVisualization", shouldRender && (depthBindingOption != NULL) ? true : false);
+        if (shouldRender) {
+          if (defaultBindingOption){
+            glBindTexture(GL_TEXTURE_2D, finalRenderingTexture(renderStages));
+          }else if (portalBindingOption){ // portal
+            assert(state.textureIndex <= renderingResources.framebuffers.portalTextures.size() && state.textureIndex >= 0);
+            glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.portalTextures.at(state.textureIndex));  
+          }else if (unknown1BindingOption){
+            glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture4);  
+          }else if (textureBindingOption){ // texture
+            shaderSetUniformBool(finalProgram, "flipCoords", textureBindingOption -> flipCoords);
+            if (world.textures.find(textureBindingOption -> texture) != world.textures.end()){
+              glBindTexture(GL_TEXTURE_2D, world.textures.at(textureBindingOption -> texture).texture.textureId);
+            }else{
+              glBindTexture(GL_TEXTURE_2D, world.textures.at(resources::GRID_TEXTURE).texture.textureId);
+            }
+          }else if (depthBindingOption){ // depth 
+            assert(state.textureIndex <=  renderingResources.framebuffers.depthTextures.size() && state.textureIndex >= 0);
+            glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(state.textureIndex));
+          }else if (bloomBindingOption){ // bloom
+            glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture2);
+          }else if (userTextureBindingOption){ // user textures
+            if (screenspaceTextureIds.size() > state.textureIndex && state.textureIndex >= 0){
+              glBindTexture(GL_TEXTURE_2D, screenspaceTextureIds.at(state.textureIndex).id);
+            }else{
+              modlog("rendering", (std::string("cannot display graph texture index: ") + std::to_string(state.textureIndex)).c_str());
+            }
+          }else if (unknown2BindingOption){ 
+             glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-ingame-ui-texture-test").texture.textureId);  
           }else{
-            glBindTexture(GL_TEXTURE_2D, world.textures.at(resources::GRID_TEXTURE).texture.textureId);
+            modassert(false, "invalid binding option");
           }
-        }else if (depthBindingOption){ // depth 
-          assert(state.textureIndex <=  renderingResources.framebuffers.depthTextures.size() && state.textureIndex >= 0);
-          glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.depthTextures.at(state.textureIndex));
-        }else if (bloomBindingOption){ // bloom
-          glBindTexture(GL_TEXTURE_2D, renderingResources.framebuffers.framebufferTexture2);
-        }else if (userTextureBindingOption){ // user textures
-          if (screenspaceTextureIds.size() > state.textureIndex && state.textureIndex >= 0){
-            glBindTexture(GL_TEXTURE_2D, screenspaceTextureIds.at(state.textureIndex).id);
-          }else{
-            modlog("rendering", (std::string("cannot display graph texture index: ") + std::to_string(state.textureIndex)).c_str());
-          }
-        }else if (unknown2BindingOption){ 
-           glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-ingame-ui-texture-test").texture.textureId);  
         }else{
-          modassert(false, "invalid binding option");
+          std::cout << "viewport: not yet supported rendering from another camera" << std::endl;
+          glBindTexture(GL_TEXTURE_2D, world.textures.at(resources::GRID_TEXTURE).texture.textureId);  
         }
-      }else{
-        std::cout << "viewport: not yet supported rendering from another camera" << std::endl;
-        glBindTexture(GL_TEXTURE_2D, world.textures.at(resources::GRID_TEXTURE).texture.textureId);  
-      }
 
-      glViewport(calcViewportOffset(viewport).x, calcViewportOffset(viewport).y, calcViewportSize(viewport).x, calcViewportSize(viewport).y);
-      glBindVertexArray(defaultResources.quadVAO);
-      glDrawArrays(GL_TRIANGLES, 0, 6);
+        glViewport(calcViewportOffset(viewport).x, calcViewportOffset(viewport).y, calcViewportSize(viewport).x, calcViewportSize(viewport).y);
+        glBindVertexArray(defaultResources.quadVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
     }
 
 
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
-
   
     {
       renderDebugUi(pixelColor);
@@ -2342,6 +2347,7 @@ int main(int argc, char* argv[]){
       glBlendFunci(1, GL_ONE, GL_ZERO);
       
       drawShapeData(lineData, *renderingResources.uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
+    }
     }
     glEnable(GL_DEPTH_TEST);
 
@@ -2355,6 +2361,10 @@ int main(int argc, char* argv[]){
     std::cout << "frame time: " << (glfwGetTime() - statistics.now) << std::endl;
     std::cout << "frame draw calls: " << numberOfDrawCallsThisFrame << std::endl;
     glfwSwapBuffers(window);
+
+    glClearColor(0.f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     currentTick++;
     
   )})

@@ -819,7 +819,7 @@ objid listSceneId(int32_t id){
 }
 
 Transformation getCameraTransform(int viewportIndex){
-  auto& viewport = getDefaultViewport();
+  auto& viewport = getViewport(viewportIndex);
   if (state.useDefaultCamera || !viewport.activeCameraObj.has_value()){
     return defaultResources.defaultCamera.transformation;
   }
@@ -836,9 +836,7 @@ Transformation getCullingTransform(int viewportIndex){
   return getCameraTransform(viewportIndex);
 }
 
-void maybeResetCamera(int32_t id){
-  auto& viewport = getDefaultViewport();
-
+void maybeResetCamera(int32_t id, ViewportSettings& viewport){
   if (viewport.activeCameraObj.has_value() &&  id == viewport.activeCameraObj.value()){
     viewport.activeCameraObj = std::nullopt;
     viewport.activeCameraData = NULL;
@@ -852,7 +850,7 @@ void setActiveCamera(std::optional<int32_t> cameraIdOpt, std::optional<int> view
   if (!cameraIdOpt.has_value()){
     if (viewport.activeCameraObj.has_value()){
       auto currCameraId = viewport.activeCameraObj.value();
-      maybeResetCamera(currCameraId);
+      maybeResetCamera(currCameraId, viewport);
     }
     return;
   }

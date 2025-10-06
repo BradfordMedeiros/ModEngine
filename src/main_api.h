@@ -43,13 +43,6 @@ NetworkPacket toNetworkPacket(UdpPacket& packet);
 
 objid listSceneId(int32_t id);
 
-Transformation getCameraTransform(int viewportIndex);
-Transformation getCullingTransform(int viewportIndex);
-void maybeResetCamera(int32_t id);
-void setActiveCamera(std::optional<int32_t> cameraId, std::optional<int> viewportIndex);
-std::optional<objid> getActiveCamera(std::optional<int> viewportIndex);
-Transformation getView();
-
 struct ViewportSettings {
   int index;
   float x;
@@ -62,6 +55,14 @@ struct ViewportSettings {
   std::optional<objid> activeCameraObj;
   GameObjectCamera* activeCameraData;
 };
+
+
+Transformation getCameraTransform(int viewportIndex);
+Transformation getCullingTransform(int viewportIndex);
+void maybeResetCamera(int32_t id, ViewportSettings& viewport);
+void setActiveCamera(std::optional<int32_t> cameraId, std::optional<int> viewportIndex);
+std::optional<objid> getActiveCamera(std::optional<int> viewportIndex);
+Transformation getView();
 
 
 void createViewport(int viewportIndex, float x, float y, float widthNdi, float heightNdi, ViewportOption bindingOption);
