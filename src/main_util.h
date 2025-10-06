@@ -11,10 +11,10 @@ struct ParsedLoadScene {
 
 objid createManipulator();
 ManipulatorSelection onManipulatorSelected();
-glm::mat4 projectionFromLayer(LayerInfo& layer);
+glm::mat4 projectionFromLayer(LayerInfo& layer, ViewportSettings& viewport);
 LayerInfo& layerByName(std::string layername);
 LayerInfo getLayerForId(objid id);
-RotationDirection getCursorInfoWorld(float ndix, float ndiy);
+RotationDirection getCursorInfoWorld(float ndix, float ndiy, int viewportIndex);
 std::vector<ParsedLoadScene> parseSceneArgs(std::vector<std::string>& rawScenes);
 std::optional<unsigned int> getTextureId(std::string& texture);
 float exposureAmount();

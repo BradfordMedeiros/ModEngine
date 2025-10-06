@@ -535,7 +535,7 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
 
   auto mainOctreeId = getMainOctreeId();
   for (auto& layer : world.sandbox.layers){      // @TODO could organize this before to not require pass on each frame
-    auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
+    auto proj = projection == NULL ? projectionFromLayer(layer, viewport) : *projection;
     auto newProjView = (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view);
 
     bool isTransparencyLayer = layer.symbol == transparencyLayer;
@@ -675,11 +675,11 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
   return numTriangles;
 }
 
-void renderVector(glm::mat4 view,  int numChunkingGridCells){
+void renderVector(glm::mat4 view,  int numChunkingGridCells, ViewportSettings& viewport){
   glUseProgram(*mainShaders.shaderProgram);
   glDisable(GL_DEPTH_TEST);
 
-  auto projection = projectionFromLayer(world.sandbox.layers.at(0));
+  auto projection = projectionFromLayer(world.sandbox.layers.at(0), viewport);
   shaderSetUniform(*mainShaders.shaderProgram, "projview", (projection * view));
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
@@ -702,8 +702,8 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells){
   drawAllLines(lineData, *mainShaders.shaderProgram , std::nullopt, lineModelMatrix);
 }
 
-void renderSkybox(GLint shaderProgram, glm::mat4 view){
-  auto projection = projectionFromLayer(world.sandbox.layers.at(0));
+void renderSkybox(GLint shaderProgram, glm::mat4 view, ViewportSettings& viewport){
+  auto projection = projectionFromLayer(world.sandbox.layers.at(0), viewport);
 
   auto value = glm::mat3(view);  // Removes last column aka translational component --> thats why when you move skybox no move!
   auto projview = projection * glm::mat4(value);
@@ -876,7 +876,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep, ViewportSe
 
     if (state.showSkybox && renderStep.renderSkybox){
       glDepthMask(GL_FALSE);
-      renderSkybox(*renderStep.shader, context.view);  // Probably better to render this at the end 
+      renderSkybox(*renderStep.shader, context.view, viewport);  // Probably better to render this at the end 
       glDepthMask(GL_TRUE);    
     }
     glEnable(GL_DEPTH_TEST);
@@ -2197,7 +2197,7 @@ int main(int argc, char* argv[]){
         idCoordsToGet.at(i).resultUv = selectionResult.uvResults.at(i).value().resultUv;
       }
 
-      renderVector(view, numChunkingGridCells);
+      renderVector(view, numChunkingGridCells, viewport);
 
       Color pixelColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
       state.hoveredColor = glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b);
