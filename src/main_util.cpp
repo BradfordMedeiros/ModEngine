@@ -5,9 +5,9 @@ extern engineState state;
 extern glm::mat4 view;
 extern Stats statistics;
 
-glm::mat4 projectionFromLayer(LayerInfo& layer){
+glm::mat4 projectionFromLayer(LayerInfo& layer, ViewportSettings& viewport){
   // this means that as the window is dragged wider (say 2560x1980) you simply see more
-  auto viewportSize = calcViewportSize(getDefaultViewport());
+  auto viewportSize = calcViewportSize(viewport);
   return glm::perspective(glm::radians(layer.fov), (float)viewportSize.x / (float)viewportSize.y, layer.nearplane, layer.farplane); 
 
   // this would show a constant amount in the screen, but then just stretch it, which might be more "fair" for a  multiplayer game, but looks super shitty
@@ -19,9 +19,10 @@ glm::mat4 projectionFromLayer(LayerInfo& layer){
 LayerInfo getLayerForId(objid id){
   return layerByName(world, getGameObject(world, id).layer);
 }
-RotationDirection getCursorInfoWorld(float ndix, float ndiy){
+RotationDirection getCursorInfoWorld(float ndix, float ndiy, int viewportIndex){
+  auto& viewport = getViewport(viewportIndex);
   auto layer = layerByName(world, "");
-  auto projection = projectionFromLayer(layer);
+  auto projection = projectionFromLayer(layer, viewport);
   float screenXPosNdi = ndix;
   float screenYPosNdi = ndiy;
   //float screenXPosNdi = convertBase(state.cursorLeft, 0.f, state.currentScreenWidth, -1.f, 1.f);
@@ -85,7 +86,7 @@ float exposureAmount(){
 glm::vec3 positionToNdi(glm::vec3 position, int viewportIndex){
   auto viewTransform = getCameraTransform(viewportIndex);
   auto view = renderView(viewTransform.position, viewTransform.rotation);
-  auto projection = projectionFromLayer(world.sandbox.layers.at(0));
+  auto projection = projectionFromLayer(world.sandbox.layers.at(0), getViewport(viewportIndex));
   auto transformedValue = projection * view * glm::vec4(position.x, position.y, position.z, 1.f);
   auto dividedValue = glm::vec4(transformedValue.x / transformedValue.w, transformedValue.y / transformedValue.w, transformedValue.z / transformedValue.w, transformedValue.z / glm::abs(transformedValue.w));
   //modlog("waypoint transformedValue1", print(transformedValue));

@@ -9,8 +9,10 @@ extern World world;
 extern glm::mat4 view;
 extern engineState state;
 
-glm::mat4 projectionFromLayer(LayerInfo& layer);
+struct ViewportSettings;
+glm::mat4 projectionFromLayer(LayerInfo& layer, ViewportSettings& viewport);
 LayerInfo& layerByName(World& world, std::string layername);
+ViewportSettings& getDefaultViewport();
 
 void drawNormals(){
   auto selectedIds = mainApi -> selected();
@@ -229,7 +231,7 @@ CScriptBinding cscriptCreateToolsBinding(CustomApiBindings& api){
     static auto manipulatorLayer = layerByName(world, "");
     onManipulatorUpdate(
       state.manipulatorState, 
-      projectionFromLayer(manipulatorLayer),
+      projectionFromLayer(manipulatorLayer, getDefaultViewport()),
       view, 
       state.manipulatorMode, 
       state.manipulatorAxis,

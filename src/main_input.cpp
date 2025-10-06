@@ -347,26 +347,26 @@ float currentMouseDepth(){
   return state.currentCursorDepth.value();
 }
 
-glm::vec3 getMouseDirectionWorld(){
+glm::vec3 getMouseDirectionWorld(ViewportSettings& viewport){
   float depth = currentMouseDepth();
 
   auto id = state.currentHoverIndex;
   bool objExists = idExists(world.sandbox, id);
   auto layer = objExists ? layerByName(world, getGameObject(world, id).layer) : layerByName(world, ""); // "" default layer
   modlog("layer is", layer.name);
-  auto proj = projectionFromLayer(layer);
+  auto proj = projectionFromLayer(layer, viewport);
   auto rayDirection = getCursorInfoWorld(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight, depth).direction;
   return rayDirection;
 }
 
-glm::vec3 getMousePositionWorld(){
+glm::vec3 getMousePositionWorld(ViewportSettings& viewport){
   float depth = currentMouseDepth();
 
   auto id = state.currentHoverIndex;
   bool objExists = idExists(world.sandbox, id);
   auto layer = objExists ? layerByName(world, getGameObject(world, id).layer) : layerByName(world, ""); // "" default layer
   modlog("layer is", layer.name);
-  auto proj = projectionFromLayer(layer);
+  auto proj = projectionFromLayer(layer, viewport);
   auto rayDirection = getCursorInfoWorld(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight, depth).projectedPosition;
   return rayDirection;
 }
@@ -375,7 +375,7 @@ glm::vec3 getMousePositionWorld(){
 bool enableSelectionVisualization = false;
 void onMouseButton(){ 
   glm::vec3 fromPos = defaultResources.defaultCamera.transformation.position;
-  auto rayPosition = getMousePositionWorld();
+  auto rayPosition = getMousePositionWorld(getDefaultViewport()); // TODO viewport 
   if (enableSelectionVisualization){
     static objid lineId = 0;
     if (lineId){
