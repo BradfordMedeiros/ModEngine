@@ -2068,35 +2068,20 @@ int main(int argc, char* argv[]){
       cBindings.onMessage(message.strTopic, message.strValue);
     }
 
+
+
     //////////////////////// rendering code below ///////////////////////
-    auto& defaultViewport = getDefaultViewport();
 
 
-    std::vector<LightInfo> lights = getLightInfo(world);
-    viewTransform = getCameraTransform(defaultViewport.index);
-    cullingViewTransform = getCullingTransform(defaultViewport.index);
-    view = renderView(viewTransform.position, viewTransform.rotation);
-    std::vector<PortalInfo> portals = getPortalInfo(world);
-    assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
-    std::vector<glm::mat4> lightMatrixs = calcShadowMapViews(lights);
-    
-    std::cout << "updateDefaultShaderPerFrame: main" << std::endl;
-    updateDefaultShaderPerFrame(*mainShaders.shaderProgram, lights, false, viewTransform.position, lightMatrixs);
+    std::cout << "updateDefaultShaderPerFrame: ui" << std::endl;
+    updateUiShaderPerFrame(*renderingResources.uiShaderProgram);
+
     modlog("shader to update size", std::to_string(extraShadersToUpdate.size()));
     for (auto shader : extraShadersToUpdate){
       if (shader.isUiShader){
         updateUiShaderPerFrame(*shader.shader);
-      }else{
-        std::cout << "updateDefaultShaderPerFrame2 extraShadersToUpdate: " << shader.name << std::endl;
-        updateDefaultShaderPerFrame(*shader.shader, lights, false, viewTransform.position, lightMatrixs);
       }
     }
-
-    std::cout << "updateDefaultShaderPerFrame: selection" << std::endl;
-    updateSelectionShaderPerFrame(*mainShaders.selectionProgram, lights, viewTransform.position, lightMatrixs);
-
-    std::cout << "updateDefaultShaderPerFrame: ui" << std::endl;
-    updateUiShaderPerFrame(*renderingResources.uiShaderProgram);
 
     auto screenspaceTextureIds = textureIdsToRender();
     PROFILE("USER-TEXTURES",
@@ -2111,6 +2096,31 @@ int main(int argc, char* argv[]){
       }
       markUserTexturesCleared();  // not really rendering, should pull this out
     )
+
+    //////////////////////// below is now viewport dependent
+
+    auto& defaultViewport = getDefaultViewport();
+
+    std::vector<LightInfo> lights = getLightInfo(world);
+    viewTransform = getCameraTransform(defaultViewport.index);
+    cullingViewTransform = getCullingTransform(defaultViewport.index);
+    view = renderView(viewTransform.position, viewTransform.rotation);
+    std::vector<PortalInfo> portals = getPortalInfo(world);
+    assert(portals.size() <= renderingResources.framebuffers.portalTextures.size());
+    std::vector<glm::mat4> lightMatrixs = calcShadowMapViews(lights);
+
+    std::cout << "updateDefaultShaderPerFrame: main" << std::endl;
+    updateDefaultShaderPerFrame(*mainShaders.shaderProgram, lights, false, viewTransform.position, lightMatrixs);
+
+    for (auto shader : extraShadersToUpdate){
+      if (!shader.isUiShader){
+        std::cout << "updateDefaultShaderPerFrame2 extraShadersToUpdate: " << shader.name << std::endl;
+        updateDefaultShaderPerFrame(*shader.shader, lights, false, viewTransform.position, lightMatrixs);
+      }
+    }
+
+    std::cout << "updateDefaultShaderPerFrame: selection" << std::endl;
+    updateSelectionShaderPerFrame(*mainShaders.selectionProgram, lights, viewTransform.position, lightMatrixs);
 
 
     RenderContext renderContext {
