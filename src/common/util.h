@@ -515,6 +515,20 @@ typedef std::variant<std::string, bool, int, float> JsonType;
 std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& allValues);
 std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadFromJson(std::string& fileContent, bool* success);
 
+struct LayerOverride {
+  //int zIndex;
+  //bool lighting;
+  //bool orthographic;
+  //bool scale;
+  //bool disableViewTransform;
+  //int depthBufferLayer;
+  std::string name;  // should use symbol instead
+  std::optional<float> fovRaw;
+  std::optional<bool> visible;
+  //float nearplane;
+  //float farplane;
+};
+
 struct DefaultBindingOption {};
 struct BloomBindingOption {};
 struct PortalBindingOption {};

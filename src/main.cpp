@@ -502,6 +502,22 @@ Texture getWaterTexture(){
   return world.textures.at(resources::TEXTURE_WATER).texture;
 }
 
+LayerInfo layerInfoForViewport(LayerInfo& layer, ViewportSettings& viewport){
+  auto newLayer = layer;
+  for (auto& layerOverride : viewport.layerOverride){
+    if (layer.name == layerOverride.name){
+      if (layerOverride.fovRaw.has_value()){
+        newLayer.fovRaw = layerOverride.fovRaw.value();
+      }
+      if (layerOverride.visible.has_value()){
+        newLayer.visible = layerOverride.visible.value();
+      }
+      break;
+    }
+  }
+  return newLayer;
+}
+
 int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly, ViewportSettings& viewport){
   glUseProgram(*shaderProgram);
   int numTriangles = 0;
@@ -533,7 +549,9 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
 
 
   auto mainOctreeId = getMainOctreeId();
-  for (auto& layer : world.sandbox.layers){      // @TODO could organize this before to not require pass on each frame
+  for (auto& realLayer : world.sandbox.layers){      // @TODO could organize this before to not require pass on each frame
+    auto layer = layerInfoForViewport(realLayer, viewport);
+
     auto proj = projection == NULL ? projectionFromLayer(layer, viewport) : *projection;
     auto newProjView = (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view);
 
@@ -1363,7 +1381,7 @@ int main(int argc, char* argv[]){
 
   setInitialState(state, "./res/world.state", statistics.now, interface.readFile, result["noinput"].as<bool>()); 
 
-  createViewport(0, state.viewportoffsetNdi.x, state.viewportoffsetNdi.y, state.viewportSizeNdi.x, state.viewportSizeNdi.y, DefaultBindingOption{});
+  createViewport(0, state.viewportoffsetNdi.x, state.viewportoffsetNdi.y, state.viewportSizeNdi.x, state.viewportSizeNdi.y, DefaultBindingOption{}, {});
 
   //createViewport(0, 0.f, 0.f, 1.f, 0.5f, 5);
   //createViewport(1, 0.f, 0.5f, 0.5f, 0.5f, 0);

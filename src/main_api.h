@@ -50,11 +50,13 @@ struct ViewportSettings {
   float widthNdi;
   float heightNdi;
 
-
   std::optional<ViewportOption> bindingOption;
   std::optional<objid> activeCameraObj;
   GameObjectCamera* activeCameraData;
+
+  std::vector<LayerOverride> layerOverride;
 };
+
 
 
 Transformation getCameraTransform(int viewportIndex);
@@ -65,7 +67,7 @@ std::optional<objid> getActiveCamera(std::optional<int> viewportIndex);
 Transformation getView();
 
 
-void createViewport(int viewportIndex, float x, float y, float widthNdi, float heightNdi, ViewportOption bindingOption);
+void createViewport(int viewportIndex, float x, float y, float widthNdi, float heightNdi, ViewportOption bindingOption, std::vector<LayerOverride> layerOverride);
 void removeViewport(int viewportIndex);
 std::vector<int> listViewports();
 

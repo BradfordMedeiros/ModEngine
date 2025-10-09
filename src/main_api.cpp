@@ -1295,7 +1295,7 @@ std::optional<ViewportSettings*> getViewportInternal(int index){
   return std::nullopt;
 }
 
-void createViewport(int viewportIndex, float x, float y, float widthNdi, float heightNdi, ViewportOption bindingOption){
+void createViewport(int viewportIndex, float x, float y, float widthNdi, float heightNdi, ViewportOption bindingOption, std::vector<LayerOverride> layerOverride){
   auto viewport = getViewportInternal(viewportIndex);
   if (!viewport.has_value()){
     viewports.push_back(ViewportSettings {
@@ -1309,6 +1309,8 @@ void createViewport(int viewportIndex, float x, float y, float widthNdi, float h
 
       .activeCameraObj = std::nullopt,
       .activeCameraData = NULL,
+
+      .layerOverride = layerOverride,
     });
     viewport = getViewportInternal(viewportIndex);
     modassert(viewport.has_value(), "just added viewport but did not retrieve it");
