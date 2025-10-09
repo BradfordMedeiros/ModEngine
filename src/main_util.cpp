@@ -8,7 +8,7 @@ extern Stats statistics;
 glm::mat4 projectionFromLayer(LayerInfo& layer, ViewportSettings& viewport){
   // this means that as the window is dragged wider (say 2560x1980) you simply see more
   auto viewportSize = calcViewportSize(viewport);
-  return glm::perspective(glm::radians(layer.fov), (float)viewportSize.x / (float)viewportSize.y, layer.nearplane, layer.farplane); 
+  return glm::perspective(glm::radians(getLayerFov(layer)), (float)viewportSize.x / (float)viewportSize.y, layer.nearplane, layer.farplane); 
 
   // this would show a constant amount in the screen, but then just stretch it, which might be more "fair" for a  multiplayer game, but looks super shitty
   // if i care about "fair" should just use a smaller viewport configuration and not render to whole scene
@@ -19,6 +19,10 @@ glm::mat4 projectionFromLayer(LayerInfo& layer, ViewportSettings& viewport){
 LayerInfo getLayerForId(objid id){
   return layerByName(world, getGameObject(world, id).layer);
 }
+float getLayerFov(LayerInfo& layer){
+  return layer.fovRaw;
+}
+
 RotationDirection getCursorInfoWorld(float ndix, float ndiy, int viewportIndex){
   auto& viewport = getViewport(viewportIndex);
   auto layer = layerByName(world, "");

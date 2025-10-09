@@ -267,7 +267,7 @@ struct LayerInfo {
   bool disableViewTransform;
   bool visible;
   int depthBufferLayer;
-  float fov;
+  float fovRaw;
   float nearplane;
   float farplane;
   int selectIndex;

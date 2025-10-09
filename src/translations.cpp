@@ -448,8 +448,8 @@ glm::vec2 uvToNdi(glm::vec2 coord){
   return glm::vec2(xCoord, yCoord);
 }
 
-FovAngles calcFovAngles(LayerInfo& layer, glm::ivec2 viewportSize){
-  auto fieldOfView = 0.5f * (layer.fov);
+FovAngles calcFovAngles(LayerInfo& layer, float layerFov, glm::ivec2 viewportSize){
+  auto fieldOfView = 0.5f * layerFov;
 
   auto aspect = ((float)viewportSize.x) / ((float)viewportSize.y);
   return FovAngles {
@@ -460,10 +460,10 @@ FovAngles calcFovAngles(LayerInfo& layer, glm::ivec2 viewportSize){
   };
 }
 
-ViewFrustum cameraToViewFrustum(LayerInfo& layer, glm::ivec2 viewportSize){
+ViewFrustum cameraToViewFrustum(LayerInfo& layer, float layerFov, glm::ivec2 viewportSize){
   // All planes have the camera locations as a point if you extend them 
   // except for the near and far plane
-  auto angles = calcFovAngles(layer, viewportSize);
+  auto angles = calcFovAngles(layer, layerFov, viewportSize);
 
   float widthXNear = angles.zNear * glm::tan(angles.x);
   float widthYNear = angles.zNear * glm::tan(angles.y);

@@ -96,8 +96,8 @@ struct FovAngles {
   float zFar;
 };
 
-FovAngles calcFovAngles(LayerInfo& layer, glm::ivec2 viewportSize);
-ViewFrustum cameraToViewFrustum(LayerInfo& layer, glm::ivec2 viewportSize);
+FovAngles calcFovAngles(LayerInfo& layer, float layerFov, glm::ivec2 viewportSize);
+ViewFrustum cameraToViewFrustum(LayerInfo& layer, float layerFov, glm::ivec2 viewportSize);
 bool passesFrustumCulling(ViewFrustum& viewFrustum, Transformation& camera, ModAABB2& aabb);
 
 #endif 

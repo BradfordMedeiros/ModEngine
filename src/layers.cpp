@@ -103,7 +103,7 @@ void setLayerOption(LayerInfo& layer, std::string& attribute, std::string& paylo
   }else if (attribute == "far"){
     layer.farplane = std::atof(payload.c_str());
   }else if (attribute == "fov"){
-    layer.fov = std::atof(payload.c_str());
+    layer.fovRaw = std::atof(payload.c_str());
   }else if (attribute == "selection"){
     layer.selectIndex = std::atoi(payload.c_str());
   }else{
@@ -143,7 +143,7 @@ std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::strin
         .disableViewTransform = false,
         .visible = true,
         .depthBufferLayer = 0,
-        .fov = 45.f,
+        .fovRaw = 45.f,
         .nearplane = 0.1f,
         .farplane = 1000.f,
         .selectIndex = 0,
@@ -176,7 +176,7 @@ std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::strin
       .disableViewTransform = false,
       .visible = true,
       .depthBufferLayer = 0,
-      .fov = 45.f,
+      .fovRaw = 45.f,
       .nearplane = 0.1f,
       .farplane = 1000.f,
       .selectIndex = 0,

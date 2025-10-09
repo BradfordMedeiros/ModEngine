@@ -14,6 +14,8 @@ ManipulatorSelection onManipulatorSelected();
 glm::mat4 projectionFromLayer(LayerInfo& layer, ViewportSettings& viewport);
 LayerInfo& layerByName(std::string layername);
 LayerInfo getLayerForId(objid id);
+float getLayerFov(LayerInfo& layer);
+
 RotationDirection getCursorInfoWorld(float ndix, float ndiy, int viewportIndex);
 std::vector<ParsedLoadScene> parseSceneArgs(std::vector<std::string>& rawScenes);
 std::optional<unsigned int> getTextureId(std::string& texture);

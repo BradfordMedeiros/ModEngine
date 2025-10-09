@@ -395,8 +395,7 @@ void visualizeFrustum(ViewFrustum& viewFrustum, Transformation& viewTransform, V
   };
 
 
-  auto angles = calcFovAngles(world.sandbox.layers.at(0), calcViewportSize(viewport));
-
+  auto angles = calcFovAngles(world.sandbox.layers.at(0),  getLayerFov(world.sandbox.layers.at(0)), calcViewportSize(viewport));
 
   auto position = viewTransform.position;  // viewFrustum
   {
@@ -507,7 +506,7 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
   glUseProgram(*shaderProgram);
   int numTriangles = 0;
 
-  auto viewFrustum = cameraToViewFrustum(world.sandbox.layers.at(0), calcViewportSize(viewport));
+  auto viewFrustum = cameraToViewFrustum(world.sandbox.layers.at(0), getLayerFov(world.sandbox.layers.at(0)), calcViewportSize(viewport));
 
   if (state.cullingObject.has_value() && state.visualizeFrustum){
     visualizeFrustum(viewFrustum, cullingViewTransform, viewport);
@@ -592,7 +591,7 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
         static glm::mat4 scaledModelMatrix(1.f); // copy assignent showed up in profiling, so just using static here so can prevent copy in most cases
         glm::mat4& finalModelMatrix = modelMatrix;
         if (layer.scale){
-          scaledModelMatrix = calculateScaledMatrix(view, modelMatrix, layer.fov);
+          scaledModelMatrix = calculateScaledMatrix(view, modelMatrix, getLayerFov(layer));
           finalModelMatrix = scaledModelMatrix;
         }
         bool isPortal = false;
