@@ -552,4 +552,9 @@ typedef std::variant<
   Unknown2BindingOption
 > ViewportOption;
 
+struct ViewportMeshEnablement {
+  bool enable;
+  int viewport;
+};
+
 #endif

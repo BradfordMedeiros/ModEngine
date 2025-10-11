@@ -662,7 +662,8 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
               finalModelMatrix,
               gameobjBuffer.lookup,
               *waterShader,
-              isTransparencyLayer
+              isTransparencyLayer,
+              viewport.index
             );
             numTriangles = numTriangles + trianglesDrawn;
           }

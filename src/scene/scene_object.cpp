@@ -542,9 +542,10 @@ std::optional<OctreeMaterial> getMaterial(World& world, glm::vec3 position){
   return getMaterial(octreeObject -> octree, glm::vec3(octreeSpaceCamPos.x, octreeSpaceCamPos.y, octreeSpaceCamPos.z), 10); // subdivision 10 is stupid, this should just retrieve to relevant depth
 }
 
-void setMeshEnabled(World& world, int32_t id, bool enabled){
+void setMeshEnabled(World& world, int32_t id, bool enabled, std::vector<ViewportMeshEnablement> viewports){
   auto meshObj = getMesh(world.objectMapping, id, getObjTypeLookup(world.sandbox, id));
   if (meshObj){
     meshObj -> isDisabled = !enabled;
+    meshObj -> viewports = viewports;
   }
 }

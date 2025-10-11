@@ -394,8 +394,8 @@ void setPhysicsVelocity(int32_t id, glm::vec3 velocity){
 }
 
 
-void setMeshEnabled(int32_t id, bool enabled){
-  setMeshEnabled(world, id, enabled);
+void setMeshEnabled(int32_t id, bool enabled, std::vector<ViewportMeshEnablement> viewports){
+  setMeshEnabled(world, id, enabled, viewports);
 }
 
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld, const char* hint){

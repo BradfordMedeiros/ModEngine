@@ -12,6 +12,8 @@ struct GameObjectMesh {
   std::vector<std::vector<objid>> boneGameObjIdCache;  // TODO - i look these up in the main loop...it might be nice to do during load instead
 
   bool isDisabled;
+  std::vector<ViewportMeshEnablement> viewports;
+
   TextureInformation texture;
   TextureLoadingData normalTexture;
 

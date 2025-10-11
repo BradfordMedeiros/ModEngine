@@ -340,6 +340,15 @@ std::string typeForLookup(ObjTypeLookup& lookup){
 }
 
 
+bool shouldRenderMesh(GameObjectMesh& gameobjMesh, int viewportId){
+  for (auto& viewport : gameobjMesh.viewports){
+    if (viewport.viewport == viewportId){
+      return viewport.enable;
+    }
+  }
+  return !gameobjMesh.isDisabled;
+}
+
 objid selectedId = 0;
 int renderObject(
   GLint shaderProgram,
@@ -357,7 +366,8 @@ int renderObject(
   glm::mat4& finalModelMatrix,
   ObjTypeLookup& lookup,
   unsigned int waterShader,
-  bool isTransparencyLayer
+  bool isTransparencyLayer,
+  int viewportId
 ){
 
   if (lookup.type ==  OBJ_MESH){
@@ -399,7 +409,7 @@ int renderObject(
   mesh: 
   {
     auto meshObj = getMesh(objectMapping, id, lookup);
-    if (meshObj != NULL && !meshObj -> isDisabled && (meshObj -> meshesToRender.size() > 0)){
+    if (meshObj != NULL && shouldRenderMesh(*meshObj, viewportId) && (meshObj -> meshesToRender.size() > 0)){
       int numTriangles = 0;
       for (int x = 0; x < meshObj -> meshesToRender.size(); x++){
         Mesh& meshToRender = meshObj -> meshesToRender.at(x);

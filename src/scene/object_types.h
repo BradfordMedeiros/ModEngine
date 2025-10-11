@@ -188,7 +188,8 @@ int renderObject(
   glm::mat4& finalModelMatrix,
   ObjTypeLookup& lookup,
   unsigned int waterShader,
-  bool isTransparencyLayer
+  bool isTransparencyLayer,
+  int viewportId
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, ObjectMapping& objectMapping, std::function<std::string(int)> getTextureName, std::function<void(std::string, std::string&)> saveFile, ObjTypeLookup& objtypeLookup);
