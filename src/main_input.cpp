@@ -285,7 +285,7 @@ void handleSnapEasy(objid id, bool left){
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
-  cBindings.onKeyCallback(getKeyRemapping(keyMapper, key), scancode, action, mods);
+  cBindings.onKeyCallback(key, scancode, action, mods);
 
   if (state.inputMode != ENABLED){
     return;
@@ -446,20 +446,6 @@ void printAxisDebug(const float* axises, int count){
   std::cout << " )" << std::endl;
 }
 
-float calcAxisValue(const float* axises, int count, int index, float deadzonemin, float deadzonemax, bool invert){
-  if (index >= count){
-    std::cout << "index: " << index << ", count: " << count << std::endl;
-    assert(false);
-  }
-  float axisValue = axises[index];
-  if (axisValue > deadzonemin && axisValue < deadzonemax){
-    return 0.f;
-  }
-  if (invert){
-    axisValue = axisValue * -1.f;
-  }
-  return axisValue;
-}
 
 void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3), float deltaTime,  void (*onKeyChar)(unsigned int codepoint), void (*onJoystick)(std::vector<JoyStickInfo> infos)){
   if (!glfwJoystickPresent(GLFW_JOYSTICK_1)){
@@ -472,25 +458,9 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
   int buttonCount;
   auto buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttonCount);
 
-  for (auto [index, axisConfiguration] : remapper.axisConfigurations){
-    if (axisConfiguration.hasKeyMapping && axisConfiguration.mapping.sourceKey < buttonCount){
-      if (buttons[axisConfiguration.mapping.sourceKey] == GLFW_PRESS){
-        onKeyChar(axisConfiguration.mapping.destinationKey);
-      }
-    }
-  }
 
   std::vector<JoyStickInfo> joystickInfos;
-  for (auto [index, axisConfig] :  remapper.axisConfigurations){
-    auto axisValue = calcAxisValue(axises, count, index, axisConfig.deadzonemin, axisConfig.deadzonemax, axisConfig.invert); 
-    if (axisConfig.shouldMapKey && axisValue > axisConfig.amount){
-      onKeyChar(axisConfig.destinationKey);
-    }
-    joystickInfos.push_back(JoyStickInfo{
-      .index = index,
-      .value = axisValue,
-    });
-  }
+
   onJoystick(joystickInfos);
   //printControllerDebug(buttons, buttonCount);
   //printAxisDebug(axises, count);

@@ -8,22 +8,6 @@
 #include <functional>
 #include "./common/util.h"
 
-struct KeyMapping {
-  int sourceKey;
-  int destinationKey;
-};
-
-struct KeyAxisConfiguration {
-  bool invert;
-  float deadzonemin;
-  float deadzonemax;
-  bool shouldMapKey;
-  float amount;
-  int destinationKey;
-  bool hasKeyMapping;
-  KeyMapping mapping;
-};
-
 enum DispatchType { BUTTON_PRESS, BUTTON_RELEASE, BUTTON_HOLD };
 
 struct ViewportSettings;
@@ -37,8 +21,6 @@ struct InputDispatch {
 };
 
 struct KeyRemapper {
-  std::vector<KeyMapping> mapping;                          // ascii value key to ascii value key
-  std::unordered_map<int, KeyAxisConfiguration> axisConfigurations;
   std::vector<InputDispatch> inputFns;
 
   // Cached Data
@@ -46,6 +28,5 @@ struct KeyRemapper {
 };
 
 KeyRemapper readMapping(std::string filemapping, std::vector<InputDispatch> inputFns, std::function<std::string(std::string)> readFile);
-int getKeyRemapping(KeyRemapper& keymapper, int key);
 
 #endif
