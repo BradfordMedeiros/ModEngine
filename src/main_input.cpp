@@ -542,14 +542,13 @@ void removeControllerInputCache(int joystick){
   std::cout << "gamepad removed from cache: " << joystick << std::endl;
   controllerCaches = newCache;
 }
-ControllerCache& getControllerCache(int joystick){
+ControllerCache* getControllerCache(int joystick){
   for (auto& cache : controllerCaches){
     if (cache.joystick == joystick){
-      return cache;
+      return &cache;
     }
   }
-  modassert(false, "invalid joystick");
-  return controllerCaches.at(0);
+  return NULL;
 }
 void processControllerCache(){
   for (auto& cache : controllerCaches){
@@ -694,20 +693,19 @@ void processControllerCache(){
 
 void joystickCallback(int jid, int event){
   if (event == GLFW_CONNECTED){
-    std::cout << "gamepad connected" << std::endl;
+    std::cout << "controller gamepad connected" << std::endl;
     createControllerInputCache(jid);
     cBindings.onController(jid, true);
   }else if (event == GLFW_DISCONNECTED){
-    std::cout << "gamepad disconnected" << std::endl;
+    std::cout << "controller gamepad disconnected" << std::endl;
     removeControllerInputCache(jid);
     cBindings.onController(jid, false);
     // this disconnection thing seems to suck.  Can turn controller off and no message here
+  }else{
+    modassert(false, "controller unexpected event");
   }
 
-  modassert(event == GLFW_CONNECTED || event == GLFW_DISCONNECTED, "unexpected event type");
-  bool connected = event == GLFW_CONNECTED;
 
-  std::cout << "joystick connected: " << connected << ", jid = " << jid << std::endl;
 }
 
 void onJoystick(std::vector<JoyStickInfo> infos){
@@ -736,6 +734,19 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
   std::cout << "button info: " << buttonInfo.value().a << std::endl;
 
   std::vector<JoyStickInfo> joystickInfos;
+
+  static bool initial = true;
+  if (initial){
+    auto joysticks = getJoysticks();
+    for (auto joystick : joysticks){
+      auto cache = getControllerCache(joystick);
+      if (!cache){
+        joystickCallback(joystick, GLFW_CONNECTED);
+      }
+    }
+    initial = false;
+  }
+
 
   processControllerCache();
 

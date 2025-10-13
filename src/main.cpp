@@ -1856,6 +1856,7 @@ int main(int argc, char* argv[]){
   for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
     loadCScript(getUniqueObjId(), script.c_str(), -1, bootStrapperMode, true);
   }
+  afterFrameForScripts(); // call this so api called will be ready -- for the above script (eg for callbacks).  This moves scripts from staged to loaded
 
   
   std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
@@ -1926,6 +1927,7 @@ int main(int argc, char* argv[]){
   }
 
   waterShader = pluginApi.loadShader("water", "./res/shaders/water");
+
 
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){

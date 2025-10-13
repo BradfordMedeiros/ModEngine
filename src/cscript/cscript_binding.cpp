@@ -22,7 +22,7 @@ CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBinding
     .onMapping = [](int32_t id, void* data, int32_t index) -> void {},
     .onKeyCallback = [](objid scriptId, void* data, int key, int scancode, int action, int mods) -> void {},
     .onKeyCharCallback = [](objid scriptId, void* data, unsigned int codepoint) -> void {},
-    .onController = [](objid scriptId, void* data, int joystick, bool) -> void {},
+    .onController = [](objid scriptId, void* data, int joystick, bool) -> void { },
     .onControllerKey = [](objid scriptId, void* data, int joystick, BUTTON_TYPE button, bool down) -> void {},
     .onCameraSystemChange = [](objid scriptId, std::string, bool) -> void {},
     .onMessage = [](objid scriptId, void* data, std::string& topic, std::any& value) -> void {},
