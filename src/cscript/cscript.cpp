@@ -278,6 +278,28 @@ void onCKeyCharCallbackAllScripts(unsigned int codepoint){
   }
 }
 
+void onCControllerAllScripts(int joystick, bool connected){
+  for (auto &objInstance : customObjInstances){
+    if (objInstance.shouldRemove){
+      continue;
+    }
+    auto binding = objInstance.cScriptBinding;
+    assert(binding != NULL);
+    binding -> onController(objInstance.instanceId, objInstance.data, joystick, connected);
+  }
+}
+
+void onCControllerKeyAllScripts(int joystick, BUTTON_TYPE button, bool up){
+  for (auto &objInstance : customObjInstances){
+    if (objInstance.shouldRemove){
+      continue;
+    }
+    auto binding = objInstance.cScriptBinding;
+    assert(binding != NULL);
+    binding -> onControllerKey(objInstance.instanceId, objInstance.data, joystick, button, up);
+  }
+}
+
 void onCCameraSystemChangeAllScripts(std::string camera, bool usingBuiltInCamera){
   for (auto &objInstance : customObjInstances){
     if (objInstance.shouldRemove){
@@ -375,6 +397,8 @@ CScriptBindingCallbacks getCScriptBindingCallbacks(){
     .onObjectHover = onCObjectHoverAllScripts,
     .onKeyCallback = onCKeyCallbackAllScripts,
     .onKeyCharCallback = onCKeyCharCallbackAllScripts,
+    .onController = onCControllerAllScripts,
+    .onControllerKey = onCControllerKeyAllScripts,
     .onCameraSystemChange = onCCameraSystemChangeAllScripts,
     .onMessage = onCMessageAllScripts,
     .onTcpMessage = onCTcpMessageAllScripts,

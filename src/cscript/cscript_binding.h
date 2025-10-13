@@ -156,6 +156,8 @@ struct CustomApiBindings {
 
   void (*click)(int button, int action);
   void (*moveMouse)(glm::vec2 ndi);
+  std::vector<int> (*getJoysticks)();
+
   void (*schedule)(objid id, bool realtime, float delayTimeMs, void* data, std::function<void(void*)> fn);
   FrameInfo (*getFrameInfo)();
   RotationDirection (*getCursorInfoWorld)(float ndix, float ndiy, int viewportIndex);
@@ -227,8 +229,12 @@ struct CScriptBinding {
   id_func_data onObjectUnselected;
   id_onobjectHoverFunc onObjectHover;
   id_funcMappingFunc onMapping;
+
   id_keycallback onKeyCallback;
   id_keycharcallback onKeyCharCallback;
+  std::function<void(int, void*, int, bool)> onController;
+  std::function<void(int, void*, int, BUTTON_TYPE, bool)> onControllerKey;
+
   id_stringboolFunc onCameraSystemChange;
   id_string2func onMessage;
   id_stringfunc onTcpMessage;

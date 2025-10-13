@@ -27,6 +27,9 @@ struct CScriptBindingCallbacks {
   onobjectHoverFunc onObjectHover;
   keycallback onKeyCallback;
   keycharcallback onKeyCharCallback;
+  std::function<void(int, bool)> onController;
+  std::function<void(int, BUTTON_TYPE, bool)> onControllerKey;
+
   stringboolFunc onCameraSystemChange;
   string2func onMessage;
   stringfunc onTcpMessage;

@@ -557,4 +557,37 @@ struct ViewportMeshEnablement {
   int viewport;
 };
 
+struct AxisInfo {
+  float leftTrigger;
+  float rightTrigger;
+  float leftStickX;
+  float leftStickY;
+  float rightStickX;
+  float rightStickY;
+};
+
+enum BUTTON_TYPE { BUTTON_A, BUTTON_B, BUTTON_X, BUTTON_Y, BUTTON_LEFT_STICK, BUTTON_RIGHT_STICK, BUTTON_START, BUTTON_LB, BUTTON_RB, BUTTON_HOME, BUTTON_UP, BUTTON_DOWN, BUTTON_LEFT, BUTTON_RIGHT };
+std::string print(BUTTON_TYPE button);
+
+struct ButtonInfo {
+  bool a = false;
+  bool b = false;
+  bool x = false;
+  bool y = false;
+  bool leftStick = false;
+  bool rightStick = false;
+  bool start = false;
+  bool leftBumper = false;
+  bool rightBumper = false;
+  bool home = false;
+  bool up = false;
+  bool down = false;
+  bool left = false;
+  bool right = false;
+};
+struct ControlInfo {
+  AxisInfo axisInfo;
+  ButtonInfo buttonInfo;
+};
+
 #endif

@@ -1669,6 +1669,7 @@ int main(int argc, char* argv[]){
     .setSelected = setSelected,
     .click = dispatchClick,
     .moveMouse = moveMouse,
+    .getJoysticks = getJoysticks,
     .schedule = schedule,
     .getFrameInfo = getFrameInfo,
     .getCursorInfoWorld = getCursorInfoWorld,

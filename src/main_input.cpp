@@ -194,21 +194,6 @@ void mouse_button_callback(engineState& state, int button, int action, int mods,
   }
 }
 
-void joystickCallback(int jid, int event){
-  if (event == GLFW_CONNECTED){
-    std::cout << "gamepad connected" << std::endl;
-  }else if (event == GLFW_DISCONNECTED){
-    std::cout << "gamepad disconnected" << std::endl;
-    // this disconnection thing seems to suck.  Can turn controller off and no message here
-  }
-}
-
-void onJoystick(std::vector<JoyStickInfo> infos){
-  modlog("joystick", "onJoystick");
-  for (auto info : infos){
-    modlog("joystick", std::to_string(info.index) + ", " + std::to_string(info.value));
-  }
-}
 
 void onArrowKey(int key){
   if (key == 262){ // right
@@ -447,6 +432,292 @@ void printAxisDebug(const float* axises, int count){
 }
 
 
+std::optional<AxisInfo> getAxisInfo(int joystick){
+  //GLFW_JOYSTICK_1
+  if (!glfwJoystickPresent(joystick)){
+    return std::nullopt;
+  }
+
+  int count;
+  auto axises = glfwGetJoystickAxes(joystick, &count);  
+  modassert(count == 6, "invalid joystick info");
+  return AxisInfo {
+    .leftTrigger = axises[5],
+    .rightTrigger = axises[4],
+    .leftStickX = axises[0],
+    .leftStickY = axises[1],
+    .rightStickX = axises[2],
+    .rightStickY = axises[3],
+  };
+}
+
+
+
+std::optional<ButtonInfo> getButtonInfo(int joystick){
+  if (!glfwJoystickPresent(joystick)){
+    return std::nullopt;
+  }
+  int buttonCount;
+  auto buttons = glfwGetJoystickButtons(joystick, &buttonCount);
+
+  //for (int i = 0; i < buttonCount; i++){
+  //  if (buttons[i] == GLFW_PRESS){
+  //    std::cout << "button[" << i << "] : DOWN |";
+  //  }else {
+  //    std::cout << "button[" << i << "] : UP |";
+  //  }
+  //}
+  return ButtonInfo {
+    .a = buttons[0] == GLFW_PRESS,
+    .b = buttons[1] == GLFW_PRESS,
+    .x = buttons[3] == GLFW_PRESS,
+    .y = buttons[4] == GLFW_PRESS,
+    .leftStick = buttons[13] == GLFW_PRESS,
+    .rightStick = buttons[14] == GLFW_PRESS,
+    .start = buttons[11] == GLFW_PRESS,
+    .leftBumper = buttons[6] == GLFW_PRESS,
+    .rightBumper = buttons[7] == GLFW_PRESS,
+    .home = buttons[12] == GLFW_PRESS,
+    .up = buttons[15] == GLFW_PRESS,
+    .down = buttons[17] == GLFW_PRESS,
+    .left = buttons[18] == GLFW_PRESS,
+    .right = buttons[16] == GLFW_PRESS,
+  };
+}
+
+
+std::optional<ControlInfo> getControlInfo(int joystick){
+  if (!glfwJoystickPresent(joystick)){
+    return std::nullopt;
+  }
+  auto axisInfo = getAxisInfo(joystick);
+  auto buttonInfo = getButtonInfo(joystick);
+  return ControlInfo {
+    .axisInfo = axisInfo.value(),
+    .buttonInfo = buttonInfo.value(),
+  }; 
+}
+
+std::vector<int> getJoysticks(){
+  std::vector<int> joysticks;
+  if (glfwJoystickPresent(GLFW_JOYSTICK_1)){
+    joysticks.push_back(0);
+  }
+  if (glfwJoystickPresent(GLFW_JOYSTICK_2)){
+    joysticks.push_back(1);
+  }
+  if (glfwJoystickPresent(GLFW_JOYSTICK_3)){
+    joysticks.push_back(2);
+  }
+  if (glfwJoystickPresent(GLFW_JOYSTICK_4)){
+    joysticks.push_back(3);
+  }
+  return joysticks;
+}
+
+struct ControllerCache {
+  int joystick;
+  ButtonInfo lastButtons;
+};
+std::vector<ControllerCache> controllerCaches;
+void createControllerInputCache(int joystick){
+  for (auto& cache : controllerCaches){
+    if (cache.joystick == joystick){
+      return;
+    }
+  }
+  std::cout << "gamepad added to cache: " << joystick << std::endl;
+  controllerCaches.push_back(ControllerCache {
+    .joystick = joystick,
+  });
+}
+void removeControllerInputCache(int joystick){
+  std::vector<ControllerCache> newCache;
+  for (auto& cache : controllerCaches){
+    if (cache.joystick == joystick){
+      continue;
+    }
+    newCache.push_back(cache);
+  }
+  std::cout << "gamepad removed from cache: " << joystick << std::endl;
+  controllerCaches = newCache;
+}
+ControllerCache& getControllerCache(int joystick){
+  for (auto& cache : controllerCaches){
+    if (cache.joystick == joystick){
+      return cache;
+    }
+  }
+  modassert(false, "invalid joystick");
+  return controllerCaches.at(0);
+}
+void processControllerCache(){
+  for (auto& cache : controllerCaches){
+    auto controlInfo = getControlInfo(cache.joystick);
+    ButtonInfo& buttonInfo = controlInfo.value().buttonInfo;
+    if (buttonInfo.a != cache.lastButtons.a){
+      if (buttonInfo.a){
+        std::cout << "gamepad pressed a" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_A, true);
+      }else{
+        std::cout << "gamepad released a" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_A, false);
+      }
+    }
+    if (buttonInfo.b != cache.lastButtons.b){
+      if (buttonInfo.b){
+        std::cout << "gamepad pressed b" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_B, true);
+      }else{
+        std::cout << "gamepad released b" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_B, false);;
+      }
+    }
+    if (buttonInfo.x != cache.lastButtons.x){
+      if (buttonInfo.x){
+        std::cout << "gamepad pressed x" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_X, true);
+      }else{
+        std::cout << "gamepad released x" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_X, false);
+      }
+    }
+    if (buttonInfo.y != cache.lastButtons.y){
+      if (buttonInfo.y){
+        std::cout << "gamepad pressed y" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_Y, true);
+      }else{
+        std::cout << "gamepad released y" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_Y, false);
+      }
+    }
+
+    if (buttonInfo.leftStick != cache.lastButtons.leftStick){
+      if (buttonInfo.leftStick){
+        std::cout << "gamepad pressed leftStick" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_LEFT_STICK, true);
+      }else{
+        std::cout << "gamepad released leftStick" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_LEFT_STICK, false);
+      }
+    }
+    if (buttonInfo.rightStick != cache.lastButtons.rightStick){
+      if (buttonInfo.rightStick){
+        std::cout << "gamepad pressed rightStick" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_RIGHT_STICK, true);
+      }else{
+        std::cout << "gamepad released rightStick" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_RIGHT_STICK, false);
+      }
+    }
+
+    if (buttonInfo.start != cache.lastButtons.start){
+      if (buttonInfo.start){
+        std::cout << "gamepad pressed start" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_START, true);
+      }else{
+        std::cout << "gamepad released start" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_START, false);
+      }
+    }
+
+    if (buttonInfo.leftBumper != cache.lastButtons.leftBumper){
+      if (buttonInfo.leftBumper){
+        std::cout << "gamepad pressed leftBumper" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_LB, true);
+      }else{
+        std::cout << "gamepad released leftBumper" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_LB, false);
+      }
+    }
+    if (buttonInfo.rightBumper != cache.lastButtons.rightBumper){
+      if (buttonInfo.rightBumper){
+        std::cout << "gamepad pressed rightBumper" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_RB, true);
+      }else{
+        std::cout << "gamepad released rightBumper" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_RB, false);
+      }
+    }
+
+    if (buttonInfo.home != cache.lastButtons.home){
+      if (buttonInfo.home){
+        std::cout << "gamepad pressed home" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_HOME, true);
+      }else{
+        std::cout << "gamepad released home" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_HOME, false);
+      }
+    }
+
+    if (buttonInfo.up != cache.lastButtons.up){
+      if (buttonInfo.up){
+        std::cout << "gamepad pressed up" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_UP, true);
+      }else{
+        std::cout << "gamepad released up" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_UP, false);
+      }
+    }
+    if (buttonInfo.down != cache.lastButtons.down){
+      if (buttonInfo.down){
+        std::cout << "gamepad pressed down" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_DOWN, true);
+      }else{
+        std::cout << "gamepad released down" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_DOWN, false);
+      }
+    }
+    if (buttonInfo.left != cache.lastButtons.left){
+      if (buttonInfo.left){
+        std::cout << "gamepad pressed left" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_LEFT, true);
+      }else{
+        std::cout << "gamepad released left" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_LEFT, false);
+      }
+    }
+    if (buttonInfo.right != cache.lastButtons.right){
+      if (buttonInfo.right){
+        std::cout << "gamepad pressed right" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_RIGHT, true);
+      }else{
+        std::cout << "gamepad released right" << std::endl;
+        cBindings.onControllerKey(cache.joystick, BUTTON_RIGHT, false);
+      }
+    }
+
+    cache.lastButtons = buttonInfo;
+  }
+}
+
+
+void joystickCallback(int jid, int event){
+  if (event == GLFW_CONNECTED){
+    std::cout << "gamepad connected" << std::endl;
+    createControllerInputCache(jid);
+    cBindings.onController(jid, true);
+  }else if (event == GLFW_DISCONNECTED){
+    std::cout << "gamepad disconnected" << std::endl;
+    removeControllerInputCache(jid);
+    cBindings.onController(jid, false);
+    // this disconnection thing seems to suck.  Can turn controller off and no message here
+  }
+
+  modassert(event == GLFW_CONNECTED || event == GLFW_DISCONNECTED, "unexpected event type");
+  bool connected = event == GLFW_CONNECTED;
+
+  std::cout << "joystick connected: " << connected << ", jid = " << jid << std::endl;
+}
+
+void onJoystick(std::vector<JoyStickInfo> infos){
+  modlog("joystick", "onJoystick");
+  for (auto info : infos){
+    modlog("joystick", std::to_string(info.index) + ", " + std::to_string(info.value));
+  }
+}
+
+
 void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3), float deltaTime,  void (*onKeyChar)(unsigned int codepoint), void (*onJoystick)(std::vector<JoyStickInfo> infos)){
   if (!glfwJoystickPresent(GLFW_JOYSTICK_1)){
     //std::cout << "joystick 0 not present" << std::endl;
@@ -458,12 +729,19 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
   int buttonCount;
   auto buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttonCount);
 
+  auto info = getAxisInfo(GLFW_JOYSTICK_1);
+  std::cout << "axis info: " << info.value().leftTrigger << std::endl;
+
+  auto buttonInfo = getButtonInfo(GLFW_JOYSTICK_1);
+  std::cout << "button info: " << buttonInfo.value().a << std::endl;
 
   std::vector<JoyStickInfo> joystickInfos;
 
+  processControllerCache();
+
   onJoystick(joystickInfos);
   //printControllerDebug(buttons, buttonCount);
-  //printAxisDebug(axises, count);
+  printAxisDebug(axises, count);
 }
 
 void processKeyBindings(GLFWwindow *window, KeyRemapper& remapper, int viewportIndex){

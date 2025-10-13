@@ -48,6 +48,7 @@ void keyCharCallback(GLFWwindow* window, unsigned int codepoint);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void onMouseButton();
 void drop_callback(GLFWwindow* window, int count, const char** paths);
+std::vector<int> getJoysticks();
 void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3), float deltaTime,  void (*onKeyChar)(unsigned int codepoint), void (*onJoystick)(std::vector<JoyStickInfo> infos));
 void processKeyBindings(GLFWwindow *window, KeyRemapper& remapper, int viewport);
 void toggleFullScreen(bool fullscreen);

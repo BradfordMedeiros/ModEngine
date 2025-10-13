@@ -1365,3 +1365,49 @@ std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadF
 
   return mapData;
 }
+
+std::string print(BUTTON_TYPE button){
+  if (button == BUTTON_A){
+    return "BUTTON_A";
+  }
+  if (button == BUTTON_B){
+    return "BUTTON_B";
+  }
+  if (button == BUTTON_X){
+    return "BUTTON_X";
+  }
+  if (button == BUTTON_Y){
+    return "BUTTON_Y";
+  }
+  if (button == BUTTON_LEFT_STICK){
+    return "BUTTON_LEFT_STICK";
+  }
+  if (button == BUTTON_RIGHT_STICK){
+    return "BUTTON_RIGHT_STICK";
+  }
+  if (button == BUTTON_START){
+    return "BUTTON_START";
+  }
+  if (button == BUTTON_LB){
+    return "BUTTON_LB";
+  }
+  if (button == BUTTON_RB){
+    return "BUTTON_RB";
+  }
+  if (button == BUTTON_HOME){
+    return "BUTTON_HOME";
+  }
+  if (button == BUTTON_UP){
+    return "BUTTON_UP";
+  }
+  if (button == BUTTON_DOWN){
+    return "BUTTON_DOWN";
+  }
+  if (button == BUTTON_LEFT){
+    return "BUTTON_LEFT";
+  }
+  if (button == BUTTON_RIGHT){
+    return "BUTTON_RIGHT";
+  }
+  return "unknown button";
+}
