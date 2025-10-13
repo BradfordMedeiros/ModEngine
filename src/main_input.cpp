@@ -715,7 +715,6 @@ void onJoystick(std::vector<JoyStickInfo> infos){
   }
 }
 
-
 void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3), float deltaTime,  void (*onKeyChar)(unsigned int codepoint), void (*onJoystick)(std::vector<JoyStickInfo> infos)){
   if (!glfwJoystickPresent(GLFW_JOYSTICK_1)){
     //std::cout << "joystick 0 not present" << std::endl;

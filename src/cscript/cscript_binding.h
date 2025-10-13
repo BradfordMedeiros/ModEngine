@@ -156,7 +156,6 @@ struct CustomApiBindings {
 
   void (*click)(int button, int action);
   void (*moveMouse)(glm::vec2 ndi);
-  std::vector<int> (*getJoysticks)();
 
   void (*schedule)(objid id, bool realtime, float delayTimeMs, void* data, std::function<void(void*)> fn);
   FrameInfo (*getFrameInfo)();
@@ -205,6 +204,9 @@ struct CustomApiBindings {
   void (*createViewport)(int viewportIndex, float x, float y, float widthNdi, float heightNdi, ViewportOption bindingOption, std::vector<LayerOverride> layerOverride);
   void (*removeViewport)(int viewportIndex);
   std::vector<int> (*listViewports)();
+
+  std::optional<ControlInfo> (*getControlInfo)(int joystick);
+
 
   std::string (*dumpDebugInfo)(bool);
   //std::vector<func_t> registerGuileFns
