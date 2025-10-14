@@ -43,7 +43,9 @@ void mouse_button_callback(engineState& state, int button, int action, int mods,
 
 void joystickCallback(int jid, int event);
 void onJoystick(std::vector<JoyStickInfo> infos);
-std::optional<ControlInfo> getControlInfo(int joystick);
+
+
+std::optional<ControlInfo2> getControlInfo2(int joystick);
 
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void keyCharCallback(unsigned int codepoint);

@@ -585,9 +585,15 @@ struct ButtonInfo {
   bool left = false;
   bool right = false;
 };
+
 struct ControlInfo {
   AxisInfo axisInfo;
   ButtonInfo buttonInfo;
 };
+struct ControlInfo2{
+  ControlInfo thisFrame;
+  ControlInfo lastFrame;
+};
+
 
 #endif

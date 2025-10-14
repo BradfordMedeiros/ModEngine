@@ -205,7 +205,7 @@ struct CustomApiBindings {
   void (*removeViewport)(int viewportIndex);
   std::vector<int> (*listViewports)();
 
-  std::optional<ControlInfo> (*getControlInfo)(int joystick);
+  std::optional<ControlInfo2> (*getControlInfo)(int joystick);
 
 
   std::string (*dumpDebugInfo)(bool);

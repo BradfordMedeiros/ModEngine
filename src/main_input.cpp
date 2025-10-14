@@ -485,11 +485,26 @@ std::optional<ButtonInfo> getButtonInfo(int joystick){
   };
 }
 
+struct ControllerCache {
+  int joystick;
+  ControlInfo currentControls;
+  ControlInfo lastControls;
+};
+std::vector<ControllerCache> controllerCaches;  // TODO static
+ControllerCache* getControllerCache(int joystick){
+  for (auto& cache : controllerCaches){
+    if (cache.joystick == joystick){
+      return &cache;
+    }
+  }
+  return NULL;
+}
 
 std::optional<ControlInfo> getControlInfo(int joystick){
   if (!glfwJoystickPresent(joystick)){
     return std::nullopt;
   }
+
   auto axisInfo = getAxisInfo(joystick);
   auto buttonInfo = getButtonInfo(joystick);
   return ControlInfo {
@@ -497,6 +512,24 @@ std::optional<ControlInfo> getControlInfo(int joystick){
     .buttonInfo = buttonInfo.value(),
   }; 
 }
+
+
+
+
+std::optional<ControlInfo2> getControlInfo2(int joystick){
+  if (!glfwJoystickPresent(joystick)){
+    return std::nullopt;
+  }
+  auto controls = getControlInfo(joystick);
+  auto cacheValue = getControllerCache(joystick);
+  modassert(cacheValue, "did not find controller in the cache");
+  return ControlInfo2 {
+    .thisFrame = cacheValue -> currentControls,
+    .lastFrame = cacheValue -> lastControls,
+  }; 
+}
+
+
 
 std::vector<int> getJoysticks(){
   std::vector<int> joysticks;
@@ -515,11 +548,7 @@ std::vector<int> getJoysticks(){
   return joysticks;
 }
 
-struct ControllerCache {
-  int joystick;
-  ButtonInfo lastButtons;
-};
-std::vector<ControllerCache> controllerCaches;
+
 void createControllerInputCache(int joystick){
   for (auto& cache : controllerCaches){
     if (cache.joystick == joystick){
@@ -542,19 +571,16 @@ void removeControllerInputCache(int joystick){
   std::cout << "gamepad removed from cache: " << joystick << std::endl;
   controllerCaches = newCache;
 }
-ControllerCache* getControllerCache(int joystick){
-  for (auto& cache : controllerCaches){
-    if (cache.joystick == joystick){
-      return &cache;
-    }
-  }
-  return NULL;
-}
+
 void processControllerCache(){
   for (auto& cache : controllerCaches){
     auto controlInfo = getControlInfo(cache.joystick);
     ButtonInfo& buttonInfo = controlInfo.value().buttonInfo;
-    if (buttonInfo.a != cache.lastButtons.a){
+
+    cache.lastControls = cache.currentControls;
+    cache.currentControls = controlInfo.value();
+
+    if (buttonInfo.a != cache.lastControls.buttonInfo.a){
       if (buttonInfo.a){
         std::cout << "gamepad pressed a" << std::endl;
         cBindings.onControllerKey(cache.joystick, BUTTON_A, true);
@@ -563,7 +589,7 @@ void processControllerCache(){
         cBindings.onControllerKey(cache.joystick, BUTTON_A, false);
       }
     }
-    if (buttonInfo.b != cache.lastButtons.b){
+    if (buttonInfo.b != cache.lastControls.buttonInfo.b){
       if (buttonInfo.b){
         std::cout << "gamepad pressed b" << std::endl;
         cBindings.onControllerKey(cache.joystick, BUTTON_B, true);
@@ -572,7 +598,7 @@ void processControllerCache(){
         cBindings.onControllerKey(cache.joystick, BUTTON_B, false);;
       }
     }
-    if (buttonInfo.x != cache.lastButtons.x){
+    if (buttonInfo.x != cache.lastControls.buttonInfo.x){
       if (buttonInfo.x){
         std::cout << "gamepad pressed x" << std::endl;
         cBindings.onControllerKey(cache.joystick, BUTTON_X, true);
@@ -581,7 +607,7 @@ void processControllerCache(){
         cBindings.onControllerKey(cache.joystick, BUTTON_X, false);
       }
     }
-    if (buttonInfo.y != cache.lastButtons.y){
+    if (buttonInfo.y != cache.lastControls.buttonInfo.y){
       if (buttonInfo.y){
         std::cout << "gamepad pressed y" << std::endl;
         cBindings.onControllerKey(cache.joystick, BUTTON_Y, true);
@@ -591,7 +617,7 @@ void processControllerCache(){
       }
     }
 
-    if (buttonInfo.leftStick != cache.lastButtons.leftStick){
+    if (buttonInfo.leftStick != cache.lastControls.buttonInfo.leftStick){
       if (buttonInfo.leftStick){
         std::cout << "gamepad pressed leftStick" << std::endl;
         cBindings.onControllerKey(cache.joystick, BUTTON_LEFT_STICK, true);
@@ -600,7 +626,7 @@ void processControllerCache(){
         cBindings.onControllerKey(cache.joystick, BUTTON_LEFT_STICK, false);
       }
     }
-    if (buttonInfo.rightStick != cache.lastButtons.rightStick){
+    if (buttonInfo.rightStick != cache.lastControls.buttonInfo.rightStick){
       if (buttonInfo.rightStick){
         std::cout << "gamepad pressed rightStick" << std::endl;
         cBindings.onControllerKey(cache.joystick, BUTTON_RIGHT_STICK, true);
@@ -610,7 +636,7 @@ void processControllerCache(){
       }
     }
 
-    if (buttonInfo.start != cache.lastButtons.start){
+    if (buttonInfo.start != cache.lastControls.buttonInfo.start){
       if (buttonInfo.start){
         std::cout << "gamepad pressed start" << std::endl;
         cBindings.onControllerKey(cache.joystick, BUTTON_START, true);
@@ -620,7 +646,7 @@ void processControllerCache(){
       }
     }
 
-    if (buttonInfo.leftBumper != cache.lastButtons.leftBumper){
+    if (buttonInfo.leftBumper != cache.lastControls.buttonInfo.leftBumper){
       if (buttonInfo.leftBumper){
         std::cout << "gamepad pressed leftBumper" << std::endl;
         cBindings.onControllerKey(cache.joystick, BUTTON_LB, true);
@@ -629,7 +655,7 @@ void processControllerCache(){
         cBindings.onControllerKey(cache.joystick, BUTTON_LB, false);
       }
     }
-    if (buttonInfo.rightBumper != cache.lastButtons.rightBumper){
+    if (buttonInfo.rightBumper != cache.lastControls.buttonInfo.rightBumper){
       if (buttonInfo.rightBumper){
         std::cout << "gamepad pressed rightBumper" << std::endl;
         cBindings.onControllerKey(cache.joystick, BUTTON_RB, true);
@@ -639,7 +665,7 @@ void processControllerCache(){
       }
     }
 
-    if (buttonInfo.home != cache.lastButtons.home){
+    if (buttonInfo.home != cache.lastControls.buttonInfo.home){
       if (buttonInfo.home){
         std::cout << "gamepad pressed home" << std::endl;
         cBindings.onControllerKey(cache.joystick, BUTTON_HOME, true);
@@ -649,7 +675,7 @@ void processControllerCache(){
       }
     }
 
-    if (buttonInfo.up != cache.lastButtons.up){
+    if (buttonInfo.up != cache.lastControls.buttonInfo.up){
       if (buttonInfo.up){
         std::cout << "gamepad pressed up" << std::endl;
         cBindings.onControllerKey(cache.joystick, BUTTON_UP, true);
@@ -658,7 +684,7 @@ void processControllerCache(){
         cBindings.onControllerKey(cache.joystick, BUTTON_UP, false);
       }
     }
-    if (buttonInfo.down != cache.lastButtons.down){
+    if (buttonInfo.down != cache.lastControls.buttonInfo.down){
       if (buttonInfo.down){
         std::cout << "gamepad pressed down" << std::endl;
         cBindings.onControllerKey(cache.joystick, BUTTON_DOWN, true);
@@ -667,7 +693,7 @@ void processControllerCache(){
         cBindings.onControllerKey(cache.joystick, BUTTON_DOWN, false);
       }
     }
-    if (buttonInfo.left != cache.lastButtons.left){
+    if (buttonInfo.left != cache.lastControls.buttonInfo.left){
       if (buttonInfo.left){
         std::cout << "gamepad pressed left" << std::endl;
         cBindings.onControllerKey(cache.joystick, BUTTON_LEFT, true);
@@ -676,7 +702,7 @@ void processControllerCache(){
         cBindings.onControllerKey(cache.joystick, BUTTON_LEFT, false);
       }
     }
-    if (buttonInfo.right != cache.lastButtons.right){
+    if (buttonInfo.right != cache.lastControls.buttonInfo.right){
       if (buttonInfo.right){
         std::cout << "gamepad pressed right" << std::endl;
         cBindings.onControllerKey(cache.joystick, BUTTON_RIGHT, true);
@@ -686,7 +712,6 @@ void processControllerCache(){
       }
     }
 
-    cache.lastButtons = buttonInfo;
   }
 }
 

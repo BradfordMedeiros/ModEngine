@@ -1713,7 +1713,7 @@ int main(int argc, char* argv[]){
     .removeViewport = removeViewport,
     .listViewports = listViewports,
 
-    .getControlInfo = getControlInfo,
+    .getControlInfo = getControlInfo2,
 
     .dumpDebugInfo = dumpDebugInfo,
   };
