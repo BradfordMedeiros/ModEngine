@@ -302,17 +302,23 @@ std::string getTexturePath(aiTextureType type, std::string modelPath,  aiMateria
   bool shouldAddLeadingDot = false;
   std::string finalPath = relativePath.string();
   if (finalPath.size() >= 2){
-    if (!(finalPath.at(0) == '.' && finalPath.at(1) == '.')){
+    bool isUpDir = finalPath.at(0) == '.' && finalPath.at(1) == '.';
+    bool isAbsPath = finalPath.at(0) == '/';
+    if (!isUpDir && !isAbsPath){
       shouldAddLeadingDot = true;
     }
   }
 
-  std::cout << "modelPath: " << modelPath << std::endl;
-  std::cout << "get texture path: " << relativePath.string() << std::endl;
-  std::cout << "raw texture path: " << texturePath.C_Str() << std::endl;
+  std::cout << "test diffuse modelPath: " << modelPath << std::endl;
+  std::cout << "test diffuse get final path: " << finalPath << std::endl;
+  std::cout << "test diffuse get texture path: " << relativePath.string() << std::endl;
+  std::cout << "test diffuse raw texture path: " << texturePath.C_Str() << std::endl;
   if (shouldAddLeadingDot){
     finalPath = "./" + finalPath;
   }
+
+  std::cout << "test diffuse texture getTexturePath: " << finalPath << std::endl;
+
   return finalPath;
 }
 
@@ -376,6 +382,7 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::string diffuseTexturePath;
    if (diffuseTextureCount == 1){
      diffuseTexturePath = getTexturePath(aiTextureType_DIFFUSE, modelPath, material);
+     std::cout << "test diffuse texture core: " << diffuseTexturePath << std::endl;
    }
 
    int emissionTextureCount = material -> GetTextureCount(aiTextureType_EMISSIVE);
