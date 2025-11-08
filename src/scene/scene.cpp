@@ -541,6 +541,7 @@ ModelData modelDataFromCache(World& world,  std::string meshpath, std::string ro
 
   for (auto [meshId, meshData] : modelData.meshIdToMeshData){
     auto meshPath = nameForMeshId(meshpath, meshId);
+    std::cout << "test diffuse texture path: " << meshData.diffuseTexturePath << std::endl;
     loadMeshData(world, meshPath, meshData, ownerId);
   } 
   return modelData;
@@ -915,9 +916,13 @@ std::set<objid> updatePhysicsFromSandbox(World& world){
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       PhysicsValue& phys = world.rigidbodys.at(index);
       auto body =  phys.body;
-      auto& fullTransform = fullTransformation(world.sandbox, index, "read back transform for rigid body position");
-      setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
-      std::cout << inColor("hint - physics setTransform", CONSOLE_COLOR_YELLOW) << ": [" << std::to_string(index) + " " + getGameObject(world, index).name + "] " << "setTransform" << " " << inColor(print(fullTransform), CONSOLE_COLOR_YELLOW) <<  std::endl;
+      
+      auto isStatic = body -> getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT;
+      if (isStatic){
+        auto& fullTransform = fullTransformation(world.sandbox, index, "read back transform for rigid body position");
+        setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
+        std::cout << inColor("hint - physics setTransform", CONSOLE_COLOR_YELLOW) << ": [" << std::to_string(index) + " " + getGameObject(world, index).name + "] " << "setTransform" << " " << inColor(print(fullTransform), CONSOLE_COLOR_YELLOW) <<  std::endl;        
+      }
     }
   }
 

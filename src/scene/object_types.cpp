@@ -462,8 +462,8 @@ int renderObject(
   {
     auto cameraObj = getCameraObj(objectMapping, id);
     if (cameraObj != NULL && (showDebugMask & 0b10)){
-      auto transform = getTransformationFromMatrix(model).position;
-      auto model = glm::translate(glm::mat4(1.f), transform);
+      auto transform = getTransformationFromMatrix(model);
+      auto model = matrixFromComponents(glm::mat4(1.f), transform.position, glm::vec3(1.f, 1.f, 1.f), transform.rotation);
       return renderDefaultNode(shaderProgram, *defaultMeshes.cameraMesh, model, id);
     }
   }
