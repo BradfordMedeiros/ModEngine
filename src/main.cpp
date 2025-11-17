@@ -23,6 +23,7 @@
 #include "./shaderstate.h"
 #include "./package.h"
 #include "./resources.h"
+#include "./scene/common/map.h"
 
 #ifdef ADDITIONAL_SRC_HEADER
   #include STR(ADDITIONAL_SRC_HEADER)
@@ -1929,6 +1930,9 @@ int main(int argc, char* argv[]){
 
   waterShader = pluginApi.loadShader("water", "./res/shaders/water");
 
+
+  parseMapData("../afterworld/scenes/levels/trench/balls/testexport.map");
+  return 0;
 
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
