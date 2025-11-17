@@ -134,16 +134,64 @@ std::vector<EntityKeyValue> parseKeyValues(std::string& content){
 
 BrushFace parseBrushFace(std::string& content){
 	std::cout << "brush face: " << content << std::endl;
-	return BrushFace{
-		.point1 = glm::vec3(1.f, 0.f, 0.f),
-    	.point2 = glm::vec3(2.f, 0.f, 0.f),
-    	.point3 = glm::vec3(3.f, 0.f, 0.f),
-    	.uvOffset = glm::vec2(1.f, 2.f),
-    	.textureScale = glm::vec2(3.f, 4.f),
-    	.rotation = 45.f,
-    	.texture = "testtexture",
-	};
+
+	bool foundLeftBrace = false;
+	std::string stringValue;
+
+	int count = 0;
+
+	bool valid = true;
+
+	std::vector<glm::vec3> points;
+	for (int i = 0; i < content.size(); i++){
+		if (count == 3){
+			stringValue += content.at(i);
+			continue;
+		}
+		auto value = content.at(i);
+		if (value == '('){
+			foundLeftBrace = true;
+		}else if (value == ')'){
+			foundLeftBrace = false;
+			std::cout << "brush face value is: [" << stringValue << "]" << std::endl;
+			glm::vec3 vec = parseVec(stringValue);
+			points.push_back(vec);
+			stringValue = "";
+			count++;
+		}else if (foundLeftBrace){
+			stringValue += value;
+		}else if (value == ' '){
+		}else{
+			valid = false;
+		}
+
+		if (!valid){
+			std::cout << "brush face unexpected value: [" << value << "]" << std::endl;
+			exit(1);
+		}
+	}
+
+	auto values = filterWhitespace(split(stringValue, ' '));
+
+	BrushFace brushFace {};
+	brushFace.point1 = points.at(0);
+	brushFace.point2 = points.at(1);
+	brushFace.point3 = points.at(2);
+
+
+	// TODO store this in a double for now
+	brushFace.uvOffset = glm::vec2(std::atof(values.at(1).c_str()), std::atof(values.at(2).c_str()));
+
+	brushFace.textureScale = glm::vec2(std::atof(values.at(4).c_str()), std::atof(values.at(5).c_str()));
+	brushFace.rotation = std::atof(values.at(3).c_str());
+
+	auto texture = values.at(0);
+	brushFace.texture = texture;
+
+	std::cout << "brush face rest: [" << print(values.at(0)) << "]" << std::endl;
+	return brushFace;
 }
+
 std::vector<BrushFace> parseBrushFaces(std::string& rawBrushFaces){
 	std::vector<BrushFace> brushFaces;
 	//std::cout << "==? raw brush content = " << rawBrushFaces << std::endl;
