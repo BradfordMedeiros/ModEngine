@@ -232,6 +232,33 @@ std::string print(BrushFace& brushFace){
 	return print(brushFace.point1) + "|" + print(brushFace.point2) + "|" + print(brushFace.point3) + "|" + print(brushFace.uvOffset) + "|" + print(brushFace.textureScale) + "|" + std::to_string(brushFace.rotation) + "|" + brushFace.texture;
 }
 
+
+std::optional<std::string*> getKeyValue(std::vector<EntityKeyValue>& keyValues, const char* name){
+	for (auto& entityKeyValue : keyValues){
+		if (entityKeyValue.key == name){
+			return &entityKeyValue.value;
+		}
+	}
+	return std::nullopt;
+}
+
+bool isLayerEntity(Entity& entity, int* layerId){
+	*layerId = 0;
+
+	auto type = getKeyValue(entity.keyValues, "_tb_type"); // _tb_layer
+	auto sortIndex = getKeyValue(entity.keyValues, "_tb_layer_sort_index"); // _tb_name
+
+	bool isLayer = false;
+	if (type.has_value() && *(type.value()) == "_tb_layer"){
+		auto name = getKeyValue(entity.keyValues, "_tb_name"); // _tb_name
+		auto layerId = getKeyValue(entity.keyValues, "_tb_id");
+		std::cout << "entity is a layer: " << *(name.value()) << ", id = " << *(layerId.value()) << std::endl;
+		isLayer = true;
+	}
+
+	return isLayer;
+}
+
 MapData parseMapData(std::string filepath){
 	auto content = readFileOrPackage(filepath);
 
@@ -268,6 +295,61 @@ MapData parseMapData(std::string filepath){
 		}
 	}
 
+	MapData mapData {
+		.layers = {},
+		.entities = {},
+	};
+
+	for (auto& entity : entities){
+		int layerId = 0;
+		auto isLayer = isLayerEntity(entity, &layerId);
+		entity.layerId = layerId;
+		if (isLayer){
+			mapData.layers.push_back(entity);
+		}else{
+			mapData.entities.push_back(entity);
+		}
+	}
+
+
+
 	//std::cout << "rawEntities: \n" << print(rawEntities(stripComments(content))) << std::endl; 
-	return MapData{};
+	return mapData;
+}
+
+std::vector<Entity*> getEntitiesByClassName(MapData& mapData, const char* name){
+	std::vector<Entity*> entities;
+
+	for (auto& entity: mapData.layers){
+		auto value = getKeyValue(entity.keyValues, "classname");
+		modassert(value.has_value(), "classname does not exist");
+		if (*(value.value()) == name){
+			entities.push_back(&entity);
+		}
+	}
+	for (auto& entity : mapData.entities){
+		auto value = getKeyValue(entity.keyValues, "classname");
+		modassert(value.has_value(), "classname does not exist");
+		if (*(value.value()) == name){
+			entities.push_back(&entity);
+		}
+	}
+
+	return entities;
+}
+
+std::optional<std::string*> getValue(Entity& entity, const char* key){
+	return getKeyValue(entity.keyValues, key);
+}
+
+void compileRawScene(MapData& mapData, std::string filepath, std::string baseFile,  std::string mapFile,  std::function<void(Entity& entity, bool& skipEntity, std::vector<AttributeValue>& attributes)> callback){
+	std::string content = "########## Base file content: " + baseFile + " ##########\n\n" + readFileOrPackage(baseFile) + "\n\n";
+
+	std::string generatedContent = "##########  Generated content: + " + mapFile + "\n\n";
+	generatedContent += "# This is where the generated content would go\n";
+
+	auto mapContent = readFileOrPackage(mapFile);
+
+
+	realfiles::saveFile(filepath, content + generatedContent + mapContent);
 }

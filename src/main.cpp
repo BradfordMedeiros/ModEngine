@@ -1144,6 +1144,7 @@ int main(int argc, char* argv[]){
    ("mount", "Mod package to mount instead of using the file system", cxxopts::value<std::string>()->default_value(""))
    ("package", "Package files to a .mod file instead of running the game", cxxopts::value<std::string>()->default_value(""))
    ("p,pak", "Package files to include", cxxopts::value<std::vector<std::string>>() -> default_value(""))
+   ("compile", "Path of map file to compile", cxxopts::value<std::string>() -> default_value(""))
    ("h,help", "Print help")
   ;        
 
@@ -1225,6 +1226,26 @@ int main(int argc, char* argv[]){
     #endif
 
     exit(missingFiles ? 1 : 0);
+  }
+
+  auto compileMapFile = result["compile"].as<std::string>();
+  if (compileMapFile != ""){
+    auto mapData = parseMapData("../afterworld/scenes/levels/trench/balls/testexport.map");
+    auto playerStarts = getEntitiesByClassName(mapData, "player_start");
+    for (auto& playerStart : playerStarts){
+      auto origin = getValue(*playerStart, "origin");
+      modassert(origin.has_value(), "player origin does not have a value");
+      std::cout << "player start: " << *(origin.value()) << std::endl;
+    }
+
+    std::string filepath =  "./build/temp.map.rawscene";
+
+    compileRawScene(mapData, filepath, "../afterworld/scenes/levels/ball.rawscene", compileMapFile, [](Entity& entity, bool& skipEntity, std::vector<AttributeValue>& attributes) -> void {
+
+    });
+
+    std::cout << "compiled: " << compileMapFile << std::endl;
+    return 0;
   }
 
   strictResourceMode = result["strict"].as<bool>();
@@ -1929,10 +1950,6 @@ int main(int argc, char* argv[]){
   }
 
   waterShader = pluginApi.loadShader("water", "./res/shaders/water");
-
-
-  parseMapData("../afterworld/scenes/levels/trench/balls/testexport.map");
-  return 0;
 
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){

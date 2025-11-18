@@ -6,6 +6,9 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "../../common/util.h"
+#include "../../common/files.h"
+#include "./mesh.h"
+
 
 struct BrushFace {
     glm::vec3 point1;
@@ -25,12 +28,6 @@ struct EntityKeyValue {
     std::string value;
 };
 
-struct LayerEntity {
-    int layerId;
-    std::vector<EntityKeyValue> keyValues;
-    std::vector<Brush> brushes;
-};
-
 struct Entity {
     int layerId;
     std::vector<EntityKeyValue> keyValues;
@@ -38,10 +35,20 @@ struct Entity {
 };
 
 struct MapData {
-    std::vector<LayerEntity> layers;
+    std::vector<Entity> layers;
     std::vector<Entity> entities;
 };
 
 MapData parseMapData(std::string file);
+std::vector<Entity*> getEntitiesByClassName(MapData& mapData, const char* name);
+std::optional<std::string*> getValue(Entity& entity, const char* key);
+
+void writeMapModelFile(MapData& mapData, std::string filepath);
+std::vector<Mesh> loadMapModel(MapData& mapData, std::string filepath);
+
+void compileRawScene(MapData& mapData, std::string filepath, std::string baseFile, std::string mapFile, std::function<void(Entity& entity, bool& skipEntity, std::vector<AttributeValue>& attributes)> callback);
+
+// another one to load the map model file to a mesh
+
 
 #endif 

@@ -33,7 +33,6 @@ glm::vec3 getOffsetForBoundInfo(BoundInfo& boundInfo, glm::vec3 scale){
   return glm::vec3(xoffset, yoffset, zoffset);
 }
 
-
 std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index, bool useGroup){  
   GameObject& obj = getGameObject(world.sandbox, index);
 
