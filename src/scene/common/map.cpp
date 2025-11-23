@@ -354,7 +354,12 @@ std::string getEntityName(std::string& baseName, std::optional<std::string>& sub
 	return baseName;
 }
 
-void compileRawScene(std::string filepath, std::string baseFile,  std::string mapFile,  std::function<void(Entity& entity, bool* _shouldWrite, std::vector<GameobjAttributeOpts>& _attributes)> callback){
+void compileBrushes(MapData& mapData, std::string path){
+	realfiles::saveFile(path, "this is a placeholder brush file");
+}
+
+
+void compileRawScene(std::string filepath, std::string baseFile,  std::string mapFile,  std::function<void(Entity& entity, bool* _shouldWrite, std::vector<GameobjAttributeOpts>& _attributes, std::string* _modelName)> callback){
 	std::string content = "########## Base file content: " + baseFile + " ##########\n\n" + readFileOrPackage(baseFile) + "\n\n";
 
 	std::string generatedContent = "##########  Generated content: + " + mapFile + "\n\n";
@@ -364,8 +369,9 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 	auto mapData = parseMapData(mapFile);
 	for (auto& entity: mapData.entities){
 		bool shouldWrite = false;
+		std::string modelName = "";
 		std::vector<GameobjAttributeOpts> attributes;
-		callback(entity, &shouldWrite, attributes);
+		callback(entity, &shouldWrite, attributes, &modelName);
 
 		bool userSpecifiedPosition = false;
 		if (shouldWrite){
@@ -375,7 +381,7 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 		    glm::vec3 position = origin.has_value() ? parseVec(*origin.value()) : glm::vec3(0.f, 0.f, 0.f);
 		    modassert(classname.has_value(), "no classname");
 
-		    std::string entityName = std::string("entity_") + *classname.value() + "_" + std::to_string(entity.index);
+		    std::string entityName = modelName != "" ?  modelName : (std::string("entity_") + *classname.value() + "_" + std::to_string(entity.index));
 
 		    // I could check uniqueness here
 		    for (auto& attribute : attributes){
@@ -395,4 +401,7 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 	}
 
 	realfiles::saveFile(filepath, content + generatedContent + generatedScene);
+
+	compileBrushes(mapData, "./build/temp.brush");
 }
+

@@ -53,9 +53,8 @@ struct GameobjAttributeOpts {
   std::optional<std::string> submodel;
 };
 
-void compileRawScene(std::string filepath, std::string baseFile, std::string mapFile, std::function<void(Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes)> callback);
+void compileRawScene(std::string filepath, std::string baseFile, std::string mapFile, std::function<void(Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* _modelName)> callback);
 
-// another one to load the map model file to a mesh
 
 
 #endif 

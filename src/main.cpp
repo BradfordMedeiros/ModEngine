@@ -1242,7 +1242,7 @@ int main(int argc, char* argv[]){
 
     std::cout << "starting to compile: " << compileMapFile << std::endl;
 
-    compileRawScene(filepath, "../afterworld/scenes/levels/ball.rawscene", compileMapFile, [](Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes) -> void {
+    compileRawScene(filepath, "../afterworld/scenes/levels/ball.rawscene", compileMapFile, [](Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName) -> void {
       auto origin = getValue(entity, "origin");
       auto className = getValue(entity, "classname");
 
@@ -1252,19 +1252,7 @@ int main(int argc, char* argv[]){
   
 
       if (*className.value() == "player_start"){
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "playerspawn",
-          .attributeValue = "true",
-        });
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field = "mode",
-          .attributeValue = "ball",
-        });
-        attributes.push_back(GameobjAttributeOpts {   // for now, not necessary
-          .field = "teleport",
-          .attributeValue = "true",
-        });
-
+        *modelName = "playerspawn";
         *shouldWrite = true;
       }else if (*className.value() == "powerup_jump"){
         *shouldWrite = false;
@@ -1299,7 +1287,7 @@ int main(int argc, char* argv[]){
           *shouldWrite = true;
           attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
             .field = "mesh",
-            .attributeValue = "../afterworld/scenes/levels/trench/balls/easy_drops_raw.obj",
+            .attributeValue = "./build/temp.brush",
           });
 
           attributes.push_back(GameobjAttributeOpts {
