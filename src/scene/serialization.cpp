@@ -339,6 +339,28 @@ std::vector<std::pair<std::string, std::string>> coreFields(GameObject& gameobje
   return pairs;
 }
 
+std::string serializeAttributeValue(AttributeValue& value){
+  auto strValue = std::get_if<std::string>(&value);
+  auto floatValue = std::get_if<float>(&value);
+  auto vec2Value = std::get_if<glm::vec2>(&value);
+  auto vec3Value = std::get_if<glm::vec3>(&value);
+  auto vec4Value = std::get_if<glm::vec4>(&value);
+  if (strValue){
+    return *strValue;
+  }else if (floatValue){
+    return serializeFloat(*floatValue);
+  }else if (vec2Value){
+    return serializeVec(*vec2Value);
+  }else if (vec3Value){
+    return serializeVec(*vec3Value);
+  }else if (vec4Value){
+    return serializeVec(*vec4Value);
+  }
+  modassert(false, " invalid type serializeAttributeValue");
+  return "";
+}
+
+
 std::vector<std::pair<std::string, std::string>> uniqueAdditionalFields(GameObject& gameobject, std::unordered_map<std::string, std::string>& serializedPairs){
   std::vector<std::pair<std::string, std::string>> fields;
   //typedef std::variant<std::vector<std::string>, float> AttributeValue;
@@ -348,24 +370,7 @@ std::vector<std::pair<std::string, std::string>> uniqueAdditionalFields(GameObje
       continue;
     }
     modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
-    auto strValue = std::get_if<std::string>(&value);
-    auto floatValue = std::get_if<float>(&value);
-    auto vec2Value = std::get_if<glm::vec2>(&value);
-    auto vec3Value = std::get_if<glm::vec3>(&value);
-    auto vec4Value = std::get_if<glm::vec4>(&value);
-    if (strValue){
-      fields.push_back({ field, *strValue });
-    }else if (floatValue){
-      fields.push_back({ field, serializeFloat(*floatValue) });
-    }else if (vec2Value){
-      fields.push_back({ field, serializeVec(*vec2Value) });
-    }else if (vec3Value){
-      fields.push_back({ field, serializeVec(*vec3Value) });
-    }else if (vec4Value){
-      fields.push_back({ field, serializeVec(*vec4Value) });
-    }else{
-      modassert(false, std::string("invalid type uniqueAdditionalFields: ") + field);
-    }
+    fields.push_back({ field, serializeAttributeValue(value) });
   }
   return fields;
 }

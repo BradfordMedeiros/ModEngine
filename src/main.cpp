@@ -1230,18 +1230,83 @@ int main(int argc, char* argv[]){
 
   auto compileMapFile = result["compile"].as<std::string>();
   if (compileMapFile != ""){
-    auto mapData = parseMapData("../afterworld/scenes/levels/trench/balls/testexport.map");
+    /*auto mapData = parseMapData("../afterworld/scenes/levels/trench/balls/testexport.map");
     auto playerStarts = getEntitiesByClassName(mapData, "player_start");
     for (auto& playerStart : playerStarts){
       auto origin = getValue(*playerStart, "origin");
       modassert(origin.has_value(), "player origin does not have a value");
       std::cout << "player start: " << *(origin.value()) << std::endl;
-    }
+    }*/
 
     std::string filepath =  "./build/temp.map.rawscene";
 
-    compileRawScene(mapData, filepath, "../afterworld/scenes/levels/ball.rawscene", compileMapFile, [](Entity& entity, bool& skipEntity, std::vector<AttributeValue>& attributes) -> void {
+    std::cout << "starting to compile: " << compileMapFile << std::endl;
 
+    compileRawScene(filepath, "../afterworld/scenes/levels/ball.rawscene", compileMapFile, [](Entity& entity, bool* shouldWrite, std::vector<GameobjAttribute>& attributes) -> void {
+      auto origin = getValue(entity, "origin");
+      auto className = getValue(entity, "classname");
+
+      modassert(className.has_value(), std::string("no className index = ") + std::to_string(entity.index));
+      std::cout << "compile index: " << entity.index << std::endl;
+      std::cout << "origin: " << (origin.has_value() ? *origin.value() : "no origin") << std::endl;
+  
+
+      if (*className.value() == "player_start"){
+        attributes.push_back(GameobjAttribute {
+          .field = "playerspawn",
+          .attributeValue = "true",
+        });
+        attributes.push_back(GameobjAttribute {   // probably not great to attach it to this
+          .field = "mode",
+          .attributeValue = "ball",
+        });
+        attributes.push_back(GameobjAttribute {   // for now, not necessary
+          .field = "teleport",
+          .attributeValue = "true",
+        });
+
+        *shouldWrite = true;
+      }else if (*className.value() == "powerup_jump"){
+        *shouldWrite = false;
+      }else if (*className.value() == "vertical_bound_plane"){
+        *shouldWrite = true;
+
+        double yValueSum = 0;
+        int totalPoints = 0;
+
+        for (auto& brush : entity.brushes){
+          for (auto &brushFace : brush.brushFaces){
+            yValueSum += brushFace.point1.y;
+            yValueSum += brushFace.point2.y;
+            yValueSum += brushFace.point3.y;
+            totalPoints += 3;
+          }
+        }
+        
+        modassert(totalPoints > 0, "invalid ballplane no faces");
+        auto average = yValueSum / totalPoints;
+        modassert(average > -10000 && average < 10000, "invalid ballplane"); // arbitrary numbers to guard against weird
+
+        attributes.push_back(GameobjAttribute {
+          .field = "ballplane",
+          .attributeValue = "true",
+        });
+        attributes.push_back(GameobjAttribute {
+          .field = "position", 
+          .attributeValue = glm::vec3(0.f, average, 0.f),
+        });
+
+      }else{
+        std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
+        *shouldWrite = false;
+      }
+      /*
+        playerspawn:teleport:true
+ 
+      //for (auto& [key, value] : entity.keyValues){
+      //  origin
+      //  std::optional<std::string*> getValue(Entity& entity, const char* key);
+      //}*/
     });
 
     std::cout << "compiled: " << compileMapFile << std::endl;

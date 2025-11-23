@@ -1,6 +1,7 @@
 #include "./map.h"
 
 std::string readFileOrPackage(std::string filepath);
+std::string serializeAttributeValue(AttributeValue& value);
 
 struct ParsedEntity {
 	std::vector<EntityKeyValue> keyValues;
@@ -267,9 +268,11 @@ MapData parseMapData(std::string filepath){
 
 	std::vector<Entity> entities;
 	auto rawEntitiesContents = rawEntities(contentNoComments);
-	for (auto& rawEntity : rawEntitiesContents){
+	for (int i = 0; i < rawEntitiesContents.size(); i++){
+		auto& rawEntity = rawEntitiesContents.at(i);
 		Entity entity{
 			.layerId = 0,
+			.index = i,
 		};
 		auto keyValues = parseKeyValues(rawEntity.keyValueData);
 		entity.keyValues = keyValues;
@@ -342,14 +345,46 @@ std::optional<std::string*> getValue(Entity& entity, const char* key){
 	return getKeyValue(entity.keyValues, key);
 }
 
-void compileRawScene(MapData& mapData, std::string filepath, std::string baseFile,  std::string mapFile,  std::function<void(Entity& entity, bool& skipEntity, std::vector<AttributeValue>& attributes)> callback){
+
+void compileRawScene(std::string filepath, std::string baseFile,  std::string mapFile,  std::function<void(Entity& entity, bool* _shouldWrite, std::vector<GameobjAttribute>& _attributes)> callback){
 	std::string content = "########## Base file content: " + baseFile + " ##########\n\n" + readFileOrPackage(baseFile) + "\n\n";
 
 	std::string generatedContent = "##########  Generated content: + " + mapFile + "\n\n";
-	generatedContent += "# This is where the generated content would go\n";
 
-	auto mapContent = readFileOrPackage(mapFile);
+	std::string generatedScene;
 
+	auto mapData = parseMapData(mapFile);
+	for (auto& entity: mapData.entities){
+		bool shouldWrite = false;
+		std::vector<GameobjAttribute> attributes;
+		callback(entity, &shouldWrite, attributes);
 
-	realfiles::saveFile(filepath, content + generatedContent + mapContent);
+		bool userSpecifiedPosition = false;
+		if (shouldWrite){
+		    auto origin = getValue(entity, "origin");
+		    auto classname = getValue(entity, "classname");
+
+		    glm::vec3 position = origin.has_value() ? parseVec(*origin.value()) : glm::vec3(0.f, 0.f, 0.f);
+		    modassert(classname.has_value(), "no classname");
+
+		    std::string entityName = std::string("entity_") + *classname.value() + "_" + std::to_string(entity.index);
+
+		    // I could check uniqueness here
+		    for (auto& attribute : attributes){
+		    	// probably wrap this is a function to illegal characters better
+		    	if (attribute.field == "position"){
+		    		userSpecifiedPosition = true;
+		    	}
+  				generatedScene += entityName + ":" + attribute.field + ":" + serializeAttributeValue(attribute.attributeValue) + "\n";
+		    }
+
+		    if (!userSpecifiedPosition){
+				generatedScene += entityName + ":position:" + serializeVec(position) + "\n\n";
+		    }else{
+				generatedScene += "\n";
+		    }
+		}
+	}
+
+	realfiles::saveFile(filepath, content + generatedContent + generatedScene);
 }

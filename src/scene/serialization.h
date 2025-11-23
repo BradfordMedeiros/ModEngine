@@ -76,6 +76,7 @@ struct AttrChildrenPair {
 std::unordered_map<std::string, AttrChildrenPair> deserializeSceneTokens(std::vector<Token> tokens);
 GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj, GameobjAttributes& additionalFields);
 std::string serializeObj(objid id, objid groupId, GameObject& gameobject, std::vector<std::string> children, bool includeIds, std::vector<std::pair<std::string, std::string>> additionalFields, std::string name = "");
+std::string serializeAttributeValue(AttributeValue& value);
 
 AttributeValue parsePropertySuffix(std::string key, std::string value);
 void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::string payload);

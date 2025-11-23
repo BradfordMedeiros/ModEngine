@@ -30,6 +30,7 @@ struct EntityKeyValue {
 
 struct Entity {
     int layerId;
+    int index;
     std::vector<EntityKeyValue> keyValues;
     std::vector<Brush> brushes; // usually empty unless special case
 };
@@ -46,7 +47,7 @@ std::optional<std::string*> getValue(Entity& entity, const char* key);
 void writeMapModelFile(MapData& mapData, std::string filepath);
 std::vector<Mesh> loadMapModel(MapData& mapData, std::string filepath);
 
-void compileRawScene(MapData& mapData, std::string filepath, std::string baseFile, std::string mapFile, std::function<void(Entity& entity, bool& skipEntity, std::vector<AttributeValue>& attributes)> callback);
+void compileRawScene(std::string filepath, std::string baseFile, std::string mapFile, std::function<void(Entity& entity, bool* shouldWrite, std::vector<GameobjAttribute>& attributes)> callback);
 
 // another one to load the map model file to a mesh
 
