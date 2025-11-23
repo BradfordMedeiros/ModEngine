@@ -1242,7 +1242,7 @@ int main(int argc, char* argv[]){
 
     std::cout << "starting to compile: " << compileMapFile << std::endl;
 
-    compileRawScene(filepath, "../afterworld/scenes/levels/ball.rawscene", compileMapFile, [](Entity& entity, bool* shouldWrite, std::vector<GameobjAttribute>& attributes) -> void {
+    compileRawScene(filepath, "../afterworld/scenes/levels/ball.rawscene", compileMapFile, [](Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes) -> void {
       auto origin = getValue(entity, "origin");
       auto className = getValue(entity, "classname");
 
@@ -1252,15 +1252,15 @@ int main(int argc, char* argv[]){
   
 
       if (*className.value() == "player_start"){
-        attributes.push_back(GameobjAttribute {
+        attributes.push_back(GameobjAttributeOpts {
           .field = "playerspawn",
           .attributeValue = "true",
         });
-        attributes.push_back(GameobjAttribute {   // probably not great to attach it to this
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
           .field = "mode",
           .attributeValue = "ball",
         });
-        attributes.push_back(GameobjAttribute {   // for now, not necessary
+        attributes.push_back(GameobjAttributeOpts {   // for now, not necessary
           .field = "teleport",
           .attributeValue = "true",
         });
@@ -1287,14 +1287,41 @@ int main(int argc, char* argv[]){
         auto average = yValueSum / totalPoints;
         modassert(average > -10000 && average < 10000, "invalid ballplane"); // arbitrary numbers to guard against weird
 
-        attributes.push_back(GameobjAttribute {
+        attributes.push_back(GameobjAttributeOpts {
           .field = "ballplane",
           .attributeValue = "true",
         });
-        attributes.push_back(GameobjAttribute {
+        attributes.push_back(GameobjAttributeOpts {
           .field = "position", 
           .attributeValue = glm::vec3(0.f, average, 0.f),
         });
+      }else if (*className.value() == "worldspawn"){
+          *shouldWrite = true;
+          attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+            .field = "mesh",
+            .attributeValue = "../afterworld/scenes/levels/trench/balls/easy_drops_raw.obj",
+          });
+
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "scale",
+            .attributeValue = glm::vec3(0.2f, 0.2f, 0.2f),
+          });
+
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "position",
+            .attributeValue = glm::vec3(68.32f, -22.1f, 166.6f),
+          });
+
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "physics_shape",
+            .attributeValue = "shape_exact",
+            .submodel = "entity0_brush9",
+          });
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "physics",
+            .attributeValue = "enabled",
+            .submodel = "entity0_brush9",
+          });
 
       }else{
         std::cout << "compile map unrecognized type: " << *className.value() << std::endl;

@@ -280,6 +280,7 @@ struct GameobjAttribute {
   AttributeValue attributeValue;
 };
 
+
 struct GameobjAttributes {
   std::unordered_map<std::string, AttributeValue> attr;
 };

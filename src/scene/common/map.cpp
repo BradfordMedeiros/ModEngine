@@ -346,7 +346,15 @@ std::optional<std::string*> getValue(Entity& entity, const char* key){
 }
 
 
-void compileRawScene(std::string filepath, std::string baseFile,  std::string mapFile,  std::function<void(Entity& entity, bool* _shouldWrite, std::vector<GameobjAttribute>& _attributes)> callback){
+
+std::string getEntityName(std::string& baseName, std::optional<std::string>& submodel){
+	if (submodel.has_value()){
+		return baseName + "/" + submodel.value();
+	}
+	return baseName;
+}
+
+void compileRawScene(std::string filepath, std::string baseFile,  std::string mapFile,  std::function<void(Entity& entity, bool* _shouldWrite, std::vector<GameobjAttributeOpts>& _attributes)> callback){
 	std::string content = "########## Base file content: " + baseFile + " ##########\n\n" + readFileOrPackage(baseFile) + "\n\n";
 
 	std::string generatedContent = "##########  Generated content: + " + mapFile + "\n\n";
@@ -356,7 +364,7 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 	auto mapData = parseMapData(mapFile);
 	for (auto& entity: mapData.entities){
 		bool shouldWrite = false;
-		std::vector<GameobjAttribute> attributes;
+		std::vector<GameobjAttributeOpts> attributes;
 		callback(entity, &shouldWrite, attributes);
 
 		bool userSpecifiedPosition = false;
@@ -372,10 +380,10 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 		    // I could check uniqueness here
 		    for (auto& attribute : attributes){
 		    	// probably wrap this is a function to illegal characters better
-		    	if (attribute.field == "position"){
+		    	if (attribute.field == "position" && !attribute.submodel.has_value()){
 		    		userSpecifiedPosition = true;
 		    	}
-  				generatedScene += entityName + ":" + attribute.field + ":" + serializeAttributeValue(attribute.attributeValue) + "\n";
+  				generatedScene += getEntityName(entityName, attribute.submodel) + ":" + attribute.field + ":" + serializeAttributeValue(attribute.attributeValue) + "\n";
 		    }
 
 		    if (!userSpecifiedPosition){

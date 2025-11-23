@@ -47,7 +47,13 @@ std::optional<std::string*> getValue(Entity& entity, const char* key);
 void writeMapModelFile(MapData& mapData, std::string filepath);
 std::vector<Mesh> loadMapModel(MapData& mapData, std::string filepath);
 
-void compileRawScene(std::string filepath, std::string baseFile, std::string mapFile, std::function<void(Entity& entity, bool* shouldWrite, std::vector<GameobjAttribute>& attributes)> callback);
+struct GameobjAttributeOpts {
+  std::string field;
+  AttributeValue attributeValue;
+  std::optional<std::string> submodel;
+};
+
+void compileRawScene(std::string filepath, std::string baseFile, std::string mapFile, std::function<void(Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes)> callback);
 
 // another one to load the map model file to a mesh
 
