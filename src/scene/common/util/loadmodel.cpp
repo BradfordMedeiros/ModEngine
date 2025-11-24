@@ -1,6 +1,7 @@
 #include "./loadmodel.h"
 
 std::string readFileOrPackage(std::string filepath);
+ModelDataCore loadModelCoreBrush(std::string modelPath);
 
 std::vector<Animation> processAnimations( const aiScene* scene){
   std::vector<Animation> animations;
@@ -733,80 +734,6 @@ ModelDataCore loadModelCoreAssimp(std::string modelPath){
    printDebugModelData(coreModelData.modelData, modelPath);
 
    return coreModelData;
-}
-
-
-MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices);
-ModelDataCore loadModelCoreBrush(std::string modelPath){
-  std::vector<glm::vec3> points;
-  std::vector<glm::vec2> uvCoords;
-  std::vector<unsigned int> indexs;
-
-  int currIndex = 0;
-  int dim = 15;
-  for (int x = 0; x < dim; x++){
-    for (int y = 0; y < dim; y++){
-      float offsetX = 5.f * x;
-      float offsetY = 5.f * y;
-      points.push_back(glm::vec3(0.f + offsetX, 0.f + offsetY, 0.f));
-      indexs.push_back(currIndex);
-      currIndex++;
-
-
-      points.push_back(glm::vec3(0.f + offsetX, 5.f + offsetY, 0.f));
-      indexs.push_back(currIndex);
-      currIndex++;
-
-      points.push_back(glm::vec3(5.f + offsetX, 0.f + offsetY, 0.f));
-      indexs.push_back(currIndex);
-      currIndex++;
-
-      //////////////
-
-      points.push_back(glm::vec3(5.f + offsetX, 0.f + offsetY, 0.f));
-      indexs.push_back(currIndex);
-      currIndex++;
-
-      points.push_back(glm::vec3(0.f + offsetX, 5.f + offsetY, 0.f));
-      indexs.push_back(currIndex);
-      currIndex++;
-
-
-      points.push_back(glm::vec3(5.f + offsetX, 5.f + offsetY, 0.f));
-      indexs.push_back(currIndex);
-      currIndex++;
-
-
-      uvCoords.push_back(glm::vec2(0.f, 0.f));
-      uvCoords.push_back(glm::vec2(0.f, 1.f));
-      uvCoords.push_back(glm::vec2(1.f, 0.f));
-
-      uvCoords.push_back(glm::vec2(1.f, 0.f));
-      uvCoords.push_back(glm::vec2(0.f, 1.f));
-      uvCoords.push_back(glm::vec2(1.f, 1.f));
-    }
-  }
-  
-  // Just collect all similar textures, render them as separate meshes
-  auto generatedMesh = generateMeshRaw(points, uvCoords, indexs);
-  ModelDataCore modelDataCore2 {
-    .modelData = ModelData {
-      .meshIdToMeshData = {{ 0, generatedMesh }},
-      .nodeToMeshId = {{ 0, { 0 }}},
-      .childToParent = {},
-      .nodeTransform = {
-        { 0, Transformation {
-          .position = glm::vec3(0.f, 0.f, 0.f),
-          .scale = glm::vec3(1.f, 1.f, 1.f),
-          .rotation = MOD_ORIENTATION_FORWARD,
-        }}
-      },
-      .names = {{ 0, "test" }},
-      .animations = {},      
-    },
-    .loadedRoot = "test",
-  };
-  return modelDataCore2;
 }
 
 ModelDataCore loadModelCore(std::string modelPath){

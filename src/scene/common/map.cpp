@@ -2,6 +2,7 @@
 
 std::string readFileOrPackage(std::string filepath);
 std::string serializeAttributeValue(AttributeValue& value);
+const float EPSILON = 0.0001f;
 
 struct ParsedEntity {
 	std::vector<EntityKeyValue> keyValues;
@@ -260,9 +261,7 @@ bool isLayerEntity(Entity& entity, int* layerId){
 	return isLayer;
 }
 
-MapData parseMapData(std::string filepath){
-	auto content = readFileOrPackage(filepath);
-
+MapData parseRawMapData(std::string& content){
 	auto contentNoComments = stripComments(content);
 	//std::cout << "stripped comments: \n" << contentNoComments << std::endl;
 
@@ -320,6 +319,12 @@ MapData parseMapData(std::string filepath){
 	return mapData;
 }
 
+MapData parseMapData(std::string filepath){
+  auto content = readFileOrPackage(filepath);
+  return parseRawMapData(content);
+}
+
+
 std::vector<Entity*> getEntitiesByClassName(MapData& mapData, const char* name){
 	std::vector<Entity*> entities;
 
@@ -354,8 +359,8 @@ std::string getEntityName(std::string& baseName, std::optional<std::string>& sub
 	return baseName;
 }
 
-void compileBrushes(MapData& mapData, std::string path){
-	realfiles::saveFile(path, "this is a placeholder brush file");
+void compileBrushes(MapData& mapData, std::string& rawMapData, std::string path){
+	realfiles::saveFile(path, rawMapData);
 }
 
 
@@ -365,6 +370,8 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 	std::string generatedContent = "##########  Generated content: + " + mapFile + "\n\n";
 
 	std::string generatedScene;
+
+	auto rawMapContent = readFileOrPackage(mapFile);
 
 	auto mapData = parseMapData(mapFile);
 	for (auto& entity: mapData.entities){
@@ -402,6 +409,252 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 
 	realfiles::saveFile(filepath, content + generatedContent + generatedScene);
 
-	compileBrushes(mapData, "./build/temp.brush");
+	compileBrushes(mapData, rawMapContent, "./build/temp.brush");
 }
 
+
+struct BrushPlane {
+	float distanceToPoint;
+	glm::vec3 normal;
+};
+
+BrushPlane brushFaceToPlane(BrushFace& brushFace){
+	glm::vec3 normal = glm::normalize(glm::cross(brushFace.point2 - brushFace.point1, brushFace.point3 - brushFace.point1));
+	float distanceToPoint = -1 * glm::dot(normal, brushFace.point1);
+
+	BrushPlane plane {
+		.distanceToPoint = distanceToPoint,
+		.normal = normal,
+	};
+	return plane;
+}
+
+std::optional<glm::vec3> intersectPlanes(BrushPlane& a, BrushPlane& b, BrushPlane& c){
+    glm::vec3 n1n2 = glm::cross(a.normal, b.normal);
+    glm::vec3 n2n3 = glm::cross(b.normal, c.normal);
+    glm::vec3 n3n1 = glm::cross(c.normal, a.normal);
+
+    float denom = glm::dot(a.normal, n2n3);
+    if (fabs(denom) < EPSILON){
+    	return std::nullopt; // planes are parallel or degenerate
+    } 
+    return ( (-a.distanceToPoint * n2n3) - (b.distanceToPoint * n3n1) - (c.distanceToPoint * n1n2) ) / denom;
+}
+
+
+
+bool insideBrushPlanes(std::vector<BrushPlane>& brushPlanes, glm::vec3 point){
+	for (auto& plane : brushPlanes){
+    if (glm::dot(plane.normal, point) + plane.distanceToPoint > EPSILON){
+        return false;
+    }
+	}
+	return true;
+}
+std::vector<glm::vec3> getAllIntersections(Brush& brush){
+	std::vector<BrushPlane> brushPlanes;
+	for (auto& brushFace : brush.brushFaces){
+		auto brushPlane = brushFaceToPlane(brushFace);
+		brushPlanes.push_back(brushPlane);
+	}
+
+	std::vector<glm::vec3> candidateVertices;
+	for (int i = 0; i < brushPlanes.size(); i++){
+		for (int j = (i + 1); j < brushPlanes.size(); j++){
+			for (int k = (j + 1); k < brushPlanes.size(); k++){
+				auto intersection = intersectPlanes(brushPlanes.at(i), brushPlanes.at(j), brushPlanes.at(k));
+				if (intersection.has_value()){
+					auto insidePlane = insideBrushPlanes(brushPlanes, intersection.value());
+					if (insidePlane){
+						candidateVertices.push_back(intersection.value());
+					}
+				}
+			}
+		}
+	}
+
+	return candidateVertices;
+}
+
+struct FaceVertices {
+    BrushFace* face;
+    std::vector<glm::vec3> vertices;
+};
+std::vector<FaceVertices> assignVerticesToFaces(Brush& brush, const std::vector<glm::vec3>& candidateVertices) {
+    std::vector<FaceVertices> result;
+    for (auto& face : brush.brushFaces) {
+        FaceVertices fv;
+        fv.face = &face;
+
+        BrushPlane plane = brushFaceToPlane(face);
+
+        for (auto& vertex : candidateVertices) {
+            if (fabs(glm::dot(plane.normal, vertex) + plane.distanceToPoint) < EPSILON) {
+                fv.vertices.push_back(vertex);
+            }
+        }
+
+        result.push_back(fv);
+    }
+    return result;
+}
+void sortVerticesCCW(FaceVertices& fv) {
+    // Compute centroid
+    glm::vec3 centroid(0.0f);
+    for (auto& v : fv.vertices) centroid += v;
+    centroid /= (float)fv.vertices.size();
+
+    // Find major axis to drop for projection (largest normal component)
+  	auto normal = brushFaceToPlane(*fv.face).normal;
+    glm::vec3 n = normal;
+    int dropAxis = 0;
+    if (fabs(n.y) > fabs(n.x) && fabs(n.y) > fabs(n.z)) dropAxis = 1;
+    else if (fabs(n.z) > fabs(n.x) && fabs(n.z) > fabs(n.y)) dropAxis = 2;
+
+    // Sort by angle
+    std::sort(fv.vertices.begin(), fv.vertices.end(),
+        [&](const glm::vec3& a, const glm::vec3& b) {
+            glm::vec2 pa, pb;
+            if (dropAxis == 0) { pa = glm::vec2(a.y - centroid.y, a.z - centroid.z); pb = glm::vec2(b.y - centroid.y, b.z - centroid.z); }
+            else if (dropAxis == 1) { pa = glm::vec2(a.x - centroid.x, a.z - centroid.z); pb = glm::vec2(b.x - centroid.x, b.z - centroid.z); }
+            else { pa = glm::vec2(a.x - centroid.x, a.y - centroid.y); pb = glm::vec2(b.x - centroid.x, b.y - centroid.y); }
+
+            return atan2(pa.y, pa.x) < atan2(pb.y, pb.x);
+        }
+    );
+}
+struct Triangle { glm::vec3 v0, v1, v2; };
+
+std::vector<Triangle> triangulateFace(FaceVertices& fv) {
+    std::vector<Triangle> tris;
+    int N = fv.vertices.size();
+    for (int i = 1; i < N - 1; i++) {
+        tris.push_back({ fv.vertices[0], fv.vertices[i], fv.vertices[i + 1] });
+    }
+    return tris;
+}
+
+void addPointsToSimpleMesh(std::vector<glm::vec3>& points, std::vector<glm::vec2>& _uvCoords,  std::vector<unsigned int>& _indexs){
+  for (int i = 0; i < points.size(); i++){
+  	int remainder = i % 6;
+  	if (remainder == 0){
+      _uvCoords.push_back(glm::vec2(0.f, 0.f));
+  	}else if (remainder == 1){
+      _uvCoords.push_back(glm::vec2(0.f, 1.f));
+  	}else if (remainder == 2){
+      _uvCoords.push_back(glm::vec2(1.f, 0.f));
+  	}else if (remainder == 3){
+      _uvCoords.push_back(glm::vec2(1.f, 0.f));
+  	}else if (remainder == 4){
+      _uvCoords.push_back(glm::vec2(0.f, 1.f));
+  	}else if (remainder == 5){
+      _uvCoords.push_back(glm::vec2(1.f, 1.f));
+  	}else{
+  		modassert(false, "programming error %");
+  	}
+    _indexs.push_back(i);
+  }
+}
+
+
+MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices);
+ModelDataCore loadModelCoreBrush(std::string modelPath){
+  std::string brushModel = "worldspawn";
+
+  std::cout << "loadModelCoreBrush: " << modelPath << ", model = " << brushModel << std::endl;
+  auto brushDataRaw2 = readFileOrPackage(modelPath);
+
+  auto mapData = parseMapData(modelPath);
+  auto entities = getEntitiesByClassName(mapData, brushModel.c_str());
+  modassert(entities.size() == 1, std::string("unexpected number of entities for brush model: " + std::to_string(entities.size())));
+
+  Entity& entity = *entities.at(0);
+
+  std::vector<glm::vec3> points;
+
+  for (auto& brush : entity.brushes){
+  	auto candidateVertices = getAllIntersections(brush);
+
+  	auto faceVertices = assignVerticesToFaces(brush, candidateVertices);
+
+  	std::cout << "face vertices size: " << faceVertices.size() << std::endl;
+  	for(auto& faceVertice : faceVertices){
+	    std::cout << "Face has " << faceVertice.vertices.size() << " vertices\n";
+
+	  	sortVerticesCCW(faceVertice);
+	  	auto triangles = triangulateFace(faceVertice);
+	  	for (auto& triangle : triangles){
+		  	points.push_back(triangle.v0);
+		  	points.push_back(triangle.v1);
+		  	points.push_back(triangle.v2);
+	  	}
+  	}
+
+  	//modassert(candidateVertices.size() % 3 == 0, std::string("invalid number of intersections: ") + std::to_string(candidateVertices.size()));
+  	//for(auto& vertex : candidateVertices){
+  ////	points.push_back(vertex);
+  	//}
+  }
+
+/*struct BrushFace {
+    glm::vec3 point1;
+    glm::vec3 point2;
+    glm::vec3 point3;
+    glm::vec2 uvOffset;
+    glm::vec2 textureScale;
+    float rotation;
+    std::string texture;
+};
+struct Brush {
+	std::vector<BrushFace> brushFaces;*/
+
+  std::cout << "size points: " << points.size() << std::endl;
+
+
+  //std::cout << "raw brush:\n-------------------------------\n" << brushDataRaw2 << std::endl;
+
+  //modassert(false, "end");
+
+
+
+  /*int dim = 15;
+  for (int x = 0; x < dim; x++){
+    for (int y = 0; y < dim; y++){
+      float offsetX = 5.f * x;
+      float offsetY = 5.f * y;
+      points.push_back(glm::vec3(0.f + offsetX, 0.f + offsetY, 0.f));
+      points.push_back(glm::vec3(0.f + offsetX, 5.f + offsetY, 0.f));
+      points.push_back(glm::vec3(5.f + offsetX, 0.f + offsetY, 0.f));
+      points.push_back(glm::vec3(5.f + offsetX, 0.f + offsetY, 0.f));
+      points.push_back(glm::vec3(0.f + offsetX, 5.f + offsetY, 0.f));
+      points.push_back(glm::vec3(5.f + offsetX, 5.f + offsetY, 0.f));
+    }
+  }*/
+
+
+  std::vector<glm::vec2> uvCoords;
+  std::vector<unsigned int> indexs;
+  addPointsToSimpleMesh(points, uvCoords, indexs);
+  
+  // Just collect all similar textures, render them as separate meshes
+
+  auto generatedMesh = generateMeshRaw(points, uvCoords, indexs);
+  ModelDataCore modelDataCore2 {
+    .modelData = ModelData {
+      .meshIdToMeshData = {{ 0, generatedMesh }},
+      .nodeToMeshId = {{ 0, { 0 }}},
+      .childToParent = {},
+      .nodeTransform = {
+        { 0, Transformation {
+          .position = glm::vec3(0.f, 0.f, 0.f),
+          .scale = glm::vec3(1.f, 1.f, 1.f),
+          .rotation = MOD_ORIENTATION_FORWARD,
+        }}
+      },
+      .names = {{ 0, "test" }},
+      .animations = {},      
+    },
+    .loadedRoot = "test",
+  };
+  return modelDataCore2;
+}
