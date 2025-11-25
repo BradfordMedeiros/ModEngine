@@ -2,7 +2,7 @@
 
 std::string readFileOrPackage(std::string filepath);
 std::string serializeAttributeValue(AttributeValue& value);
-const float EPSILON = 0.0001f;
+const float EPSILON = 0.001f;
 
 struct ParsedEntity {
 	std::vector<EntityKeyValue> keyValues;
@@ -412,19 +412,52 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 	compileBrushes(mapData, rawMapContent, "./build/temp.brush");
 }
 
+void addPointsToSimpleMesh(std::vector<glm::vec3>& points, std::vector<glm::vec2>& _uvCoords,  std::vector<unsigned int>& _indexs){
+  for (int i = 0; i < points.size(); i++){
+  	int remainder = i % 6;
+  	if (remainder == 0){
+      _uvCoords.push_back(glm::vec2(0.f, 0.f));
+  	}else if (remainder == 1){
+      _uvCoords.push_back(glm::vec2(0.f, 1.f));
+  	}else if (remainder == 2){
+      _uvCoords.push_back(glm::vec2(1.f, 0.f));
+  	}else if (remainder == 3){
+      _uvCoords.push_back(glm::vec2(1.f, 0.f));
+  	}else if (remainder == 4){
+      _uvCoords.push_back(glm::vec2(0.f, 1.f));
+  	}else if (remainder == 5){
+      _uvCoords.push_back(glm::vec2(1.f, 1.f));
+  	}else{
+  		modassert(false, "programming error %");
+  	}
+    _indexs.push_back(i);
+  }
+}
+
 
 struct BrushPlane {
 	float distanceToPoint;
 	glm::vec3 normal;
+	glm::vec3 pointOnPlane;
 };
 
 BrushPlane brushFaceToPlane(BrushFace& brushFace){
 	glm::vec3 normal = glm::normalize(glm::cross(brushFace.point2 - brushFace.point1, brushFace.point3 - brushFace.point1));
 	float distanceToPoint = -1 * glm::dot(normal, brushFace.point1);
+	
+	std::cout << "distanceToPoint: " << distanceToPoint << std::endl;
+	//if (distanceToPoint > 0.f){
+	//	// This means trenchbroom flipped a normal on us, it is inward facing, let's just reverse it
+	//	normal = -1.f * normal;
+	//	distanceToPoint *= -1;
+	//	//modassert(distanceToPoint <= 0.f, std::string("unexpected value brushFaceToPlane: ") + std::to_string(distanceToPoint));
+	//}
+
 
 	BrushPlane plane {
 		.distanceToPoint = distanceToPoint,
 		.normal = normal,
+		.pointOnPlane = brushFace.point1,
 	};
 	return plane;
 }
@@ -438,16 +471,22 @@ std::optional<glm::vec3> intersectPlanes(BrushPlane& a, BrushPlane& b, BrushPlan
     if (fabs(denom) < EPSILON){
     	return std::nullopt; // planes are parallel or degenerate
     } 
+
     return ( (-a.distanceToPoint * n2n3) - (b.distanceToPoint * n3n1) - (c.distanceToPoint * n1n2) ) / denom;
 }
 
 
 
 bool insideBrushPlanes(std::vector<BrushPlane>& brushPlanes, glm::vec3 point){
+	std::cout << "\ninsideBrushPlanes" << std::endl;
 	for (auto& plane : brushPlanes){
-    if (glm::dot(plane.normal, point) + plane.distanceToPoint > EPSILON){
-        return false;
-    }
+        float projection = glm::dot(plane.normal, point - plane.pointOnPlane);
+		bool insidePlane = projection >= 0.f;
+
+		std::cout << "insideBrushPlanes: plane point = " << print(plane.pointOnPlane) << " normal = " << print(plane.normal) << ", distanceToPoint = " << plane.distanceToPoint << ", point = " << print(point) + ",dp = " << projection << ", insidePlane = " << insidePlane << std::endl;
+    	if (!insidePlane) {
+    		return false;
+    	}
 	}
 	return true;
 }
@@ -476,85 +515,6 @@ std::vector<glm::vec3> getAllIntersections(Brush& brush){
 	return candidateVertices;
 }
 
-struct FaceVertices {
-    BrushFace* face;
-    std::vector<glm::vec3> vertices;
-};
-std::vector<FaceVertices> assignVerticesToFaces(Brush& brush, const std::vector<glm::vec3>& candidateVertices) {
-    std::vector<FaceVertices> result;
-    for (auto& face : brush.brushFaces) {
-        FaceVertices fv;
-        fv.face = &face;
-
-        BrushPlane plane = brushFaceToPlane(face);
-
-        for (auto& vertex : candidateVertices) {
-            if (fabs(glm::dot(plane.normal, vertex) + plane.distanceToPoint) < EPSILON) {
-                fv.vertices.push_back(vertex);
-            }
-        }
-
-        result.push_back(fv);
-    }
-    return result;
-}
-void sortVerticesCCW(FaceVertices& fv) {
-    // Compute centroid
-    glm::vec3 centroid(0.0f);
-    for (auto& v : fv.vertices) centroid += v;
-    centroid /= (float)fv.vertices.size();
-
-    // Find major axis to drop for projection (largest normal component)
-  	auto normal = brushFaceToPlane(*fv.face).normal;
-    glm::vec3 n = normal;
-    int dropAxis = 0;
-    if (fabs(n.y) > fabs(n.x) && fabs(n.y) > fabs(n.z)) dropAxis = 1;
-    else if (fabs(n.z) > fabs(n.x) && fabs(n.z) > fabs(n.y)) dropAxis = 2;
-
-    // Sort by angle
-    std::sort(fv.vertices.begin(), fv.vertices.end(),
-        [&](const glm::vec3& a, const glm::vec3& b) {
-            glm::vec2 pa, pb;
-            if (dropAxis == 0) { pa = glm::vec2(a.y - centroid.y, a.z - centroid.z); pb = glm::vec2(b.y - centroid.y, b.z - centroid.z); }
-            else if (dropAxis == 1) { pa = glm::vec2(a.x - centroid.x, a.z - centroid.z); pb = glm::vec2(b.x - centroid.x, b.z - centroid.z); }
-            else { pa = glm::vec2(a.x - centroid.x, a.y - centroid.y); pb = glm::vec2(b.x - centroid.x, b.y - centroid.y); }
-
-            return atan2(pa.y, pa.x) < atan2(pb.y, pb.x);
-        }
-    );
-}
-struct Triangle { glm::vec3 v0, v1, v2; };
-
-std::vector<Triangle> triangulateFace(FaceVertices& fv) {
-    std::vector<Triangle> tris;
-    int N = fv.vertices.size();
-    for (int i = 1; i < N - 1; i++) {
-        tris.push_back({ fv.vertices[0], fv.vertices[i], fv.vertices[i + 1] });
-    }
-    return tris;
-}
-
-void addPointsToSimpleMesh(std::vector<glm::vec3>& points, std::vector<glm::vec2>& _uvCoords,  std::vector<unsigned int>& _indexs){
-  for (int i = 0; i < points.size(); i++){
-  	int remainder = i % 6;
-  	if (remainder == 0){
-      _uvCoords.push_back(glm::vec2(0.f, 0.f));
-  	}else if (remainder == 1){
-      _uvCoords.push_back(glm::vec2(0.f, 1.f));
-  	}else if (remainder == 2){
-      _uvCoords.push_back(glm::vec2(1.f, 0.f));
-  	}else if (remainder == 3){
-      _uvCoords.push_back(glm::vec2(1.f, 0.f));
-  	}else if (remainder == 4){
-      _uvCoords.push_back(glm::vec2(0.f, 1.f));
-  	}else if (remainder == 5){
-      _uvCoords.push_back(glm::vec2(1.f, 1.f));
-  	}else{
-  		modassert(false, "programming error %");
-  	}
-    _indexs.push_back(i);
-  }
-}
 
 
 MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices);
@@ -575,7 +535,9 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   for (auto& brush : entity.brushes){
   	auto candidateVertices = getAllIntersections(brush);
 
-  	auto faceVertices = assignVerticesToFaces(brush, candidateVertices);
+  	std::cout << "candidateVertices: size = " << candidateVertices.size() << std::endl;
+
+  	/*auto faceVertices = assignVerticesToFaces(brush, candidateVertices);
 
   	std::cout << "face vertices size: " << faceVertices.size() << std::endl;
   	for(auto& faceVertice : faceVertices){
@@ -588,13 +550,15 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 		  	points.push_back(triangle.v1);
 		  	points.push_back(triangle.v2);
 	  	}
-  	}
+  	}*/
 
   	//modassert(candidateVertices.size() % 3 == 0, std::string("invalid number of intersections: ") + std::to_string(candidateVertices.size()));
   	//for(auto& vertex : candidateVertices){
   ////	points.push_back(vertex);
   	//}
   }
+
+  modassert(false, "stop here");
 
 /*struct BrushFace {
     glm::vec3 point1;
