@@ -134,6 +134,15 @@ std::vector<EntityKeyValue> parseKeyValues(std::string& content){
 	return keyValues;
 }
 
+glm::vec3 parseVecTrenchbroom(std::string positionRaw){;
+	return parseVec(positionRaw);
+
+  float x, y, z;
+  std::istringstream in(positionRaw);
+  in >> x >> y >> z;
+  return glm::vec3(x, z, y);
+}
+
 BrushFace parseBrushFace(std::string& content){
 	std::cout << "brush face: " << content << std::endl;
 
@@ -156,7 +165,7 @@ BrushFace parseBrushFace(std::string& content){
 		}else if (value == ')'){
 			foundLeftBrace = false;
 			std::cout << "brush face value is: [" << stringValue << "]" << std::endl;
-			glm::vec3 vec = parseVec(stringValue);
+			glm::vec3 vec = parseVecTrenchbroom(stringValue);
 			points.push_back(vec);
 			stringValue = "";
 			count++;
@@ -181,10 +190,13 @@ BrushFace parseBrushFace(std::string& content){
 	brushFace.point3 = points.at(2);
 
 
+	modassert(values.size() == 6, std::string("map parsing, unexpected number of values: ") + std::to_string(values.size()));
+	std::cout << "calculate: values: " << print(values) << std::endl;
 	// TODO store this in a double for now
 	brushFace.uvOffset = glm::vec2(std::atof(values.at(1).c_str()), std::atof(values.at(2).c_str()));
 
 	brushFace.textureScale = glm::vec2(std::atof(values.at(4).c_str()), std::atof(values.at(5).c_str()));
+	std::cout << "calculate brush scale: " << print(brushFace.textureScale) << std::endl;
 	brushFace.rotation = std::atof(values.at(3).c_str());
 
 	auto texture = values.at(0);
@@ -385,7 +397,7 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 		    auto origin = getValue(entity, "origin");
 		    auto classname = getValue(entity, "classname");
 
-		    glm::vec3 position = origin.has_value() ? parseVec(*origin.value()) : glm::vec3(0.f, 0.f, 0.f);
+		    glm::vec3 position = origin.has_value() ? parseVecTrenchbroom(*origin.value()) : glm::vec3(0.f, 0.f, 0.f);
 		    modassert(classname.has_value(), "no classname");
 
 		    std::string entityName = modelName != "" ?  modelName : (std::string("entity_") + *classname.value() + "_" + std::to_string(entity.index));
@@ -412,23 +424,25 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 	compileBrushes(mapData, rawMapContent, "./build/temp.brush");
 }
 
-void addPointsToSimpleMesh(std::vector<glm::vec3>& points, std::vector<glm::vec2>& _uvCoords,  std::vector<unsigned int>& _indexs){
+void addPointsToSimpleMesh(std::vector<glm::vec3>& points, std::vector<glm::vec2>& _uvCoords,  std::vector<unsigned int>& _indexs, bool addUvs){
   for (int i = 0; i < points.size(); i++){
   	int remainder = i % 6;
-  	if (remainder == 0){
-      _uvCoords.push_back(glm::vec2(0.f, 0.f));
-  	}else if (remainder == 1){
-      _uvCoords.push_back(glm::vec2(0.f, 1.f));
-  	}else if (remainder == 2){
-      _uvCoords.push_back(glm::vec2(1.f, 0.f));
-  	}else if (remainder == 3){
-      _uvCoords.push_back(glm::vec2(1.f, 0.f));
-  	}else if (remainder == 4){
-      _uvCoords.push_back(glm::vec2(0.f, 1.f));
-  	}else if (remainder == 5){
-      _uvCoords.push_back(glm::vec2(1.f, 1.f));
-  	}else{
-  		modassert(false, "programming error %");
+  	if (addUvs){
+  		if (remainder == 0){
+    	  _uvCoords.push_back(glm::vec2(0.f, 0.f));
+  		}else if (remainder == 1){
+    	  _uvCoords.push_back(glm::vec2(0.f, 1.f));
+  		}else if (remainder == 2){
+    	  _uvCoords.push_back(glm::vec2(1.f, 0.f));
+  		}else if (remainder == 3){
+    	  _uvCoords.push_back(glm::vec2(1.f, 0.f));
+  		}else if (remainder == 4){
+    	  _uvCoords.push_back(glm::vec2(0.f, 1.f));
+  		}else if (remainder == 5){
+    	  _uvCoords.push_back(glm::vec2(1.f, 1.f));
+  		}else{
+  			modassert(false, "programming error %");
+  		}
   	}
     _indexs.push_back(i);
   }
@@ -515,6 +529,130 @@ std::vector<glm::vec3> getAllIntersections(Brush& brush){
 	return candidateVertices;
 }
 
+struct VertexWithData {
+	glm::vec3 pos;
+	glm::vec2 uv;
+};
+
+void sortVerticesCCW(std::vector<VertexWithData>& vertices, const glm::vec3& normal) {
+	if (vertices.size() == 0){
+		return;
+	}
+  glm::vec3 centroid(0.f, 0.f, 0.f);
+   {
+   	for (auto& vertex : vertices) {
+   		centroid += vertex.pos;
+   	};
+   	centroid /= (float)vertices.size();
+  }
+
+  // Pick a reference axis on the plane
+ 	glm::vec3 ref = glm::normalize(vertices.at(0).pos - centroid);
+
+  // Sort by angle around normal
+  std::sort(vertices.begin(), vertices.end(), [&](const VertexWithData& vertexOne, const VertexWithData& vertexTwo) {
+      glm::vec3 va = glm::normalize(vertexOne.pos - centroid);
+      glm::vec3 vb = glm::normalize(vertexTwo.pos - centroid);
+      float angle = glm::atan(glm::dot(glm::cross(ref, va), normal), glm::dot(ref, va));
+      float angleB = glm::atan(glm::dot(glm::cross(ref, vb), normal), glm::dot(ref, vb));
+      return angle < angleB;
+  });
+}
+
+glm::vec2 calculateUv(BrushFace& brushFace, BrushPlane& brushPlane, glm::vec3 vertex) {
+    // Plane normal
+
+		vertex.x /= 1024;
+		vertex.y /= 1024;
+		vertex.z /= 1024;
+
+    glm::vec3 N = brushPlane.normal;
+
+    // Pick a stable "up" vector to avoid degeneracy
+    glm::vec3 up = (fabs(N.z) > 0.999f) ? glm::vec3(0, 1, 0) : glm::vec3(0, 0, 1);
+
+    // Construct local U/V axes on the plane
+    glm::vec3 U = glm::normalize(glm::cross(up, N));
+    glm::vec3 V = glm::normalize(glm::cross(N, U));
+
+    // Project the vertex onto the plane axes
+    float u = glm::dot(vertex, U);
+    float v = glm::dot(vertex, V);
+
+    // Apply TrenchBroom scale and shift exactly as in the .map file
+    // scale = world units per texture repeat
+    // shift = world-space offset along the axis
+    u = (u + brushFace.uvOffset.x) / brushFace.textureScale.x;
+    v = (v + brushFace.uvOffset.y) / brushFace.textureScale.y;
+
+    return glm::vec2(u, v);
+}
+
+struct FaceVertexAssignment {
+    BrushFace* face;       
+    std::vector<VertexWithData> vertices; 
+};
+std::vector<FaceVertexAssignment> assignVerticesToFaces(std::vector<BrushFace>& faces, std::vector<glm::vec3>& candidateVertices){
+    std::vector<FaceVertexAssignment> assignments;
+
+    for (auto& face : faces) {
+       	auto brushPlane = brushFaceToPlane(face);
+
+        std::vector<VertexWithData> vertsOnFace;
+
+        // Pick vertices that lie on the plane of this face
+        for (auto& v : candidateVertices) {
+            float distance = glm::dot(brushPlane.normal, v) + brushPlane.distanceToPoint; // plane equation
+            if (fabs(distance) < 0.001f) { // tolerance for floating point
+                vertsOnFace.push_back(VertexWithData {
+                	.pos = v,
+                	.uv = calculateUv(face, brushPlane, v),
+                });
+            }
+        }
+
+        sortVerticesCCW(vertsOnFace, brushPlane.normal);
+
+        assignments.push_back(FaceVertexAssignment{ 
+        	.face = &face, 
+        	.vertices = vertsOnFace,
+        });
+    }
+
+    return assignments;
+}
+
+struct Triangle {
+    glm::vec3 vertex0;
+    glm::vec3 vertex1;
+    glm::vec3 vertex2;
+
+    glm::vec2 vertex0Uv;
+    glm::vec2 vertex1Uv;
+    glm::vec2 vertex2Uv;
+};
+
+std::vector<Triangle> triangulateFace(FaceVertexAssignment& faceAssignment) {
+    if (faceAssignment.vertices.size() < 3) {
+    	//modassert(false, std::string("face assignment invalid number of vertices < 3: num = ") + std::to_string(faceAssignment.vertices.size()));
+    	return {};
+    }
+
+    // Fan from the center, vertices form a perimeter so the triangles are the edge and connect to the center
+    std::vector<Triangle> triangles;
+    for (size_t i = 1; i + 1 < faceAssignment.vertices.size(); ++i) {
+        triangles.push_back(Triangle {
+        	.vertex0 = faceAssignment.vertices.at(0).pos,
+        	.vertex1 = faceAssignment.vertices.at(i).pos,
+        	.vertex2 = faceAssignment.vertices.at(i + 1).pos,
+
+        	.vertex0Uv = faceAssignment.vertices.at(0).uv,
+        	.vertex1Uv = faceAssignment.vertices.at(i).uv,
+        	.vertex2Uv = faceAssignment.vertices.at(i + 1).uv,
+        });
+    }
+    return triangles;
+}
 
 
 MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices);
@@ -531,75 +669,41 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   Entity& entity = *entities.at(0);
 
   std::vector<glm::vec3> points;
+  std::vector<glm::vec2> uvCoords;
 
   for (auto& brush : entity.brushes){
   	auto candidateVertices = getAllIntersections(brush);
 
   	std::cout << "candidateVertices: size = " << candidateVertices.size() << std::endl;
 
-  	/*auto faceVertices = assignVerticesToFaces(brush, candidateVertices);
+  	auto faceVertices = assignVerticesToFaces(brush.brushFaces, candidateVertices);
 
   	std::cout << "face vertices size: " << faceVertices.size() << std::endl;
   	for(auto& faceVertice : faceVertices){
 	    std::cout << "Face has " << faceVertice.vertices.size() << " vertices\n";
 
-	  	sortVerticesCCW(faceVertice);
 	  	auto triangles = triangulateFace(faceVertice);
 	  	for (auto& triangle : triangles){
-		  	points.push_back(triangle.v0);
-		  	points.push_back(triangle.v1);
-		  	points.push_back(triangle.v2);
-	  	}
-  	}*/
+		  	points.push_back(triangle.vertex0);
+		  	uvCoords.push_back(triangle.vertex0Uv);
 
-  	//modassert(candidateVertices.size() % 3 == 0, std::string("invalid number of intersections: ") + std::to_string(candidateVertices.size()));
-  	//for(auto& vertex : candidateVertices){
-  ////	points.push_back(vertex);
-  	//}
+		  	points.push_back(triangle.vertex1);
+		  	uvCoords.push_back(triangle.vertex1Uv);
+
+		  	points.push_back(triangle.vertex2);
+		  	uvCoords.push_back(triangle.vertex2Uv);
+	  	}
+  	}
+
   }
 
-  modassert(false, "stop here");
-
-/*struct BrushFace {
-    glm::vec3 point1;
-    glm::vec3 point2;
-    glm::vec3 point3;
-    glm::vec2 uvOffset;
-    glm::vec2 textureScale;
-    float rotation;
-    std::string texture;
-};
-struct Brush {
-	std::vector<BrushFace> brushFaces;*/
-
+  
   std::cout << "size points: " << points.size() << std::endl;
 
-
-  //std::cout << "raw brush:\n-------------------------------\n" << brushDataRaw2 << std::endl;
-
-  //modassert(false, "end");
-
-
-
-  /*int dim = 15;
-  for (int x = 0; x < dim; x++){
-    for (int y = 0; y < dim; y++){
-      float offsetX = 5.f * x;
-      float offsetY = 5.f * y;
-      points.push_back(glm::vec3(0.f + offsetX, 0.f + offsetY, 0.f));
-      points.push_back(glm::vec3(0.f + offsetX, 5.f + offsetY, 0.f));
-      points.push_back(glm::vec3(5.f + offsetX, 0.f + offsetY, 0.f));
-      points.push_back(glm::vec3(5.f + offsetX, 0.f + offsetY, 0.f));
-      points.push_back(glm::vec3(0.f + offsetX, 5.f + offsetY, 0.f));
-      points.push_back(glm::vec3(5.f + offsetX, 5.f + offsetY, 0.f));
-    }
-  }*/
-
-
-  std::vector<glm::vec2> uvCoords;
   std::vector<unsigned int> indexs;
-  addPointsToSimpleMesh(points, uvCoords, indexs);
-  
+  addPointsToSimpleMesh(points, uvCoords, indexs, false);
+  modassert(points.size() == uvCoords.size(), "unexpected diff in points and uv coords size");
+
   // Just collect all similar textures, render them as separate meshes
 
   auto generatedMesh = generateMeshRaw(points, uvCoords, indexs);
