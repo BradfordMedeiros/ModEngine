@@ -239,6 +239,22 @@ else()
   message("MODBUILD - Not Including ASSIMP")
 endif()
 
+##### Effekseer
+
+#Obviously this path needs to be cleaned up, but it compiles and links!
+# https://effekseer.github.io/en/download.html  effekseer for c++
+set(BUILD_EXAMPLES OFF CACHE BOOL "Build examples" FORCE)
+add_subdirectory("/home/brad/Desktop/effects/" "${CMAKE_BINARY_DIR}/effekseer_build")
+target_link_libraries(${PROJECT_NAME} 
+    Effekseer
+    EffekseerRendererGL
+    glfw
+)
+target_include_directories(${PROJECT_NAME} PRIVATE
+    "/home/brad/Desktop/effects/src/include"
+    "/home/brad/Desktop/effects/src/Effekseer"
+)
+
 
 ## Bullet - physics -- this should come from the actual lib folder eventually but oh well for now.
 if (NOT NO_INCLUDE_BULLET)
