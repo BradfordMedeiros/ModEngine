@@ -25,6 +25,9 @@
 #include "./resources.h"
 #include "./scene/common/map.h"
 
+#include "./effekseer.h"
+
+
 #ifdef ADDITIONAL_SRC_HEADER
   #include STR(ADDITIONAL_SRC_HEADER)
 #endif
@@ -668,6 +671,7 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
             );
             numTriangles = numTriangles + trianglesDrawn;
           }
+
         }
   
         glStencilFunc(GL_EQUAL, 1, 0xFF);
@@ -862,6 +866,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep, ViewportSe
       std::cout << "Warning: render step not enabled: " << renderStep.name << std::endl;
       return triangles;
     }
+
     glUseProgram(*renderStep.shader);
     setRenderUniformData(*renderStep.shader, renderStep.uniforms);
     for (int i = 0; i < renderStep.textures.size(); i++){
@@ -894,10 +899,12 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep, ViewportSe
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
 
     if (state.showSkybox && renderStep.renderSkybox){
-      glDepthMask(GL_FALSE);
-      renderSkybox(*renderStep.shader, context.view, viewport);  // Probably better to render this at the end 
-      glDepthMask(GL_TRUE);    
+       glDepthMask(GL_FALSE);
+       renderSkybox(*renderStep.shader, context.view, viewport);  // Probably better to render this at the end 
+       glDepthMask(GL_TRUE);    
     }
+
+
     glEnable(GL_DEPTH_TEST);
     if (renderStep.blend){
       glEnable(GL_BLEND);
@@ -2036,10 +2043,29 @@ int main(int argc, char* argv[]){
   PROFILE("FRAME",
     std::cout << inColor("hint - START FRAME", CONSOLE_COLOR_YELLOW) << std::endl;
 
+    /*glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    PROFILE("EFFEK",
+      glViewport(0, 0, (int)state.currentScreenWidth, (int)state.currentScreenHeight);
+      glClearColor(0.f, 0.f, 0.f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      
+
+      onEffekSeekerFrame();
+      onEffekSeekerRender((float)state.currentScreenWidth, (float)state.currentScreenHeight);
+  
+      glfwSwapBuffers(window);
+      glfwPollEvents();
+
+    )
+    continue;*/
+
     auto shouldExit = updateTime(fpsFixed, fixedDelta, state.engineSpeed, timetoexit, hasFramelimit, minDeltaTime, fpsLag);
     if (shouldExit || shouldQuitControl){
       goto cleanup;
     }
+
+
 
     resetReservedId();
     disposeTempBufferedData(lineData);
@@ -2454,6 +2480,7 @@ int main(int argc, char* argv[]){
         glViewport(calcViewportOffset(viewport).x, calcViewportOffset(viewport).y, calcViewportSize(viewport).x, calcViewportSize(viewport).y);
         glBindVertexArray(defaultResources.quadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
     }
 
 

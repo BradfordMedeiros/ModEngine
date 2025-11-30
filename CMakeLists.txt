@@ -244,12 +244,15 @@ endif()
 #Obviously this path needs to be cleaned up, but it compiles and links!
 # https://effekseer.github.io/en/download.html  effekseer for c++
 set(BUILD_EXAMPLES OFF CACHE BOOL "Build examples" FORCE)
+
 add_subdirectory("/home/brad/Desktop/effects/" "${CMAKE_BINARY_DIR}/effekseer_build")
 target_link_libraries(${PROJECT_NAME} 
     Effekseer
     EffekseerRendererGL
     glfw
+    GL  # I'm not sure i want to link this directly vs just using glad only?
 )
+
 target_include_directories(${PROJECT_NAME} PRIVATE
     "/home/brad/Desktop/effects/src/include"
     "/home/brad/Desktop/effects/src/Effekseer"
