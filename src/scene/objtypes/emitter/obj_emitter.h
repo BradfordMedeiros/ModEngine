@@ -4,6 +4,7 @@
 #include "../../../common/util.h"
 #include "../obj_util.h"
 #include "./emitter.h"
+#include "./effekseer.h"
 
 struct GameObjectEmitter{
 	float rate;
@@ -11,7 +12,10 @@ struct GameObjectEmitter{
 	int numParticlesPerFrame;
 	int limit;
 	bool state;
-  EmitterDeleteBehavior deleteBehavior;
+  	EmitterDeleteBehavior deleteBehavior;
+
+  	std::string effekseer;
+  	std::optional<EffekEffect> effekseerEffect;
 };
 
 GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& util);

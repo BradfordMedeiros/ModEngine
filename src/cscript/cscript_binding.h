@@ -126,7 +126,12 @@ struct CustomApiBindings {
   void (*saveScreenshot)(std::string);
   void (*setState)(std::string);
   glm::vec3 (*navPosition)(objid, glm::vec3 pos);
+  
+  // This applies to the core particle system only
   void (*emit)(objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity, std::optional<glm::vec3> initAvelocity, std::optional<objid> parentId);
+  void (*setParticleState)(objid id, bool on);
+
+
   objid (*loadAround)(objid);
   void (*rmLoadAround)(objid);
   void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string);

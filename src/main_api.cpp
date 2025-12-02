@@ -987,6 +987,21 @@ void emit(objid id, std::optional<glm::vec3> initPosition, std::optional<glm::qu
   });
 }
 
+void setParticleState(objid id, bool on){
+  auto emitter = getEmitter(world.objectMapping, id);
+  modassert(emitter, "emitter does not exist");
+  if (emitter -> effekseerEffect.has_value()){
+    if (on){
+      auto emitterPosition = getGameObjectPosition(id, true, "setParticleState");
+      playEffect(emitter -> effekseerEffect.value(), emitterPosition);
+    }else{
+      stopEffect(emitter -> effekseerEffect.value());
+    }
+  }else{
+    modassert(false, "setParticleState not yet implemented for non-effekseer particles");
+  }
+}
+
 objid addLoadingAround(objid id){
   return addLoadingAround(dynamicLoading, id);
 }

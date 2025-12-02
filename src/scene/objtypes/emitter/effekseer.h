@@ -1,0 +1,23 @@
+#ifndef MOD_EFFEKSEER
+#define MOD_EFFEKSEER
+
+#include <iostream>
+#include <codecvt>
+#include <Effekseer.h>
+#include <EffekseerRendererGL.h>
+#include "../../../common/util.h"
+
+void onEffekSeekerFrame();
+void onEffekSeekerRender(float windowSizeX, float windowSizeY, glm::vec3 viewPosition, glm::quat viewDirection, glm::vec3 effectPosition);
+
+struct EffekEffect {
+	objid effectId;
+};
+
+EffekEffect createEffect(std::string effect);
+void freeEffect(EffekEffect& effect);
+void setEffectState(EffekEffect& effect, bool loopContinuously);
+void playEffect(EffekEffect& effect, glm::vec3 position);
+void stopEffect(EffekEffect& effect);
+
+#endif

@@ -160,7 +160,7 @@ std::vector<AutoSerialize> emitterAutoserializer {
     .field = "state", 
     .onString = "enabled",
     .offString = "disabled",
-    .defaultValue = true,
+    .defaultValue = false,
   },
   AutoSerializeEnums {
     .structOffset = offsetof(GameObjectEmitter, deleteBehavior),
@@ -169,6 +169,12 @@ std::vector<AutoSerialize> emitterAutoserializer {
     .field = "onremove",
     .defaultValue = EMITTER_DELETE,
   },
+  AutoSerializeString {
+    .structOffset = offsetof(GameObjectEmitter, effekseer),
+    .field = "effekseer",
+    .defaultValue = "",
+  },
+
 };
 
 
@@ -230,58 +236,72 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
   createAutoSerializeWithTextureLoading((char*)&obj, emitterAutoserializer, attributes, util);
   assert(obj.limit >= 0);
   
-  auto allAttributes = allKeysAndAttributes(attributes);
-  auto allSubmodelPaths = emitterSubmodelAttr(allAttributes);
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
-  for (auto &submodel : allSubmodelPaths){
-    submodelAttributes[submodel] = emitterExtractAttributes(attributes, submodel);
+  if (obj.effekseer == ""){
+    auto allAttributes = allKeysAndAttributes(attributes);
+    auto allSubmodelPaths = emitterSubmodelAttr(allAttributes);
+    std::unordered_map<std::string, GameobjAttributes> submodelAttributes = {};
+    for (auto &submodel : allSubmodelPaths){
+      submodelAttributes[submodel] = emitterExtractAttributes(attributes, submodel);
+    }
+    ParticleConfig particleConfig {
+      .particleAttributes = particleFieldFrames(attributes),
+      .submodelAttributes = {
+        SubmodelAttributeFrame {
+          .frame = 0,
+          .attr = submodelAttributes,
+        },
+        SubmodelAttributeFrame {
+          .frame = 1,
+          .attr = submodelAttributes,
+        },
+        SubmodelAttributeFrame {
+          .frame = 2,
+          .attr = submodelAttributes,
+        },
+        SubmodelAttributeFrame {
+          .frame = 3,
+          .attr = submodelAttributes,
+        },
+        SubmodelAttributeFrame {
+          .frame = 4,
+          .attr = submodelAttributes,
+        },
+        SubmodelAttributeFrame {
+          .frame = 5,
+          .attr = submodelAttributes,
+        },
+      },
+      .deltas = emitterDeltasFrames(attributes),
+    };
+    addEmitter(emitterSystem, util.id, util.getCurrentTime(), obj.limit, obj.rate, obj.duration, obj.numParticlesPerFrame, particleConfig, obj.state, obj.deleteBehavior);    
+  }else{
+    obj.effekseerEffect = createEffect(obj.effekseer);
+    setEffectState(obj.effekseerEffect.value(), obj.state);
   }
 
-  ParticleConfig particleConfig {
-    .particleAttributes = particleFieldFrames(attributes),
-    .submodelAttributes = {
-      SubmodelAttributeFrame {
-        .frame = 0,
-        .attr = submodelAttributes,
-      },
-      SubmodelAttributeFrame {
-        .frame = 1,
-        .attr = submodelAttributes,
-      },
-      SubmodelAttributeFrame {
-        .frame = 2,
-        .attr = submodelAttributes,
-      },
-      SubmodelAttributeFrame {
-        .frame = 3,
-        .attr = submodelAttributes,
-      },
-      SubmodelAttributeFrame {
-        .frame = 4,
-        .attr = submodelAttributes,
-      },
-      SubmodelAttributeFrame {
-        .frame = 5,
-        .attr = submodelAttributes,
-      },
-    },
-    .deltas = emitterDeltasFrames(attributes),
-  };
-  addEmitter(emitterSystem, util.id, util.getCurrentTime(), obj.limit, obj.rate, obj.duration, obj.numParticlesPerFrame, particleConfig, obj.state, obj.deleteBehavior);
   return obj;
 }
 
 void removeEmitterObj(GameObjectEmitter& obj, ObjectRemoveUtil& util){
   removeEmitter(emitterSystem, util.id);
+  if (obj.effekseerEffect.has_value()){
+    freeEffect(obj.effekseerEffect.value());
+  }
 }
 
 bool setEmitterAttribute(GameObjectEmitter& emitterObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&){
   bool setAnyValue = autoserializerSetAttrWithTextureLoading((char*)&emitterObj, emitterAutoserializer, field, value, util);
   std::string fieldName(field);
-  if (fieldName == "state"){
-    updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
-      .enabled = emitterObj.state,
-    });
+  if (fieldName == "effekseer"){
+    modassert(false, "cannot update effekseer effect at runtime");
+  }else if (fieldName == "state"){
+    if (emitterObj.effekseerEffect.has_value()){
+      setEffectState(emitterObj.effekseerEffect.value(), emitterObj.state);
+    }else{
+      updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {
+        .enabled = emitterObj.state,
+      });
+    }
     setAnyValue = true;
   }else if (fieldName == "rate"){
     updateEmitterOptions(emitterSystem, util.id, EmitterUpdateOptions {

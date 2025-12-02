@@ -25,7 +25,7 @@
 #include "./resources.h"
 #include "./scene/common/map.h"
 
-#include "./effekseer.h"
+#include "./scene/objtypes/emitter/effekseer.h"
 
 
 #ifdef ADDITIONAL_SRC_HEADER
@@ -556,6 +556,8 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
   for (auto& realLayer : world.sandbox.layers){      // @TODO could organize this before to not require pass on each frame
     auto layer = layerInfoForViewport(realLayer, viewport);
 
+    std::cout << "layer fov: " << layer.fovRaw << std::endl;
+
     auto proj = projection == NULL ? projectionFromLayer(layer, viewport) : *projection;
     auto newProjView = (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view);
 
@@ -689,9 +691,10 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
       }
     }  
   }
-        
- 
-  
+
+  PROFILE("EFFEK",
+    onEffekSeekerRender(viewport.widthNdi, viewport.heightNdi, viewTransform.position, viewTransform.rotation, glm::vec3(0.f, 0.f, 10.f));
+  )
   auto maxExpectedClears = numUniqueDepthLayers(world.sandbox.layers);
   //modassert(numDepthClears <= maxExpectedClears, std::string("numDepthClears = ") + std::to_string(numDepthClears) + std::string(", expected = ") + std::to_string(maxExpectedClears));
  
@@ -1744,6 +1747,7 @@ int main(int argc, char* argv[]){
     .setState = setState,
     .navPosition = navPosition,
     .emit = emit,
+    .setParticleState = setParticleState,
     .loadAround = addLoadingAround,
     .rmLoadAround = removeLoadingAround,
     .generateMesh = createGeneratedMesh,
@@ -2043,29 +2047,12 @@ int main(int argc, char* argv[]){
   PROFILE("FRAME",
     std::cout << inColor("hint - START FRAME", CONSOLE_COLOR_YELLOW) << std::endl;
 
-    /*glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    PROFILE("EFFEK",
-      glViewport(0, 0, (int)state.currentScreenWidth, (int)state.currentScreenHeight);
-      glClearColor(0.f, 0.f, 0.f, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      
-
-      onEffekSeekerFrame();
-      onEffekSeekerRender((float)state.currentScreenWidth, (float)state.currentScreenHeight);
-  
-      glfwSwapBuffers(window);
-      glfwPollEvents();
-
-    )
-    continue;*/
-
     auto shouldExit = updateTime(fpsFixed, fixedDelta, state.engineSpeed, timetoexit, hasFramelimit, minDeltaTime, fpsLag);
     if (shouldExit || shouldQuitControl){
       goto cleanup;
     }
 
-
+    onEffekSeekerFrame();
 
     resetReservedId();
     disposeTempBufferedData(lineData);

@@ -14,7 +14,7 @@ struct MeshgenConfig {
 Vertex createVertex(glm::vec3 position, glm::vec2 texCoords){
   Vertex vertex {
     .position = position,
-    .normal = glm::vec3(0.f, 0.f, 0.f),  // TODO - calculate normal properly
+    .normal = glm::normalize(position),  // TODO - calculate normal properly
     .texCoords = texCoords,
   };
   for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
@@ -195,6 +195,8 @@ MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& 
     .hasEmissionTexture = false,
     .opacityTexturePath = "",
     .hasOpacityTexture = false,
+    .normalTexturePath = "../gameresources/build/textures/arcade/trench/city/building_faces/building_13.normal.jpg",
+    .hasNormalTexture = false,
     .boundInfo = getBounds(vertices),
     .bones = {},
   };
