@@ -14,6 +14,7 @@ struct EffectData {
 	std::optional<Effekseer::Handle> playingEffect;
 	std::optional<glm::vec3> position;
 	bool loopContinuously;
+	std::string effectName;
 };
 std::unordered_map<objid, EffectData> effekseerData;
 
@@ -155,19 +156,23 @@ void onEffekSeekerRender(float windowSizeX, float windowSizeY, glm::vec3 viewPos
 	effekRenderer -> EndRendering();
 }
 
-EffekEffect createEffect(std::string effect){
-	auto effectId = getUniqueObjId();
-
+Effekseer::EffectRef doCreateEffect(std::string& effect){
 	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
     auto pathUtf16 = convert.from_bytes(effect.c_str());
 	Effekseer::EffectRef effectRef = Effekseer::Effect::Create(effekseerManager,  pathUtf16.c_str());
 	modassert(effectRef != NULL, std::string("effect invalid: ") + effect);
+	return effectRef;
+}
+
+EffekEffect createEffect(std::string effect){
+	auto effectId = getUniqueObjId();
 
 	effekseerData[effectId] = EffectData {
-		.effectRef = effectRef,
+		.effectRef = doCreateEffect(effect),
 		.playingEffect = std::nullopt,
 		.position = std::nullopt,
 		.loopContinuously = false,
+		.effectName = effect,
 	};
 	return EffekEffect{
 		.effectId = effectId,
@@ -209,5 +214,16 @@ void updateEffectPosition(EffekEffect& effectEffect, glm::vec3 position){
 }
 
 void reloadEffect(std::string file){
-	modassert(false, std::string("reload effect not implmented: ") + file);
+	modlog("effekseer reloadEffect", file);
+	for (auto& [id, effect] : effekseerData){
+		if (true || effect.effectName == file){ // paths are wrong, just reload them all for now
+			modlog("effekseer reload effect", effect.effectName);
+			if (effect.playingEffect.has_value()){
+				effekseerManager -> StopEffect(effect.playingEffect.value());
+				effect.playingEffect = std::nullopt;
+			}
+			effect.effectRef = NULL;
+			effect.effectRef = doCreateEffect(effect.effectName);
+		}
+	}
 }

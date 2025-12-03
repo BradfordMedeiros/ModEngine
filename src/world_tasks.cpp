@@ -237,6 +237,7 @@ void handleChangedResourceFiles(std::set<std::string> changedFiles){
       maybeReloadTextureWorld(world, file);
     }
     if (fileType == EFFEKSEEKER_EXTENSION){
+      // this needs to be a relative path
       reloadEffect(file);
     }
     if (fileType == UNKNOWN_EXTENSION){
