@@ -486,7 +486,7 @@ struct RenderStagesDofInfo {
 };
 
 
-enum FILE_EXTENSION_TYPE { IMAGE_EXTENSION, AUDIO_EXTENSION, MODEL_EXTENSION, UNKNOWN_EXTENSION };
+enum FILE_EXTENSION_TYPE { IMAGE_EXTENSION, AUDIO_EXTENSION, MODEL_EXTENSION, UNKNOWN_EXTENSION, EFFEKSEEKER_EXTENSION };
 FILE_EXTENSION_TYPE getFileType(std::string filepath);
 std::optional<std::string> getExtension(std::string file);
 std::optional<std::string> getPreExtension(std::string file);

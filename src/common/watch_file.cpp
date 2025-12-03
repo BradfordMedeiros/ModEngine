@@ -55,6 +55,7 @@ std::optional<FileWatch> watchFiles(std::string directory, std::optional<float> 
             .fds = fds,
         },
         .timeFileChanged = {},
+        .directory = directory,
     };
     for (auto &filePath : getAllFilesInDirectory(directory)){
         std::cout << "File is: " << std::filesystem::canonical(filePath).string() << std::endl;
@@ -112,7 +113,11 @@ std::set<std::string> pollChangedFiles(std::optional<FileWatch>& filewatch, floa
     }
     std::set<std::string> changedFiles;
     getChangedFilesFromWatch(filewatch, changedFiles);
-    if (!filewatch.value().debouncePeriodSeconds.has_value()){
+    if (!filewatch.value().debouncePeriodSeconds.has_value() && changedFiles.size() > 0){
+        // Not sure why I have to readd the watch, but apparently i do
+        // Probably some bugs in this file, whatever, this is just for local and it works
+        closeWatch(filewatch.value());
+        watchFiles(filewatch.value().directory, filewatch.value().debouncePeriodSeconds);
         return changedFiles;
     }
 

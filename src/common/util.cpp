@@ -1169,11 +1169,13 @@ Bounds toBounds(ModAABB2& aabb){
 std::vector<std::string> imageExtensions = { "png", "jpg", "jpeg", "tga" };
 std::vector<std::string> audioExtensions = { "wav", "mp3" };
 std::vector<std::string> modelExtensions = { "fbx", "dae", "obj", "gltf" };
+std::vector<std::string> effekseekerExtensions = { "efkefc" };
 
 FILE_EXTENSION_TYPE getFileType(std::string filepath){
   auto extensionData = getExtension(filepath);
   if(extensionData.has_value()){
     auto extension = extensionData.value();
+    std::cout << "extension is: " << extension << std::endl;
     if (std::find(imageExtensions.begin(), imageExtensions.end(), extension) != imageExtensions.end()){
       return IMAGE_EXTENSION;
     }
@@ -1183,6 +1185,9 @@ FILE_EXTENSION_TYPE getFileType(std::string filepath){
     if (std::find(modelExtensions.begin(), modelExtensions.end(), extension) != modelExtensions.end()){
       return MODEL_EXTENSION;
     } 
+    if (std::find(effekseekerExtensions.begin(), effekseekerExtensions.end(), extension) != effekseekerExtensions.end()){
+      return EFFEKSEEKER_EXTENSION;
+    }
   }
   return UNKNOWN_EXTENSION;
 }

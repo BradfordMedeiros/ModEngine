@@ -5,6 +5,7 @@
 #include <string>
 #include <functional>
 #include <sys/inotify.h>
+#include <fcntl.h>
 #include <sys/select.h>
 #include <unistd.h>
 #include "./util.h"
@@ -25,6 +26,7 @@ struct FileWatch {
 	std::optional<float> debouncePeriodSeconds;
 	Watcher files;
 	std::unordered_map<std::string, float> timeFileChanged;
+	std::string directory;
 };
 
 

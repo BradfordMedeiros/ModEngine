@@ -231,8 +231,17 @@ void tickRecordings(float time){
 
 void handleChangedResourceFiles(std::set<std::string> changedFiles){
   for (auto &file : changedFiles){
-    if (getFileType(file) == IMAGE_EXTENSION){
+    std::cout << "watch handleChangedResourceFiles: " << file << std::endl;
+    auto fileType = getFileType(file);
+    if (fileType == IMAGE_EXTENSION){
       maybeReloadTextureWorld(world, file);
     }
+    if (fileType == EFFEKSEEKER_EXTENSION){
+      reloadEffect(file);
+    }
+    if (fileType == UNKNOWN_EXTENSION){
+      std::cout << "watch handleChangedResourceFiles unknown file type: " << file << ", extension = " << fileType << std::endl;
+    }
+    //
   }
 }

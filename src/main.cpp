@@ -1403,7 +1403,7 @@ int main(int argc, char* argv[]){
     exit(0);
   }
 
-  auto filewatch = watchFiles(result["watch"].as<std::string>(), 1.f);
+  auto filewatch = watchFiles(result["watch"].as<std::string>(), std::nullopt /* this is debounce, broken */);
 
   interface = SysInterface {
     .loadCScript = [](std::string script, objid id, objid sceneId) -> void {

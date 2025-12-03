@@ -207,3 +207,7 @@ void updateEffectPosition(EffekEffect& effectEffect, glm::vec3 position){
 		effekseerManager->SetLocation(effect.playingEffect.value(), position.x, position.y, position.z);
 	}
 }
+
+void reloadEffect(std::string file){
+	modassert(false, std::string("reload effect not implmented: ") + file);
+}

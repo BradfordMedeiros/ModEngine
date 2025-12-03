@@ -20,4 +20,6 @@ void setEffectState(EffekEffect& effect, bool loopContinuously);
 void playEffect(EffekEffect& effect, glm::vec3 position);
 void stopEffect(EffekEffect& effect);
 
+void reloadEffect(std::string file);
+
 #endif
