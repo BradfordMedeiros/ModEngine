@@ -113,7 +113,7 @@ void onEffekSeekerFrame(){
 	//}
 }
 
-void onEffekSeekerRender(float windowSizeX, float windowSizeY, glm::vec3 viewPosition, glm::quat viewDirection,  glm::vec3 effectPosition){
+void onEffekSeekerRender(float windowSizeX, float windowSizeY, float fovRadians, glm::vec3 viewPosition, glm::quat viewDirection){
 	std::cout << "effekseer: " << windowSizeX << ", " << windowSizeY << std::endl;
 
 	auto viewerPosition = ::Effekseer::Vector3D(10.0f, 5.0f, 10.0f);
@@ -136,7 +136,7 @@ void onEffekSeekerRender(float windowSizeX, float windowSizeY, glm::vec3 viewPos
 
     ::Effekseer::Matrix44 projectionMatrix;
 	// projectionMatrix.PerspectiveFovRH_OpenGL(90.0f / 180.0f * 3.14159f, windowSizeX / windowSizeY, 1.0f, 500.0f);
-	projectionMatrix.PerspectiveFovRH_OpenGL(glm::radians(45.f), (float)windowSizeX / (float)windowSizeY, 0.01f, 500.0f);
+	projectionMatrix.PerspectiveFovRH_OpenGL(fovRadians, (float)windowSizeX / (float)windowSizeY, 0.01f, 500.0f);
 
     ::Effekseer::Matrix44 cameraMatrix;
     cameraMatrix.LookAtRH(viewerPosition, lookAt, ::Effekseer::Vector3D(0.0f, 1.0f, 0.0f));

@@ -692,8 +692,11 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
     }  
   }
 
+  auto viewportDim = calcViewportSize(viewport);
+  auto fov = getLayerFov(world.sandbox.layers.at(0));
+
   PROFILE("EFFEK",
-    onEffekSeekerRender(viewport.widthNdi, viewport.heightNdi, viewTransform.position, viewTransform.rotation, glm::vec3(0.f, 0.f, 10.f));
+    onEffekSeekerRender(static_cast<float>(viewportDim.x), static_cast<float>(viewportDim.y), glm::radians(fov), viewTransform.position, viewTransform.rotation);
   )
   auto maxExpectedClears = numUniqueDepthLayers(world.sandbox.layers);
   //modassert(numDepthClears <= maxExpectedClears, std::string("numDepthClears = ") + std::to_string(numDepthClears) + std::string(", expected = ") + std::to_string(maxExpectedClears));

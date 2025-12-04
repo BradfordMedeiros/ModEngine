@@ -8,7 +8,7 @@
 #include "../../../common/util.h"
 
 void onEffekSeekerFrame();
-void onEffekSeekerRender(float windowSizeX, float windowSizeY, glm::vec3 viewPosition, glm::quat viewDirection, glm::vec3 effectPosition);
+void onEffekSeekerRender(float windowSizeX, float windowSizeY, float fovRadians,  glm::vec3 viewPosition, glm::quat viewDirection);
 
 struct EffekEffect {
 	objid effectId;
