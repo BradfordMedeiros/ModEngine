@@ -522,7 +522,7 @@ LayerInfo layerInfoForViewport(LayerInfo& layer, ViewportSettings& viewport){
   return newLayer;
 }
 
-int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly, ViewportSettings& viewport){
+int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view, std::vector<PortalInfo> portals, bool textBoundingOnly, ViewportSettings& viewport, bool renderParticles){
   glUseProgram(*shaderProgram);
   int numTriangles = 0;
 
@@ -692,12 +692,14 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
     }  
   }
 
-  auto viewportDim = calcViewportSize(viewport);
-  auto fov = getLayerFov(world.sandbox.layers.at(0));
+  if (renderParticles){
+    auto viewportDim = calcViewportSize(viewport);
+    auto fov = getLayerFov(world.sandbox.layers.at(0));
+    PROFILE("EFFEK",
+      onEffekSeekerRender(static_cast<float>(viewportDim.x), static_cast<float>(viewportDim.y), glm::radians(fov), viewTransform.position, viewTransform.rotation);
+    )    
+  }
 
-  PROFILE("EFFEK",
-    onEffekSeekerRender(static_cast<float>(viewportDim.x), static_cast<float>(viewportDim.y), glm::radians(fov), viewTransform.position, viewTransform.rotation);
-  )
   auto maxExpectedClears = numUniqueDepthLayers(world.sandbox.layers);
   //modassert(numDepthClears <= maxExpectedClears, std::string("numDepthClears = ") + std::to_string(numDepthClears) + std::string(", expected = ") + std::to_string(maxExpectedClears));
  
@@ -941,7 +943,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep, ViewportSe
     if (renderStep.renderWorld){
       // important - redundant call to glUseProgram
       glm::mat4* projection = context.projection.has_value() ? &context.projection.value() : NULL;
-      auto worldTriangles = renderWorld(world, renderStep.shader, renderStep.allowShaderOverride, projection, context.view, context.portals, renderStep.textBoundingOnly, viewport);
+      auto worldTriangles = renderWorld(world, renderStep.shader, renderStep.allowShaderOverride, projection, context.view, context.portals, renderStep.textBoundingOnly, viewport, renderStep.renderParticles);
       triangles += worldTriangles;
     }
 

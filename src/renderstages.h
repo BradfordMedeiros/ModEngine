@@ -41,6 +41,7 @@ struct RenderStep {
   bool enableStencil;
   bool allowShaderOverride;
   bool textBoundingOnly;
+  bool renderParticles;
   RenderUniforms uniforms;
   std::vector<RenderTexture> textures;
 };

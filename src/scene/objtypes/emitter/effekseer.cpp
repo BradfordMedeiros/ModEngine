@@ -227,3 +227,13 @@ void reloadEffect(std::string file){
 		}
 	}
 }
+
+
+int effekSeekerTriangleCount(){
+	return effekRenderer -> GetDrawVertexCount() / 3;
+}
+
+int effekSeekerDrawCount(){
+	return effekRenderer -> GetDrawCallCount();
+}
+

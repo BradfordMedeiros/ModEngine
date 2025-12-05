@@ -22,4 +22,7 @@ void stopEffect(EffekEffect& effect);
 
 void reloadEffect(std::string file);
 
+int effekSeekerTriangleCount();
+int effekSeekerDrawCount();
+
 #endif

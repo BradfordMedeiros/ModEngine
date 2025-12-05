@@ -198,6 +198,7 @@ RenderStages loadRenderStages(
     .enableStencil = false,
     .allowShaderOverride = false,
     .textBoundingOnly = true,
+    .renderParticles = false,
     .uniforms {
       .intUniforms = {},
       .floatUniforms = {},
@@ -224,6 +225,7 @@ RenderStages loadRenderStages(
       .enableStencil = false,
       .allowShaderOverride = false,
       .textBoundingOnly = false,
+      .renderParticles = false,
       .uniforms {
         .intUniforms = {},
         .floatUniforms = {},
@@ -252,6 +254,7 @@ RenderStages loadRenderStages(
     .enableStencil = true,
     .allowShaderOverride = true,
     .textBoundingOnly = false,
+    .renderParticles = true,
     .uniforms = {
       .intUniforms = {},
       .floatUniforms = {},
@@ -278,6 +281,7 @@ RenderStages loadRenderStages(
       .enableStencil = false,
       .allowShaderOverride = false,
       .textBoundingOnly = false,
+      .renderParticles = false,
       .uniforms {
         .intUniforms = {},
         .floatUniforms = {},
@@ -312,6 +316,7 @@ RenderStages loadRenderStages(
     .enableStencil = false,
     .allowShaderOverride = false,
     .textBoundingOnly = false,
+    .renderParticles = false,
     .uniforms = {
       .intUniforms = {
         RenderDataInt { .uniformName = "useDepthTexture", .value = false },
@@ -343,6 +348,7 @@ RenderStages loadRenderStages(
     .enableStencil = false,
     .allowShaderOverride = false,
     .textBoundingOnly = false,
+    .renderParticles = false,
     .uniforms = {
       .intUniforms = {
         RenderDataInt { .uniformName = "useDepthTexture", .value = false },
@@ -375,6 +381,7 @@ RenderStages loadRenderStages(
     .enableStencil = false,
     .allowShaderOverride = false,
     .textBoundingOnly = false,
+    .renderParticles = false,
     .uniforms = {
       .intUniforms = {
         RenderDataInt { .uniformName = "firstpass", .value = true },
