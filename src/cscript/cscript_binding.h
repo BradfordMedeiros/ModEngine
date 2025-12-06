@@ -28,7 +28,6 @@ struct CustomApiBindings {
   std::set<objid> (*getChildrenIdsAndParent)(objid id);
   objid (*rootSceneId)();
   std::vector<ScenegraphDebug> (*scenegraph)();
-  void (*sendLoadScene)(int32_t id);
   void (*createScene)(std::string scenename);
   void (*deleteScene)(std::string scenename);
   Transformation (*getCameraTransform)(int viewportIndex);
@@ -109,8 +108,6 @@ struct CustomApiBindings {
   std::unordered_map<std::string, std::string> (*listServers)();
   std::string (*connectServer)(std::string server);
   void (*disconnectServer)();
-  void (*sendMessageTcp)(std::string data);
-  void (*sendMessageUdp)(std::string data);
   void (*playRecording)(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type, std::optional<PlayRecordingOption> recordingOption);
   void (*stopRecording)(objid id);
   float (*recordingLength)(std::string recordingPath);
@@ -244,10 +241,6 @@ struct CScriptBinding {
 
   id_stringboolFunc onCameraSystemChange;
   id_string2func onMessage;
-  id_stringfunc onTcpMessage;
-  id_stringfunc onUdpMessage;
-  id_stringfunc onPlayerJoined;
-  id_stringfunc onPlayerLeave;
   std::function<void(objid, void*, objid)> onObjectAdded;
   std::function<void(objid, void*, objid)> onObjectRemoved;
   std::function<void(void*)> render;

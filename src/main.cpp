@@ -10,7 +10,7 @@
 #include "./main_input.h"
 #include "./scene/common/vectorgfx.h"
 #include "./scene/objtypes/lighting/scene_lighting.h"
-#include "./netscene.h"
+#include "./network/netscene.h"
 #include "./main_util.h"
 #include "./cscript/cscripts/plugins/perf-visualize.h"
 #include "./cscript/cscripts/plugins/performance_graph.h"
@@ -838,7 +838,6 @@ void renderDebugUi(Color pixelColor){
 
 
 void onClientMessage(std::string message){
-  cBindings.onTcpMessage(message);
 }
 
 bool signalHandlerCalled = false;
@@ -1633,7 +1632,6 @@ int main(int argc, char* argv[]){
     .getChildrenIdsAndParent = getChildrenIdsAndParent,
     .rootSceneId = rootSceneId,
     .scenegraph = scenegraph,
-    .sendLoadScene = sendLoadScene,
     .createScene = createScene,
     .deleteScene = deleteScene,
     .getCameraTransform = getCameraTransform,
@@ -1734,8 +1732,6 @@ int main(int argc, char* argv[]){
     .listServers = listServers,
     .connectServer = connectServer,
     .disconnectServer = disconnectServer,
-    .sendMessageTcp = sendMessageToActiveServer,
-    .sendMessageUdp = sendDataUdp,
     .playRecording = playRecording,
     .stopRecording = stopRecording,
     .recordingLength = recordingLength,
@@ -1864,7 +1860,7 @@ int main(int argc, char* argv[]){
   cBindings = getCScriptBindingCallbacks();
 
   if(bootStrapperMode){
-    netcode = initNetCode(cBindings.onPlayerJoined, cBindings.onPlayerLeave, interface.readFile);
+    netcode = initNetCode(interface.readFile);
   }
 
   modassert(modlayerFileExists(state.iconpath), std::string("icon file does not exist: ") + state.iconpath);
@@ -1891,15 +1887,8 @@ int main(int argc, char* argv[]){
     onObjectEnter, 
     onObjectLeave, 
     [enableNet](objid id) -> void {
-      if (enableNet){
-        GameObject& obj = getGameObject(world.sandbox, id); // i could defer getting this
-        netObjectUpdate(world, obj, netcode, bootStrapperMode);        
-      }
     }, 
     [enableNet](GameObject& obj) -> void {
-      if (enableNet){
-        netObjectCreate(world, obj, netcode, bootStrapperMode);
-      }
       cBindings.onObjectAdded(obj.id);
     },
     [enableNet](objid id, bool isNet) -> void {
@@ -1912,9 +1901,7 @@ int main(int argc, char* argv[]){
         setSelectedOctreeId(std::nullopt);
       }
       removeScheduledTaskByOwner({ id });
-      if (enableNet){
-        netObjectDelete(id, isNet, netcode, bootStrapperMode);
-      }
+
       cBindings.onObjectRemoved(id);
       timings.disableAnimationIds.erase(id);
       freeTexture(id);
@@ -2100,7 +2087,7 @@ int main(int argc, char* argv[]){
 
     cBindings.onFrame();
 
-    onNetCode(world, netcode, onClientMessage, bootStrapperMode);
+    onNetCode(netcode, onClientMessage, bootStrapperMode);
 
     { 
       auto forward = calculateRelativeOffset(viewTransform.rotation, {0, 0, -1 }, false);

@@ -321,47 +321,6 @@ void onCMessageAllScripts(std::string& topic, std::any& value){
   }
 }
 
-void onCTcpMessageAllScripts(std::string& message){
-  for (auto &objInstance : customObjInstances){
-    if (objInstance.shouldRemove){
-      continue;
-    }
-    auto binding = objInstance.cScriptBinding;
-    assert(binding != NULL);
-    binding -> onTcpMessage(objInstance.instanceId, message);
-  }
-}
-void onCUdpMessageAllScripts(std::string& message){
-  for (auto &objInstance : customObjInstances){
-    if (objInstance.shouldRemove){
-      continue;
-    }
-    auto binding = objInstance.cScriptBinding;
-    assert(binding != NULL);
-    binding -> onUdpMessage(objInstance.instanceId, message);
-  }
-}
-
-void onCPlayerJoinedAllScripts(std::string& connectionHash){
-  for (auto &objInstance : customObjInstances){
-    if (objInstance.shouldRemove){
-      continue;
-    }
-    auto binding = objInstance.cScriptBinding;
-    assert(binding != NULL);
-    binding -> onPlayerJoined(objInstance.instanceId, connectionHash);
-  }
-}
-void onCPlayerLeaveAllScripts(std::string& connectionHash){
-  for (auto &objInstance : customObjInstances){
-    if (objInstance.shouldRemove){
-      continue;
-    }
-    auto binding = objInstance.cScriptBinding;
-    assert(binding != NULL);
-    binding -> onPlayerLeave(objInstance.instanceId, connectionHash);
-  }
-}
 void onCObjectAddedAllScripts(objid idAdded){
   for (auto &objInstance : customObjInstances){
     if (objInstance.shouldRemove){
@@ -401,10 +360,6 @@ CScriptBindingCallbacks getCScriptBindingCallbacks(){
     .onControllerKey = onCControllerKeyAllScripts,
     .onCameraSystemChange = onCCameraSystemChangeAllScripts,
     .onMessage = onCMessageAllScripts,
-    .onTcpMessage = onCTcpMessageAllScripts,
-    .onUdpMessage = onCUdpMessageAllScripts,
-    .onPlayerJoined = onCPlayerJoinedAllScripts,
-    .onPlayerLeave = onCPlayerLeaveAllScripts,
     .onObjectAdded = onCObjectAddedAllScripts,
     .onObjectRemoved = onCObjectRemovedAllScripts,
   };

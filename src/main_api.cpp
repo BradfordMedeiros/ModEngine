@@ -327,10 +327,6 @@ std::vector<ScenegraphDebug> scenegraph(){
   return parentToChild;
 }
 
-void sendLoadScene(int32_t id){
-  sendLoadScene(world, netcode, bootStrapperMode, id);
-}
-
 void createScene(std::string scenename){
   auto extension = getExtension(scenename);
   bool canSave = extension.has_value() && extension == "rawscene";

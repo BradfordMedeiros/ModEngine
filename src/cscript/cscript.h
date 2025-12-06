@@ -32,10 +32,7 @@ struct CScriptBindingCallbacks {
 
   stringboolFunc onCameraSystemChange;
   string2func onMessage;
-  stringfunc onTcpMessage;
-  stringfunc onUdpMessage;
-  stringfunc onPlayerJoined;
-  stringfunc onPlayerLeave;
+
   std::function<void(objid)> onObjectAdded;
   std::function<void(objid)> onObjectRemoved;
 };

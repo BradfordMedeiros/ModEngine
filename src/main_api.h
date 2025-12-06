@@ -8,11 +8,10 @@
 #include "./state.h"
 #include "./scene/physics.h"
 #include "./scene/sprites/sprites.h"
-#include "./network/servers.h"
-#include "./network/activemanager.h"
+#include "./network/netscene.h"
 #include "./scene/sysinterface.h"
 #include "./worldloader.h"
-#include "./netscene.h"
+#include "./network/netscene.h"
 #include "./worldtiming.h"
 #include "./renderstages.h"
 #include "./cscript/cscript.h"
@@ -34,8 +33,6 @@ struct DefaultResources {
 
 float getTotalTimeGame();
 float getTotalTime();
-
-NetworkPacket toNetworkPacket(UdpPacket& packet);
 
 // This file is really just an extension of main.cpp (notice heavy usage of external scope) but organizes the business logic of the api functions
 // These functions represent the functionality that individual language bindings use, but should not be coupled to any language in particular. 
@@ -107,7 +104,6 @@ std::set<objid> listObjAndDescInScene(objid sceneId);
 std::set<objid> getChildrenIdsAndParent(objid id);
 std::vector<ScenegraphDebug> scenegraph();
 
-void sendLoadScene(int32_t sceneId);
 void createScene(std::string scenename);
 void deleteScene(std::string scenename);
 
