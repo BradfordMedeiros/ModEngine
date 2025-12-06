@@ -13,7 +13,7 @@
 #include "../scene/common/util/types.h"
 #include "../scene/physics_common.h"
 #include "../scene/scene_sandbox.h"
-#include "../common/http.h"
+#include "../network/http.h"
 
 struct CustomApiBindings {
   int32_t (*listSceneId)(int32_t objid);

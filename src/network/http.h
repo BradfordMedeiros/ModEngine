@@ -5,7 +5,7 @@
 #include <cstring>
 #include <unordered_map>
 #include <curl/curl.h>
-#include "./util.h"
+#include "../common/util.h"
 
 bool downloadFile(std::string url, std::string outputFile);
 std::optional<std::string> downloadFileInMemory(std::string urlStr, bool* isSuccess);
