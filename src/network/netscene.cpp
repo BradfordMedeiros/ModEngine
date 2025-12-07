@@ -78,6 +78,7 @@ std::optional<ConnectionInfo> acceptSocketAndMarkNonBlocking(modsocket& socketIn
       .ipAddress = getIpAddressFromSocketIn(socketin),
     };
 
+
     std::cout << "network: maxFd is now: " << newSocket << std::endl;
     FD_SET(newSocket, &socketInfo.fds);     
     socketInfo.maxFd = socketInfo.maxFd > newSocket ? socketInfo.maxFd : newSocket;
@@ -102,7 +103,9 @@ void closeServerSocket(modsocket& socketInfo, int socketFd){
   socketInfo.infos = infos;
 }
 
-void sendDataToSocket(modsocket& socketInfo, int socketFd, std::function<SocketResponse(std::string, int)> onData){
+typedef std::function<void(std::string, int, std::function<void(char* data, size_t size, bool closeSocket)>)> OnDataFn;
+
+void sendDataToSocket(modsocket& socketInfo, int socketFd, OnDataFn onData){
   char buffer[NETWORK_BUFFER_SIZE] = {0};
   int value = read(socketFd, buffer, NETWORK_BUFFER_SIZE);      // @TODO -> read might still have more data?
   //assert(value != -1);
@@ -110,18 +113,24 @@ void sendDataToSocket(modsocket& socketInfo, int socketFd, std::function<SocketR
     return;
   }
 
-  auto socketResponse = onData(buffer, socketFd);
+  bool responseHandled = false;
+  onData(buffer, socketFd, [&socketInfo, socketFd, &responseHandled](char* data, size_t size, bool closeSocket) -> void {
+    if (data){
+      send(socketFd, data, size, 0);
+    }
+    if (closeSocket){
+      closeServerSocket(socketInfo, socketFd);
+    }
+    responseHandled = true;
+  });
 
-  if (socketResponse.shouldSendData){
-    const char* responsep = socketResponse.response.c_str();
-    send(socketFd, responsep, strlen(responsep), 0);
-  }
-  if (socketResponse.shouldCloseSocket){
+  if (!responseHandled){
+    std::cout << "response not handled" << std::endl;
     closeServerSocket(socketInfo, socketFd);
   }
 }
 
-void getDataFromServerSocket(modsocket& socketInfo, std::function<SocketResponse(std::string, int)> onData){
+void getDataFromServerSocket(modsocket& socketInfo, OnDataFn onData){
   auto optConnectionInfo = acceptSocketAndMarkNonBlocking(socketInfo);
   if (optConnectionInfo.has_value()){
     socketInfo.infos.push_back(optConnectionInfo.value());
@@ -174,8 +183,8 @@ NetCode initNetCode(bool bootstrapperMode, std::function<std::string(std::string
 }
 
 // Client code ////////////////////////////////////////////////////////////////////////
-void sendMessageWithClientConnection(int sockFd, const char* networkBuffer){
-  write(sockFd, networkBuffer, strlen(networkBuffer));
+void sendMessageWithClientConnection(int sockFd, const char* networkBuffer, size_t size){
+  write(sockFd, networkBuffer, size);
 }
 std::string readMessageWithConnection(int sockFd){
   char buffer[NETWORK_BUFFER_CLIENT_SIZE] = {0};
@@ -199,9 +208,9 @@ int socketClientConnection(std::string ip, int port){
   return sockFd;
 }
 
-std::string sendMessageNewConnection(std::string ip, int port, const char* networkBuffer){
+std::string sendMessageNewConnection(std::string ip, int port, const char* networkBuffer, size_t size){
   int sockFd = socketClientConnection(ip, port);
-  sendMessageWithClientConnection(sockFd, networkBuffer);
+  sendMessageWithClientConnection(sockFd, networkBuffer, size);
   auto buffer = readMessageWithConnection(sockFd);
   close(sockFd);
   return buffer;
@@ -210,7 +219,7 @@ void sendMessageToActiveServer(std::string data){
   assert(client.isConnected);
   std::string content = "type:data\n" + data;
   std::cout << "Sending message to active server starting: " << data << std::endl;
-  sendMessageWithClientConnection(client.currentSocket, content.c_str());
+  sendMessageWithClientConnection(client.currentSocket, content.c_str(), strlen(content.c_str()));
   std::cout << "Sending message to active server complete: " << data << std::endl;
 }
 
@@ -267,34 +276,36 @@ void disconnectServer(){
 }
 
 std::string sendMessage(std::string dataToSend){
-  return "test sendMessage";
+  std::string value = "this is the message to send";
+  auto response = sendMessageNewConnection("127.0.0.1", 8000, value.c_str(), strlen(value.c_str()));
+  return response;
 }
 
+std::vector<uint8_t> sendMessage(const char* data, size_t size){
+  std::vector<uint8_t> values;
+  for (int i = 0; i < size; i++){
+    values.push_back(data[i]);
+  }
+  return values;
+}
+
+
 // Core per frame tick ////////////
-
-struct MessageToSend {
-  int value = 123;
-};
-
 void onNetCode(NetCode& netcode, std::function<void(std::string)> onClientMessage, bool bootstrapperMode){
   maybeReadClientMessage(client, onClientMessage);
   if (bootstrapperMode){
     tcpServer& tserver = netcode.tServer;
-    getDataFromServerSocket(tserver.server, [&tserver](std::string request, int socketFd) -> SocketResponse {      
+    getDataFromServerSocket(tserver.server, [&tserver](std::string request, int socketFd, std::function<void(char* data, size_t size, bool closeSocket)> sendData) -> void {      
       bool shouldCloseSocket = true;
       bool shouldSendData = true;
 
-      MessageToSend message{};
-      std::string response = "this is the default response";
+      //MessageToSend message{
+      //  .value = 10002,
+      //};
+      //sendData((char*)&message, sizeof(MessageToSend), false);
 
-      // this would be the place to shim in the application logic
-
-      SocketResponse serverResponse {
-        .response = response,
-        .shouldCloseSocket = shouldCloseSocket,
-        .shouldSendData = shouldSendData,
-      };
-      return serverResponse;
+      std::string basicResponse = "this is your response";
+      sendData((char*)basicResponse.c_str(), basicResponse.size(), false);
     });
   }
 }

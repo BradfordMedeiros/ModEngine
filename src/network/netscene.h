@@ -19,11 +19,6 @@
 
 void guard(int value, const char* runtimeErrorMessage);
 
-struct NetworkPacket {
-  void* packet;
-  unsigned int packetSize;
-};
-
 struct ConnectionInfo {
   short unsigned int port;
   int socketFd;
@@ -38,12 +33,6 @@ struct modsocket {
   std::vector<ConnectionInfo> infos;
 };
       
-struct SocketResponse {
-  std::string response;
-  bool shouldCloseSocket;
-  bool shouldSendData;
-};
-
 struct tcpServer {
   modsocket server;
 };
@@ -57,15 +46,44 @@ struct NetCode {
 };
 
 NetCode initNetCode(bool bootstrapperMode, std::function<std::string(std::string)> readFile);
-
 void onNetCode(NetCode& netcode, std::function<void(std::string)> onClientMessage, bool bootstrapperMode);
 
+// client 
 void connectServer(std::string data);
 void disconnectServer();
+
 std::string sendMessage(std::string dataToSend);
+std::vector<uint8_t> sendMessage(const char* data, size_t size);
 
 
-std::unordered_map<std::string, std::string> listServers();
+template <typename T> 
+std::optional<T> convertToType(std::vector<uint8_t>& value){
+  T msg;
+
+  bool isExpectedSize = value.size() == sizeof(T);
+  if (!isExpectedSize){
+    return std::nullopt;
+  }
+  //modassert(, std::string("unexpected buffer size: expected = ") + std::to_string(sizeof(T)) + ", actual = " + std::to_string(response.size())); 
+  std::memcpy(&msg, value.data(), sizeof(msg)); 
+  return msg;
+}
+
+template <typename T>
+std::optional<T> sendMessage(const char* data, size_t size){
+  auto values = sendMessage(data, size);
+  return convertToType<T>(values);
+}
+
+template <typename ReturnType, typename TypeToSend> 
+std::optional<ReturnType> sendMessageAnyType(TypeToSend& dataToSend){
+  return sendMessage<ReturnType>((char*)&dataToSend, sizeof(TypeToSend));
+}
+
+
+struct MessageToSend {
+  int value = 123;
+};
 
 
 #endif

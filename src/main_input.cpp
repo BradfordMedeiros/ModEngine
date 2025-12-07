@@ -1938,7 +1938,12 @@ std::vector<InputDispatch> inputFns = {
 
       auto serverResponse = sendMessage("test message");
       std::cout << "server response: " << serverResponse << std::endl;
-      modassert(false, "net code thing not yet implemented");
+
+      MessageToSend messageToSend {
+        .value = 123,
+      };
+      auto msg = sendMessageAnyType<MessageToSend, MessageToSend>(messageToSend);
+      std::cout << "got message back: " << std::to_string(msg.value().value) << std::endl;
     }
   },
 
