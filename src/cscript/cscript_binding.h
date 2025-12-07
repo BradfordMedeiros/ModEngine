@@ -105,8 +105,7 @@ struct CustomApiBindings {
   double (*timeElapsed)();
   int (*currentFrame)();
   bool (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename);
-  std::unordered_map<std::string, std::string> (*listServers)();
-  std::string (*connectServer)(std::string server);
+  void (*connectServer)(std::string server);
   void (*disconnectServer)();
   void (*playRecording)(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type, std::optional<PlayRecordingOption> recordingOption);
   void (*stopRecording)(objid id);

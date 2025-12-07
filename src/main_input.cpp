@@ -1935,6 +1935,10 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = [](ViewportSettings& viewport) -> void {
       state.rampDirection = (state.rampDirection ==  RAMP_LEFT) ? RAMP_RIGHT : RAMP_LEFT;
+
+      auto serverResponse = sendMessage("test message");
+      std::cout << "server response: " << serverResponse << std::endl;
+      modassert(false, "net code thing not yet implemented");
     }
   },
 

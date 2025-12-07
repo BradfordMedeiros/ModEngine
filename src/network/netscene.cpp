@@ -1,14 +1,18 @@
 #include "./netscene.h"
 
-
 #define MAX_LISTENING_QUEUE 100
 #define NETWORK_BUFFER_SIZE 1024
+#define NETWORK_BUFFER_CLIENT_SIZE 1024
+
+ClientConnection client{};
 
 void guard(int value, const char* runtimeErrorMessage){
   if (value < 0){
     throw std::runtime_error(runtimeErrorMessage);
   }
 }
+
+// Server code ////////////////////////////////////////////////////////////////////////
 
 modsocket createServer(){
   int socketFd = socket(AF_INET, SOCK_STREAM, 0); 
@@ -41,15 +45,6 @@ modsocket createServer(){
   };
 
   return socketInfo;
-}
-
-ConnectionInfo getConnectionInfo(modsocket& modsocket, int sockfd){
-  for (auto connectionInfo : modsocket.infos){
-    if (connectionInfo.socketFd == sockfd){
-      return connectionInfo;
-    }
-  }
-  assert(false);
 }
 
 short unsigned int getPortFromSocketIn(sockaddr_in& socketin){
@@ -89,9 +84,10 @@ std::optional<ConnectionInfo> acceptSocketAndMarkNonBlocking(modsocket& socketIn
     return info;
   }
   assert(false);
+  return std::nullopt;
 }
 
-void closeSocket(modsocket& socketInfo, int socketFd){
+void closeServerSocket(modsocket& socketInfo, int socketFd){
   std::cout << "network: closing socket" << std::endl;
   close(socketFd);
   FD_CLR(socketFd, &socketInfo.fds);
@@ -105,10 +101,8 @@ void closeSocket(modsocket& socketInfo, int socketFd){
   }
   socketInfo.infos = infos;
 }
-void sendDataOnSocket(int socketFd, const char* data){
-  send(socketFd, data, strlen(data), 0);
-}
-void sendDataToSocket(modsocket& socketInfo, int socketFd, std::function<socketResponse(std::string, int)> onData){
+
+void sendDataToSocket(modsocket& socketInfo, int socketFd, std::function<SocketResponse(std::string, int)> onData){
   char buffer[NETWORK_BUFFER_SIZE] = {0};
   int value = read(socketFd, buffer, NETWORK_BUFFER_SIZE);      // @TODO -> read might still have more data?
   //assert(value != -1);
@@ -120,14 +114,14 @@ void sendDataToSocket(modsocket& socketInfo, int socketFd, std::function<socketR
 
   if (socketResponse.shouldSendData){
     const char* responsep = socketResponse.response.c_str();
-    sendDataOnSocket(socketFd, responsep);
+    send(socketFd, responsep, strlen(responsep), 0);
   }
   if (socketResponse.shouldCloseSocket){
-    closeSocket(socketInfo, socketFd);
+    closeServerSocket(socketInfo, socketFd);
   }
 }
 
-void getDataFromSocket(modsocket& socketInfo, std::function<socketResponse(std::string, int)> onData){
+void getDataFromServerSocket(modsocket& socketInfo, std::function<SocketResponse(std::string, int)> onData){
   auto optConnectionInfo = acceptSocketAndMarkNonBlocking(socketInfo);
   if (optConnectionInfo.has_value()){
     socketInfo.infos.push_back(optConnectionInfo.value());
@@ -164,40 +158,23 @@ tcpServer initTcpServer(std::function<std::string(std::string)> readFile){
   std::cout << "INFO: create server start" << std::endl;
   auto server = createServer();
   std::cout << "INFO: create server end" << std::endl;
-  std::unordered_map<std::string, ConnectionInfo> connections;
   tcpServer tserver {
     .server = server,
-    .connections = connections,
   };
   return tserver;
 }
 
-std::string getConnectionHash(std::string ipAddress, int port){
-  return ipAddress + "\\" + std::to_string(port);
-}
-
-NetCode initNetCode(std::function<std::string(std::string)> readFile){
+NetCode initNetCode(bool bootstrapperMode, std::function<std::string(std::string)> readFile){
   std::cout << "INFO: running in server bootstrapper mode" << std::endl;
-  NetCode netcode {
-    .tServer = initTcpServer(readFile),
-  };
+  NetCode netcode {};
+  if (bootstrapperMode){
+    netcode.tServer = initTcpServer(readFile);
+  }
   return netcode;
 }
 
-
-#define NETWORK_BUFFER_CLIENT_SIZE 1024
-
-static bool isConnected = false;  // static-state
-static std::string currentServerIp = "";
-
-static std::string bootstrapperServer = "127.0.0.1";
-static int bootstrapperPort = 8000;
-
-// TCP specific 
-static int currentSocket = -1;
-
-
-void sendMessageWithConnection(int sockFd, const char* networkBuffer){
+// Client code ////////////////////////////////////////////////////////////////////////
+void sendMessageWithClientConnection(int sockFd, const char* networkBuffer){
   write(sockFd, networkBuffer, strlen(networkBuffer));
 }
 std::string readMessageWithConnection(int sockFd){
@@ -206,7 +183,7 @@ std::string readMessageWithConnection(int sockFd){
   return buffer;
 }
 
-int socketConnection(std::string ip, int port){
+int socketClientConnection(std::string ip, int port){
   struct sockaddr_in address = {
     .sin_family = AF_INET,
     .sin_port = htons(port),
@@ -223,155 +200,42 @@ int socketConnection(std::string ip, int port){
 }
 
 std::string sendMessageNewConnection(std::string ip, int port, const char* networkBuffer){
-  int sockFd = socketConnection(ip, port);
-  sendMessageWithConnection(sockFd, networkBuffer);
+  int sockFd = socketClientConnection(ip, port);
+  sendMessageWithClientConnection(sockFd, networkBuffer);
   auto buffer = readMessageWithConnection(sockFd);
   close(sockFd);
   return buffer;
 }
-
-std::unordered_map<std::string, std::string> listServers(){
-  return { { "localhost", "8000" }};
+void sendMessageToActiveServer(std::string data){
+  assert(client.isConnected);
+  std::string content = "type:data\n" + data;
+  std::cout << "Sending message to active server starting: " << data << std::endl;
+  sendMessageWithClientConnection(client.currentSocket, content.c_str());
+  std::cout << "Sending message to active server complete: " << data << std::endl;
 }
 
 struct connectResponse {
   int sockFd;
-  std::string connectionHash;
 };
 connectResponse connectTcp(std::string serverAddress){
-  auto sockFd = socketConnection(serverAddress, 8000);
-  sendMessageWithConnection(sockFd, "connect");
-  auto response = readMessageWithConnection(sockFd);
-  assert(response != "nack");
+  auto sockFd = socketClientConnection(serverAddress, 8000);
   connectResponse resp {
     .sockFd = sockFd,
-    .connectionHash = response,
   };
   return resp;
 }
 
-std::string connectServerVal(std::string server){
-  assert(!isConnected);
-
-  auto serverAddress = listServers().at(server);
-
-  // TCP Connection 
-  auto response = connectTcp(serverAddress);
-  currentSocket = response.sockFd;
-  std::cout << "connect hash is: " << response.connectionHash << std::endl;
-
-  // Statekeeping
-  std::cout << "INFO: connection request succeeded" << std::endl;
-
-  std::cout << "INFO: now connected" << std::endl;
-  isConnected = true;
-  currentServerIp = serverAddress;
-
-  return response.connectionHash;
-}
-
-void disconnectServer(){
-  assert(isConnected);
-  
-  sendMessageWithConnection(currentSocket, "disconnect");
-  auto response = readMessageWithConnection(currentSocket);
-  assert(response == "ack");
-
-  isConnected = false;
-  currentServerIp = "";
-  currentSocket = -1;
-}
-bool isConnectedToServer(){
-  return isConnected;
-}
-
-void sendMessageToActiveServer(std::string data){
-  assert(isConnected);
-  std::string content = "type:data\n" + data;
-  std::cout << "Sending message to active server starting: " << data << std::endl;
-  sendMessageWithConnection(currentSocket, content.c_str());
-  std::cout << "Sending message to active server complete: " << data << std::endl;
-}
-
-
-NetworkPacket toNetworkPacket(UdpPacket& packet){
-  NetworkPacket netpacket {
-    .packet = &packet,
-    .packetSize = sizeof(packet),
-  };
-  return netpacket;
-}
-
-
-void tickNetCode(NetCode& netcode){
-  tcpServer& tserver = netcode.tServer;
-  getDataFromSocket(tserver.server, [&tserver](std::string request, int socketFd) -> socketResponse {      
-    auto requestLines = split(request, '\n');
-    auto requestHeader = requestLines.size() > 0 ? requestLines.at(0) : "";
-
-    std::string response = "ok";
-    bool shouldCloseSocket = false;
-    bool shouldSendData = false;
-
-    if (requestHeader == "list-servers"){
-      response = "server browser no longer a thing";
-      shouldCloseSocket = true;
-      shouldSendData = true;
-    } else if (requestHeader == "connect"){
-      auto connectionInfo = getConnectionInfo(tserver.server, socketFd);
-      auto connectionHash = getConnectionHash(connectionInfo.ipAddress, connectionInfo.port);
-   
-      if (tserver.connections.find(connectionHash) == tserver.connections.end()){
-        std::cout << "INFO: connection hash: " << connectionHash << std::endl;
-        response = connectionHash;
-        tserver.connections[connectionHash] = connectionInfo;
-      }else{
-        response = "nack";
-        shouldCloseSocket = true;
-      }
-      shouldSendData = true;
-    }else if (requestHeader == "disconnect"){
-      auto connectionInfo = getConnectionInfo(tserver.server, socketFd);
-      auto connectionHash = getConnectionHash(connectionInfo.ipAddress, connectionInfo.port);
-      if (tserver.connections.find(connectionHash) == tserver.connections.end()){
-        response = "nack";
-      }else{
-        tserver.connections.erase(connectionHash);      
-        response = "ack";
-      }
-      shouldCloseSocket = true;
-      shouldSendData = true;
-    }
-    else if (requestHeader == "type:data"){
-      auto data = request.substr(10);
-      response = "ok";
-
-      for (auto [_, connection] : tserver.connections){
-        sendDataOnSocket(connection.socketFd, data.c_str());
-      }
-      shouldSendData = true;
-    }
-
-    socketResponse serverResponse {
-      .response = response,
-      .shouldCloseSocket = shouldCloseSocket,
-      .shouldSendData = shouldSendData,
-    };
-    return serverResponse;
-  });
-}
-
 bool socketHasDataToRead(int socketFd){
   int count;
-  ioctl(currentSocket, FIONREAD, &count);
-  return count > 0;
+  ioctl(client.currentSocket, FIONREAD, &count);
+  bool hasData = count > 0;
+  return hasData;
 }
-
-void maybeGetClientMessage(std::function<void(std::string)> onClientMessage){
-  if (isConnectedToServer()){
-    if (socketHasDataToRead(currentSocket)){
+void maybeReadClientMessage(ClientConnection& client, std::function<void(std::string)> onClientMessage){
+  if (client.isConnected){
+    if (socketHasDataToRead(client.currentSocket)){
       char buffer[NETWORK_BUFFER_CLIENT_SIZE] = {0};
-      guard(read(currentSocket, buffer, NETWORK_BUFFER_CLIENT_SIZE), "error get client message");
+      guard(read(client.currentSocket, buffer, NETWORK_BUFFER_CLIENT_SIZE), "error get client message");
       std::cout << "reading client message: end" << std::endl;
       std::string message = buffer;
       if (message != ""){
@@ -382,21 +246,55 @@ void maybeGetClientMessage(std::function<void(std::string)> onClientMessage){
   }
 }
 
+void connectServer(std::string server){
+  assert(!client.isConnected);
+  // TCP Connection 
+  auto response = connectTcp("localhost:8000");
+  client.currentSocket = response.sockFd;
+
+  // Statekeeping
+  std::cout << "INFO: connection request succeeded" << std::endl;
+
+  std::cout << "INFO: now connected" << std::endl;
+  client.isConnected = true;
+}
+
+void disconnectServer(){
+  assert(client.isConnected);
+  client.isConnected = false;
+  close(client.currentSocket);
+  client.currentSocket = -1;
+}
+
+std::string sendMessage(std::string dataToSend){
+  return "test sendMessage";
+}
+
+// Core per frame tick ////////////
+
+struct MessageToSend {
+  int value = 123;
+};
+
 void onNetCode(NetCode& netcode, std::function<void(std::string)> onClientMessage, bool bootstrapperMode){
-  maybeGetClientMessage(onClientMessage);
+  maybeReadClientMessage(client, onClientMessage);
   if (bootstrapperMode){
-    tickNetCode(netcode);
+    tcpServer& tserver = netcode.tServer;
+    getDataFromServerSocket(tserver.server, [&tserver](std::string request, int socketFd) -> SocketResponse {      
+      bool shouldCloseSocket = true;
+      bool shouldSendData = true;
+
+      MessageToSend message{};
+      std::string response = "this is the default response";
+
+      // this would be the place to shim in the application logic
+
+      SocketResponse serverResponse {
+        .response = response,
+        .shouldCloseSocket = shouldCloseSocket,
+        .shouldSendData = shouldSendData,
+      };
+      return serverResponse;
+    });
   }
 }
-
-std::string connectServer(std::string data){
-  UdpPacket setup = {
-    .type = SETUP,
-  };  
-
-  SetupPacket setupPacket {};
-  auto packet = toNetworkPacket(setup);
-
-  return connectServerVal(data);
-}
-

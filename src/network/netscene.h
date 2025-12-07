@@ -15,8 +15,7 @@
 #include <cstring>
 #include <errno.h>
 #include <assert.h>
-#include "../common/util.h"
-
+#include <optional>
 
 void guard(int value, const char* runtimeErrorMessage);
 
@@ -39,56 +38,32 @@ struct modsocket {
   std::vector<ConnectionInfo> infos;
 };
       
-struct socketResponse {
+struct SocketResponse {
   std::string response;
   bool shouldCloseSocket;
   bool shouldSendData;
 };
 
-struct udpmodsocket {
-  int socketFd;
-};
-
-struct UdpSocketData {
-  bool hasData;
-  sockaddr_in socketin;
-};
-
-short unsigned int getPortFromSocketIn(sockaddr_in& socketin);
-std::string getIpAddressFromSocketIn(sockaddr_in& socketin);
-
 struct tcpServer {
   modsocket server;
-  std::unordered_map<std::string, ConnectionInfo> connections;
 };
 
+struct ClientConnection {
+  bool isConnected = false;
+  int currentSocket = -1;
+};
 struct NetCode {
   tcpServer tServer;
-  std::function<void(std::string&)> onPlayerConnected;
-  std::function<void(std::string&)> onPlayerDisconnected;
 };
-NetCode initNetCode(std::function<std::string(std::string)> readFile);
 
-
-
-//////////////
-enum PacketType { SETUP };
-struct SetupPacket {
-  char connectionHash[4000];
-};
-union PacketPayload {
-  SetupPacket setuppacket;
-};
-struct UdpPacket {
-  PacketType type;
-  PacketPayload payload;
-};
+NetCode initNetCode(bool bootstrapperMode, std::function<std::string(std::string)> readFile);
 
 void onNetCode(NetCode& netcode, std::function<void(std::string)> onClientMessage, bool bootstrapperMode);
 
-std::string connectServer(std::string data);
+void connectServer(std::string data);
 void disconnectServer();
-void sendMessageToActiveServer(std::string data);
+std::string sendMessage(std::string dataToSend);
+
 
 std::unordered_map<std::string, std::string> listServers();
 

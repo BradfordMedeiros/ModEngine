@@ -1729,9 +1729,7 @@ int main(int argc, char* argv[]){
     .timeElapsed = timeElapsed,
     .currentFrame = currentFrame,
     .saveScene = saveScene,
-    .listServers = listServers,
     .connectServer = connectServer,
-    .disconnectServer = disconnectServer,
     .playRecording = playRecording,
     .stopRecording = stopRecording,
     .recordingLength = recordingLength,
@@ -1859,10 +1857,8 @@ int main(int argc, char* argv[]){
   registerAllBindings(pluginBindings);
   cBindings = getCScriptBindingCallbacks();
 
-  if(bootStrapperMode){
-    netcode = initNetCode(interface.readFile);
-  }
-
+  netcode = initNetCode(bootStrapperMode, interface.readFile);
+  
   modassert(modlayerFileExists(state.iconpath), std::string("icon file does not exist: ") + state.iconpath);
   GLFWimage images[1]; 
   stbi_set_flip_vertically_on_load(false);
