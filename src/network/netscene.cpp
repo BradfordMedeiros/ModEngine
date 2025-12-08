@@ -103,7 +103,6 @@ void closeServerSocket(modsocket& socketInfo, int socketFd){
   socketInfo.infos = infos;
 }
 
-typedef std::function<void(char*, size_t, int, std::function<void(char* data, size_t size, bool closeSocket)>)> OnDataFn;
 
 void sendDataToSocket(modsocket& socketInfo, int socketFd, OnDataFn onData){
   char buffer[NETWORK_BUFFER_SIZE] = {0};
@@ -173,14 +172,7 @@ tcpServer initTcpServer(std::function<std::string(std::string)> readFile){
   return tserver;
 }
 
-NetCode initNetCode(bool bootstrapperMode, std::function<std::string(std::string)> readFile){
-  std::cout << "INFO: running in server bootstrapper mode" << std::endl;
-  NetCode netcode {};
-  if (bootstrapperMode){
-    netcode.tServer = initTcpServer(readFile);
-  }
-  return netcode;
-}
+
 
 // Client code ////////////////////////////////////////////////////////////////////////
 void sendMessageWithClientConnection(int sockFd, const char* networkBuffer, size_t size){
@@ -304,25 +296,3 @@ std::vector<uint8_t> sendMessageAsBytes(const char* data, size_t size){
   return response;
 }
 
-
-// Core per frame tick ////////////
-void onNetCode(NetCode& netcode, std::function<void(std::string)> onClientMessage, bool bootstrapperMode){
-  maybeReadClientMessage(client, onClientMessage);
-  if (bootstrapperMode){
-    tcpServer& tserver = netcode.tServer;
-    getDataFromServerSocket(tserver.server, [&tserver](char* data, size_t size, int socketFd, std::function<void(char* data, size_t size, bool closeSocket)> sendData) -> void {      
-
-      // echo
-      sendData(data, size, false);
-      return;
-
-      ////
-      MessageToSend message{
-        .value = 10002,
-      };
-      //sendData((char*)&message, sizeof(MessageToSend), false);
-
-      sendData((char*)&message, sizeof(MessageToSend), false);
-    });
-  }
-}

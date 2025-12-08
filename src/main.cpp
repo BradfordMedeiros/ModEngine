@@ -10,7 +10,7 @@
 #include "./main_input.h"
 #include "./scene/common/vectorgfx.h"
 #include "./scene/objtypes/lighting/scene_lighting.h"
-#include "./network/netscene.h"
+#include "./network/modnet.h"
 #include "./main_util.h"
 #include "./cscript/cscripts/plugins/perf-visualize.h"
 #include "./cscript/cscripts/plugins/performance_graph.h"
@@ -838,6 +838,8 @@ void renderDebugUi(Color pixelColor){
 
 
 void onClientMessage(std::string message){
+
+  
 }
 
 bool signalHandlerCalled = false;

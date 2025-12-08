@@ -41,12 +41,13 @@ struct ClientConnection {
   bool isConnected = false;
   int currentSocket = -1;
 };
-struct NetCode {
-  tcpServer tServer;
-};
 
-NetCode initNetCode(bool bootstrapperMode, std::function<std::string(std::string)> readFile);
-void onNetCode(NetCode& netcode, std::function<void(std::string)> onClientMessage, bool bootstrapperMode);
+tcpServer initTcpServer(std::function<std::string(std::string)> readFile);
+
+void maybeReadClientMessage(ClientConnection& client, std::function<void(std::string)> onClientMessage);
+
+typedef std::function<void(char*, size_t, int, std::function<void(char* data, size_t size, bool closeSocket)>)> OnDataFn;
+void getDataFromServerSocket(modsocket& socketInfo, OnDataFn onData);
 
 // client 
 void connectServer(std::string data);

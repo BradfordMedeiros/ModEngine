@@ -1,27 +1,6 @@
 #include "./crud.h"
 
 
-struct TestApiRequest {
-	int value;
-};
-struct TestApiResponse{};
-
-struct AnotherApiRequest {
-	int valueOne;
-	int valueTwo;
-};
-
-union NetworkMessage {
-	TestApiRequest testRequest;
-	AnotherApiRequest anotherRequest;
-};
-
-struct ResponseVoid{};
-union NetworkMessageResponse {
-	ResponseVoid voidResponse;
-	TestApiResponse testApiResponse;
-};
-
 std::optional<NetworkMessageResponse> handleTestRequest(NetworkMessage& networkMessage){
 	TestApiRequest& testMessage = networkMessage.testRequest;
 
@@ -37,12 +16,6 @@ std::unordered_map<std::size_t, std::function<std::optional<NetworkMessageRespon
 	{ typeid(AnotherApiRequest).hash_code(), handleAnotherApiRequest },
 };
 
-
-struct WireMessage {
-	int version;
-	std::size_t apiType;
-	NetworkMessage networkMessage;
-};
 
 WireMessage createWireMessage(NetworkMessage networkMessage, std::size_t apiType){
 	return WireMessage {
