@@ -1937,13 +1937,13 @@ std::vector<InputDispatch> inputFns = {
       state.rampDirection = (state.rampDirection ==  RAMP_LEFT) ? RAMP_RIGHT : RAMP_LEFT;
 
       auto serverResponse = sendMessage("test message");
-      std::cout << "server response: " << serverResponse << std::endl;
+      std::cout << "netscene server response: " << serverResponse << std::endl;
 
       MessageToSend messageToSend {
         .value = 123,
       };
       auto msg = sendMessageAnyType<MessageToSend, MessageToSend>(messageToSend);
-      std::cout << "got message back: " << std::to_string(msg.value().value) << std::endl;
+      std::cout << "netscene got message back: " << std::to_string(msg.value().value) << std::endl;
     }
   },
 

@@ -54,7 +54,7 @@ void disconnectServer();
 
 std::string sendMessage(std::string dataToSend);
 std::vector<uint8_t> sendMessage(const char* data, size_t size);
-
+std::vector<uint8_t> sendMessageAsBytes(const char* data, size_t size);
 
 template <typename T> 
 std::optional<T> convertToType(std::vector<uint8_t>& value){
@@ -62,6 +62,7 @@ std::optional<T> convertToType(std::vector<uint8_t>& value){
 
   bool isExpectedSize = value.size() == sizeof(T);
   if (!isExpectedSize){
+    std::cout << "netscene: unexpected size: expected = " << sizeof(T) << ", got = " << value.size() << ", value = "  << std::string(reinterpret_cast<const char*>(value.data()), value.size()) << std::endl;
     return std::nullopt;
   }
   //modassert(, std::string("unexpected buffer size: expected = ") + std::to_string(sizeof(T)) + ", actual = " + std::to_string(response.size())); 
@@ -71,7 +72,7 @@ std::optional<T> convertToType(std::vector<uint8_t>& value){
 
 template <typename T>
 std::optional<T> sendMessage(const char* data, size_t size){
-  auto values = sendMessage(data, size);
+  auto values = sendMessageAsBytes(data, size);
   return convertToType<T>(values);
 }
 

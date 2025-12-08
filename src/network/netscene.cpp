@@ -103,18 +103,18 @@ void closeServerSocket(modsocket& socketInfo, int socketFd){
   socketInfo.infos = infos;
 }
 
-typedef std::function<void(std::string, int, std::function<void(char* data, size_t size, bool closeSocket)>)> OnDataFn;
+typedef std::function<void(char*, size_t, int, std::function<void(char* data, size_t size, bool closeSocket)>)> OnDataFn;
 
 void sendDataToSocket(modsocket& socketInfo, int socketFd, OnDataFn onData){
   char buffer[NETWORK_BUFFER_SIZE] = {0};
-  int value = read(socketFd, buffer, NETWORK_BUFFER_SIZE);      // @TODO -> read might still have more data?
+  size_t bytesRead = read(socketFd, buffer, NETWORK_BUFFER_SIZE);      // @TODO -> read might still have more data?
   //assert(value != -1);
-  if (value == -1){
+  if (bytesRead == -1){
     return;
   }
 
   bool responseHandled = false;
-  onData(buffer, socketFd, [&socketInfo, socketFd, &responseHandled](char* data, size_t size, bool closeSocket) -> void {
+  onData(buffer, bytesRead, socketFd, [&socketInfo, socketFd, &responseHandled](char* data, size_t size, bool closeSocket) -> void {
     if (data){
       send(socketFd, data, size, 0);
     }
@@ -186,11 +186,19 @@ NetCode initNetCode(bool bootstrapperMode, std::function<std::string(std::string
 void sendMessageWithClientConnection(int sockFd, const char* networkBuffer, size_t size){
   write(sockFd, networkBuffer, size);
 }
-std::string readMessageWithConnection(int sockFd){
-  char buffer[NETWORK_BUFFER_CLIENT_SIZE] = {0};
-  guard(read(sockFd, buffer, NETWORK_BUFFER_CLIENT_SIZE), "error reading message");   // @TODO -> read should just be threaded off and pump to an event loop
-  return buffer;
+
+std::vector<uint8_t> readMessageWithConnectionAsBytes(int sockFd) {
+    uint8_t buffer[NETWORK_BUFFER_CLIENT_SIZE];
+    size_t bytesRead = read(sockFd, buffer, NETWORK_BUFFER_CLIENT_SIZE);
+    guard(bytesRead, "error reading message");
+    return std::vector<uint8_t>(buffer, buffer + bytesRead);
 }
+
+std::string readMessageWithConnection(int sockFd){
+  auto response = readMessageWithConnectionAsBytes(sockFd);
+  return std::string(reinterpret_cast<const char*>(response.data()), response.size());
+}
+
 
 int socketClientConnection(std::string ip, int port){
   struct sockaddr_in address = {
@@ -215,6 +223,17 @@ std::string sendMessageNewConnection(std::string ip, int port, const char* netwo
   close(sockFd);
   return buffer;
 }
+
+std::vector<uint8_t> sendMessageNewConnectionAsBytes(std::string ip, int port, const char* networkBuffer, size_t size){
+  int sockFd = socketClientConnection(ip, port);
+  sendMessageWithClientConnection(sockFd, networkBuffer, size);
+  auto buffer = readMessageWithConnectionAsBytes(sockFd);
+  close(sockFd);
+  return buffer;
+}
+
+
+
 void sendMessageToActiveServer(std::string data){
   assert(client.isConnected);
   std::string content = "type:data\n" + data;
@@ -276,17 +295,13 @@ void disconnectServer(){
 }
 
 std::string sendMessage(std::string dataToSend){
-  std::string value = "this is the message to send";
-  auto response = sendMessageNewConnection("127.0.0.1", 8000, value.c_str(), strlen(value.c_str()));
+  auto response = sendMessageNewConnection("127.0.0.1", 8000, dataToSend.c_str(), strlen(dataToSend.c_str()));
   return response;
 }
 
-std::vector<uint8_t> sendMessage(const char* data, size_t size){
-  std::vector<uint8_t> values;
-  for (int i = 0; i < size; i++){
-    values.push_back(data[i]);
-  }
-  return values;
+std::vector<uint8_t> sendMessageAsBytes(const char* data, size_t size){
+  auto response = sendMessageNewConnectionAsBytes("127.0.0.1", 8000, data, size);
+  return response;
 }
 
 
@@ -295,17 +310,19 @@ void onNetCode(NetCode& netcode, std::function<void(std::string)> onClientMessag
   maybeReadClientMessage(client, onClientMessage);
   if (bootstrapperMode){
     tcpServer& tserver = netcode.tServer;
-    getDataFromServerSocket(tserver.server, [&tserver](std::string request, int socketFd, std::function<void(char* data, size_t size, bool closeSocket)> sendData) -> void {      
-      bool shouldCloseSocket = true;
-      bool shouldSendData = true;
+    getDataFromServerSocket(tserver.server, [&tserver](char* data, size_t size, int socketFd, std::function<void(char* data, size_t size, bool closeSocket)> sendData) -> void {      
 
-      //MessageToSend message{
-      //  .value = 10002,
-      //};
+      // echo
+      sendData(data, size, false);
+      return;
+
+      ////
+      MessageToSend message{
+        .value = 10002,
+      };
       //sendData((char*)&message, sizeof(MessageToSend), false);
 
-      std::string basicResponse = "this is your response";
-      sendData((char*)basicResponse.c_str(), basicResponse.size(), false);
+      sendData((char*)&message, sizeof(MessageToSend), false);
     });
   }
 }
