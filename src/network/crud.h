@@ -7,7 +7,6 @@
 #include <optional>
 #include <unordered_map>
 #include <functional>
-
-void handleRequest(void* request);
+#include <iostream>
 
 #endif 

@@ -4,30 +4,35 @@
 struct TestApiRequest {
 	int value;
 };
+struct TestApiResponse{};
 
 struct AnotherApiRequest {
 	int valueOne;
 	int valueTwo;
 };
 
-
-enum RequestHandlerType {
-	TestRequest = 1,
-};
-
-void handleTestRequest(void* data){
-
-}
-void handleAnotherApiRequest(void* data){
-
-}
-
 union NetworkMessage {
 	TestApiRequest testRequest;
 	AnotherApiRequest anotherRequest;
 };
 
-std::unordered_map<std::size_t, std::function<void(void*)>> requestTypeToFn {
+struct ResponseVoid{};
+union NetworkMessageResponse {
+	ResponseVoid voidResponse;
+	TestApiResponse testApiResponse;
+};
+
+std::optional<NetworkMessageResponse> handleTestRequest(NetworkMessage& networkMessage){
+	TestApiRequest& testMessage = networkMessage.testRequest;
+
+	return std::nullopt;
+}
+std::optional<NetworkMessageResponse> handleAnotherApiRequest(NetworkMessage& networkMessage){
+	AnotherApiRequest& apiRequest = networkMessage.anotherRequest;
+	return std::nullopt;
+}
+
+std::unordered_map<std::size_t, std::function<std::optional<NetworkMessageResponse>(NetworkMessage&)>> requestTypeToFn {
 	{ typeid(TestApiRequest).hash_code(), handleTestRequest },
 	{ typeid(AnotherApiRequest).hash_code(), handleAnotherApiRequest },
 };
@@ -37,43 +42,28 @@ struct WireMessage {
 	int version;
 	std::size_t apiType;
 	NetworkMessage networkMessage;
-	std::vector<std::string> values;
 };
-struct SimulatedNetwork {
-	std::queue<WireMessage> networkBuffer;
 
-};
-SimulatedNetwork simulatedNetwork;
-
-std::optional<NetworkMessage> receiveData(){
-	return std::nullopt;
-}
-void sendData(NetworkMessage& networkMessage, std::size_t apiType){
-	simulatedNetwork.networkBuffer.push(WireMessage {
+WireMessage createWireMessage(NetworkMessage networkMessage, std::size_t apiType){
+	return WireMessage {
 		.version = 0,
-		.apiType = apiType,
+		.apiType = apiType, 
 		.networkMessage = networkMessage,
-	});
-}
-
-
-void sendToTestApi(){
-	TestApiRequest value {
-		.value = 10,
 	};
-	NetworkMessage networkMessage{};
-	networkMessage.testRequest = value;
-	sendData(networkMessage, typeid(TestApiRequest).hash_code());
 }
 
-void handleRequest(void* request){
+std::optional<NetworkMessageResponse> handleWireMessage(WireMessage& wireMessage){
+	auto apiType = wireMessage.apiType;
+	if (requestTypeToFn.find(apiType) == requestTypeToFn.end()){
+		std::cout << "crud: invalid api type: " << apiType << std::endl;
+		return std::nullopt;
+	}
+
+	auto response = requestTypeToFn.at(apiType)(wireMessage.networkMessage);
+	if(!response.has_value()){
+		NetworkMessageResponse response{};
+		response.voidResponse = ResponseVoid{};
+		return response;
+	}
+	return response;
 }
-
-
-/////////////////
-
-struct tcpSocket {
-	int socketFd;
-	fd_set fds;
-	int maxFd;
-};
