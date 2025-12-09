@@ -13,10 +13,13 @@ NetCode initNetCode(bool bootstrapperMode, std::function<std::string(std::string
 
 
 void sendError(std::function<void(char* data, size_t size, bool closeSocket)> sendData, bool closeSocket){
- 	size_t dataSize = sizeof(NetworkMessageResponse);
-    NetworkMessageResponse networkErrorResponse{};
-    networkErrorResponse.errorResponse = ResponseError{};
-	sendData((char*)&networkErrorResponse, dataSize, closeSocket);
+ 	size_t dataSize = sizeof(WireMessageResponse);
+  	WireMessageResponse wireResponse{};
+	std::memset(&wireResponse, 0, sizeof(wireResponse));
+	wireResponse.version = 0;
+	wireResponse.error = true;
+
+	sendData((char*)&wireResponse, dataSize, closeSocket);
 }
 
 void onNetCode(NetCode& netcode, std::function<void(std::string)> onClientMessage, bool bootstrapperMode){
@@ -29,15 +32,22 @@ void onNetCode(NetCode& netcode, std::function<void(std::string)> onClientMessag
       	WireMessage wireMessage{};
       	std::memcpy(&wireMessage, data,size); 
       	std::cout << "modnet wireMessage: version = " << wireMessage.version << ", apiType = " << wireMessage.apiType << std::endl;
-      	std::optional<NetworkMessageResponse> response = handleWireMessage(wireMessage);
-   		size_t dataSize = sizeof(NetworkMessageResponse);
-      	if (response.has_value()){
-      		sendData((char*)&response.value(), dataSize, true);
-      		return;
-      	}
+
+      	WireMessageResponse response = handleWireMessage(wireMessage);
+      	sendData((char*)&response, sizeof(WireMessageResponse), true);
+      	return;
       }
       sendError(sendData, true);
 
     });
   }
+}
+
+std::optional<WireMessageResponse> sendWireMessage(WireMessage wireMessage){
+   auto wireNetworkResponse = sendMessageAnyType<WireMessageResponse, WireMessage>(wireMessage);
+   if (!wireNetworkResponse.has_value()){
+        std::cout << "modnet did not get expected type back" << std::endl;
+        return std::nullopt;
+   }
+   return wireNetworkResponse;
 }

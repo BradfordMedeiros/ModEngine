@@ -8,6 +8,8 @@
 #include <unordered_map>
 #include <functional>
 #include <iostream>
+#include <assert.h>
+#include <cstring>
 
 struct TestApiRequest {
 	int value;
@@ -27,15 +29,25 @@ struct WireMessage {
 	NetworkMessage networkMessage;
 };
 
-struct ResponseError{};
 struct ResponseVoid{};
-struct TestApiResponse{};
+struct TestApiResponse{
+	int responseValue;
+};
 union NetworkMessageResponse {
-	ResponseError errorResponse;
-	ResponseVoid voidResponse;
 	TestApiResponse testApiResponse;
+	ResponseVoid anotherApiResponse;
 };
 
-std::optional<NetworkMessageResponse> handleWireMessage(WireMessage& wireMessage);
+struct WireMessageResponse {
+	int version;
+	bool error;
+	NetworkMessageResponse response;
+};
+
+WireMessageResponse handleWireMessage(WireMessage& wireMessage);
+
+WireMessage createWireMessage(TestApiRequest& testRequest);
+WireMessage createWireMessage(AnotherApiRequest& anotherRequest);
+
 
 #endif 

@@ -83,9 +83,4 @@ std::optional<ReturnType> sendMessageAnyType(TypeToSend& dataToSend){
 }
 
 
-struct MessageToSend {
-  int value = 123;
-};
-
-
 #endif

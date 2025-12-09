@@ -1939,11 +1939,19 @@ std::vector<InputDispatch> inputFns = {
       //auto serverResponse = sendMessage("test message");
       //std::cout << "netscene server response: " << serverResponse << std::endl;
 
-      MessageToSend messageToSend {
-        .value = 123,
+      TestApiRequest testRequest {
+        .value = 987,
       };
-      auto msg = sendMessageAnyType<MessageToSend, MessageToSend>(messageToSend);
-      std::cout << "netscene got message back: " << std::to_string(msg.value().value) << std::endl;
+
+      auto msg = sendWireMessage(createWireMessage(testRequest));
+      if (msg.has_value() && !msg.value().error){
+        std::cout << "modnet : " << msg.value().response.testApiResponse.responseValue << std::endl;
+      }else{
+        std::cout << "modnet did not get a valid message back" << std::endl;
+      }
+
+      //auto msg = sendMessageAnyType<MessageToSend, MessageToSend>(testApiRequest);
+      //std::cout << "netscene got message back: " << std::to_string(msg.value().value) << std::endl;
 
       
     }

@@ -11,4 +11,6 @@ struct NetCode {
 NetCode initNetCode(bool bootstrapperMode, std::function<std::string(std::string)> readFile);
 void onNetCode(NetCode& netcode, std::function<void(std::string)> onClientMessage, bool bootstrapperMode);
 
+std::optional<WireMessageResponse> sendWireMessage(WireMessage wireMessage);
+
 #endif
