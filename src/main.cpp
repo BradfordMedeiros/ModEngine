@@ -694,9 +694,19 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
 
   if (renderParticles){
     auto viewportDim = calcViewportSize(viewport);
-    auto fov = getLayerFov(world.sandbox.layers.at(0));
+    auto& layer = world.sandbox.layers.at(0);
+    auto fov = getLayerFov(layer);
     PROFILE("EFFEK",
-      onEffekSeekerRender(static_cast<float>(viewportDim.x), static_cast<float>(viewportDim.y), glm::radians(fov), viewTransform.position, viewTransform.rotation);
+      static bool createdDummy = false;
+      static GLuint dummyVAO = 0;
+      if (!createdDummy){
+        glGenVertexArrays(1, &dummyVAO);
+        glBindVertexArray(dummyVAO);
+        createdDummy = true;
+      }
+      glBindVertexArray(dummyVAO);
+      
+      onEffekSeekerRender(static_cast<float>(viewportDim.x), static_cast<float>(viewportDim.y), glm::radians(fov), viewTransform.position, viewTransform.rotation,  layer.nearplane, layer.farplane);
     )    
   }
 

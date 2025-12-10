@@ -113,7 +113,7 @@ void onEffekSeekerFrame(){
 	//}
 }
 
-void onEffekSeekerRender(float windowSizeX, float windowSizeY, float fovRadians, glm::vec3 viewPosition, glm::quat viewDirection){
+void onEffekSeekerRender(float windowSizeX, float windowSizeY, float fovRadians, glm::vec3 viewPosition, glm::quat viewDirection, float nearPlane, float farPlane){
 	std::cout << "effekseer: " << windowSizeX << ", " << windowSizeY << std::endl;
 
 	auto viewerPosition = ::Effekseer::Vector3D(10.0f, 5.0f, 10.0f);
@@ -136,7 +136,7 @@ void onEffekSeekerRender(float windowSizeX, float windowSizeY, float fovRadians,
 
     ::Effekseer::Matrix44 projectionMatrix;
 	// projectionMatrix.PerspectiveFovRH_OpenGL(90.0f / 180.0f * 3.14159f, windowSizeX / windowSizeY, 1.0f, 500.0f);
-	projectionMatrix.PerspectiveFovRH_OpenGL(fovRadians, (float)windowSizeX / (float)windowSizeY, 0.01f, 500.0f);
+	projectionMatrix.PerspectiveFovRH_OpenGL(fovRadians, (float)windowSizeX / (float)windowSizeY, nearPlane, farPlane);
 
     ::Effekseer::Matrix44 cameraMatrix;
     cameraMatrix.LookAtRH(viewerPosition, lookAt, ::Effekseer::Vector3D(0.0f, 1.0f, 0.0f));
@@ -146,8 +146,8 @@ void onEffekSeekerRender(float windowSizeX, float windowSizeY, float fovRadians,
 
 
 	Effekseer::Manager::DrawParameter drawParameter;
-    drawParameter.ZNear = 0.01f;
-    drawParameter.ZFar = 500.0f;
+    drawParameter.ZNear = nearPlane;
+    drawParameter.ZFar = farPlane;
 
 	drawParameter.ViewProjectionMatrix = effekRenderer->GetCameraProjectionMatrix();
 
