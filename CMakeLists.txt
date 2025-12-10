@@ -245,7 +245,10 @@ endif()
 # https://effekseer.github.io/en/download.html  effekseer for c++
 set(BUILD_EXAMPLES OFF CACHE BOOL "Build examples" FORCE)
 
-add_subdirectory("/home/brad/Desktop/effects/" "${CMAKE_BINARY_DIR}/effekseer_build")
+set(EFFEKSEER_DIR "${LIB_DIR}/effekseer")
+
+
+add_subdirectory("${EFFEKSEER_DIR}" "${CMAKE_BINARY_DIR}/effekseer_build")
 target_link_libraries(${PROJECT_NAME} 
     Effekseer
     EffekseerRendererGL
@@ -254,8 +257,8 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-    "/home/brad/Desktop/effects/src/include"
-    "/home/brad/Desktop/effects/src/Effekseer"
+    "${EFFEKSEER_DIR}/src/include"
+    "${EFFEKSEER_DIR}/src/Effekseer"
 )
 
 
