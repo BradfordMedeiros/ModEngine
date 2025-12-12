@@ -39,7 +39,7 @@ Texture loadTextureEmpty(int textureWidth, int textureHeight, int numChannels){
 Texture loadTextureSelection(int textureWidth, int textureHeight){
   unsigned int texture;
   glGenTextures(1, &texture);
-  genFramebufferTexture(&texture, textureWidth, textureHeight);
+  genFramebufferTexture(&texture, textureWidth, textureHeight, NULL);
   Texture tex {
     .textureId = texture,
   };

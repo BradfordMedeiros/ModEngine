@@ -1,6 +1,6 @@
 #include "./textures_gen.h"
 
-void genFramebufferTexture(unsigned int *texture, unsigned int resolutionX, unsigned int resolutionY){
+void genFramebufferTexture(unsigned int *texture, unsigned int resolutionX, unsigned int resolutionY, const char* debugName){
   glGenTextures(1, texture);
   glBindTexture(GL_TEXTURE_2D, *texture);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, resolutionX, resolutionY, 0, GL_RGBA, GL_FLOAT, NULL);
@@ -8,6 +8,11 @@ void genFramebufferTexture(unsigned int *texture, unsigned int resolutionX, unsi
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+  if (debugName){
+    glObjectLabel(GL_TEXTURE, *texture, -1, debugName);
+  }
+
 }
 
 void updateDepthTexturesSize(unsigned int* textures, int numTextures, unsigned int resolutionX, unsigned int resolutionY){
@@ -62,10 +67,10 @@ Framebuffers generateFramebuffers(int resolutionX, int resolutionY){
 
   glGenFramebuffers(1, &framebuffers.fbo);
 
-  genFramebufferTexture(&framebuffers.framebufferTexture, resolutionX, resolutionY);
-  genFramebufferTexture(&framebuffers.framebufferTexture2, resolutionX, resolutionY);
-  genFramebufferTexture(&framebuffers.framebufferTexture3, resolutionX, resolutionY);
-  genFramebufferTexture(&framebuffers.framebufferTexture4, resolutionX, resolutionY);
+  genFramebufferTexture(&framebuffers.framebufferTexture, resolutionX, resolutionY, "framebuffer_texture_0");
+  genFramebufferTexture(&framebuffers.framebufferTexture2, resolutionX, resolutionY, "framebuffer_texture_2");
+  genFramebufferTexture(&framebuffers.framebufferTexture3, resolutionX, resolutionY, "framebuffer_texture_3");
+  genFramebufferTexture(&framebuffers.framebufferTexture4, resolutionX, resolutionY, "framebuffer_texture_4");
 
   generateDepthTextures(&framebuffers.depthTextures.at(0), framebuffers.depthTextures.size(), resolutionX, resolutionY);
   generateDepthTextures(&framebuffers.textureDepthTextures.at(0), 1, resolutionX, resolutionY);

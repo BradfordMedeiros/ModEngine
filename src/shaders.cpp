@@ -119,6 +119,9 @@ std::optional<unsigned int> loadShader(std::string vertexShaderFilepath, std::st
    glAttachShader(shaderProgramId, fragmentShaderId);
    glLinkProgram(shaderProgramId);
 
+   std::string programNameForDebug = std::string("program|") + fragmentShaderFilepath;
+   glObjectLabel(GL_PROGRAM, shaderProgramId, -1, programNameForDebug.c_str()); // good enough for a name, not great
+
    glDeleteShader(vertexShaderId);
    glDeleteShader(fragmentShaderId);
 

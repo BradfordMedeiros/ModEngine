@@ -469,7 +469,7 @@ void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ow
       .mesh = loadMesh("./res/textures/default.jpg", meshData, [&world, &textureRefs, &meshPath, ownerId](std::string texture) -> Texture {
         textureRefs.insert(texture);
         return loadTextureWorld(world, texture, ownerId);
-      })  
+      }, meshPath.c_str())  
     };
     world.meshes.at(meshPath).textureRefs = textureRefs;
   }
@@ -933,7 +933,7 @@ std::function<Mesh(MeshData&)> createScopedLoadMesh(World& world, objid id){
   auto loadMeshObject = [&world, id](MeshData& meshdata) -> Mesh {
     return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {
       return loadTextureWorld(world, texture, id);
-    });    
+    }, (std::string("scoped-mesh-") + std::to_string(id)).c_str());    
   };
   return loadMeshObject;
 }
@@ -1409,7 +1409,7 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
   auto loadMeshObject = [&world, id](MeshData& meshdata) -> Mesh {
     return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {
       return loadTextureWorld(world, texture, id);
-    });    
+    }, NULL);    
   };
 
   ObjectSetAttribUtil util {

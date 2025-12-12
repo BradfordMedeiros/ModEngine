@@ -21,7 +21,7 @@ void setVertexPosition(Mesh& mesh, unsigned int vertexIndex, glm::vec3 pos, glm:
   glBufferSubData(GL_ARRAY_BUFFER, (sizeof(Vertex) * vertexIndex) + offsetof(Vertex, normal), sizeof(normal), &normal);
 }
 
-Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Texture(std::string)> ensureLoadTexture){
+Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Texture(std::string)> ensureLoadTexture, const char* debugHint){
   registerStat(statistics.loadMeshStat, 1);
 
   assert((meshData.indices.size() % 3) == 0);
@@ -30,6 +30,8 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO); 
+
+  glObjectLabel(GL_VERTEX_ARRAY, VAO, -1, debugHint);
 
   unsigned int EBO;
   glGenBuffers(1, &EBO);
@@ -142,6 +144,7 @@ Mesh load2DMesh(std::string imagePath, float vertices[], unsigned int indices[],
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO); 
+  glObjectLabel(GL_VERTEX_ARRAY, VAO, -1, (std::string("2d-mesh|") + std::to_string(VAO)).c_str());
 
   unsigned int EBO;
   glGenBuffers(1, &EBO);
@@ -329,6 +332,7 @@ LineRenderData createLineRenderData(std::vector<Line>& allLines){
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
+  glObjectLabel(GL_VERTEX_ARRAY, VAO, -1, "createLineRenderData");
 
   unsigned int EBO;
   glGenBuffers(1, &EBO);
@@ -390,7 +394,7 @@ Mesh loadSkybox(std::string defaultTexture, std::string skyboxPath, std::string 
   ModelData data = loadModel("", skyboxPath);
   assert(data.meshIdToMeshData.size() == 1);
   MeshData meshData = data.meshIdToMeshData.begin() -> second;
-  Mesh mesh = loadMesh(defaultTexture, meshData, ensureLoadTexture);
+  Mesh mesh = loadMesh(defaultTexture, meshData, ensureLoadTexture, NULL);
   mesh.hasCubemapTexture = skyboxTexture != "";
   if (skyboxTexture != ""){
     mesh.cubemapTexture = ensureLoadCubemapTexture(skyboxTexture);
@@ -419,6 +423,9 @@ unsigned int loadFullscreenQuadVAO(){
   glGenVertexArrays(1, &quadVAO);
   glGenBuffers(1, &quadVBO);
   glBindVertexArray(quadVAO);
+  glObjectLabel(GL_VERTEX_ARRAY, quadVAO, -1, "fullscreen_quad_vao");
+
+
   glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
   glEnableVertexAttribArray(0); 
@@ -442,6 +449,8 @@ unsigned int loadFullscreenQuadVAO3D(){
   glGenVertexArrays(1, &quadVAO);
   glGenBuffers(1, &quadVBO);
   glBindVertexArray(quadVAO);
+  glObjectLabel(GL_VERTEX_ARRAY, quadVAO, -1, "fullscreen_quad_vao_3d");
+
   glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
   glEnableVertexAttribArray(0); 
