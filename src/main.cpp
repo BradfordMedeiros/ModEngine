@@ -181,6 +181,8 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
   glDrawBuffers(4, buffers_to_render);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,  texture2.textureId, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D,  0, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D,  0, 0);
 
   modassert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "framebuffer incomplete");
 
@@ -213,6 +215,8 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
   glEnable(GL_BLEND);
   glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glBlendFunci(1, GL_ONE, GL_ZERO);
+  glBlendFunci(2, GL_ONE, GL_ZERO);
+  glBlendFunci(3, GL_ONE, GL_ZERO);
 
 
   drawShapeData(lineData, *renderingResources.uiShaderProgram, fontFamilyByName, texture.textureId,  texSize.height, texSize.width, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
@@ -526,6 +530,9 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
   glUseProgram(*shaderProgram);
   int numTriangles = 0;
 
+  GLenum bufs[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+  glDrawBuffers(4, bufs);
+
   auto viewFrustum = cameraToViewFrustum(world.sandbox.layers.at(0), getLayerFov(world.sandbox.layers.at(0)), calcViewportSize(viewport));
 
   if (state.cullingObject.has_value() && state.visualizeFrustum){
@@ -630,7 +637,9 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
         }
 
         bool portalTextureInCache = portalIdCache.find(id) != portalIdCache.end();
-        glStencilMask(isPortal ? 0xFF : 0x00);
+        if (isPortal){
+          glStencilMask(0xFF);
+        }
 
         if (layer.visible && id != 0){
           //std::cout << "render object: " << getGameObject(world, id).name << std::endl;
@@ -673,11 +682,10 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
             );
             numTriangles = numTriangles + trianglesDrawn;
           }
-
         }
   
-        glStencilFunc(GL_EQUAL, 1, 0xFF);
         if (isPortal && portalTextureInCache && isPerspectivePortal){
+          glStencilFunc(GL_EQUAL, 1, 0xFF);
           glUseProgram(*renderingResources.framebufferProgram); 
           glDisable(GL_DEPTH_TEST);
           glBindVertexArray(defaultResources.quadVAO);
@@ -685,14 +693,21 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
           glDrawArrays(GL_TRIANGLES, 0, 6);
           glEnable(GL_DEPTH_TEST);
           glUseProgram(newShader); 
+          glStencilFunc(GL_ALWAYS, 1, 0xFF);
+          glClear(GL_STENCIL_BUFFER_BIT);
+
         }
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glClear(GL_STENCIL_BUFFER_BIT);
+        if (isPortal){
+          glStencilMask(0x00);
+        }
       }
     }  
   }
 
-  if (renderParticles){
+  if (false && renderParticles){
+    GLenum bufs[] = {GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1, bufs);
+
     auto viewportDim = calcViewportSize(viewport);
     auto& layer = world.sandbox.layers.at(0);
     auto fov = getLayerFov(layer);
@@ -706,6 +721,8 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
       }
       glBindVertexArray(dummyVAO);
       
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, 0, 0);
+
       onEffekSeekerRender(static_cast<float>(viewportDim.x), static_cast<float>(viewportDim.y), glm::radians(fov), viewTransform.position, viewTransform.rotation,  layer.nearplane, layer.farplane);
     )    
   }
@@ -929,6 +946,8 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep, ViewportSe
       glEnable(GL_BLEND);
       glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glBlendFunci(1, GL_ONE, GL_ZERO);
+      glBlendFunci(2, GL_ONE, GL_ZERO);
+      glBlendFunci(3, GL_ONE, GL_ZERO);
     }else{
       glDisable(GL_BLEND);
     }
@@ -1029,12 +1048,21 @@ struct SelectionResult {
   std::vector<std::optional<IdAndUv>> uvResults;
 };
 
+
 SelectionResult readSelectionFromBuffer(bool readSelectionShader, glm::vec2 adjustedCoords){
+  glBindFramebuffer(GL_FRAMEBUFFER, renderingResources.framebuffers.fbo);
+  GLenum bufs[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+  glDrawBuffers(4, bufs);
+
   SelectionResult selectionResult{};
       
   std::vector<std::optional<IdAndUv>> uvResults;
   Color hoveredItemColor = readSelectionShader ? getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y) : getPixelColorAttachment2(adjustedCoords.x, adjustedCoords.y);
   objid hoveredId = getIdFromColor(hoveredItemColor);
+
+  if (!readSelectionShader){
+    std::cout << "selection result raw id: " << hoveredId << ", exists = " << idExists(world.sandbox, hoveredId) <<  std::endl; 
+  }
   if (hoveredId != 0 && hoveredId != -16777216){
     selectionResult.id = hoveredId;
     selectionResult.color = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b);
@@ -2305,38 +2333,79 @@ int main(int argc, char* argv[]){
       )
       //std::cout << "cache size: " << portalIdCache.size() << std::endl;
 
-      statistics.numTriangles = renderWithProgram(renderContext, renderStages.main, viewport);
+      Color pixelColor;
+      PROFILE("MAIN",
+        statistics.numTriangles = renderWithProgram(renderContext, renderStages.main, viewport);
+    
 
-      auto selectionResult = readSelectionFromBuffer(false, adjustedCoords);
-      if (uiSelectionResult.id.has_value()){
-        selectionResult.id = uiSelectionResult.id;
-        selectionResult.color = uiSelectionResult.color;
-        std::cout << "selection result: " << uiSelectionResult.id.value() << std::endl;
-      }
-      for (int i = 0; i < selectionResult.uvResults.size(); i++){
-        if (uiSelectionResult.uvResults.at(i).has_value()){
-          selectionResult.uvResults.at(i) = uiSelectionResult.uvResults.at(i);
+        shaderLogDebug("read-selection");
+
+
+
+        auto selectionResult = readSelectionFromBuffer(false, adjustedCoords);
+        if (uiSelectionResult.id.has_value()){
+          selectionResult.id = uiSelectionResult.id;
+          selectionResult.color = uiSelectionResult.color;
+          std::cout << "selection result: " << uiSelectionResult.id.value() << std::endl;
+        }else{
+          std::cout << "selection result: no value" << std::endl;
         }
-      }
-
-      if (selectionResult.id.has_value()){
-        state.lastHoverIndex = state.currentHoverIndex; // stateupdate
-        state.currentHoverIndex = selectionResult.id.value(); // 
-        auto hoveredItemColor = selectionResult.color.value();
-        state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate     
-      }
-      for (int i = 0; i < selectionResult.uvResults.size(); i++){
-        if (!selectionResult.uvResults.at(i).has_value()){
-          continue;
+        for (int i = 0; i < selectionResult.uvResults.size(); i++){
+          if (uiSelectionResult.uvResults.at(i).has_value()){
+            selectionResult.uvResults.at(i) = uiSelectionResult.uvResults.at(i);
+          }
         }
-        idCoordsToGet.at(i).result = selectionResult.uvResults.at(i).value().result;
-        idCoordsToGet.at(i).resultUv = selectionResult.uvResults.at(i).value().resultUv;
-      }
 
-      renderVector(view, numChunkingGridCells, viewport);
+        if (selectionResult.id.has_value()){
+          state.lastHoverIndex = state.currentHoverIndex; // stateupdate
+          state.currentHoverIndex = selectionResult.id.value(); // 
+          auto hoveredItemColor = selectionResult.color.value();
+          state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate     
+        }
+        for (int i = 0; i < selectionResult.uvResults.size(); i++){
+          if (!selectionResult.uvResults.at(i).has_value()){
+            continue;
+          }
+          idCoordsToGet.at(i).result = selectionResult.uvResults.at(i).value().result;
+          idCoordsToGet.at(i).resultUv = selectionResult.uvResults.at(i).value().resultUv;
+        }
 
-      Color pixelColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
-      state.hoveredColor = glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b);
+        {
+            //GLenum bufs[] = {GL_COLOR_ATTACHMENT0};
+            //glDrawBuffers(1, bufs);
+
+            auto viewportDim = calcViewportSize(viewport);
+            auto& layer = world.sandbox.layers.at(0);
+            auto fov = getLayerFov(layer);
+            PROFILE("EFFEK",
+              static bool createdDummy = false;
+              static GLuint dummyVAO = 0;
+              if (!createdDummy){
+                glGenVertexArrays(1, &dummyVAO);
+                glBindVertexArray(dummyVAO);
+              createdDummy = true;
+            }
+            glBindVertexArray(dummyVAO);
+
+            glDrawBuffers(1, buffers_to_render);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, 0, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, 0, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, 0, 0);
+
+            onEffekSeekerRender(static_cast<float>(viewportDim.x), static_cast<float>(viewportDim.y), glm::radians(fov), viewTransform.position, viewTransform.rotation,  layer.nearplane, layer.farplane);
+            
+           )   
+        }
+
+        PROFILE("RENDER-VECTOR",
+          renderVector(view, numChunkingGridCells, viewport);
+        )
+
+        shaderLogDebug("read-pixel-color");
+        pixelColor = getPixelColorAttachment0(adjustedCoords.x, adjustedCoords.y);
+        state.hoveredColor = glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b);
+      )
 
       if (state.enableBloom){
         PROFILE("BLOOM-RENDERING",
