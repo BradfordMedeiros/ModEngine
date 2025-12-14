@@ -13,6 +13,7 @@ struct EffectData {
 	Effekseer::EffectRef effectRef;
 	std::optional<Effekseer::Handle> playingEffect;
 	std::optional<glm::vec3> position;
+	std::optional<glm::quat> rotation;
 	bool loopContinuously;
 	std::string effectName;
 };
@@ -86,12 +87,24 @@ bool effectPlaying(EffectData& effect){
 	return effectStillPlaying;
 }
 
+
+
+
 void playEffectsAlways(){
 	for (auto& [id, effect] : effekseerData){
 		if (effect.loopContinuously && !effectPlaying(effect)){
 			glm::vec3 position = effect.position.has_value() ? effect.position.value() : glm::vec3(0.f, 0.f, 0.f); // this should come from
 			Effekseer::Handle playingEffect = effekseerManager -> Play(effect.effectRef, position.x, position.y, position.z);
 			effect.playingEffect = playingEffect;
+			if (effect.rotation.has_value()){
+				glm::vec3 euler = glm::eulerAngles(effect.rotation.value());
+				effekseerManager->SetRotation(
+				    effect.playingEffect.value(),
+				    euler.x,
+				    euler.y,
+				    euler.z
+				);
+			}
 		}
 	}	
 }
@@ -164,19 +177,23 @@ Effekseer::EffectRef doCreateEffect(std::string& effect){
 	return effectRef;
 }
 
-EffekEffect createEffect(std::string effect){
+EffekEffect createEffect(std::string effect, glm::vec3 position, glm::quat rotation){
 	auto effectId = getUniqueObjId();
 
 	effekseerData[effectId] = EffectData {
 		.effectRef = doCreateEffect(effect),
 		.playingEffect = std::nullopt,
 		.position = std::nullopt,
+		.rotation = std::nullopt,
 		.loopContinuously = false,
 		.effectName = effect,
 	};
-	return EffekEffect{
+
+	EffekEffect effekEffect {
 		.effectId = effectId,
 	};
+	updateEffectPosition(effekEffect, position, rotation);
+	return effekEffect;
 }
 
 void freeEffect(EffekEffect& effect){
@@ -205,11 +222,20 @@ void stopEffect(EffekEffect& effectEffect){
 	effekseerManager->StopEffect(effect.playingEffect.value());
 }
 
-void updateEffectPosition(EffekEffect& effectEffect, glm::vec3 position){
+void updateEffectPosition(EffekEffect& effectEffect, glm::vec3 position, glm::quat rotation){
 	auto& effect = effekseerData.at(effectEffect.effectId);
 	effect.position = position;
+	effect.rotation = rotation;
 	if (effect.playingEffect.has_value()){
 		effekseerManager->SetLocation(effect.playingEffect.value(), position.x, position.y, position.z);
+
+		glm::vec3 euler = glm::eulerAngles(rotation);
+		effekseerManager->SetRotation(
+		    effect.playingEffect.value(),
+		    euler.x,
+		    euler.y,
+		    euler.z
+		);
 	}
 }
 

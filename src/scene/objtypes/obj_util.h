@@ -27,6 +27,7 @@ struct TextureInformation {
 
 struct ObjectTypeUtil {
   objid id;
+  Transformation fullInitialTransform;;
   std::function<Mesh(std::string)> createMeshCopy;
   std::unordered_map<std::string, MeshRef>& meshes;
   std::function<Texture(std::string)> ensureTextureLoaded;

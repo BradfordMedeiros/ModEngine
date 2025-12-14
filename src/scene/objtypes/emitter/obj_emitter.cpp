@@ -275,7 +275,7 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
     };
     addEmitter(emitterSystem, util.id, util.getCurrentTime(), obj.limit, obj.rate, obj.duration, obj.numParticlesPerFrame, particleConfig, obj.state, obj.deleteBehavior);    
   }else{
-    obj.effekseerEffect = createEffect(obj.effekseer);
+    obj.effekseerEffect = createEffect(obj.effekseer, util.fullInitialTransform.position, util.fullInitialTransform.rotation);
     setEffectState(obj.effekseerEffect.value(), obj.state);
   }
 

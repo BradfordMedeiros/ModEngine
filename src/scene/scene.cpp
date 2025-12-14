@@ -992,6 +992,7 @@ void addObjectToWorld(
 
     ObjectTypeUtil util {
       .id = id,
+      .fullInitialTransform = fullTransformation(world.sandbox, id, "addObjectToWorld"),
       .createMeshCopy = getCreateMeshCopy(world, rootname),
       .meshes = world.meshes,
       .ensureTextureLoaded = ensureTextureLoaded,
@@ -1736,8 +1737,8 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
 
   for (auto id : world.entitiesToUpdate){
     if (idExists(world.sandbox, id)){  // why do i need this check?
-      auto absolutePosition = fullTransformation(world.sandbox, id, "object type position updates").position;
-      updateObjectPositions(world.objectMapping, id, absolutePosition, viewTransform);      
+      auto& absoluteTransform = fullTransformation(world.sandbox, id, "object type position updates");
+      updateObjectPositions(world.objectMapping, id, absoluteTransform, viewTransform);      
     }
   }
 

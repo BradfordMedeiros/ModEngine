@@ -14,11 +14,12 @@ struct EffekEffect {
 	objid effectId;
 };
 
-EffekEffect createEffect(std::string effect);
+EffekEffect createEffect(std::string effec, glm::vec3 position, glm::quat rotation);
 void freeEffect(EffekEffect& effect);
 void setEffectState(EffekEffect& effect, bool loopContinuously);
 void playEffect(EffekEffect& effect, glm::vec3 position);
 void stopEffect(EffekEffect& effect);
+void updateEffectPosition(EffekEffect& effectEffect, glm::vec3 position, glm::quat rotation);
 
 void reloadEffect(std::string file);
 

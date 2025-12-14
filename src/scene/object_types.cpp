@@ -966,7 +966,10 @@ std::optional<Texture> textureForId(ObjectMapping& mapping, objid id, ObjTypeLoo
   return std::nullopt;
 }
 
-void updateObjectPositions(ObjectMapping& mapping, objid id, glm::vec3 position, Transformation& viewTransform){
+void updateObjectPositions(ObjectMapping& mapping, objid id, Transformation& transform, Transformation& viewTransform){
+  auto& rotation = transform.rotation;
+  auto& position = transform.position;
+
   auto soundObj = getSoundObj(mapping, id);
   if (soundObj != NULL){
     if (soundObj -> center){
@@ -979,6 +982,13 @@ void updateObjectPositions(ObjectMapping& mapping, objid id, glm::vec3 position,
   auto lightObj = getLight(mapping, id);
   if (lightObj != NULL){
     updateVoxelLightPosition(id, position, lightObj -> voxelSize);
+  }
+
+  auto emitterObj = getEmitter(mapping, id);
+  if (emitterObj != NULL){
+    if (emitterObj -> effekseerEffect.has_value()){
+      updateEffectPosition(emitterObj -> effekseerEffect.value(), position, rotation);
+    }
   }
 }
 
