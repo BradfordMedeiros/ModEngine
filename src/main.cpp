@@ -1135,9 +1135,11 @@ void onFramebufferSizeChange(GLFWwindow* window, int width, int height){
 
 
 std::vector<glm::vec3> debugPoints;
+std::vector<std::optional<glm::vec3>> debugPointsTo;
 std::vector<glm::vec3> debugPointsColors;
-void setDebugPoints(std::vector<glm::vec3> points, std::vector<glm::vec3> colors){
+void setDebugPoints(std::vector<glm::vec3> points, std::vector<std::optional<glm::vec3>> pointsTo, std::vector<glm::vec3> colors){
   debugPoints = points;
+  debugPointsTo = pointsTo,
   debugPointsColors = colors;
   modassert(debugPoints.size() == debugPointsColors.size(), "setDebugPoints differing sizes");
 }
@@ -2096,10 +2098,16 @@ int main(int argc, char* argv[]){
 
     for (int i = 0; i < debugPoints.size(); i++){
       auto point = debugPoints.at(i);
+      auto pointTo = debugPointsTo.at(i);
       auto color = debugPointsColors.at(i);
-      addLineNextCycle(point, point + glm::vec3(0.f, 5.f, 0.f), false, -1, glm::vec4(color.r, color.g, color.b, 1.f), std::nullopt, std::nullopt);
-      addLineNextCycle(point, point + glm::vec3(5.f, 0.f, 0.f), false, -1, glm::vec4(color.r, color.g, color.b, 1.f), std::nullopt, std::nullopt);
-      addLineNextCycle(point, point + glm::vec3(0.f, 0.f, -5.f), false, -1, glm::vec4(color.r, color.g, color.b, 1.f), std::nullopt, std::nullopt);
+
+      if (pointTo.has_value()){
+        addLineNextCycle(point, pointTo.value(), false, -1, glm::vec4(color.r, color.g, color.b, 1.f), std::nullopt, std::nullopt);
+      }else{
+        addLineNextCycle(point, point + glm::vec3(0.f, 5.f, 0.f), false, -1, glm::vec4(color.r, color.g, color.b, 1.f), std::nullopt, std::nullopt);
+        addLineNextCycle(point, point + glm::vec3(5.f, 0.f, 0.f), false, -1, glm::vec4(color.r, color.g, color.b, 1.f), std::nullopt, std::nullopt);
+        addLineNextCycle(point, point + glm::vec3(0.f, 0.f, -5.f), false, -1, glm::vec4(color.r, color.g, color.b, 1.f), std::nullopt, std::nullopt);        
+      }
     }
 
     doRemoveQueuedRemovals();

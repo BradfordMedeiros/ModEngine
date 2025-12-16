@@ -2,7 +2,7 @@
 
 std::string readFileOrPackage(std::string filepath);
 std::string serializeAttributeValue(AttributeValue& value);
-void setDebugPoints(std::vector<glm::vec3> points, std::vector<glm::vec3> colors);
+void setDebugPoints(std::vector<glm::vec3> points, std::vector<std::optional<glm::vec3>> pointsTo, std::vector<glm::vec3> colors);
 
 const float EPSILON = 0.001f;
 
@@ -455,6 +455,8 @@ struct BrushPlane {
 	float distanceToPoint;
 	glm::vec3 normal;
 	glm::vec3 pointOnPlane;
+	glm::vec3 pointOnPlane2;
+	glm::vec3 pointOnPlane3;
 };
 
 BrushPlane brushFaceToPlane(BrushFace& brushFace){
@@ -474,6 +476,8 @@ BrushPlane brushFaceToPlane(BrushFace& brushFace){
 		.distanceToPoint = distanceToPoint,
 		.normal = normal,
 		.pointOnPlane = brushFace.point1,
+		.pointOnPlane2 = brushFace.point2,
+		.pointOnPlane3 = brushFace.point3,
 	};
 	return plane;
 }
@@ -496,7 +500,7 @@ std::optional<glm::vec3> intersectPlanes(BrushPlane& a, BrushPlane& b, BrushPlan
 bool insideBrushPlanes(std::vector<BrushPlane>& brushPlanes, glm::vec3 point){
 	std::cout << "\ninsideBrushPlanes" << std::endl;
 	for (auto& plane : brushPlanes){
-        float projection = glm::dot(plane.normal, point - plane.pointOnPlane);
+    float projection = glm::dot(plane.normal, point - plane.pointOnPlane);
 		bool insidePlane = projection >= 0.f;
 
 		std::cout << "insideBrushPlanes: plane point = " << print(plane.pointOnPlane) << " normal = " << print(plane.normal) << ", distanceToPoint = " << plane.distanceToPoint << ", point = " << print(point) + ",dp = " << projection << ", insidePlane = " << insidePlane << std::endl;
@@ -506,6 +510,7 @@ bool insideBrushPlanes(std::vector<BrushPlane>& brushPlanes, glm::vec3 point){
 	}
 	return true;
 }
+
 std::vector<glm::vec3> getAllIntersections(Brush& brush, bool includeAll, std::vector<bool>& isInsidePlanes){
 	std::vector<BrushPlane> brushPlanes;
 	for (auto& brushFace : brush.brushFaces){
@@ -665,6 +670,7 @@ std::vector<Triangle> triangulateFace(FaceVertexAssignment& faceAssignment) {
 MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices);
 ModelDataCore loadModelCoreBrush(std::string modelPath){
 	std::vector<glm::vec3> debugPoints;
+  std::vector<std::optional<glm::vec3>> debugPointsTo;
 	std::vector<glm::vec3> debugColors;
 
   std::string brushModel = "worldspawn";
@@ -682,6 +688,43 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   std::vector<glm::vec2> uvCoords;
 
   for (auto& brush : entity.brushes){
+  	{
+  		std::vector<BrushPlane> brushPlanes;
+			for (auto& brushFace : brush.brushFaces){
+				auto brushPlane = brushFaceToPlane(brushFace);
+				brushPlanes.push_back(brushPlane);
+			}
+			//struct BrushPlane {
+			//	float distanceToPoint;
+			//	glm::vec3 normal;
+			//	glm::vec3 pointOnPlane;
+			//}
+			for(auto& brushPlane : brushPlanes){
+
+				auto pointOne = brushPlane.pointOnPlane;
+				auto pointTwo = brushPlane.pointOnPlane2;
+				auto pointThree = brushPlane.pointOnPlane3;
+
+				auto midpoint = (pointOne + pointTwo + pointThree) / 3.f;;
+
+				debugPoints.push_back(midpoint);
+				debugPointsTo.push_back(midpoint + brushPlane.normal);
+				debugColors.push_back(glm::vec3(0.f, 1.f, 1.f));
+
+				debugPoints.push_back(pointOne);
+				debugPointsTo.push_back(pointTwo);
+				debugColors.push_back(glm::vec3(0.f, 0.f, 1.f));
+
+				debugPoints.push_back(pointOne);
+				debugPointsTo.push_back(pointThree);
+				debugColors.push_back(glm::vec3(0.f, 0.f, 1.f));
+
+				debugPoints.push_back(pointTwo);
+				debugPointsTo.push_back(pointThree);
+				debugColors.push_back(glm::vec3(0.f, 0.f, 1.f));
+			}
+
+  	}
  		std::vector<bool> isForced;
   	auto candidateVertices = getAllIntersections(brush, false, isForced);
 
@@ -692,6 +735,7 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   			debugPoints.push_back(vertex);
   			auto isInside = isForced.at(i);
   			debugColors.push_back(isInside ? glm::vec3(1.f, 1.f, 1.f) : glm::vec3(0.f, 1.f, 0.f));
+ 			  debugPointsTo.push_back(std::nullopt);
   		}  		
   	}
 
@@ -746,7 +790,7 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
     .loadedRoot = "test",
   };
 
- 	setDebugPoints(debugPoints, debugColors);
+ 	setDebugPoints(debugPoints, debugPointsTo, debugColors);
 
   return modelDataCore2;
 }
