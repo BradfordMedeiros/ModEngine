@@ -501,7 +501,7 @@ bool insideBrushPlanes(std::vector<BrushPlane>& brushPlanes, glm::vec3 point){
 	std::cout << "\ninsideBrushPlanes" << std::endl;
 	for (auto& plane : brushPlanes){
     float projection = glm::dot(plane.normal, point - plane.pointOnPlane);
-		bool insidePlane = projection >= 0.f;
+		bool insidePlane = projection >= (-1 * EPSILON);
 
 		std::cout << "insideBrushPlanes: plane point = " << print(plane.pointOnPlane) << " normal = " << print(plane.normal) << ", distanceToPoint = " << plane.distanceToPoint << ", point = " << print(point) + ",dp = " << projection << ", insidePlane = " << insidePlane << std::endl;
     	if (!insidePlane) {
@@ -708,8 +708,8 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 				auto midpoint = (pointOne + pointTwo + pointThree) / 3.f;;
 
 				debugPoints.push_back(midpoint);
-				debugPointsTo.push_back(midpoint + brushPlane.normal);
-				debugColors.push_back(glm::vec3(0.f, 1.f, 1.f));
+				debugPointsTo.push_back(midpoint + (glm::normalize(brushPlane.normal) * 10.f));
+				debugColors.push_back(glm::vec3(1.f, 0.f, 0.f));
 
 				debugPoints.push_back(pointOne);
 				debugPointsTo.push_back(pointTwo);
