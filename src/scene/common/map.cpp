@@ -615,7 +615,7 @@ std::vector<FaceVertexAssignment> assignVerticesToFaces(std::vector<BrushFace>& 
         // Pick vertices that lie on the plane of this face
         for (auto& v : candidateVertices) {
             float distance = glm::dot(brushPlane.normal, v) + brushPlane.distanceToPoint; // plane equation
-            if (fabs(distance) < 0.001f) { // tolerance for floating point
+            if (fabs(distance) < EPSILON) { // tolerance for floating point
                 vertsOnFace.push_back(VertexWithData {
                 	.pos = v,
                 	.uv = calculateUv(face, brushPlane, v),
@@ -623,7 +623,7 @@ std::vector<FaceVertexAssignment> assignVerticesToFaces(std::vector<BrushFace>& 
             }
         }
 
-        sortVerticesCCW(vertsOnFace, brushPlane.normal);
+        sortVerticesCCW(vertsOnFace, -1.f * brushPlane.normal);
 
         assignments.push_back(FaceVertexAssignment{ 
         	.face = &face, 
