@@ -290,3 +290,5 @@ void disposeTempBufferedData(LineData& lineData){
   removeTempShapeData(lineData);
   removeTempLines(lineData);
 }
+
+

@@ -1133,6 +1133,12 @@ void onFramebufferSizeChange(GLFWwindow* window, int width, int height){
   updateFramebufferWindowSizeChange(renderingResources.framebuffers, state.resolution.x, state.resolution.y);
 }; 
 
+
+std::vector<glm::vec3> debugPoints;
+void setDebugPoints(std::vector<glm::vec3> points){
+  debugPoints = points;
+}
+
 void onGLFWEerror(int error, const char* description){
   std::cerr << "Error: " << description << std::endl;
 }
@@ -2084,6 +2090,13 @@ int main(int argc, char* argv[]){
 
     resetReservedId();
     disposeTempBufferedData(lineData);
+
+    for (auto& point : debugPoints){
+      addLineNextCycle(point, point + glm::vec3(0.f, 5.f, 0.f), false, -1, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, std::nullopt);
+      addLineNextCycle(point, point + glm::vec3(5.f, 0.f, 0.f), false, -1, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, std::nullopt);
+      addLineNextCycle(point, point + glm::vec3(0.f, 0.f, -5.f), false, -1, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, std::nullopt);
+    }
+
     doRemoveQueuedRemovals();
     doUnloadScenes();
     registerStatistics();

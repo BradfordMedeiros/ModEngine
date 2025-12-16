@@ -2,6 +2,8 @@
 
 std::string readFileOrPackage(std::string filepath);
 std::string serializeAttributeValue(AttributeValue& value);
+void setDebugPoints(std::vector<glm::vec3> points);
+
 const float EPSILON = 0.001f;
 
 struct ParsedEntity {
@@ -657,6 +659,8 @@ std::vector<Triangle> triangulateFace(FaceVertexAssignment& faceAssignment) {
 
 MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices);
 ModelDataCore loadModelCoreBrush(std::string modelPath){
+	std::vector<glm::vec3> debugPoints;
+
   std::string brushModel = "worldspawn";
 
   std::cout << "loadModelCoreBrush: " << modelPath << ", model = " << brushModel << std::endl;
@@ -673,6 +677,11 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 
   for (auto& brush : entity.brushes){
   	auto candidateVertices = getAllIntersections(brush);
+
+  	for (auto& vertex : candidateVertices){
+  		debugPoints.push_back(vertex);
+  	}
+
 
   	std::cout << "candidateVertices: size = " << candidateVertices.size() << std::endl;
 
@@ -724,5 +733,8 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
     },
     .loadedRoot = "test",
   };
+
+ 	setDebugPoints(debugPoints);
+
   return modelDataCore2;
 }
