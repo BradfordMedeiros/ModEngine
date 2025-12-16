@@ -1135,8 +1135,11 @@ void onFramebufferSizeChange(GLFWwindow* window, int width, int height){
 
 
 std::vector<glm::vec3> debugPoints;
-void setDebugPoints(std::vector<glm::vec3> points){
+std::vector<glm::vec3> debugPointsColors;
+void setDebugPoints(std::vector<glm::vec3> points, std::vector<glm::vec3> colors){
   debugPoints = points;
+  debugPointsColors = colors;
+  modassert(debugPoints.size() == debugPointsColors.size(), "setDebugPoints differing sizes");
 }
 
 void onGLFWEerror(int error, const char* description){
@@ -2091,10 +2094,12 @@ int main(int argc, char* argv[]){
     resetReservedId();
     disposeTempBufferedData(lineData);
 
-    for (auto& point : debugPoints){
-      addLineNextCycle(point, point + glm::vec3(0.f, 5.f, 0.f), false, -1, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, std::nullopt);
-      addLineNextCycle(point, point + glm::vec3(5.f, 0.f, 0.f), false, -1, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, std::nullopt);
-      addLineNextCycle(point, point + glm::vec3(0.f, 0.f, -5.f), false, -1, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, std::nullopt);
+    for (int i = 0; i < debugPoints.size(); i++){
+      auto point = debugPoints.at(i);
+      auto color = debugPointsColors.at(i);
+      addLineNextCycle(point, point + glm::vec3(0.f, 5.f, 0.f), false, -1, glm::vec4(color.r, color.g, color.b, 1.f), std::nullopt, std::nullopt);
+      addLineNextCycle(point, point + glm::vec3(5.f, 0.f, 0.f), false, -1, glm::vec4(color.r, color.g, color.b, 1.f), std::nullopt, std::nullopt);
+      addLineNextCycle(point, point + glm::vec3(0.f, 0.f, -5.f), false, -1, glm::vec4(color.r, color.g, color.b, 1.f), std::nullopt, std::nullopt);
     }
 
     doRemoveQueuedRemovals();

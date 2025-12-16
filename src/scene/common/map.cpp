@@ -2,7 +2,7 @@
 
 std::string readFileOrPackage(std::string filepath);
 std::string serializeAttributeValue(AttributeValue& value);
-void setDebugPoints(std::vector<glm::vec3> points);
+void setDebugPoints(std::vector<glm::vec3> points, std::vector<glm::vec3> colors);
 
 const float EPSILON = 0.001f;
 
@@ -506,7 +506,7 @@ bool insideBrushPlanes(std::vector<BrushPlane>& brushPlanes, glm::vec3 point){
 	}
 	return true;
 }
-std::vector<glm::vec3> getAllIntersections(Brush& brush){
+std::vector<glm::vec3> getAllIntersections(Brush& brush, bool includeAll, std::vector<bool>& isInsidePlanes){
 	std::vector<BrushPlane> brushPlanes;
 	for (auto& brushFace : brush.brushFaces){
 		auto brushPlane = brushFaceToPlane(brushFace);
@@ -520,8 +520,13 @@ std::vector<glm::vec3> getAllIntersections(Brush& brush){
 				auto intersection = intersectPlanes(brushPlanes.at(i), brushPlanes.at(j), brushPlanes.at(k));
 				if (intersection.has_value()){
 					auto insidePlane = insideBrushPlanes(brushPlanes, intersection.value());
-					if (insidePlane){
+					if (includeAll){
 						candidateVertices.push_back(intersection.value());
+						isInsidePlanes.push_back(insidePlane);;
+					}else{
+						if (insidePlane){
+							candidateVertices.push_back(intersection.value());
+						}
 					}
 				}
 			}
@@ -660,6 +665,7 @@ std::vector<Triangle> triangulateFace(FaceVertexAssignment& faceAssignment) {
 MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices);
 ModelDataCore loadModelCoreBrush(std::string modelPath){
 	std::vector<glm::vec3> debugPoints;
+	std::vector<glm::vec3> debugColors;
 
   std::string brushModel = "worldspawn";
 
@@ -676,12 +682,18 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   std::vector<glm::vec2> uvCoords;
 
   for (auto& brush : entity.brushes){
-  	auto candidateVertices = getAllIntersections(brush);
+ 		std::vector<bool> isForced;
+  	auto candidateVertices = getAllIntersections(brush, false, isForced);
 
-  	for (auto& vertex : candidateVertices){
-  		debugPoints.push_back(vertex);
+  	{
+  		auto allVertices = getAllIntersections(brush, true, isForced);
+  		for (int i = 0; i < allVertices.size(); i++){
+  			auto& vertex = allVertices.at(i);
+  			debugPoints.push_back(vertex);
+  			auto isInside = isForced.at(i);
+  			debugColors.push_back(isInside ? glm::vec3(1.f, 1.f, 1.f) : glm::vec3(0.f, 1.f, 0.f));
+  		}  		
   	}
-
 
   	std::cout << "candidateVertices: size = " << candidateVertices.size() << std::endl;
 
@@ -734,7 +746,7 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
     .loadedRoot = "test",
   };
 
- 	setDebugPoints(debugPoints);
+ 	setDebugPoints(debugPoints, debugColors);
 
   return modelDataCore2;
 }
