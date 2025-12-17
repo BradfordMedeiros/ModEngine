@@ -3,6 +3,7 @@
 std::string readFileOrPackage(std::string filepath);
 std::string serializeAttributeValue(AttributeValue& value);
 void setDebugPoints(std::vector<glm::vec3> points, std::vector<std::optional<glm::vec3>> pointsTo, std::vector<glm::vec3> colors);
+MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indexs, std::string* texture);
 
 const float EPSILON = 0.001f;
 
@@ -426,26 +427,8 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 	compileBrushes(mapData, rawMapContent, "./build/temp.brush");
 }
 
-void addPointsToSimpleMesh(std::vector<glm::vec3>& points, std::vector<glm::vec2>& _uvCoords,  std::vector<unsigned int>& _indexs, bool addUvs){
+void addPointsToSimpleMesh(std::vector<glm::vec3>& points, std::vector<unsigned int>& _indexs){
   for (int i = 0; i < points.size(); i++){
-  	int remainder = i % 6;
-  	if (addUvs){
-  		if (remainder == 0){
-    	  _uvCoords.push_back(glm::vec2(0.f, 0.f));
-  		}else if (remainder == 1){
-    	  _uvCoords.push_back(glm::vec2(0.f, 1.f));
-  		}else if (remainder == 2){
-    	  _uvCoords.push_back(glm::vec2(1.f, 0.f));
-  		}else if (remainder == 3){
-    	  _uvCoords.push_back(glm::vec2(1.f, 0.f));
-  		}else if (remainder == 4){
-    	  _uvCoords.push_back(glm::vec2(0.f, 1.f));
-  		}else if (remainder == 5){
-    	  _uvCoords.push_back(glm::vec2(1.f, 1.f));
-  		}else{
-  			modassert(false, "programming error %");
-  		}
-  	}
     _indexs.push_back(i);
   }
 }
@@ -642,6 +625,8 @@ struct Triangle {
     glm::vec2 vertex0Uv;
     glm::vec2 vertex1Uv;
     glm::vec2 vertex2Uv;
+
+    std::string* texture;
 };
 
 std::vector<Triangle> triangulateFace(FaceVertexAssignment& faceAssignment) {
@@ -661,13 +646,19 @@ std::vector<Triangle> triangulateFace(FaceVertexAssignment& faceAssignment) {
         	.vertex0Uv = faceAssignment.vertices.at(0).uv,
         	.vertex1Uv = faceAssignment.vertices.at(i).uv,
         	.vertex2Uv = faceAssignment.vertices.at(i + 1).uv,
+
+        	.texture = &faceAssignment.face -> texture,
         });
     }
     return triangles;
 }
 
+struct MapRawValue {
+	std::vector<glm::vec3> points;
+	std::vector<glm::vec2> uvCoords;
+};
 
-MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices);
+
 ModelDataCore loadModelCoreBrush(std::string modelPath){
 	std::vector<glm::vec3> debugPoints;
   std::vector<std::optional<glm::vec3>> debugPointsTo;
@@ -684,8 +675,7 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 
   Entity& entity = *entities.at(0);
 
-  std::vector<glm::vec3> points;
-  std::vector<glm::vec2> uvCoords;
+  std::unordered_map<std::string, MapRawValue> meshForTextures;
 
   for (auto& brush : entity.brushes){
   	{
@@ -744,38 +734,38 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   	auto faceVertices = assignVerticesToFaces(brush.brushFaces, candidateVertices);
 
   	std::cout << "face vertices size: " << faceVertices.size() << std::endl;
+
+
   	for(auto& faceVertice : faceVertices){
 	    std::cout << "Face has " << faceVertice.vertices.size() << " vertices\n";
 
 	  	auto triangles = triangulateFace(faceVertice);
+
 	  	for (auto& triangle : triangles){
-		  	points.push_back(triangle.vertex0);
-		  	uvCoords.push_back(triangle.vertex0Uv);
+	  		auto texture = std::string("../gameresources/textures/") + *triangle.texture + ".jpg";
+	  		if (meshForTextures.find(texture) == meshForTextures.end()){
+	  			meshForTextures[texture] = MapRawValue{};
+	  		}
 
-		  	points.push_back(triangle.vertex1);
-		  	uvCoords.push_back(triangle.vertex1Uv);
+	  		auto& meshForTexture = meshForTextures.at(texture);
+		  	meshForTexture.points.push_back(triangle.vertex0);
+		  	meshForTexture.uvCoords.push_back(triangle.vertex0Uv);
 
-		  	points.push_back(triangle.vertex2);
-		  	uvCoords.push_back(triangle.vertex2Uv);
+		  	meshForTexture.points.push_back(triangle.vertex1);
+		  	meshForTexture.uvCoords.push_back(triangle.vertex1Uv);
+
+		  	meshForTexture.points.push_back(triangle.vertex2);
+		  	meshForTexture.uvCoords.push_back(triangle.vertex2Uv);
 	  	}
   	}
 
   }
 
   
-  std::cout << "size points: " << points.size() << std::endl;
-
-  std::vector<unsigned int> indexs;
-  addPointsToSimpleMesh(points, uvCoords, indexs, false);
-  modassert(points.size() == uvCoords.size(), "unexpected diff in points and uv coords size");
-
-  // Just collect all similar textures, render them as separate meshes
-
-  auto generatedMesh = generateMeshRaw(points, uvCoords, indexs);
   ModelDataCore modelDataCore2 {
     .modelData = ModelData {
-      .meshIdToMeshData = {{ 0, generatedMesh }},
-      .nodeToMeshId = {{ 0, { 0 }}},
+      .meshIdToMeshData = {},
+      .nodeToMeshId = {},
       .childToParent = {},
       .nodeTransform = {
         { 0, Transformation {
@@ -789,6 +779,24 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
     },
     .loadedRoot = "test",
   };
+
+  int meshId = 0;
+  std::vector<int> meshIds;
+  for (auto& [texturePath, meshForTexture] : meshForTextures){
+  	std::vector<unsigned int> indexs;
+  	addPointsToSimpleMesh(meshForTexture.points, indexs);
+  	modassert(meshForTexture.points.size() == meshForTexture.uvCoords.size(), "unexpected diff in points and uv coords size");
+  	
+  	std::string texture = texturePath;
+  	auto generatedMesh = generateMeshRaw(meshForTexture.points, meshForTexture.uvCoords, indexs, &texture);
+  	meshIds.push_back(meshId);
+  	modelDataCore2.modelData.meshIdToMeshData[meshId] = generatedMesh;
+   	
+  	meshId++;
+  }
+ 	modelDataCore2.modelData.nodeToMeshId[0] = meshIds;
+
+ 	std::cout << "loadModelCoreBrush num meshes: " << modelDataCore2.modelData.nodeToMeshId.at(0).size() << std::endl;
 
  	setDebugPoints(debugPoints, debugPointsTo, debugColors);
 

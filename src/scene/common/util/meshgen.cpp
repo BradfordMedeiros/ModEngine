@@ -177,7 +177,7 @@ MeshData generateMesh(std::vector<glm::vec3>& face, std::vector<glm::vec3>& poin
   return meshdata;
 }
 
-MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices){
+MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices, std::string* texture){
   modassert(indices.size() % 3 == 0, "indices must be multiple of 3");
   modassert(verts.size() == uvCoords.size(), "verts must be same size of uvCoords");
 
@@ -189,7 +189,7 @@ MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& 
   MeshData meshdata {
     .vertices = vertices,
     .indices = indices,
-    .diffuseTexturePath = "./res/textures/wood.jpg",
+    .diffuseTexturePath = texture ? (*texture) : "./res/textures/wood.jpg",
     .hasDiffuseTexture = true,
     .emissionTexturePath = "",
     .hasEmissionTexture = false,

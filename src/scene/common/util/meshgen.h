@@ -10,6 +10,6 @@
 
 Vertex createVertex(glm::vec3 position, glm::vec2 texCoords);
 MeshData generateMesh(std::vector<glm::vec3>& face, std::vector<glm::vec3>& points);
-MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indexs);
+MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indexs, std::string* texture);
 
 #endif
