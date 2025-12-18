@@ -658,6 +658,9 @@ struct MapRawValue {
 	std::vector<glm::vec2> uvCoords;
 };
 
+glm::vec3 changeCoord(glm::vec3 pos){
+	return glm::vec3(pos.x, pos.z, -1 * pos.y);
+}
 
 ModelDataCore loadModelCoreBrush(std::string modelPath){
 	std::vector<glm::vec3> debugPoints;
@@ -748,13 +751,13 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 	  		}
 
 	  		auto& meshForTexture = meshForTextures.at(texture);
-		  	meshForTexture.points.push_back(triangle.vertex0);
+		  	meshForTexture.points.push_back(changeCoord(triangle.vertex0));
 		  	meshForTexture.uvCoords.push_back(triangle.vertex0Uv);
 
-		  	meshForTexture.points.push_back(triangle.vertex1);
+		  	meshForTexture.points.push_back(changeCoord(triangle.vertex1));
 		  	meshForTexture.uvCoords.push_back(triangle.vertex1Uv);
 
-		  	meshForTexture.points.push_back(triangle.vertex2);
+		  	meshForTexture.points.push_back(changeCoord(triangle.vertex2));
 		  	meshForTexture.uvCoords.push_back(triangle.vertex2Uv);
 	  	}
   	}
