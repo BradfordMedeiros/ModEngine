@@ -554,33 +554,91 @@ void sortVerticesCCW(std::vector<VertexWithData>& vertices, const glm::vec3& nor
   });
 }
 
-glm::vec2 calculateUv(BrushFace& brushFace, BrushPlane& brushPlane, glm::vec3 vertex) {
-    // Plane normal
 
-		vertex.x /= 1024;
-		vertex.y /= 1024;
-		vertex.z /= 1024;
+glm::vec2 calculateUv(BrushFace& brushFace, BrushPlane& brushPlane, glm::vec3 vertex) {
+    vertex.x /= 1000;
+    vertex.y /= 1000;
+    vertex.z /= 1000;
 
     glm::vec3 N = brushPlane.normal;
 
-    // Pick a stable "up" vector to avoid degeneracy
-    glm::vec3 up = (fabs(N.z) > 0.999f) ? glm::vec3(0, 1, 0) : glm::vec3(0, 0, 1);
+    // stable up vector
+    glm::vec3 up = fabs(N.z) > 0.999f ? glm::vec3(0, 1, 0) : glm::vec3(0, 0, 1);
 
-    // Construct local U/V axes on the plane
-    glm::vec3 U = glm::normalize(glm::cross(up, N));
-    glm::vec3 V = glm::normalize(glm::cross(N, U));
+    // axes on the plane
+        glm::vec3 local = vertex - brushPlane.pointOnPlane;
 
-    // Project the vertex onto the plane axes
+
+    glm::vec3 U = glm::normalize(glm::cross(N, up));
+    glm::vec3 V = glm::normalize(glm::cross(U, N));
+
+   glm::vec3 absN = glm::abs(N);
+
+   /*
+   if (absN.x > absN.y && absN.x > absN.z) {
+        // ±X face
+        U = glm::vec3(0, 0, 1); // Z
+        V = glm::vec3(0, 1, 0); // Y
+    }
+    else if (absN.y > absN.z) {
+        // ±Y face
+        U = glm::vec3(1, 0, 0); // X
+        V = glm::vec3(0, 0, 1); // Z
+    }
+    else {
+        // ±Z face
+        U = glm::vec3(1, 0, 0); // X
+        V = glm::vec3(0, 1, 0); // Y
+    }*/
+    if (absN.x > absN.y && absN.x > absN.z) {
+        // X faces
+        if (N.x > 0) {
+            U = glm::vec3(0, 1, 0); // -Z
+            V = glm::vec3(0, 0, 1); // Y
+        } else {
+            U = glm::vec3(0, 1, 0); // +Z
+		        V = glm::vec3(0, 0, 1); // Y
+        }
+    }
+    else if (absN.y > absN.z) {
+        // Y faces
+        U = glm::vec3(1, 0, 0); // X
+        V = glm::vec3(0, 0, 1); // Z
+    }
+    else {
+        // Z faces
+        U = glm::vec3(1, 0, 0); // X
+        V = glm::vec3(0, 1, 0); // Y
+    }
+
+    // project vertex onto axes
     float u = glm::dot(vertex, U);
     float v = glm::dot(vertex, V);
 
-    // Apply TrenchBroom scale and shift exactly as in the .map file
-    // scale = world units per texture repeat
-    // shift = world-space offset along the axis
-    u = (u + brushFace.uvOffset.x) / brushFace.textureScale.x;
-    v = (v + brushFace.uvOffset.y) / brushFace.textureScale.y;
+    // rotate in degrees (TrenchBroom style)
+    float angleRad = glm::radians(brushFace.rotation);
+    float cosA = cos(angleRad);
+    float sinA = sin(angleRad);
+		float uRot =  cosA * u + sinA * v;
+		float vRot = -sinA * u + cosA * v;
+
+    // scale and offset
+    //u = (uRot + brushFace.uvOffset.x) / brushFace.textureScale.x;
+    //v = (vRot + brushFace.uvOffset.y) / brushFace.textureScale.y;
+
+    //u = (uRot + brushFace.uvOffset.x) / brushFace.textureScale.x;
+    //v = (vRot + brushFace.uvOffset.y) / brushFace.textureScale.y;
+
+    //u = (u + brushFace.uvOffset.x) / brushFace.textureScale.x;
+    //v = (v + brushFace.uvOffset.y) / brushFace.textureScale.y;
+ 		
+ 		std::cout << "uv offset: " << brushFace.uvOffset.x << ", " << brushFace.uvOffset.y << std::endl;
+ 		u = (uRot / brushFace.textureScale.x) + (brushFace.uvOffset.x / 1000.f);
+    v = (vRot / brushFace.textureScale.y) + (brushFace.uvOffset.y / 1000.f);
 
     return glm::vec2(u, v);
+
+
 }
 
 struct FaceVertexAssignment {
