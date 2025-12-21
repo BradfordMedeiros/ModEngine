@@ -3,7 +3,8 @@
 std::string readFileOrPackage(std::string filepath);
 std::string serializeAttributeValue(AttributeValue& value);
 void setDebugPoints(std::vector<glm::vec3> points, std::vector<std::optional<glm::vec3>> pointsTo, std::vector<glm::vec3> colors);
-MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indexs, std::string* texture);
+MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indexs, std::string* texture, std::string* normalTexture);
+std::optional<std::string> lookupNormalTexture(std::string textureName);
 
 const float EPSILON = 0.001f;
 
@@ -612,8 +613,8 @@ glm::vec2 calculateUv(BrushFace& brushFace, BrushPlane& brushPlane, glm::vec3 ve
     }
 
     // project vertex onto axes
-    float u = glm::dot(vertex, U);
-    float v = glm::dot(vertex, V);
+    float u = glm::dot(vertex, U)  + (brushFace.uvOffset.x);
+    float v = glm::dot(vertex, V)  + (brushFace.uvOffset.y / 1000.f);
 
     // rotate in degrees (TrenchBroom style)
     float angleRad = glm::radians(brushFace.rotation);
@@ -633,8 +634,8 @@ glm::vec2 calculateUv(BrushFace& brushFace, BrushPlane& brushPlane, glm::vec3 ve
     //v = (v + brushFace.uvOffset.y) / brushFace.textureScale.y;
  		
  		std::cout << "uv offset: " << brushFace.uvOffset.x << ", " << brushFace.uvOffset.y << std::endl;
- 		u = (uRot / brushFace.textureScale.x) + (brushFace.uvOffset.x / 1000.f);
-    v = (vRot / brushFace.textureScale.y) + (brushFace.uvOffset.y / 1000.f);
+ 		u = (uRot * brushFace.textureScale.x);
+    v = (vRot * brushFace.textureScale.y);
 
     return glm::vec2(u, v);
 
@@ -849,7 +850,9 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   	modassert(meshForTexture.points.size() == meshForTexture.uvCoords.size(), "unexpected diff in points and uv coords size");
   	
   	std::string texture = texturePath;
-  	auto generatedMesh = generateMeshRaw(meshForTexture.points, meshForTexture.uvCoords, indexs, &texture);
+  	auto normalTexture = lookupNormalTexture(texture);
+  	modassert(normalTexture.has_value(), std::string("texture does not exist: ") + texture);
+  	auto generatedMesh = generateMeshRaw(meshForTexture.points, meshForTexture.uvCoords, indexs, &texture, normalTexture.has_value() ? &normalTexture.value() : NULL);
   	meshIds.push_back(meshId);
   	modelDataCore2.modelData.meshIdToMeshData[meshId] = generatedMesh;
    	
@@ -859,7 +862,7 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 
  	std::cout << "loadModelCoreBrush num meshes: " << modelDataCore2.modelData.nodeToMeshId.at(0).size() << std::endl;
 
- 	setDebugPoints(debugPoints, debugPointsTo, debugColors);
+ 	//setDebugPoints(debugPoints, debugPointsTo, debugColors);
 
   return modelDataCore2;
 }

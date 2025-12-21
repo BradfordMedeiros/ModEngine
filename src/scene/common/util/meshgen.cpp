@@ -14,15 +14,19 @@ struct MeshgenConfig {
 Vertex createVertex(glm::vec3 position, glm::vec2 texCoords){
   Vertex vertex {
     .position = position,
-    .normal = glm::normalize(position),  // TODO - calculate normal properly
+    .normal = glm::vec3(0.f, 1.f, 0.f),  // calculate these two correctly
+    .tangent = glm::vec3(1.f, 0.f, 0.f),
+    .color = glm::vec3(0.f, 0.f, 0.f),
     .texCoords = texCoords,
   };
   for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
     vertex.boneIndexes[i] = 0;
     vertex.boneWeights[i] = 0;
   }
+
   return vertex;
 }
+
 
 struct MeshInterpolated {
   glm::vec3 position;
@@ -177,7 +181,7 @@ MeshData generateMesh(std::vector<glm::vec3>& face, std::vector<glm::vec3>& poin
   return meshdata;
 }
 
-MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices, std::string* texture){
+MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices, std::string* texture, std::string* normalTexture){
   modassert(indices.size() % 3 == 0, "indices must be multiple of 3");
   modassert(verts.size() == uvCoords.size(), "verts must be same size of uvCoords");
 
@@ -195,10 +199,16 @@ MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& 
     .hasEmissionTexture = false,
     .opacityTexturePath = "",
     .hasOpacityTexture = false,
-    .normalTexturePath = "../gameresources/build/textures/arcade/trench/city/building_faces/building_13.normal.jpg",
+    .normalTexturePath = "",
     .hasNormalTexture = false,
     .boundInfo = getBounds(vertices),
     .bones = {},
   };
+
+  if (normalTexture){
+    meshdata.hasNormalTexture = true;
+    meshdata.normalTexturePath = *normalTexture;
+  }
+
   return meshdata;
 }
