@@ -1361,13 +1361,13 @@ int main(int argc, char* argv[]){
 
           attributes.push_back(GameobjAttributeOpts {
             .field = "scale",
-            .attributeValue = glm::vec3(0.2f, 0.2f, 0.2f),
+            .attributeValue = glm::vec3(0.1f, 0.1f, 0.1f),
           });
 
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "position",
-            .attributeValue = glm::vec3(68.32f, -22.1f, 166.6f),
-          });
+          //attributes.push_back(GameobjAttributeOpts {
+          //  .field = "position",
+          //  .attributeValue = glm::vec3(68.32f, -22.1f, 166.6f),
+          //});
 
           attributes.push_back(GameobjAttributeOpts {
             .field = "physics_shape",

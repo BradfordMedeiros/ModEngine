@@ -555,8 +555,162 @@ void sortVerticesCCW(std::vector<VertexWithData>& vertices, const glm::vec3& nor
   });
 }
 
+static const glm::vec3 quakeBaseAxes[6][3] = {
+    {{ 0,  0,  1}, { 1,  0,  0}, { 0, -1,  0}}, // floor
+    {{ 0,  0, -1}, { 1,  0,  0}, { 0, -1,  0}}, // ceiling
+    {{ 1,  0,  0}, { 0,  1,  0}, { 0,  0, -1}}, // east
+    {{-1,  0,  0}, { 0,  1,  0}, { 0,  0, -1}}, // west
+    {{ 0,  1,  0}, { 1,  0,  0}, { 0,  0, -1}}, // north
+    {{ 0, -1,  0}, { 1,  0,  0}, { 0,  0, -1}}  // south
+};
 
-glm::vec2 calculateUv(BrushFace& brushFace, BrushPlane& brushPlane, glm::vec3 vertex) {
+int chooseQuakeAxis(const glm::vec3& n)
+{
+    float ax = fabs(n.x);
+    float ay = fabs(n.y);
+    float az = fabs(n.z);
+
+    if (az >= ax && az >= ay)
+        return (n.z > 0) ? 0 : 1;
+    if (ax >= ay)
+        return (n.x > 0) ? 2 : 3;
+    return (n.y > 0) ? 4 : 5;
+}
+
+void buildQuakeTexAxes(
+    glm::vec3& faceNormal,
+    float rotationDegrees,
+    float scaleX,
+    float scaleY,
+    glm::vec3* _U,
+    glm::vec3* _V
+)
+{
+    int axis = chooseQuakeAxis(faceNormal);
+
+    glm::vec3 U = quakeBaseAxes[axis][1];
+    glm::vec3 V = quakeBaseAxes[axis][2];
+
+    // --- rotation (2D in-plane, NOT generic 3D) ---
+    float ang = glm::radians(rotationDegrees);
+    float s = sinf(ang);
+    float c = cosf(ang);
+
+    glm::vec3 U2 =  U * c - V * s;
+    glm::vec3 V2 =  U * s + V * c;
+
+    U = U2;
+    V = V2;
+
+    U /= scaleX;
+    V /= scaleY;
+
+    *_U = U;
+    *_V = V;
+}
+
+
+glm::vec2 calculateUv(BrushFace& brushFace, BrushPlane& brushPlane,  glm::vec3 vertex) {
+   	float textureWidth = 1000.f;
+   	float textureHeight = 1000.f;
+
+
+   	glm::vec3 U(0.f, 0.f, 0.f);
+   	glm::vec3 V(0.f, 0.f, 0.f);
+
+   	auto flippedNormal = -1.f * brushPlane.normal;
+   	buildQuakeTexAxes(brushPlane.normal, brushFace.rotation, brushFace.textureScale.x, brushFace.textureScale.y, &U, &V);
+
+    float u = glm::dot(vertex, U) + brushFace.uvOffset.x;
+    float v = glm::dot(vertex, V) + brushFace.uvOffset.y;
+
+    u /= textureWidth;
+    v /= textureHeight;
+
+    return glm::vec2(u, -1.f * v);
+
+}
+
+
+
+glm::vec2 calculateUv2(BrushFace& brushFace, BrushPlane& brushPlane,  glm::vec3 vertex) {
+    glm::vec3 N = brushPlane.normal;
+
+    // stable up vector
+    glm::vec3 up = fabs(N.z) > 0.999f ? glm::vec3(0, 1, 0) : glm::vec3(0, 0, 1);
+
+    // axes on the plane
+        glm::vec3 local = vertex - brushPlane.pointOnPlane;
+
+
+    glm::vec3 U = glm::normalize(glm::cross(N, up));
+    glm::vec3 V = glm::normalize(glm::cross(U, N));
+
+   glm::vec3 absN = glm::abs(N);
+
+   /*
+   if (absN.x > absN.y && absN.x > absN.z) {
+        // ±X face
+        U = glm::vec3(0, 0, 1); // Z
+        V = glm::vec3(0, 1, 0); // Y
+    }
+    else if (absN.y > absN.z) {
+        // ±Y face
+        U = glm::vec3(1, 0, 0); // X
+        V = glm::vec3(0, 0, 1); // Z
+    }
+    else {
+        // ±Z face
+        U = glm::vec3(1, 0, 0); // X
+        V = glm::vec3(0, 1, 0); // Y
+    }*/
+    if (absN.x > absN.y && absN.x > absN.z) {
+        // X faces
+        if (N.x > 0) {
+            U = glm::vec3(0, 1, 0); // -Z
+            V = glm::vec3(0, 0, 1); // Y
+        } else {
+            U = glm::vec3(0, 1, 0); // +Z
+		        V = glm::vec3(0, 0, 1); // Y
+        }
+    }
+    else if (absN.y > absN.z) {
+        // Y faces
+        U = glm::vec3(1, 0, 0); // X
+        V = glm::vec3(0, 0, 1); // Z
+    }
+    else {
+        // Z faces
+        U = glm::vec3(1, 0, 0); // X
+        V = glm::vec3(0, 1, 0); // Y
+    }
+
+    // project vertex onto axes
+    float u = (glm::dot(vertex, U));
+    float v = (glm::dot(vertex, V));
+
+		u /= brushFace.textureScale.x;
+		v /= brushFace.textureScale.y;
+
+		// Apply offset (pixels)
+		u += brushFace.uvOffset.x;
+		v += brushFace.uvOffset.y;
+
+    // rotate in degrees (TrenchBroom style)
+    float angleRad = glm::radians(brushFace.rotation);
+    float cosA = cos(angleRad);
+    float sinA = sin(angleRad);
+		float uRot =  cosA * u + sinA * v;
+		float vRot = -sinA * u + cosA * v;
+
+ 		u = (uRot) / 1000.f; // + uvOffsetX;
+    v = (vRot) / 1000.f; // + uvOffsetY;
+
+
+    return glm::vec2(u, v);
+}
+
+glm::vec2 calculateUvBackup(BrushFace& brushFace, BrushPlane& brushPlane, glm::vec3 vertex) {
     vertex.x /= 1000;
     vertex.y /= 1000;
     vertex.z /= 1000;
@@ -613,8 +767,8 @@ glm::vec2 calculateUv(BrushFace& brushFace, BrushPlane& brushPlane, glm::vec3 ve
     }
 
     // project vertex onto axes
-    float u = glm::dot(vertex, U)  + (brushFace.uvOffset.x);
-    float v = glm::dot(vertex, V)  + (brushFace.uvOffset.y / 1000.f);
+    float u = glm::dot(vertex, U) ;
+    float v = glm::dot(vertex, V) ;
 
     // rotate in degrees (TrenchBroom style)
     float angleRad = glm::radians(brushFace.rotation);
@@ -630,16 +784,23 @@ glm::vec2 calculateUv(BrushFace& brushFace, BrushPlane& brushPlane, glm::vec3 ve
     //u = (uRot + brushFace.uvOffset.x) / brushFace.textureScale.x;
     //v = (vRot + brushFace.uvOffset.y) / brushFace.textureScale.y;
 
-    //u = (u + brushFace.uvOffset.x) / brushFace.textureScale.x;
-    //v = (v + brushFace.uvOffset.y) / brushFace.textureScale.y;
- 		
+    //u = (uRot / brushFace.textureScale.x) + (brushFace.uvOffset.x / 1000.f);
+    //v = (vRot / brushFace.textureScale.y) + (brushFace.uvOffset.y / 1000.f);
+
+    // this works for the most test cases 
+ 		u = (uRot + (brushFace.uvOffset.x / 1000.f)) / brushFace.textureScale.x;
+    v = (vRot + (brushFace.uvOffset.y / 1000.f)) / brushFace.textureScale.y;
+
+    //
+
+
  		std::cout << "uv offset: " << brushFace.uvOffset.x << ", " << brushFace.uvOffset.y << std::endl;
- 		u = (uRot * brushFace.textureScale.x);
-    v = (vRot * brushFace.textureScale.y);
+
+ 		// this works for the left wall, works for basic rotation, and scale, but not with offset
+ 		//u = (uRot / brushFace.textureScale.x); 
+    //v = (vRot / brushFace.textureScale.y);
 
     return glm::vec2(u, v);
-
-
 }
 
 struct FaceVertexAssignment {
@@ -851,7 +1012,7 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   	
   	std::string texture = texturePath;
   	auto normalTexture = lookupNormalTexture(texture);
-  	modassert(normalTexture.has_value(), std::string("texture does not exist: ") + texture);
+  	//modassert(normalTexture.has_value(), std::string("normal for texture does not exist: ") + texture);
   	auto generatedMesh = generateMeshRaw(meshForTexture.points, meshForTexture.uvCoords, indexs, &texture, normalTexture.has_value() ? &normalTexture.value() : NULL);
   	meshIds.push_back(meshId);
   	modelDataCore2.modelData.meshIdToMeshData[meshId] = generatedMesh;
