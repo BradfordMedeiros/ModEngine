@@ -20,6 +20,7 @@ LayerInfo getLayerForId(objid id){
   return layerByName(world, getGameObject(world, id).layer);
 }
 float getLayerFov(LayerInfo& layer){
+  std::cout << "field of view: " << layer.fovRaw << std::endl;
   return layer.fovRaw;
 }
 
