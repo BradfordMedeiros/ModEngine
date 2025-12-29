@@ -47,4 +47,6 @@ struct TextureSizeInfo {
 // Side effect binding the texture
 TextureSizeInfo getTextureSizeInfo(Texture& texture);
 
+TextureSizeInfo loadTextureSizeInfo(std::string textureFilePath);
+
 #endif

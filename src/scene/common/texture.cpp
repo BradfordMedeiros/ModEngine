@@ -1,6 +1,6 @@
 #include "./texture.h"
 
-std::string readFileOrPackage(std::string filepath); // i dont really like directly referencing this here, but...it's ok
+std::string readFileOrPackage(std::string filepath); // no reason to copy the string here
 bool fileExistsFromPackage(std::string path);
 
 unsigned char* stbiloadImage(const char* textureFilePath, int* _textureWidth, int* _textureHeight, int* _numChannels, int forcedChannels){
@@ -288,4 +288,21 @@ Texture loadTextureAtlas(std::vector<std::string> textureFilePaths, std::optiona
     return loadTexture(cacheFileName.value());
   }
   return loadTextureAtlasMaybeWriteCache(textureFilePaths, cacheFileName);
+}
+
+TextureSizeInfo loadTextureSizeInfo(std::string textureFilePath){
+  int textureWidth = 0;
+  int textureHeight = 0;
+  int numChannels = 0;
+  
+  auto textureData = readFileOrPackage(textureFilePath); 
+  int value = stbi_info_from_memory((const unsigned char*)textureData.c_str(), textureData.size(), &textureWidth, &textureHeight, &numChannels);
+  modassert(value != 0, "error loading image");
+
+  TextureSizeInfo sizeInfo {
+    .width = textureWidth,
+    .height = textureHeight,
+  };
+
+  return sizeInfo;
 }

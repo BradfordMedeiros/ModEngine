@@ -5,6 +5,12 @@ std::string serializeAttributeValue(AttributeValue& value);
 void setDebugPoints(std::vector<glm::vec3> points, std::vector<std::optional<glm::vec3>> pointsTo, std::vector<glm::vec3> colors);
 MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indexs, std::string* texture, std::string* normalTexture);
 std::optional<std::string> lookupNormalTexture(std::string textureName);
+TextureSizeInfo loadTextureSizeInfo(std::string textureFilePath);
+
+std::string textureForMapTextureName(std::string mapTexture){
+	auto texture = std::string("../gameresources/textures/") + mapTexture + ".jpg";
+	return texture;
+}
 
 const float EPSILON = 0.001f;
 
@@ -610,11 +616,7 @@ void buildQuakeTexAxes(
 }
 
 
-glm::vec2 calculateUv(BrushFace& brushFace, BrushPlane& brushPlane,  glm::vec3 vertex) {
-   	float textureWidth = 650.f;
-   	float textureHeight = 650.f;
-
-
+glm::vec2 calculateUv(BrushFace& brushFace, BrushPlane& brushPlane,  glm::vec3 vertex, float textureWidth, float textureHeight) {
    	glm::vec3 U(0.f, 0.f, 0.f);
    	glm::vec3 V(0.f, 0.f, 0.f);
 
@@ -641,6 +643,7 @@ std::vector<FaceVertexAssignment> assignVerticesToFaces(std::vector<BrushFace>& 
 
     for (auto& face : faces) {
        	auto brushPlane = brushFaceToPlane(face);
+       	auto textureInfo = loadTextureSizeInfo(textureForMapTextureName(face.texture));
 
         std::vector<VertexWithData> vertsOnFace;
 
@@ -650,7 +653,7 @@ std::vector<FaceVertexAssignment> assignVerticesToFaces(std::vector<BrushFace>& 
             if (fabs(distance) < EPSILON) { // tolerance for floating point
                 vertsOnFace.push_back(VertexWithData {
                 	.pos = v,
-                	.uv = calculateUv(face, brushPlane, v),
+                	.uv = calculateUv(face, brushPlane, v, textureInfo.width, textureInfo.height),
                 });
             }
         }
@@ -710,6 +713,7 @@ struct MapRawValue {
 glm::vec3 changeCoord(glm::vec3 pos){
 	return glm::vec3(pos.x, pos.z, -1 * pos.y);
 }
+
 
 ModelDataCore loadModelCoreBrush(std::string modelPath){
 	std::vector<glm::vec3> debugPoints;
@@ -794,7 +798,7 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 	  	auto triangles = triangulateFace(faceVertice);
 
 	  	for (auto& triangle : triangles){
-	  		auto texture = std::string("../gameresources/textures/") + *triangle.texture + ".jpg";
+	  		auto texture = textureForMapTextureName(*triangle.texture);
 	  		if (meshForTextures.find(texture) == meshForTextures.end()){
 	  			meshForTextures[texture] = MapRawValue{};
 	  		}
