@@ -6,10 +6,20 @@ void setDebugPoints(std::vector<glm::vec3> points, std::vector<std::optional<glm
 MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indexs, std::string* texture, std::string* normalTexture);
 std::optional<std::string> lookupNormalTexture(std::string textureName);
 TextureSizeInfo loadTextureSizeInfo(std::string textureFilePath);
+bool fileExistsFromPackage(std::string filepath);
 
 std::string textureForMapTextureName(std::string mapTexture){
-	auto texture = std::string("../gameresources/textures/") + mapTexture + ".jpg";
-	return texture;
+	auto jpgImage = std::string("../gameresources/textures/") + mapTexture + ".jpg";
+	auto pngImage = std::string("../gameresources/textures/") + mapTexture + ".png";
+
+	if (fileExistsFromPackage(jpgImage)){
+		return jpgImage;
+	}
+	if (fileExistsFromPackage(pngImage)){
+		return pngImage;
+	}
+	modassert(false, std::string("textureForMapTextureName missing image: ") + mapTexture);
+	return "";
 }
 
 const float EPSILON = 0.001f;
