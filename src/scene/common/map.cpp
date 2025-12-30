@@ -725,21 +725,65 @@ glm::vec3 changeCoord(glm::vec3 pos){
 }
 
 
+struct ModelAndPath {
+	std::string brushFile;
+	std::optional<int> entityIndex;
+};
+
+ModelAndPath parseModelPath(std::string modelPath){
+	auto parts = split(modelPath, ',');
+
+	if (parts.size() == 1){
+		auto filename = parts.at(0);
+		return ModelAndPath {
+			.brushFile = parts.at(0),
+			.entityIndex = std::nullopt,
+		};
+	}
+	modassert(parts.size() == 2, "parseModelPath invalid parts size");
+
+	auto realBrushFile = parts.at(0);
+	auto indexPart = parts.at(1);
+	auto entityIndexParts = split(indexPart, '.');
+	modassert(entityIndexParts.size() == 2, "parseModelPath invalid part size");
+
+	return ModelAndPath {
+		.brushFile = realBrushFile,
+		.entityIndex = std::atoi(entityIndexParts.at(0).c_str()),
+	};
+}
+
+std::string print(ModelAndPath& modelpath){
+	std::string data;
+	data += "brushFile = " + modelpath.brushFile + "\n";
+	data += "entityIndex = " + print(modelpath.entityIndex) + "\n";
+	return data;
+}
+
+Entity& getEntityByName(MapData& mapData, const char* name){
+  auto entities = getEntitiesByClassName(mapData, name);
+  modassert(entities.size() == 1, std::string("unexpected number of entities for brush model: " + std::to_string(entities.size())));
+  Entity& entity = *entities.at(0);
+  return entity;
+}
+
+Entity& getEntityByIndex(MapData& mapData, int index){
+	return mapData.entities.at(index);
+}
+
 ModelDataCore loadModelCoreBrush(std::string modelPath){
 	std::vector<glm::vec3> debugPoints;
   std::vector<std::optional<glm::vec3>> debugPointsTo;
 	std::vector<glm::vec3> debugColors;
 
-  std::string brushModel = "worldspawn";
+  std::cout << "loadModelCoreBrush: " << modelPath << std::endl;
 
-  std::cout << "loadModelCoreBrush: " << modelPath << ", model = " << brushModel << std::endl;
-  auto brushDataRaw2 = readFileOrPackage(modelPath);
+  auto parsedPath = parseModelPath(modelPath);
+  std::cout << print(parsedPath ) << std::endl;
 
-  auto mapData = parseMapData(modelPath);
-  auto entities = getEntitiesByClassName(mapData, brushModel.c_str());
-  modassert(entities.size() == 1, std::string("unexpected number of entities for brush model: " + std::to_string(entities.size())));
+  auto mapData = parseMapData(parsedPath.brushFile);
 
-  Entity& entity = *entities.at(0);
+  Entity& entity = parsedPath.entityIndex.has_value() ? getEntityByIndex(mapData, parsedPath.entityIndex.value()) : getEntityByName(mapData, "worldspawn");
 
   std::unordered_map<std::string, MapRawValue> meshForTextures;
 
@@ -750,11 +794,7 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 				auto brushPlane = brushFaceToPlane(brushFace);
 				brushPlanes.push_back(brushPlane);
 			}
-			//struct BrushPlane {
-			//	float distanceToPoint;
-			//	glm::vec3 normal;
-			//	glm::vec3 pointOnPlane;
-			//}
+
 			for(auto& brushPlane : brushPlanes){
 
 				auto pointOne = brushPlane.pointOnPlane;

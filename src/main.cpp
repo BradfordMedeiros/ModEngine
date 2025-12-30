@@ -1308,10 +1308,11 @@ int main(int argc, char* argv[]){
     }*/
 
     std::string filepath =  "./build/temp.map.rawscene";
+    std::string brushFileOut = "./build/temp.brush";
 
     std::cout << "starting to compile: " << compileMapFile << std::endl;
 
-    compileRawScene(filepath, "../afterworld/scenes/levels/ball.rawscene", compileMapFile, [](Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName) -> void {
+    compileRawScene(filepath, "../afterworld/scenes/levels/ball.rawscene", compileMapFile, [&brushFileOut](Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName) -> void {
       auto origin = getValue(entity, "origin");
       auto className = getValue(entity, "classname");
 
@@ -1356,30 +1357,47 @@ int main(int argc, char* argv[]){
           *shouldWrite = true;
           attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
             .field = "mesh",
-            .attributeValue = "./build/temp.brush",
+            .attributeValue = brushFileOut,
           });
 
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "scale",
-            .attributeValue = glm::vec3(0.1f, 0.1f, 0.1f),
-          });
+          //attributes.push_back(GameobjAttributeOpts {
+          //  .field = "scale",
+          //  .attributeValue = glm::vec3(0.1f, 0.1f, 0.1f),
+          //});
 
           //attributes.push_back(GameobjAttributeOpts {
           //  .field = "position",
           //  .attributeValue = glm::vec3(68.32f, -22.1f, 166.6f),
-          //});
+          //});attributes
 
           attributes.push_back(GameobjAttributeOpts {
             .field = "physics_shape",
             .attributeValue = "shape_exact",
-            .submodel = "entity0_brush9",
           });
           attributes.push_back(GameobjAttributeOpts {
             .field = "physics",
             .attributeValue = "enabled",
-            .submodel = "entity0_brush9",
           });
 
+          // maybe i should add validation here
+          for (auto &keyValue : entity.keyValues){
+            if (keyValue.key == "_tb_textures" || keyValue.key == "classname" || keyValue.key == "_tb_def"){
+              continue;
+            }
+            std::cout << "compile: worldspawn key: " << keyValue.key << ", value: " << keyValue.value << std::endl;
+            attributes.push_back(GameobjAttributeOpts {
+              .field = keyValue.key, 
+              .attributeValue = keyValue.value,
+            });
+          }
+
+      }else if (*className.value() == "player_end"){
+        //modassert(false, "player_end not supported");
+        *shouldWrite = true;
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".brush",
+        });
       }else{
         std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
         *shouldWrite = false;

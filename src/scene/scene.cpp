@@ -511,6 +511,10 @@ void loadModelData(World& world, std::string meshpath, int ownerId){
     world.modelDatas.at(meshpath).owners.insert(ownerId);
   }else{
     auto pathExists = fileExistsFromPackage(meshpath);
+    auto fileExtension = getExtension(meshpath);
+    if (fileExtension.has_value() && fileExtension.value() == "brush"){
+      pathExists = true;
+    }
     if (!pathExists){
       if (strictResourceMode){
         modassert(false, std::string("model does not exist: ") + meshpath);
