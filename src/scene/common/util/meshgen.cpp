@@ -181,13 +181,57 @@ MeshData generateMesh(std::vector<glm::vec3>& face, std::vector<glm::vec3>& poin
   return meshdata;
 }
 
+Vertex createVertex3(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal, glm::vec3 tangent){
+  Vertex vertex {
+    .position = position,
+    .normal = normal,
+    .tangent = tangent,
+    .color = glm::vec3(0.f, 0.f, 0.f),
+    .texCoords = texCoords,
+  };
+  for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
+    vertex.boneIndexes[i] = 0;
+    vertex.boneWeights[i] = 0;
+  }
+
+  return vertex;
+}
 MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices, std::string* texture, std::string* normalTexture){
   modassert(indices.size() % 3 == 0, "indices must be multiple of 3");
   modassert(verts.size() == uvCoords.size(), "verts must be same size of uvCoords");
 
   std::vector<Vertex> vertices;
-  for (int i = 0; i < verts.size(); i++){
-    vertices.push_back(createVertex(verts.at(i), uvCoords.at(i)));
+  for (int i = 0; i < verts.size(); i+=3){
+    auto vert1 = verts.at(i);
+    auto vert2 = verts.at(i + 1);
+    auto vert3 = verts.at(i + 2);
+    auto uvCoord1 = uvCoords.at(i);
+    auto uvCoord2 = uvCoords.at(i + 1);
+    auto uvCoord3 = uvCoords.at(i + 2);
+
+    auto edgeOne = vert2 - vert1;
+    auto edgeTwo = vert3 - vert1;
+    glm::vec3 normal = glm::normalize(glm::cross(edgeOne, edgeTwo));
+
+    glm::vec3 tangent(0.f, 0.f, 0.f);
+    {
+      glm::vec2 dUV1 = uvCoord2 - uvCoord1;
+      glm::vec2 dUV2 = uvCoord3 - uvCoord1;
+      float det = dUV1.x * dUV2.y - dUV2.x * dUV1.y;
+      if (fabs(det) > 1e-8f) {
+          float invDet = 1.0f / det;
+          tangent   = (edgeOne * dUV2.y - edgeTwo * dUV1.y) * invDet;
+          tangent = glm::normalize(tangent - normal * glm::dot(normal, tangent));
+      } else {
+          glm::vec3 up = (fabs(normal.z) < 0.999f) ? glm::vec3(0, 0, 1) : glm::vec3(0, 1, 0);
+          tangent = glm::normalize(glm::cross(up, normal));
+      }
+    }
+
+
+    vertices.push_back(createVertex3(vert1, uvCoord1, normal, tangent));
+    vertices.push_back(createVertex3(vert2, uvCoord2, normal, tangent));
+    vertices.push_back(createVertex3(vert3, uvCoord3, normal, tangent));
   }
 
   MeshData meshdata {
