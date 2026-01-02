@@ -1421,6 +1421,43 @@ int main(int argc, char* argv[]){
           .attributeValue = "true",
         });
 
+      }else if (*className.value() == "teleport_zone"){
+        *shouldWrite = true;
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".brush",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_shape",
+          .attributeValue = "shape_exact",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics",
+          .attributeValue = "enabled",
+        });
+
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_collision",
+          .attributeValue = "nocollide",
+        });
+
+        auto teleportTarget = getValue(entity, "exit");
+        if (teleportTarget.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "teleport_zone",
+            .attributeValue = *teleportTarget.value(),
+          });          
+        }
+      }else if (*className.value() == "teleport_exit"){
+        std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
+        *shouldWrite = true;
+        auto teleportTarget = getValue(entity, "exit");
+        if (teleportTarget.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "teleport_exit",
+            .attributeValue = *teleportTarget.value(),
+          });             
+        }
       }else{
         std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
         *shouldWrite = false;
