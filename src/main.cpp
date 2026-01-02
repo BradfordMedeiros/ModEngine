@@ -1325,7 +1325,11 @@ int main(int argc, char* argv[]){
         *modelName = "playerspawn";
         *shouldWrite = true;
       }else if (*className.value() == "powerup_jump"){
-        *shouldWrite = false;
+        *shouldWrite = true;
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = "./res/models/box/box.obj",
+        });
       }else if (*className.value() == "vertical_bound_plane"){
         *shouldWrite = true;
 
@@ -1398,6 +1402,25 @@ int main(int argc, char* argv[]){
           .field = "mesh",
           .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".brush",
         });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_shape",
+          .attributeValue = "shape_exact",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics",
+          .attributeValue = "enabled",
+        });
+
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_collision",
+          .attributeValue = "nocollide",
+        });
+
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "player_end",
+          .attributeValue = "true",
+        });
+
       }else{
         std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
         *shouldWrite = false;
