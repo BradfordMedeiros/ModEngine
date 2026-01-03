@@ -1330,6 +1330,10 @@ int main(int argc, char* argv[]){
           .field = "mesh",
           .attributeValue = "./res/models/box/box.obj",
         });
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "scale",
+          .attributeValue = glm::vec3(10.f, 50.f, 10.f),
+        });
       }else if (*className.value() == "vertical_bound_plane"){
         *shouldWrite = true;
 
@@ -1446,13 +1450,17 @@ int main(int argc, char* argv[]){
           attributes.push_back(GameobjAttributeOpts {
             .field = "teleport_zone",
             .attributeValue = *teleportTarget.value(),
-          });          
+          });
         }
       }else if (*className.value() == "teleport_exit"){
         std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
         *shouldWrite = true;
         auto teleportTarget = getValue(entity, "exit");
         if (teleportTarget.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "teleport",
+            .attributeValue = "true",
+          });
           attributes.push_back(GameobjAttributeOpts {
             .field = "teleport_exit",
             .attributeValue = *teleportTarget.value(),

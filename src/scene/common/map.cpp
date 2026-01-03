@@ -155,12 +155,10 @@ std::vector<EntityKeyValue> parseKeyValues(std::string& content){
 }
 
 glm::vec3 parseVecTrenchbroom(std::string positionRaw){;
-	return parseVec(positionRaw);
-
   float x, y, z;
   std::istringstream in(positionRaw);
   in >> x >> y >> z;
-  return glm::vec3(x, z, y);
+  return glm::vec3(x, z, -1 * y);
 }
 
 BrushFace parseBrushFace(std::string& content){
@@ -185,7 +183,7 @@ BrushFace parseBrushFace(std::string& content){
 		}else if (value == ')'){
 			foundLeftBrace = false;
 			std::cout << "brush face value is: [" << stringValue << "]" << std::endl;
-			glm::vec3 vec = parseVecTrenchbroom(stringValue);
+			glm::vec3 vec = parseVec(stringValue);
 			points.push_back(vec);
 			stringValue = "";
 			count++;
