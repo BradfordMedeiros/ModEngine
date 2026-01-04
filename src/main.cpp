@@ -1312,6 +1312,7 @@ int main(int argc, char* argv[]){
 
     std::cout << "starting to compile: " << compileMapFile << std::endl;
 
+    // this logic needs to not be in the main repo code
     compileRawScene(filepath, "../afterworld/scenes/levels/ball.rawscene", compileMapFile, [&brushFileOut](Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName) -> void {
       auto origin = getValue(entity, "origin");
       auto className = getValue(entity, "classname");
@@ -1324,16 +1325,56 @@ int main(int argc, char* argv[]){
       if (*className.value() == "player_start"){
         *modelName = "playerspawn";
         *shouldWrite = true;
-      }else if (*className.value() == "powerup_jump"){
+      }else if (*className.value() == "powerup_jump" || *className.value() == "powerup_dash" || *className.value() == "powerup_teleport" || *className.value() == "powerup_lowgravity"){
         *shouldWrite = true;
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field = "mesh",
-          .attributeValue = "./res/models/box/box.obj",
-        });
+
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
           .field = "scale",
-          .attributeValue = glm::vec3(10.f, 50.f, 10.f),
+          .attributeValue = glm::vec3(10.f, 10.f, 10.f),
         });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_shape",
+          .attributeValue = "shape_sphere",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics",
+          .attributeValue = "enabled",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_collision",
+          .attributeValue = "nocollide",
+        });
+
+        // Replace with a better powerup model
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = "./res/models/box/crate.gltf",
+        });
+        
+        if (*className.value() == "powerup_jump"){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "powerup",
+            .attributeValue = "jump",
+          });          
+        }else if (*className.value() == "powerup_dash"){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "powerup",
+            .attributeValue = "dash",
+          });          
+        }else if (*className.value() == "powerup_teleport"){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "powerup",
+            .attributeValue = "low_gravity",
+          });          
+        }else if (*className.value() == "powerup_lowgravity"){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "powerup",
+            .attributeValue = "teleport",
+          });          
+        }else{
+          modassert(false, "invalid powerup type");
+        }
+
       }else if (*className.value() == "vertical_bound_plane"){
         *shouldWrite = true;
 
@@ -1367,17 +1408,6 @@ int main(int argc, char* argv[]){
             .field = "mesh",
             .attributeValue = brushFileOut,
           });
-
-          //attributes.push_back(GameobjAttributeOpts {
-          //  .field = "scale",
-          //  .attributeValue = glm::vec3(0.1f, 0.1f, 0.1f),
-          //});
-
-          //attributes.push_back(GameobjAttributeOpts {
-          //  .field = "position",
-          //  .attributeValue = glm::vec3(68.32f, -22.1f, 166.6f),
-          //});attributes
-
           attributes.push_back(GameobjAttributeOpts {
             .field = "physics_shape",
             .attributeValue = "shape_exact",
@@ -1387,7 +1417,6 @@ int main(int argc, char* argv[]){
             .attributeValue = "enabled",
           });
 
-          // maybe i should add validation here
           for (auto &keyValue : entity.keyValues){
             if (keyValue.key == "_tb_textures" || keyValue.key == "classname" || keyValue.key == "_tb_def"){
               continue;
@@ -1400,7 +1429,6 @@ int main(int argc, char* argv[]){
           }
 
       }else if (*className.value() == "player_end"){
-        //modassert(false, "player_end not supported");
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
           .field = "mesh",
