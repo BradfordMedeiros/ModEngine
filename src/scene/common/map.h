@@ -36,6 +36,7 @@ struct Entity {
 };
 
 struct MapData {
+    float scale;
     std::vector<Entity> layers;
     std::vector<Entity> entities;
 };

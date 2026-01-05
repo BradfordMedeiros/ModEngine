@@ -154,11 +154,15 @@ std::vector<EntityKeyValue> parseKeyValues(std::string& content){
 	return keyValues;
 }
 
-glm::vec3 parseVecTrenchbroom(std::string positionRaw){;
+glm::vec3 parseVecTrenchbroom(std::string positionRaw, float scale){;
   float x, y, z;
   std::istringstream in(positionRaw);
   in >> x >> y >> z;
-  return glm::vec3(x, z, -1 * y);
+  return glm::vec3(x / scale, z / scale, (-1 * y) / scale);
+}
+
+float parseFloatTrenchbroom(std::string& value){
+	return std::atof(value.c_str());
 }
 
 BrushFace parseBrushFace(std::string& content){
@@ -327,7 +331,31 @@ MapData parseRawMapData(std::string& content){
 		}
 	}
 
+
+	float scale = 10.f;
+	for (auto& entity : entities){
+		auto value = getKeyValue(entity.keyValues, "classname");
+		if (value.has_value() && *value.value() == "worldspawn"){
+			auto value = getKeyValue(entity.keyValues, "worldscale");
+			if (value.has_value()){
+				auto worldspawnScale = parseFloatTrenchbroom(*value.value());
+				scale = worldspawnScale;
+			}
+		}
+	}
+
+	for (auto &entity : entities){
+		for (auto& brush : entity.brushes){
+			for (auto& brushFace : brush.brushFaces){
+				brushFace.point1 /= scale;
+				brushFace.point2 /= scale;
+				brushFace.point3 /= scale;
+			}
+		}
+	}
+
 	MapData mapData {
+		.scale = scale,
 		.layers = {},
 		.entities = {},
 	};
@@ -415,7 +443,7 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 		    auto origin = getValue(entity, "origin");
 		    auto classname = getValue(entity, "classname");
 
-		    glm::vec3 position = origin.has_value() ? parseVecTrenchbroom(*origin.value()) : glm::vec3(0.f, 0.f, 0.f);
+		    glm::vec3 position = origin.has_value() ? parseVecTrenchbroom(*origin.value(), mapData.scale) : glm::vec3(0.f, 0.f, 0.f);
 		    modassert(classname.has_value(), "no classname");
 
 		    std::string entityName = modelName != "" ?  modelName : (std::string("entity_") + *classname.value() + "_" + std::to_string(entity.index));
@@ -646,7 +674,7 @@ struct FaceVertexAssignment {
     BrushFace* face;       
     std::vector<VertexWithData> vertices; 
 };
-std::vector<FaceVertexAssignment> assignVerticesToFaces(std::vector<BrushFace>& faces, std::vector<glm::vec3>& candidateVertices){
+std::vector<FaceVertexAssignment> assignVerticesToFaces(std::vector<BrushFace>& faces, std::vector<glm::vec3>& candidateVertices, float scale){
     std::vector<FaceVertexAssignment> assignments;
 
     for (auto& face : faces) {
@@ -661,7 +689,7 @@ std::vector<FaceVertexAssignment> assignVerticesToFaces(std::vector<BrushFace>& 
             if (fabs(distance) < EPSILON) { // tolerance for floating point
                 vertsOnFace.push_back(VertexWithData {
                 	.pos = v,
-                	.uv = calculateUv(face, brushPlane, v, textureInfo.width, textureInfo.height),
+                	.uv = calculateUv(face, brushPlane, v * scale, textureInfo.width, textureInfo.height),
                 });
             }
         }
@@ -835,7 +863,7 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 
   	std::cout << "candidateVertices: size = " << candidateVertices.size() << std::endl;
 
-  	auto faceVertices = assignVerticesToFaces(brush.brushFaces, candidateVertices);
+  	auto faceVertices = assignVerticesToFaces(brush.brushFaces, candidateVertices, mapData.scale);
 
   	std::cout << "face vertices size: " << faceVertices.size() << std::endl;
 

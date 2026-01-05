@@ -1330,7 +1330,7 @@ int main(int argc, char* argv[]){
 
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
           .field = "scale",
-          .attributeValue = glm::vec3(10.f, 10.f, 10.f),
+          .attributeValue = glm::vec3(1.f, 1.f, 1.f),
         });
         attributes.push_back(GameobjAttributeOpts {
           .field = "physics_shape",
@@ -1350,7 +1350,7 @@ int main(int argc, char* argv[]){
           .field = "mesh",
           .attributeValue = "./res/models/box/crate.gltf",
         });
-        
+
         if (*className.value() == "powerup_jump"){
           attributes.push_back(GameobjAttributeOpts {
             .field = "powerup",
