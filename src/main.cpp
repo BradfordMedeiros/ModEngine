@@ -1351,6 +1351,21 @@ int main(int argc, char* argv[]){
           .attributeValue = "./res/models/box/crate.gltf",
         });
 
+        // When it becomes deactivated (respawnable but used) make it transparent
+        // So hence this layer
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "layer",
+          .attributeValue = "transparency",
+        });
+
+        auto rate = getIntValue(entity, "rate");
+        if (rate.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "powerup-rate",
+            .attributeValue = static_cast<float>(rate.value()),
+          });
+        }
+
         if (*className.value() == "powerup_jump"){
           attributes.push_back(GameobjAttributeOpts {
             .field = "powerup",

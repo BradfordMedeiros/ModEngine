@@ -408,7 +408,14 @@ std::optional<std::string*> getValue(Entity& entity, const char* key){
 	return getKeyValue(entity.keyValues, key);
 }
 
+std::optional<int> getIntValue(Entity& entity, const char* key){
+	auto value = getKeyValue(entity.keyValues, key);
+	if (!value.has_value()){
+		return std::nullopt;
+	}
 
+	return std::atoi(value.value() -> c_str());
+}
 
 std::string getEntityName(std::string& baseName, std::optional<std::string>& submodel){
 	if (submodel.has_value()){
