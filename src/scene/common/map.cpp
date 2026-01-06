@@ -417,6 +417,17 @@ std::optional<int> getIntValue(Entity& entity, const char* key){
 	return std::atoi(value.value() -> c_str());
 }
 
+std::optional<glm::vec3> getScaledVec3Value(MapData& mapData, Entity& entity, const char* key){
+	auto value = getKeyValue(entity.keyValues, key);
+	if (!value.has_value()){
+		return std::nullopt;
+	}
+
+	glm::vec3 position = parseVecTrenchbroom(*value.value(), mapData.scale);
+	return position;
+}
+
+
 std::string getEntityName(std::string& baseName, std::optional<std::string>& submodel){
 	if (submodel.has_value()){
 		return baseName + "/" + submodel.value();
@@ -429,7 +440,7 @@ void compileBrushes(MapData& mapData, std::string& rawMapData, std::string path)
 }
 
 
-void compileRawScene(std::string filepath, std::string baseFile,  std::string mapFile,  std::function<void(Entity& entity, bool* _shouldWrite, std::vector<GameobjAttributeOpts>& _attributes, std::string* _modelName)> callback){
+void compileRawScene(std::string filepath, std::string baseFile,  std::string mapFile,  std::function<void(MapData& mapData, Entity& entity, bool* _shouldWrite, std::vector<GameobjAttributeOpts>& _attributes, std::string* _modelName)> callback, std::function<void(MapData& mapData, std::string&)> afterEntities){
 	std::string content = "########## Base file content: " + baseFile + " ##########\n\n" + readFileOrPackage(baseFile) + "\n\n";
 
 	std::string generatedContent = "##########  Generated content: + " + mapFile + "\n\n";
@@ -443,15 +454,15 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 		bool shouldWrite = false;
 		std::string modelName = "";
 		std::vector<GameobjAttributeOpts> attributes;
-		callback(entity, &shouldWrite, attributes, &modelName);
+		callback(mapData, entity, &shouldWrite, attributes, &modelName);
 
 		bool userSpecifiedPosition = false;
 		if (shouldWrite){
-		    auto origin = getValue(entity, "origin");
 		    auto classname = getValue(entity, "classname");
-
-		    glm::vec3 position = origin.has_value() ? parseVecTrenchbroom(*origin.value(), mapData.scale) : glm::vec3(0.f, 0.f, 0.f);
 		    modassert(classname.has_value(), "no classname");
+
+		    auto origin = getValue(entity, "origin");
+		    glm::vec3 position = origin.has_value() ? parseVecTrenchbroom(*origin.value(), mapData.scale) : glm::vec3(0.f, 0.f, 0.f);
 
 		    std::string entityName = modelName != "" ?  modelName : (std::string("entity_") + *classname.value() + "_" + std::to_string(entity.index));
 
@@ -472,7 +483,9 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 		}
 	}
 
-	realfiles::saveFile(filepath, content + generatedContent + generatedScene);
+	auto sceneFileData = content + generatedContent + generatedScene + "\n";
+	afterEntities(mapData, sceneFileData);
+	realfiles::saveFile(filepath, sceneFileData);
 
 	compileBrushes(mapData, rawMapContent, "./build/temp.brush");
 }

@@ -1312,8 +1312,15 @@ int main(int argc, char* argv[]){
 
     std::cout << "starting to compile: " << compileMapFile << std::endl;
 
+    struct RailEntity {
+      glm::vec3 position;
+      std::string railName;
+      int railIndex;
+    };
+    std::vector<RailEntity> rails;
+
     // this logic needs to not be in the main repo code
-    compileRawScene(filepath, "../afterworld/scenes/levels/ball.rawscene", compileMapFile, [&brushFileOut](Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName) -> void {
+    compileRawScene(filepath, "../afterworld/scenes/levels/ball.rawscene", compileMapFile, [&brushFileOut, &rails](MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName) -> void {
       auto origin = getValue(entity, "origin");
       auto className = getValue(entity, "classname");
 
@@ -1509,6 +1516,37 @@ int main(int argc, char* argv[]){
             .attributeValue = *teleportTarget.value(),
           });             
         }
+      }else if (*className.value() == "dynamic"){
+        std::cout << "got dynamic" << std::endl;
+        *shouldWrite = true;
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".brush",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_shape",
+          .attributeValue = "shape_exact",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics",
+          .attributeValue = "enabled",
+        });
+      }else if (*className.value() == "rail"){
+        auto position = getScaledVec3Value(mapData, entity, "origin");
+        if (!position.has_value()){
+          modassert(false, "rail - position does not have a value");
+        }
+        auto rail = getValue(entity, "rail");
+        modassert(rail.has_value(), "rail does not have a value");
+
+        auto railIndex = getIntValue(entity, "rail-index");
+        modassert(railIndex.has_value(), "rail-index does not have a value");
+
+        rails.push_back(RailEntity {
+          .position = position.value(),
+          .railName = *rail.value(),
+          .railIndex = railIndex.value(),
+        });
       }else{
         std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
         *shouldWrite = false;
@@ -1520,7 +1558,38 @@ int main(int argc, char* argv[]){
       //  origin
       //  std::optional<std::string*> getValue(Entity& entity, const char* key);
       //}*/
-    });
+    }, 
+    [&rails](MapData& mapData, std::string& generatedScene) -> void {
+      generatedScene += "combined_entities_rail:rail:true\n";
+
+      {
+        std::string data = "combined_entities_rail:data-pos:";
+        for (int i = 0; i < rails.size(); i++){
+          data = data + serializeVec(rails.at(i).position) + ((i == (rails.size() - 1)) ? "\n" : ",");
+        }
+        generatedScene += data;
+      }
+
+      {
+        std::string data = "combined_entities_rail:data-name:";
+        for (int i = 0; i < rails.size(); i++){
+          data = data + rails.at(i).railName + ((i == (rails.size() - 1)) ? "\n" : ",");
+        }
+        generatedScene += data;
+      }
+
+      {
+        std::string data = "combined_entities_rail:data-index:";
+        for (int i = 0; i < rails.size(); i++){
+          data = data + std::to_string(rails.at(i).railIndex) + ((i == (rails.size() - 1)) ? "\n" : ",");
+        }
+        generatedScene += data;
+      }
+
+    }); 
+
+    std::cout << "rails is: " << rails.size() << std::endl;
+
 
     std::cout << "compiled: " << compileMapFile << std::endl;
     return 0;
