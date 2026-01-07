@@ -1531,6 +1531,14 @@ int main(int argc, char* argv[]){
           .field = "physics",
           .attributeValue = "enabled",
         });
+
+        auto curve = getValue(entity, "curve");
+        modassert(curve.has_value(), "curve does not have a value");
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "curve",
+          .attributeValue = *curve.value(),
+        });
+
       }else if (*className.value() == "rail"){
         auto position = getScaledVec3Value(mapData, entity, "origin");
         if (!position.has_value()){
