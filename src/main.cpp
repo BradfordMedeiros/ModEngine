@@ -1475,6 +1475,42 @@ int main(int argc, char* argv[]){
           .attributeValue = "true",
         });
 
+      }else if (*className.value() == "trigger_zone"){
+        *shouldWrite = true;
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".brush",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_shape",
+          .attributeValue = "shape_exact",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics",
+          .attributeValue = "enabled",
+        });
+
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_collision",
+          .attributeValue = "nocollide",
+        });
+
+        auto triggerTarget = getValue(entity, "trigger");
+        if (triggerTarget.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "trigger_zone",
+            .attributeValue = *triggerTarget.value(),
+          });
+        }
+
+        auto triggerData = getValue(entity, "trigger_data");
+        if (triggerData.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "trigger_data",
+            .attributeValue = *triggerData.value(),
+          });
+        }
+
       }else if (*className.value() == "teleport_zone"){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
@@ -1538,6 +1574,14 @@ int main(int argc, char* argv[]){
           .field = "curve",
           .attributeValue = *curve.value(),
         });
+
+        auto trigger = getValue(entity, "trigger");
+        if (trigger.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "trigger",
+            .attributeValue = *trigger.value(),
+          });
+        }
 
       }else if (*className.value() == "rail"){
         auto position = getScaledVec3Value(mapData, entity, "origin");
