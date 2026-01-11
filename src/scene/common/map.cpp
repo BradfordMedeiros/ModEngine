@@ -427,6 +427,16 @@ std::optional<glm::vec3> getScaledVec3Value(MapData& mapData, Entity& entity, co
 	return position;
 }
 
+std::optional<glm::vec3> getVec3Value(MapData& mapData, Entity& entity, const char* key){
+	auto value = getKeyValue(entity.keyValues, key);
+	if (!value.has_value()){
+		return std::nullopt;
+	}
+
+	glm::vec3 position = parseVec(*value.value());
+	return position;
+}
+
 
 std::string getEntityName(std::string& baseName, std::optional<std::string>& submodel){
 	if (submodel.has_value()){
@@ -817,6 +827,70 @@ Entity& getEntityByIndex(MapData& mapData, int index){
 	return mapData.entities.at(index);
 }
 
+struct MapBoundingBox {
+	std::optional<float> minX;
+	std::optional<float> maxX;
+	std::optional<float> minY;
+	std::optional<float> maxY;
+	std::optional<float> minZ;
+	std::optional<float> maxZ;
+};
+void addPoint(MapBoundingBox& box, glm::vec3 point){
+	if (!box.minX.has_value()){
+		box.minX = point.x;
+	}
+	if (!box.maxX.has_value()){
+		box.maxX = point.x;
+	}
+	if (!box.minY.has_value()){
+		box.minY = point.y;
+	}
+	if (!box.maxY.has_value()){
+		box.maxY = point.y;
+	}
+	if (!box.minZ.has_value()){
+		box.minZ = point.z;
+	}
+	if (!box.maxZ.has_value()){
+		box.maxZ = point.z;
+	}
+
+	if (box.minX.value() > point.x){
+		box.minX = point.x;
+	}
+	if (box.maxX.value() < point.x){
+		box.maxX = point.x;
+	}
+
+	if (box.minY.value() > point.y){
+		box.minY = point.y;
+	}
+	if (box.maxY.value() < point.y){
+		box.maxY = point.y;
+	}
+	
+	if (box.minZ.value() > point.z){
+		box.minZ = point.z;
+	}
+	if (box.maxZ.value() < point.z){
+		box.maxZ = point.z;
+	}
+}
+
+glm::vec3 calcMidpoints(MapBoundingBox& boundingBox){
+	modassert(boundingBox.minX.has_value(), "boundingBox no minX");
+	modassert(boundingBox.maxX.has_value(), "boundingBox no maxX");
+	modassert(boundingBox.minY.has_value(), "boundingBox no minY");
+	modassert(boundingBox.maxY.has_value(), "boundingBox no maxY");
+	modassert(boundingBox.minZ.has_value(), "boundingBox no minZ");
+	modassert(boundingBox.maxZ.has_value(), "boundingBox no maxZ");
+
+	float midpointX = 0.5f * (boundingBox.maxX.value() + boundingBox.minX.value());
+	float midpointY = 0.5f *  (boundingBox.maxY.value() + boundingBox.minY.value());
+	float midpointZ = 0.5f * (boundingBox.maxZ.value() + boundingBox.minZ.value());
+	return glm::vec3(midpointX, midpointY, midpointZ);
+}
+
 ModelDataCore loadModelCoreBrush(std::string modelPath){
 	std::vector<glm::vec3> debugPoints;
   std::vector<std::optional<glm::vec3>> debugPointsTo;
@@ -832,6 +906,8 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   Entity& entity = parsedPath.entityIndex.has_value() ? getEntityByIndex(mapData, parsedPath.entityIndex.value()) : getEntityByName(mapData, "worldspawn");
 
   std::unordered_map<std::string, MapRawValue> meshForTextures;
+
+  MapBoundingBox boundingBox{};
 
   for (auto& brush : entity.brushes){
   	{
@@ -887,7 +963,6 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 
   	std::cout << "face vertices size: " << faceVertices.size() << std::endl;
 
-
   	for(auto& faceVertice : faceVertices){
 	    std::cout << "Face has " << faceVertice.vertices.size() << " vertices\n";
 
@@ -902,17 +977,21 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 	  		auto& meshForTexture = meshForTextures.at(texture);
 		  	meshForTexture.points.push_back(changeCoord(triangle.vertex0));
 		  	meshForTexture.uvCoords.push_back(triangle.vertex0Uv);
+		  	addPoint(boundingBox, changeCoord(triangle.vertex0));
 
 		  	meshForTexture.points.push_back(changeCoord(triangle.vertex1));
 		  	meshForTexture.uvCoords.push_back(triangle.vertex1Uv);
+		  	addPoint(boundingBox, changeCoord(triangle.vertex1));
 
 		  	meshForTexture.points.push_back(changeCoord(triangle.vertex2));
 		  	meshForTexture.uvCoords.push_back(triangle.vertex2Uv);
+		  	addPoint(boundingBox, changeCoord(triangle.vertex2));
+
 	  	}
   	}
-
   }
 
+ 	auto boundingOffset = calcMidpoints(boundingBox);
   
   ModelDataCore modelDataCore2 {
     .modelData = ModelData {
@@ -921,13 +1000,14 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
       .childToParent = {},
       .nodeTransform = {
         { 0, Transformation {
-          .position = glm::vec3(0.f, 0.f, 0.f),
+          .position = boundingOffset,
           .scale = glm::vec3(1.f, 1.f, 1.f),
           .rotation = MOD_ORIENTATION_FORWARD,
         }}
       },
       .names = {{ 0, "test" }},
-      .animations = {},      
+      .animations = {},
+	    .sponsorRootPosition = true,
     },
     .loadedRoot = "test",
   };
@@ -939,6 +1019,10 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   	addPointsToSimpleMesh(meshForTexture.points, indexs);
   	modassert(meshForTexture.points.size() == meshForTexture.uvCoords.size(), "unexpected diff in points and uv coords size");
   	
+  	for (int i = 0; i < meshForTexture.points.size(); i++){
+  		meshForTexture.points.at(i) -= boundingOffset;
+  	}
+
   	std::string texture = texturePath;
   	auto normalTexture = lookupNormalTexture(texture);
   	//modassert(normalTexture.has_value(), std::string("normal for texture does not exist: ") + texture);

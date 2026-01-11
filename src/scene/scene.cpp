@@ -967,6 +967,12 @@ void addObjectToWorld(
       ModelData modelData = modelDataFromCache(world, meshName, name, id);
       attr.attr["meshes"] =  meshNamesForNode(modelData, meshName, name);
 
+      if (modelData.sponsorRootPosition){
+        //modassert(false, std::string("extra root transform: ") + name + " - " + print(modelData.nodeTransform.at(0).position));
+        physicsLocalTransformSet(world, id, modelData.nodeTransform.at(0), std::nullopt);
+
+      }
+
       auto additionalFields = applyFieldsToSubelements(meshName, modelData, submodelAttributes); 
       auto newSerialObjs = multiObjAdd(
         world.sandbox,
