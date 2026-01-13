@@ -23,5 +23,6 @@ int closeFileOrPackage(unsigned int handle);
 size_t readFileOrPackage(unsigned int handle, void *ptr, size_t size, size_t nmemb);
 int seekFileOrPackage(unsigned int handle, int offset, int whence);
 size_t tellFileOrPackage(unsigned int handle);
+size_t getSizeFileOrPackage(unsigned int handle);
 
 #endif

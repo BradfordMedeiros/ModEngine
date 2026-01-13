@@ -427,6 +427,16 @@ std::optional<glm::vec3> getScaledVec3Value(MapData& mapData, Entity& entity, co
 	return position;
 }
 
+std::optional<glm::vec3> getUnitVec3Value(MapData& mapData, Entity& entity, const char* key){
+	auto value = getKeyValue(entity.keyValues, key);
+	if (!value.has_value()){
+		return std::nullopt;
+	}
+
+	glm::vec3 position = parseVecTrenchbroom(*value.value(), 1.f);
+	return position;
+}
+
 std::optional<glm::vec3> getVec3Value(MapData& mapData, Entity& entity, const char* key){
 	auto value = getKeyValue(entity.keyValues, key);
 	if (!value.has_value()){
@@ -696,7 +706,6 @@ glm::vec2 calculateUv(BrushFace& brushFace, BrushPlane& brushPlane,  glm::vec3 v
     v /= textureHeight;
 
     return glm::vec2(u, -1.f * v);
-
 }
 
 

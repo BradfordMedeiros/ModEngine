@@ -446,3 +446,30 @@ size_t tellFileOrPackage(unsigned int handle){
    modassert(false, "invalid file handle");
    return 0;
 }
+
+size_t getSizeFileOrPackage(unsigned int handle){
+    for (auto &file : openFiles){
+        if (file.fileHandle == handle){
+            if (file.nativeFs){
+                long curPos = ftell(file.nativeFile);
+                modassert(curPos != -1L, "ftell failed");
+
+                int error = fseek(file.nativeFile, 0, SEEK_END);
+                modassert(error == 0, "fseek failed");
+                
+                long size = ftell(file.nativeFile);
+                modassert(size != -1L, "ftell failed");
+
+                error = fseek(file.nativeFile, curPos, SEEK_SET);
+                modassert(error == 0, "fseek restore failed");
+
+                return static_cast<size_t>(size);
+            }else{
+                // package file: size is already tracked
+                return file.packageFileSize;
+            }
+        }
+    }
+    modassert(false, "invalid file handle");
+    return 0;
+}

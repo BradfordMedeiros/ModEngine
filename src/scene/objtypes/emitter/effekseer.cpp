@@ -19,33 +19,105 @@ struct EffectData {
 };
 std::unordered_map<objid, EffectData> effekseerData;
 
-/*class MyFileInterface : public Effekseer::DefaultFileReader
+
+/*class MemoryFileInterface : public Effekseer::FileInterface
 {
-
-};
-
-class MyEffectLoader : public Effekseer::EffectLoader
-{
-    Effekseer::FileInterfaceRef fileInterface_;
-
 public:
-    MyEffectLoader(Effekseer::FileInterfaceRef fileInterface)
-        : fileInterface_(fileInterface)
-    {}
-
-    bool Load(const char16_t* path, void*& data, int32_t& size) override
+    Effekseer::FileReaderRef OpenRead(const EFK_CHAR* path) override
     {
-        std::u16string msg(path);
-        std::string utf8(msg.begin(), msg.end());
-
-        std::cout << "[Effekseer/EffectLoader] Load: " << utf8 << std::endl;
-
-        //return Effekseer::EffectLoader::Load(data, size, effect, path);
+        // Implement: return a reader for embedded file (texture, model, etc.)
+        // You can use a map<std::u16string, std::vector<uint8_t>> of your assets
+        modassert(false, "open read not yet implemented");
     }
 
-    void Unload(void* data, int32_t size) override
+    Effekseer::FileWriterRef OpenWrite(const EFK_CHAR* path) override { 
+    	modassert(false, "open write not yet implemented");
+    	return nullptr; 
+    }
+};*/
+
+
+
+std::string readFileOrPackage(std::string filepath); // i dont really like directly referencing this here, but...it's ok
+unsigned int openFileOrPackage(std::string filepath);
+int closeFileOrPackage(unsigned int handle);
+size_t readFileOrPackage(unsigned int handle, void *ptr, size_t size, size_t nmemb);
+int seekFileOrPackage(unsigned int handle, int offset, int whence);
+size_t tellFileOrPackage(unsigned int handle);
+size_t getSizeFileOrPackage(unsigned int handle);
+
+class ModEffekseerFileReader : public Effekseer::FileReader {
+
+unsigned int handle;
+public:
+	ModEffekseerFileReader(std::string path) {
+    	modlog("memory file interface open file", "");
+		this -> handle = openFileOrPackage(path);
+	}
+	~ModEffekseerFileReader() override {
+    	modlog("memory file interface close file", "");
+		closeFileOrPackage(this -> handle);
+	}
+
+	size_t Read(void* buffer, size_t size) override {
+    	modlog("memory file interface Read", "");
+		return readFileOrPackage(this -> handle, buffer, size, 1);
+	}
+	void Seek(int position) override {
+    	modlog("memory file interface Seek", "");
+		auto value = seekFileOrPackage(this -> handle, position, SEEK_SET /* 0 */);
+		modassert(value == 0, "received non-zero in seek effekseer");
+	}
+
+	int GetPosition() const override {
+    	modlog("memory file interface GetPosition", "");
+		return tellFileOrPackage(this -> handle);
+	}
+
+	size_t GetLength() const override {
+    	modlog("memory file interface GetLength", "");
+		return getSizeFileOrPackage(this -> handle);
+	}
+};
+
+
+class MemoryFileInterface : public Effekseer::DefaultFileInterface {
+public:
+    Effekseer::FileReaderRef OpenRead(const EFK_CHAR* path) override
     {
-        std::cout << "[Effekseer/EffectLoader] Unload" << std::endl;
+    	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
+		std::string pathStr = convert.to_bytes(path);
+		return Effekseer::MakeRefPtr<ModEffekseerFileReader>(pathStr);
+    }
+
+    Effekseer::FileWriterRef OpenWrite(const EFK_CHAR* path) override { 
+    	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
+		std::string pathUtf8 = convert.to_bytes(path);
+    	modlog("memory file interface OpenWrite", pathUtf8);
+    	modassert(false, "Effekseer tried to write, this is unexpected");
+    	//return Effekseer::DefaultFileInterface::OpenWrite(path);	
+    	return nullptr;
+    }
+};
+
+
+/*class MemoryFileInterface : public Effekseer::DefaultFileInterface {
+public:
+    Effekseer::FileReaderRef OpenRead(const EFK_CHAR* path) override
+    {
+    	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
+		std::string pathUtf8 = convert.to_bytes(path);
+    	modlog("memory file interface OpenRead", pathUtf8);
+        return Effekseer::DefaultFileInterface::OpenRead(path);
+    }
+
+    Effekseer::FileWriterRef OpenWrite(const EFK_CHAR* path) override { 
+    	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
+		std::string pathUtf8 = convert.to_bytes(path);
+    	modlog("memory file interface OpenWrite", pathUtf8);
+    	modassert(false, "Effekseer tried to write, this is unexpected");
+    	//return Effekseer::DefaultFileInterface::OpenWrite(path);	
+    	return nullptr;
     }
 };*/
 
@@ -67,17 +139,21 @@ void initEffekseer(){
 
   effekRenderer -> SetRestorationOfStatesFlag(true);
 
+  ::Effekseer::FileInterfaceRef fileInterface = Effekseer::MakeRefPtr<MemoryFileInterface>(); // Loads from buffer
+
   effekseerManager -> SetSpriteRenderer(effekRenderer ->CreateSpriteRenderer());
   effekseerManager -> SetRibbonRenderer(effekRenderer ->CreateRibbonRenderer());
   effekseerManager -> SetRingRenderer(effekRenderer -> CreateRingRenderer());
   effekseerManager -> SetTrackRenderer(effekRenderer -> CreateTrackRenderer());
   effekseerManager -> SetModelRenderer(effekRenderer -> CreateModelRenderer());
 
-  effekseerManager->SetTextureLoader(effekRenderer->CreateTextureLoader());
-  effekseerManager->SetModelLoader(effekRenderer->CreateModelLoader());
-  effekseerManager->SetMaterialLoader(effekRenderer->CreateMaterialLoader());
-  effekseerManager->SetCurveLoader(Effekseer::MakeRefPtr<Effekseer::CurveLoader>());
+  effekseerManager -> SetTextureLoader(effekRenderer->CreateTextureLoader(fileInterface));
+  effekseerManager -> SetModelLoader(effekRenderer->CreateModelLoader(fileInterface));
+  effekseerManager -> SetMaterialLoader(effekRenderer->CreateMaterialLoader(fileInterface));
+  effekseerManager -> SetCurveLoader(Effekseer::MakeRefPtr<Effekseer::CurveLoader>(fileInterface));
+  effekseerManager -> SetEffectLoader(Effekseer::Effect::CreateEffectLoader(fileInterface));
 }
+
 
 bool effectPlaying(EffectData& effect){
 	if (!effect.playingEffect.has_value()){
