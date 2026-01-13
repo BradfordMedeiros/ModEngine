@@ -1317,6 +1317,7 @@ int main(int argc, char* argv[]){
       glm::vec3 rotation; // euler angles
       std::string railName;
       int railIndex;
+      int railTime;
     };
     std::vector<RailEntity> rails;
 
@@ -1595,6 +1596,7 @@ int main(int argc, char* argv[]){
         auto railIndex = getIntValue(entity, "rail-index");
         modassert(railIndex.has_value(), "rail-index does not have a value");
 
+        auto railTime = getIntValue(entity, "time");
         auto rotationEuler = getVec3Value(mapData, entity, "angles");
 
         rails.push_back(RailEntity {
@@ -1602,6 +1604,7 @@ int main(int argc, char* argv[]){
           .rotation = rotationEuler.has_value() ? rotationEuler.value() : glm::vec3(0.f, 0.f, 0.f),
           .railName = *rail.value(),
           .railIndex = railIndex.value(),
+          .railTime = railTime.has_value() ? railTime.value() : -1,
         });
       }else{
         std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
@@ -1647,6 +1650,14 @@ int main(int argc, char* argv[]){
         std::string data = "combined_entities_rail:data-index:";
         for (int i = 0; i < rails.size(); i++){
           data = data + std::to_string(rails.at(i).railIndex) + ((i == (rails.size() - 1)) ? "\n" : ",");
+        }
+        generatedScene += data;
+      }
+
+      {
+        std::string data = "combined_entities_rail:data-time:";
+        for (int i = 0; i < rails.size(); i++){
+          data = data + std::to_string(rails.at(i).railTime) + ((i == (rails.size() - 1)) ? "\n" : ",");
         }
         generatedScene += data;
       }
