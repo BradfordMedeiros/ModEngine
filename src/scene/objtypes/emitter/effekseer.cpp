@@ -224,7 +224,6 @@ void onEffekSeekerRender(float windowSizeX, float windowSizeY, float fovRadians,
 
 
     ::Effekseer::Matrix44 projectionMatrix;
-	// projectionMatrix.PerspectiveFovRH_OpenGL(90.0f / 180.0f * 3.14159f, windowSizeX / windowSizeY, 1.0f, 500.0f);
 	projectionMatrix.PerspectiveFovRH_OpenGL(fovRadians, (float)windowSizeX / (float)windowSizeY, nearPlane, farPlane);
 
     ::Effekseer::Matrix44 cameraMatrix;
@@ -233,12 +232,11 @@ void onEffekSeekerRender(float windowSizeX, float windowSizeY, float fovRadians,
 	effekRenderer->SetProjectionMatrix(projectionMatrix);
 	effekRenderer->SetCameraMatrix(cameraMatrix);
 
-
 	Effekseer::Manager::DrawParameter drawParameter;
     drawParameter.ZNear = nearPlane;
     drawParameter.ZFar = farPlane;
 
-	drawParameter.ViewProjectionMatrix = effekRenderer->GetCameraProjectionMatrix();
+	drawParameter.ViewProjectionMatrix = effekRenderer -> GetCameraProjectionMatrix();
 
 	effekRenderer -> BeginRendering();
 	effekseerManager -> Draw(drawParameter);

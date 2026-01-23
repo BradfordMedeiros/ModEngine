@@ -1321,8 +1321,14 @@ int main(int argc, char* argv[]){
     };
     std::vector<RailEntity> rails;
 
+    struct OrbEntity {
+      glm::vec3 position;
+      std::string orbName;
+    };
+    std::vector<OrbEntity> orbs;
+
     // this logic needs to not be in the main repo code
-    compileRawScene(filepath, "../afterworld/scenes/levels/ball.rawscene", compileMapFile, [&brushFileOut, &rails](MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName) -> void {
+    compileRawScene(filepath, "../afterworld/scenes/levels/ball.rawscene", compileMapFile, [&brushFileOut, &rails, &orbs](MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName) -> void {
       auto origin = getValue(entity, "origin");
       auto className = getValue(entity, "classname");
 
@@ -1606,6 +1612,19 @@ int main(int argc, char* argv[]){
           .railIndex = railIndex.value(),
           .railTime = railTime.has_value() ? railTime.value() : -1,
         });
+      }else if (*className.value() == "orb"){
+        auto position = getScaledVec3Value(mapData, entity, "origin");
+        if (!position.has_value()){
+          modassert(false, "orb - position does not have a value");
+        }
+
+        auto orb = getValue(entity, "orb");
+        modassert(orb.has_value(), "orb does not have a value");
+        orbs.push_back(OrbEntity {
+          .position = position.value(),
+          .orbName = *orb.value(),
+        });
+
       }else{
         std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
         *shouldWrite = false;
@@ -1618,50 +1637,70 @@ int main(int argc, char* argv[]){
       //  std::optional<std::string*> getValue(Entity& entity, const char* key);
       //}*/
     }, 
-    [&rails](MapData& mapData, std::string& generatedScene) -> void {
-      generatedScene += "combined_entities_rail:rail:true\n";
+    [&rails, &orbs](MapData& mapData, std::string& generatedScene) -> void {
+      if (rails.size() != 0){
+        generatedScene += "combined_entities_rail:rail:true\n";
 
-      {
-        std::string data = "combined_entities_rail:data-pos:";
-        for (int i = 0; i < rails.size(); i++){
-          data = data + serializeVec(rails.at(i).position) + ((i == (rails.size() - 1)) ? "\n" : ",");
+        {
+          std::string data = "combined_entities_rail:data-pos:";
+          for (int i = 0; i < rails.size(); i++){
+            data = data + serializeVec(rails.at(i).position) + ((i == (rails.size() - 1)) ? "\n" : ",");
+          }
+          generatedScene += data;
         }
-        generatedScene += data;
-      }
 
-      {
-        std::string data = "combined_entities_rail:data-rot:";
-        for (int i = 0; i < rails.size(); i++){
-          data = data + serializeVec(rails.at(i).rotation) + ((i == (rails.size() - 1)) ? "\n" : ",");
+        {
+          std::string data = "combined_entities_rail:data-rot:";
+          for (int i = 0; i < rails.size(); i++){
+            data = data + serializeVec(rails.at(i).rotation) + ((i == (rails.size() - 1)) ? "\n" : ",");
+          }
+          generatedScene += data;
         }
-        generatedScene += data;
-      }
 
 
-      {
-        std::string data = "combined_entities_rail:data-name:";
-        for (int i = 0; i < rails.size(); i++){
-          data = data + rails.at(i).railName + ((i == (rails.size() - 1)) ? "\n" : ",");
+        {
+          std::string data = "combined_entities_rail:data-name:";
+          for (int i = 0; i < rails.size(); i++){
+            data = data + rails.at(i).railName + ((i == (rails.size() - 1)) ? "\n" : ",");
+          }
+          generatedScene += data;
         }
-        generatedScene += data;
-      }
 
-      {
-        std::string data = "combined_entities_rail:data-index:";
-        for (int i = 0; i < rails.size(); i++){
-          data = data + std::to_string(rails.at(i).railIndex) + ((i == (rails.size() - 1)) ? "\n" : ",");
+        {
+          std::string data = "combined_entities_rail:data-index:";
+          for (int i = 0; i < rails.size(); i++){
+            data = data + std::to_string(rails.at(i).railIndex) + ((i == (rails.size() - 1)) ? "\n" : ",");
+          }
+          generatedScene += data;
         }
-        generatedScene += data;
-      }
 
-      {
-        std::string data = "combined_entities_rail:data-time:";
-        for (int i = 0; i < rails.size(); i++){
-          data = data + std::to_string(rails.at(i).railTime) + ((i == (rails.size() - 1)) ? "\n" : ",");
+        {
+          std::string data = "combined_entities_rail:data-time:";
+          for (int i = 0; i < rails.size(); i++){
+            data = data + std::to_string(rails.at(i).railTime) + ((i == (rails.size() - 1)) ? "\n" : ",");
+          }
+          generatedScene += data;
         }
-        generatedScene += data;
       }
+      if (orbs.size() != 0){
+        generatedScene += "combined_entities_orb:orbui:true\n";
 
+        {
+          std::string data = "combined_entities_orb:data-pos:";
+          for (int i = 0; i < orbs.size(); i++){
+            data = data + serializeVec(orbs.at(i).position) + ((i == (orbs.size() - 1)) ? "\n" : ",");
+          }
+          generatedScene += data;
+        }
+        {
+          std::string data = "combined_entities_orb:data-name:";
+          for (int i = 0; i < orbs.size(); i++){
+            data = data + orbs.at(i).orbName + ((i == (orbs.size() - 1)) ? "\n" : ",");
+          }
+          generatedScene += data;
+        }
+
+      }
     }); 
 
     std::cout << "rails is: " << rails.size() << std::endl;
