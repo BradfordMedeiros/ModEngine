@@ -1148,6 +1148,39 @@ void setDebugPoints(std::vector<glm::vec3> points, std::vector<std::optional<glm
   modassert(debugPoints.size() == debugPointsColors.size(), "setDebugPoints differing sizes");
 }
 
+
+struct RailEntity {
+  glm::vec3 position;
+  glm::vec3 rotation; // euler angles
+  std::string railName;
+  int railIndex;
+  int railTime;
+};
+struct OrbEntity {
+  glm::vec3 position;
+  std::string orbName;
+  std::vector<std::string> conn;
+};
+std::vector<int> getOrbConnectionIndex(std::vector<OrbEntity>& orbs, int index){
+  std::vector<int> connections;
+  OrbEntity& orbEntity = orbs.at(index);
+  for (int i = 0; i < orbEntity.conn.size(); i++){
+    auto name = orbEntity.conn.at(i);
+    bool matchedOrbName = false;
+    for (int j = 0; j < orbs.size(); j++){
+      if (name == orbs.at(j).orbName){
+        connections.push_back(j);
+        matchedOrbName = true;
+        break;
+      }
+    }
+    if (!matchedOrbName){
+      modassert(false, std::string("no matching orb name: ") + name);
+    }
+  }
+  return connections;
+}
+
 void onGLFWEerror(int error, const char* description){
   std::cerr << "Error: " << description << std::endl;
 }
@@ -1312,19 +1345,7 @@ int main(int argc, char* argv[]){
 
     std::cout << "starting to compile: " << compileMapFile << std::endl;
 
-    struct RailEntity {
-      glm::vec3 position;
-      glm::vec3 rotation; // euler angles
-      std::string railName;
-      int railIndex;
-      int railTime;
-    };
     std::vector<RailEntity> rails;
-
-    struct OrbEntity {
-      glm::vec3 position;
-      std::string orbName;
-    };
     std::vector<OrbEntity> orbs;
 
     // this logic needs to not be in the main repo code
@@ -1620,10 +1641,19 @@ int main(int argc, char* argv[]){
 
         auto orb = getValue(entity, "orb");
         modassert(orb.has_value(), "orb does not have a value");
-        orbs.push_back(OrbEntity {
+
+        OrbEntity orbEntity {
           .position = position.value(),
           .orbName = *orb.value(),
-        });
+          .conn = {},
+        };
+
+        auto conn = getValue(entity, "conn");
+        modassert(conn.has_value(), "orb - conn does not have a value");
+
+        auto connections = split(*conn.value(), ',');
+        orbEntity.conn = connections;
+        orbs.push_back(orbEntity);
 
       }else{
         std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
@@ -1692,6 +1722,24 @@ int main(int argc, char* argv[]){
           }
           generatedScene += data;
         }
+
+        {
+          std::string data = "combined_entities_orb:data-conn:";
+          for (int i = 0; i < orbs.size(); i++){
+            std::string connections;
+            std::vector<int> connectionsIndex = getOrbConnectionIndex(orbs, i);
+            for (int j = 0; j < connectionsIndex.size(); j++){
+              connections += std::to_string(connectionsIndex.at(j));
+              if (j != (connectionsIndex.size() - 1)){
+                connections += ".";
+              }
+            }
+            data = data + connections + ((i == (orbs.size() - 1)) ? "\n" : ",");
+          }
+          generatedScene += data;
+        }
+
+        //data-conn
         {
           std::string data = "combined_entities_orb:data-name:";
           for (int i = 0; i < orbs.size(); i++){
