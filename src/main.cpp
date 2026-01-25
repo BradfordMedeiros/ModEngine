@@ -1159,6 +1159,7 @@ struct RailEntity {
 struct OrbEntity {
   glm::vec3 position;
   std::string orbName;
+  std::string level;
   std::vector<std::string> conn;
 };
 std::vector<int> getOrbConnectionIndex(std::vector<OrbEntity>& orbs, int index){
@@ -1642,9 +1643,13 @@ int main(int argc, char* argv[]){
         auto orb = getValue(entity, "orb");
         modassert(orb.has_value(), "orb does not have a value");
 
+        auto orbLevel = getValue(entity, "level");
+        modassert(orbLevel.has_value(), "orb does not have a level");
+
         OrbEntity orbEntity {
           .position = position.value(),
           .orbName = *orb.value(),
+          .level = *orbLevel.value(),
           .conn = {},
         };
 
@@ -1741,9 +1746,18 @@ int main(int argc, char* argv[]){
 
         //data-conn
         {
-          std::string data = "combined_entities_orb:data-name:";
+        std::string data = "combined_entities_orb:data-name:";
           for (int i = 0; i < orbs.size(); i++){
             data = data + orbs.at(i).orbName + ((i == (orbs.size() - 1)) ? "\n" : ",");
+          }
+          generatedScene += data;
+        }
+
+        // data-level
+        {
+          std::string data = "combined_entities_orb:data-level:";
+          for (int i = 0; i < orbs.size(); i++){
+            data = data + orbs.at(i).level + ((i == (orbs.size() - 1)) ? "\n" : ",");
           }
           generatedScene += data;
         }
