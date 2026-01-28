@@ -1248,6 +1248,8 @@ int main(int argc, char* argv[]){
    ("package", "Package files to a .mod file instead of running the game", cxxopts::value<std::string>()->default_value(""))
    ("p,pak", "Package files to include", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("compile", "Path of map file to compile", cxxopts::value<std::string>() -> default_value(""))
+   ("template", "Path of template for file to compile map file", cxxopts::value<std::string>() -> default_value(""))
+
    ("h,help", "Print help")
   ;        
 
@@ -1332,6 +1334,7 @@ int main(int argc, char* argv[]){
   }
 
   auto compileMapFile = result["compile"].as<std::string>();
+  auto templateFile = result["template"].as<std::string>();
   if (compileMapFile != ""){
     /*auto mapData = parseMapData("../afterworld/scenes/levels/trench/balls/testexport.map");
     auto playerStarts = getEntitiesByClassName(mapData, "player_start");
@@ -1350,7 +1353,8 @@ int main(int argc, char* argv[]){
     std::vector<OrbEntity> orbs;
 
     // this logic needs to not be in the main repo code
-    compileRawScene(filepath, "../afterworld/scenes/levels/ball.rawscene", compileMapFile, [&brushFileOut, &rails, &orbs](MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName) -> void {
+    auto baseFile = templateFile != "" ? templateFile : "../afterworld/scenes/levels/ball.rawscene";
+    compileRawScene(filepath, baseFile, compileMapFile, [&brushFileOut, &rails, &orbs](MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName) -> void {
       auto origin = getValue(entity, "origin");
       auto className = getValue(entity, "classname");
 
