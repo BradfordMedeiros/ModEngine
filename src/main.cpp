@@ -1352,8 +1352,9 @@ int main(int argc, char* argv[]){
     std::string filepath = useTempFile ? "./build/temp.map.rawscene"  : (path.dirPath + "/" + path.filename + ".rawscene");
     std::string brushFileOut = useTempFile ? "./build/temp.brush" : (path.dirPath + "/" + path.filename + ".brush");
     auto baseFile = templateFile != "" ? templateFile : "../afterworld/scenes/levels/ball.rawscene";
-    if (fileExistsFromPackage(baseFile)){
-      auto overriddenTemplate = path.dirPath + "/" + path.filename + ".template";
+
+    auto overriddenTemplate = path.dirPath + "/" + path.filename + ".template";
+    if (fileExistsFromPackage(overriddenTemplate)){
       baseFile = overriddenTemplate;
     }
 
