@@ -1249,6 +1249,7 @@ int main(int argc, char* argv[]){
    ("p,pak", "Package files to include", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("compile", "Path of map file to compile", cxxopts::value<std::string>() -> default_value(""))
    ("template", "Path of template for file to compile map file", cxxopts::value<std::string>() -> default_value(""))
+   ("temp", "Compile temp.rawscene", cxxopts::value<bool>()->default_value("false"))
 
    ("h,help", "Print help")
   ;        
@@ -1335,6 +1336,7 @@ int main(int argc, char* argv[]){
 
   auto compileMapFile = result["compile"].as<std::string>();
   auto templateFile = result["template"].as<std::string>();
+
   if (compileMapFile != ""){
     /*auto mapData = parseMapData("../afterworld/scenes/levels/trench/balls/testexport.map");
     auto playerStarts = getEntitiesByClassName(mapData, "player_start");
@@ -1344,7 +1346,7 @@ int main(int argc, char* argv[]){
       std::cout << "player start: " << *(origin.value()) << std::endl;
     }*/
 
-    bool useTempFile = false;
+    bool useTempFile = result["temp"].as<bool>();;
 
     auto path = decomposePath(compileMapFile);
     std::cout << print(path) << std::endl;
