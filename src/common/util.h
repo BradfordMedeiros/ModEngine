@@ -495,6 +495,15 @@ std::string relativePath(std::string folder, std::string path, std::string worki
 bool isInFolder(std::string folder, std::string path, std::string workingDir);
 bool isExtensionType(std::string& file, std::vector<std::string>& extensions);
 
+struct FileDecomposition {
+  std::string dirPath;
+  std::string filename;
+  std::string extension;
+};
+
+FileDecomposition decomposePath(const std::string& filepath);
+std::string print(FileDecomposition& file);
+
 struct Hint {
   const char* hint = NULL;
 };

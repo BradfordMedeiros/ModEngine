@@ -460,7 +460,7 @@ void compileBrushes(MapData& mapData, std::string& rawMapData, std::string path)
 }
 
 
-void compileRawScene(std::string filepath, std::string baseFile,  std::string mapFile,  std::function<void(MapData& mapData, Entity& entity, bool* _shouldWrite, std::vector<GameobjAttributeOpts>& _attributes, std::string* _modelName)> callback, std::function<void(MapData& mapData, std::string&)> afterEntities){
+void compileRawScene(std::string filepath, std::string baseFile,  std::string mapFile, std::string brushFileOut, std::function<void(MapData& mapData, Entity& entity, bool* _shouldWrite, std::vector<GameobjAttributeOpts>& _attributes, std::string* _modelName)> callback, std::function<void(MapData& mapData, std::string&)> afterEntities){
 	std::string content = "########## Base file content: " + baseFile + " ##########\n\n" + readFileOrPackage(baseFile) + "\n\n";
 
 	std::string generatedContent = "##########  Generated content: + " + mapFile + "\n\n";
@@ -507,7 +507,7 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 	afterEntities(mapData, sceneFileData);
 	realfiles::saveFile(filepath, sceneFileData);
 
-	compileBrushes(mapData, rawMapContent, "./build/temp.brush");
+	compileBrushes(mapData, rawMapContent, brushFileOut);
 }
 
 void addPointsToSimpleMesh(std::vector<glm::vec3>& points, std::vector<unsigned int>& _indexs){

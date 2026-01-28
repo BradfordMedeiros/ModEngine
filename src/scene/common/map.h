@@ -60,7 +60,7 @@ struct GameobjAttributeOpts {
   std::optional<std::string> submodel;
 };
 
-void compileRawScene(std::string filepath, std::string baseFile, std::string mapFile, std::function<void(MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* _modelName)> callback, std::function<void(MapData& mapData, std::string&)> afterEntities);
+void compileRawScene(std::string filepath, std::string baseFile, std::string mapFile, std::string brushFileOut, std::function<void(MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* _modelName)> callback, std::function<void(MapData& mapData, std::string&)> afterEntities);
 
 
 

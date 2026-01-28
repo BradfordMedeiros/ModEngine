@@ -1344,17 +1344,27 @@ int main(int argc, char* argv[]){
       std::cout << "player start: " << *(origin.value()) << std::endl;
     }*/
 
-    std::string filepath =  "./build/temp.map.rawscene";
-    std::string brushFileOut = "./build/temp.brush";
+    bool useTempFile = false;
+
+    auto path = decomposePath(compileMapFile);
+    std::cout << print(path) << std::endl;
+
+    std::string filepath = useTempFile ? "./build/temp.map.rawscene"  : (path.dirPath + "/" + path.filename + ".rawscene");
+    std::string brushFileOut = useTempFile ? "./build/temp.brush" : (path.dirPath + "/" + path.filename + ".brush");
+    auto baseFile = templateFile != "" ? templateFile : "../afterworld/scenes/levels/ball.rawscene";
+    if (fileExistsFromPackage(baseFile)){
+      auto overriddenTemplate = path.dirPath + "/" + path.filename + ".template";
+      baseFile = overriddenTemplate;
+    }
 
     std::cout << "starting to compile: " << compileMapFile << std::endl;
+    std::cout << "fileout: " << filepath << ", brush: " << brushFileOut << ", template = " <<  baseFile <<  std::endl;
 
     std::vector<RailEntity> rails;
     std::vector<OrbEntity> orbs;
 
     // this logic needs to not be in the main repo code
-    auto baseFile = templateFile != "" ? templateFile : "../afterworld/scenes/levels/ball.rawscene";
-    compileRawScene(filepath, baseFile, compileMapFile, [&brushFileOut, &rails, &orbs](MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName) -> void {
+    compileRawScene(filepath, baseFile, compileMapFile, brushFileOut, [&brushFileOut, &rails, &orbs](MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName) -> void {
       auto origin = getValue(entity, "origin");
       auto className = getValue(entity, "classname");
 

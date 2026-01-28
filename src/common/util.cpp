@@ -1252,6 +1252,20 @@ bool isExtensionType(std::string& file, std::vector<std::string>& extensions){
   return isValidExtension;
 }
 
+FileDecomposition decomposePath(const std::string& filepath) {
+    std::filesystem::path p(filepath);
+    FileDecomposition result;
+    result.dirPath   = p.parent_path().string();
+    result.filename  = p.stem().string();
+    result.extension = p.extension().string();
+    return result;
+}
+
+std::string print(FileDecomposition& file){
+  std::string content = "dirPath = " + file.dirPath + ", filename = " + file.filename + ", extension = " + file.extension;
+  return content;
+}
+
 void printColor(std::string str, std::optional<CONSOLE_COLOR> color){
   if (!color.has_value()){
     std::cout << str;
