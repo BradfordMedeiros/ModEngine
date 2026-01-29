@@ -969,12 +969,10 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   	std::cout << "candidateVertices: size = " << candidateVertices.size() << std::endl;
 
   	auto faceVertices = assignVerticesToFaces(brush.brushFaces, candidateVertices, mapData.scale);
-
   	std::cout << "face vertices size: " << faceVertices.size() << std::endl;
 
   	for(auto& faceVertice : faceVertices){
 	    std::cout << "Face has " << faceVertice.vertices.size() << " vertices\n";
-
 	  	auto triangles = triangulateFace(faceVertice);
 
 	  	for (auto& triangle : triangles){
@@ -1000,6 +998,7 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   	}
   }
 
+  modassert(entity.brushes.size() > 0, std::string("loading an entity brush with 0 brushes: ") + modelPath + ", path = " + print(parsedPath));
  	auto boundingOffset = calcMidpoints(boundingBox);
   
   ModelDataCore modelDataCore2 {
