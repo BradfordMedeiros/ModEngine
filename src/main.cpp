@@ -1158,6 +1158,7 @@ struct RailEntity {
 };
 struct OrbEntity {
   glm::vec3 position;
+  glm::vec3 rotation;  // euler angles
   std::string orbName;
   std::string level;
   std::vector<std::string> conn;
@@ -1663,8 +1664,12 @@ int main(int argc, char* argv[]){
         auto orbLevel = getValue(entity, "level");
         modassert(orbLevel.has_value(), "orb does not have a level");
 
+        auto rotationEuler = getVec3Value(mapData, entity, "angles");
+        auto rotation = rotationEuler.has_value() ? rotationEuler.value() : glm::vec3(0.f, 0.f, 0.f);
+
         OrbEntity orbEntity {
           .position = position.value(),
+          .rotation = rotation,
           .orbName = *orb.value(),
           .level = *orbLevel.value(),
           .conn = {},
@@ -1744,6 +1749,16 @@ int main(int argc, char* argv[]){
           }
           generatedScene += data;
         }
+
+        {
+          std::string data = "combined_entities_orb:data-rot:";
+          for (int i = 0; i < orbs.size(); i++){
+            data = data + serializeVec(orbs.at(i).rotation) + ((i == (orbs.size() - 1)) ? "\n" : ",");
+          }
+          generatedScene += data;
+        }
+
+
 
         {
           std::string data = "combined_entities_orb:data-conn:";
