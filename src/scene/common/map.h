@@ -32,12 +32,11 @@ struct Entity {
     int layerId;
     int index;
     std::vector<EntityKeyValue> keyValues;
-    std::vector<Brush> brushes; // usually empty unless special case
+    std::vector<Brush> brushes;
 };
 
 struct MapData {
     float scale;
-    std::vector<Entity> layers;
     std::vector<Entity> entities;
 };
 
@@ -50,6 +49,8 @@ std::optional<int> getIntValue(Entity& entity, const char* key);
 std::optional<glm::vec3> getScaledVec3Value(MapData& mapData, Entity& entity, const char* key);
 std::optional<glm::vec3> getUnitVec3Value(MapData& mapData, Entity& entity, const char* key);
 std::optional<glm::vec3> getVec3Value(MapData& mapData, Entity& entity, const char* key);
+
+bool isLayerEntity(Entity& entity, int* layerId);
 
 void writeMapModelFile(MapData& mapData, std::string filepath);
 std::vector<Mesh> loadMapModel(MapData& mapData, std::string filepath);

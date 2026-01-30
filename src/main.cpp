@@ -1376,8 +1376,24 @@ int main(int argc, char* argv[]){
       std::cout << "compile index: " << entity.index << std::endl;
       std::cout << "origin: " << (origin.has_value() ? *origin.value() : "no origin") << std::endl;
   
+      int layerIndex = -1;
+      if (isLayerEntity(entity, &layerIndex) && entity.brushes.size() > 0){
+        // same as world spawn, but without added keys
+        *shouldWrite = true;
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".brush",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_shape",
+          .attributeValue = "shape_exact",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics",
+          .attributeValue = "enabled",
+        });
 
-      if (*className.value() == "player_start"){
+      }else if (*className.value() == "player_start"){
         *modelName = "playerspawn";
         *shouldWrite = true;
       }else if (*className.value() == "powerup_jump" || *className.value() == "powerup_dash" || *className.value() == "powerup_teleport" || *className.value() == "powerup_lowgravity"){

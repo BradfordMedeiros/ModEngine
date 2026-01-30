@@ -356,7 +356,6 @@ MapData parseRawMapData(std::string& content){
 
 	MapData mapData {
 		.scale = scale,
-		.layers = {},
 		.entities = {},
 	};
 
@@ -364,11 +363,7 @@ MapData parseRawMapData(std::string& content){
 		int layerId = 0;
 		auto isLayer = isLayerEntity(entity, &layerId);
 		entity.layerId = layerId;
-		if (isLayer){
-			mapData.layers.push_back(entity);
-		}else{
-			mapData.entities.push_back(entity);
-		}
+		mapData.entities.push_back(entity);
 	}
 
 
@@ -386,13 +381,6 @@ MapData parseMapData(std::string filepath){
 std::vector<Entity*> getEntitiesByClassName(MapData& mapData, const char* name){
 	std::vector<Entity*> entities;
 
-	for (auto& entity: mapData.layers){
-		auto value = getKeyValue(entity.keyValues, "classname");
-		modassert(value.has_value(), "classname does not exist");
-		if (*(value.value()) == name){
-			entities.push_back(&entity);
-		}
-	}
 	for (auto& entity : mapData.entities){
 		auto value = getKeyValue(entity.keyValues, "classname");
 		modassert(value.has_value(), "classname does not exist");
