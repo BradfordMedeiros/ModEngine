@@ -1160,6 +1160,7 @@ struct OrbEntity {
   glm::vec3 position;
   glm::vec3 rotation;  // euler angles
   std::string orbName;
+  std::string orbUi;
   std::string level;
   std::vector<std::string> conn;
 };
@@ -1170,7 +1171,7 @@ std::vector<int> getOrbConnectionIndex(std::vector<OrbEntity>& orbs, int index){
     auto name = orbEntity.conn.at(i);
     bool matchedOrbName = false;
     for (int j = 0; j < orbs.size(); j++){
-      if (name == orbs.at(j).orbName){
+      if (name == orbs.at(j).orbName && orbEntity.orbUi == orbs.at(j).orbUi){
         connections.push_back(j);
         matchedOrbName = true;
         break;
@@ -1677,6 +1678,9 @@ int main(int argc, char* argv[]){
         auto orb = getValue(entity, "orb");
         modassert(orb.has_value(), "orb does not have a value");
 
+        auto orbUi = getValue(entity, "orbui");
+        modassert(orbUi.has_value(), "orbUi does not have a value");
+
         auto orbLevel = getValue(entity, "level");
         modassert(orbLevel.has_value(), "orb does not have a level");
 
@@ -1687,6 +1691,7 @@ int main(int argc, char* argv[]){
           .position = position.value(),
           .rotation = rotation,
           .orbName = *orb.value(),
+          .orbUi = *orbUi.value(),
           .level = *orbLevel.value(),
           .conn = {},
         };
@@ -1792,11 +1797,20 @@ int main(int argc, char* argv[]){
           generatedScene += data;
         }
 
-        //data-conn
+        //data-name
         {
         std::string data = "combined_entities_orb:data-name:";
           for (int i = 0; i < orbs.size(); i++){
             data = data + orbs.at(i).orbName + ((i == (orbs.size() - 1)) ? "\n" : ",");
+          }
+          generatedScene += data;
+        }
+
+        //data-orbui
+        {
+        std::string data = "combined_entities_orb:data-orbui:";
+          for (int i = 0; i < orbs.size(); i++){
+            data = data + orbs.at(i).orbUi + ((i == (orbs.size() - 1)) ? "\n" : ",");
           }
           generatedScene += data;
         }
