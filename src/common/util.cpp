@@ -1312,6 +1312,7 @@ std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::s
       bool* boolValue = std::get_if<bool>(&value);
       int* intValue = std::get_if<int>(&value);
       float* floatValue = std::get_if<float>(&value);
+      std::vector<std::string>* vecStrValue = std::get_if<std::vector<std::string>>(&value);
       if (strValue){
         rapidjson::Value jsonValue(strValue -> c_str(), allocator);
         innerMap.AddMember(jsonKey, jsonValue, allocator);
@@ -1321,6 +1322,12 @@ std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::s
         innerMap.AddMember(jsonKey, *intValue, allocator);
       }else if (floatValue){
         innerMap.AddMember(jsonKey, *floatValue, allocator);
+      }else if (vecStrValue){
+        rapidjson::Value jsonArray(rapidjson::kArrayType);
+        for (auto& element : *vecStrValue){
+          jsonArray.PushBack(rapidjson::Value(element.c_str(), allocator), allocator);
+        }
+        innerMap.AddMember(jsonKey, jsonArray, allocator);
       }else{
         modassert(strValue != NULL, "saveToJson only string, bool, int supported");
       }
@@ -1372,8 +1379,19 @@ std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadF
         }else if (innerObj -> value.IsFloat()){
           float innerVal = innerObj -> value.GetFloat();
           mapData.at(key)[innerKey] = innerVal;
+        }else if (innerObj -> value.IsArray()){
+          for (rapidjson::SizeType i = 0; i < innerObj -> value.Size(); ++i) {
+              rapidjson::Value& element = innerObj -> value[i];
+              std::vector<std::string> values;
+              if (element.IsString()) {
+                values.push_back(element.GetString());
+              }else{
+                modassert(false, "loadFromJson array - not a string type, unsupported");
+              }
+              mapData.at(key)[innerKey] = values;
+          }
         }else{
-          modassert(false, "only string type or bool supported to be loaded");
+          modassert(false, "loadFromJson type not supported for loading");
         }
       }
     }else{
