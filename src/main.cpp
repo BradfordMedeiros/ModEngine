@@ -1744,6 +1744,16 @@ int main(int argc, char* argv[]){
           .attributeValue = *gemValue.value(),
         });
 
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "condition",
+          .attributeValue = "true",
+        });
+
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "gem-label",
+          .attributeValue = *gemValue.value(),
+        });
+
       }else{
         std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
         *shouldWrite = false;
