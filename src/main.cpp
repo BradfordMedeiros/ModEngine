@@ -1703,6 +1703,47 @@ int main(int argc, char* argv[]){
         orbEntity.conn = connections;
         orbs.push_back(orbEntity);
 
+      }else if (*className.value() == "gem"){
+        *shouldWrite = true;
+
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "scale",
+          .attributeValue = glm::vec3(1.f, 1.f, 1.f),
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_shape",
+          .attributeValue = "shape_sphere",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics",
+          .attributeValue = "enabled",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_collision",
+          .attributeValue = "nocollide",
+        });
+
+        // Replace with a better gem model
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = "./res/models/box/crate.gltf",
+        });
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "tint",
+          .attributeValue = glm::vec4(1.f, 0.f, 0.f, 1.f),
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "layer",
+          .attributeValue = "transparency",
+        });
+
+        auto gemValue = getValue(entity, "gem");
+        modassert(gemValue.has_value(), "gem does not have a value");
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "gem",
+          .attributeValue = *gemValue.value(),
+        });
+
       }else{
         std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
         *shouldWrite = false;
