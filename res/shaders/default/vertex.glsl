@@ -23,6 +23,7 @@ uniform mat4 lightsprojview;
 // global 
 uniform bool showBoneWeight;
 uniform bool useBoneTransform;
+uniform vec3 cameraPosition;
 
 
 out vec2 TexCoord;
@@ -77,6 +78,7 @@ void main(){
       if (useInstancing){
         fullmodel = model  * (inverse(groupToModel) * mul);
       }
+
       modelPosition = fullmodel * vec4(aPos.xyz, 1.0);
 
       /*if (totalWeight == 1){
@@ -111,6 +113,7 @@ void main(){
 
     gl_Position = projview * modelPosition;
     TexCoord = aTexCoords;
+
     Normal = mat3(transpose(inverse(model))) * aNormal;  
     FragPos = modelPosition.xyz;
     sshadowCoord = lightsprojview * vec4(FragPos, 1.0);

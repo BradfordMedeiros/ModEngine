@@ -570,7 +570,9 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
     std::cout << "layer fov: " << layer.fovRaw << std::endl;
 
     auto proj = projection == NULL ? projectionFromLayer(layer, viewport) : *projection;
-    auto newProjView = (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj) * (layer.disableViewTransform ? glm::mat4(1.f) : view);
+    auto projMat = (layer.orthographic ?  glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) :  proj);
+    auto viewMat = (layer.disableViewTransform ? glm::mat4(1.f) : view);
+    auto newProjView = projMat * viewMat;
 
     bool isTransparencyLayer = layer.symbol == transparencyLayer;
     for (auto& data : datum){
@@ -619,9 +621,6 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
         }
         glProgramUniform1i(newShader, glGetUniformLocation(newShader, "enableLighting"), layer.lighting); // TODO - add type safety and stuff to this
 
-        shaderSetUniform(newShader, "projview", newProjView);
-
-        shaderSetUniform(*waterShader, "projview", newProjView);
 
         static glm::mat4 scaledModelMatrix(1.f); // copy assignent showed up in profiling, so just using static here so can prevent copy in most cases
         glm::mat4& finalModelMatrix = modelMatrix;
@@ -682,7 +681,10 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
               gameobjBuffer.lookup,
               *waterShader,
               isTransparencyLayer,
-              viewport.index
+              viewport.index,
+              newProjView,
+              projMat,
+              viewMat
             );
             numTriangles = numTriangles + trianglesDrawn;
           }

@@ -42,7 +42,7 @@ vec3 calculatePhongLight(vec3 normal, out vec3 lightPos, out bool hasLight, bool
     vec3 diffuse = max(dot(normal, lightDir), 0.0) * vec3(1.0, 1.0, 1.0);
     vec3 viewDir = normalize(cameraPosition - FragPos);
     vec3 reflectDir = reflect(-lightDir, normal);  
-    vec3 specular = pow(max(dot(viewDir, reflectDir), 0.0), 32) * vec3(1.0, 1.0, 1.0);  
+    vec3 specular = pow(max(dot(viewDir, reflectDir), 0.0), 32) * vec3(0.0, 0.0, 0.00);  
     float attenuation = calcAttenutation(lightIndex);
 
     totalDiffuse = totalDiffuse + angleFactor * (attenuation * diffuse * lightscolor[lightIndex]);
@@ -77,10 +77,10 @@ vec3 calculatePhongLight(vec3 normal, out vec3 lightPos, out bool hasLight, bool
         angleFactor = (angle - minAngle) / (maxAngle - minAngle);
       }
 
-      vec3 diffuse = max(dot(normal, lightDir), 0.0) * vec3(1.0, 1.0, 1.0);
+      vec3 diffuse = max(dot(normal, lightDir), 0.0) * vec3(0.4, 0.4, 0.4);
       vec3 viewDir = normalize(cameraPosition - FragPos);
       vec3 reflectDir = reflect(-lightDir, normal);  
-      vec3 specular = pow(max(dot(viewDir, reflectDir), 0.0), 32) * vec3(1.0, 1.0, 1.0);  
+      vec3 specular = pow(max(dot(viewDir, reflectDir), 0.0), 32) * vec3(0.3, 0.3, 0.3);  
       float attenuation = calcAttenutation(lightIndex);
 
       totalDiffuse = totalDiffuse + angleFactor * (attenuation * diffuse * lightscolor[lightIndex]);

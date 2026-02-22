@@ -1010,6 +1010,13 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 
   int meshId = 0;
   std::vector<int> meshIds;
+
+  auto material = getValue(entity, "material");
+  bool isSky = false;
+  if (material.has_value() && (*material.value() == "sky")){
+  	isSky = true;
+  }
+
   for (auto& [texturePath, meshForTexture] : meshForTextures){
   	std::vector<unsigned int> indexs;
   	addPointsToSimpleMesh(meshForTexture.points, indexs);
@@ -1023,6 +1030,8 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   	auto normalTexture = lookupNormalTexture(texture);
   	//modassert(normalTexture.has_value(), std::string("normal for texture does not exist: ") + texture);
   	auto generatedMesh = generateMeshRaw(meshForTexture.points, meshForTexture.uvCoords, indexs, &texture, normalTexture.has_value() ? &normalTexture.value() : NULL);
+  	generatedMesh.isWater = isSky;
+  	
   	meshIds.push_back(meshId);
   	modelDataCore2.modelData.meshIdToMeshData[meshId] = generatedMesh;
    	

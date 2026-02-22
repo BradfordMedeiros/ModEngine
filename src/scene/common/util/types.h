@@ -43,6 +43,7 @@ struct MeshData {
   bool hasNormalTexture = false;
   BoundInfo boundInfo;
   std::vector<Bone> bones;
+  bool isWater = false;
 };
 
 struct Line {

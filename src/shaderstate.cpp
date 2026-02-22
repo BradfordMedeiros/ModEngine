@@ -68,7 +68,7 @@ void initDefaultShader(unsigned int shader){
 	 	"bones[0]", "hasBones", "cameraPosition", "discardTexAmount", "emissionAmount", "enableAttenutation", "enableDiffuse",
 	 	"enableLighting", "enableShadows", "enableSpecular", "visualizeVoxelLighting",
  		"model", "numlights", "shadowIntensity", "useBoneTransform",
-    "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture", "lightTexture",
+    "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture", "sky", "lightTexture",
     "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscoord[0]", "lightscolor[0]", "lightsdir[0]", "lightsdirmat[0]", "lightsisdir[0]", "lightstexindex[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "voxelcellwidth", "voxelOffset", "defaultVoxelLight",
     "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview", "realtime", "time", 
 
@@ -103,6 +103,9 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
   glProgramUniform1i(shader, glGetUniformLocation(shader, "enableLighting"), true); // TODO - add type safety and stuff to this
 
   shaderSetUniform(shader, "cameraPosition", cameraPosition);
+
+  glProgramUniform1i(shader, glGetUniformLocation(shader, "sky"), false); // TODO - add type safety and stuff to this
+
 
   if (!isSelection){
     if (lightMatrixs.size() > 0){
@@ -235,7 +238,7 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
   setUniformData(shader, uniformData, {
     "textureid", "bones[0]", "encodedid", "hasBones", "model", "discardTexAmount", 
     "emissionAmount", 
-    "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture",
+    "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture", "sky", 
     "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscoord[0]", "lightscolor[0]", "lightsdir[0]", "lightsdirmat[0]", "lightsisdir[0]", "lightstexindex[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth", "voxelOffset",
     "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview",
 

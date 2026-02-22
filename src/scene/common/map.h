@@ -53,7 +53,6 @@ std::optional<glm::vec3> getVec3Value(MapData& mapData, Entity& entity, const ch
 bool isLayerEntity(Entity& entity, int* layerId);
 
 void writeMapModelFile(MapData& mapData, std::string filepath);
-std::vector<Mesh> loadMapModel(MapData& mapData, std::string filepath);
 
 struct GameobjAttributeOpts {
   std::string field;

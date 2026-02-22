@@ -367,8 +367,14 @@ int renderObject(
   ObjTypeLookup& lookup,
   unsigned int waterShader,
   bool isTransparencyLayer,
-  int viewportId
+  int viewportId,
+  glm::mat4& projview,
+  glm::mat4& proj,
+  glm::mat4& view
 ){
+
+  shaderSetUniform(shaderProgram, "projview", projview);
+  shaderSetUniform(waterShader, "projview", projview);
 
   if (lookup.type ==  OBJ_MESH){
     goto mesh;
@@ -413,6 +419,7 @@ int renderObject(
       int numTriangles = 0;
       for (int x = 0; x < meshObj -> meshesToRender.size(); x++){
         Mesh& meshToRender = meshObj -> meshesToRender.at(x);
+        auto isWater = meshToRender.isWater;
         shaderLogDebug((std::string("draw mesh: ") + meshObj -> meshNames.at(x)).c_str());
   
         MeshUniforms meshUniforms {
@@ -428,7 +435,19 @@ int renderObject(
           .bones = &meshToRender.bones,
           .id = id,
         };
-        drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms);   
+        if (isWater){
+          glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "sky"), true); // TODO - add type safety and stuff to this
+          glm::mat4 modelRotationOnly = glm::mat4(glm::mat3(finalModelMatrix)); // keep rotation, zero translation
+
+          auto value = glm::mat3(view);  // Removes last column aka translational component --> thats why when you move skybox no move!
+          auto projview = proj * glm::mat4(value);
+
+          drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms);   
+          glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "sky"), false); // TODO - add type safety and stuff to this
+        }else{
+          drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms);   
+
+        }
         numTriangles = numTriangles + meshToRender.numTriangles; 
       }
       return numTriangles;

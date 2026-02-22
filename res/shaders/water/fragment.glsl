@@ -39,6 +39,7 @@ uniform bool hasOpacityTexture;
 uniform bool hasCubemapTexture;
 uniform bool hasRoughnessTexture;
 uniform bool hasNormalTexture;
+uniform bool sky;
 uniform float shadowIntensity;
 
 uniform vec2 textureOffset;
@@ -154,7 +155,8 @@ float calcAttenutation(int lightNumber){
 uniform float time;
 
 vec4 calcWaveOffsetColor(vec3 position){
-  return 0 * cos(time) * vec4(0, 0.05 * cos(position.x ), 0 * cos(position.x + time), 0) + (emissionAmount.x * vec4(1, 0, 0, 0));
+  vec4 value = 0 * cos(time) * vec4(0, 0.05 * cos(position.x ), 0 * cos(position.x + time), 0) + (emissionAmount.x * vec4(1, 0, 0, 0));
+  return vec4(value.xyz, 1);
 }
 
 
@@ -164,6 +166,9 @@ vec2 scrollWater(vec2 coords, float waterSpeed){
 }
 
 void main(){
+    if (sky){
+      discard;
+    }
     //EncodeId = vec4(encodedid.x, encodedid.y, encodedid.z, encodedid.w);
     //UVCoords = vec4(TexCoord.x, TexCoord.y, textureid, 0);
     
@@ -244,7 +249,7 @@ void main(){
 
 
     if (enableLighting){
-      FragColor = (tint * ( calcWaveOffsetColor(FragPos) + vec4(color.xyz * shadowDelta, 0.6)));
+      FragColor = (tint * ( calcWaveOffsetColor(FragPos) + vec4(color.xyz * shadowDelta, 0)));
     }else{
       FragColor = tint * texColor * 0;
     }

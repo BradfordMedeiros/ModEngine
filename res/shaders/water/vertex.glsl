@@ -30,9 +30,9 @@ uniform bool useBoneTransform;
 
 uniform float time;
 
-float waveLeftandRight = 0.001;
-float waveHeight = 0.002;
-float waveForwardTurb = 0.001;
+float waveLeftandRight = 0.01;
+float waveHeight = 2.2;
+float waveForwardTurb = 0.01;
 float waveSpeed = 0.6;
 vec3 calcWaveOffset(vec3 position){
 	return position + vec3(waveForwardTurb * cos(position.x + (waveSpeed * time)), (-1 * waveHeight)- (waveHeight * cos((position.x * 20)  + (waveSpeed * time))), waveLeftandRight  * cos(position.x + (waveSpeed * time)));

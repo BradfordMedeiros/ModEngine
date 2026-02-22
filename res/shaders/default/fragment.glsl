@@ -33,6 +33,7 @@ uniform bool hasOpacityTexture;
 uniform bool hasCubemapTexture;
 uniform bool hasRoughnessTexture;
 uniform bool hasNormalTexture;
+uniform bool sky;
 
 uniform vec2 textureOffset;
 uniform vec2 textureTiling;
@@ -169,13 +170,23 @@ void main(){
     EncodeId = vec4(encodedid.x, encodedid.y, encodedid.z, encodedid.w);
     UVCoords = vec4(TexCoord.x, TexCoord.y, textureid, 0);
 
+    /////////
+    vec2 NewTexCoord = TexCoord;
+    if (sky){
+      vec3 toVertex = FragPos - cameraPosition;
+      float dist = length(toVertex);        // distance from camera to vertex
+      NewTexCoord = toVertex.xz / dist * 0.1; // divide by distance → perspective      
+    }
+
+    /////////////////
+
     if (hasCubemapTexture){
       FragColor = tint * texture(cubemapTexture, normalize(vec3(FragPos.x, FragPos.y, -1 * FragPos.z)));
       return;
     }
 
     vec3 shadowCoord = sshadowCoord.xyz * 0.5 + 0.5;
-    vec2 offsetTexCoord = vec2(TexCoord.x, TexCoord.y); 
+    vec2 offsetTexCoord = vec2(NewTexCoord.x, NewTexCoord.y); 
   
     vec2 adjustedTexCoord = mod(offsetTexCoord * textureTiling, 1) * textureSize + textureOffset;
 
@@ -249,7 +260,7 @@ void main(){
       vec4 lightTextureColor = texture(lightTexture, uv);
   
       //color = color + vec4(lightTextureColor.rgb, 0);      
-      color = color * vec4(0.2 + lightTextureColor.r, 0.2 + lightTextureColor.g, 0.2 + lightTextureColor.b, 1);      
+      color = color  + vec4(0.05 * lightTextureColor.r, 0.05 * lightTextureColor.g, 0.05 * lightTextureColor.b, 0);      
 
     }
 
