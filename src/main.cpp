@@ -2857,10 +2857,7 @@ int main(int argc, char* argv[]){
       PROFILE("MAIN",
         statistics.numTriangles = renderWithProgram(renderContext, renderStages.main, viewport);
     
-
         shaderLogDebug("read-selection");
-
-
 
         auto selectionResult = readSelectionFromBuffer(false, adjustedCoords);
         if (uiSelectionResult.id.has_value()){

@@ -128,6 +128,7 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
     .numTriangles = numTriangles,
     .numVertices = meshData.vertices.size(),
     .numIndices = meshData.indices.size(),
+    .isSky = meshData.isSky,
     .isWater = meshData.isWater,
     //.debugVertexs = meshData.vertices,
   }; 

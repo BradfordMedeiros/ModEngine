@@ -419,7 +419,6 @@ int renderObject(
       int numTriangles = 0;
       for (int x = 0; x < meshObj -> meshesToRender.size(); x++){
         Mesh& meshToRender = meshObj -> meshesToRender.at(x);
-        auto isWater = meshToRender.isWater;
         shaderLogDebug((std::string("draw mesh: ") + meshObj -> meshNames.at(x)).c_str());
   
         MeshUniforms meshUniforms {
@@ -435,18 +434,31 @@ int renderObject(
           .bones = &meshToRender.bones,
           .id = id,
         };
-        if (isWater){
-          glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "sky"), true); // TODO - add type safety and stuff to this
+        if (meshToRender.isSky){
+          glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "sky"), true);
           glm::mat4 modelRotationOnly = glm::mat4(glm::mat3(finalModelMatrix)); // keep rotation, zero translation
 
           auto value = glm::mat3(view);  // Removes last column aka translational component --> thats why when you move skybox no move!
           auto projview = proj * glm::mat4(value);
 
           drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms);   
-          glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "sky"), false); // TODO - add type safety and stuff to this
+          glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "sky"), false);
+        }else if(meshToRender.isWater){
+          glUseProgram(waterShader); 
+          auto cubemap = getTestCubemap();
+          MeshUniforms waterUniforms {
+            .model = finalModelMatrix,
+            //.customTextureId = getWaterTexture().textureId,
+            .id = id,
+          };
+          if (cubemap.has_value()){
+            waterUniforms.customCubemapTextureId = cubemap.value().textureId;
+          }
+          drawMesh(meshToRender, waterShader, drawPoints, meshUniforms);   
+          
+          glUseProgram(shaderProgram);        
         }else{
           drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms);   
-
         }
         numTriangles = numTriangles + meshToRender.numTriangles; 
       }
