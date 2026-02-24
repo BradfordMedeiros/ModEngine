@@ -276,7 +276,6 @@ void main(){
     }
 
 
-
     //if (FragColor.r > 0.2 || FragColor.g > 0.2 || FragColor.b > 0.2){
     //  FragColor *= 1.5;
     //  FragColor.w = 1;

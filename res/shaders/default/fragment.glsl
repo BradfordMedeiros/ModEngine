@@ -175,7 +175,7 @@ void main(){
     if (sky){
       vec3 toVertex = FragPos - cameraPosition;
       float dist = length(toVertex);        // distance from camera to vertex
-      NewTexCoord = toVertex.xz / dist * 0.1; // divide by distance → perspective      
+      NewTexCoord = toVertex.xz / dist * 2.4; // divide by distance → perspective      
     }
 
     /////////////////
