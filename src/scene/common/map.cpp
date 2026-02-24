@@ -744,7 +744,86 @@ struct Triangle {
     std::string* texture;
 };
 
-std::vector<Triangle> triangulateFace(FaceVertexAssignment& faceAssignment) {
+bool needsTriangulation(Triangle& triangle){
+	float minDistance = 2.f;
+	if (glm::distance(triangle.vertex0, triangle.vertex1) > minDistance){
+		return true;
+	}
+	if (glm::distance(triangle.vertex0, triangle.vertex2) > minDistance){
+		return true;
+	}
+	return false;
+}
+
+std::vector<Triangle> subdivide(Triangle& triangle){
+	auto midpoint_0_to_1 = 0.5f * (triangle.vertex0 + triangle.vertex1);
+	auto midpoint_uv_0_to_1 = 0.5f * (triangle.vertex0Uv + triangle.vertex1Uv);
+
+	auto midpoint_0_to_2 = 0.5f * (triangle.vertex0 + triangle.vertex2);
+	auto midpoint_uv_0_to_2 = 0.5f * (triangle.vertex0Uv + triangle.vertex2Uv);
+
+	auto midpoint_1_to_2 = 0.5f * (triangle.vertex1 + triangle.vertex2);
+	auto midpoint_uv_1_to_2 = 0.5f * (triangle.vertex1Uv + triangle.vertex2Uv);
+
+	Triangle triangle0 {
+    .vertex0 = triangle.vertex0,
+    .vertex1 = midpoint_0_to_1,
+    .vertex2 = midpoint_0_to_2,
+    .vertex0Uv = triangle.vertex0Uv,
+    .vertex1Uv = midpoint_uv_0_to_1,
+    .vertex2Uv = midpoint_uv_0_to_2,
+   	.texture = triangle.texture,
+	};
+	Triangle triangle1 {
+    .vertex0 = triangle.vertex1,
+    .vertex1 = midpoint_1_to_2,
+    .vertex2 = midpoint_0_to_1,
+    .vertex0Uv = triangle.vertex1Uv,
+    .vertex1Uv = midpoint_uv_1_to_2,
+    .vertex2Uv = midpoint_uv_0_to_1,
+   	.texture = triangle.texture,
+	};
+	Triangle triangle2 {
+    .vertex0 = triangle.vertex2,
+    .vertex1 = midpoint_0_to_2,
+    .vertex2 = midpoint_1_to_2,
+    .vertex0Uv = triangle.vertex2Uv,
+    .vertex1Uv = midpoint_uv_0_to_2,
+    .vertex2Uv = midpoint_uv_1_to_2,
+   	.texture = triangle.texture,
+	};
+	Triangle triangle3 {
+    .vertex0 = midpoint_0_to_1,
+    .vertex1 = midpoint_1_to_2,
+    .vertex2 = midpoint_0_to_2,
+    .vertex0Uv = midpoint_uv_0_to_1,
+    .vertex1Uv = midpoint_uv_1_to_2,
+    .vertex2Uv = midpoint_uv_0_to_2,
+   	.texture = triangle.texture,
+	};
+
+	return { triangle0, triangle1, triangle2, triangle3 };
+}
+
+std::vector<Triangle> triangulateWater(Triangle triangle, bool isWater){
+	if (!isWater){
+		return { triangle };
+	}
+	if (!needsTriangulation(triangle)){
+		return { triangle };
+	}
+	auto triangles = subdivide(triangle);
+	std::vector<Triangle> newTriangles;
+	for (auto& triangle : triangles){
+		auto subdivided = triangulateWater(triangle, isWater);
+		for (auto& subdivideTriangle : subdivided){
+			newTriangles.push_back(subdivideTriangle);
+		}
+	}
+	return newTriangles;
+}
+
+std::vector<Triangle> triangulateFace(FaceVertexAssignment& faceAssignment, bool isWater) {
     if (faceAssignment.vertices.size() < 3) {
     	//modassert(false, std::string("face assignment invalid number of vertices < 3: num = ") + std::to_string(faceAssignment.vertices.size()));
     	return {};
@@ -753,17 +832,21 @@ std::vector<Triangle> triangulateFace(FaceVertexAssignment& faceAssignment) {
     // Fan from the center, vertices form a perimeter so the triangles are the edge and connect to the center
     std::vector<Triangle> triangles;
     for (size_t i = 1; i + 1 < faceAssignment.vertices.size(); ++i) {
-        triangles.push_back(Triangle {
-        	.vertex0 = faceAssignment.vertices.at(0).pos,
-        	.vertex1 = faceAssignment.vertices.at(i).pos,
-        	.vertex2 = faceAssignment.vertices.at(i + 1).pos,
+    	Triangle triangle {
+        .vertex0 = faceAssignment.vertices.at(0).pos,
+        .vertex1 = faceAssignment.vertices.at(i).pos,
+        .vertex2 = faceAssignment.vertices.at(i + 1).pos,
 
-        	.vertex0Uv = faceAssignment.vertices.at(0).uv,
-        	.vertex1Uv = faceAssignment.vertices.at(i).uv,
-        	.vertex2Uv = faceAssignment.vertices.at(i + 1).uv,
+        .vertex0Uv = faceAssignment.vertices.at(0).uv,
+        .vertex1Uv = faceAssignment.vertices.at(i).uv,
+        .vertex2Uv = faceAssignment.vertices.at(i + 1).uv,
 
-        	.texture = &faceAssignment.face -> texture,
-        });
+        .texture = &faceAssignment.face -> texture,
+    	};
+    	auto allTriangles = triangulateWater(triangle, isWater);
+    	for (auto& triangle : allTriangles){
+	    	triangles.push_back(triangle);
+    	}
     }
     return triangles;
 }
@@ -902,6 +985,18 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 
   Entity& entity = parsedPath.entityIndex.has_value() ? getEntityByIndex(mapData, parsedPath.entityIndex.value()) : getEntityByName(mapData, "worldspawn");
 
+  auto material = getValue(entity, "material");
+  bool isSky = false;
+  bool isWater = false;
+
+  if (material.has_value() && (*material.value() == "sky")){
+  	isSky = true;
+  }
+  if (material.has_value() && (*material.value() == "water")){
+  	isWater = true;
+  }
+
+
   std::unordered_map<std::string, MapRawValue> meshForTextures;
 
   MapBoundingBox boundingBox{};
@@ -961,7 +1056,7 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 
   	for(auto& faceVertice : faceVertices){
 	    std::cout << "Face has " << faceVertice.vertices.size() << " vertices\n";
-	  	auto triangles = triangulateFace(faceVertice);
+	  	auto triangles = triangulateFace(faceVertice, isWater);
 
 	  	for (auto& triangle : triangles){
 	  		auto texture = textureForMapTextureName(*triangle.texture);
@@ -1011,16 +1106,6 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   int meshId = 0;
   std::vector<int> meshIds;
 
-  auto material = getValue(entity, "material");
-  bool isSky = false;
-  bool isWater = false;
-
-  if (material.has_value() && (*material.value() == "sky")){
-  	isSky = true;
-  }
-  if (material.has_value() && (*material.value() == "water")){
-  	isWater = true;
-  }
 
   for (auto& [texturePath, meshForTexture] : meshForTextures){
   	std::vector<unsigned int> indexs;

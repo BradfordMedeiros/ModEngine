@@ -1578,6 +1578,21 @@ int main(int argc, char* argv[]){
           });
         }
 
+      }else if (*className.value() == "water"){
+        *shouldWrite = true;
+        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+          .field = "mesh",
+          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".brush",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics_shape",
+          .attributeValue = "shape_box",
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "physics",
+          .attributeValue = "enabled",
+        });
+
       }else if (*className.value() == "teleport_zone"){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
@@ -1759,6 +1774,24 @@ int main(int argc, char* argv[]){
       }else{
         std::cout << "compile map unrecognized type: " << *className.value() << std::endl;
         *shouldWrite = false;
+      }
+
+      auto layer = getValue(entity, "layer");
+      if (layer.has_value()){
+        bool foundLayer = false;
+        for (auto& attribute : attributes){
+          if (attribute.field == "layer"){
+            foundLayer = true;
+            break;
+          }
+        }
+        if (!foundLayer){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "layer",
+            .attributeValue = *layer.value(),
+          });          
+        }
+
       }
       /*
         playerspawn:teleport:true
