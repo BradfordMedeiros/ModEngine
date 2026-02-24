@@ -425,7 +425,7 @@ std::optional<glm::vec3> getUnitVec3Value(MapData& mapData, Entity& entity, cons
 	return position;
 }
 
-std::optional<glm::vec3> getVec3Value(MapData& mapData, Entity& entity, const char* key){
+std::optional<glm::vec3> getVec3Value(Entity& entity, const char* key){
 	auto value = getKeyValue(entity.keyValues, key);
 	if (!value.has_value()){
 		return std::nullopt;

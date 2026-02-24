@@ -1677,7 +1677,7 @@ int main(int argc, char* argv[]){
         modassert(railIndex.has_value(), "rail-index does not have a value");
 
         auto railTime = getIntValue(entity, "time");
-        auto rotationEuler = getVec3Value(mapData, entity, "angles");
+        auto rotationEuler = getVec3Value(entity, "angles");
 
         rails.push_back(RailEntity {
           .position = position.value(),
@@ -1701,7 +1701,7 @@ int main(int argc, char* argv[]){
         auto orbLevel = getValue(entity, "level");
         modassert(orbLevel.has_value(), "orb does not have a level");
 
-        auto rotationEuler = getVec3Value(mapData, entity, "angles");
+        auto rotationEuler = getVec3Value(entity, "angles");
         auto rotation = rotationEuler.has_value() ? rotationEuler.value() : glm::vec3(0.f, 0.f, 0.f);
 
         OrbEntity orbEntity {
@@ -1791,7 +1791,23 @@ int main(int argc, char* argv[]){
             .attributeValue = *layer.value(),
           });          
         }
+      }
 
+      auto scroll = getVec3Value(entity, "scroll");
+      if (scroll.has_value()){
+        bool foundLayer = false;
+        for (auto& attribute : attributes){
+          if (attribute.field == "scrollspeed"){
+            foundLayer = true;
+            break;
+          }
+        }
+        if (!foundLayer){
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "scrollspeed",
+            .attributeValue = scroll.value(),
+          });          
+        }
       }
       /*
         playerspawn:teleport:true

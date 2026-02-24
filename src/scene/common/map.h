@@ -48,7 +48,7 @@ std::optional<std::string*> getValue(Entity& entity, const char* key);
 std::optional<int> getIntValue(Entity& entity, const char* key);
 std::optional<glm::vec3> getScaledVec3Value(MapData& mapData, Entity& entity, const char* key);
 std::optional<glm::vec3> getUnitVec3Value(MapData& mapData, Entity& entity, const char* key);
-std::optional<glm::vec3> getVec3Value(MapData& mapData, Entity& entity, const char* key);
+std::optional<glm::vec3> getVec3Value(Entity& entity, const char* key);
 
 bool isLayerEntity(Entity& entity, int* layerId);
 
