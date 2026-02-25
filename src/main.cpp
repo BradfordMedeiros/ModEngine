@@ -1186,6 +1186,21 @@ std::vector<int> getOrbConnectionIndex(std::vector<OrbEntity>& orbs, int index){
   return connections;
 }
 
+void addCoreTrench(std::vector<GameobjAttributeOpts>& attributes, std::string meshpath){
+  attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
+    .field = "mesh",
+    .attributeValue = meshpath,
+  });
+  attributes.push_back(GameobjAttributeOpts {
+    .field = "physics_shape",
+    .attributeValue = "shape_exact",
+  });
+  attributes.push_back(GameobjAttributeOpts {
+    .field = "physics",
+    .attributeValue = "enabled",
+  });
+}
+
 void onGLFWEerror(int error, const char* description){
   std::cerr << "Error: " << description << std::endl;
 }
@@ -1383,18 +1398,8 @@ int main(int argc, char* argv[]){
       if (isLayerEntity(entity, &layerIndex) && entity.brushes.size() > 0){
         // same as world spawn, but without added keys
         *shouldWrite = true;
-        attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-          .field = "mesh",
-          .attributeValue = brushFileOut + "," + std::to_string(entity.index) + ".brush",
-        });
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "physics_shape",
-          .attributeValue = "shape_exact",
-        });
-        attributes.push_back(GameobjAttributeOpts {
-          .field = "physics",
-          .attributeValue = "enabled",
-        });
+
+        addCoreTrench(attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
 
       }else if (*className.value() == "player_start"){
         *modelName = "playerspawn";
@@ -1493,18 +1498,8 @@ int main(int argc, char* argv[]){
         });
       }else if (*className.value() == "worldspawn"){
           *shouldWrite = true;
-          attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
-            .field = "mesh",
-            .attributeValue = brushFileOut,
-          });
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "physics_shape",
-            .attributeValue = "shape_exact",
-          });
-          attributes.push_back(GameobjAttributeOpts {
-            .field = "physics",
-            .attributeValue = "enabled",
-          });
+
+          addCoreTrench(attributes, brushFileOut);
 
           for (auto &keyValue : entity.keyValues){
             if (keyValue.key == "_tb_textures" || keyValue.key == "classname" || keyValue.key == "_tb_def"){
@@ -1578,6 +1573,19 @@ int main(int argc, char* argv[]){
           });
         }
 
+      }else if (*className.value() == "bouncepad"){
+        *shouldWrite = true;
+        addCoreTrench(attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "bounce",
+          .attributeValue = glm::vec3(0.f, 0.f, -200.f),
+        });
+        //attributes.push_back(GameobjAttributeOpts {
+        //  .field = "bouncetype",
+        //  .attributeValue = "fixed",
+        //});
+      }else if (*className.value() == "conveyer"){
+       // modassert(false, "conveyer not yet implemented");
       }else if (*className.value() == "water"){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
