@@ -1576,16 +1576,19 @@ int main(int argc, char* argv[]){
       }else if (*className.value() == "bouncepad"){
         *shouldWrite = true;
         addCoreTrench(attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
+        auto magnitude = getIntValue(entity, "mag");
         attributes.push_back(GameobjAttributeOpts {
           .field = "bounce",
-          .attributeValue = glm::vec3(0.f, 0.f, -200.f),
+          .attributeValue = glm::vec3(0.f, 0.f, -1.f * (magnitude.has_value() ? magnitude.value() : 1)),
         });
-        //attributes.push_back(GameobjAttributeOpts {
-        //  .field = "bouncetype",
-        //  .attributeValue = "fixed",
-        //});
       }else if (*className.value() == "conveyer"){
-       // modassert(false, "conveyer not yet implemented");
+        *shouldWrite = true;
+        addCoreTrench(attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "modspeed",
+          .attributeValue = glm::vec3(0.f, 0.f, -50.f),
+        });
+
       }else if (*className.value() == "water"){
         *shouldWrite = true;
         attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
