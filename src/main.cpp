@@ -1584,9 +1584,10 @@ int main(int argc, char* argv[]){
       }else if (*className.value() == "conveyer"){
         *shouldWrite = true;
         addCoreTrench(attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
+        auto modspeed = getVec3Value(entity, "move");
         attributes.push_back(GameobjAttributeOpts {
           .field = "modspeed",
-          .attributeValue = glm::vec3(0.f, 0.f, -50.f),
+          .attributeValue = modspeed.value(),
         });
 
       }else if (*className.value() == "water"){
