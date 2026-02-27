@@ -1573,6 +1573,43 @@ int main(int argc, char* argv[]){
           });
         }
 
+      }else if (*className.value() == "killplane"){
+        *shouldWrite = true;
+        addCoreTrench(attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
+      }else if (*className.value() == "laser"){
+        *shouldWrite = true;
+        addCoreTrench(attributes, "../gameresources/build/objtypes/spawnpoint.gltf");
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "tint",
+          .attributeValue = glm::vec4(0.f, 1.f, 0.f, 1.f),
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "scale",
+          .attributeValue = glm::vec3(5.f, 5.f, 5.f),
+        });
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "laser",
+          .attributeValue = "true",
+        });    
+
+        // this is wrong
+        auto rotationEuler = getVec3Value(entity, "angles");
+        if (rotationEuler.has_value()){
+
+          auto rotation = quatFromTrenchBroomAngles(
+            rotationEuler.value().x,  // pitch
+            rotationEuler.value().y,  // yaw
+            -1 * rotationEuler.value().z   // roll
+          );
+          auto vecValue = serializeQuatToVec4(rotation);
+
+          attributes.push_back(GameobjAttributeOpts {
+            .field = "rotation",
+            .attributeValue = vecValue,
+          });              
+        }
+        ///////////////////////////////
+
       }else if (*className.value() == "bouncepad"){
         *shouldWrite = true;
         addCoreTrench(attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");

@@ -1136,3 +1136,18 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 
   return modelDataCore2;
 }
+
+
+glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll) {
+	float pitchRad = glm::radians(pitch);
+	float yawRad   = glm::radians(yaw);
+	float rollRad  = glm::radians(roll);
+
+	glm::quat qPitch = glm::angleAxis(pitchRad, glm::vec3(0, 0, -1));
+	glm::quat qYaw   = glm::angleAxis(yawRad,   glm::vec3(0, 1,  0));
+	glm::quat qRoll  = glm::angleAxis(rollRad,  glm::vec3(1, 0,  0));
+
+	glm::quat q = qYaw * qPitch * qRoll;
+	
+	return q;
+}
