@@ -185,7 +185,7 @@ void playEffectsAlways(){
 	}	
 }
 
-void onEffekSeekerFrame(){
+void onEffekSeekerFrame(float timeDelta){
 	static bool initialized = false;
 	if (!initialized){
 		initialized = true;
@@ -195,7 +195,7 @@ void onEffekSeekerFrame(){
 	playEffectsAlways();
 
 	Effekseer::Manager::UpdateParameter updateParameter;
-	effekseerManager -> Update(); // pass in the actual delta time
+	effekseerManager -> Update(timeDelta); // pass in the actual delta time
 
 	//for (int i = 0; i < 10000; i++){
 	//	std::cout << "hasdf" << std::endl;
@@ -208,6 +208,7 @@ void onEffekSeekerRender(float windowSizeX, float windowSizeY, float fovRadians,
 	auto viewerPosition = ::Effekseer::Vector3D(10.0f, 5.0f, 10.0f);
     auto lookAt = ::Effekseer::Vector3D(0.0f, 0.0f, 0.0f);
 
+	glm::vec3 up = viewDirection * glm::vec3(0,1,0);
 
 	{
 		viewerPosition = ::Effekseer::Vector3D(viewPosition.x, viewPosition.y, viewPosition.z);
@@ -227,7 +228,7 @@ void onEffekSeekerRender(float windowSizeX, float windowSizeY, float fovRadians,
 	projectionMatrix.PerspectiveFovRH_OpenGL(fovRadians, (float)windowSizeX / (float)windowSizeY, nearPlane, farPlane);
 
     ::Effekseer::Matrix44 cameraMatrix;
-    cameraMatrix.LookAtRH(viewerPosition, lookAt, ::Effekseer::Vector3D(0.0f, 1.0f, 0.0f));
+    cameraMatrix.LookAtRH(viewerPosition, lookAt, ::Effekseer::Vector3D(up.x, up.y, up.z));
 
 	effekRenderer->SetProjectionMatrix(projectionMatrix);
 	effekRenderer->SetCameraMatrix(cameraMatrix);

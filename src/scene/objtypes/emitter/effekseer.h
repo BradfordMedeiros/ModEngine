@@ -7,7 +7,7 @@
 #include <EffekseerRendererGL.h>
 #include "../../../common/util.h"
 
-void onEffekSeekerFrame();
+void onEffekSeekerFrame(float timeElapsed);
 void onEffekSeekerRender(float windowSizeX, float windowSizeY, float fovRadians,  glm::vec3 viewPosition, glm::quat viewDirection, float nearPlane, float farPlane);
 
 struct EffekEffect {

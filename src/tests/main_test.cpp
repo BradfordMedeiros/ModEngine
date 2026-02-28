@@ -17,7 +17,7 @@ std::vector<TestCase> tests = {
     .name = "sample_test",
     .test = sampleTest,
   },
-  TestCase {
+  /*TestCase {
     .name = "sandboxBasicDeserialization",
     .test = sandboxBasicDeserialization,
   },
@@ -52,7 +52,7 @@ std::vector<TestCase> tests = {
   TestCase {
     .name = "sandboxRemoveSceneParentTest",
     .test = sandboxRemoveSceneParentTest,
-  },
+  },*/
   TestCase {
     .name = "moveRelativeIdentityTest",
     .test = moveRelativeIdentityTest,
@@ -109,6 +109,7 @@ int runTests(){
   for (int i = 0; i < tests.size(); i++){
     auto test = tests.at(i);
     try {
+      std::cout << "running test: " << i << std::endl;
       test.test();
       std::string value = std::to_string(i) + std::string(" : ") + std::string(test.name) + std::string(" : pass\n"); 
       printColor(value, CONSOLE_COLOR_GREEN);

@@ -443,7 +443,7 @@ float angleFromQuat(glm::quat rotation){
 // At least would be nice to round the values to nearest degree maybe? 
 glm::vec4 serializeQuatToVec4(glm::quat rotation){
   auto axis = rotation * glm::vec3(0.f, 0.f, -1.f);
-  auto axisOrientation  = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), axis);
+  auto axisOrientation  = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), axis); // this removes roll
   float w = angleFromQuat(glm::inverse(axisOrientation) * rotation);
   //std::cout << "(radians, degree) : " << w << " , " << glm::degrees(w) << std::endl;
   float degreesAngle = glm::degrees(w);
@@ -457,15 +457,18 @@ std::string serializeQuat(glm::quat rotation){
 glm::vec3 quatToVec(glm::quat quat){
   return quat * glm::vec3(0.f, 0.f, -1.f);    // rotate the forward direction by the quat. 
 }
-glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
 
+glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
   if (fromPos.x == targetPosition.x && fromPos.z == targetPosition.z && !(fromPos.y == targetPosition.y)){   
     if (fromPos.y < targetPosition.y){
       return  glm::quat(glm::vec3(glm::radians(90.f), 0, 0));
     }
     return glm::quat(glm::vec3(glm::radians(-90.f), 0, 0));
   }
-  return glm::normalize(glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0)))));
+  // This is use to be different, look at history if this no good
+  glm::quat q = glm::quatLookAt(glm::normalize(targetPosition - fromPos), glm::vec3(0, 1, 0));
+  return q;
+
 }
 
 std::string serializeFloat(float value){

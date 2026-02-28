@@ -1595,11 +1595,13 @@ int main(int argc, char* argv[]){
         // this is wrong
         auto rotationEuler = getVec3Value(entity, "angles");
         if (rotationEuler.has_value()){
-
-          auto rotation = quatFromTrenchBroomAngles(
-            rotationEuler.value().x,  // pitch
-            rotationEuler.value().y,  // yaw
-            -1 * rotationEuler.value().z   // roll
+          auto x = rotationEuler.value().z;
+          auto y = rotationEuler.value().y;
+          auto z = rotationEuler.value().x;
+          auto rotation = quatFromTrenchBroomAngles2(
+            x,
+            y,
+            z
           );
           auto vecValue = serializeQuatToVec4(rotation);
 
@@ -2683,7 +2685,7 @@ int main(int argc, char* argv[]){
       goto cleanup;
     }
 
-    onEffekSeekerFrame();
+    onEffekSeekerFrame(timePlayback.getDeltaTime());
 
     resetReservedId();
     disposeTempBufferedData(lineData);
