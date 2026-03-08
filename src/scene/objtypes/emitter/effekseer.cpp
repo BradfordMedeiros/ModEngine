@@ -1,6 +1,7 @@
 #include "./effekseer.h"
 
 double timeElapsed();
+double timeSeconds(bool realtime);
 
 // notes: 
 // This exists, might be useful later, since particles not affected by lighting.  
@@ -16,27 +17,10 @@ struct EffectData {
 	std::optional<glm::quat> rotation;
 	bool loopContinuously;
 	std::string effectName;
+
+	std::optional<float> startTime;
 };
 std::unordered_map<objid, EffectData> effekseerData;
-
-
-/*class MemoryFileInterface : public Effekseer::FileInterface
-{
-public:
-    Effekseer::FileReaderRef OpenRead(const EFK_CHAR* path) override
-    {
-        // Implement: return a reader for embedded file (texture, model, etc.)
-        // You can use a map<std::u16string, std::vector<uint8_t>> of your assets
-        modassert(false, "open read not yet implemented");
-    }
-
-    Effekseer::FileWriterRef OpenWrite(const EFK_CHAR* path) override { 
-    	modassert(false, "open write not yet implemented");
-    	return nullptr; 
-    }
-};*/
-
-
 
 std::string readFileOrPackage(std::string filepath); // i dont really like directly referencing this here, but...it's ok
 unsigned int openFileOrPackage(std::string filepath);
@@ -101,26 +85,6 @@ public:
 };
 
 
-/*class MemoryFileInterface : public Effekseer::DefaultFileInterface {
-public:
-    Effekseer::FileReaderRef OpenRead(const EFK_CHAR* path) override
-    {
-    	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
-		std::string pathUtf8 = convert.to_bytes(path);
-    	modlog("memory file interface OpenRead", pathUtf8);
-        return Effekseer::DefaultFileInterface::OpenRead(path);
-    }
-
-    Effekseer::FileWriterRef OpenWrite(const EFK_CHAR* path) override { 
-    	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
-		std::string pathUtf8 = convert.to_bytes(path);
-    	modlog("memory file interface OpenWrite", pathUtf8);
-    	modassert(false, "Effekseer tried to write, this is unexpected");
-    	//return Effekseer::DefaultFileInterface::OpenWrite(path);	
-    	return nullptr;
-    }
-};*/
-
 void initEffekseer(){
   std::cout << "effekseer initialized start" << std::endl;
 
@@ -159,22 +123,32 @@ bool effectPlaying(EffectData& effect){
 	if (!effect.playingEffect.has_value()){
 		return false;
 	}
-	bool effectStillPlaying = effekseerManager->Exists(effect.playingEffect.value());
+	bool effectStillPlaying = effekseerManager -> Exists(effect.playingEffect.value());
 	return effectStillPlaying;
 }
 
 
-
-
-void playEffectsAlways(){
+bool isFinalEffectFrame(EffectData& effect, float currentTime){
+	auto elapsedTime = currentTime - effect.startTime.value();
+	auto currentFrame = std::ceil(elapsedTime * 60.0f);
+	auto term = effect.effectRef -> CalculateTerm();
+	if (currentFrame >= term.TermMin){
+		std::cout << "final frame: " << elapsedTime << ", frame = " << currentFrame << ", min = " << term.TermMin << ", max = " << term.TermMax << std::endl;
+		return true;
+	}
+	return false;
+}
+void playEffectsAlways(float currentTime){
 	for (auto& [id, effect] : effekseerData){
-		if (effect.loopContinuously && !effectPlaying(effect)){
+		bool shouldReplayEffect = !effectPlaying(effect) || isFinalEffectFrame(effect, currentTime);
+		if (effect.loopContinuously && shouldReplayEffect){
 			glm::vec3 position = effect.position.has_value() ? effect.position.value() : glm::vec3(0.f, 0.f, 0.f); // this should come from
-
 			auto effectPosition = ::Effekseer::Vector3D(position.x, position.y, position.z);
 			Effekseer::Handle playingEffect = effekseerManager -> Play(effect.effectRef, effectPosition, 0 /* start frame frame 0 seems to flicker in general */);
 		
 			effect.playingEffect = playingEffect;
+			effect.startTime = currentTime;
+
 			if (effect.rotation.has_value()){
 				glm::vec3 euler = glm::eulerAngles(effect.rotation.value());
 				effekseerManager->SetRotation(
@@ -188,14 +162,14 @@ void playEffectsAlways(){
 	}	
 }
 
-void onEffekSeekerFrame(float timeDelta){
+void onEffekSeekerFrame(float timeDelta, float currentTime){
 	static bool initialized = false;
 	if (!initialized){
 		initialized = true;
 		initEffekseer();
 	}
 
-	playEffectsAlways();
+	playEffectsAlways(currentTime);
 
 	effekseerManager -> Update(timeDelta * 60.f /* 60x because 1 = 1/60th seconds for some reason */); // pass in the actual delta time
 
@@ -264,6 +238,7 @@ EffekEffect createEffect(std::string effect, glm::vec3 position, glm::quat rotat
 		.rotation = std::nullopt,
 		.loopContinuously = false,
 		.effectName = effect,
+		.startTime = std::nullopt,
 	};
 
 	EffekEffect effekEffect {
@@ -290,9 +265,8 @@ void playEffect(EffekEffect& effect, glm::vec3 position){
 	auto effectPosition = ::Effekseer::Vector3D(position.x, position.y, position.z);
 	Effekseer::Handle playingEffect = effekseerManager -> Play(effectData.effectRef, effectPosition, 0 /* start frame frame 0 seems to flicker in general */);
 	effectData.playingEffect = playingEffect;
+	effectData.startTime = timeSeconds(false);
 	effectData.position = position;
-
-
 }
 
 void stopEffect(EffekEffect& effectEffect){
@@ -328,6 +302,7 @@ void reloadEffect(std::string file){
 			if (effect.playingEffect.has_value()){
 				effekseerManager -> StopEffect(effect.playingEffect.value());
 				effect.playingEffect = std::nullopt;
+				effect.startTime = std::nullopt;
 			}
 			effect.effectRef = NULL;
 			effect.effectRef = doCreateEffect(effect.effectName);
