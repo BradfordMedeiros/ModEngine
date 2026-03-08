@@ -2685,7 +2685,9 @@ int main(int argc, char* argv[]){
       goto cleanup;
     }
 
-    onEffekSeekerFrame(timePlayback.getDeltaTime());
+    auto deltaTime = timePlayback.getDeltaTime();
+    std::cout << "deltaTime diff: " << deltaTime << std::endl;
+    onEffekSeekerFrame(deltaTime);
 
     resetReservedId();
     disposeTempBufferedData(lineData);

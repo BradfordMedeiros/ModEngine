@@ -170,7 +170,10 @@ void playEffectsAlways(){
 	for (auto& [id, effect] : effekseerData){
 		if (effect.loopContinuously && !effectPlaying(effect)){
 			glm::vec3 position = effect.position.has_value() ? effect.position.value() : glm::vec3(0.f, 0.f, 0.f); // this should come from
-			Effekseer::Handle playingEffect = effekseerManager -> Play(effect.effectRef, position.x, position.y, position.z);
+
+			auto effectPosition = ::Effekseer::Vector3D(position.x, position.y, position.z);
+			Effekseer::Handle playingEffect = effekseerManager -> Play(effect.effectRef, effectPosition, 0 /* start frame frame 0 seems to flicker in general */);
+		
 			effect.playingEffect = playingEffect;
 			if (effect.rotation.has_value()){
 				glm::vec3 euler = glm::eulerAngles(effect.rotation.value());
@@ -194,8 +197,7 @@ void onEffekSeekerFrame(float timeDelta){
 
 	playEffectsAlways();
 
-	Effekseer::Manager::UpdateParameter updateParameter;
-	effekseerManager -> Update(timeDelta); // pass in the actual delta time
+	effekseerManager -> Update(timeDelta * 60.f /* 60x because 1 = 1/60th seconds for some reason */); // pass in the actual delta time
 
 	//for (int i = 0; i < 10000; i++){
 	//	std::cout << "hasdf" << std::endl;
@@ -284,9 +286,13 @@ void playEffect(EffekEffect& effect, glm::vec3 position){
 	stopEffect(effect);
 
 	auto& effectData = effekseerData.at(effect.effectId);
-	Effekseer::Handle playingEffect = effekseerManager -> Play(effectData.effectRef, position.x, position.y, position.z);
+
+	auto effectPosition = ::Effekseer::Vector3D(position.x, position.y, position.z);
+	Effekseer::Handle playingEffect = effekseerManager -> Play(effectData.effectRef, effectPosition, 0 /* start frame frame 0 seems to flicker in general */);
 	effectData.playingEffect = playingEffect;
 	effectData.position = position;
+
+
 }
 
 void stopEffect(EffekEffect& effectEffect){
