@@ -132,7 +132,7 @@ bool isFinalEffectFrame(EffectData& effect, float currentTime){
 	auto elapsedTime = currentTime - effect.startTime.value();
 	auto currentFrame = std::ceil(elapsedTime * 60.0f);
 	auto term = effect.effectRef -> CalculateTerm();
-	if (currentFrame >= term.TermMin){
+	if (currentFrame > term.TermMin){
 		std::cout << "final frame: " << elapsedTime << ", frame = " << currentFrame << ", min = " << term.TermMin << ", max = " << term.TermMax << std::endl;
 		return true;
 	}
@@ -162,20 +162,19 @@ void playEffectsAlways(float currentTime){
 	}	
 }
 
-void onEffekSeekerFrame(float timeDelta, float currentTime){
+void onEffekSeekerFrame(float timeDelta, float currentTime, bool paused){
 	static bool initialized = false;
 	if (!initialized){
 		initialized = true;
 		initEffekseer();
 	}
 
+	if (paused){
+		return;
+	}
+	
 	playEffectsAlways(currentTime);
-
 	effekseerManager -> Update(timeDelta * 60.f /* 60x because 1 = 1/60th seconds for some reason */); // pass in the actual delta time
-
-	//for (int i = 0; i < 10000; i++){
-	//	std::cout << "hasdf" << std::endl;
-	//}
 }
 
 void onEffekSeekerRender(float windowSizeX, float windowSizeY, float fovRadians, glm::vec3 viewPosition, glm::quat viewDirection, float nearPlane, float farPlane){
