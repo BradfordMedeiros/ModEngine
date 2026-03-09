@@ -1595,20 +1595,25 @@ int main(int argc, char* argv[]){
         // this is wrong
         auto rotationEuler = getVec3Value(entity, "angles");
         if (rotationEuler.has_value()){
-          auto x = rotationEuler.value().z;
+          auto x = rotationEuler.value().x;
           auto y = rotationEuler.value().y;
-          auto z = rotationEuler.value().x;
-          auto rotation = quatFromTrenchBroomAngles2(
+          auto z = rotationEuler.value().z;
+          auto rotation = quatFromTrenchBroomAngles(
             x,
             y,
             z
           );
           auto vecValue = serializeQuatToVec4(rotation);
+          auto backRotation = parseQuat(vecValue);
+          //attributes.push_back(GameobjAttributeOpts {
+          //  .field = "rotation",
+          //  .attributeValue = vecValue,
+          //});
 
           attributes.push_back(GameobjAttributeOpts {
-            .field = "rotation",
-            .attributeValue = vecValue,
-          });              
+            .field = "angles",
+            .attributeValue = rotationEuler.value(),
+          });
         }
         ///////////////////////////////
 

@@ -443,7 +443,7 @@ float angleFromQuat(glm::quat rotation){
 // At least would be nice to round the values to nearest degree maybe? 
 glm::vec4 serializeQuatToVec4(glm::quat rotation){
   auto axis = rotation * glm::vec3(0.f, 0.f, -1.f);
-  auto axisOrientation  = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), axis); // this removes roll
+  auto axisOrientation  = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), axis);
   float w = angleFromQuat(glm::inverse(axisOrientation) * rotation);
   //std::cout << "(radians, degree) : " << w << " , " << glm::degrees(w) << std::endl;
   float degreesAngle = glm::degrees(w);
@@ -459,16 +459,17 @@ glm::vec3 quatToVec(glm::quat quat){
 }
 
 glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
+  // @TODO consider extracting a better up direction from current orientation
+  // https://stackoverflow.com/questions/18151845/converting-glmlookat-matrix-to-quaternion-and-back/29992778
+  // This feels like a really bad hack, but if an object is just straight up, this returns NaN. 
+  // Should look more into the math!  How to pick up vector properly? 
   if (fromPos.x == targetPosition.x && fromPos.z == targetPosition.z && !(fromPos.y == targetPosition.y)){   
     if (fromPos.y < targetPosition.y){
       return  glm::quat(glm::vec3(glm::radians(90.f), 0, 0));
     }
     return glm::quat(glm::vec3(glm::radians(-90.f), 0, 0));
   }
-  // This is use to be different, look at history if this no good
-  glm::quat q = glm::quatLookAt(glm::normalize(targetPosition - fromPos), glm::vec3(0, 1, 0));
-  return q;
-
+  return glm::normalize(glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0)))));
 }
 
 std::string serializeFloat(float value){

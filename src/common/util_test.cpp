@@ -18,6 +18,7 @@ void utilParseAndSerializeQuatTest() {
     "0 -1 0 0",   // 12
     "0 1 0 0",   // 13
     "0 1 0 354",   // 14
+    "0.608385 0.778166 0.155964 159.012",
   };
   int numFailingTests = 0;
   std::string errorStr = "\n";
@@ -26,11 +27,22 @@ void utilParseAndSerializeQuatTest() {
     auto rawParsed = parseVec4(rawquat);
     auto normalizedRaw = glm::normalize(glm::vec3(rawParsed.x, rawParsed.y, rawParsed.z));
     auto normalizedRaw4 = glm::vec4(normalizedRaw.x, normalizedRaw.y, normalizedRaw.z, rawParsed.w);
-    auto serializedParsed = parseVec4(serializeQuat(parseQuat(parseVec4(rawQuatsTests.at(i)))));
+
+    auto vecValue = parseVec4(rawQuatsTests.at(i));
+    auto quatValue = parseQuat(vecValue);
+    auto serializedParsed = parseVec4(serializeQuat(quatValue));
+
+    auto dirVec = glm::normalize(quatValue * glm::vec3(0.f, 0.f, -1.f));
+    auto originalValue = glm::normalize(glm::vec3(vecValue.x, vecValue.y, vecValue.z));
+
     if (!aboutEqual(normalizedRaw4, serializedParsed)){
       numFailingTests++;
-      errorStr = errorStr + "test: " + std::to_string(i) + " - " + "got : " + print(serializedParsed) + " but wanted: " + print(normalizedRaw4) + " - original: " + print(rawParsed) + "\n";
-    }   
+      errorStr = errorStr + "test: " + std::to_string(i) + " - fail serialize " + "got : " + print(serializedParsed) + " but wanted: " + print(normalizedRaw4) + " - original: " + print(rawParsed) + "\n";
+    }else if (!aboutEqual(dirVec, originalValue)){
+      numFailingTests++;
+      errorStr = errorStr + "test: " + std::to_string(i) + " - fail dir " + "got : " + print(dirVec) + " but wanted: " + print(originalValue) + " - original: " + print(rawParsed) + "\n";  
+    }
+
   }
   if (errorStr != ""){
     throw std::logic_error("num failing tests: " + std::to_string(numFailingTests) + errorStr);
