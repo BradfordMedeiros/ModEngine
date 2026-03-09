@@ -425,31 +425,50 @@ glm::quat eulerToQuat(glm::vec3 eulerAngles){
   return glm::quat(glm::vec3(eulerAngles.x, eulerAngles.y, eulerAngles.z));
 }
 
-// im misunderstanding what the quaternion represnts, thais is only for the single rotation,
-// so what i could do, is simply rotate 
-glm::quat parseQuat(glm::vec4 vecXYZRotation){
-  auto parsedVec = glm::normalize(glm::vec3(vecXYZRotation.x, vecXYZRotation.y, vecXYZRotation.z));
-  auto direction = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), parsedVec);
-  auto rotateAngle = glm::angleAxis(glm::radians(vecXYZRotation.w), glm::vec3(0, 0, 1));
-  return  direction * rotateAngle;
+glm::quat parseQuat(glm::vec4 v) {
+    glm::vec3 dir = glm::normalize(glm::vec3(v));
+    float twistDeg = v.w;                          
+    float twistRad = glm::radians(twistDeg); 
+
+    if (glm::length(dir) < 1e-6f){
+        return glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+    }
+    glm::vec3 forward = glm::vec3(0, 0, -1);
+    glm::quat look = glm::rotation(forward, dir);
+
+    glm::quat twistQuat = glm::angleAxis(twistRad, dir);
+
+    return twistQuat * look;
 }
 
-float angleFromQuat(glm::quat rotation){
-    float w = glm::clamp(rotation.w, -1.0f, 1.0f);
-    return glm::acos(w) * 2.f;
+glm::vec4 serializeQuatToVec4(glm::quat q) {
+    glm::vec3 forward = glm::vec3(0, 0, -1);
+    glm::vec3 dir = glm::normalize(q * forward);
+
+    glm::quat look = glm::rotation(forward, dir);
+    glm::quat twistQuat = q * glm::conjugate(look);
+
+    glm::vec3 axis;
+    float angleRad;
+    angleRad = glm::angle(twistQuat);
+    axis = glm::axis(twistQuat);
+
+    if (glm::dot(axis, dir) < 0.0f){
+        angleRad = -angleRad;
+    }
+
+    float twistDeg = glm::degrees(angleRad);
+
+    if (twistDeg > 180.0f) { 
+      twistDeg -= 360.0f;
+    }
+    if (twistDeg < -180.0f){
+      twistDeg += 360.0f;
+    }
+
+    return glm::vec4(dir, twistDeg);
 }
 
-// Fails serialization by .04 degrees... which is probably ok...but why, remnant of just float ops?  
-// At least would be nice to round the values to nearest degree maybe? 
-glm::vec4 serializeQuatToVec4(glm::quat rotation){
-  auto axis = rotation * glm::vec3(0.f, 0.f, -1.f);
-  auto axisOrientation  = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), axis);
-  float w = angleFromQuat(glm::inverse(axisOrientation) * rotation);
-  //std::cout << "(radians, degree) : " << w << " , " << glm::degrees(w) << std::endl;
-  float degreesAngle = glm::degrees(w);
-  return glm::vec4(axis.x, axis.y, axis.z, degreesAngle);  
-}
- 
 std::string serializeQuat(glm::quat rotation){
   return serializeVec(serializeQuatToVec4(rotation)); 
 }

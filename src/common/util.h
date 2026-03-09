@@ -15,6 +15,7 @@
 #include <glm/glm.hpp>
 #include <sstream>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <stdlib.h>    
 #include <variant>
 #include <iostream>
