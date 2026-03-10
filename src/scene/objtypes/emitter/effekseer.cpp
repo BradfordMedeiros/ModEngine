@@ -138,25 +138,44 @@ bool isFinalEffectFrame(EffectData& effect, float currentTime){
 	}
 	return false;
 }
+
+Effekseer::Matrix43 glmToEffekseer(const glm::mat4& m){
+		Effekseer::Matrix43 mat;
+		for (int r = 0; r < 3; r++) {
+		    for (int c = 0; c < 4; c++) {
+		        mat.Value[c][r] = m[c][r];
+		    }
+		}
+		return mat;
+}
+
+void setEffekseerRotation(Effekseer::Handle handle, glm::quat& rotation, glm::vec3 position){
+	//effekseerManager -> SetLocation(handle, position.x, position.y, position.z);
+	//glm::vec3 euler = glm::eulerAngles(rotation);
+	//effekseerManager -> SetRotation(
+	//    handle,
+	//    euler.x,
+	//    euler.y,
+	//    euler.z
+	//);
+
+	glm::mat4 matrix = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(rotation);
+	effekseerManager->SetMatrix(handle, glmToEffekseer(matrix));
+
+}
+
 void playEffectsAlways(float currentTime){
 	for (auto& [id, effect] : effekseerData){
 		bool shouldReplayEffect = !effectPlaying(effect) || isFinalEffectFrame(effect, currentTime);
 		if (effect.loopContinuously && shouldReplayEffect){
 			glm::vec3 position = effect.position.has_value() ? effect.position.value() : glm::vec3(0.f, 0.f, 0.f); // this should come from
-			auto effectPosition = ::Effekseer::Vector3D(position.x, position.y, position.z);
-			Effekseer::Handle playingEffect = effekseerManager -> Play(effect.effectRef, effectPosition, 0 /* start frame frame 0 seems to flicker in general */);
+			Effekseer::Handle playingEffect = effekseerManager -> Play(effect.effectRef, ::Effekseer::Vector3D(0.f, 0.f, 0.f), 0 /* start frame frame 0 seems to flicker in general */);
 		
 			effect.playingEffect = playingEffect;
 			effect.startTime = currentTime;
 
 			if (effect.rotation.has_value()){
-				glm::vec3 euler = glm::eulerAngles(effect.rotation.value());
-				effekseerManager->SetRotation(
-				    effect.playingEffect.value(),
-				    euler.x,
-				    euler.y,
-				    euler.z
-				);
+				setEffekseerRotation(effect.playingEffect.value(), effect.rotation.value(), position);
 			}
 		}
 	}	
@@ -281,15 +300,7 @@ void updateEffectPosition(EffekEffect& effectEffect, glm::vec3 position, glm::qu
 	effect.position = position;
 	effect.rotation = rotation;
 	if (effect.playingEffect.has_value()){
-		effekseerManager->SetLocation(effect.playingEffect.value(), position.x, position.y, position.z);
-
-		glm::vec3 euler = glm::eulerAngles(rotation);
-		effekseerManager->SetRotation(
-		    effect.playingEffect.value(),
-		    euler.x,
-		    euler.y,
-		    euler.z
-		);
+		setEffekseerRotation(effect.playingEffect.value(), rotation, position);
 	}
 }
 

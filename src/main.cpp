@@ -1576,6 +1576,11 @@ int main(int argc, char* argv[]){
       }else if (*className.value() == "killplane"){
         *shouldWrite = true;
         addCoreTrench(attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "killplane",
+          .attributeValue = "true",
+        });
+        
       }else if (*className.value() == "laser"){
         *shouldWrite = true;
         addCoreTrench(attributes, "../gameresources/build/objtypes/spawnpoint.gltf");
@@ -1590,29 +1595,20 @@ int main(int argc, char* argv[]){
         attributes.push_back(GameobjAttributeOpts {
           .field = "laser",
           .attributeValue = "true",
-        });    
+        });   
 
         // this is wrong
         auto rotationEuler = getVec3Value(entity, "angles");
         if (rotationEuler.has_value()){
-          auto x = rotationEuler.value().x;
-          auto y = rotationEuler.value().y;
-          auto z = rotationEuler.value().z;
           auto rotation = quatFromTrenchBroomAngles(
-            x,
-            y,
-            z
+            rotationEuler.value().x,
+            rotationEuler.value().y,
+            rotationEuler.value().z
           );
           auto vecValue = serializeQuatToVec4(rotation);
-          auto backRotation = parseQuat(vecValue);
-          //attributes.push_back(GameobjAttributeOpts {
-          //  .field = "rotation",
-          //  .attributeValue = vecValue,
-          //});
-
           attributes.push_back(GameobjAttributeOpts {
-            .field = "angles",
-            .attributeValue = rotationEuler.value(),
+            .field = "rotation",
+            .attributeValue = vecValue,
           });
         }
         ///////////////////////////////

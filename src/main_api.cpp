@@ -1257,8 +1257,8 @@ std::optional<objid> getMainOctreeId(){
   return id;
 }
 
-void createPhysicsBody(objid id, ShapeCreateType option){
-  createPhysicsBody(world, id, option);
+void createPhysicsBody(objid id, ShapeCreateType option, std::optional<glm::vec3> offset){
+  createPhysicsBody(world, id, option, offset);
 }
 
 void setPhysicsOptions(objid id, rigidBodyOpts& opts){

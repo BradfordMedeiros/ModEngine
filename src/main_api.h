@@ -290,7 +290,7 @@ std::vector<TagInfo> getAllTags(int tag);
 std::optional<objid> getMainOctreeId();
 std::optional<OctreeMaterial> getMaterial(glm::vec3 position);
 
-void createPhysicsBody(objid id, ShapeCreateType option);
+void createPhysicsBody(objid id, ShapeCreateType option, std::optional<glm::vec3> offset);
 void setPhysicsOptions(objid id, rigidBodyOpts& opts);
 void createFixedConstraint(objid idOne, objid idTwo);
 void createPointConstraint(objid idOne, objid idTwo);

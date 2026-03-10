@@ -1839,14 +1839,13 @@ int getNumberOfRigidBodies(World& world){
   return world.rigidbodys.size();
 }
 
-void createPhysicsBody(World& world, objid id, ShapeCreateType option){
+void createPhysicsBody(World& world, objid id, ShapeCreateType option, std::optional<glm::vec3> offset){
   if (world.rigidbodys.find(id) != world.rigidbodys.end()){
     //modassert(false, std::string("rigid body already exists on this:  customManaged = ") + (world.rigidbodys.at(id).customManaged ? "true" : "false"));
     modassert(false, std::string("rigid body already exists on this"));
   }
 
   auto gameobjTransform = fullTransformation(world.sandbox, id);
-  std::optional<glm::vec3> offset;
 
   rigidBodyOpts opts {
     .linear = glm::vec3(1.f, 1.f, 1.f),
