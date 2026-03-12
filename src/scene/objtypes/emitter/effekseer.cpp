@@ -15,6 +15,7 @@ struct EffectData {
 	std::optional<Effekseer::Handle> playingEffect;
 	std::optional<glm::vec3> position;
 	std::optional<glm::quat> rotation;
+	std::optional<glm::vec3> scale;
 	bool loopContinuously;
 	std::string effectName;
 
@@ -149,34 +150,24 @@ Effekseer::Matrix43 glmToEffekseer(const glm::mat4& m){
 		return mat;
 }
 
-void setEffekseerRotation(Effekseer::Handle handle, glm::quat& rotation, glm::vec3 position){
-	//effekseerManager -> SetLocation(handle, position.x, position.y, position.z);
-	//glm::vec3 euler = glm::eulerAngles(rotation);
-	//effekseerManager -> SetRotation(
-	//    handle,
-	//    euler.x,
-	//    euler.y,
-	//    euler.z
-	//);
-
-	glm::mat4 matrix = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(rotation);
-	effekseerManager->SetMatrix(handle, glmToEffekseer(matrix));
-
+void setEffekseerTransform(Effekseer::Handle handle, glm::quat& rotation, glm::vec3 position, glm::vec3 scale){
+	glm::mat4 matrix = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(rotation) * glm::scale(glm::mat4(1.0f), scale);
+	effekseerManager -> SetMatrix(handle, glmToEffekseer(matrix));
 }
+
+
 
 void playEffectsAlways(float currentTime){
 	for (auto& [id, effect] : effekseerData){
 		bool shouldReplayEffect = !effectPlaying(effect) || isFinalEffectFrame(effect, currentTime);
 		if (effect.loopContinuously && shouldReplayEffect){
-			glm::vec3 position = effect.position.has_value() ? effect.position.value() : glm::vec3(0.f, 0.f, 0.f); // this should come from
+			modassert(effect.rotation.has_value(), "no rotation");
+			modassert(effect.scale.has_value(), "no scale");
+			modassert(effect.position.has_value(), "no position");
 			Effekseer::Handle playingEffect = effekseerManager -> Play(effect.effectRef, ::Effekseer::Vector3D(0.f, 0.f, 0.f), 0 /* start frame frame 0 seems to flicker in general */);
-		
 			effect.playingEffect = playingEffect;
 			effect.startTime = currentTime;
-
-			if (effect.rotation.has_value()){
-				setEffekseerRotation(effect.playingEffect.value(), effect.rotation.value(), position);
-			}
+			setEffekseerTransform(effect.playingEffect.value(), effect.rotation.value(), effect.position.value(), effect.scale.value());
 		}
 	}	
 }
@@ -188,7 +179,7 @@ void onEffekSeekerFrame(float timeDelta, float currentTime, bool paused){
 		initEffekseer();
 	}
 
-	if (paused){
+	if (false && paused){
 		return;
 	}
 	
@@ -246,7 +237,7 @@ Effekseer::EffectRef doCreateEffect(std::string& effect){
 	return effectRef;
 }
 
-EffekEffect createEffect(std::string effect, glm::vec3 position, glm::quat rotation){
+EffekEffect createEffect(std::string effect, glm::vec3 position, glm::quat rotation, glm::vec3 scale){
 	auto effectId = getUniqueObjId();
 
 	effekseerData[effectId] = EffectData {
@@ -254,6 +245,7 @@ EffekEffect createEffect(std::string effect, glm::vec3 position, glm::quat rotat
 		.playingEffect = std::nullopt,
 		.position = std::nullopt,
 		.rotation = std::nullopt,
+		.scale = std::nullopt,
 		.loopContinuously = false,
 		.effectName = effect,
 		.startTime = std::nullopt,
@@ -262,7 +254,7 @@ EffekEffect createEffect(std::string effect, glm::vec3 position, glm::quat rotat
 	EffekEffect effekEffect {
 		.effectId = effectId,
 	};
-	updateEffectPosition(effekEffect, position, rotation);
+	updateEffectPosition(effekEffect, position, rotation, scale);
 	return effekEffect;
 }
 
@@ -295,12 +287,13 @@ void stopEffect(EffekEffect& effectEffect){
 	effekseerManager->StopEffect(effect.playingEffect.value());
 }
 
-void updateEffectPosition(EffekEffect& effectEffect, glm::vec3 position, glm::quat rotation){
+void updateEffectPosition(EffekEffect& effectEffect, glm::vec3 position, glm::quat rotation, glm::vec3 scale){
 	auto& effect = effekseerData.at(effectEffect.effectId);
 	effect.position = position;
 	effect.rotation = rotation;
+	effect.scale = scale;
 	if (effect.playingEffect.has_value()){
-		setEffekseerRotation(effect.playingEffect.value(), rotation, position);
+		setEffekseerTransform(effect.playingEffect.value(), rotation, position, scale);
 	}
 }
 
