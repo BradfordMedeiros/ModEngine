@@ -1000,6 +1000,7 @@ std::optional<Texture> textureForId(ObjectMapping& mapping, objid id, ObjTypeLoo
 void updateObjectPositions(ObjectMapping& mapping, objid id, Transformation& transform, Transformation& viewTransform){
   auto& rotation = transform.rotation;
   auto& position = transform.position;
+  auto& scale = transform.scale;
 
   auto soundObj = getSoundObj(mapping, id);
   if (soundObj != NULL){
@@ -1018,7 +1019,7 @@ void updateObjectPositions(ObjectMapping& mapping, objid id, Transformation& tra
   auto emitterObj = getEmitter(mapping, id);
   if (emitterObj != NULL){
     if (emitterObj -> effekseerEffect.has_value()){
-      updateEffectPosition(emitterObj -> effekseerEffect.value(), position, rotation);
+      updateEffectPosition(emitterObj -> effekseerEffect.value(), position, rotation, scale);
     }
   }
 }
