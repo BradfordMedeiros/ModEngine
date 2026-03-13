@@ -412,6 +412,14 @@ std::optional<float> getFloatValue(Entity& entity, const char* key){
 	return std::atof(value.value() -> c_str());
 }
 
+std::optional<float> getScaledFloatValue(MapData& mapData, Entity& entity, const char* key){
+	auto value = getKeyValue(entity.keyValues, key);
+	if (!value.has_value()){
+		return std::nullopt;
+	}
+	return std::atof(value.value() -> c_str()) / mapData.scale;
+}
+
 std::optional<glm::vec3> getScaledVec3Value(MapData& mapData, Entity& entity, const char* key){
 	auto value = getKeyValue(entity.keyValues, key);
 	if (!value.has_value()){

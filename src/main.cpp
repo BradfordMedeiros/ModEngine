@@ -1612,7 +1612,7 @@ int main(int argc, char* argv[]){
           });
         }
 
-        auto laserLength = getFloatValue(entity, "length");
+        auto laserLength = getScaledFloatValue(mapData, entity, "length");
         attributes.push_back(GameobjAttributeOpts {
           .field = "laserlength",
           .attributeValue = laserLength.value(),
