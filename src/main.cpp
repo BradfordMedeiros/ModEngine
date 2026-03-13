@@ -1611,6 +1611,13 @@ int main(int argc, char* argv[]){
             .attributeValue = vecValue,
           });
         }
+
+        auto laserLength = getFloatValue(entity, "length");
+        attributes.push_back(GameobjAttributeOpts {
+          .field = "laserlength",
+          .attributeValue = laserLength.value(),
+        });       
+
         ///////////////////////////////
 
       }else if (*className.value() == "bouncepad"){
