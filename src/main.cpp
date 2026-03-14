@@ -1186,7 +1186,7 @@ std::vector<int> getOrbConnectionIndex(std::vector<OrbEntity>& orbs, int index){
   return connections;
 }
 
-void addCoreTrench(std::vector<GameobjAttributeOpts>& attributes, std::string meshpath){
+void addCoreTrench(Entity& entity, std::vector<GameobjAttributeOpts>& attributes, std::string meshpath){
   attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
     .field = "mesh",
     .attributeValue = meshpath,
@@ -1199,6 +1199,14 @@ void addCoreTrench(std::vector<GameobjAttributeOpts>& attributes, std::string me
     .field = "physics",
     .attributeValue = "enabled",
   });
+
+  auto triggercolor = getValue(entity, "triggercolor");
+  if (triggercolor.has_value()){
+    attributes.push_back(GameobjAttributeOpts {
+     .field = "triggercolor",
+     .attributeValue = *triggercolor.value(),
+    });   
+  }
 }
 
 void onGLFWEerror(int error, const char* description){
@@ -1399,7 +1407,7 @@ int main(int argc, char* argv[]){
         // same as world spawn, but without added keys
         *shouldWrite = true;
 
-        addCoreTrench(attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
+        addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
 
       }else if (*className.value() == "player_start"){
         *modelName = "playerspawn";
@@ -1499,7 +1507,7 @@ int main(int argc, char* argv[]){
       }else if (*className.value() == "worldspawn"){
           *shouldWrite = true;
 
-          addCoreTrench(attributes, brushFileOut);
+          addCoreTrench(entity, attributes, brushFileOut);
 
           for (auto &keyValue : entity.keyValues){
             if (keyValue.key == "_tb_textures" || keyValue.key == "classname" || keyValue.key == "_tb_def"){
@@ -1573,9 +1581,17 @@ int main(int argc, char* argv[]){
           });
         }
 
+        auto triggercolor = getValue(entity, "triggercolor");
+        if (triggercolor.has_value()){
+          attributes.push_back(GameobjAttributeOpts {
+           .field = "triggercolor",
+           .attributeValue = *triggercolor.value(),
+          });   
+        }
+
       }else if (*className.value() == "killplane"){
         *shouldWrite = true;
-        addCoreTrench(attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
+        addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
         attributes.push_back(GameobjAttributeOpts {
           .field = "killplane",
           .attributeValue = "true",
@@ -1583,7 +1599,7 @@ int main(int argc, char* argv[]){
         
       }else if (*className.value() == "laser"){
         *shouldWrite = true;
-        addCoreTrench(attributes, "../gameresources/build/objtypes/spawnpoint.gltf");
+        addCoreTrench(entity, attributes, "../gameresources/build/objtypes/spawnpoint.gltf");
         attributes.push_back(GameobjAttributeOpts {
           .field = "tint",
           .attributeValue = glm::vec4(0.f, 1.f, 0.f, 1.f),
@@ -1622,7 +1638,7 @@ int main(int argc, char* argv[]){
 
       }else if (*className.value() == "bouncepad"){
         *shouldWrite = true;
-        addCoreTrench(attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
+        addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
         auto magnitude = getIntValue(entity, "mag");
         attributes.push_back(GameobjAttributeOpts {
           .field = "bounce",
@@ -1630,7 +1646,7 @@ int main(int argc, char* argv[]){
         });
       }else if (*className.value() == "conveyer"){
         *shouldWrite = true;
-        addCoreTrench(attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
+        addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
         auto modspeed = getVec3Value(entity, "move");
         attributes.push_back(GameobjAttributeOpts {
           .field = "modspeed",

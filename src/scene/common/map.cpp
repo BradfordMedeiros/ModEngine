@@ -450,6 +450,17 @@ std::optional<glm::vec3> getVec3Value(Entity& entity, const char* key){
 	return position;
 }
 
+std::optional<glm::vec4> getVec4Value(Entity& entity, const char* key){
+	auto value = getKeyValue(entity.keyValues, key);
+	if (!value.has_value()){
+		return std::nullopt;
+	}
+
+	glm::vec4 position = parseVec4(*value.value());
+	return position;
+}
+
+
 
 std::string getEntityName(std::string& baseName, std::optional<std::string>& submodel){
 	if (submodel.has_value()){
