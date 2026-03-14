@@ -1186,6 +1186,32 @@ std::vector<int> getOrbConnectionIndex(std::vector<OrbEntity>& orbs, int index){
   return connections;
 }
 
+
+void addTriggerColor(Entity& entity, std::vector<GameobjAttributeOpts>& attributes){
+  auto triggercolor = getValue(entity, "triggercolor");
+  if (triggercolor.has_value()){
+    attributes.push_back(GameobjAttributeOpts {
+     .field = "triggercolor",
+     .attributeValue = *triggercolor.value(),
+    });  
+
+    auto activeColor = getVec4Value(entity, "activecolor");
+    auto unactiveColor = getVec4Value(entity, "unactivecolor");
+    if (activeColor.has_value()){
+      attributes.push_back(GameobjAttributeOpts {
+       .field = "activecolor",
+       .attributeValue = activeColor.value(),
+      });  
+    }
+    if (unactiveColor.has_value()){
+      attributes.push_back(GameobjAttributeOpts {
+       .field = "unactivecolor",
+       .attributeValue = unactiveColor.value(),
+      });  
+    }
+  }
+}
+
 void addCoreTrench(Entity& entity, std::vector<GameobjAttributeOpts>& attributes, std::string meshpath){
   attributes.push_back(GameobjAttributeOpts {   // probably not great to attach it to this
     .field = "mesh",
@@ -1200,13 +1226,7 @@ void addCoreTrench(Entity& entity, std::vector<GameobjAttributeOpts>& attributes
     .attributeValue = "enabled",
   });
 
-  auto triggercolor = getValue(entity, "triggercolor");
-  if (triggercolor.has_value()){
-    attributes.push_back(GameobjAttributeOpts {
-     .field = "triggercolor",
-     .attributeValue = *triggercolor.value(),
-    });   
-  }
+  addTriggerColor(entity, attributes);
 }
 
 void onGLFWEerror(int error, const char* description){
@@ -1580,15 +1600,7 @@ int main(int argc, char* argv[]){
             .attributeValue = *triggerData.value(),
           });
         }
-
-        auto triggercolor = getValue(entity, "triggercolor");
-        if (triggercolor.has_value()){
-          attributes.push_back(GameobjAttributeOpts {
-           .field = "triggercolor",
-           .attributeValue = *triggercolor.value(),
-          });   
-        }
-
+        addTriggerColor(entity, attributes);
       }else if (*className.value() == "killplane"){
         *shouldWrite = true;
         addCoreTrench(entity, attributes, brushFileOut + "," + std::to_string(entity.index) + ".brush");
