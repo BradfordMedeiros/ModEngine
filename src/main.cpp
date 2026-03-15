@@ -1269,6 +1269,17 @@ int main(int argc, char* argv[]){
 
   dataPath = result["data"].as<std::string>();
 
+  auto parsedArgs = result["args"].as<std::vector<std::string>>();
+  for (auto arg : parsedArgs){
+    auto parsedArg = split(arg, '=');
+    assert(parsedArg.size() <= 2);
+    if (parsedArg.size() == 2){
+      args[parsedArg.at(0)] = parsedArg.at(1);
+    }else{
+      args[parsedArg.at(0)] = "";
+    }
+  }
+
   auto pathsToValidate = result["validate"].as<std::vector<std::string>>();
   if (pathsToValidate.size() > 0){
     // I could plugin to the actual data types here and do true validation, but this is pragmatic 
@@ -1325,9 +1336,14 @@ int main(int argc, char* argv[]){
     exit(missingFiles ? 1 : 0);
   }
 
+
   auto compileMapFile = result["compile"].as<std::string>();
   auto templateFile = result["template"].as<std::string>();
   bool useTempFile = result["temp"].as<bool>();;
+
+  #ifdef ADDITIONAL_SRC_HEADER
+    setupGameCompileFn(args);
+  #endif
 
   if (compileMapFile != ""){
     compileMap(compileMapFile, templateFile, useTempFile);
@@ -1363,17 +1379,6 @@ int main(int argc, char* argv[]){
 
   std::string worldfile = result["world"].as<std::string>();
   bool useChunkingSystem = worldfile != "";
-
-  auto parsedArgs = result["args"].as<std::vector<std::string>>();
-  for (auto arg : parsedArgs){
-    auto parsedArg = split(arg, '=');
-    assert(parsedArg.size() <= 2);
-    if (parsedArg.size() == 2){
-      args[parsedArg.at(0)] = parsedArg.at(1);
-    }else{
-      args[parsedArg.at(0)] = "";
-    }
-  }
 
   if (args.find("sqldir") != args.end()){
     sqlDirectory = args.at("sqldir");
@@ -1818,7 +1823,7 @@ int main(int argc, char* argv[]){
     .listViewports = listViewports,
 
     .getControlInfo = getControlInfo2,
-
+    
     .dumpDebugInfo = dumpDebugInfo,
   };
 
@@ -1846,6 +1851,7 @@ int main(int argc, char* argv[]){
       pluginBindings.push_back(userBinding);
     }
   #endif
+
   registerAllBindings(pluginBindings);
   cBindings = getCScriptBindingCallbacks();
 

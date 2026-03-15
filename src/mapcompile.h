@@ -15,4 +15,6 @@ struct CompileMapFns {
 };
 CompileMapFns getCompileMapForGame();
 
+void setCompileFn(CompileMapFns& compileFns);
+
 #endif

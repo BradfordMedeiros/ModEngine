@@ -14,6 +14,7 @@
 #include "../scene/physics_common.h"
 #include "../scene/scene_sandbox.h"
 #include "../network/http.h"
+#include "../mapcompile.h"
 
 struct CustomApiBindings {
   int32_t (*listSceneId)(int32_t objid);
@@ -207,7 +208,6 @@ struct CustomApiBindings {
   std::vector<int> (*listViewports)();
 
   std::optional<ControlInfo2> (*getControlInfo)(int joystick);
-
 
   std::string (*dumpDebugInfo)(bool);
   //std::vector<func_t> registerGuileFns
