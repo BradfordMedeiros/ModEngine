@@ -2040,9 +2040,7 @@ int main(int argc, char* argv[]){
 
     auto deltaTime = timePlayback.getDeltaTime();
     std::cout << "deltaTime diff: " << deltaTime << std::endl;
-
-    onEffekSeekerFrame(deltaTime, timePlayback.getCurrentTime(), state.worldpaused);
-
+    
     resetReservedId();
     disposeTempBufferedData(lineData);
 
@@ -2116,6 +2114,7 @@ int main(int argc, char* argv[]){
     onWorldFrame(world, timePlayback.getDeltaTime(), timePlayback.getCurrentTime(), state.enablePhysics, state.worldpaused, viewTransform, state.inputMode == ENABLED, false);
     cBindings.onFrameAfterUpdate();
     onWorldFrame(world, timePlayback.getDeltaTime(), timePlayback.getCurrentTime(), false, state.worldpaused, viewTransform, state.inputMode == ENABLED, true);
+    onEffekSeekerFrame(deltaTime, timePlayback.getCurrentTime(), state.worldpaused);
 
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
     if (useChunkingSystem){
