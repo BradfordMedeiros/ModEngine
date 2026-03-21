@@ -8,6 +8,7 @@ int seekFileOrPackage(unsigned int handle, int offset, int whence);
 size_t tellFileOrPackage(unsigned int handle);
 static std::unordered_map<std::string, ALuint> soundBuffers;  
 static std::unordered_map<std::string, int> soundUsages;
+static std::unordered_map<ALuint, ALuint> soundOneshotsSourceToBuffer;
 
 //// global sound stuff /////
 void startSoundSystem(){
@@ -44,30 +45,8 @@ void setListenerPosition(float x, float y, float z, std::vector<float> forward, 
 }
 
 ///////////////////////
-
-void playSource(ALuint source, std::optional<float> volume, std::optional<glm::vec3> position){
-  ALfloat oldVolume;
-  ALfloat x;
-  ALfloat y;
-  ALfloat z;
-
-  if (volume.has_value()){
-    alGetSourcef(source, AL_GAIN, &oldVolume);
-    setSoundVolume(source, volume.value());
-  }
-  if (position.has_value()){
-    alGetSource3f(source, AL_POSITION, &x, &y, &z);
-    setSoundPosition(source, position.value().x, position.value().y, position.value().z);
-  }
-
+void playSource(ALuint source){
   alSourcePlay(source);
-
-  if (volume.has_value()){
-    //setSoundVolume(source, oldVolume);
-  }
-  if (position.has_value()){
-    setSoundPosition(source, x, y, z);
-  }
 }
 
 void stopSource(ALuint source){
@@ -75,24 +54,15 @@ void stopSource(ALuint source){
 }
 
 
-std::vector<std::string> listSounds(){
-  std::vector<std::string> sounds;
-  for (auto [soundname, _ ] : soundBuffers){
-    sounds.push_back(soundname);
-  }
-  return sounds;
-}
 void setSoundPosition(ALuint source, float x, float y, float z){
   alSource3f(source, AL_POSITION, x, y, z);
 }
-
 void setSoundVolume(ALuint source, float newVolume){
   alSourcef(source, AL_GAIN, newVolume);
 }
 void setSoundLooping(ALuint source, bool shouldLoop){
   alSourcei(source, AL_LOOPING, shouldLoop ? AL_TRUE : AL_FALSE);
 }
-
 void setSoundPitch(ALuint source, float pitchMultiplier){
   modassert(pitchMultiplier >= 0, "pitch multiplier negative");
   alSourcef(source, AL_PITCH, pitchMultiplier);
@@ -234,11 +204,46 @@ ALuint loadSoundState(std::string filepath){
   return soundSource;
 }
 
+ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::optional<float> volume){
+  ALuint source = createSource(buffer);
+
+  if (volume.has_value()){
+    setSoundVolume(source, volume.value());
+  }
+  if (position.has_value()){
+    setSoundPosition(source, position.value().x, position.value().y, position.value().z);
+  }
+
+  alSourcePlay(source);
+  modassert(soundOneshotsSourceToBuffer.find(source) == soundOneshotsSourceToBuffer.end(), "duplicate source");
+  soundOneshotsSourceToBuffer[source] = buffer;
+  return source;
+}
+
+ALuint getBufferFromSource(ALuint source){
+  ALuint bufferId;
+  alGetSourcei(source, AL_BUFFER, (ALint*)&bufferId);
+  ALenum err = alGetError();
+  if (err != AL_NO_ERROR) {
+    std::cerr << "OpenAL error querying buffer: " << err << std::endl;
+    modassert(false, "error querying buffer");
+  }
+  return bufferId;
+}
+
 int getUsages(std::string filepath){
   if (soundUsages.find(filepath) == soundUsages.end()){
     return 0;
   }
   return soundUsages.at(filepath);
+}
+
+std::vector<std::string> listSounds(){
+  std::vector<std::string> sounds;
+  for (auto [soundname, _ ] : soundBuffers){
+    sounds.push_back(soundname);
+  }
+  return sounds;
 }
 
 void unloadSoundState(ALuint source,  std::string filepath){
@@ -248,13 +253,43 @@ void unloadSoundState(ALuint source,  std::string filepath){
   if (usages == 1){
     soundUsages.erase(filepath);
     ALuint buffer = soundBuffers.at(filepath);
+
+    std::vector<ALuint> sourceToRemove;
+    for (auto& [oneshotSource, bufferId] : soundOneshotsSourceToBuffer){
+      if(bufferId == buffer){
+        sourceToRemove.push_back(oneshotSource);
+      }
+    }
+    for (auto oneshotSource : sourceToRemove){
+      soundOneshotsSourceToBuffer.erase(oneshotSource);
+      alDeleteSources(1, &oneshotSource);
+    }
+
     alDeleteBuffers(1, &buffer);
     soundBuffers.erase(filepath);
+
   }else{
     soundUsages[filepath] = soundUsages[filepath] - 1;
   }
 }
 
+void onSoundFrame(){
+  std::vector<ALuint> sourceIds;
+  for (auto& [sourceId, bufferId] : soundOneshotsSourceToBuffer){
+    ALint state;
+    alGetSourcei(sourceId, AL_SOURCE_STATE, &state);
+    if (state == AL_STOPPED){
+      sourceIds.push_back(sourceId);
+    }
+  }
+  for (auto sourceId : sourceIds){
+    modlog("onSoundFrame remove oneshot", std::to_string(sourceId));
+    alDeleteSources(1, &sourceId);
+    soundOneshotsSourceToBuffer.erase(sourceId);
+  }
+}
+
+//////// AUDIO STUFF FOR VIDEO CODE //////////////
 const int NUM_AUDIO_BUFFERS = 5; // increasing this can add latency 
 BufferedAudio createBufferedAudio(){
   ALuint buffers[NUM_AUDIO_BUFFERS];
@@ -295,7 +330,6 @@ void freeBufferedAudio(BufferedAudio& buffer){
   assert(alGetError() == AL_NO_ERROR);
 }
 
-bool isPlaying = false;
 void playBufferedAudio(BufferedAudio& buffer, void* data, int datasize, int samplerate){
   auto alutError = alGetError();
   if (alutError  != AL_NO_ERROR){

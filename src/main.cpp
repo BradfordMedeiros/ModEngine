@@ -1715,6 +1715,7 @@ int main(int argc, char* argv[]){
     .setAnimationPose = setAnimationPose,
     .clearAnimationPose = clearAnimationPose,
     .animationLength = animationLength,
+    
     .listClips = listSounds,
     .playClip = playSoundState,
     .playClipById = playSoundState,
@@ -1722,6 +1723,8 @@ int main(int argc, char* argv[]){
     .stopClipById = stopSoundStateById,
     .setSoundPitch = setSoundPitch,
     .setSoundVolume = setSoundVolume,
+    .playOneshot = playOneshot,
+
     .listResources = listResources,
     .sendNotifyMessage = sendNotifyMessage,
     .timeSeconds = timeSeconds,

@@ -1004,6 +1004,7 @@ void updateObjectPositions(ObjectMapping& mapping, objid id, Transformation& tra
 
   auto soundObj = getSoundObj(mapping, id);
   if (soundObj != NULL){
+    //std::cout << "updateObjectPositions: " << getGameObjectName(id).value() << std::endl;
     if (soundObj -> center){
       setSoundPosition(soundObj -> source, viewTransform.position.x, viewTransform.position.y, viewTransform.position.z);
     }else{
@@ -1027,7 +1028,7 @@ void updateObjectPositions(ObjectMapping& mapping, objid id, Transformation& tra
 void playSoundState(ObjectMapping& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position){
   auto soundObj = getSoundObj(mapping, id);
   if (soundObj != NULL){
-    playSource(soundObj -> source, volume, position);
+    playSource(soundObj -> source);
   }else{
     std::cout << "WARNING: " << id << " is not a sound object" << std::endl;
   }

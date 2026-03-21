@@ -101,6 +101,8 @@ struct CustomApiBindings {
   void (*setSoundPitch)(objid id, std::optional<float> pitch);
   void (*setSoundVolume)(objid id, std::optional<float> pitch);
 
+  void (*playOneshot)(objid, std::optional<glm::vec3> position, std::optional<float> volume);
+
   ///////////
   std::vector<std::string> (*listResources)(std::string);
   void (*sendNotifyMessage)(std::string message, std::any value);

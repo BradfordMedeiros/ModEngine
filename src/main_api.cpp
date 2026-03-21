@@ -976,6 +976,15 @@ void stopSoundStateById(objid id){
   stopSoundState(world.objectMapping, id); 
 }
 
+void playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume){
+  auto soundObj = getSoundObj(world.objectMapping, id);
+  if (soundObj != NULL){
+    auto buffer = getBufferFromSource(soundObj -> source);
+    playSourceOneshot(buffer, position, volume);
+    return;
+  }
+}
+
 //////////////////
 
 

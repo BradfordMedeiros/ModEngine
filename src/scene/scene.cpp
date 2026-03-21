@@ -1770,6 +1770,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   for (auto &[id, videoObj] : world.objectMapping.video){
     onVideoObjFrame(videoObj, timeElapsed, viewTransform);
   }
+  onSoundFrame();
 
   if (showVisualizations){
     // move this into on object frame
@@ -1795,6 +1796,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       });
     }    
   }
+
 }
 
 std::string sceneFileForSceneId(World& world, objid sceneId){

@@ -171,6 +171,8 @@ void stopSoundStateById(objid id);
 void setSoundPitch(objid id, std::optional<float> pitch);
 void setSoundVolume(objid id, std::optional<float> volume);
 
+void playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume);
+
 std::vector<std::string> listResources(std::string resourceType);
 
 void sendNotifyMessage(std::string message, std::any value);
