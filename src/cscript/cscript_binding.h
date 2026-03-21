@@ -98,6 +98,8 @@ struct CustomApiBindings {
   void (*playClipById)(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
   void (*stopClip)(std::string source, objid sceneId);
   void (*stopClipById)(objid id);
+  void (*setSoundPitch)(objid id, std::optional<float> pitch);
+  void (*setSoundVolume)(objid id, std::optional<float> pitch);
 
   ///////////
   std::vector<std::string> (*listResources)(std::string);

@@ -927,9 +927,28 @@ void setCameraRotation(glm::quat orientation){
   }
 }
 
+///////////////////////
 
 void playSoundState(objid id, std::optional<float> volume, std::optional<glm::vec3> position){
   playSoundState(world.objectMapping, id, volume, position); 
+}
+
+void setSoundPitch(objid id, std::optional<float> pitch){
+  auto soundObj = getSoundObj(world.objectMapping, id);
+  if (soundObj != NULL){
+    setSoundPitch(soundObj -> source, pitch.has_value() ? pitch.value() : 1.f);
+    return;
+  }
+  modassert(false, "no sound object setSoundPitch");
+}
+
+void setSoundVolume(objid id, std::optional<float> volume){
+  auto soundObj = getSoundObj(world.objectMapping, id);
+  if (soundObj != NULL){
+    setSoundVolume(soundObj -> source, volume.has_value() ? volume.value() : 1.f);
+    return;
+  }
+  modassert(false, "no sound object setSoundVolume");  
 }
 
 void playSoundState(std::string source, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position){
@@ -956,6 +975,10 @@ void stopSoundState(std::string source, objid sceneId){
 void stopSoundStateById(objid id){
   stopSoundState(world.objectMapping, id); 
 }
+
+//////////////////
+
+
 
 std::string activeTextureName(int activeTextureIndex, std::unordered_map<std::string, TextureRef> worldTextures){
   int currentTextureIndex = 0;

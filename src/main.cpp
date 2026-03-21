@@ -1720,6 +1720,8 @@ int main(int argc, char* argv[]){
     .playClipById = playSoundState,
     .stopClip = stopSoundState,
     .stopClipById = stopSoundStateById,
+    .setSoundPitch = setSoundPitch,
+    .setSoundVolume = setSoundVolume,
     .listResources = listResources,
     .sendNotifyMessage = sendNotifyMessage,
     .timeSeconds = timeSeconds,

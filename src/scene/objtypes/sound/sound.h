@@ -32,6 +32,7 @@ std::vector<std::string> listSounds();
 void setSoundPosition(ALuint source, float x, float y, float z);
 void setSoundVolume(ALuint source, float newVolume);
 void setSoundLooping(ALuint source, bool shouldLoop);
+void setSoundPitch(ALuint source, float pitchMultiplier);
 
 void setListenerPosition(float x, float y, float z, std::vector<float> forward, std::vector<float> up);
 

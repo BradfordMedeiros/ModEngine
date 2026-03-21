@@ -75,6 +75,11 @@ void setSoundLooping(ALuint source, bool shouldLoop){
   alSourcei(source, AL_LOOPING, shouldLoop ? AL_TRUE : AL_FALSE);
 }
 
+void setSoundPitch(ALuint source, float pitchMultiplier){
+  modassert(pitchMultiplier >= 0, "pitch multiplier negative");
+  alSourcef(source, AL_PITCH, pitchMultiplier);
+}
+
 void setListenerPosition(float x, float y, float z, std::vector<float> forward, std::vector<float> up){
   assert(forward.size() == 3);
   assert(up.size() == 3);

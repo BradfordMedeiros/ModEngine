@@ -168,6 +168,8 @@ std::vector<std::string> listSounds(int32_t id);
 void playSound(std::string sound);
 void stopSoundState(std::string source, objid sceneId);
 void stopSoundStateById(objid id);
+void setSoundPitch(objid id, std::optional<float> pitch);
+void setSoundVolume(objid id, std::optional<float> volume);
 
 std::vector<std::string> listResources(std::string resourceType);
 
