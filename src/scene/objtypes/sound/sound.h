@@ -20,13 +20,16 @@
 
 void startSoundSystem();
 void stopSoundSystem();
+float getVolume();
+void setVolume(float volume);
+void setListenerPosition(float x, float y, float z, std::vector<float> forward, std::vector<float> up);
+
 ALuint loadSoundState(std::string filepath);
 void unloadSoundState(ALuint source, std::string filepath);
 void playSource(ALuint source, std::optional<float> volume, std::optional<glm::vec3> position);
 void stopSource(ALuint source);
 
-float getVolume();
-void setVolume(float volume);
+
 
 std::vector<std::string> listSounds();
 void setSoundPosition(ALuint source, float x, float y, float z);
@@ -34,7 +37,6 @@ void setSoundVolume(ALuint source, float newVolume);
 void setSoundLooping(ALuint source, bool shouldLoop);
 void setSoundPitch(ALuint source, float pitchMultiplier);
 
-void setListenerPosition(float x, float y, float z, std::vector<float> forward, std::vector<float> up);
 
 struct BufferedAudio {
   ALuint source;

@@ -56,6 +56,8 @@ GameObjectSound createSound(GameobjAttributes& attr, ObjectTypeUtil& util){
   createAutoSerializeWithTextureLoading((char*)&obj, soundAutoserializer, attr, util);
   setSoundVolume(obj.source, obj.volume);
   setSoundLooping(obj.source, obj.loop);
+  setSoundPosition(obj.source, util.fullInitialTransform.position.x, util.fullInitialTransform.position.y, util.fullInitialTransform.position.z);
+
   return obj;
 }
 

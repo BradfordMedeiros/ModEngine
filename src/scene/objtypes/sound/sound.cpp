@@ -9,6 +9,7 @@ size_t tellFileOrPackage(unsigned int handle);
 static std::unordered_map<std::string, ALuint> soundBuffers;  
 static std::unordered_map<std::string, int> soundUsages;
 
+//// global sound stuff /////
 void startSoundSystem(){
   alutInit(NULL, NULL);
 }
@@ -26,6 +27,23 @@ void setVolume(float volume){
   modassert(volume >= 0 && volume <=1, "set listener volume invalid volume");
   alListenerf(AL_GAIN, volume);
 }
+
+void setListenerPosition(float x, float y, float z, std::vector<float> forward, std::vector<float> up){
+  assert(forward.size() == 3);
+  assert(up.size() == 3);
+  alListener3f(AL_POSITION, x, y, z); 
+
+  float orientation[6];
+  orientation[0] = forward.at(0);
+  orientation[1] = forward.at(1);
+  orientation[2] = forward.at(2);
+  orientation[3] = up.at(0);
+  orientation[4] = up.at(1);
+  orientation[5] = up.at(2);
+  alListenerfv(AL_ORIENTATION, orientation);
+}
+
+///////////////////////
 
 void playSource(ALuint source, std::optional<float> volume, std::optional<glm::vec3> position){
   ALfloat oldVolume;
@@ -80,29 +98,6 @@ void setSoundPitch(ALuint source, float pitchMultiplier){
   alSourcef(source, AL_PITCH, pitchMultiplier);
 }
 
-void setListenerPosition(float x, float y, float z, std::vector<float> forward, std::vector<float> up){
-  assert(forward.size() == 3);
-  assert(up.size() == 3);
-  alListener3f(AL_POSITION, x, y, z); 
-
-  float orientation[6];
-  orientation[0] = forward.at(0);
-  orientation[1] = forward.at(1);
-  orientation[2] = forward.at(2);
-  orientation[3] = up.at(0);
-  orientation[4] = up.at(1);
-  orientation[5] = up.at(2);
-  alListenerfv(AL_ORIENTATION, orientation);
-}
-
-
-
-int getUsages(std::string filepath){
-  if (soundUsages.find(filepath) == soundUsages.end()){
-    return 0;
-  }
-  return soundUsages.at(filepath);
-}
 
 size_t my_read_func(void *ptr, size_t size, size_t nmemb, void *datasource) {
   unsigned int* handle = static_cast<unsigned int*>(datasource);
@@ -226,8 +221,6 @@ ALuint createSource(ALuint soundBuffer){
   return soundSource;
 }
 
-// @todo support ogg file format.
-// This call should support: .wav, .snd, .au , but have only tested .wav
 ALuint loadSoundState(std::string filepath){
   std::cout << "EVENT: loading sound:" << filepath <<  std::endl; 
 
@@ -239,6 +232,13 @@ ALuint loadSoundState(std::string filepath){
   }
   soundUsages[filepath] = soundUsages[filepath] + 1;
   return soundSource;
+}
+
+int getUsages(std::string filepath){
+  if (soundUsages.find(filepath) == soundUsages.end()){
+    return 0;
+  }
+  return soundUsages.at(filepath);
 }
 
 void unloadSoundState(ALuint source,  std::string filepath){
