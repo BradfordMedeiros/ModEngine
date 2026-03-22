@@ -171,7 +171,12 @@ void stopSoundStateById(objid id);
 void setSoundPitch(objid id, std::optional<float> pitch);
 void setSoundVolume(objid id, std::optional<float> volume);
 
-void playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume);
+ALuint playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume, bool loop);
+void setSoundPitchOneshot(ALuint source, std::optional<float> pitch);
+void setSoundVolumeOneshot(ALuint source, std::optional<float> volume);
+
+bool isSoundFinished(ALuint source);
+bool isCurrentOneshot(ALuint sourceId);
 
 std::vector<std::string> listResources(std::string resourceType);
 

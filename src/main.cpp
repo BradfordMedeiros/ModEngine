@@ -1724,6 +1724,8 @@ int main(int argc, char* argv[]){
     .setSoundPitch = setSoundPitch,
     .setSoundVolume = setSoundVolume,
     .playOneshot = playOneshot,
+    .setSoundPitchOneshot = setSoundPitchOneshot,
+    .setSoundVolumeOneshot = setSoundVolumeOneshot,
 
     .listResources = listResources,
     .sendNotifyMessage = sendNotifyMessage,

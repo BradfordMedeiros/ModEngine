@@ -976,14 +976,26 @@ void stopSoundStateById(objid id){
   stopSoundState(world.objectMapping, id); 
 }
 
-void playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume){
+ALuint playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume, bool loop){
   auto soundObj = getSoundObj(world.objectMapping, id);
   if (soundObj != NULL){
     auto buffer = getBufferFromSource(soundObj -> source);
-    playSourceOneshot(buffer, position, volume);
-    return;
+    return playSourceOneshot(buffer, position, volume, loop);
   }
+  modassert(false, "playOneshot id does not exist");
+  return 0;
 }
+
+void setSoundPitchOneshot(ALuint source, std::optional<float> pitch){
+  modassert(isCurrentOneshot(source), "not a oneshot sound");
+  setSoundPitch(source, pitch.has_value() ? pitch.value() : 1.f);
+}
+
+void setSoundVolumeOneshot(ALuint source, std::optional<float> volume){
+  modassert(isCurrentOneshot(source), "not a oneshot sound");
+  setSoundVolume(source, volume.has_value() ? volume.value() : 1.f);
+}
+
 
 //////////////////
 

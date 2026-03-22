@@ -15,6 +15,7 @@
 #include "../scene/scene_sandbox.h"
 #include "../network/http.h"
 #include "../mapcompile.h"
+#include "../scene/objtypes/sound/sound.h"
 
 struct CustomApiBindings {
   int32_t (*listSceneId)(int32_t objid);
@@ -99,9 +100,11 @@ struct CustomApiBindings {
   void (*stopClip)(std::string source, objid sceneId);
   void (*stopClipById)(objid id);
   void (*setSoundPitch)(objid id, std::optional<float> pitch);
-  void (*setSoundVolume)(objid id, std::optional<float> pitch);
+  void (*setSoundVolume)(objid id, std::optional<float> volume);
 
-  void (*playOneshot)(objid, std::optional<glm::vec3> position, std::optional<float> volume);
+  ALuint (*playOneshot)(objid, std::optional<glm::vec3> position, std::optional<float> volume, bool loop);
+  void (*setSoundPitchOneshot)(ALuint source, std::optional<float> pitch);
+  void (*setSoundVolumeOneshot)(ALuint source, std::optional<float> volume);
 
   ///////////
   std::vector<std::string> (*listResources)(std::string);

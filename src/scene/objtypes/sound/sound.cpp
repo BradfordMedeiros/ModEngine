@@ -204,7 +204,7 @@ ALuint loadSoundState(std::string filepath){
   return soundSource;
 }
 
-ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::optional<float> volume){
+ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::optional<float> volume, bool loop){
   ALuint source = createSource(buffer);
 
   if (volume.has_value()){
@@ -212,6 +212,10 @@ ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::
   }
   if (position.has_value()){
     setSoundPosition(source, position.value().x, position.value().y, position.value().z);
+  }
+
+  if (loop){
+    setSoundLooping(source, loop);
   }
 
   alSourcePlay(source);
@@ -273,12 +277,21 @@ void unloadSoundState(ALuint source,  std::string filepath){
   }
 }
 
+bool isSoundFinished(ALuint sourceId){
+  ALint state;
+  alGetSourcei(sourceId, AL_SOURCE_STATE, &state);
+  return state == AL_STOPPED;
+}
+
+bool isCurrentOneshot(ALuint sourceId){
+  return soundOneshotsSourceToBuffer.find(sourceId) != soundOneshotsSourceToBuffer.end();
+}
+
 void onSoundFrame(){
   std::vector<ALuint> sourceIds;
   for (auto& [sourceId, bufferId] : soundOneshotsSourceToBuffer){
-    ALint state;
-    alGetSourcei(sourceId, AL_SOURCE_STATE, &state);
-    if (state == AL_STOPPED){
+    bool isFinished = isSoundFinished(sourceId);
+    if (isFinished){
       sourceIds.push_back(sourceId);
     }
   }

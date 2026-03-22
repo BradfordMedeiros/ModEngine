@@ -39,8 +39,9 @@ void setSoundVolume(ALuint source, float newVolume);
 void setSoundLooping(ALuint source, bool shouldLoop);
 void setSoundPitch(ALuint source, float pitchMultiplier);
 
-ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::optional<float> volume);
+ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::optional<float> volume, bool loop);
 ALuint getBufferFromSource(ALuint source);
+bool isCurrentOneshot(ALuint sourceId);
 
 // Video ////
 
