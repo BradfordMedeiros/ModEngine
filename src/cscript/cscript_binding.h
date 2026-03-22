@@ -102,7 +102,7 @@ struct CustomApiBindings {
   void (*setSoundPitch)(objid id, std::optional<float> pitch);
   void (*setSoundVolume)(objid id, std::optional<float> volume);
 
-  ALuint (*playOneshot)(objid, std::optional<glm::vec3> position, std::optional<float> volume, bool loop);
+  ALuint (*playOneshot)(objid, std::optional<glm::vec3> position, std::optional<float> volume, bool loop, bool center);
   void (*setSoundPitchOneshot)(ALuint source, std::optional<float> pitch);
   void (*setSoundVolumeOneshot)(ALuint source, std::optional<float> volume);
 

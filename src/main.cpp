@@ -2107,6 +2107,7 @@ int main(int argc, char* argv[]){
     onNetCode(netcode, onClientMessage, bootStrapperMode);
 
     { 
+      // TODO - consider moving this later, i think this ends up having one frame of lag for the listener
       auto forward = calculateRelativeOffset(viewTransform.rotation, {0, 0, -1 }, false);
       auto up  = calculateRelativeOffset(viewTransform.rotation, {0, 1, 0 }, false);
       setListenerPosition(
@@ -2115,6 +2116,7 @@ int main(int argc, char* argv[]){
         { up.x, up.y, up.z }
       );
       setVolume(state.muteSound ? 0.f : state.volume);
+      onSoundFrame(viewTransform.position);
     }
 
 

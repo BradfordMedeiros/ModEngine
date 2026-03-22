@@ -976,11 +976,11 @@ void stopSoundStateById(objid id){
   stopSoundState(world.objectMapping, id); 
 }
 
-ALuint playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume, bool loop){
+ALuint playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume, bool loop, bool center){
   auto soundObj = getSoundObj(world.objectMapping, id);
   if (soundObj != NULL){
     auto buffer = getBufferFromSource(soundObj -> source);
-    return playSourceOneshot(buffer, position, volume, loop);
+    return playSourceOneshot(buffer, position, volume, loop, center);
   }
   modassert(false, "playOneshot id does not exist");
   return 0;

@@ -31,7 +31,7 @@ void unloadSoundState(ALuint source, std::string filepath);
 void playSource(ALuint source);
 void stopSource(ALuint source);
 std::vector<std::string> listSounds();
-void onSoundFrame();
+void onSoundFrame(glm::vec3 listenerPosition);
 
 
 void setSoundPosition(ALuint source, float x, float y, float z);
@@ -39,7 +39,7 @@ void setSoundVolume(ALuint source, float newVolume);
 void setSoundLooping(ALuint source, bool shouldLoop);
 void setSoundPitch(ALuint source, float pitchMultiplier);
 
-ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::optional<float> volume, bool loop);
+ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::optional<float> volume, bool loop, bool center);
 ALuint getBufferFromSource(ALuint source);
 bool isCurrentOneshot(ALuint sourceId);
 

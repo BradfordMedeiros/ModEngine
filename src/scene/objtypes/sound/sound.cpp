@@ -8,7 +8,13 @@ int seekFileOrPackage(unsigned int handle, int offset, int whence);
 size_t tellFileOrPackage(unsigned int handle);
 static std::unordered_map<std::string, ALuint> soundBuffers;  
 static std::unordered_map<std::string, int> soundUsages;
-static std::unordered_map<ALuint, ALuint> soundOneshotsSourceToBuffer;
+
+struct OneShotData {
+  ALuint bufferId;
+  bool center;
+};
+
+static std::unordered_map<ALuint, OneShotData> soundOneshotsSourceToBuffer;
 
 //// global sound stuff /////
 void startSoundSystem(){
@@ -204,7 +210,7 @@ ALuint loadSoundState(std::string filepath){
   return soundSource;
 }
 
-ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::optional<float> volume, bool loop){
+ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::optional<float> volume, bool loop, bool center){
   ALuint source = createSource(buffer);
 
   if (volume.has_value()){
@@ -220,7 +226,10 @@ ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::
 
   alSourcePlay(source);
   modassert(soundOneshotsSourceToBuffer.find(source) == soundOneshotsSourceToBuffer.end(), "duplicate source");
-  soundOneshotsSourceToBuffer[source] = buffer;
+  soundOneshotsSourceToBuffer[source] = OneShotData {
+    .bufferId = buffer,
+    .center = center,
+  };
   return source;
 }
 
@@ -259,8 +268,8 @@ void unloadSoundState(ALuint source,  std::string filepath){
     ALuint buffer = soundBuffers.at(filepath);
 
     std::vector<ALuint> sourceToRemove;
-    for (auto& [oneshotSource, bufferId] : soundOneshotsSourceToBuffer){
-      if(bufferId == buffer){
+    for (auto& [oneshotSource, oneshotData] : soundOneshotsSourceToBuffer){
+      if(oneshotData.bufferId == buffer){
         sourceToRemove.push_back(oneshotSource);
       }
     }
@@ -287,7 +296,13 @@ bool isCurrentOneshot(ALuint sourceId){
   return soundOneshotsSourceToBuffer.find(sourceId) != soundOneshotsSourceToBuffer.end();
 }
 
-void onSoundFrame(){
+void onSoundFrame(glm::vec3 listenerPosition){
+  for (auto& [sourceId, oneshotData] : soundOneshotsSourceToBuffer){
+    if (oneshotData.center){
+      setSoundPosition(sourceId, listenerPosition.x, listenerPosition.y, listenerPosition.z);
+    }
+  }
+
   std::vector<ALuint> sourceIds;
   for (auto& [sourceId, bufferId] : soundOneshotsSourceToBuffer){
     bool isFinished = isSoundFinished(sourceId);
