@@ -205,7 +205,7 @@ std::vector<std::string>& getMeshNames(ObjectMapping& mapping, objid id, ObjType
 bool isNavmesh(ObjectMapping& mapping, objid id);
 std::optional<Texture> textureForId(ObjectMapping& mapping, objid id, ObjTypeLookup& objtypeLookup);
 void updateObjectPositions(ObjectMapping& mapping, objid, Transformation& transform, Transformation& viewTransform);
-void playSoundState(ObjectMapping& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position);
+void playSoundState(ObjectMapping& mapping, objid id, std::optional<float> volume);
 void stopSoundState(ObjectMapping& mapping, objid id);
 
 void onObjectSelected(objid id);

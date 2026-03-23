@@ -1025,7 +1025,7 @@ void updateObjectPositions(ObjectMapping& mapping, objid id, Transformation& tra
   }
 }
 
-void playSoundState(ObjectMapping& mapping, objid id, std::optional<float> volume, std::optional<glm::vec3> position){
+void playSoundState(ObjectMapping& mapping, objid id, std::optional<float> volume){
   auto soundObj = getSoundObj(mapping, id);
   if (soundObj != NULL){
     playSource(soundObj -> source);

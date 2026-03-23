@@ -210,8 +210,9 @@ void setWorldState(std::vector<ObjectValue> values);
 std::vector<ObjectValue> getWorldState();
 void setLayerState(std::vector<StrValues> values);
 
-void playSoundState(std::string source, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
-void playSoundState(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
+void playSoundState(std::string source, objid sceneId, std::optional<float> volume);
+void playSoundState(objid id, std::optional<float> volume);
+std::optional<objid> getClipByName(std::string name, objid sceneId);
 
 unsigned int activeTextureId();
 

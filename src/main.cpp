@@ -1723,6 +1723,7 @@ int main(int argc, char* argv[]){
     .stopClipById = stopSoundStateById,
     .setSoundPitch = setSoundPitch,
     .setSoundVolume = setSoundVolume,
+    .getClipByName = getClipByName,
     .playOneshot = playOneshot,
     .setSoundPitchOneshot = setSoundPitchOneshot,
     .setSoundVolumeOneshot = setSoundVolumeOneshot,

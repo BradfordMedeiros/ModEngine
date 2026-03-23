@@ -95,12 +95,13 @@ struct CustomApiBindings {
   std::optional<float> (*animationLength)(int32_t id, std::string animationToPlay);
 
   std::vector<std::string>(*listClips)();
-  void (*playClip)(std::string, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
-  void (*playClipById)(objid id, std::optional<float> volume, std::optional<glm::vec3> position);
+  void (*playClip)(std::string, objid sceneId, std::optional<float> volume);
+  void (*playClipById)(objid id, std::optional<float> volume);
   void (*stopClip)(std::string source, objid sceneId);
   void (*stopClipById)(objid id);
   void (*setSoundPitch)(objid id, std::optional<float> pitch);
   void (*setSoundVolume)(objid id, std::optional<float> volume);
+  std::optional<objid> (*getClipByName)(std::string, objid sceneId);
 
   OneShot (*playOneshot)(objid, std::optional<glm::vec3> position, std::optional<float> volume, bool loop, bool center);
   void (*setSoundPitchOneshot)(OneShot& source, std::optional<float> pitch);

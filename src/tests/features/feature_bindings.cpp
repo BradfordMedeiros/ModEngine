@@ -55,7 +55,7 @@ CScriptBinding cscriptSoundBinding(CustomApiBindings& api){
     }
     auto sceneId = api.listSceneId(id);
     auto sampleId = api.getGameObjectByName("&sample", sceneId).value();
-    api.playClipById(sampleId, std::nullopt, std::nullopt);
+    api.playClipById(sampleId, std::nullopt);
   };
   return binding;
 }
