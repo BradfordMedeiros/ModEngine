@@ -171,9 +171,9 @@ void stopSoundStateById(objid id);
 void setSoundPitch(objid id, std::optional<float> pitch);
 void setSoundVolume(objid id, std::optional<float> volume);
 
-ALuint playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume, bool loop, bool center);
-void setSoundPitchOneshot(ALuint source, std::optional<float> pitch);
-void setSoundVolumeOneshot(ALuint source, std::optional<float> volume);
+OneShot playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume, bool loop, bool center);
+void setSoundPitchOneshot(OneShot& oneShot, std::optional<float> pitch);
+void setSoundVolumeOneshot(OneShot& oneShot, std::optional<float> volume);
 
 bool isSoundFinished(ALuint source);
 bool isCurrentOneshot(ALuint sourceId);

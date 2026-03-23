@@ -43,6 +43,10 @@ ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::
 ALuint getBufferFromSource(ALuint source);
 bool isCurrentOneshot(ALuint sourceId);
 
+struct OneShot {
+  ALuint source;
+};
+
 // Video ////
 
 struct BufferedAudio {
