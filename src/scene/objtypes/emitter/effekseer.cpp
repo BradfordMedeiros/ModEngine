@@ -86,7 +86,9 @@ public:
 };
 
 
+bool initEffekseerCalled = false;
 void initEffekseer(){
+	initEffekseerCalled = true;
   std::cout << "effekseer initialized start" << std::endl;
 
   Effekseer::SetLogger([](Effekseer::LogType logType, const std::string& value) -> void {
@@ -121,6 +123,7 @@ void initEffekseer(){
 
 
 bool effectPlaying(EffectData& effect){
+	modassert(initEffekseerCalled, "Effekseer not initialized");
 	if (!effect.playingEffect.has_value()){
 		return false;
 	}
@@ -130,6 +133,7 @@ bool effectPlaying(EffectData& effect){
 
 
 bool isFinalEffectFrame(EffectData& effect, float currentTime){
+	modassert(initEffekseerCalled, "Effekseer not initialized");
 	auto elapsedTime = currentTime - effect.startTime.value();
 	auto currentFrame = std::ceil(elapsedTime * 60.0f);
 	auto term = effect.effectRef -> CalculateTerm();
@@ -173,13 +177,7 @@ void playEffectsAlways(float currentTime){
 }
 
 void onEffekSeekerFrame(float timeDelta, float currentTime, bool paused){
-	static bool initialized = false;
-	if (!initialized){
-		initialized = true;
-		initEffekseer();
-	}
-
-	if (false && paused){
+	if (paused){
 		return;
 	}
 	
@@ -230,14 +228,18 @@ void onEffekSeekerRender(float windowSizeX, float windowSizeY, float fovRadians,
 }
 
 Effekseer::EffectRef doCreateEffect(std::string& effect){
+	modassert(initEffekseerCalled, "Effekseer not initialized doCreateEffect");
+	
 	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
-    auto pathUtf16 = convert.from_bytes(effect.c_str());
+  auto pathUtf16 = convert.from_bytes(effect.c_str());
 	Effekseer::EffectRef effectRef = Effekseer::Effect::Create(effekseerManager,  pathUtf16.c_str());
 	modassert(effectRef != NULL, std::string("effect invalid: ") + effect);
 	return effectRef;
 }
 
 EffekEffect createEffect(std::string effect, glm::vec3 position, glm::quat rotation, glm::vec3 scale){
+	modassert(initEffekseerCalled, "Effekseer not initialized");
+
 	auto effectId = getUniqueObjId();
 
 	effekseerData[effectId] = EffectData {

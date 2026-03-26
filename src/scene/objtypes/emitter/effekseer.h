@@ -7,6 +7,7 @@
 #include <EffekseerRendererGL.h>
 #include "../../../common/util.h"
 
+void initEffekseer();
 void onEffekSeekerFrame(float timeElapsed, float currentTime, bool paused);
 void onEffekSeekerRender(float windowSizeX, float windowSizeY, float fovRadians,  glm::vec3 viewPosition, glm::quat viewDirection, float nearPlane, float farPlane);
 

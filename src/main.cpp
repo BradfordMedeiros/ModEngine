@@ -2035,7 +2035,8 @@ int main(int argc, char* argv[]){
   }
 
   waterShader = pluginApi.loadShader("water", "./res/shaders/water");
-
+  initEffekseer();
+  
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
   PROFILE("FRAME",
