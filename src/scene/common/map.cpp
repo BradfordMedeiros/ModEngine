@@ -485,20 +485,20 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 
 	auto mapData = parseMapData(mapFile);
 	for (auto& entity: mapData.entities){
+    auto classname = getValue(entity, "classname");
+    modassert(classname.has_value(), "no classname");
+
 		bool shouldWrite = false;
-		std::string modelName = "";
+		std::string modelName = std::string("entity_") + *classname.value() + "_" + std::to_string(entity.index);
 		std::vector<GameobjAttributeOpts> attributes;
 		callback(mapData, entity, &shouldWrite, attributes, &modelName);
 
 		bool userSpecifiedPosition = false;
 		if (shouldWrite){
-		    auto classname = getValue(entity, "classname");
-		    modassert(classname.has_value(), "no classname");
-
 		    auto origin = getValue(entity, "origin");
 		    glm::vec3 position = origin.has_value() ? parseVecTrenchbroom(*origin.value(), mapData.scale) : glm::vec3(0.f, 0.f, 0.f);
 
-		    std::string entityName = modelName != "" ?  modelName : (std::string("entity_") + *classname.value() + "_" + std::to_string(entity.index));
+		    std::string entityName = modelName;
 
 		    // I could check uniqueness here
 		    for (auto& attribute : attributes){
