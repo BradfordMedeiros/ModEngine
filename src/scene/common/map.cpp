@@ -1165,16 +1165,17 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 
 
 glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll) {
-	float pitchRad = glm::radians(pitch);
+	float pitchRad = glm::radians(-1 * roll);
 	float yawRad   = glm::radians(yaw);
-	float rollRad  = glm::radians(roll);
+	float rollRad  = glm::radians(-1 * pitch);
 
-	glm::quat qPitch = glm::angleAxis(pitchRad, glm::vec3(0, 0, -1));
+	glm::quat qPitch = glm::angleAxis(pitchRad, glm::vec3(0, 0, 1));
 	glm::quat qYaw   = glm::angleAxis(yawRad,   glm::vec3(0, 1,  0));
 	glm::quat qRoll  = glm::angleAxis(rollRad,  glm::vec3(1, 0,  0));
 
+	glm::quat tbToEngine = glm::angleAxis(glm::radians(-90.f), glm::vec3(0, 1, 0));
 	glm::quat q = qYaw * qPitch * qRoll;
 	
-	return q;
+	return tbToEngine * q;
 }
 
