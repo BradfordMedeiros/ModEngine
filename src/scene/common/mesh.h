@@ -37,6 +37,7 @@ struct Mesh {
   int numIndices;   // if this is < 0, invalid don't depend on
   bool isSky = false;
   bool isWater = false;
+  bool isHidden = false;
   //std::vector<Vertex> debugVertexs;
 };
 

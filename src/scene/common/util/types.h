@@ -45,6 +45,7 @@ struct MeshData {
   std::vector<Bone> bones;
   bool isSky = false;
   bool isWater = false;
+  bool isHidden = false;
 };
 
 struct Line {

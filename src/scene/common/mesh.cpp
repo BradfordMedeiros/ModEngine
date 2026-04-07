@@ -130,6 +130,7 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
     .numIndices = meshData.indices.size(),
     .isSky = meshData.isSky,
     .isWater = meshData.isWater,
+    .isHidden = meshData.isHidden,
     //.debugVertexs = meshData.vertices,
   }; 
   std::cout << "mesh - created a mesh with num vertices = " << mesh.numVertices << std::endl;

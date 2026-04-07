@@ -1014,6 +1014,7 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   auto material = getValue(entity, "material");
   bool isSky = false;
   bool isWater = false;
+  bool isHidden = false;
 
   if (material.has_value() && (*material.value() == "sky")){
   	isSky = true;
@@ -1021,7 +1022,9 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   if (material.has_value() && (*material.value() == "water")){
   	isWater = true;
   }
-
+  if (material.has_value() && (*material.value() == "hidden")){
+  	isHidden = true;
+  }
 
   std::unordered_map<std::string, MapRawValue> meshForTextures;
 
@@ -1148,6 +1151,7 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   	auto generatedMesh = generateMeshRaw(meshForTexture.points, meshForTexture.uvCoords, indexs, &texture, normalTexture.has_value() ? &normalTexture.value() : NULL);
   	generatedMesh.isSky = isSky;
   	generatedMesh.isWater = isWater;
+  	generatedMesh.isHidden = isHidden;
 
   	meshIds.push_back(meshId);
   	modelDataCore2.modelData.meshIdToMeshData[meshId] = generatedMesh;

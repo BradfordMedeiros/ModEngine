@@ -434,6 +434,7 @@ int renderObject(
           .bones = &meshToRender.bones,
           .id = id,
         };
+     
         if (meshToRender.isSky){
           glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "sky"), true);
           glm::mat4 modelRotationOnly = glm::mat4(glm::mat3(finalModelMatrix)); // keep rotation, zero translation
@@ -457,6 +458,8 @@ int renderObject(
           drawMesh(meshToRender, waterShader, drawPoints, meshUniforms);   
           
           glUseProgram(shaderProgram);        
+        }else if (meshToRender.isHidden){
+          // do nothing
         }else{
           drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms);   
         }
