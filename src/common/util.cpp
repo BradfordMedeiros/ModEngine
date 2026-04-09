@@ -1471,3 +1471,35 @@ std::string print(BUTTON_TYPE button){
   }
   return "unknown button";
 }
+
+std::string print(ControlInfo& controlInfo){
+  std::string content;
+  content += std::string("controller| a: ") + (controlInfo.buttonInfo.a ? "true" : "false") + "\n";
+  content += std::string("controller| b: ") + (controlInfo.buttonInfo.b ? "true" : "false") + "\n";
+  content += std::string("controller| x: ") + (controlInfo.buttonInfo.x ? "true" : "false") + "\n";
+  content += std::string("controller| y: ") + (controlInfo.buttonInfo.y ? "true" : "false") + "\n";
+
+  content += std::string("controller| leftStick: ") + (controlInfo.buttonInfo.leftStick ? "true" : "false") + "\n";
+  content += std::string("controller| rightStick: ") + (controlInfo.buttonInfo.rightStick ? "true" : "false") + "\n";
+
+  content += std::string("controller| start: ") + (controlInfo.buttonInfo.start ? "true" : "false") + "\n";
+
+  content += std::string("controller| leftBumper: ") + (controlInfo.buttonInfo.leftBumper ? "true" : "false") + "\n";
+  content += std::string("controller| rightBumper: ") + (controlInfo.buttonInfo.rightBumper ? "true" : "false") + "\n";
+
+  content += std::string("controller| home: ") + (controlInfo.buttonInfo.home ? "true" : "false") + "\n";
+
+  content += std::string("controller| up: ") + (controlInfo.buttonInfo.up ? "true" : "false") + "\n";
+  content += std::string("controller| down: ") + (controlInfo.buttonInfo.down ? "true" : "false") + "\n";
+  content += std::string("controller| left: ") + (controlInfo.buttonInfo.left ? "true" : "false") + "\n";
+  content += std::string("controller| right: ") + (controlInfo.buttonInfo.right ? "true" : "false") + "\n";
+
+  content += std::string("controller| leftTrigger: ") + std::to_string(controlInfo.axisInfo.leftTrigger) + "\n";
+  content += std::string("controller| rightTrigger: ") + std::to_string(controlInfo.axisInfo.rightTrigger) + "\n";
+  content += std::string("controller| leftStickX: ") + std::to_string(controlInfo.axisInfo.leftStickX) + "\n";
+  content += std::string("controller| leftStickY: ") + std::to_string(controlInfo.axisInfo.leftStickY) + "\n";
+  content += std::string("controller| rightStickX: ") + std::to_string(controlInfo.axisInfo.rightStickX) + "\n";
+  content += std::string("controller| rightStickY: ") + std::to_string(controlInfo.axisInfo.rightStickY) + "\n";
+
+  return content;
+}

@@ -606,5 +606,6 @@ struct ControlInfo2{
   ControlInfo lastFrame;
 };
 
+std::string print(ControlInfo& controlInfo);
 
 #endif
