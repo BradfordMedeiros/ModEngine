@@ -145,7 +145,8 @@ std::string readFile(Package& package, const char* file){
          std::cout << "found this file!" << name << std::endl;
          char* data = (char*)malloc(fileMetadata.sizeBytes); // give more thought about the size of this
          fseek(package.handle, fileMetadata.offsetBytes, SEEK_SET);
-         fread(data, sizeof(char), fileMetadata.sizeBytes, package.handle);
+         auto bytesRead = fread(data, sizeof(char), fileMetadata.sizeBytes, package.handle);
+         modassert(bytesRead == fileMetadata.sizeBytes, "unexpected read size");
 
          std::string readData(data, fileMetadata.sizeBytes);
          /*std::string checkData = loadFile(fileStr);

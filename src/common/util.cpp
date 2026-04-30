@@ -662,7 +662,7 @@ AttributeValue addAttributes(AttributeValue one, AttributeValue two){
   auto fValueTwo = std::get_if<float>(&two);
   if (fValueOne != NULL){
     modassert(fValueTwo != NULL, "Incompatible types between float value one and two");
-    return *fValueOne + *valueTwo;
+    return *fValueOne + *fValueTwo;
   }
   modassert(false, "addAttributes value types not supported");
   return 0.f;
