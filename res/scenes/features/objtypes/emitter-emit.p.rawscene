@@ -14,3 +14,5 @@ platform:position:0 -5 0
 +particles:+fragshader:./res/shaders/discard_lowintensity/fragment.glsl
 +particles:state:enabled
 +particles:script:./res/scenes/features/objtypes/emitter-emit.scm
+
++particles:effek:./path/to/affect

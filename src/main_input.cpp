@@ -299,16 +299,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     std::cout << "texture index: " << state.textureIndex << std::endl;
   }
 
-  /*if (key == GLFW_KEY_N && action == 1){
-    return;
-    assert(!state.isRecording);
-    auto gameobj = getGameObjectByName(world, "record");
-    if (gameobj.has_value()){
-      std::cout << "INPUT -> STARTED RECORDING" << std::endl;
-      state.isRecording = true;
-      state.recordingIndex = createRecording(gameobj.value());
-    }
-  } */
+
 
   if (key == 260){
     state.editor.selectedObjs = {};

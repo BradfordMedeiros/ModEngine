@@ -373,17 +373,7 @@ struct Token {
   std::string payload;
 };
 
-enum RecordingPlaybackType { RECORDING_PLAY_ONCE, RECORDING_PLAY_ONCE_REVERSE, RECORDING_PLAY_LOOP, RECORDING_PLAY_LOOP_REVERSE, RECORDING_SETONLY };
-struct RecordingOptionResume{};
-struct RecordingOptionResumeAtTime{
-  float elapsedTime;
-};
-typedef std::variant<RecordingOptionResume, RecordingOptionResumeAtTime> PlayRecordingOption;
 
-struct RecordingState {
-  float timeElapsed;
-  float length;
-};
 
 struct ModAABB {
   glm::vec3 position;
