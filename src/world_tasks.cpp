@@ -6,9 +6,9 @@ extern engineState state;
 extern World world;
 extern SysInterface interface;
 
-std::unordered_map<objid, RequestMovingObject> requestMovingObjects; // TODO STATIC
-std::vector<ScheduledTask> scheduledTasks;  // TODO STATIC
-std::vector<ScheduledTask> tasksToSchedule; // // TODO STATIC taks to schedule is sepearate since want enqueue only in the tick, since task.fn can modify 
+extern std::unordered_map<objid, RequestMovingObject> requestMovingObjects;
+extern std::vector<ScheduledTask> scheduledTasks; 
+extern std::vector<ScheduledTask> tasksToSchedule; // tasks to schedule is sepearate since want enqueue only in the tick, since task.fn can modify 
 
 
 // moving objects 

@@ -8,6 +8,11 @@
 #include <iostream>
 
 typedef std::variant<int, float> StatValue;
+struct StatInfo {
+  std::string name;
+  StatValue amount;
+};
+
 // TODO -> this should be how all the values in benchmark come from
 // then benchmark would just be the aggregator 
 unsigned int statName(std::string name);
@@ -49,6 +54,7 @@ struct Stats {
   unsigned int numScheduledTasks;
 };
 
+Stats createStatistics();
 void initializeStatistics();
 
 #endif

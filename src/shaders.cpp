@@ -2,7 +2,7 @@
 
 #define SHADER_INFO_LOG_LENGTH 512
 
-std::unordered_map<std::string, ShaderInformation> shaderstringToId; // TODO STATIC
+extern std::unordered_map<std::string, ShaderInformation> shaderstringToId;
 
 struct shaderError {
   bool isError;

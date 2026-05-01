@@ -1,6 +1,7 @@
 #include "./mapcompile.h"
 
-std::optional<CompileMapFns> compileFns;
+extern std::optional<CompileMapFns> compileFns;
+
 void setCompileFn(CompileMapFns& compileFnsVal){
 	compileFns = compileFnsVal;
 }

@@ -1,7 +1,7 @@
 #include "./symbols.h"
 
-std::unordered_map<std::string, int> goalnameToInt;  // static state
-int symbolIndex = -1;                                // static state
+extern std::unordered_map<std::string, int> goalnameToInt;
+extern int symbolIndex;                                
 
 int getSymbol(std::string name){
   //std::cout << "get symbol called: " << name << std::endl;

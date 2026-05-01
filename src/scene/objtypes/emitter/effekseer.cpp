@@ -7,8 +7,8 @@ double timeSeconds(bool realtime);
 // This exists, might be useful later, since particles not affected by lighting.  
 //effekseerManager -> SetAllColor(handle, Effekseer::Color(255, 255, 255, 255));
 
-Effekseer::ManagerRef effekseerManager;
-EffekseerRendererGL::RendererRef effekRenderer;
+Effekseer::ManagerRef effekseerManager;          // TODO STATIC
+EffekseerRendererGL::RendererRef effekRenderer;  // TODO STATIC
 
 struct EffectData {
 	Effekseer::EffectRef effectRef;
@@ -21,7 +21,7 @@ struct EffectData {
 
 	std::optional<float> startTime;
 };
-std::unordered_map<objid, EffectData> effekseerData;
+std::unordered_map<objid, EffectData> effekseerData;  // TODO STATIC
 
 std::string readFileOrPackage(std::string filepath); // i dont really like directly referencing this here, but...it's ok
 unsigned int openFileOrPackage(std::string filepath);

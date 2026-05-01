@@ -25,6 +25,9 @@ extern std::unordered_map<unsigned int, std::vector<ShaderTextureBinding>> textu
 extern int currentTick;
 extern std::vector<ViewportSettings> viewports;
 
+extern std::vector<objid> objectsQueuedForRemoval;
+extern std::vector<objid> groupsQueuedForRemoval;
+
 float getTotalTime(){
   return statistics.now - statistics.initialTime;
 }
@@ -33,8 +36,7 @@ float getTotalTimeGame(){
   return timePlayback.getCurrentTime() - statistics.initialTime;
 }
 
-std::vector<objid> objectsQueuedForRemoval = {};  // TODO STATIC
-std::vector<objid> groupsQueuedForRemoval = {};   // TODO STATIC
+
 bool gameobjExists(objid id){
   if (!idExists(world.sandbox, id)){
     return false;

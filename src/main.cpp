@@ -68,9 +68,12 @@ struct ShaderToUpdate {
   bool isUiShader;
   std::string name;
 };
-std::vector<ShaderToUpdate> extraShadersToUpdate; // TODO STATIC get rid of this, but useful given at render shader loading
+std::vector<ShaderToUpdate> extraShadersToUpdate;
 std::unordered_map<unsigned int, std::vector<ShaderTextureBinding>> textureBindings; 
 unsigned int* waterShader = NULL;
+
+std::unordered_map<std::string, int> goalnameToInt;
+int symbolIndex = -1;                                
 
 // core system 
 NetCode netcode { };
@@ -95,6 +98,23 @@ float lastReloadTime = 0.f;
 
 TimePlayback timePlayback(statistics.initialTime); 
 std::vector<ViewportSettings> viewports;
+
+std::unordered_map<objid, RequestMovingObject> requestMovingObjects;
+std::vector<ScheduledTask> scheduledTasks; 
+std::vector<ScheduledTask> tasksToSchedule;
+
+std::vector<objid> objectsQueuedForRemoval;
+std::vector<objid> groupsQueuedForRemoval;
+
+Stats statistics = createStatistics();
+std::vector<StatInfo> stats;
+
+std::unordered_map<std::string, ShaderInformation> shaderstringToId;
+
+std::vector<CScriptBinding> bindings;
+
+std::optional<CompileMapFns> compileFns;
+std::vector<std::string> installedMods;
 
 
 std::unordered_map<std::string, std::string>& getTemplateValues(){

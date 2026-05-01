@@ -1,33 +1,32 @@
 #include "./benchstats.h"
 
-Stats statistics {
-  .initialTime = 0.f,
-  .now = 0.f,
-  .deltaTime = 0.f, // Time between current frame and last frame
-  .previous = 0.f,
-  .last60 = 0.f,
-  .currentFps = 0.f,
-  .frameCount = 0,
-  .totalFrames = 0,
-  .numTriangles = 0,
-  .numDrawCalls = 0,
-  .numObjectsStat = 0,
-  .rigidBodiesStat = 0,
-  .scenesLoadedStat = 0,
-  .fpsStat = 0,
-  .loadModelFileStat = 0,
-  .loadModelFileStatCacheHit = 0,
-  .loadMeshStat = 0,
-  .numScheduledTasks = 0,
-};
+extern Stats statistics;
+extern std::vector<StatInfo> stats;
 
+Stats createStatistics(){
+  Stats statistics {
+    .initialTime = 0.f,
+    .now = 0.f,
+    .deltaTime = 0.f, // Time between current frame and last frame
+    .previous = 0.f,
+    .last60 = 0.f,
+    .currentFps = 0.f,
+    .frameCount = 0,
+    .totalFrames = 0,
+    .numTriangles = 0,
+    .numDrawCalls = 0,
+    .numObjectsStat = 0,
+    .rigidBodiesStat = 0,
+    .scenesLoadedStat = 0,
+    .fpsStat = 0,
+    .loadModelFileStat = 0,
+    .loadModelFileStatCacheHit = 0,
+    .loadMeshStat = 0,
+    .numScheduledTasks = 0,
+  };
+  return statistics;
+}
 
-struct StatInfo {
-  std::string name;
-  StatValue amount;
-};
-
-std::vector<StatInfo> stats = {};  // static-state
 
 unsigned int statName(std::string name){
 	for (int i = 0; i < stats.size(); i++){
