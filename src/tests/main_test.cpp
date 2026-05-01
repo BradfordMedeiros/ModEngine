@@ -93,14 +93,6 @@ std::vector<TestCase> tests = {
     .name = "planeIntersectionTest",
     .test = planeIntersectionTest,
   },
-  TestCase {
-    .name = "recorderIndexsForRecordingTest",
-    .test = recorderIndexsForRecordingTest,
-  },
-  TestCase {
-    .name = "recorderIndexsForRecordingReverseTest",
-    .test = recorderIndexsForRecordingReverseTest,
-  },
 };
 
 int runTests(){

@@ -472,7 +472,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .screenshotPath = "",
     .multiselect = false,
     .editor = EditorContent{},
-    .isRecording = false,
     .recordingIndex = -1,
     .snappingMode = SNAP_RELATIVE,
     .drawPoints = false,

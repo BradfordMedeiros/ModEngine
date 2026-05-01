@@ -4,7 +4,6 @@
 #include <iostream>
 #include <map>
 #include "./scene/animation/playback.h"
-#include "./scene/animation/recorder.h"
 #include "./scene/scene.h"
 
 struct BlendAnimationData {

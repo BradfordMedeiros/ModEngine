@@ -116,12 +116,6 @@ struct CustomApiBindings {
   bool (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename);
   void (*connectServer)(std::string server);
   void (*disconnectServer)();
-  void (*playRecording)(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type, std::optional<PlayRecordingOption> recordingOption);
-  void (*stopRecording)(objid id);
-  float (*recordingLength)(std::string recordingPath);
-  std::optional<RecordingState>(*recordingState)(objid id);
-  objid (*createRecording)(objid id);
-  void (*saveRecording)(objid recordingId, std::string filepath);
   std::optional<objid> (*makeObjectAttr)(objid sceneId, std::string name, GameobjAttributes& attr, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes);
   void (*makeParent)(objid child, objid parent);
   std::optional<objid> (*getParent)(objid id);

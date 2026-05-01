@@ -92,7 +92,6 @@ struct engineState {
   
   bool multiselect;
   EditorContent editor;
-  bool isRecording;
   objid recordingIndex;
   SNAPPING_MODE snappingMode;
   bool drawPoints;

@@ -1735,12 +1735,6 @@ int main(int argc, char* argv[]){
     .currentFrame = currentFrame,
     .saveScene = saveScene,
     .connectServer = connectServer,
-    .playRecording = playRecording,
-    .stopRecording = stopRecording,
-    .recordingLength = recordingLength,
-    .recordingState = recordingState,
-    .createRecording = createRecording,
-    .saveRecording = saveRecording,
     .makeObjectAttr = makeObjectAttr,
     .makeParent = makeParent,
     .getParent = getParent,
@@ -2096,7 +2090,6 @@ int main(int argc, char* argv[]){
       loadSkybox(world, state.skybox); 
       state.updateSkybox = false;
     }
-    tickRecordings(getTotalTimeGame());
     tickScheduledTasks();
     handleMovingObjects(timePlayback.getCurrentTime());
 

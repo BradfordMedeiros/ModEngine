@@ -106,19 +106,45 @@ btRigidBody* createRigidBodyCylinder(physicsEnv& env, float radius, float height
   return createRigidBody(pos, shape, rot, scaling);
 }
 
-btRigidBody* createRigidBodyHull(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts){
-  modassert(verts.size() % 3 == 0, "verts must be % 3 = 0");
-  btTriangleMesh* trimesh = new btTriangleMesh();
-  for (int i = 0; i < verts.size(); i+=3){
-    trimesh -> addTriangle(glmToBt(verts.at(i)), glmToBt(verts.at(i + 1)), glmToBt(verts.at(i + 2)));
-  }
-  btConvexTriangleMeshShape* shape = new btConvexTriangleMeshShape(trimesh);
-  shape -> setMargin(0.1); // TODO check if this margin makes sense
-  btShapeHull hullBuilder(shape);
-  hullBuilder.buildHull(0);
+btRigidBody* createRigidBodyHull(
+    physicsEnv& env,
+    const std::vector<glm::vec3>& verts,
+    const glm::vec3& pos,
+    const glm::quat& rot,
+    const glm::vec3& scaling,
+    rigidBodyOpts opts)
+{
+    modassert(verts.size() % 3 == 0, "verts must be % 3 = 0");
 
-  std::cout << "physics createRigidBodyHull, created, allocated: 2 elements" << std::endl;
-  return createRigidBody(pos, shape, rot, scaling);
+    auto* trimesh = new btTriangleMesh();
+
+    const glm::vec3* v = verts.data();
+    const size_t count = verts.size();
+
+    for (size_t i = 0; i < count; i += 3)
+    {
+        trimesh->addTriangle(
+            glmToBt(v[i]),
+            glmToBt(v[i + 1]),
+            glmToBt(v[i + 2]));
+    }
+
+    auto* triShape = new btConvexTriangleMeshShape(trimesh);
+    triShape->setMargin(0.1f);
+
+    btShapeHull hullBuilder(triShape);
+    hullBuilder.buildHull(triShape->getMargin());
+
+    auto* hullShape = new btConvexHullShape(
+        (const btScalar*)hullBuilder.getVertexPointer(),
+        hullBuilder.numVertices(),
+        sizeof(btVector3));
+
+    hullShape->setLocalScaling(glmToBt(scaling));
+
+    std::cout << "physics createRigidBodyHull created" << std::endl;
+
+    return createRigidBody(pos, hullShape, rot, scaling);
 }
 
 btRigidBody* createRigidBodyExact(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, glm::vec3 scaling, rigidBodyOpts opts){

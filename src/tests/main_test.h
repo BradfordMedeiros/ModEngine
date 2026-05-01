@@ -7,7 +7,6 @@
 #include "../translations_test.h"
 #include "../common/util_test.h"
 #include "../modlayer_test.h"
-#include "../scene/animation/recorder_test.h"
 #include "../cscript/cscript_binding.h"
 #include "./integration/common.h"
 #include "./integration/makeobject.h"

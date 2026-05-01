@@ -310,15 +310,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
   } */
 
-  if (key == GLFW_KEY_M && action == 1){
-    return;
-    assert(state.isRecording);
-    std::cout << "INPUT -> STOPPED RECORDING" << std::endl;
-    saveRecording(state.recordingIndex, "./res/recordings/move.rec");
-    state.isRecording = false;
-    state.recordingIndex = -1;
-  }
-
   if (key == 260){
     state.editor.selectedObjs = {};
   }
