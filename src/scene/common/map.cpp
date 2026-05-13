@@ -531,13 +531,6 @@ void addPointsToSimpleMesh(std::vector<glm::vec3>& points, std::vector<unsigned 
 }
 
 
-struct BrushPlane {
-	float distanceToPoint;
-	glm::vec3 normal;
-	glm::vec3 pointOnPlane;
-	glm::vec3 pointOnPlane2;
-	glm::vec3 pointOnPlane3;
-};
 
 BrushPlane brushFaceToPlane(BrushFace& brushFace){
 	glm::vec3 normal = glm::normalize(glm::cross(brushFace.point2 - brushFace.point1, brushFace.point3 - brushFace.point1));
@@ -1094,15 +1087,20 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 	  		}
 
 	  		auto& meshForTexture = meshForTextures.at(texture);
-		  	meshForTexture.points.push_back(changeCoord(triangle.vertex0));
+
+	  		auto vertex0 = changeCoord(triangle.vertex0);
+		  	meshForTexture.points.push_back(vertex0);
 		  	meshForTexture.uvCoords.push_back(triangle.vertex0Uv);
+
 		  	addPoint(boundingBox, changeCoord(triangle.vertex0));
 
-		  	meshForTexture.points.push_back(changeCoord(triangle.vertex1));
+	  		auto vertex1 = changeCoord(triangle.vertex1);
+		  	meshForTexture.points.push_back(vertex1);
 		  	meshForTexture.uvCoords.push_back(triangle.vertex1Uv);
 		  	addPoint(boundingBox, changeCoord(triangle.vertex1));
 
-		  	meshForTexture.points.push_back(changeCoord(triangle.vertex2));
+	  		auto vertex2 = changeCoord(triangle.vertex2);
+		  	meshForTexture.points.push_back(vertex2);
 		  	meshForTexture.uvCoords.push_back(triangle.vertex2Uv);
 		  	addPoint(boundingBox, changeCoord(triangle.vertex2));
 
@@ -1167,7 +1165,6 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   return modelDataCore2;
 }
 
-
 glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll) {
 	float pitchRad = glm::radians(-1 * roll);
 	float yawRad   = glm::radians(yaw);
@@ -1183,3 +1180,39 @@ glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll) {
 	return tbToEngine * q;
 }
 
+
+EntityLightingInfo loadBrushLighting(std::string modelPath){
+  auto parsedPath = parseModelPath(modelPath);
+  auto mapData = parseMapData(parsedPath.brushFile);
+//  Entity& entity = parsedPath.entityIndex.has_value() ? getEntityByIndex(mapData, parsedPath.entityIndex.value()) : getEntityByName(mapData, "worldspawn");
+  Entity& entity =  getEntityByName(mapData, "lightzone");
+
+  EntityLightingInfo entityLightingInfo{};
+
+  for (auto& brush : entity.brushes){
+  	{
+  		std::vector<BrushPlane> brushPlanes;
+			for (auto& brushFace : brush.brushFaces){
+				auto brushPlane = brushFaceToPlane(brushFace);
+				brushPlanes.push_back(brushPlane);
+			}
+  	}
+
+ 		std::vector<BrushPlane> brushPlanes;
+		for (auto& brushFace : brush.brushFaces){
+			auto brushPlane = brushFaceToPlane(brushFace);
+			brushPlanes.push_back(brushPlane);
+		}
+
+		entityLightingInfo.brushLightingInfo.push_back(BrushLightingInfo {
+			.color = glm::vec3(0.f, 1.f, 0.f),
+			.brushPlanes = brushPlanes,
+		});
+
+  }
+  return entityLightingInfo;
+
+}
+
+
+// test with		auto insidePlane = insideBrushPlanes(brushPlanes, glm::vec3(0.f, 0.f, 0.f));

@@ -69,4 +69,23 @@ void compileRawScene(std::string filepath, std::string baseFile, std::string map
 glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll);
 glm::quat quatFromTrenchBroomAngles2(float pitch, float yaw, float roll);
 
+
+struct BrushPlane {
+    float distanceToPoint;
+    glm::vec3 normal;
+    glm::vec3 pointOnPlane;
+    glm::vec3 pointOnPlane2;
+    glm::vec3 pointOnPlane3;
+};
+
+struct BrushLightingInfo {
+    glm::vec3 color;
+    std::vector<BrushPlane> brushPlanes;
+};
+struct EntityLightingInfo {
+    std::vector<BrushLightingInfo> brushLightingInfo;
+};
+EntityLightingInfo loadBrushLighting(std::string modelPath);
+
+   
 #endif 

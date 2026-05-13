@@ -605,6 +605,10 @@ void freeMeshRefsByOwner(World& world, int ownerId){
   }
 }
 
+void updateMeshLighting(std::string lightingMesh){
+  
+}
+
 std::function<Mesh(std::string)> getCreateMeshCopy(World& world, std::string& rootname){
   return [&world, &rootname](std::string meshname) -> Mesh {
     std::cout << "ensure mesh, loading getting copy: " << meshname << ", rootname: " << rootname << std::endl;

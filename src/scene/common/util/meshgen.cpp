@@ -181,12 +181,12 @@ MeshData generateMesh(std::vector<glm::vec3>& face, std::vector<glm::vec3>& poin
   return meshdata;
 }
 
-Vertex createVertex3(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal, glm::vec3 tangent){
+Vertex createVertex3(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal, glm::vec3 tangent, glm::vec3 color){
   Vertex vertex {
     .position = position,
     .normal = normal,
     .tangent = tangent,
-    .color = glm::vec3(0.f, 0.f, 0.f),
+    .color = color,
     .texCoords = texCoords,
   };
   for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
@@ -196,6 +196,7 @@ Vertex createVertex3(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal, 
 
   return vertex;
 }
+
 MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices, std::string* texture, std::string* normalTexture){
   modassert(indices.size() % 3 == 0, "indices must be multiple of 3");
   modassert(verts.size() == uvCoords.size(), "verts must be same size of uvCoords");
@@ -229,9 +230,9 @@ MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& 
     }
 
 
-    vertices.push_back(createVertex3(vert1, uvCoord1, normal, tangent));
-    vertices.push_back(createVertex3(vert2, uvCoord2, normal, tangent));
-    vertices.push_back(createVertex3(vert3, uvCoord3, normal, tangent));
+    vertices.push_back(createVertex3(vert1, uvCoord1, normal, tangent, glm::vec3(0.f, 0.f, 0.f)));
+    vertices.push_back(createVertex3(vert2, uvCoord2, normal, tangent, glm::vec3(0.f, 0.f, 0.f)));
+    vertices.push_back(createVertex3(vert3, uvCoord3, normal, tangent, glm::vec3(0.f, 0.f, 0.f)));
   }
 
   MeshData meshdata {
