@@ -1418,3 +1418,7 @@ ViewportSettings& getViewport(int index){
   modassert(viewport.has_value(), "no viewport");
   return *viewport.value();
 }
+
+void applyVertexLighting(std::string lightingMesh){
+  updateMeshLighting(world, lightingMesh);
+}

@@ -46,6 +46,9 @@ bool stringContains(std::string& str, char character){
 bool stringContains(std::string& str, const char* value){
   return str.find(value) != std::string::npos;
 }
+bool stringContains(std::string& str, std::string value){
+  return str.find(value) != std::string::npos;
+}
 bool stringEndsWith(std::string& str, const char* value){
   std::string suffix(value);
   if (str.length() < suffix.length()) {

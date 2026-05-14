@@ -98,6 +98,7 @@ unsigned int loadFullscreenQuadVAO();  // TODO - maybe make an unload...but in p
 unsigned int loadFullscreenQuadVAO3D();
 
 std::vector<Vertex> readVertsFromMeshVao(Mesh& mesh);
+void updateMeshVertices(Mesh& mesh, std::vector<Vertex>& vertices);
 
 std::string print(Mesh& mesh);
 

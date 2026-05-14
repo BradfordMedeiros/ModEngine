@@ -878,6 +878,9 @@ struct MapRawValue {
 glm::vec3 changeCoord(glm::vec3 pos){
 	return glm::vec3(pos.x, pos.z, -1 * pos.y);
 }
+glm::vec3 unchangeCoord(glm::vec3 pos){
+    return glm::vec3(pos.x, -pos.z, pos.y);
+}
 
 
 struct ModelAndPath {
@@ -1110,7 +1113,8 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 
   modassert(entity.brushes.size() > 0, std::string("loading an entity brush with 0 brushes: ") + modelPath + ", path = " + print(parsedPath));
  	auto boundingOffset = calcMidpoints(boundingBox);
-  
+  //boundingOffset = glm::vec3(0.f, 0.f, 0.f);
+
   ModelDataCore modelDataCore2 {
     .modelData = ModelData {
       .meshIdToMeshData = {},
@@ -1186,6 +1190,7 @@ EntityLightingInfo loadBrushLighting(std::string modelPath){
   auto mapData = parseMapData(parsedPath.brushFile);
 //  Entity& entity = parsedPath.entityIndex.has_value() ? getEntityByIndex(mapData, parsedPath.entityIndex.value()) : getEntityByName(mapData, "worldspawn");
   Entity& entity =  getEntityByName(mapData, "lightzone");
+  auto color =  getVec3Value(entity, "color");
 
   EntityLightingInfo entityLightingInfo{};
 
@@ -1205,7 +1210,7 @@ EntityLightingInfo loadBrushLighting(std::string modelPath){
 		}
 
 		entityLightingInfo.brushLightingInfo.push_back(BrushLightingInfo {
-			.color = glm::vec3(0.f, 1.f, 0.f),
+			.color = color.has_value() ? color.value() : glm::vec3(0.f, 0.f, 0.f),
 			.brushPlanes = brushPlanes,
 		});
 
@@ -1214,13 +1219,19 @@ EntityLightingInfo loadBrushLighting(std::string modelPath){
 
 }
 
-glm::vec3 calculateLightingForPoint(EntityLightingInfo& entityLightingInfo, glm::vec3 point){
+LightZoneResult calculateLightingForPoint(EntityLightingInfo& entityLightingInfo, glm::vec3 point){
 	for (auto& entity : entityLightingInfo.brushLightingInfo){
-		auto insidePlane = insideBrushPlanes(entity.brushPlanes, point);
+		auto insidePlane = insideBrushPlanes(entity.brushPlanes, unchangeCoord(point));
 		if (insidePlane){
-			return glm::vec3(0.f, 1.f, 0.f);
+			return LightZoneResult {
+				.color = entity.color,
+				.inZone = true,
+			};
 		}
 	}
-	return glm::vec3(0.f, 0.f, 0.f);
+	return LightZoneResult {
+		.color = glm::vec3(0.f, 0.f, 0.f),
+		.inZone = false,
+	};
 }
 

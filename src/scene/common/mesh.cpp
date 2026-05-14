@@ -525,3 +525,9 @@ std::string print(Mesh& mesh){
 
   return value;
 }
+
+void updateMeshVertices(Mesh& mesh, std::vector<Vertex>& vertices){
+  modassert(mesh.numVertices == vertices.size(), "updateMeshVertices unexpected vert size");
+  glBindBuffer(GL_ARRAY_BUFFER, mesh.VBOPointer);
+  glBufferSubData(GL_ARRAY_BUFFER,  0, sizeof(Vertex) * vertices.size(), vertices.data());
+}

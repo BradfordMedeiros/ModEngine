@@ -16,6 +16,7 @@
 #include "./common/util/meshgen.h"
 #include "./scene_sandbox.h"
 #include "../common/symbols.h"
+#include "./common/map.h"
 
 struct Constraint {
   std::vector<objid> ids;
@@ -141,5 +142,7 @@ void createFixedConstraint(World& world, objid idOne, objid idTwo);
 void createPointConstraint(World& world, objid idOne, objid idTwo);
 void createHingeConstraint(World& world, objid idOne, objid idTwo);
 std::optional<int> physicsLayer(World& world, objid id);
+
+void updateMeshLighting(World& world, std::string lightingMesh);
 
 #endif

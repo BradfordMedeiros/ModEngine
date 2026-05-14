@@ -605,8 +605,26 @@ void freeMeshRefsByOwner(World& world, int ownerId){
   }
 }
 
-void updateMeshLighting(std::string lightingMesh){
-  
+void updateMeshLighting(World& world, std::string lightingMesh){
+  auto lightingInfo = loadBrushLighting("/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/ball-level-select.brush");
+  for (auto& [name, meshRef] : world.meshes){
+    std::string meshName = name;
+    if (stringContains(meshName, "brush")){
+      std::cout << "updateMeshLighting: " << name << std::endl;
+        auto vertices = readVertsFromMeshVao(meshRef.mesh);
+
+        int numVertsInZone = 0;
+        for (auto& vertex : vertices){
+          auto lightZoneResult = calculateLightingForPoint(lightingInfo, vertex.position);
+          vertex.color = lightZoneResult.color;
+          if (lightZoneResult.inZone){
+            numVertsInZone++;
+          }
+          std::cout << "-- updateMeshLighting verts in lightzone = " << numVertsInZone <<  std::endl;
+        }
+        updateMeshVertices(meshRef.mesh, vertices);
+    }
+  }
 }
 
 std::function<Mesh(std::string)> getCreateMeshCopy(World& world, std::string& rootname){

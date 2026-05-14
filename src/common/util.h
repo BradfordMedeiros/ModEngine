@@ -57,6 +57,7 @@ void modlogSetLogEndpoint(std::optional<std::function<void(std::string&)>> fn);
 
 
 bool stringContains(std::string& str, char character);
+bool stringContains(std::string& str, std::string value);
 bool stringContains(std::string& str, const char* value);
 bool stringEndsWith(std::string& str, const char* value);
 std::string trim(const std::string& str);
