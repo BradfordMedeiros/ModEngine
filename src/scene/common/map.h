@@ -86,6 +86,6 @@ struct EntityLightingInfo {
     std::vector<BrushLightingInfo> brushLightingInfo;
 };
 EntityLightingInfo loadBrushLighting(std::string modelPath);
-
+glm::vec3 calculateLightingForPoint(EntityLightingInfo& lightingInfo, glm::vec3 point);
    
 #endif 

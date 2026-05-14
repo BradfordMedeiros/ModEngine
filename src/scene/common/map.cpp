@@ -1214,5 +1214,13 @@ EntityLightingInfo loadBrushLighting(std::string modelPath){
 
 }
 
+glm::vec3 calculateLightingForPoint(EntityLightingInfo& entityLightingInfo, glm::vec3 point){
+	for (auto& entity : entityLightingInfo.brushLightingInfo){
+		auto insidePlane = insideBrushPlanes(entity.brushPlanes, point);
+		if (insidePlane){
+			return glm::vec3(0.f, 1.f, 0.f);
+		}
+	}
+	return glm::vec3(0.f, 0.f, 0.f);
+}
 
-// test with		auto insidePlane = insideBrushPlanes(brushPlanes, glm::vec3(0.f, 0.f, 0.f));
