@@ -1239,9 +1239,9 @@ LightZoneResult calculateLightingForPoint(EntityLightingInfo& entityLightingInfo
 					weight = weight * weight * (3.0f - 2.0f * weight);			
 		  	  newColor = entity.color * weight;
 	
-		  	  std::cout << "-- updateMeshLighting distance = " << distance <<  std::endl;
-		  	  std::cout << "-- updateMeshLighting weight = " << weight <<  std::endl;
-		  	  std::cout << "-- updateMeshLighting newColor = " << print(newColor) <<  std::endl;
+		  	  //std::cout << "-- updateMeshLighting distance = " << distance <<  std::endl;
+		  	  //std::cout << "-- updateMeshLighting weight = " << weight <<  std::endl;
+		  	  //std::cout << "-- updateMeshLighting newColor = " << print(newColor) <<  std::endl;
 				}
 			}else{
 		  	  newColor = entity.color;

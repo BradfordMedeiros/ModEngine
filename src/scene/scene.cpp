@@ -606,26 +606,35 @@ void freeMeshRefsByOwner(World& world, int ownerId){
 }
 
 void updateMeshLighting(World& world, std::string lightingMesh){
-  //auto lightingInfo = loadBrushLighting("/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/ball-level-select.brush");
-  auto lightingInfo = loadBrushLighting("./build/temp.brush");
+  std::unordered_map<std::string, EntityLightingInfo> rootMeshToLighting;
+  for (auto& [name, meshRef] : world.meshes){
+    std::string meshName = name;
+    auto rootMeshName = rootMesh(meshName);
+    auto fileSuffix = getExtension(rootMeshName);
+    std::cout << "updateMeshLighting: file suffix: " << print(fileSuffix) << std::endl;
+    if (fileSuffix.has_value() && fileSuffix.value() == "brush"){
+      if (rootMeshToLighting.find(rootMeshName) == rootMeshToLighting.end()){
+        rootMeshToLighting[rootMeshName] = loadBrushLighting(rootMeshName);
+      }      
+    }
+  }
 
   for (auto& [name, meshRef] : world.meshes){
     std::string meshName = name;
-    if (stringContains(meshName, "brush")){
-      //std::cout << "updateMeshLighting: " << name << std::endl;
-        auto vertices = readVertsFromMeshVao(meshRef.mesh);
+    auto rootMeshName = rootMesh(meshName);
+    if (rootMeshToLighting.find(rootMeshName) != rootMeshToLighting.end()){
+      std::cout << "updateMeshLighting: " << name << ", with lighting: " << "./build/temp.brush" << ", root = " << rootMesh(meshName) << std::endl;
+      auto vertices = readVertsFromMeshVao(meshRef.mesh);
 
-        int numVertsInZone = 0;
-        for (auto& vertex : vertices){
-          auto lightZoneResult = calculateLightingForPoint(lightingInfo, vertex.position);
-          vertex.color = lightZoneResult.color;
-          if (lightZoneResult.inZone){
-            numVertsInZone++;
-          }
-          //std::cout << "-- updateMeshLighting verts in lightzone = " << numVertsInZone <<  std::endl;
-        }
-        updateMeshVertices(meshRef.mesh, vertices);
+      for (auto& vertex : vertices){
+        auto& lightingInfo = rootMeshToLighting.at(rootMeshName);
+        auto lightZoneResult = calculateLightingForPoint(lightingInfo, vertex.position);
+        vertex.color = lightZoneResult.color;
+      }
+      updateMeshVertices(meshRef.mesh, vertices);
     }
+
+    
   }
 }
 
