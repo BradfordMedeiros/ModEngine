@@ -80,6 +80,8 @@ struct BrushPlane {
 
 struct BrushLightingInfo {
     glm::vec3 color;
+    glm::vec3 lightPosition;
+    std::optional<float> radius;
     std::vector<BrushPlane> brushPlanes;
 };
 struct EntityLightingInfo {

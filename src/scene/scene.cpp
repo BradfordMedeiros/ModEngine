@@ -606,11 +606,13 @@ void freeMeshRefsByOwner(World& world, int ownerId){
 }
 
 void updateMeshLighting(World& world, std::string lightingMesh){
-  auto lightingInfo = loadBrushLighting("/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/ball-level-select.brush");
+  //auto lightingInfo = loadBrushLighting("/home/brad/gamedev/mosttrusted/afterworld/scenes/levels/ball-level-select.brush");
+  auto lightingInfo = loadBrushLighting("./build/temp.brush");
+
   for (auto& [name, meshRef] : world.meshes){
     std::string meshName = name;
     if (stringContains(meshName, "brush")){
-      std::cout << "updateMeshLighting: " << name << std::endl;
+      //std::cout << "updateMeshLighting: " << name << std::endl;
         auto vertices = readVertsFromMeshVao(meshRef.mesh);
 
         int numVertsInZone = 0;
@@ -620,7 +622,7 @@ void updateMeshLighting(World& world, std::string lightingMesh){
           if (lightZoneResult.inZone){
             numVertsInZone++;
           }
-          std::cout << "-- updateMeshLighting verts in lightzone = " << numVertsInZone <<  std::endl;
+          //std::cout << "-- updateMeshLighting verts in lightzone = " << numVertsInZone <<  std::endl;
         }
         updateMeshVertices(meshRef.mesh, vertices);
     }

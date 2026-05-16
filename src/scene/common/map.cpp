@@ -929,70 +929,6 @@ Entity& getEntityByIndex(MapData& mapData, int index){
 	return mapData.entities.at(index);
 }
 
-struct MapBoundingBox {
-	std::optional<float> minX;
-	std::optional<float> maxX;
-	std::optional<float> minY;
-	std::optional<float> maxY;
-	std::optional<float> minZ;
-	std::optional<float> maxZ;
-};
-void addPoint(MapBoundingBox& box, glm::vec3 point){
-	if (!box.minX.has_value()){
-		box.minX = point.x;
-	}
-	if (!box.maxX.has_value()){
-		box.maxX = point.x;
-	}
-	if (!box.minY.has_value()){
-		box.minY = point.y;
-	}
-	if (!box.maxY.has_value()){
-		box.maxY = point.y;
-	}
-	if (!box.minZ.has_value()){
-		box.minZ = point.z;
-	}
-	if (!box.maxZ.has_value()){
-		box.maxZ = point.z;
-	}
-
-	if (box.minX.value() > point.x){
-		box.minX = point.x;
-	}
-	if (box.maxX.value() < point.x){
-		box.maxX = point.x;
-	}
-
-	if (box.minY.value() > point.y){
-		box.minY = point.y;
-	}
-	if (box.maxY.value() < point.y){
-		box.maxY = point.y;
-	}
-	
-	if (box.minZ.value() > point.z){
-		box.minZ = point.z;
-	}
-	if (box.maxZ.value() < point.z){
-		box.maxZ = point.z;
-	}
-}
-
-glm::vec3 calcMidpoints(MapBoundingBox& boundingBox){
-	modassert(boundingBox.minX.has_value(), "boundingBox no minX");
-	modassert(boundingBox.maxX.has_value(), "boundingBox no maxX");
-	modassert(boundingBox.minY.has_value(), "boundingBox no minY");
-	modassert(boundingBox.maxY.has_value(), "boundingBox no maxY");
-	modassert(boundingBox.minZ.has_value(), "boundingBox no minZ");
-	modassert(boundingBox.maxZ.has_value(), "boundingBox no maxZ");
-
-	float midpointX = 0.5f * (boundingBox.maxX.value() + boundingBox.minX.value());
-	float midpointY = 0.5f *  (boundingBox.maxY.value() + boundingBox.minY.value());
-	float midpointZ = 0.5f * (boundingBox.maxZ.value() + boundingBox.minZ.value());
-	return glm::vec3(midpointX, midpointY, midpointZ);
-}
-
 ModelDataCore loadModelCoreBrush(std::string modelPath){
 	std::vector<glm::vec3> debugPoints;
   std::vector<std::optional<glm::vec3>> debugPointsTo;
@@ -1024,7 +960,6 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 
   std::unordered_map<std::string, MapRawValue> meshForTextures;
 
-  MapBoundingBox boundingBox{};
 
   for (auto& brush : entity.brushes){
   	{
@@ -1095,25 +1030,20 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
 		  	meshForTexture.points.push_back(vertex0);
 		  	meshForTexture.uvCoords.push_back(triangle.vertex0Uv);
 
-		  	addPoint(boundingBox, changeCoord(triangle.vertex0));
 
 	  		auto vertex1 = changeCoord(triangle.vertex1);
 		  	meshForTexture.points.push_back(vertex1);
 		  	meshForTexture.uvCoords.push_back(triangle.vertex1Uv);
-		  	addPoint(boundingBox, changeCoord(triangle.vertex1));
 
 	  		auto vertex2 = changeCoord(triangle.vertex2);
 		  	meshForTexture.points.push_back(vertex2);
 		  	meshForTexture.uvCoords.push_back(triangle.vertex2Uv);
-		  	addPoint(boundingBox, changeCoord(triangle.vertex2));
 
 	  	}
   	}
   }
 
   modassert(entity.brushes.size() > 0, std::string("loading an entity brush with 0 brushes: ") + modelPath + ", path = " + print(parsedPath));
- 	auto boundingOffset = calcMidpoints(boundingBox);
-  //boundingOffset = glm::vec3(0.f, 0.f, 0.f);
 
   ModelDataCore modelDataCore2 {
     .modelData = ModelData {
@@ -1122,7 +1052,7 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
       .childToParent = {},
       .nodeTransform = {
         { 0, Transformation {
-          .position = boundingOffset,
+          .position = glm::vec3(0.f, 0.f, 0.f),
           .scale = glm::vec3(1.f, 1.f, 1.f),
           .rotation = MOD_ORIENTATION_FORWARD,
         }}
@@ -1143,10 +1073,6 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   	addPointsToSimpleMesh(meshForTexture.points, indexs);
   	modassert(meshForTexture.points.size() == meshForTexture.uvCoords.size(), "unexpected diff in points and uv coords size");
   	
-  	for (int i = 0; i < meshForTexture.points.size(); i++){
-  		meshForTexture.points.at(i) -= boundingOffset;
-  	}
-
   	std::string texture = texturePath;
   	auto normalTexture = lookupNormalTexture(texture);
   	//modassert(normalTexture.has_value(), std::string("normal for texture does not exist: ") + texture);
@@ -1184,6 +1110,73 @@ glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll) {
 	return tbToEngine * q;
 }
 
+struct MapBoundingBox {
+       std::optional<float> minX;
+       std::optional<float> maxX;
+       std::optional<float> minY;
+       std::optional<float> maxY;
+       std::optional<float> minZ;
+       std::optional<float> maxZ;
+};
+void addPoint(MapBoundingBox& box, glm::vec3 point){
+       if (!box.minX.has_value()){
+               box.minX = point.x;
+       }
+       if (!box.maxX.has_value()){
+               box.maxX = point.x;
+       }
+       if (!box.minY.has_value()){
+               box.minY = point.y;
+       }
+       if (!box.maxY.has_value()){
+               box.maxY = point.y;
+       }
+       if (!box.minZ.has_value()){
+               box.minZ = point.z;
+       }
+       if (!box.maxZ.has_value()){
+               box.maxZ = point.z;
+       }
+
+       if (box.minX.value() > point.x){
+               box.minX = point.x;
+       }
+       if (box.maxX.value() < point.x){
+               box.maxX = point.x;
+       }
+
+       if (box.minY.value() > point.y){
+               box.minY = point.y;
+       }
+       if (box.maxY.value() < point.y){
+               box.maxY = point.y;
+       }
+       
+       if (box.minZ.value() > point.z){
+               box.minZ = point.z;
+       }
+       if (box.maxZ.value() < point.z){
+               box.maxZ = point.z;
+       }
+}
+
+glm::vec3 calcMidpoints(MapBoundingBox& boundingBox){
+  modassert(boundingBox.minX.has_value(), "boundingBox no minX");
+  modassert(boundingBox.maxX.has_value(), "boundingBox no maxX");
+  modassert(boundingBox.minY.has_value(), "boundingBox no minY");
+  modassert(boundingBox.maxY.has_value(), "boundingBox no maxY");
+  modassert(boundingBox.minZ.has_value(), "boundingBox no minZ");
+  modassert(boundingBox.maxZ.has_value(), "boundingBox no maxZ");
+
+  float midpointX = 0.5f * (boundingBox.maxX.value() + boundingBox.minX.value());
+  float midpointY = 0.5f *  (boundingBox.maxY.value() + boundingBox.minY.value());
+  float midpointZ = 0.5f * (boundingBox.maxZ.value() + boundingBox.minZ.value());
+
+  std::cout << "updateMeshLighting: width = " << (boundingBox.maxX.value() - boundingBox.minX.value()) << std::endl;
+  return glm::vec3(midpointX, midpointY, midpointZ);
+}
+
+
 
 EntityLightingInfo loadBrushLighting(std::string modelPath){
   auto parsedPath = parseModelPath(modelPath);
@@ -1191,17 +1184,20 @@ EntityLightingInfo loadBrushLighting(std::string modelPath){
 //  Entity& entity = parsedPath.entityIndex.has_value() ? getEntityByIndex(mapData, parsedPath.entityIndex.value()) : getEntityByName(mapData, "worldspawn");
   Entity& entity =  getEntityByName(mapData, "lightzone");
   auto color =  getVec3Value(entity, "color");
+  auto radius = getFloatValue(entity, "radius");
 
   EntityLightingInfo entityLightingInfo{};
 
   for (auto& brush : entity.brushes){
-  	{
-  		std::vector<BrushPlane> brushPlanes;
-			for (auto& brushFace : brush.brushFaces){
-				auto brushPlane = brushFaceToPlane(brushFace);
-				brushPlanes.push_back(brushPlane);
-			}
-  	}
+
+  	std::vector<bool> insidePlanes;
+		auto intersections = getAllIntersections(brush, false, insidePlanes);
+
+  	MapBoundingBox boundingBox{};
+    for (auto& point : intersections){
+        addPoint(boundingBox, point);
+    }
+    auto center = calcMidpoints(boundingBox);
 
  		std::vector<BrushPlane> brushPlanes;
 		for (auto& brushFace : brush.brushFaces){
@@ -1209,12 +1205,15 @@ EntityLightingInfo loadBrushLighting(std::string modelPath){
 			brushPlanes.push_back(brushPlane);
 		}
 
+
 		entityLightingInfo.brushLightingInfo.push_back(BrushLightingInfo {
 			.color = color.has_value() ? color.value() : glm::vec3(0.f, 0.f, 0.f),
+			.lightPosition = changeCoord(center),
+			.radius = radius,
 			.brushPlanes = brushPlanes,
 		});
-
   }
+
   return entityLightingInfo;
 
 }
@@ -1223,8 +1222,31 @@ LightZoneResult calculateLightingForPoint(EntityLightingInfo& entityLightingInfo
 	for (auto& entity : entityLightingInfo.brushLightingInfo){
 		auto insidePlane = insideBrushPlanes(entity.brushPlanes, unchangeCoord(point));
 		if (insidePlane){
+			float distance = glm::distance(point, entity.lightPosition);
+
+			float weight = 1.f;
+
+			glm::vec3 newColor(0.f, 0.f, 0.f);
+		
+			if (entity.radius.has_value()){
+				if (entity.radius.has_value() && distance <= entity.radius.value()){
+					float radius = entity.radius.value();
+					float t = glm::clamp(distance / radius, 0.0f, 1.0f);
+					float weight = 1.0f - t;
+					weight = weight * weight * (3.0f - 2.0f * weight);			
+		  	  newColor = entity.color * weight;
+	
+		  	  std::cout << "-- updateMeshLighting distance = " << distance <<  std::endl;
+		  	  std::cout << "-- updateMeshLighting weight = " << weight <<  std::endl;
+		  	  std::cout << "-- updateMeshLighting newColor = " << print(newColor) <<  std::endl;
+				}
+			}else{
+		  	  newColor = entity.color;
+			}
+
+
 			return LightZoneResult {
-				.color = entity.color,
+				.color = newColor,
 				.inZone = true,
 			};
 		}
