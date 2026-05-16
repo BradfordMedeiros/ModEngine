@@ -1185,8 +1185,11 @@ EntityLightingInfo loadBrushLighting(std::string modelPath){
   Entity& entity =  getEntityByName(mapData, "lightzone");
   auto color =  getVec3Value(entity, "color");
   auto radius = getFloatValue(entity, "radius");
+  auto type = getValue(entity, "type");
 
-  EntityLightingInfo entityLightingInfo{};
+  EntityLightingInfo entityLightingInfo{
+  	.type = (type.has_value() && *type.value() == "point") ? POINT : BOUNDING,
+  };
 
   for (auto& brush : entity.brushes){
 
@@ -1220,7 +1223,7 @@ EntityLightingInfo loadBrushLighting(std::string modelPath){
 
 LightZoneResult calculateLightingForPoint(EntityLightingInfo& entityLightingInfo, glm::vec3 point){
 	for (auto& entity : entityLightingInfo.brushLightingInfo){
-		auto insidePlane = insideBrushPlanes(entity.brushPlanes, unchangeCoord(point));
+		auto insidePlane = entityLightingInfo.type == POINT ? true :  insideBrushPlanes(entity.brushPlanes, unchangeCoord(point));
 		if (insidePlane){
 			float distance = glm::distance(point, entity.lightPosition);
 

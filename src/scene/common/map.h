@@ -84,7 +84,10 @@ struct BrushLightingInfo {
     std::optional<float> radius;
     std::vector<BrushPlane> brushPlanes;
 };
+
+enum BrushLightType { BOUNDING, POINT };
 struct EntityLightingInfo {
+    BrushLightType type;
     std::vector<BrushLightingInfo> brushLightingInfo;
 };
 EntityLightingInfo loadBrushLighting(std::string modelPath);
