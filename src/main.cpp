@@ -1824,6 +1824,7 @@ int main(int argc, char* argv[]){
     .getVoxelLightingData = getVoxelLightingData,
     .setGlobalLight = setGlobalLight,
     .setVoxelLighting = setVoxelLighting2,
+    .applyVertexLighting = applyVertexLighting,
     .getTag = getTag,
     .getAllTags = getAllTags,
     .getMaterial = getMaterial,

@@ -21,7 +21,7 @@ std::vector<AutoSerialize> lightAutoserializer {
     .structOffset = offsetof(GameObjectLight, attenuation),
     .structOffsetFiller = std::nullopt,
     .field = "attenuation",
-    .defaultValue = glm::vec3(0, 0, 1),
+    .defaultValue = glm::vec3(0, 1.f, 0),
   },
   AutoSerializeCustom {
     .structOffset = 0,
