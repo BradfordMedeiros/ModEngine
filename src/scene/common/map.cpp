@@ -474,6 +474,13 @@ void compileBrushes(MapData& mapData, std::string& rawMapData, std::string path)
 }
 
 
+std::string defaultEntityModelName(Entity& entity){
+  auto classname = getValue(entity, "classname");
+  modassert(classname.has_value(), "no classname");
+	std::string modelName = std::string("entity_") + *classname.value() + "_" + std::to_string(entity.index);
+	return modelName;
+}
+
 void compileRawScene(std::string filepath, std::string baseFile,  std::string mapFile, std::string brushFileOut, std::function<void(MapData& mapData, Entity& entity, bool* _shouldWrite, std::vector<GameobjAttributeOpts>& _attributes, std::string* _modelName)> callback, std::function<void(MapData& mapData, std::string&)> afterEntities){
 	std::string content = "########## Base file content: " + baseFile + " ##########\n\n" + readFileOrPackage(baseFile) + "\n\n";
 
@@ -485,11 +492,8 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 
 	auto mapData = parseMapData(mapFile);
 	for (auto& entity: mapData.entities){
-    auto classname = getValue(entity, "classname");
-    modassert(classname.has_value(), "no classname");
-
 		bool shouldWrite = false;
-		std::string modelName = std::string("entity_") + *classname.value() + "_" + std::to_string(entity.index);
+		std::string modelName = defaultEntityModelName(entity);
 		std::vector<GameobjAttributeOpts> attributes;
 		callback(mapData, entity, &shouldWrite, attributes, &modelName);
 
@@ -1178,85 +1182,102 @@ glm::vec3 calcMidpoints(MapBoundingBox& boundingBox){
 
 
 
-EntityLightingInfo loadBrushLighting(std::string modelPath){
+MapLighting loadBrushLighting(std::string modelPath){
   auto parsedPath = parseModelPath(modelPath);
   auto mapData = parseMapData(parsedPath.brushFile);
 //  Entity& entity = parsedPath.entityIndex.has_value() ? getEntityByIndex(mapData, parsedPath.entityIndex.value()) : getEntityByName(mapData, "worldspawn");
-  Entity& entity =  getEntityByName(mapData, "lightzone");
-  auto color =  getVec3Value(entity, "color");
-  auto radius = getFloatValue(entity, "radius");
-  auto type = getValue(entity, "type");
+	auto entities = getEntitiesByClassName(mapData, "lightzone");
 
-  EntityLightingInfo entityLightingInfo{
-  	.type = (type.has_value() && *type.value() == "point") ? POINT : BOUNDING,
-  };
+	std::cout << "lightzone: ";
+	for (auto entityPtr : entities){
+		Entity& entity = *entityPtr;
+		auto lightZoneName = defaultEntityModelName(entity);
+		std::cout << lightZoneName << " ";
+	}
+	std::cout << std::endl;
 
-  for (auto& brush : entity.brushes){
+  MapLighting mapLighting {};
 
-  	std::vector<bool> insidePlanes;
-		auto intersections = getAllIntersections(brush, false, insidePlanes);
+	for (auto entityPtr : entities){
+ 		Entity& entity = *entityPtr;
+ 		auto entityName = defaultEntityModelName(entity);
 
-  	MapBoundingBox boundingBox{};
-    for (auto& point : intersections){
-        addPoint(boundingBox, point);
-    }
-    auto center = calcMidpoints(boundingBox);
+  	auto type = getValue(entity, "type");
+  	auto color =  getVec3Value(entity, "color");
+  	auto radius = getFloatValue(entity, "radius");
 
- 		std::vector<BrushPlane> brushPlanes;
-		for (auto& brushFace : brush.brushFaces){
-			auto brushPlane = brushFaceToPlane(brushFace);
-			brushPlanes.push_back(brushPlane);
-		}
-
-
-		entityLightingInfo.brushLightingInfo.push_back(BrushLightingInfo {
+  	EntityLightingInfo entityLightingInfo{
+  		.type = (type.has_value() && *type.value() == "point") ? POINT : BOUNDING,
 			.color = color.has_value() ? color.value() : glm::vec3(0.f, 0.f, 0.f),
-			.lightPosition = changeCoord(center),
 			.radius = radius,
-			.brushPlanes = brushPlanes,
-		});
-  }
+  	};
 
-  return entityLightingInfo;
+  	for (auto& brush : entity.brushes){
 
-}
+  		std::vector<bool> insidePlanes;
+			auto intersections = getAllIntersections(brush, false, insidePlanes);
 
-LightZoneResult calculateLightingForPoint(EntityLightingInfo& entityLightingInfo, glm::vec3 point){
-	for (auto& entity : entityLightingInfo.brushLightingInfo){
-		auto insidePlane = entityLightingInfo.type == POINT ? true :  insideBrushPlanes(entity.brushPlanes, unchangeCoord(point));
-		if (insidePlane){
-			float distance = glm::distance(point, entity.lightPosition);
+  		MapBoundingBox boundingBox{};
+    	for (auto& point : intersections){
+    	    addPoint(boundingBox, point);
+    	}
+    	auto center = calcMidpoints(boundingBox);
 
-			float weight = 1.f;
-
-			glm::vec3 newColor(0.f, 0.f, 0.f);
-		
-			if (entity.radius.has_value()){
-				if (entity.radius.has_value() && distance <= entity.radius.value()){
-					float radius = entity.radius.value();
-					float t = glm::clamp(distance / radius, 0.0f, 1.0f);
-					float weight = 1.0f - t;
-					weight = weight * weight * (3.0f - 2.0f * weight);			
-		  	  newColor = entity.color * weight;
-	
-		  	  //std::cout << "-- updateMeshLighting distance = " << distance <<  std::endl;
-		  	  //std::cout << "-- updateMeshLighting weight = " << weight <<  std::endl;
-		  	  //std::cout << "-- updateMeshLighting newColor = " << print(newColor) <<  std::endl;
-				}
-			}else{
-		  	  newColor = entity.color;
+ 			std::vector<BrushPlane> brushPlanes;
+			for (auto& brushFace : brush.brushFaces){
+				auto brushPlane = brushFaceToPlane(brushFace);
+				brushPlanes.push_back(brushPlane);
 			}
 
 
-			return LightZoneResult {
-				.color = newColor,
-				.inZone = true,
-			};
+			entityLightingInfo.brushLightingInfo.push_back(BrushLightingInfo {
+				.lightPosition = changeCoord(center),
+				.brushPlanes = brushPlanes,
+			});
+  	}
+
+  	mapLighting.lightzoneToEntity[entityName] = entityLightingInfo;
+	}
+
+  return mapLighting;
+
+}
+
+glm::vec3  calculateLightingForPoint(MapLighting& mapLighting, glm::vec3 point){
+	glm::vec3 color(0.f, 0.f, 0.f);
+	for (auto& [entityName, entityLightingInfo] : mapLighting.lightzoneToEntity){
+		for (auto& brushForEntity : entityLightingInfo.brushLightingInfo){
+			auto insidePlane = entityLightingInfo.type == POINT ? true :  insideBrushPlanes(brushForEntity.brushPlanes, unchangeCoord(point));
+			if (insidePlane){
+				float distance = glm::distance(point, brushForEntity.lightPosition);
+	
+				float weight = 1.f;
+	
+				glm::vec3 newColor(0.f, 0.f, 0.f);
+			
+				if (entityLightingInfo.radius.has_value()){
+					if (entityLightingInfo.radius.has_value() && distance <= entityLightingInfo.radius.value()){
+						float radius = entityLightingInfo.radius.value();
+						float t = glm::clamp(distance / radius, 0.0f, 1.0f);
+						float weight = 1.0f - t;
+						weight = weight * weight * (3.0f - 2.0f * weight);			
+			  	  newColor = entityLightingInfo.color * weight;
+						color += newColor;
+						break;
+			  	  //std::cout << "-- updateMeshLighting distance = " << distance <<  std::endl;
+			  	  //std::cout << "-- updateMeshLighting weight = " << weight <<  std::endl;
+			  	  //std::cout << "-- updateMeshLighting newColor = " << print(newColor) <<  std::endl;
+					}
+				}else{
+			  	  newColor = entityLightingInfo.color;
+						color += newColor;
+			  	  break;
+				}
+	
+			}
 		}
 	}
-	return LightZoneResult {
-		.color = glm::vec3(0.f, 0.f, 0.f),
-		.inZone = false,
-	};
+
+	return color;
 }
 

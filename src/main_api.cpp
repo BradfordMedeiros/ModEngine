@@ -1419,6 +1419,6 @@ ViewportSettings& getViewport(int index){
   return *viewport.value();
 }
 
-void applyVertexLighting(std::string lightingMesh){
-  updateMeshLighting(world, lightingMesh);
+void applyVertexLighting(){
+  updateMeshLighting(world);
 }

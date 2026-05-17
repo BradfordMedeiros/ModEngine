@@ -79,23 +79,25 @@ struct BrushPlane {
 };
 
 struct BrushLightingInfo {
-    glm::vec3 color;
     glm::vec3 lightPosition;
-    std::optional<float> radius;
     std::vector<BrushPlane> brushPlanes;
 };
 
 enum BrushLightType { BOUNDING, POINT };
 struct EntityLightingInfo {
     BrushLightType type;
+    glm::vec3 color;
+    std::optional<float> radius;
     std::vector<BrushLightingInfo> brushLightingInfo;
 };
-EntityLightingInfo loadBrushLighting(std::string modelPath);
 
-struct LightZoneResult {
-    glm::vec3 color;
-    bool inZone;
+struct MapLighting {
+    std::unordered_map<std::string, EntityLightingInfo> lightzoneToEntity;
 };
-LightZoneResult calculateLightingForPoint(EntityLightingInfo& lightingInfo, glm::vec3 point);
+
+MapLighting loadBrushLighting(std::string modelPath);
+
+
+glm::vec3 calculateLightingForPoint(MapLighting& lightingInfo, glm::vec3 point);
    
 #endif 

@@ -605,8 +605,8 @@ void freeMeshRefsByOwner(World& world, int ownerId){
   }
 }
 
-void updateMeshLighting(World& world, std::string lightingMesh){
-  std::unordered_map<std::string, EntityLightingInfo> rootMeshToLighting;
+void updateMeshLighting(World& world){
+  std::unordered_map<std::string, MapLighting> rootMeshToLighting;
   for (auto& [name, meshRef] : world.meshes){
     std::string meshName = name;
     auto rootMeshName = rootMesh(meshName);
@@ -627,9 +627,9 @@ void updateMeshLighting(World& world, std::string lightingMesh){
       auto vertices = readVertsFromMeshVao(meshRef.mesh);
 
       for (auto& vertex : vertices){
-        auto& lightingInfo = rootMeshToLighting.at(rootMeshName);
-        auto lightZoneResult = calculateLightingForPoint(lightingInfo, vertex.position);
-        vertex.color = lightZoneResult.color;
+        auto& mapLighting = rootMeshToLighting.at(rootMeshName);
+        auto color = calculateLightingForPoint(mapLighting, vertex.position);
+        vertex.color = color;
       }
       updateMeshVertices(meshRef.mesh, vertices);
     }

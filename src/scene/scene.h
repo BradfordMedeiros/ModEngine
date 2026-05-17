@@ -143,6 +143,6 @@ void createPointConstraint(World& world, objid idOne, objid idTwo);
 void createHingeConstraint(World& world, objid idOne, objid idTwo);
 std::optional<int> physicsLayer(World& world, objid id);
 
-void updateMeshLighting(World& world, std::string lightingMesh);
+void updateMeshLighting(World& world);
 
 #endif
