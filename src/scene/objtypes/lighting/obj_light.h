@@ -11,10 +11,12 @@ struct GameObjectLight {
   LightType type;
   float maxangle;
   float angledelta;
-  glm::vec3 attenuation;
-  int voxelSize;
   bool disabled;
   std::string texture;
+
+  glm::vec3 attenuation;
+  int voxelSize;
+  bool autocalcVoxelSize;
 };
 
 GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util);

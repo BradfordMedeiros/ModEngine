@@ -112,7 +112,12 @@ std::optional<int> lightingPositionToIndex(glm::vec3 position, glm::ivec3 offset
 	return index;
 }
 
-void addVoxelLight(objid lightIndex, glm::vec3 position, int requestedRadius){
+
+int calculateRadius(int requestedRadius, bool autocalcVoxelSize){
+	return requestedRadius;
+}
+
+void addVoxelLight(objid lightIndex, glm::vec3 position, int requestedRadius, bool autocalcVoxelSize){
 	lightingData.lastLightPosition[lightIndex] = position;
 	if (lightIndex == lightingData.defaultLightIndex){
 		return;
@@ -164,7 +169,7 @@ void removeVoxelLight(objid lightIndex, bool removeDefaultLight){
 
 // obviously this could be more efficient
 // eg could keep a mapping of cell ids to shortcut to them
-void updateVoxelLightPosition(objid lightIndex, glm::vec3 position, int radius){
+void updateVoxelLightPosition(objid lightIndex, glm::vec3 position, int radius, bool autocalcVoxelSize){
 
 	// This is necessary because eg the light can rotate or sway. 
 	// Expensive still if it's going to move out of the cell it is in originally.
@@ -180,13 +185,13 @@ void updateVoxelLightPosition(objid lightIndex, glm::vec3 position, int radius){
 
 	modlog("update voxel light position", std::to_string(lightIndex) + ", " + print(position));
 	removeVoxelLight(lightIndex, false);
-	addVoxelLight(lightIndex, position, radius);
+	addVoxelLight(lightIndex, position, radius, autocalcVoxelSize);
 }
 
 void recalculateLights(std::vector<LightUpdate>& allUpdates){
 	lightingData.cells = generateLightingCells(numCellsDim);
 	for (auto &update : allUpdates){
-		addVoxelLight(update.lightIndex, update.position, update.radius);
+		addVoxelLight(update.lightIndex, update.position, update.radius, update.autocalcVoxelSize);
 	}
 }
 

@@ -14,15 +14,6 @@ std::vector<AutoSerialize> lightAutoserializer {
     .field = "color",
     .defaultValue = glm::vec3(1.f, 1.f, 1.f),
   },
-  // constant, linear, quadratic
-  // in shader =>  float attenuation = 1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)));  
-  // physically accurate ish would be to attenuate based on 1 / r^2  hence the 0 0 1 default
-  AutoSerializeVec3 {
-    .structOffset = offsetof(GameObjectLight, attenuation),
-    .structOffsetFiller = std::nullopt,
-    .field = "attenuation",
-    .defaultValue = glm::vec3(0, 1.f, 0),
-  },
   AutoSerializeCustom {
     .structOffset = 0,
     .field = "angle",
@@ -55,11 +46,6 @@ std::vector<AutoSerialize> lightAutoserializer {
     .field = "angledelta",
     .defaultValue = 0.f,
   },
-  AutoSerializeInt {
-    .structOffset = offsetof(GameObjectLight, voxelSize),
-    .field = "voxelsize",
-    .defaultValue = 1,
-  },
   AutoSerializeBool {
     .structOffset = offsetof(GameObjectLight, disabled),
     .field = "disabled",
@@ -73,12 +59,35 @@ std::vector<AutoSerialize> lightAutoserializer {
     .defaultValue = "",
   },
 
+  // constant, linear, quadratic
+  // in shader =>  float attenuation = 1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)));  
+  // physically accurate ish would be to attenuate based on 1 / r^2  hence the 0 0 1 default
+  AutoSerializeVec3 {
+    .structOffset = offsetof(GameObjectLight, attenuation),
+    .structOffsetFiller = std::nullopt,
+    .field = "attenuation",
+    .defaultValue = glm::vec3(0, 1.f, 0),
+  },
+  AutoSerializeInt {
+    .structOffset = offsetof(GameObjectLight, voxelSize),
+    .field = "voxelsize",
+    .defaultValue = 1,
+  },
+  AutoSerializeBool {
+    .structOffset = offsetof(GameObjectLight, autocalcVoxelSize),
+    .field = "autovoxel",
+    .onString = "true",
+    .offString = "false",
+    .defaultValue = true,
+  },
 };
+
+
 
 GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectLight obj {};
   createAutoSerializeWithTextureLoading((char*)&obj, lightAutoserializer, attr, util);
-  addVoxelLight(util.id, glm::vec3(0.f, 0.f, 0.f), obj.voxelSize);
+  addVoxelLight(util.id, glm::vec3(0.f, 0.f, 0.f), obj.voxelSize, obj.autocalcVoxelSize);
   return obj;
 }
 

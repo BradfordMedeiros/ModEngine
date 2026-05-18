@@ -64,7 +64,8 @@ int getLightsArrayIndex(std::vector<LightInfo>& lights, objid lightId){
 
 void recalculateLighting(World& world){
   std::vector<LightUpdate> updates;
-  updates.push_back(LightUpdate{
+
+  updates.push_back(LightUpdate{  // TODO - fix this, why...is this here?
     .lightIndex = 0,
     .position = glm::vec3(0.f, 0.f, 0.f),
     .radius = 2,
@@ -78,6 +79,7 @@ void recalculateLighting(World& world){
       .lightIndex = id,
       .position = lightTransform.position,
       .radius = lightObject -> voxelSize,
+      .autocalcVoxelSize = lightObject -> autocalcVoxelSize,
     });
   }
 
