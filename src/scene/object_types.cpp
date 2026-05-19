@@ -1017,7 +1017,7 @@ void updateObjectPositions(ObjectMapping& mapping, objid id, Transformation& tra
 
   auto lightObj = getLight(mapping, id);
   if (lightObj != NULL){
-    updateVoxelLightPosition(id, position, lightObj -> voxelSize, lightObj -> autocalcVoxelSize);
+    updateVoxelLightPosition(id, position, lightObj -> voxelSize, lightObj -> autocalcVoxelSize, lightObj -> attenuation);
   }
 
   auto emitterObj = getEmitter(mapping, id);

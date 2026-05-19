@@ -80,6 +80,7 @@ void recalculateLighting(World& world){
       .position = lightTransform.position,
       .radius = lightObject -> voxelSize,
       .autocalcVoxelSize = lightObject -> autocalcVoxelSize,
+      .attenuation = lightObject -> attenuation,
     });
   }
 

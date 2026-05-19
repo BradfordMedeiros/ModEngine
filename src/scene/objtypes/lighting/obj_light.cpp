@@ -87,7 +87,7 @@ std::vector<AutoSerialize> lightAutoserializer {
 GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectLight obj {};
   createAutoSerializeWithTextureLoading((char*)&obj, lightAutoserializer, attr, util);
-  addVoxelLight(util.id, glm::vec3(0.f, 0.f, 0.f), obj.voxelSize, obj.autocalcVoxelSize);
+  addVoxelLight(util.id, glm::vec3(0.f, 0.f, 0.f), obj.voxelSize, obj.autocalcVoxelSize, obj.attenuation);
   return obj;
 }
 

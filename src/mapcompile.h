@@ -12,6 +12,7 @@ typedef std::function<void(MapData& mapData, std::string& generatedScene)> Final
 struct CompileMapFns {
   CompileFn compileFn;
   FinalizeFn finalizeFn;
+  std::function<std::string(std::string mapFile, std::optional<std::string> templateFile)> getTemplateFn;
 };
 CompileMapFns getCompileMapForGame();
 

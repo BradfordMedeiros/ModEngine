@@ -32,15 +32,16 @@ int getLightingCellWidth();
 int getLightingNumCellsDim();
 int getLightingNumCellsTotal();
 std::vector<LightingUpdate> getLightUpdates();
-void addVoxelLight(objid lightIndex, glm::vec3 position, int radius, bool autocalcVoxelSize);
+void addVoxelLight(objid lightIndex, glm::vec3 position, int radius, bool autocalcVoxelSize, glm::vec3 attenuation);
 void removeVoxelLight(objid lightIndex, bool removeDefaultLight);
-void updateVoxelLightPosition(objid lightIndex, glm::vec3 position, int radius, bool autocalcVoxelSize);
+void updateVoxelLightPosition(objid lightIndex, glm::vec3 position, int radius, bool autocalcVoxelSize, glm::vec3 attenuation);
 
 struct LightUpdate { 
   objid lightIndex;
   glm::vec3 position;
   int radius;
   bool autocalcVoxelSize;
+  glm::vec3 attenuation;
 };
 void recalculateLights(std::vector<LightUpdate>& allUpdates);
 

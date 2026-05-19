@@ -1169,23 +1169,26 @@ void setDebugPoints(std::vector<glm::vec3> points, std::vector<std::optional<glm
   modassert(debugPoints.size() == debugPointsColors.size(), "setDebugPoints differing sizes");
 }
 
-void compileMap(std::string compileMapFile, std::string templateFile, bool useTempFile){
+void compileMap(std::string compileMapFile, std::string templateFile, bool useTempFile, CompileMapFns compileFns){
   auto path = decomposePath(compileMapFile);
   std::cout << print(path) << std::endl;
 
   std::string filepath = useTempFile ? "./build/temp.map.rawscene"  : (path.dirPath + "/" + path.filename + ".rawscene");
   std::string brushFileOut = useTempFile ? "./build/temp.brush" : (path.dirPath + "/" + path.filename + ".brush");
-  auto baseFile = templateFile != "" ? templateFile : "../afterworld/scenes/levels/ball.rawscene";
+  auto baseFile = templateFile != "" ? templateFile : "./res/scenes/empty.p.rawscene";
 
   auto overriddenTemplate = path.dirPath + "/" + path.filename + ".template";
+
+  bool hasTemplateFile = false;
   if (fileExistsFromPackage(overriddenTemplate)){
     baseFile = overriddenTemplate;
+    hasTemplateFile = true;
   }
+  baseFile = compileFns.getTemplateFn(compileMapFile, hasTemplateFile ? overriddenTemplate : std::optional<std::string>(std::nullopt));
 
   std::cout << "starting to compile: " << compileMapFile << std::endl;
   std::cout << "fileout: " << filepath << ", brush: " << brushFileOut << ", template = " <<  baseFile <<  std::endl;
 
-  auto compileFns = getCompileMapForGame();
   compileRawScene(filepath, baseFile, compileMapFile, brushFileOut, [&compileFns, &brushFileOut](MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName) -> void {
     compileFns.compileFn(brushFileOut, mapData, entity, shouldWrite, attributes, modelName);
   }, compileFns.finalizeFn); 
@@ -1366,7 +1369,8 @@ int main(int argc, char* argv[]){
   #endif
 
   if (compileMapFile != ""){
-    compileMap(compileMapFile, templateFile, useTempFile);
+    auto compileFns = getCompileMapForGame();
+    compileMap(compileMapFile, templateFile, useTempFile, compileFns);
     return 0;
   }
 

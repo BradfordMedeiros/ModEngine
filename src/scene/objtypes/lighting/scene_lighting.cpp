@@ -113,20 +113,77 @@ std::optional<int> lightingPositionToIndex(glm::vec3 position, glm::ivec3 offset
 }
 
 
-int calculateRadius(int requestedRadius, bool autocalcVoxelSize){
-	return requestedRadius;
+//   float attenuation = enableAttenutation ? (1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)))) : 1;
+float calculateLightDistance(float minAttenuation, glm::vec3 attenuation){
+    float constant = attenuation.x;
+    float linear = attenuation.y;
+    float quadratic = attenuation.z;
+
+    float target = 1.0f / minAttenuation;
+    float rhs = target - constant;
+
+    if (fabs(quadratic) < 1e-6f){
+        if (fabs(linear) < 1e-6f){
+            return 0;
+        }
+        return rhs / linear;
+    }
+
+    if (fabs(linear) < 1e-6f){
+        if (rhs < 0.0f){
+            return 0;
+        }
+        return sqrt(rhs / quadratic);
+    }
+
+    float a = quadratic;
+    float b = linear;
+    float c = constant - target;
+
+    float discriminant = b * b - 4.0f * a * c;
+
+    if (discriminant < 0.0f){
+        return 0;
+    }
+
+    float sqrtD = sqrt(discriminant);
+
+    float r1 = (-b + sqrtD) / (2.0f * a);
+    float r2 = (-b - sqrtD) / (2.0f * a);
+
+    return glm::max(r1, r2);
 }
 
-void addVoxelLight(objid lightIndex, glm::vec3 position, int requestedRadius, bool autocalcVoxelSize){
+int calculateRadius(int requestedRadius, bool autocalcVoxelSize, glm::vec3 attenuation){
+	int radius = requestedRadius;
+	if (radius <= 0){
+		radius = 1; // max size 
+	}
+
+	if (!autocalcVoxelSize){
+		return radius;
+	}
+
+	auto distance =  calculateLightDistance(0.1f, attenuation);
+	float voxelDistance = (distance / lightingData.voxelCellWidth) + (lightingData.voxelCellWidth * 0.5f);
+	int voxelsRoundedUp = glm::ceil(voxelDistance);
+
+	std::cout << "voxel lighting atten = " << print(attenuation) << std::endl;
+	std::cout << "voxel lighting voxel distance = " << voxelDistance << std::endl;
+	std::cout << "voxel lighting -- voxel rounded = " << voxelsRoundedUp << std::endl;	
+
+	return voxelsRoundedUp + 1;
+}
+
+void addVoxelLight(objid lightIndex, glm::vec3 position, int requestedRadius, bool autocalcVoxelSize, glm::vec3 attenuation){
 	lightingData.lastLightPosition[lightIndex] = position;
 	if (lightIndex == lightingData.defaultLightIndex){
 		return;
 	}
 	modlog("voxel lighting add: ", std::to_string(lightIndex));
-	int radius = requestedRadius;
-	if (radius <= 0){
-		radius = 1; // max size 
-	}
+
+	int radius = calculateRadius(requestedRadius, autocalcVoxelSize, attenuation);
+
 	glm::vec3 color(1.f, 1.f, 1.f);
 
 	//modlog("voxel lighting add: ", std::to_string(lightIndex));
@@ -169,7 +226,7 @@ void removeVoxelLight(objid lightIndex, bool removeDefaultLight){
 
 // obviously this could be more efficient
 // eg could keep a mapping of cell ids to shortcut to them
-void updateVoxelLightPosition(objid lightIndex, glm::vec3 position, int radius, bool autocalcVoxelSize){
+void updateVoxelLightPosition(objid lightIndex, glm::vec3 position, int radius, bool autocalcVoxelSize, glm::vec3 attenuation){
 
 	// This is necessary because eg the light can rotate or sway. 
 	// Expensive still if it's going to move out of the cell it is in originally.
@@ -185,13 +242,13 @@ void updateVoxelLightPosition(objid lightIndex, glm::vec3 position, int radius, 
 
 	modlog("update voxel light position", std::to_string(lightIndex) + ", " + print(position));
 	removeVoxelLight(lightIndex, false);
-	addVoxelLight(lightIndex, position, radius, autocalcVoxelSize);
+	addVoxelLight(lightIndex, position, radius, autocalcVoxelSize, attenuation);
 }
 
 void recalculateLights(std::vector<LightUpdate>& allUpdates){
 	lightingData.cells = generateLightingCells(numCellsDim);
 	for (auto &update : allUpdates){
-		addVoxelLight(update.lightIndex, update.position, update.radius, update.autocalcVoxelSize);
+		addVoxelLight(update.lightIndex, update.position, update.radius, update.autocalcVoxelSize, update.attenuation);
 	}
 }
 
