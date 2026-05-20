@@ -1174,7 +1174,7 @@ void compileMap(std::string compileMapFile, std::string templateFile, bool useTe
   std::cout << print(path) << std::endl;
 
   std::string filepath = useTempFile ? "./build/temp.map.rawscene"  : (path.dirPath + "/" + path.filename + ".rawscene");
-  std::string brushFileOut = useTempFile ? "./build/temp.brush" : (path.dirPath + "/" + path.filename + ".brush");
+  std::string brushFileOut = useTempFile ? "./build/temp.map" : (path.dirPath + "/" + path.filename + ".map");
   auto baseFile = templateFile != "" ? templateFile : "./res/scenes/empty.p.rawscene";
 
   auto overriddenTemplate = path.dirPath + "/" + path.filename + ".template";
@@ -1191,7 +1191,7 @@ void compileMap(std::string compileMapFile, std::string templateFile, bool useTe
 
   compileRawScene(filepath, baseFile, compileMapFile, brushFileOut, [&compileFns, &brushFileOut](MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName) -> void {
     compileFns.compileFn(brushFileOut, mapData, entity, shouldWrite, attributes, modelName);
-  }, compileFns.finalizeFn); 
+  }, compileFns.finalizeFn, useTempFile); 
 
   std::cout << "compiled: " << compileMapFile << std::endl;
 }

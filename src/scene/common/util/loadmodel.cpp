@@ -738,7 +738,7 @@ ModelDataCore loadModelCoreAssimp(std::string modelPath){
 
 ModelDataCore loadModelCore(std::string modelPath){
   auto extension = getExtension(modelPath);
-  if (extension.has_value() && extension.value() == "brush"){
+  if (extension.has_value() && extension.value() == "map"){
     return loadModelCoreBrush(modelPath);
   }
   return loadModelCoreAssimp(modelPath);

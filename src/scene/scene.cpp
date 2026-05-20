@@ -512,7 +512,7 @@ void loadModelData(World& world, std::string meshpath, int ownerId){
   }else{
     auto pathExists = fileExistsFromPackage(meshpath);
     auto fileExtension = getExtension(meshpath);
-    if (fileExtension.has_value() && fileExtension.value() == "brush"){
+    if (fileExtension.has_value() && fileExtension.value() == "map"){
       pathExists = true;
     }
     if (!pathExists){
@@ -612,7 +612,7 @@ void updateMeshLighting(World& world){
     auto rootMeshName = rootMesh(meshName);
     auto fileSuffix = getExtension(rootMeshName);
     std::cout << "updateMeshLighting: file suffix: " << print(fileSuffix) << std::endl;
-    if (fileSuffix.has_value() && fileSuffix.value() == "brush"){
+    if (fileSuffix.has_value() && fileSuffix.value() == "map"){
       if (rootMeshToLighting.find(rootMeshName) == rootMeshToLighting.end()){
         rootMeshToLighting[rootMeshName] = loadBrushLighting(rootMeshName);
       }      
@@ -623,7 +623,7 @@ void updateMeshLighting(World& world){
     std::string meshName = name;
     auto rootMeshName = rootMesh(meshName);
     if (rootMeshToLighting.find(rootMeshName) != rootMeshToLighting.end()){
-      std::cout << "updateMeshLighting: " << name << ", with lighting: " << "./build/temp.brush" << ", root = " << rootMesh(meshName) << std::endl;
+      std::cout << "updateMeshLighting: " << name << ", with lighting: " << "./build/temp.map" << ", root = " << rootMesh(meshName) << std::endl;
       auto vertices = readVertsFromMeshVao(meshRef.mesh);
 
       for (auto& vertex : vertices){
