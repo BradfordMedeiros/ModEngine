@@ -43,6 +43,7 @@ struct MapData {
 MapData parseMapData(std::string file);
 MapData parseRawMapData(std::string& fileContent);
 std::vector<Entity*> getEntitiesByClassName(MapData& mapData, const char* name);
+Entity& getEntityByName(MapData& mapData, const char* name);
 
 std::optional<std::string*> getValue(Entity& entity, const char* key);
 std::optional<int> getIntValue(Entity& entity, const char* key);

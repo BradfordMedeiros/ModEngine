@@ -318,6 +318,11 @@ bool setEmitterAttribute(GameObjectEmitter& emitterObj, const char* field, Attri
       .lifetime = emitterObj.duration,
     });
     setAnyValue = true;
+  }else if (fieldName == "effect-tint"){
+    if (emitterObj.effekseerEffect.has_value()){
+      glm::vec4 tint = unwrapAttr<glm::vec4>(value);
+      setEffectColor(emitterObj.effekseerEffect.value(), glm::vec4(tint.x * 255, tint.y * 255, tint.z * 255, tint.w * 255));
+    }
   }else {
     GameobjAttributes attributes {
       .attr = {

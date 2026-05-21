@@ -16,6 +16,7 @@ struct EffectData {
 	std::optional<glm::vec3> position;
 	std::optional<glm::quat> rotation;
 	std::optional<glm::vec3> scale;
+	std::optional<glm::vec4> tint;
 	bool loopContinuously;
 	std::string effectName;
 
@@ -172,6 +173,13 @@ void playEffectsAlways(float currentTime){
 			effect.playingEffect = playingEffect;
 			effect.startTime = currentTime;
 			setEffekseerTransform(effect.playingEffect.value(), effect.rotation.value(), effect.position.value(), effect.scale.value());
+
+			if (effect.tint.has_value()){
+				auto tint = effect.tint.value();
+				effekseerManager->SetAllColor(effect.playingEffect.value(),  Effekseer::Color(tint.x, tint.y, tint.z, tint.w));			
+			}
+
+
 		}
 	}	
 }
@@ -248,6 +256,7 @@ EffekEffect createEffect(std::string effect, glm::vec3 position, glm::quat rotat
 		.position = std::nullopt,
 		.rotation = std::nullopt,
 		.scale = std::nullopt,
+		.tint = std::nullopt,
 		.loopContinuously = false,
 		.effectName = effect,
 		.startTime = std::nullopt,
@@ -279,6 +288,7 @@ void playEffect(EffekEffect& effect, glm::vec3 position){
 	effectData.playingEffect = playingEffect;
 	effectData.startTime = timeSeconds(false);
 	effectData.position = position;
+
 }
 
 void stopEffect(EffekEffect& effectEffect){
@@ -315,6 +325,16 @@ void reloadEffect(std::string file){
 	}
 }
 
+// given the restarting...i probably have to do this on restart too
+// color = [0, 255]
+void setEffectColor(EffekEffect& effectEffect, glm::vec4 color){
+	auto& effect = effekseerData.at(effectEffect.effectId);
+	effect.tint = color;
+
+	if (effect.playingEffect.has_value()){
+		effekseerManager->SetAllColor(effect.playingEffect.value(),  Effekseer::Color(color.r, color.g, color.b, color.w));	
+	}
+}
 
 int effekSeekerTriangleCount(){
 	return effekRenderer -> GetDrawVertexCount() / 3;
