@@ -147,7 +147,7 @@ std::optional<T*> getTypeFromAttr(std::optional<AttributeValuePtr> ptrValue){
     return std::nullopt;
   }
   T** valuePtrPtr = std::get_if<T*>(&ptrValue.value());
-  assert(valuePtrPtr);
+  modassert(valuePtrPtr, "getTypeFromAttr unexpected type for attribute");
   T* valuePtr = *valuePtrPtr;
   return valuePtr;
 }
