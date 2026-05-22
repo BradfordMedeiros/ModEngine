@@ -270,6 +270,7 @@ EffekEffect createEffect(std::string effect, glm::vec3 position, glm::quat rotat
 }
 
 void freeEffect(EffekEffect& effect){
+	stopEffect(effect);
 	effekseerData.erase(effect.effectId);
 }
 
