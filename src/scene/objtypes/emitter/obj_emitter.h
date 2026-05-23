@@ -16,6 +16,7 @@ struct GameObjectEmitter{
 
   	std::string effekseer;
   	std::optional<EffekEffect> effekseerEffect;
+  	std::optional<glm::vec4> tint;
 };
 
 GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& util);

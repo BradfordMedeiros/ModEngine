@@ -277,6 +277,15 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
   }else{
     obj.effekseerEffect = createEffect(obj.effekseer, util.fullInitialTransform.position, util.fullInitialTransform.rotation, util.fullInitialTransform.scale);
     setEffectState(obj.effekseerEffect.value(), obj.state);
+
+ 
+    auto effectTint = getVec4Attr(attributes, "effect-tint");
+    if (effectTint.has_value()){
+      auto tint = effectTint.value();
+      setEffectColor(obj.effekseerEffect.value(), glm::vec4(tint.x * 255, tint.y * 255, tint.z * 255, tint.w * 255));
+    }
+
+
   }
 
   return obj;
