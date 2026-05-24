@@ -1189,8 +1189,8 @@ void compileMap(std::string compileMapFile, std::string templateFile, bool useTe
   std::cout << "starting to compile: " << compileMapFile << std::endl;
   std::cout << "fileout: " << filepath << ", brush: " << brushFileOut << ", template = " <<  baseFile <<  std::endl;
 
-  compileRawScene(filepath, baseFile, compileMapFile, brushFileOut, [&compileFns, &brushFileOut](MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName) -> void {
-    compileFns.compileFn(brushFileOut, mapData, entity, shouldWrite, attributes, modelName);
+  compileRawScene(filepath, baseFile, compileMapFile, brushFileOut, [&compileFns, &brushFileOut](MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* modelName, std::vector<AdditionalEntity>& additionalEntities) -> void {
+    compileFns.compileFn(brushFileOut, mapData, entity, shouldWrite, attributes, modelName, additionalEntities);
   }, compileFns.finalizeFn, useTempFile); 
 
   std::cout << "compiled: " << compileMapFile << std::endl;

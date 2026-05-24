@@ -476,7 +476,13 @@ std::string defaultEntityModelName(Entity& entity){
 	return modelName;
 }
 
-void compileRawScene(std::string filepath, std::string baseFile,  std::string mapFile, std::string brushFileOut, std::function<void(MapData& mapData, Entity& entity, bool* _shouldWrite, std::vector<GameobjAttributeOpts>& _attributes, std::string* _modelName)> callback, std::function<void(MapData& mapData, std::string&)> afterEntities, bool copyMapFile){
+glm::vec3 getEntityPosition(MapData& mapData, Entity& entity){
+    auto origin = getValue(entity, "origin");
+    glm::vec3 position = origin.has_value() ? parseVecTrenchbroom(*origin.value(), mapData.scale) : glm::vec3(0.f, 0.f, 0.f);
+    return position;
+}
+
+void compileRawScene(std::string filepath, std::string baseFile,  std::string mapFile, std::string brushFileOut, std::function<void(MapData& mapData, Entity& entity, bool* _shouldWrite, std::vector<GameobjAttributeOpts>& _attributes, std::string* _modelName, std::vector<AdditionalEntity>& additionalEntities)> callback, std::function<void(MapData& mapData, std::string&)> afterEntities, bool copyMapFile){
 	std::string content = "########## Base file content: " + baseFile + " ##########\n\n" + readFileOrPackage(baseFile) + "\n\n";
 
 	std::string generatedContent = "##########  Generated content: + " + mapFile + "\n\n";
@@ -490,12 +496,15 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 		bool shouldWrite = false;
 		std::string modelName = defaultEntityModelName(entity);
 		std::vector<GameobjAttributeOpts> attributes;
-		callback(mapData, entity, &shouldWrite, attributes, &modelName);
+
+		std::vector<AdditionalEntity> additionalEntities;
+		callback(mapData, entity, &shouldWrite, attributes, &modelName, additionalEntities);
 
 		bool userSpecifiedPosition = false;
+
+    glm::vec3 position = getEntityPosition(mapData, entity);
 		if (shouldWrite){
-		    auto origin = getValue(entity, "origin");
-		    glm::vec3 position = origin.has_value() ? parseVecTrenchbroom(*origin.value(), mapData.scale) : glm::vec3(0.f, 0.f, 0.f);
+
 
 		    std::string entityName = modelName;
 
@@ -509,11 +518,28 @@ void compileRawScene(std::string filepath, std::string baseFile,  std::string ma
 		    }
 
 		    if (!userSpecifiedPosition){
-				generatedScene += entityName + ":position:" + serializeVec(position) + "\n\n";
+					generatedScene += entityName + ":position:" + serializeVec(position) + "\n\n";
 		    }else{
-				generatedScene += "\n";
+					generatedScene += "\n";
 		    }
 		}
+
+		bool additionalUSpecifiedPosition = false;
+		for (auto& additionalEntity : additionalEntities){
+		    for (auto& attribute : additionalEntity.attributes){
+		    	if (attribute.field == "position" && !attribute.submodel.has_value()){
+		    		additionalUSpecifiedPosition = true;
+		    	}
+  				generatedScene += getEntityName(additionalEntity.modelName, attribute.submodel) + ":" + attribute.field + ":" + serializeAttributeValue(attribute.attributeValue) + "\n";
+		    }		
+
+			  if (!additionalUSpecifiedPosition){
+					generatedScene += additionalEntity.modelName + ":position:" + serializeVec(position) + "\n\n";
+		    }else{
+					generatedScene += "\n";
+		    }	    	
+		}
+
 	}
 
 	auto sceneFileData = content + generatedContent + generatedScene + "\n";

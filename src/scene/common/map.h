@@ -45,6 +45,7 @@ MapData parseRawMapData(std::string& fileContent);
 std::vector<Entity*> getEntitiesByClassName(MapData& mapData, const char* name);
 Entity& getEntityByName(MapData& mapData, const char* name);
 
+glm::vec3 getEntityPosition(MapData& mapData, Entity& entity);
 std::optional<std::string*> getValue(Entity& entity, const char* key);
 std::optional<int> getIntValue(Entity& entity, const char* key);
 std::optional<float> getFloatValue(Entity& entity, const char* key);
@@ -65,7 +66,11 @@ struct GameobjAttributeOpts {
   std::optional<std::string> submodel;
 };
 
-void compileRawScene(std::string filepath, std::string baseFile, std::string mapFile, std::string brushFileOut, std::function<void(MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* _modelName)> callback, std::function<void(MapData& mapData, std::string&)> afterEntities, bool copyMapFile);
+struct AdditionalEntity {
+    std::string modelName;
+    std::vector<GameobjAttributeOpts> attributes;
+};
+void compileRawScene(std::string filepath, std::string baseFile, std::string mapFile, std::string brushFileOut, std::function<void(MapData& mapData, Entity& entity, bool* shouldWrite, std::vector<GameobjAttributeOpts>& attributes, std::string* _modelName, std::vector<AdditionalEntity>& additionalEntities)> callback, std::function<void(MapData& mapData, std::string&)> afterEntities, bool copyMapFile);
 
 glm::quat quatFromTrenchBroomAngles(float pitch, float yaw, float roll);
 glm::quat quatFromTrenchBroomAngles2(float pitch, float yaw, float roll);
