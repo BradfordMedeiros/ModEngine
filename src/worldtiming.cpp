@@ -232,6 +232,7 @@ void tickAnimations(World& world, WorldTiming& timings, float currentTime){
     // might be better to not have this check here and instead just assume obj exists,
     // remove animation when del object, but for now!
     if (!idExists(world.sandbox, playback.groupId)){  // why are we doing this check here?
+      std::cout << "tick: warning: removing" << std::endl;
       auto& layers = timings.animations.playbacks.at(playback.groupId).layer;
       for (int i = 0; i < layers.size(); i++){
         timings.playbacksToRemove.push_back(
@@ -411,7 +412,13 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
     invalidatePlaybackToRemove(timings, groupId, zIndex);
   }
 
-  auto animation = getAnimation(world, groupId, animationToPlay, mask.has_value() ? mask.value() : timings.disableAnimationIds, invertMask);
+  // TODO - this needs to figure out the disabled list and compute it properly 
+  auto joinedMask = mask.has_value() ? mask.value() : timings.disableAnimationIds;
+  bool shouldInvert = mask.has_value() ? invertMask : true;
+  if (!shouldInvert){
+    modassert(timings.disableAnimationIds.size() == 0, "must invert mask with disableAnimationIds");
+  }
+  auto animation = getAnimation(world, groupId, animationToPlay, joinedMask, shouldInvert);
   modassertwarn(animation.has_value(), std::string("animation does not exist: ") + animationToPlay);
   if (!animation.has_value()){
     return;
