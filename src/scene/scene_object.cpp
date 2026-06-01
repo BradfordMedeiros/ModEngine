@@ -254,7 +254,18 @@ bool idInGroup(World& world, objid id, std::vector<objid> groupIds){
 }
 
 void emit(World& world, objid id, NewParticleOptions particleOpts){
-  emitNewParticle(getEmitterSystem(), id, particleOpts);
+  auto emitter = getEmitter(world.objectMapping, id);
+  modassert(emitter, "emit - type is not an emitter");
+
+  if (emitter -> effekseer != ""){
+    modassert(!particleOpts.orientation.has_value(), "cannot specify orientation on oneshot for effekseer");
+    modassert(!particleOpts.velocity.has_value(), "cannot specify velocity on oneshot for effekseer");
+    modassert(!particleOpts.angularVelocity.has_value(), "cannot specify angularVelocity on oneshot for effekseer");
+    modassert(!particleOpts.parentId.has_value(), "cannot specify parentId on oneshot for effekseer");
+    playEffectOneShot(emitter -> effekseerEffect.value(), particleOpts.position);
+  }else{
+    emitNewParticle(getEmitterSystem(), id, particleOpts);
+  }
 }
 
 

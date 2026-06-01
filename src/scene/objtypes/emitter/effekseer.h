@@ -26,6 +26,8 @@ void reloadEffect(std::string file);
 
 void setEffectColor(EffekEffect& effectEffect, glm::vec4 color);
 
+void playEffectOneShot(EffekEffect& effect, std::optional<glm::vec3> position);
+
 int effekSeekerTriangleCount();
 int effekSeekerDrawCount();
 

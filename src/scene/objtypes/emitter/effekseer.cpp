@@ -10,6 +10,11 @@ double timeSeconds(bool realtime);
 Effekseer::ManagerRef effekseerManager;          // TODO STATIC
 EffekseerRendererGL::RendererRef effekRenderer;  // TODO STATIC
 
+
+struct EffekOneshot {
+	Effekseer::Handle playingEffect;
+};
+
 struct EffectData {
 	Effekseer::EffectRef effectRef;
 	std::optional<Effekseer::Handle> playingEffect;
@@ -21,6 +26,8 @@ struct EffectData {
 	std::string effectName;
 
 	std::optional<float> startTime;
+
+	std::unordered_map<objid, EffekOneshot> oneshots;
 };
 std::unordered_map<objid, EffectData> effekseerData;  // TODO STATIC
 
@@ -122,7 +129,6 @@ void initEffekseer(){
   effekseerManager -> SetEffectLoader(Effekseer::Effect::CreateEffectLoader(fileInterface));
 }
 
-
 bool effectPlaying(EffectData& effect){
 	modassert(initEffekseerCalled, "Effekseer not initialized");
 	if (!effect.playingEffect.has_value()){
@@ -161,7 +167,6 @@ void setEffekseerTransform(Effekseer::Handle handle, glm::quat& rotation, glm::v
 }
 
 
-
 void playEffectsAlways(float currentTime){
 	for (auto& [id, effect] : effekseerData){
 		bool shouldReplayEffect = !effectPlaying(effect) || isFinalEffectFrame(effect, currentTime);
@@ -178,8 +183,18 @@ void playEffectsAlways(float currentTime){
 				auto tint = effect.tint.value();
 				effekseerManager->SetAllColor(effect.playingEffect.value(),  Effekseer::Color(tint.x, tint.y, tint.z, tint.w));			
 			}
+		}
 
 
+		std::vector<objid> idsToRemove;
+		for (auto& [id, oneshot] : effect.oneshots){
+			if (!effekseerManager -> Exists(oneshot.playingEffect)){
+				idsToRemove.push_back(id);
+			}
+		}
+		for (auto id : idsToRemove){
+			std::cout << "play effect erase: " << id << std::endl;
+			effect.oneshots.erase(id);
 		}
 	}	
 }
@@ -239,7 +254,7 @@ Effekseer::EffectRef doCreateEffect(std::string& effect){
 	modassert(initEffekseerCalled, "Effekseer not initialized doCreateEffect");
 	
 	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
-  auto pathUtf16 = convert.from_bytes(effect.c_str());
+    auto pathUtf16 = convert.from_bytes(effect.c_str());
 	Effekseer::EffectRef effectRef = Effekseer::Effect::Create(effekseerManager,  pathUtf16.c_str());
 	modassert(effectRef != NULL, std::string("effect invalid: ") + effect);
 	return effectRef;
@@ -271,6 +286,11 @@ EffekEffect createEffect(std::string effect, glm::vec3 position, glm::quat rotat
 
 void freeEffect(EffekEffect& effect){
 	stopEffect(effect);
+
+	auto& effectValue = effekseerData.at(effect.effectId);
+	for (auto& [id, oneshot] : effectValue.oneshots){
+		effekseerManager -> StopEffect(oneshot.playingEffect);
+	}
 	effekseerData.erase(effect.effectId);
 }
 
@@ -336,6 +356,28 @@ void setEffectColor(EffekEffect& effectEffect, glm::vec4 color){
 		effekseerManager->SetAllColor(effect.playingEffect.value(),  Effekseer::Color(color.r, color.g, color.b, color.w));	
 	}
 }
+
+void playEffectOneShot(EffekEffect& effectEffect, std::optional<glm::vec3> optPosition){
+	auto& data = effekseerData.at(effectEffect.effectId);
+	auto position = optPosition.has_value() ? optPosition.value() : data.position.value();
+
+
+	auto& effect = effekseerData.at(effectEffect.effectId);
+	auto effectPosition = ::Effekseer::Vector3D(position.x, position.y, position.z);
+	Effekseer::Handle playingEffect = effekseerManager -> Play(effect.effectRef, effectPosition, 0 /* start frame frame 0 seems to flicker in general */);
+
+	setEffekseerTransform(playingEffect, data.rotation.value(), position, data.scale.value());
+	if (data.tint.has_value()){
+		auto tint = data.tint.value();
+		effekseerManager -> SetAllColor(playingEffect,  Effekseer::Color(tint.x, tint.y, tint.z, tint.w));			
+	}
+
+	auto objectId = getUniqueObjId();
+	effect.oneshots[objectId] = EffekOneshot {
+		.playingEffect = playingEffect,
+	};
+}
+
 
 int effekSeekerTriangleCount(){
 	return effekRenderer -> GetDrawVertexCount() / 3;
