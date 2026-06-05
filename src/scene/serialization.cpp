@@ -451,7 +451,9 @@ std::optional<AttributeValuePtr> getAttributePtr(GameObject& gameobj, const char
 
 bool setAttribute(GameObject& gameobj, const char* field, AttributeValue value, ObjectSetAttribUtil& util){
   modassert(std::string(field) != "script", "setting script attr not yet supported");
-  return autoserializerSetAttrWithTextureLoading((char*)&gameobj, gameobjSerializer, field, value, util);
+  auto didSet = autoserializerSetAttrWithTextureLoading((char*)&gameobj, gameobjSerializer, field, value, util);
+  gameobj.layerSymbol = getSymbol(gameobj.layer);
+  return didSet;
 }
 
 bool isReservedAttribute(std::string field, std::set<std::string>& autoserializerFields){

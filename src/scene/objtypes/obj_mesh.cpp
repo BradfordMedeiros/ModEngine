@@ -110,5 +110,8 @@ std::optional<AttributeValuePtr> getMeshAttribute(GameObjectMesh& meshObj, const
 }
 
 bool setMeshAttribute(GameObjectMesh& meshObj, const char* field, AttributeValue value, ObjectSetAttribUtil& util, SetAttrFlags&){
+  if (std::string(field) == "tint"){
+    std::cout << "gameobj.layer set tint: " << std::endl;
+  }
   return autoserializerSetAttrWithTextureLoading((char*)&meshObj, meshAutoserializer, field, value, util);
 }
