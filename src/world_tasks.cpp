@@ -42,6 +42,9 @@ void handleMovingObjects(float currTime){
     requestMovingObjects.erase(id);
   }
 }
+void removeMovingObjects(objid id){
+  requestMovingObjects.erase(id);
+}
 
 
 /////// scheduled tasks

@@ -1922,7 +1922,8 @@ int main(int argc, char* argv[]){
         setSelectedOctreeId(std::nullopt);
       }
       removeScheduledTaskByOwner({ id });
-
+      removeMovingObjects(id);
+      
       cBindings.onObjectRemoved(id);
       timings.disableAnimationIds.erase(id);
       freeTexture(id);

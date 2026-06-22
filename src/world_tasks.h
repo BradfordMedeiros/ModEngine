@@ -14,7 +14,7 @@ struct RequestMovingObject {
 
 void moveCameraTo(objid cameraId, glm::vec3 position, std::optional<float> duration);
 void handleMovingObjects(float currTime);
-
+void removeMovingObjects(objid id);
 
 //////////////////////////
 struct ScheduledTask {
