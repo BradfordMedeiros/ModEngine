@@ -1000,11 +1000,6 @@ void addObjectToWorld(
       ModelData modelData = modelDataFromCache(world, meshName, name, id);
       attr.attr["meshes"] =  meshNamesForNode(modelData, meshName, name);
 
-      if (modelData.sponsorRootPosition){
-        //modassert(false, std::string("extra root transform: ") + name + " - " + print(modelData.nodeTransform.at(0).position));
-        physicsLocalTransformSet(world, id, modelData.nodeTransform.at(0), std::nullopt);
-
-      }
 
       auto additionalFields = applyFieldsToSubelements(meshName, modelData, submodelAttributes); 
       auto newSerialObjs = multiObjAdd(
@@ -1021,6 +1016,17 @@ void addObjectToWorld(
         modelData.bones,
         id
       );
+
+      if (modelData.sponsorRootPosition){
+
+        // Multiobj add does not sponsor the root position so we just set + updateSandbox.
+        // Without the call to update sandbox, the position is not correct until a frame after adding
+        // It would probably be better to solve this in multiobj add directly
+        physicsLocalTransformSet(world, id, modelData.nodeTransform.at(0), std::nullopt);
+        updateSandbox(world.sandbox);  
+      }
+
+
       for (auto &[name, objAttr] : newSerialObjs){
         addObjectToWorld(world, sceneId, objAttr.id, name, getId, objAttr.attr, submodelAttributes, prefabId, rootname);
       }
@@ -1505,7 +1511,7 @@ void setAttributes(World& world, objid id, std::vector<GameobjAttribute> allAttr
 }
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative, Hint hint){
-  //std::cout << "physics translate set: " << index << " relative: " << relative << std::endl;
+  std::cout << "physics translate set: " << index << " relative: " << relative << std::endl;
   if (relative){
     updateRelativePosition(world.sandbox, index, pos, hint);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
@@ -1531,7 +1537,7 @@ void physicsLocalTransformSet(World& world, objid index, Transformation& transfo
 }
 
 void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relative, Hint hint){
-  //std::cout << "physics rotate set: " << index << " relative: " << relative << std::endl;
+  std::cout << "physics rotate set: " << index << " relative: " << relative << std::endl;
   if (relative){
     updateRelativeRotation(world.sandbox, index, rotation, hint);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
