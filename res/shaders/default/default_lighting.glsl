@@ -163,10 +163,9 @@ float calcAttenutation(int lightNumber){
   return attenuation;
 }
 
-
 #include "./res/shaders/default/algorithms/phong.glsl"
 
-void mainAlgorithm(out vec4 _fragColor){
+void mainAlgorithm(out vec4 _fragColor, out vec3 _normal){
   EncodeId = vec4(encodedid.x, encodedid.y, encodedid.z, encodedid.w);
   UVCoords = vec4(TexCoord.x, TexCoord.y, textureid, 0);
 
@@ -216,6 +215,8 @@ void mainAlgorithm(out vec4 _fragColor){
       //normal = normalize(TangentToWorld * vec3(normalTexColor.r * 2 - 1, normalTexColor.g * 2 - 1, normalTexColor.b * 2 - 1));
       normal = normalize(transpose(TangentToWorld) * vec3(normalTexColor.r * 2 - 1, normalTexColor.g * 2 - 1, normalTexColor.b * 2 - 1));
     }
+
+    _normal = normal;
 
     /*if (hasNormalTexture){
       vec3 normalTexColor = texture(normalTexture, adjustedTexCoord).rgb ;
