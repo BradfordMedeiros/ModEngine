@@ -76,9 +76,6 @@ void initDefaultShader(unsigned int shader){
     "forceTint", // selection shader only
     "useInstancing", "instanceOffsets[0]",
     "groupToModel",
-
-    // shouldnt be here
-    "postColor", "circleColor",
   });
 }
 void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& lights, bool isSelection, glm::vec3 cameraPosition, std::vector<glm::mat4>& lightMatrixs){
@@ -251,10 +248,6 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
     "forceTint", // selection shader only
     "useInstancing", "instanceOffsets[0]",
     "groupToModel",
-
-
-    // this is specific and shouldn't be here
-    "postColor", "circleColor",
   });
 
 
