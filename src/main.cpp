@@ -334,6 +334,9 @@ std::vector<std::string> listLightTextures(){
 std::optional<std::string> lookupNormalTexture(std::string textureName){
   return lookupNormalTexture(world, textureName);
 }
+std::optional<std::string> lookupOpacityTexture(std::string textureName){
+  return lookupOpacityTexture(world, textureName);
+}
 
 // This is wasteful, as obviously I shouldn't be loading in all the textures on load, but ok for now. 
 // This shoiuld really just be creating a list of names, and then the cycle above should cycle between possible textures to load, instead of what is loaded 

@@ -292,7 +292,7 @@ void createGeneratedMesh(World& world, std::vector<glm::vec3>& face, std::vector
 
 void createGeneratedMeshRaw(World& world, std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indexs, std::string destMesh){
  std::optional<std::vector<glm::vec3>> colors(std::nullopt);
- auto generatedMesh = generateMeshRaw(verts, uvCoords, indexs, NULL, NULL);
+ auto generatedMesh = generateMeshRaw(verts, uvCoords, indexs, NULL, NULL, NULL);
   ModelDataCore modelDataCore {
     .modelData = ModelData {
       .meshIdToMeshData = {{ 0, generatedMesh }},
@@ -323,19 +323,31 @@ std::vector<TextureAndName> worldTextures(World& world){
   return textures;
 }
 
-std::optional<std::string> lookupNormalTexture(World& world, std::string textureName){
+std::optional<std::string> lookupTextureType(World& world, std::string& textureName, std::string type){
   if (!world.interface.modlayerFileExists(textureName)){
+    std::cout << "found texture no texture: " << textureName << std::endl;
     return std::nullopt;
   }
   std::filesystem::path textureFile(textureName);
   auto folder = textureFile.parent_path();
-  auto newFileName = textureFile.stem().string() + ".normal" + textureFile.extension().string();
+  auto newFileName = textureFile.stem().string() + "." + type + textureFile.extension().string();
   std::filesystem::path fullNormalPath = folder / newFileName; //  / is append operator 
   modlog("editor", "normal fullfilepath is: " + fullNormalPath.string() + ", orig was: " + textureName);
   if (!world.interface.modlayerFileExists(fullNormalPath)){
+    std::cout << "found texture missing: " << fullNormalPath << std::endl;
     return std::nullopt;
   }
+
+  std::cout << "found texture: " << fullNormalPath << std::endl;
   return fullNormalPath;
+}
+
+std::optional<std::string> lookupNormalTexture(World& world, std::string textureName){
+  return lookupTextureType(world, textureName,  "normal");
+}
+
+std::optional<std::string> lookupOpacityTexture(World& world, std::string textureName){
+  return lookupTextureType(world, textureName, "opacity");
 }
 
 void setTexture(World& world, objid index, std::string textureName, std::function<void(unsigned int)> setNavmeshTextureId){

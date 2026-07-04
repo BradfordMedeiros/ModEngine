@@ -3,8 +3,9 @@
 std::string readFileOrPackage(std::string filepath);
 std::string serializeAttributeValue(AttributeValue& value);
 void setDebugPoints(std::vector<glm::vec3> points, std::vector<std::optional<glm::vec3>> pointsTo, std::vector<glm::vec3> colors);
-MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indexs, std::string* texture, std::string* normalTexture);
+MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indexs, std::string* texture, std::string* normalTexture, std::string* opacityTexture);
 std::optional<std::string> lookupNormalTexture(std::string textureName);
+std::optional<std::string> lookupOpacityTexture(std::string textureName);
 TextureSizeInfo loadTextureSizeInfo(std::string textureFilePath);
 bool fileExistsFromPackage(std::string filepath);
 
@@ -1179,8 +1180,10 @@ ModelDataCore loadModelCoreBrush(std::string modelPath){
   	
   	std::string texture = texturePath;
   	auto normalTexture = lookupNormalTexture(texture);
+  	auto opacityTexture = lookupOpacityTexture(texture);
+
   	//modassert(normalTexture.has_value(), std::string("normal for texture does not exist: ") + texture);
-  	auto generatedMesh = generateMeshRaw(meshForTexture.points, meshForTexture.uvCoords, indexs, &texture, normalTexture.has_value() ? &normalTexture.value() : NULL);
+  	auto generatedMesh = generateMeshRaw(meshForTexture.points, meshForTexture.uvCoords, indexs, &texture, normalTexture.has_value() ? &normalTexture.value() : NULL, opacityTexture.has_value() ? &opacityTexture.value() : NULL);
   	generatedMesh.isSky = isSky;
   	generatedMesh.isWater = isWater;
   	generatedMesh.isHidden = isHidden;

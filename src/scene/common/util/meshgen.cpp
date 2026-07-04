@@ -197,7 +197,7 @@ Vertex createVertex3(glm::vec3 position, glm::vec2 texCoords, glm::vec3 normal, 
   return vertex;
 }
 
-MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices, std::string* texture, std::string* normalTexture){
+MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& uvCoords, std::vector<unsigned int>& indices, std::string* texture, std::string* normalTexture, std::string* opacityTexture){
   modassert(indices.size() % 3 == 0, "indices must be multiple of 3");
   modassert(verts.size() == uvCoords.size(), "verts must be same size of uvCoords");
 
@@ -253,6 +253,10 @@ MeshData generateMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2>& 
   if (normalTexture){
     meshdata.hasNormalTexture = true;
     meshdata.normalTexturePath = *normalTexture;
+  }
+  if (opacityTexture){
+    meshdata.hasOpacityTexture = true;
+    meshdata.opacityTexturePath = *opacityTexture;
   }
 
   return meshdata;
