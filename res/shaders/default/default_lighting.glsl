@@ -193,18 +193,10 @@ void mainAlgorithm(out vec4 _fragColor, out vec3 _normal){
     float closestDepth = texture(lightDepthTexture, shadowCoord.xy).r;
 
     vec4 emissionColor = texture(emissionTexture, adjustedTexCoord);
-    vec4 opacityColor = texture(opacityTexture, adjustedTexCoord);
 
-    bool discardTexture = hasOpacityTexture && opacityColor.r < discardTexAmount;   
-    vec4 texColor;
-
-    vec3 finalEmission = vec3(0, 0, 0);
-    if (discardTexture){
-      discard;
-    }else{
-        texColor = diffuseColor;
-        finalEmission = (hasEmissionTexture ? vec3(emissionAmount.r * emissionColor.r, emissionAmount.g * emissionColor.g, emissionAmount.b * emissionColor.b) : vec3(0, 0, 0));
-    }
+    vec4 texColor = diffuseColor;
+    vec3 finalEmission = (hasEmissionTexture ? vec3(emissionAmount.r * emissionColor.r, emissionAmount.g * emissionColor.g, emissionAmount.b * emissionColor.b) : vec3(0, 0, 0));
+    
     if (texColor.a < 0.1){
       discard;
     }
