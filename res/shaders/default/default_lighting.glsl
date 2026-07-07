@@ -166,7 +166,7 @@ float calcAttenutation(int lightNumber){
 
 #include "./res/shaders/default/algorithms/phong.glsl"
 
-void mainAlgorithm(out vec4 _fragColor, out vec3 _normal){
+void mainAlgorithm(out vec4 _fragColor, out vec3 _normal, vec2 extraUvOffset){
   EncodeId = vec4(encodedid.x, encodedid.y, encodedid.z, encodedid.w);
   UVCoords = vec4(TexCoord.x, TexCoord.y, textureid, 0);
 
@@ -189,6 +189,7 @@ void mainAlgorithm(out vec4 _fragColor, out vec3 _normal){
     vec2 offsetTexCoord = vec2(NewTexCoord.x, NewTexCoord.y); 
   
     vec2 adjustedTexCoord = mod(offsetTexCoord * textureTiling, 1) * textureSize + textureOffset;
+    adjustedTexCoord = adjustedTexCoord + extraUvOffset;
 
     vec4 diffuseColor = hasDiffuseTexture ? texture(maintexture, adjustedTexCoord) : vec4(1, 1, 1, 1);
     float closestDepth = texture(lightDepthTexture, shadowCoord.xy).r;
