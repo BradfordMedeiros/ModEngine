@@ -20,6 +20,7 @@ layout (location = 3) out vec4 UVCoords;
 uniform sampler2D maintexture;
 uniform sampler2D emissionTexture;
 uniform sampler2D opacityTexture;  // todo remove this and make this a special shader to accomplish this instead
+
 uniform sampler2D lightDepthTexture;
 uniform samplerCube cubemapTexture;
 uniform sampler2D roughnessTexture;
