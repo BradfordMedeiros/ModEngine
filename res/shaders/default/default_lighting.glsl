@@ -166,12 +166,12 @@ float calcAttenutation(int lightNumber){
 
 #include "./res/shaders/default/algorithms/phong.glsl"
 
-void mainAlgorithm(out vec4 _fragColor, out vec3 _normal, vec2 extraUvOffset){
+void mainAlgorithm(out vec4 _fragColor, out vec3 _normal, vec2 extraUvOffset, vec2 texCoord){
   EncodeId = vec4(encodedid.x, encodedid.y, encodedid.z, encodedid.w);
   UVCoords = vec4(TexCoord.x, TexCoord.y, textureid, 0);
 
     /////////
-    vec2 NewTexCoord = TexCoord;
+    vec2 NewTexCoord = texCoord;
     if (sky){
       vec3 toVertex = FragPos - cameraPosition;
       float dist = length(toVertex);        // distance from camera to vertex

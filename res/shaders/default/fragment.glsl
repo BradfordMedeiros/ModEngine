@@ -2,5 +2,5 @@
 
 void main(){
   vec3 normalVec = vec3(0, 0, 0);
-  mainAlgorithm(FragColor, normalVec, vec2(0, 0));
+  mainAlgorithm(FragColor, normalVec, vec2(0, 0), TexCoord);
 }
