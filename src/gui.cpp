@@ -97,6 +97,9 @@ ImGui::End();
 
 }
 
+enum ImMenuView { MENUVIEW_NONE, MENUVIEW_EDITOR };
+ImMenuView menuViewState = MENUVIEW_NONE;
+
 void renderNavbar(){
     if (ImGui::BeginMainMenuBar())
     {
@@ -154,11 +157,16 @@ void renderNavbar(){
         // View menu
         if (ImGui::BeginMenu("View"))
         {
-            static bool showHierarchy = true;
-            static bool showInspector = true;
+            bool showNone = menuViewState == MENUVIEW_NONE;
+            bool showEditor = menuViewState == MENUVIEW_EDITOR;
 
-            ImGui::MenuItem("Hierarchy", nullptr, &showHierarchy);
-            ImGui::MenuItem("Inspector", nullptr, &showInspector);
+            if(ImGui::MenuItem("None", nullptr, showNone)){
+            	menuViewState = MENUVIEW_NONE;
+            }
+            if(ImGui::MenuItem("Editor", nullptr, showEditor)){
+            	menuViewState = MENUVIEW_EDITOR;
+            }
+
 
             ImGui::EndMenu();
         }
@@ -169,13 +177,56 @@ void renderNavbar(){
 
 void renderObjectDetails(){
   ImGui::Begin("Object Details");
-  ImGui::Text("Hello World");
-  ImGui::Button("Click me");
+
+  std::string objectName = std::string("Name: ") + "testobject";
+  ImGui::Text(objectName.c_str());
+
+  static std::string testname = "hello world";
+  ImGui::InputText("Rename Object", &testname);
+  ImGui::Button("Rename");
+  ImGui::Dummy(ImVec2(0, 10));
 
   static bool showOption = true;
-  static std::string testname = "hello world";
-  ImGui::Checkbox("option name", &showOption);
-  ImGui::InputText("Object Name", &testname);
+  ImGui::Checkbox("Enable Physics", &showOption);
+  ImGui::Checkbox("Dynamic", &showOption);
+  ImGui::Checkbox("Collision", &showOption);
+
+  ImGui::Text("Physics Shape");
+
+  ImGui::Checkbox("Box", &showOption);
+  ImGui::SameLine();
+  ImGui::Checkbox("Sphere", &showOption);
+  ImGui::SameLine();
+  ImGui::Checkbox("Capsule", &showOption);
+  
+  ImGui::Checkbox("Cylinder", &showOption);
+  ImGui::SameLine();
+  ImGui::Checkbox("Hull", &showOption);
+  ImGui::SameLine();
+  ImGui::Checkbox("Auto", &showOption);
+  ImGui::SameLine();
+  ImGui::Checkbox("Exact", &showOption);
+
+  static float position[3] = {0.0f, 1.0f, 2.0f};
+  ImGui::Dummy(ImVec2(0, 10));
+
+  ImGui::Text("Position");
+  ImGui::PushItemWidth(70);
+  ImGui::DragFloat("X", &position[0], 0.1f);
+  ImGui::SameLine();
+  ImGui::DragFloat("Y", &position[1], 0.1f);
+  ImGui::SameLine();
+  ImGui::DragFloat("Z", &position[2], 0.1f);
+  ImGui::PopItemWidth();
+
+  ImGui::Text("Scale");
+  ImGui::PushItemWidth(70);
+  ImGui::DragFloat("X", &position[0], 0.1f);
+  ImGui::SameLine();
+  ImGui::DragFloat("Y", &position[1], 0.1f);
+  ImGui::SameLine();
+  ImGui::DragFloat("Z", &position[2], 0.1f);
+  ImGui::PopItemWidth();
 
   if (ImGui::BeginPopupContextItem()){
       if (ImGui::MenuItem("Add Child"))
@@ -191,6 +242,40 @@ void renderObjectDetails(){
       ImGui::EndPopup();
   }
   
+  ImGui::End();
+}
+
+void renderCameraPanel(){
+  ImGui::Begin("Cameras");
+
+  ImGui::Button("Create Camera");
+
+  static bool doThing = false;
+  ImGui::Checkbox("Depth of Field", &doThing);
+  
+ float speed = 5.0f;
+
+  ImGui::SliderFloat("Min Blur", &speed, 0.0f, 10.0f);
+  ImGui::SliderFloat("Max Blur", &speed, 0.0f, 10.0f);
+  ImGui::SliderFloat("Blur Amount", &speed, 0.0f, 10.0f);
+
+  ImGui::End();
+}
+
+void renderLightPanel(){
+  ImGui::Begin("Light");
+
+  ImGui::Button("Create Light");
+
+  static bool showOption = false;
+  ImGui::Text("Type");
+
+  ImGui::Checkbox("Point", &showOption);
+  ImGui::SameLine();
+  ImGui::Checkbox("Spotlight", &showOption);
+  ImGui::SameLine();
+  ImGui::Checkbox("Directional", &showOption);
+
   ImGui::End();
 }
 
@@ -216,12 +301,252 @@ void renderActiveScene(){
   ImGui::End();
 }
 
-void renderUi(){
+void DrawDockSpace()
+{	
+	ImGui::Begin("TestTabs");
 
+    if(ImGui::BeginTabBar("tabs")){
+    	if (ImGui::BeginTabItem("tab1")){
+   			ImGui::Text("Hello World 1");
+			ImGui::EndTabItem();
+    	}
+    	if (ImGui::BeginTabItem("tab2")){
+   			ImGui::Text("Hello World 2");
+			ImGui::EndTabItem();
+    	}
+
+  	    ImGui::EndTabBar();     
+
+    }
+	ImGui::End();
+
+}
+
+bool Splitter(bool vertical, float thickness, float* size)
+{
+    ImGui::Button(
+        "splitter",
+        vertical ?
+            ImVec2(thickness, ImGui::GetContentRegionAvail().y) :
+            ImVec2(ImGui::GetContentRegionAvail().x, thickness));
+
+    if (ImGui::IsItemActive())
+    {
+        *size += vertical ?
+            ImGui::GetIO().MouseDelta.x :
+            ImGui::GetIO().MouseDelta.y;
+
+        return true;
+    }
+
+    return false;
+}
+
+
+void RenderEditor()
+{
+    ImGui::Begin("Editor");
+
+    static float leftWidth = 250.0f;
+
+    ImVec2 available = ImGui::GetContentRegionAvail();
+
+    // Left panel
+    ImGui::BeginChild(
+        "LeftPanel",
+        ImVec2(leftWidth, available.y),
+        true
+    );
+
+    ImGui::Text("Scene Hierarchy");
+    ImGui::Text("Player");
+    ImGui::Text("Enemy");
+
+    ImGui::EndChild();
+
+
+    ImGui::SameLine();
+
+
+    // Splitter
+    Splitter(true, 5.0f, &leftWidth);
+
+
+    ImGui::SameLine();
+
+
+    // Right panel
+    ImGui::BeginChild(
+        "RightPanel",
+        ImVec2(0, available.y),
+        true
+    );
+
+    ImGui::Text("Viewport / Inspector");
+    
+    ImGui::EndChild();
+
+
+    ImGui::End();
+}
+
+#include <filesystem>
+
+void FileExplorer(std::string directory){
+
+    for (auto& entry : std::filesystem::directory_iterator(directory))
+    {
+        if (entry.is_directory())
+        {
+            if (ImGui::TreeNode(entry.path().filename().string().c_str()))
+            {
+                FileExplorer(entry.path());
+                ImGui::TreePop();
+            }
+        }
+        else
+        {
+            ImGui::Selectable(
+                entry.path().filename().string().c_str()
+            );
+        }
+    }
+
+}
+
+void leftSidebar(){
+    ImGui::Begin(
+        "Editor",
+        nullptr
+    );
+
+    ImVec2 size = ImGui::GetContentRegionAvail();
+    /*    ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoResize*/
+
+    ImGui::BeginChild(
+        "Assets",
+        ImVec2(size.x, size.y * 0.5),
+        true
+    );
+
+    FileExplorer(".");
+
+    ImGui::EndChild();
+
+
+
+
+    ImGui::BeginChild(
+        "Viewport 1",
+        ImVec2(size.x , size.y * 0.5),
+        true
+    );
+
+    ImGui::Text("Game viewport 1");
+
+    ImGui::EndChild();
+
+    ImGui::BeginChild(
+        "Viewport 2",
+        ImVec2(size.x , size.y * 0.5),
+        true
+    );
+
+    ImGui::Text("Game viewport 2");
+
+    ImGui::EndChild();
+
+    ImGui::BeginChild(
+        "Viewport 3",
+        ImVec2(size.x , size.y * 0.5),
+        true
+    );
+
+    ImGui::Text("Game viewport 3");
+
+    ImGui::EndChild();
+
+    ImGui::End();
+}
+
+void renderUi(){
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    renderNavbar();
+
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+    if (menuViewState == MENUVIEW_NONE){
+    	renderObjectDetails();
+    	renderCameraPanel();
+    	renderLightPanel();
+    }else if (menuViewState == MENUVIEW_EDITOR){
+    	ImGui::SetNextWindowPos(viewport->WorkPos);
+
+    	auto size = viewport -> WorkSize;
+    	ImGui::SetNextWindowSize(ImVec2(size.x * 0.2 , size.y));
+
+    	leftSidebar(); 	
+    }
+
+
+
+
+
+    /*ImGui::BeginChild(
+        "Viewport 2",
+        ImVec2(0, size.y),
+        true
+    );
+
+    ImGui::Text("Game viewport 2");
+
+    ImGui::EndChild();*/
+
+
+
+    ImGui::Render();
+/*
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
+ // ImGui::Begin("Editor",  nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+
+  renderNavbar();
+ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+	ImGui::SetNextWindowPos(viewport->WorkPos);
+ImGui::SetNextWindowSize(viewport->WorkSize);
+
+
+   ImVec2 size = ImGui::GetContentRegionAvail();
+
+
+  ImGui::BeginChild(
+    "Viewport",
+    ImVec2(300, size.y - 10),
+    true
+
+
+  ImGui::Begin("Assets", nullptr,  ImGuiWindowFlags_NoMove |
+    ImGuiWindowFlags_NoResize |
+    ImGuiWindowFlags_NoCollapse);
+  FileExplorer(".");
+  ImGui::End();
+
+  ImGui::EndChild();
+
+  RenderEditor();
+	//DrawDockSpace();      // One dockspace host
+
+	//  ImGui::End();
+*/
+/*
   renderObjectDetails();
   renderDebug();
   renderActiveScene();
@@ -250,8 +575,7 @@ void renderUi(){
 
 
   renderConsole();
-
-  renderNavbar();
+*/
 
 
 
