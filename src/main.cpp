@@ -26,6 +26,7 @@
 #include "./scene/common/map.h"
 #include "./scene/objtypes/emitter/effekseer.h"
 #include "./mapcompile.h"
+#include "./gui.h"
 
 #ifdef ADDITIONAL_SRC_HEADER
   #include STR(ADDITIONAL_SRC_HEADER)
@@ -1208,6 +1209,7 @@ GLFWmonitor* monitor = NULL;
 const GLFWvidmode* mode = NULL;
 
 int main(int argc, char* argv[]){
+
   auto start = std::chrono::steady_clock::now();
 
   signal(SIGABRT, signalHandler);  
@@ -2060,6 +2062,9 @@ int main(int argc, char* argv[]){
   waterShader = pluginApi.loadShader("water", "./res/shaders/water");
   initEffekseer();
   
+  initUi();
+
+
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
   PROFILE("FRAME",
@@ -2541,6 +2546,8 @@ int main(int argc, char* argv[]){
         glViewport(calcViewportOffset(viewport).x, calcViewportOffset(viewport).y, calcViewportSize(viewport).x, calcViewportSize(viewport).y);
         glBindVertexArray(defaultResources.quadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        renderUi();
 
     }
 
