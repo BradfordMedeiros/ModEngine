@@ -185,7 +185,9 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
     GameObjectH& obj = getGameObjectH(deserializedScene.scene, id);
     if (parentId.has_value() && obj.parentId == 0){
       enforceParentRelationship(sandbox.mainScene, id, parentId.value());
-    } 
+    }else if (!parentId.has_value()){
+      enforceParentRelationship(sandbox.mainScene, id, 0);
+    }
   }
 
 
@@ -477,6 +479,7 @@ SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std
   auto rootObj = gameObjectFromFields(name, 0, GameobjAttributes {}, getObjautoserializerFields(name), false); 
   auto rootObjId = sandboxAddToScene(mainScene, 0, std::nullopt, rootObj, std::nullopt);
 
+  std::cout << "scenegraph rootObjId: " << rootObjId << std::endl;
   SceneSandbox sandbox {
     .mainScene = mainScene,
     .layers = layers,

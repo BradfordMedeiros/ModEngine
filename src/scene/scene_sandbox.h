@@ -65,7 +65,6 @@ struct SceneMetadata {
 };
 
 struct SceneSandbox {
-  std::unordered_map<objid, objid> sceneIdToRootObj;
   std::unordered_map<objid, SceneMetadata> sceneIdToSceneMetadata;
   Scene mainScene;
   std::vector<LayerInfo> layers;
@@ -167,5 +166,8 @@ Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId);
 
 objid rootSceneId(SceneSandbox& sandbox);
 bool transformLoggingEnabled();
+
+void getChild(SceneSandbox& sandbox, objid id);
+
 
 #endif 
