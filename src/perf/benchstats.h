@@ -52,6 +52,11 @@ struct Stats {
   unsigned int loadModelFileStatCacheHit;
   unsigned int loadMeshStat;
   unsigned int numScheduledTasks;
+
+  unsigned int numTexturesStat;
+  unsigned int numModelsStat;
+  unsigned int numMeshesStat;
+  unsigned int numAnimations;
 };
 
 Stats createStatistics();

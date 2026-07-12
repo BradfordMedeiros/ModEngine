@@ -13,6 +13,7 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include "imgui_internal.h"
 #include "./views/core.h"
+#include "./widgets.h"
 
 #endif
 

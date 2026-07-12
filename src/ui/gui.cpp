@@ -59,8 +59,32 @@ ImGui::End();
 
 }
 
-enum ImMenuView { MENUVIEW_NONE, MENUVIEW_EDITOR, MENUVIEW_SCENEGRAPH, MENUVIEW_DEBUG, MENUVIEW_BALL, MENUVIEW_MODEL };
+enum ImMenuView { MENUVIEW_NONE, MENUVIEW_EDITOR, MENUVIEW_SCENEGRAPH,  MENUVIEW_BALL, MENUVIEW_MODEL };
+
+enum ImMenuWidgets  { WIDGET_OBJECTCOUNT, WIDGET_DEBUG, WIDGET_ACTIVE_SCENE };
 ImMenuView menuViewState = MENUVIEW_NONE;
+std::set<ImMenuWidgets> widgets {
+    WIDGET_OBJECTCOUNT,
+};
+
+struct WidgetMenuItem {
+    std::string name;
+    ImMenuWidgets widget;
+};
+std::vector<WidgetMenuItem> widgetMenuItems {
+    WidgetMenuItem {
+        .name = "Object Count",
+        .widget = WIDGET_OBJECTCOUNT,
+    },
+    WidgetMenuItem {
+        .name = "Debug",
+        .widget = WIDGET_DEBUG,
+    },
+    WidgetMenuItem {
+        .name = "ActiveScene",
+        .widget = WIDGET_ACTIVE_SCENE,
+    },
+};
 
 void renderNavbar(){
     if (ImGui::BeginMainMenuBar())
@@ -104,7 +128,6 @@ void renderNavbar(){
             bool showNone = menuViewState == MENUVIEW_NONE;
             bool showEditor = menuViewState == MENUVIEW_EDITOR;
             bool showScene = menuViewState == MENUVIEW_SCENEGRAPH;
-            bool showDebug = menuViewState == MENUVIEW_DEBUG;
             bool showBall = menuViewState == MENUVIEW_BALL;
 
             if(ImGui::MenuItem("None", nullptr, showNone)){
@@ -116,30 +139,27 @@ void renderNavbar(){
             if(ImGui::MenuItem("Scenegraph", nullptr, showScene)){
             	menuViewState = MENUVIEW_SCENEGRAPH;
             }
-            if (ImGui::MenuItem("Debug", nullptr, showDebug)){
-            	menuViewState = MENUVIEW_DEBUG;
-            }
 
   			ImGui::Dummy(ImVec2(0, 10));
-            if (ImGui::MenuItem("Stats", nullptr, showDebug)){
 
-            }
 
   			ImGui::Dummy(ImVec2(0, 10));
         	if (ImGui::MenuItem("Ball Options", nullptr, showBall)){
             	menuViewState = MENUVIEW_BALL;
             }
 
-
-
-
             ImGui::EndMenu();
         }
 
         if (ImGui::BeginMenu("Widget")){
-
-            if (ImGui::MenuItem("Object counts")){
-
+            for (auto& widgetMenuItem : widgetMenuItems){
+                if (ImGui::MenuItem(widgetMenuItem.name.c_str())){
+                    if (widgets.count(widgetMenuItem.widget) > 0){
+                        widgets.erase(widgetMenuItem.widget);
+                    }else{
+                        widgets.insert(widgetMenuItem.widget);
+                    }
+                }
             }
 
             ImGui::EndMenu();
@@ -271,27 +291,6 @@ void renderLightPanel(){
   ImGui::End();
 }
 
-void renderDebug(){
-  ImGui::Begin("Debug Panel");
-  static bool doThing = false;
-  ImGui::Checkbox("Show Debug", &doThing);
-  ImGui::Checkbox("Show Cameras", &doThing);
-  ImGui::Checkbox("Show Lights", &doThing);
-  ImGui::Checkbox("Show Sounds", &doThing);
-  ImGui::Checkbox("Show Emitters", &doThing);
-
-  ImGui::End();
-}
-
-void renderPlayMode(){
-  ImGui::Begin("Play Mode");
-  static bool doThing = false;
-  ImGui::Checkbox("Play", &doThing);
-  ImGui::Checkbox("Free Cam", &doThing);
-  ImGui::Checkbox("Editor", &doThing);
-  ImGui::End();
-}
-
 void renderBallGameplay(){
   ImGui::Begin("Ball Gameplay");
   static bool doThing = false;
@@ -305,17 +304,6 @@ void renderBallGameplay(){
   ImGui::DragFloat("friction", &speed, 0.0f, 10.0f);
   ImGui::DragFloat("restitution", &speed, 0.0f, 10.0f);
   ImGui::DragFloat("gravity", &speed, 0.0f, 10.0f);
-
-  ImGui::End();
-}
-
-
-void renderActiveScene(){
-  ImGui::Begin("Active Scene");
-
-  ImGui::Text("Active Id = [19323939]");
-  ImGui::Button("Save Scene");
-  ImGui::Button("Reset Scene");
 
   ImGui::End();
 }
@@ -564,107 +552,27 @@ void renderUi(){
             }
         }
 
-    }else if (menuViewState == MENUVIEW_DEBUG){
-    	renderDebug();
-    	renderPlayMode();
     }else if (menuViewState == MENUVIEW_BALL){
     	renderBallGameplay();
     }
 
 
 
+    for (auto &widget : widgets){
+        if (widget == WIDGET_OBJECTCOUNT){
+            renderObjectCount();
+        }
+        if (widget == WIDGET_DEBUG){
+            renderDebug();
+        }
+        if (widget == WIDGET_ACTIVE_SCENE){
+            renderActiveScene();
+        }
+    }
 
+    ImGui::Render();
 
-    /*ImGui::BeginChild(
-        "Viewport 2",
-        ImVec2(0, size.y),
-        true
-    );
-
-    ImGui::Text("Game viewport 2");
-
-    ImGui::EndChild();*/
-
-
-
-  //ImGui::Begin("Scenegraph");
-  //renderScenegraph();
-  //ImGui::End();
-/*
-  ImGui_ImplOpenGL3_NewFrame();
-  ImGui_ImplGlfw_NewFrame();
-  ImGui::NewFrame();
-
- // ImGui::Begin("Editor",  nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-
-  renderNavbar();
-ImGuiViewport* viewport = ImGui::GetMainViewport();
-
-	ImGui::SetNextWindowPos(viewport->WorkPos);
-ImGui::SetNextWindowSize(viewport->WorkSize);
-
-
-   ImVec2 size = ImGui::GetContentRegionAvail();
-
-
-  ImGui::BeginChild(
-    "Viewport",
-    ImVec2(300, size.y - 10),
-    true
-
-
-  ImGui::Begin("Assets", nullptr,  ImGuiWindowFlags_NoMove |
-    ImGuiWindowFlags_NoResize |
-    ImGuiWindowFlags_NoCollapse);
-  FileExplorer(".");
-  ImGui::End();
-
-  ImGui::EndChild();
-
-  RenderEditor();
-	//DrawDockSpace();      // One dockspace host
-
-	//  ImGui::End();
-*/
-/*
-  renderObjectDetails();
-  renderDebug();
-  renderActiveScene();
-  
-  ImGui::SetNextWindowSizeConstraints(
-      ImVec2(300, 0),        // minimum size
-      ImVec2(FLT_MAX, FLT_MAX) // maximum size
-  );
-
-  ImGui::Begin("Editor",  nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-
-  if (ImGui::CollapsingHeader("Scenegraph")){
-  	  renderScenegraph();
-  }
-  if (ImGui::CollapsingHeader("Scenegraph2")){
-  	  renderScenegraph();
-  }
-  if (ImGui::CollapsingHeader("Scenegraph3")){
-  	  renderScenegraph();
-  }
-  if (ImGui::CollapsingHeader("Scenegraph4")){
-  	  renderScenegraph();
-  }
-  ImGui::End();
-
-
-
-  renderConsole();
-*/
-
-
-
-
-  ImGui::Render();
-
-  ImGui_ImplOpenGL3_RenderDrawData(
-      ImGui::GetDrawData()
-  );
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 }
 

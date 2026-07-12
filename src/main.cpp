@@ -185,6 +185,12 @@ void registerStatistics(){
   logBenchmarkTick(benchmark, statistics.deltaTime, numObjects, statistics.numTriangles);
 
   registerStat(statistics.fpsStat, statistics.currentFps);
+
+  registerStat(statistics.numModelsStat, static_cast<int>(world.modelDatas.size()));
+  registerStat(statistics.numMeshesStat, static_cast<int>(world.meshes.size()));
+  registerStat(statistics.numTexturesStat, static_cast<int>(world.textures.size()));
+  registerStat(statistics.numAnimations, static_cast<int>(world.animations.size()));
+
 }
 
 void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId){

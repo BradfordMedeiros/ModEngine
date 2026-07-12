@@ -82,4 +82,9 @@ void initializeStatistics(){
   statistics.loadModelFileStatCacheHit = statName("load-model-file-stat-cache-hit");
   statistics.loadMeshStat = statName("load-mesh-stat");
   statistics.numScheduledTasks = statName("num-scheduled");
+
+  statistics.numTexturesStat = statName("num-textures");
+  statistics.numModelsStat = statName("num-models");
+  statistics.numMeshesStat = statName("num-meshes");
+  statistics.numAnimations = statName("num-animations");
 }
