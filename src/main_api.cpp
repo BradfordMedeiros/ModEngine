@@ -890,7 +890,7 @@ void setActiveCamera(std::optional<int32_t> cameraIdOpt, std::optional<int> view
 
 std::optional<objid> getActiveCamera(std::optional<int> viewportIndex){
   auto& viewport = getViewport(viewportIndex.has_value() ? viewportIndex.value() : 0);
-  return viewport.activeCameraObj;;
+  return viewport.activeCameraObj;
 }
 
 Transformation getView(){
@@ -918,6 +918,16 @@ void moveCamera(glm::vec3 offset){
   }else{
     auto cameraLocalTransform = gameobjectTransformation(world, viewport.activeCameraObj.value(), false, "move camera");
     setGameObjectPosition(viewport.activeCameraObj.value(), moveRelative(cameraLocalTransform.position, cameraLocalTransform.rotation, glm::vec3(offset), false), true, Hint{ .hint = "moveCamera" });
+  }
+}
+
+void moveCameraAbs(glm::vec3 position){
+  auto& viewport = getDefaultViewport();
+
+  if (!viewport.activeCameraObj.has_value()){
+    defaultResources.defaultCamera.transformation.position = position;
+  }else{
+    setGameObjectPosition(viewport.activeCameraObj.value(), position, true, Hint{ .hint = "moveCameraAbs" });
   }
 }
 

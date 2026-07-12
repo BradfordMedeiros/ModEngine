@@ -7,6 +7,7 @@ void renderUi(){}
 
 #else 
 
+extern CustomApiBindings* mainApi;
 extern GLFWwindow* window;
 
 void initUi(){
@@ -175,10 +176,12 @@ void renderNavbar(){
     }
 }
 
-void renderObjectDetails(){
+void renderObjectDetails(objid id){
+  auto name = mainApi -> getGameObjNameForId(id).value();
+
   ImGui::Begin("Object Details");
 
-  std::string objectName = std::string("Name: ") + "testobject";
+  std::string objectName = std::string("Name: ") + name;
   ImGui::Text(objectName.c_str());
 
   static std::string testname = "hello world";
@@ -537,20 +540,30 @@ void renderUi(){
     	ImGui::SetNextWindowSize(ImVec2(size.x * 0.2 , size.y));
     	leftSidebar(); 	
     }else if (menuViewState == MENUVIEW_SCENEGRAPH){
+        static std::optional<objid> objectToDetail;
+
     	auto size = viewport -> WorkSize;
 
     	ImGui::SetNextWindowPos(viewport->WorkPos);
     	ImGui::SetNextWindowSize(ImVec2(size.x * 0.2 , size.y), ImGuiCond_FirstUseEver);
-    	renderScenegraph("Scenegraph 1"); 	
+    	auto selectedId = renderScenegraph("Scenegraph 1");
+        if (selectedId.has_value()){
+            objectToDetail = selectedId.value();
+        }
 
 		const float rightPaneWidth = viewport -> WorkSize.x * 0.25f;
 		ImGui::SetNextWindowPos(ImVec2(viewport -> WorkSize.x - rightPaneWidth,	viewport -> WorkPos.y), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowSize(
-		    ImVec2(rightPaneWidth, viewport -> WorkSize.y),
-		    ImGuiCond_FirstUseEver
-		);
+		ImGui::SetNextWindowSize(ImVec2(rightPaneWidth, viewport -> WorkSize.y),ImGuiCond_FirstUseEver);
 
-    	renderObjectDetails();
+        if (objectToDetail.has_value()){
+            auto exists = mainApi -> gameobjExists(objectToDetail.value());
+            if (!exists){
+                objectToDetail = std::nullopt;
+            }else{
+                renderObjectDetails(objectToDetail.value());
+            }
+        }
+
     }else if (menuViewState == MENUVIEW_DEBUG){
     	renderDebug();
     	renderPlayMode();
