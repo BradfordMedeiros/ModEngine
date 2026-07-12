@@ -218,6 +218,18 @@ objid rootSceneId(){
   return rootSceneId(world.sandbox);
 }
 
+objid rootObjId(){
+  std::cout << "scenegraph sceneId: " << sceneId << std::endl;
+
+  auto rootObjId = 0;
+  std::cout << "scenegraph rootObjId: " << rootObjId << std::endl;
+  return rootObjId;
+}
+std::set<objid> childObj(objid id){
+  auto& gameobjh  = getGameObjectH(world.sandbox, id); 
+  return gameobjh.children;
+}
+
 std::set<int32_t> queuedUnloadScenes = {};
 
 void unloadScene(int32_t sceneId){  

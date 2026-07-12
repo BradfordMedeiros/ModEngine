@@ -1,9 +1,5 @@
-#ifndef MOD_GUI
-#define MOD_GUI
-
-#define USE_IMGUI
-
-#ifdef USE_IMGUI
+#include "imgui.h"
+#include <string>
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -11,9 +7,6 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include "imgui_internal.h"
 
-#endif
+#pragma once
 
-void initUi();
-void renderUi();
-
-#endif
+void renderScenegraph(const char* name);

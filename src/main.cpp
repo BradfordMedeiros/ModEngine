@@ -26,7 +26,7 @@
 #include "./scene/common/map.h"
 #include "./scene/objtypes/emitter/effekseer.h"
 #include "./mapcompile.h"
-#include "./gui.h"
+#include "./ui/gui.h"
 
 #ifdef ADDITIONAL_SRC_HEADER
   #include STR(ADDITIONAL_SRC_HEADER)

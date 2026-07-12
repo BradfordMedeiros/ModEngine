@@ -16,45 +16,6 @@ void initUi(){
 	ImGui_ImplOpenGL3_Init("#version 330");
 }
 
-void renderScenegraph(){
-  ImGui::Text("Hello World");
-  ImGui::Button("Click me");
-
-  static float color2[4] = {1.0f, 0.2f, 0.3f, 1.0f};
-  ImGui::ColorPicker4("Light Color", color2);
-
-  static int count = 10;
-  ImGui::SliderInt("Count", &count, 0, 100);
-
-  static float value1 = 0.5f;
-  ImGui::SliderFloat("Value", &value1, 0.0f, 1.0f);
-
-  static float position[3] = {0.0f, 1.0f, 2.0f};
-  ImGui::SliderFloat3("Position", position, -100.0f, 100.0f);
-
-  static bool showOption = false;
-  static std::string testname = "test name";
-
-  ImGui::Checkbox("option name", &showOption);
-  ImGui::InputText("Object Name", &testname);
-
-
-  if (ImGui::BeginPopupContextItem()){
-      if (ImGui::MenuItem("Add Child"))
-      {
-          // create node
-      }
-  
-      if (ImGui::MenuItem("Delete"))
-      {
-          // remove node
-      }
-  
-      ImGui::EndPopup();
-  }
-  
-}
-
 void renderConsole(){
 ImGui::Begin("Console");
 
@@ -97,7 +58,7 @@ ImGui::End();
 
 }
 
-enum ImMenuView { MENUVIEW_NONE, MENUVIEW_EDITOR };
+enum ImMenuView { MENUVIEW_NONE, MENUVIEW_EDITOR, MENUVIEW_SCENEGRAPH, MENUVIEW_DEBUG, MENUVIEW_BALL, MENUVIEW_MODEL };
 ImMenuView menuViewState = MENUVIEW_NONE;
 
 void renderNavbar(){
@@ -106,22 +67,6 @@ void renderNavbar(){
         // File menu
         if (ImGui::BeginMenu("File"))
         {
-            if (ImGui::MenuItem("New", "Ctrl+N"))
-            {
-                // Create new scene
-            }
-
-            if (ImGui::MenuItem("Open", "Ctrl+O"))
-            {
-                // Open file dialog
-            }
-
-            if (ImGui::MenuItem("Save", "Ctrl+S"))
-            {
-                // Save scene
-            }
-
-            ImGui::Separator();
 
             if (ImGui::MenuItem("Exit"))
             {
@@ -132,25 +77,23 @@ void renderNavbar(){
         }
 
         // Edit menu
-        if (ImGui::BeginMenu("Edit"))
+        if (ImGui::BeginMenu("Mode"))
         {
-            if (ImGui::MenuItem("Undo", "Ctrl+Z"))
+            if (ImGui::MenuItem("Play", "play the game"))
             {
                 // Undo
             }
 
-            if (ImGui::MenuItem("Redo", "Ctrl+Y"))
-            {
-                // Redo
-            }
-
             ImGui::Separator();
 
-            if (ImGui::MenuItem("Delete", "Del"))
+            if (ImGui::MenuItem("Free", "move camera freely"))
             {
-                // Delete selected object
+            }
+            if (ImGui::MenuItem("Edit", "editor mode"))
+            {
             }
 
+ 
             ImGui::EndMenu();
         }
 
@@ -159,6 +102,9 @@ void renderNavbar(){
         {
             bool showNone = menuViewState == MENUVIEW_NONE;
             bool showEditor = menuViewState == MENUVIEW_EDITOR;
+            bool showScene = menuViewState == MENUVIEW_SCENEGRAPH;
+            bool showDebug = menuViewState == MENUVIEW_DEBUG;
+            bool showBall = menuViewState == MENUVIEW_BALL;
 
             if(ImGui::MenuItem("None", nullptr, showNone)){
             	menuViewState = MENUVIEW_NONE;
@@ -166,9 +112,63 @@ void renderNavbar(){
             if(ImGui::MenuItem("Editor", nullptr, showEditor)){
             	menuViewState = MENUVIEW_EDITOR;
             }
+            if(ImGui::MenuItem("Scenegraph", nullptr, showScene)){
+            	menuViewState = MENUVIEW_SCENEGRAPH;
+            }
+            if (ImGui::MenuItem("Debug", nullptr, showDebug)){
+            	menuViewState = MENUVIEW_DEBUG;
+            }
+
+  			ImGui::Dummy(ImVec2(0, 10));
+            if (ImGui::MenuItem("Stats", nullptr, showDebug)){
+
+            }
+
+  			ImGui::Dummy(ImVec2(0, 10));
+        	if (ImGui::MenuItem("Ball Options", nullptr, showBall)){
+            	menuViewState = MENUVIEW_BALL;
+            }
+
+
 
 
             ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Widget")){
+
+            if (ImGui::MenuItem("Object counts")){
+
+            }
+
+            ImGui::EndMenu();
+
+        }   
+
+
+        if (ImGui::BeginMenu("Special")){
+           if (ImGui::MenuItem("Gun Editor"))
+           {
+           }
+
+           if (ImGui::BeginMenu("Arcade"))
+           {
+
+               if (ImGui::MenuItem("Invaders"))
+               {
+                    // open scene1
+               }
+
+               if (ImGui::MenuItem("Tennis"))
+               {
+                    // open scene1
+               }
+
+               ImGui::EndMenu();
+
+           }
+
+           ImGui::EndMenu();
         }
 
         ImGui::EndMainMenuBar();
@@ -228,20 +228,9 @@ void renderObjectDetails(){
   ImGui::DragFloat("Z", &position[2], 0.1f);
   ImGui::PopItemWidth();
 
-  if (ImGui::BeginPopupContextItem()){
-      if (ImGui::MenuItem("Add Child"))
-      {
-          // create node
-      }
-  
-      if (ImGui::MenuItem("Delete"))
-      {
-          // remove node
-      }
-  
-      ImGui::EndPopup();
-  }
-  
+  auto objectDetailsSize = ImGui::GetWindowSize();
+  std::cout << "object details size: " << objectDetailsSize.x << std::endl;
+
   ImGui::End();
 }
 
@@ -290,6 +279,33 @@ void renderDebug(){
 
   ImGui::End();
 }
+
+void renderPlayMode(){
+  ImGui::Begin("Play Mode");
+  static bool doThing = false;
+  ImGui::Checkbox("Play", &doThing);
+  ImGui::Checkbox("Free Cam", &doThing);
+  ImGui::Checkbox("Editor", &doThing);
+  ImGui::End();
+}
+
+void renderBallGameplay(){
+  ImGui::Begin("Ball Gameplay");
+  static bool doThing = false;
+
+  static float speed = 0.f;
+  ImGui::DragFloat("jump", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("magnitude", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("torque", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("jump-magnitude", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("mass", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("friction", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("restitution", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("gravity", &speed, 0.0f, 10.0f);
+
+  ImGui::End();
+}
+
 
 void renderActiveScene(){
   ImGui::Begin("Active Scene");
@@ -468,7 +484,40 @@ void leftSidebar(){
 
     ImGui::EndChild();
 
+
+    ImGui::BeginChild(
+        "Viewport 4",
+        ImVec2(size.x , size.y * 0.5),
+        true
+    );
+static char text[4096] = "sdfasljdhalsjhdfjklhs";
+
+ImGui::InputTextMultiline(
+    "##editor",
+    text,
+    sizeof(text),
+    ImVec2(500, 300)
+);
+
+    ImGui::EndChild();
+
+
     ImGui::End();
+
+      ImGui::Begin(
+        "Editor Text",
+        nullptr
+    );
+
+ImGui::InputTextMultiline(
+    "##editortext",
+    text,
+    sizeof(text),
+    ImVec2(500, 300)
+);
+
+    ImGui::End();
+
 }
 
 void renderUi(){
@@ -481,16 +530,32 @@ void renderUi(){
     ImGuiViewport* viewport = ImGui::GetMainViewport();
 
     if (menuViewState == MENUVIEW_NONE){
-    	renderObjectDetails();
-    	renderCameraPanel();
-    	renderLightPanel();
+
     }else if (menuViewState == MENUVIEW_EDITOR){
     	ImGui::SetNextWindowPos(viewport->WorkPos);
-
     	auto size = viewport -> WorkSize;
     	ImGui::SetNextWindowSize(ImVec2(size.x * 0.2 , size.y));
-
     	leftSidebar(); 	
+    }else if (menuViewState == MENUVIEW_SCENEGRAPH){
+    	auto size = viewport -> WorkSize;
+
+    	ImGui::SetNextWindowPos(viewport->WorkPos);
+    	ImGui::SetNextWindowSize(ImVec2(size.x * 0.2 , size.y), ImGuiCond_FirstUseEver);
+    	renderScenegraph("Scenegraph 1"); 	
+
+		const float rightPaneWidth = viewport -> WorkSize.x * 0.25f;
+		ImGui::SetNextWindowPos(ImVec2(viewport -> WorkSize.x - rightPaneWidth,	viewport -> WorkPos.y), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(
+		    ImVec2(rightPaneWidth, viewport -> WorkSize.y),
+		    ImGuiCond_FirstUseEver
+		);
+
+    	renderObjectDetails();
+    }else if (menuViewState == MENUVIEW_DEBUG){
+    	renderDebug();
+    	renderPlayMode();
+    }else if (menuViewState == MENUVIEW_BALL){
+    	renderBallGameplay();
     }
 
 
@@ -509,7 +574,9 @@ void renderUi(){
 
 
 
-    ImGui::Render();
+  //ImGui::Begin("Scenegraph");
+  //renderScenegraph();
+  //ImGui::End();
 /*
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
@@ -576,6 +643,7 @@ ImGui::SetNextWindowSize(viewport->WorkSize);
 
   renderConsole();
 */
+
 
 
 
