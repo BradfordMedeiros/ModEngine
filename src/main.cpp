@@ -2553,8 +2553,6 @@ int main(int argc, char* argv[]){
         glBindVertexArray(defaultResources.quadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
-        renderUi();
-
     }
 
 
@@ -2572,6 +2570,10 @@ int main(int argc, char* argv[]){
       
       drawShapeData(lineData, *renderingResources.uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, false);
     }
+
+    renderUi();
+
+
     }
     glEnable(GL_DEPTH_TEST);
 
