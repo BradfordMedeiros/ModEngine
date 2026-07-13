@@ -8,8 +8,15 @@
 #include "imgui_internal.h"
 #include "../cscript/cscript_binding.h"
 
-void renderDebug();
-void renderObjectCount();
-void renderActiveScene();
+void renderDebug(bool includePanel);
+void renderObjectCount(bool includePanel);
+void renderActiveScene(bool includePanel);
+
+void renderCameraPanel(bool includePanel);
+void renderLightPanel(bool includePanel);
+
+void renderBallGameplay(bool includePanel);
+
+void renderObjectDetails(objid id, bool includePanel);
 
 #endif

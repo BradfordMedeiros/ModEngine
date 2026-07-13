@@ -59,19 +59,18 @@ ImGui::End();
 
 }
 
-enum ImMenuView { MENUVIEW_NONE, MENUVIEW_EDITOR, MENUVIEW_SCENEGRAPH,  MENUVIEW_BALL, MENUVIEW_MODEL };
+enum ImMenuView { MENUVIEW_NONE, MENUVIEW_EDITOR, MENUVIEW_SCENEGRAPH, MENUVIEW_MODEL };
 
-enum ImMenuWidgets  { WIDGET_OBJECTCOUNT, WIDGET_DEBUG, WIDGET_ACTIVE_SCENE };
+enum ImMenuWidgets  { WIDGET_OBJECTCOUNT, WIDGET_DEBUG, WIDGET_ACTIVE_SCENE, WIDGET_CAMERA, WIDGET_LIGHT, WIDGET_BALL, WIDGET_OBJECT_DETAILS };
 ImMenuView menuViewState = MENUVIEW_NONE;
-std::set<ImMenuWidgets> widgets {
-    WIDGET_OBJECTCOUNT,
-};
+std::set<ImMenuWidgets> widgets {};
 
 struct WidgetMenuItem {
     std::string name;
     ImMenuWidgets widget;
 };
 std::vector<WidgetMenuItem> widgetMenuItems {
+    // Generic Global ones
     WidgetMenuItem {
         .name = "Object Count",
         .widget = WIDGET_OBJECTCOUNT,
@@ -84,6 +83,24 @@ std::vector<WidgetMenuItem> widgetMenuItems {
         .name = "ActiveScene",
         .widget = WIDGET_ACTIVE_SCENE,
     },
+
+    // Object Specific
+    WidgetMenuItem {
+        .name = "Object - Light",
+        .widget = WIDGET_LIGHT,
+    },
+    WidgetMenuItem {
+        .name = "Object - Camera",
+        .widget = WIDGET_CAMERA,
+    },
+
+    // Game Specific 
+
+    WidgetMenuItem {
+        .name = "Game - Ball",
+        .widget = WIDGET_BALL,
+    },
+
 };
 
 void renderNavbar(){
@@ -128,7 +145,6 @@ void renderNavbar(){
             bool showNone = menuViewState == MENUVIEW_NONE;
             bool showEditor = menuViewState == MENUVIEW_EDITOR;
             bool showScene = menuViewState == MENUVIEW_SCENEGRAPH;
-            bool showBall = menuViewState == MENUVIEW_BALL;
 
             if(ImGui::MenuItem("None", nullptr, showNone)){
             	menuViewState = MENUVIEW_NONE;
@@ -140,18 +156,15 @@ void renderNavbar(){
             	menuViewState = MENUVIEW_SCENEGRAPH;
             }
 
-  			ImGui::Dummy(ImVec2(0, 10));
-
-
-  			ImGui::Dummy(ImVec2(0, 10));
-        	if (ImGui::MenuItem("Ball Options", nullptr, showBall)){
-            	menuViewState = MENUVIEW_BALL;
-            }
-
             ImGui::EndMenu();
         }
 
         if (ImGui::BeginMenu("Widget")){
+            if(ImGui::MenuItem("Hide All")){
+                widgets = {};
+            }
+            ImGui::Separator();
+
             for (auto& widgetMenuItem : widgetMenuItems){
                 if (ImGui::MenuItem(widgetMenuItem.name.c_str())){
                     if (widgets.count(widgetMenuItem.widget) > 0){
@@ -196,117 +209,8 @@ void renderNavbar(){
     }
 }
 
-void renderObjectDetails(objid id){
-  auto name = mainApi -> getGameObjNameForId(id).value();
 
-  ImGui::Begin("Object Details");
 
-  std::string objectName = std::string("Name: ") + name;
-  ImGui::Text(objectName.c_str());
-
-  static std::string testname = "hello world";
-  ImGui::InputText("Rename Object", &testname);
-  ImGui::Button("Rename");
-  ImGui::Dummy(ImVec2(0, 10));
-
-  static bool showOption = true;
-  ImGui::Checkbox("Enable Physics", &showOption);
-  ImGui::Checkbox("Dynamic", &showOption);
-  ImGui::Checkbox("Collision", &showOption);
-
-  ImGui::Text("Physics Shape");
-
-  ImGui::Checkbox("Box", &showOption);
-  ImGui::SameLine();
-  ImGui::Checkbox("Sphere", &showOption);
-  ImGui::SameLine();
-  ImGui::Checkbox("Capsule", &showOption);
-  
-  ImGui::Checkbox("Cylinder", &showOption);
-  ImGui::SameLine();
-  ImGui::Checkbox("Hull", &showOption);
-  ImGui::SameLine();
-  ImGui::Checkbox("Auto", &showOption);
-  ImGui::SameLine();
-  ImGui::Checkbox("Exact", &showOption);
-
-  static float position[3] = {0.0f, 1.0f, 2.0f};
-  ImGui::Dummy(ImVec2(0, 10));
-
-  ImGui::Text("Position");
-  ImGui::PushItemWidth(70);
-  ImGui::DragFloat("X", &position[0], 0.1f);
-  ImGui::SameLine();
-  ImGui::DragFloat("Y", &position[1], 0.1f);
-  ImGui::SameLine();
-  ImGui::DragFloat("Z", &position[2], 0.1f);
-  ImGui::PopItemWidth();
-
-  ImGui::Text("Scale");
-  ImGui::PushItemWidth(70);
-  ImGui::DragFloat("X", &position[0], 0.1f);
-  ImGui::SameLine();
-  ImGui::DragFloat("Y", &position[1], 0.1f);
-  ImGui::SameLine();
-  ImGui::DragFloat("Z", &position[2], 0.1f);
-  ImGui::PopItemWidth();
-
-  auto objectDetailsSize = ImGui::GetWindowSize();
-  std::cout << "object details size: " << objectDetailsSize.x << std::endl;
-
-  ImGui::End();
-}
-
-void renderCameraPanel(){
-  ImGui::Begin("Cameras");
-
-  ImGui::Button("Create Camera");
-
-  static bool doThing = false;
-  ImGui::Checkbox("Depth of Field", &doThing);
-  
- float speed = 5.0f;
-
-  ImGui::SliderFloat("Min Blur", &speed, 0.0f, 10.0f);
-  ImGui::SliderFloat("Max Blur", &speed, 0.0f, 10.0f);
-  ImGui::SliderFloat("Blur Amount", &speed, 0.0f, 10.0f);
-
-  ImGui::End();
-}
-
-void renderLightPanel(){
-  ImGui::Begin("Light");
-
-  ImGui::Button("Create Light");
-
-  static bool showOption = false;
-  ImGui::Text("Type");
-
-  ImGui::Checkbox("Point", &showOption);
-  ImGui::SameLine();
-  ImGui::Checkbox("Spotlight", &showOption);
-  ImGui::SameLine();
-  ImGui::Checkbox("Directional", &showOption);
-
-  ImGui::End();
-}
-
-void renderBallGameplay(){
-  ImGui::Begin("Ball Gameplay");
-  static bool doThing = false;
-
-  static float speed = 0.f;
-  ImGui::DragFloat("jump", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("magnitude", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("torque", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("jump-magnitude", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("mass", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("friction", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("restitution", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("gravity", &speed, 0.0f, 10.0f);
-
-  ImGui::End();
-}
 
 void DrawDockSpace()
 {	
@@ -350,8 +254,7 @@ bool Splitter(bool vertical, float thickness, float* size)
 }
 
 
-void RenderEditor()
-{
+void RenderEditor(){
     ImGui::Begin("Editor");
 
     static float leftWidth = 250.0f;
@@ -421,95 +324,74 @@ void FileExplorer(std::string directory){
 
 }
 
-void leftSidebar(){
-    ImGui::Begin(
-        "Editor",
-        nullptr
-    );
-
-    ImVec2 size = ImGui::GetContentRegionAvail();
-    /*    ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoResize*/
-
-    ImGui::BeginChild(
-        "Assets",
-        ImVec2(size.x, size.y * 0.5),
-        true
-    );
-
-    FileExplorer(".");
-
-    ImGui::EndChild();
-
-
-
-
-    ImGui::BeginChild(
-        "Viewport 1",
-        ImVec2(size.x , size.y * 0.5),
-        true
-    );
-
-    ImGui::Text("Game viewport 1");
-
-    ImGui::EndChild();
-
-    ImGui::BeginChild(
-        "Viewport 2",
-        ImVec2(size.x , size.y * 0.5),
-        true
-    );
-
-    ImGui::Text("Game viewport 2");
-
-    ImGui::EndChild();
-
-    ImGui::BeginChild(
-        "Viewport 3",
-        ImVec2(size.x , size.y * 0.5),
-        true
-    );
-
-    ImGui::Text("Game viewport 3");
-
-    ImGui::EndChild();
-
-
-    ImGui::BeginChild(
-        "Viewport 4",
-        ImVec2(size.x , size.y * 0.5),
-        true
-    );
-static char text[4096] = "sdfasljdhalsjhdfjklhs";
-
-ImGui::InputTextMultiline(
-    "##editor",
-    text,
-    sizeof(text),
-    ImVec2(500, 300)
-);
-
-    ImGui::EndChild();
-
-
-    ImGui::End();
-
-      ImGui::Begin(
-        "Editor Text",
-        nullptr
-    );
-
-ImGui::InputTextMultiline(
-    "##editortext",
-    text,
-    sizeof(text),
-    ImVec2(500, 300)
-);
-
-    ImGui::End();
-
+static std::optional<objid> objectToDetail;
+void renderObjectDetailsWithState(bool includePanel){
+    if (objectToDetail.has_value()){
+        auto exists = mainApi -> gameobjExists(objectToDetail.value());
+        if (exists){
+            renderObjectDetails(objectToDetail.value(), includePanel);
+        }else{
+            renderObjectDetails(0, includePanel);
+        }
+    }else{
+        renderObjectDetails(0, includePanel);
+    }
 }
+void renderWidget(ImMenuWidgets widget, bool includePanel){
+    if (widget == WIDGET_OBJECTCOUNT){
+        renderObjectCount(includePanel);
+    }
+    if (widget == WIDGET_DEBUG){
+        renderDebug(includePanel);
+    }
+    if (widget == WIDGET_ACTIVE_SCENE){
+        renderActiveScene(includePanel);
+    }
+    if (widget == WIDGET_CAMERA){
+        renderCameraPanel(includePanel);
+    }
+    if (widget == WIDGET_LIGHT){
+        renderLightPanel(includePanel);
+    }
+    if (widget == WIDGET_BALL){
+        renderBallGameplay(includePanel);
+    }
+    if (widget == WIDGET_OBJECT_DETAILS){
+        renderObjectDetailsWithState(includePanel);
+    }
+}
+
+void leftSidebar(std::vector<WidgetMenuItem>& widgets){
+    ImGui::Begin("Editor", nullptr);
+        ImVec2 size = ImGui::GetContentRegionAvail();
+        
+        for (int i = 0; i < widgets.size(); i++){
+            auto& widget = widgets.at(i);
+            ImGui::BeginChild(std::to_string(i).c_str(), ImVec2(size.x, size.y * 0.5), true);
+                renderWidget(widget.widget, false);
+            ImGui::EndChild();
+        }
+
+    ImGui::End();
+}
+
+
+void rightSidebar(std::vector<WidgetMenuItem>& widgets){
+    ImGui::Begin("Editor2", nullptr);
+        ImVec2 size = ImGui::GetContentRegionAvail();
+        
+        for (int i = 0; i < widgets.size(); i++){
+            auto& widget = widgets.at(i);
+            ImGui::BeginChild(std::to_string(i).c_str(), ImVec2(size.x , size.y * 0.5), true);
+                renderWidget(widget.widget, false);
+            ImGui::EndChild();
+        }
+
+    ImGui::End();
+}
+
+
+
 
 void renderUi(){
     ImGui_ImplOpenGL3_NewFrame();
@@ -523,13 +405,30 @@ void renderUi(){
     if (menuViewState == MENUVIEW_NONE){
 
     }else if (menuViewState == MENUVIEW_EDITOR){
+        auto size = viewport -> WorkSize;
     	ImGui::SetNextWindowPos(viewport->WorkPos);
-    	auto size = viewport -> WorkSize;
     	ImGui::SetNextWindowSize(ImVec2(size.x * 0.2 , size.y));
-    	leftSidebar(); 	
-    }else if (menuViewState == MENUVIEW_SCENEGRAPH){
-        static std::optional<objid> objectToDetail;
+        std::vector<WidgetMenuItem> widgets {
+            WidgetMenuItem {
+                .name = "Object Count",
+                .widget = WIDGET_OBJECTCOUNT,
+            },
+            WidgetMenuItem {
+                .name = "Object Count",
+                .widget = WIDGET_OBJECTCOUNT,
+            },
+            WidgetMenuItem {
+                .name = "Object Count",
+                .widget = WIDGET_OBJECT_DETAILS,
+            },
+        };
+    	leftSidebar(widgets);
 
+        ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + 400, viewport->WorkPos.y));
+        ImGui::SetNextWindowSize(ImVec2(size.x * 0.2 , size.y));
+        rightSidebar(widgets);
+
+    }else if (menuViewState == MENUVIEW_SCENEGRAPH){
     	auto size = viewport -> WorkSize;
 
     	ImGui::SetNextWindowPos(viewport->WorkPos);
@@ -543,31 +442,11 @@ void renderUi(){
 		ImGui::SetNextWindowPos(ImVec2(viewport -> WorkSize.x - rightPaneWidth,	viewport -> WorkPos.y), ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowSize(ImVec2(rightPaneWidth, viewport -> WorkSize.y),ImGuiCond_FirstUseEver);
 
-        if (objectToDetail.has_value()){
-            auto exists = mainApi -> gameobjExists(objectToDetail.value());
-            if (!exists){
-                objectToDetail = std::nullopt;
-            }else{
-                renderObjectDetails(objectToDetail.value());
-            }
-        }
-
-    }else if (menuViewState == MENUVIEW_BALL){
-    	renderBallGameplay();
+        renderObjectDetailsWithState(true);
     }
 
-
-
     for (auto &widget : widgets){
-        if (widget == WIDGET_OBJECTCOUNT){
-            renderObjectCount();
-        }
-        if (widget == WIDGET_DEBUG){
-            renderDebug();
-        }
-        if (widget == WIDGET_ACTIVE_SCENE){
-            renderActiveScene();
-        }
+        renderWidget(widget, true);
     }
 
     ImGui::Render();
