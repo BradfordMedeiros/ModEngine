@@ -163,7 +163,12 @@ void renderObjectDetails(objid id, bool includePanel){
   std::string objectName = std::string("Name: ") + name;
   ImGui::Text(objectName.c_str());
 
-  static std::string testname = "hello world";
+  static std::string testname = name;
+  static objid objectId = id;
+  if (objectId != id){
+  	testname = objectName;
+  }
+
   ImGui::InputText("Rename Object", &testname);
   ImGui::Button("Rename");
   ImGui::Dummy(ImVec2(0, 10));
@@ -189,7 +194,9 @@ void renderObjectDetails(objid id, bool includePanel){
   ImGui::SameLine();
   ImGui::Checkbox("Exact", &showOption);
 
-  static float position[3] = {0.0f, 1.0f, 2.0f};
+  auto objPosition = mainApi -> getGameObjectPos(id, true, "[ui] obj pos");
+
+  static float position[3] = {objPosition.x, objPosition.y, objPosition.z};
   ImGui::Dummy(ImVec2(0, 10));
 
   ImGui::Text("Position");
@@ -201,14 +208,14 @@ void renderObjectDetails(objid id, bool includePanel){
   ImGui::DragFloat("Z", &position[2], 0.1f);
   ImGui::PopItemWidth();
 
-  ImGui::Text("Scale");
+  /*ImGui::Text("Scale");
   ImGui::PushItemWidth(70);
   ImGui::DragFloat("X", &position[0], 0.1f);
   ImGui::SameLine();
   ImGui::DragFloat("Y", &position[1], 0.1f);
   ImGui::SameLine();
   ImGui::DragFloat("Z", &position[2], 0.1f);
-  ImGui::PopItemWidth();
+  ImGui::PopItemWidth();*/
 
   auto objectDetailsSize = ImGui::GetWindowSize();
   std::cout << "object details size: " << objectDetailsSize.x << std::endl;

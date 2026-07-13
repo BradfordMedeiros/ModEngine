@@ -63,18 +63,20 @@ std::optional<objid> ScenegraphView2(objid id){
 }
 
 
-std::optional<objid> renderScenegraph(const char* name){
-    ImGui::Begin(name, nullptr);
+std::optional<objid> renderScenegraph(const char* name, bool includePanel){
+    if (includePanel){
+        ImGui::Begin(name, nullptr);
+    }
     ImVec2 size = ImGui::GetContentRegionAvail();
-    ImGui::BeginChild("Assets", ImVec2(size.x, size.y), true);
   
     auto selectedId = ScenegraphView2(rootObjId());
     if (selectedId.has_value()){
         std::cout << "scenegraph selected: " << selectedId.value() << std::endl;
     }
 
-    ImGui::EndChild();
-    ImGui::End();
+    if (includePanel){
+        ImGui::End();
+    }
 
     return selectedId;
 }

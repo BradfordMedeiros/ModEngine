@@ -59,9 +59,9 @@ ImGui::End();
 
 }
 
-enum ImMenuView { MENUVIEW_NONE, MENUVIEW_EDITOR, MENUVIEW_SCENEGRAPH, MENUVIEW_MODEL };
+enum ImMenuView { MENUVIEW_NONE, MENUVIEW_EDITOR };
 
-enum ImMenuWidgets  { WIDGET_OBJECTCOUNT, WIDGET_DEBUG, WIDGET_ACTIVE_SCENE, WIDGET_CAMERA, WIDGET_LIGHT, WIDGET_BALL, WIDGET_OBJECT_DETAILS };
+enum ImMenuWidgets  { WIDGET_OBJECTCOUNT, WIDGET_DEBUG, WIDGET_ACTIVE_SCENE, WIDGET_CAMERA, WIDGET_LIGHT, WIDGET_BALL, WIDGET_OBJECT_DETAILS, WIDGET_SCENEGRAPH };
 ImMenuView menuViewState = MENUVIEW_NONE;
 std::set<ImMenuWidgets> widgets {};
 
@@ -99,6 +99,11 @@ std::vector<WidgetMenuItem> widgetMenuItems {
     WidgetMenuItem {
         .name = "Game - Ball",
         .widget = WIDGET_BALL,
+    },
+
+    WidgetMenuItem {
+        .name = "Scenegraph",
+        .widget = WIDGET_SCENEGRAPH,
     },
 
 };
@@ -144,16 +149,12 @@ void renderNavbar(){
         {
             bool showNone = menuViewState == MENUVIEW_NONE;
             bool showEditor = menuViewState == MENUVIEW_EDITOR;
-            bool showScene = menuViewState == MENUVIEW_SCENEGRAPH;
 
             if(ImGui::MenuItem("None", nullptr, showNone)){
             	menuViewState = MENUVIEW_NONE;
             }
             if(ImGui::MenuItem("Editor", nullptr, showEditor)){
             	menuViewState = MENUVIEW_EDITOR;
-            }
-            if(ImGui::MenuItem("Scenegraph", nullptr, showScene)){
-            	menuViewState = MENUVIEW_SCENEGRAPH;
             }
 
             ImGui::EndMenu();
@@ -326,6 +327,7 @@ void FileExplorer(std::string directory){
 
 static std::optional<objid> objectToDetail;
 void renderObjectDetailsWithState(bool includePanel){
+    std::cout << "objectdetails: " << print(objectToDetail) << std::endl;
     if (objectToDetail.has_value()){
         auto exists = mainApi -> gameobjExists(objectToDetail.value());
         if (exists){
@@ -337,6 +339,13 @@ void renderObjectDetailsWithState(bool includePanel){
         renderObjectDetails(0, includePanel);
     }
 }
+void renderScenegraphWithState(bool includePanel){
+   auto selectedId = renderScenegraph("scenegraph", includePanel);
+   if (selectedId.has_value()){
+     objectToDetail = selectedId.value(); 
+   }
+}
+
 void renderWidget(ImMenuWidgets widget, bool includePanel){
     if (widget == WIDGET_OBJECTCOUNT){
         renderObjectCount(includePanel);
@@ -359,10 +368,13 @@ void renderWidget(ImMenuWidgets widget, bool includePanel){
     if (widget == WIDGET_OBJECT_DETAILS){
         renderObjectDetailsWithState(includePanel);
     }
+    if (widget == WIDGET_SCENEGRAPH){
+        renderScenegraphWithState(includePanel);
+    }
 }
 
-void leftSidebar(std::vector<WidgetMenuItem>& widgets){
-    ImGui::Begin("Editor", nullptr);
+float sidebar(const char* title, std::vector<WidgetMenuItem>& widgets){
+    ImGui::Begin(title, nullptr);
         ImVec2 size = ImGui::GetContentRegionAvail();
         
         for (int i = 0; i < widgets.size(); i++){
@@ -371,26 +383,11 @@ void leftSidebar(std::vector<WidgetMenuItem>& widgets){
                 renderWidget(widget.widget, false);
             ImGui::EndChild();
         }
+    float width = ImGui::GetWindowWidth();
 
     ImGui::End();
+    return width;
 }
-
-
-void rightSidebar(std::vector<WidgetMenuItem>& widgets){
-    ImGui::Begin("Editor2", nullptr);
-        ImVec2 size = ImGui::GetContentRegionAvail();
-        
-        for (int i = 0; i < widgets.size(); i++){
-            auto& widget = widgets.at(i);
-            ImGui::BeginChild(std::to_string(i).c_str(), ImVec2(size.x , size.y * 0.5), true);
-                renderWidget(widget.widget, false);
-            ImGui::EndChild();
-        }
-
-    ImGui::End();
-}
-
-
 
 
 void renderUi(){
@@ -405,46 +402,34 @@ void renderUi(){
     if (menuViewState == MENUVIEW_NONE){
 
     }else if (menuViewState == MENUVIEW_EDITOR){
-        auto size = viewport -> WorkSize;
-    	ImGui::SetNextWindowPos(viewport->WorkPos);
-    	ImGui::SetNextWindowSize(ImVec2(size.x * 0.2 , size.y));
-        std::vector<WidgetMenuItem> widgets {
+        std::vector<WidgetMenuItem> leftWidgets {
             WidgetMenuItem {
                 .name = "Object Count",
-                .widget = WIDGET_OBJECTCOUNT,
+                .widget = WIDGET_SCENEGRAPH,
             },
+        };
+
+        std::vector<WidgetMenuItem> rightWidgets {
             WidgetMenuItem {
-                .name = "Object Count",
-                .widget = WIDGET_OBJECTCOUNT,
-            },
-            WidgetMenuItem {
-                .name = "Object Count",
+                .name = "Object Details",
                 .widget = WIDGET_OBJECT_DETAILS,
             },
         };
-    	leftSidebar(widgets);
 
-        ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + 400, viewport->WorkPos.y));
-        ImGui::SetNextWindowSize(ImVec2(size.x * 0.2 , size.y));
-        rightSidebar(widgets);
 
-    }else if (menuViewState == MENUVIEW_SCENEGRAPH){
-    	auto size = viewport -> WorkSize;
+        float paddedOffset = viewport -> WorkSize.x * 0.005;
 
-    	ImGui::SetNextWindowPos(viewport->WorkPos);
-    	ImGui::SetNextWindowSize(ImVec2(size.x * 0.2 , size.y), ImGuiCond_FirstUseEver);
-    	auto selectedId = renderScenegraph("Scenegraph 1");
-        if (selectedId.has_value()){
-            objectToDetail = selectedId.value();
-        }
+        float leftPaneWidth = viewport -> WorkSize.x * 0.125f;
+    	ImGui::SetNextWindowPos(ImVec2(viewport -> WorkPos.x - paddedOffset, viewport -> WorkPos.y));
+    	ImGui::SetNextWindowSize(ImVec2(leftPaneWidth , viewport -> WorkSize.y), ImGuiCond_FirstUseEver);
+    	sidebar("Scenegraph", leftWidgets);
 
-		const float rightPaneWidth = viewport -> WorkSize.x * 0.25f;
-		ImGui::SetNextWindowPos(ImVec2(viewport -> WorkSize.x - rightPaneWidth,	viewport -> WorkPos.y), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowSize(ImVec2(rightPaneWidth, viewport -> WorkSize.y),ImGuiCond_FirstUseEver);
-
-        renderObjectDetailsWithState(true);
+        static float rightPaneWidth = viewport -> WorkSize.x * 0.125f;
+        ImGui::SetNextWindowPos(ImVec2(viewport -> WorkSize.x - rightPaneWidth + paddedOffset, viewport -> WorkPos.y));
+        ImGui::SetNextWindowSize(ImVec2(rightPaneWidth, viewport -> WorkSize.y), ImGuiCond_FirstUseEver);
+        rightPaneWidth = sidebar("GameObject Details", rightWidgets);
     }
-
+    
     for (auto &widget : widgets){
         renderWidget(widget, true);
     }

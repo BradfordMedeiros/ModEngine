@@ -10,4 +10,4 @@
 
 #pragma once
 
-std::optional<objid> renderScenegraph(const char* name);
+std::optional<objid> renderScenegraph(const char* name, bool includePanel);
