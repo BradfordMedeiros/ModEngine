@@ -154,6 +154,10 @@ void renderBallGameplay(bool includePanel){
 }
 
 void renderObjectDetails(objid id, bool includePanel){
+  if (id == 0){
+    return;
+  }
+
   auto name = mainApi -> getGameObjNameForId(id).value();
 
   if (includePanel){
@@ -173,9 +177,22 @@ void renderObjectDetails(objid id, bool includePanel){
   ImGui::Button("Rename");
   ImGui::Dummy(ImVec2(0, 10));
 
-  static bool showOption = true;
-  ImGui::Checkbox("Enable Physics", &showOption);
-  ImGui::Checkbox("Dynamic", &showOption);
+
+  bool showPhysics = isGameObjectPhysicsEnabled(id);
+  bool newShowPhysics = showPhysics;
+  ImGui::Checkbox("Enable Physics", &newShowPhysics);
+  if (newShowPhysics != showPhysics){
+    setGameObjectPhysicsEnable(id, newShowPhysics);
+  }
+
+  bool showIsDynamic = isGameObjectPhysicsDynamic(id);
+  bool newShowIsDynamic = showIsDynamic;
+  ImGui::Checkbox("Dynamic", &newShowIsDynamic);
+  if (showIsDynamic != newShowIsDynamic){
+    setGameObjectPhysicsDynamic(id, newShowIsDynamic);
+  }
+
+  bool showOption = false;
   ImGui::Checkbox("Collision", &showOption);
 
   ImGui::Text("Physics Shape");
@@ -194,19 +211,117 @@ void renderObjectDetails(objid id, bool includePanel){
   ImGui::SameLine();
   ImGui::Checkbox("Exact", &showOption);
 
-  auto objPosition = mainApi -> getGameObjectPos(id, true, "[ui] obj pos");
-
-  static float position[3] = {objPosition.x, objPosition.y, objPosition.z};
   ImGui::Dummy(ImVec2(0, 10));
 
-  ImGui::Text("Position");
-  ImGui::PushItemWidth(70);
-  ImGui::DragFloat("X", &position[0], 0.1f);
-  ImGui::SameLine();
-  ImGui::DragFloat("Y", &position[1], 0.1f);
-  ImGui::SameLine();
-  ImGui::DragFloat("Z", &position[2], 0.1f);
-  ImGui::PopItemWidth();
+  // Maybe should protect to only set when it changes
+  {
+    auto objPosition = mainApi -> getGameObjectPos(id, true, "[ui] obj pos");
+  
+    static float position[3] = {0};
+    position[0] = objPosition.x;
+    position[1] = objPosition.y;
+    position[2] = objPosition.z;
+
+    ImGui::Text("Position");
+    ImGui::PushItemWidth(70);
+    ImGui::DragFloat("X", &position[0], 0.1f);
+    ImGui::SameLine();
+    ImGui::DragFloat("Y", &position[1], 0.1f);
+    ImGui::SameLine();
+    ImGui::DragFloat("Z", &position[2], 0.1f);
+    ImGui::PopItemWidth();
+
+    mainApi -> setGameObjectPosition(id, glm::vec3(position[0], position[1], position[2]), true, Hint { .hint = "[ui] - obj set pos" });
+  }
+
+  {
+    auto objScale = mainApi -> getGameObjectScale(id, true);
+  
+    static float scale[3] = {0};
+    scale[0] = objScale.x;
+    scale[1] = objScale.y;
+    scale[2] = objScale.z;
+
+    ImGui::Text("Scale");
+    ImGui::PushItemWidth(70);
+    ImGui::DragFloat("#X", &scale[0], 0.1f);
+    ImGui::SameLine();
+    ImGui::DragFloat("#Y", &scale[1], 0.1f);
+    ImGui::SameLine();
+    ImGui::DragFloat("#Z", &scale[2], 0.1f);
+    ImGui::PopItemWidth();
+
+    mainApi -> setGameObjectScale(id, glm::vec3(scale[0], scale[1], scale[2]), true);
+  }
+
+
+  {
+    auto layer = getGameObjectLayer(id);
+
+    std::vector<std::string> items = {
+        "default",
+        "ui",
+        "basicui",
+        "noselect",
+        "nolighting",
+    };
+    int current = -1;
+    for (int i = 0; i < items.size(); i++){
+      if (layer == items.at(i)){
+        current = i;
+      }
+    }
+
+    if (layer == ""){
+      current = 0;
+    }
+    auto labelName = current == -1 ? "<unknown>" : items.at(current);
+
+    int oldLayerIndex = current;
+    if (ImGui::BeginCombo("Layer", labelName.c_str()))
+    {
+        for (int i = 0; i < items.size(); i++){
+            bool selected = (current == i);
+            if (ImGui::Selectable(items.at(i).c_str(), selected)){
+               current = i;
+            }
+            if (selected){
+              ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    if (oldLayerIndex != current){
+      std::cout << "new layer is: " << items.at(current) << std::endl;
+      setGameObjectLayer(id, current == 0 ? "" : items.at(current));
+    }
+  }
+
+
+
+  {
+    std::vector<std::string> items = {
+        "Default",
+        "Grass",
+        "Ball"
+    };
+    static int current = 0;
+    if (ImGui::BeginCombo("Shader", items.at(current).c_str()))
+    {
+        for (int i = 0; i < items.size(); i++){
+            bool selected = (current == i);
+            if (ImGui::Selectable(items.at(i).c_str(), selected)){
+               current = i;
+            }
+            if (selected){
+              ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+  }
+
 
   /*ImGui::Text("Scale");
   ImGui::PushItemWidth(70);

@@ -7,6 +7,7 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include "imgui_internal.h"
 #include "../cscript/cscript_binding.h"
+#include "../object_util.h"
 
 void renderDebug(bool includePanel);
 void renderObjectCount(bool includePanel);

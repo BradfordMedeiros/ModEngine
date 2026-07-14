@@ -117,7 +117,7 @@ void renderNavbar(){
 
             if (ImGui::MenuItem("Exit"))
             {
-                // Quit application
+                exit(0);
             }
 
             ImGui::EndMenu();
@@ -128,7 +128,6 @@ void renderNavbar(){
         {
             if (ImGui::MenuItem("Play", "play the game"))
             {
-                // Undo
             }
 
             ImGui::Separator();

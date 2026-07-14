@@ -739,29 +739,6 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
     }  
   }
 
-  if (false && renderParticles){
-    GLenum bufs[] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, bufs);
-
-    auto viewportDim = calcViewportSize(viewport);
-    auto& layer = world.sandbox.layers.at(0);
-    auto fov = getLayerFov(layer);
-    PROFILE("EFFEK",
-      static bool createdDummy = false;
-      static GLuint dummyVAO = 0;
-      if (!createdDummy){
-        glGenVertexArrays(1, &dummyVAO);
-        glBindVertexArray(dummyVAO);
-        createdDummy = true;
-      }
-      glBindVertexArray(dummyVAO);
-      
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, 0, 0);
-
-      onEffekSeekerRender(static_cast<float>(viewportDim.x), static_cast<float>(viewportDim.y), glm::radians(fov), viewTransform.position, viewTransform.rotation,  layer.nearplane, layer.farplane);
-    )    
-  }
-
   auto maxExpectedClears = numUniqueDepthLayers(world.sandbox.layers);
   //modassert(numDepthClears <= maxExpectedClears, std::string("numDepthClears = ") + std::to_string(numDepthClears) + std::string(", expected = ") + std::to_string(maxExpectedClears));
  
