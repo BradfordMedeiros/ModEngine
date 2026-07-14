@@ -30,4 +30,7 @@ void setGameObjectEmitterEffectTint(objid id, glm::vec4 tint);
 std::string getGameObjectLayer(objid id);
 void setGameObjectLayer(objid id, std::string layer);
 
+std::string getGameObjectShader(objid id);
+void setGameObjectShader(objid id, std::string shader);
+
 #endif

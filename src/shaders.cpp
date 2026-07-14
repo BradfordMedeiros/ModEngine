@@ -239,6 +239,14 @@ std::optional<unsigned int> shaderByName(std::string name){
   return shaderstringToId.at(name).programId; 
 }
 
+std::vector<std::string> getAllShaders(){
+  std::vector<std::string> shaders;
+  for (auto& [shaderString, _ ] : shaderstringToId){
+    shaders.push_back(shaderString);
+  }
+  return shaders;
+}
+
 std::vector<UniformData> queryUniforms(unsigned int program){
   GLint size;
   GLenum type;

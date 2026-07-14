@@ -114,3 +114,13 @@ std::string getGameObjectLayer(objid id){
 void setGameObjectLayer(objid id, std::string layer){
   mainApi -> setSingleGameObjectAttr(id, "layer", layer);
 }
+
+std::string getGameObjectShader(objid id){
+  std::optional<std::string*> value = getTypeFromAttr<std::string>(getObjectAttributePtr(world, id, "layer"));
+  modassert(value.has_value(), "no shader");
+  return *(value.value());
+}
+
+void setGameObjectShader(objid id, std::string shader){
+  mainApi -> setSingleGameObjectAttr(id, "shader", shader);
+}

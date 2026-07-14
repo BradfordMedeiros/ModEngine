@@ -1,6 +1,7 @@
 #include "./widgets.h"
 
 extern CustomApiBindings* mainApi;
+std::vector<std::string> getAllShaders();
 
 void renderDebug(bool includePanel){
 	if (includePanel){
@@ -301,18 +302,24 @@ void renderObjectDetails(objid id, bool includePanel){
 
 
   {
-    std::vector<std::string> items = {
-        "Default",
-        "Grass",
-        "Ball"
-    };
-    static int current = 0;
-    if (ImGui::BeginCombo("Shader", items.at(current).c_str()))
+    std::vector<std::string> items = getAllShaders();
+    auto shader = getGameObjectShader(id);
+    std::cout << "curr shader: " << shader << std::endl;
+    int oldShader = 0;
+    for (int i = 0; i < items.size(); i++){
+      if (items.at(i) == shader || (items.at(i) == "default" && shader == "")){
+        oldShader = i;
+        break;
+      }
+    }
+
+    int newShader = oldShader;
+    if (ImGui::BeginCombo("Shader", items.at(oldShader).c_str()))
     {
         for (int i = 0; i < items.size(); i++){
-            bool selected = (current == i);
+            bool selected = (newShader == i);
             if (ImGui::Selectable(items.at(i).c_str(), selected)){
-               current = i;
+               newShader = i;
             }
             if (selected){
               ImGui::SetItemDefaultFocus();
@@ -320,17 +327,13 @@ void renderObjectDetails(objid id, bool includePanel){
         }
         ImGui::EndCombo();
     }
+    if (oldShader != newShader){
+      auto& newShaderStr = items.at(newShader);
+      std::cout << "setting curr shader: " << newShaderStr << std::endl;
+      setGameObjectShader(id, newShaderStr == "default" ? "" : newShaderStr);
+    }
   }
 
-
-  /*ImGui::Text("Scale");
-  ImGui::PushItemWidth(70);
-  ImGui::DragFloat("X", &position[0], 0.1f);
-  ImGui::SameLine();
-  ImGui::DragFloat("Y", &position[1], 0.1f);
-  ImGui::SameLine();
-  ImGui::DragFloat("Z", &position[2], 0.1f);
-  ImGui::PopItemWidth();*/
 
   auto objectDetailsSize = ImGui::GetWindowSize();
   std::cout << "object details size: " << objectDetailsSize.x << std::endl;
