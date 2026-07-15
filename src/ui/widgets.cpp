@@ -7,12 +7,50 @@ void renderDebug(bool includePanel){
 	if (includePanel){
 	  ImGui::Begin("Debug Panel");
 	}
-  static bool doThing = false;
-  ImGui::Checkbox("Show Debug", &doThing);
-  ImGui::Checkbox("Show Cameras", &doThing);
-  ImGui::Checkbox("Show Lights", &doThing);
-  ImGui::Checkbox("Show Sounds", &doThing);
-  ImGui::Checkbox("Show Emitters", &doThing);
+
+  {
+    auto currValue = isEditorDebug();
+    auto oldValue = currValue;
+    ImGui::Checkbox("Show Debug", &currValue);
+    if(oldValue != currValue){
+      setEditorDebug(currValue);
+    }
+  }
+
+  {
+    auto currValue = isShowCamera();
+    auto oldValue = currValue;
+    ImGui::Checkbox("Show Cameras", &currValue);
+    if(oldValue != currValue){
+      setShowCamera(currValue);
+    }
+  }
+
+  {
+    auto currValue = isShowSound();
+    auto oldValue = currValue;
+    ImGui::Checkbox("Show Sounds", &currValue);
+    if(oldValue != currValue){
+      setShowSound(currValue);
+    }
+  }
+  {
+    auto currValue = isShowEmitters();
+    auto oldValue = currValue;
+    ImGui::Checkbox("Show Emitters", &currValue);
+    if(oldValue != currValue){
+      setShowEmitters(currValue);
+    }
+  }
+
+  {
+    auto currValue = isShowLights();
+    auto oldValue = currValue;
+    ImGui::Checkbox("Show Lights", &currValue);
+    if(oldValue != currValue){
+      setShowLights(currValue);
+    }
+  }
 
   if (includePanel){
 	  ImGui::End();
@@ -91,6 +129,22 @@ void renderActiveScene(bool includePanel){
   }
 }
 
+void renderCreateObj(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Create Object");
+  }
+
+  ImGui::Button("Create Mesh");
+  ImGui::Button("Create Camera");
+  ImGui::Button("Create Light");
+  ImGui::Button("Create Text");
+
+
+  if (includePanel){
+    ImGui::End();
+  }
+}
+
 void renderCameraPanel(bool includePanel){
 	if (includePanel){
 	  ImGui::Begin("Cameras");
@@ -131,6 +185,83 @@ void renderLightPanel(bool includePanel){
   if (includePanel){
 	  ImGui::End();
   }
+}
+
+void renderMeshPanel(bool includePanel, std::optional<objid> objectToDetail){
+  if (includePanel){
+    ImGui::Begin("Mesh");
+  }
+
+  ImGui::Text("Mesh");
+  if (objectToDetail.has_value()){
+    auto id = objectToDetail.value();
+    auto tint = getGameObjectTint(id);
+
+    ImGui::Text(std::to_string(id).c_str());
+
+    float color[4] = {tint.r, tint.g, tint.b, tint.a};
+    if (ImGui::ColorEdit4("Tint", color)){
+      setGameObjectTint(id, glm::vec4(color[0], color[1], color[2], color[3]));
+    }
+  }
+
+  if (includePanel){
+    ImGui::End();
+  }
+}
+
+void renderUnknownObjPanel(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Unsupported Object Type");
+  }
+
+  ImGui::Text("Unsupported Object Type");
+  ImGui::Text("Detail Not yet implemented");
+
+  if (includePanel){
+    ImGui::End();
+  } 
+}
+
+void renderObjPanel(bool includePanel, std::optional<objid> objectToDetail){
+  if (includePanel){
+    ImGui::Begin("Object Type Panel");
+  }
+
+  if (objectToDetail.has_value()){
+    auto id = objectToDetail.value();
+    auto type = getObjectType(id);
+    if (type == OBJ_MESH){
+      renderMeshPanel(includePanel, objectToDetail);
+      // enum ObjectType {, , , , , , ,  };
+    }else if (type == OBJ_CAMERA){
+      renderCameraPanel(includePanel);
+    }else if (type == OBJ_PORTAL){
+      renderUnknownObjPanel(includePanel);
+    }else if (type == OBJ_SOUND){
+      renderUnknownObjPanel(includePanel);
+    }else if (type == OBJ_LIGHT){
+      renderLightPanel(includePanel);
+    }else if (type == OBJ_OCTREE){
+      renderUnknownObjPanel(includePanel);
+    }else if (type == OBJ_EMITTER){
+      renderUnknownObjPanel(includePanel);
+    }else if (type == OBJ_NAVMESH){
+      renderUnknownObjPanel(includePanel);
+    }else if (type == OBJ_TEXT){
+      renderUnknownObjPanel(includePanel);
+    }else if (type == OBJ_PREFAB){
+      renderUnknownObjPanel(includePanel);
+    }else if (type == OBJ_VIDEO){
+      renderUnknownObjPanel(includePanel);
+    }else{
+      renderUnknownObjPanel(includePanel);
+    }
+  }
+
+  if (includePanel){
+    ImGui::End();
+  } 
 }
 
 void renderBallGameplay(bool includePanel){
@@ -194,24 +325,55 @@ void renderObjectDetails(objid id, bool includePanel){
   }
 
   bool showOption = false;
-  ImGui::Checkbox("Collision", &showOption);
+  /*
+  .structOffset = offsetof(GameObject, physicsOptions.hasCollisions),
+    .field = "physics_collision", 
+    .onString = "collide",
+    .offString = "nocollide",
+    .defaultValue = true,*/
 
-  ImGui::Text("Physics Shape");
+  auto showHasCollision = getGameObjectHasCollision(id);
+  bool newShowHasCollision = showHasCollision;
+  ImGui::Checkbox("Collision", &newShowHasCollision);
+  if (showHasCollision != newShowHasCollision){
+    setGameObjectHasCollision(id, newShowHasCollision);
+  }
 
-  ImGui::Checkbox("Box", &showOption);
-  ImGui::SameLine();
-  ImGui::Checkbox("Sphere", &showOption);
-  ImGui::SameLine();
-  ImGui::Checkbox("Capsule", &showOption);
-  
-  ImGui::Checkbox("Cylinder", &showOption);
-  ImGui::SameLine();
-  ImGui::Checkbox("Hull", &showOption);
-  ImGui::SameLine();
-  ImGui::Checkbox("Auto", &showOption);
-  ImGui::SameLine();
-  ImGui::Checkbox("Exact", &showOption);
+  {
+    std::vector<std::string> items = {
+      "shape_box", "shape_sphere", "shape_capsule", "shape_cylinder", "shape_hull", "shape_exact", "shape_auto"
+    };
+    std::string shape = getGameObjectPhysicsShape(id);
+    int current = 0;
+    for (int i = 0; i < items.size(); i++){
+      if (items.at(i) == shape){
+        current = i;
+        break;
+      }
+    }
+    int oldCurrent = current;
 
+    if (ImGui::BeginCombo("Physics Shape", shape.c_str()))
+    {
+        for (int i = 0; i < items.size(); i++){
+          bool selected = (current == i);
+            if (ImGui::Selectable(items.at(i).c_str(), selected)){
+               current = i;
+            }
+            if (selected){
+              ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    if (current != oldCurrent){
+      std::cout << "set physics shape: " << items.at(current) << std::endl;
+      setGameObjectPhysicsShape(id, items.at(current));
+
+    }
+
+  }
   ImGui::Dummy(ImVec2(0, 10));
 
   // Maybe should protect to only set when it changes

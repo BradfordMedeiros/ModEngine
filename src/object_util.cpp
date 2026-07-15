@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* mainApi;
 extern World world;
+extern engineState state;
 
 void setGameObjectTexture(objid id, std::string texture){
   mainApi -> setSingleGameObjectAttr(id, "texture", texture);
@@ -25,9 +26,19 @@ glm::vec3 getGameObjectVelocity(objid id){
 void setGameObjectVelocity(objid id, glm::vec3 velocity){
   mainApi -> setPhysicsVelocity(id, velocity);
 }
+
 void setGameObjectTint(objid id, glm::vec4 tint){
   mainApi -> setSingleGameObjectAttr(id, "tint", tint);
 }
+glm::vec4 getGameObjectTint(objid id){
+  std::optional<glm::vec4*> value = getTypeFromAttr<glm::vec4>(getObjectAttributePtr(world, id, "tint"));
+  if (value.has_value()){
+    return *(value.value());
+  }
+  modassert(false, "getGameObjectTint no tint");
+  return glm::vec4(1.f, 1.f, 1.f, 1.f);
+}
+
 void setGameObjectStateEnabled(objid id, bool enable){
   mainApi -> setSingleGameObjectAttr(id, "state", enable ? std::string("enabled") : std::string("disabled"));
 }
@@ -116,7 +127,7 @@ void setGameObjectLayer(objid id, std::string layer){
 }
 
 std::string getGameObjectShader(objid id){
-  std::optional<std::string*> value = getTypeFromAttr<std::string>(getObjectAttributePtr(world, id, "layer"));
+  std::optional<std::string*> value = getTypeFromAttr<std::string>(getObjectAttributePtr(world, id, "shader"));
   modassert(value.has_value(), "no shader");
   return *(value.value());
 }
@@ -124,3 +135,80 @@ std::string getGameObjectShader(objid id){
 void setGameObjectShader(objid id, std::string shader){
   mainApi -> setSingleGameObjectAttr(id, "shader", shader);
 }
+
+bool getGameObjectHasCollision(objid id){
+  std::optional<bool*> value = getTypeFromAttr<bool>(getObjectAttributePtr(world, id, "physics_collision"));
+  modassert(value.has_value(), "no shader");
+  return *(value.value());
+}
+
+void setGameObjectHasCollision(objid id, bool hasCollision){
+  mainApi -> setSingleGameObjectAttr(id, "physics_collision", hasCollision);
+}
+
+std::string getGameObjectPhysicsShape(objid id){
+  std::optional<std::string*> value = getTypeFromAttr<std::string>(getObjectAttributePtr(world, id, "physics_shape"));
+  modassert(value.has_value(), "no shader");
+  return *(value.value());
+}
+
+void setGameObjectPhysicsShape(objid id, std::string shape){
+  mainApi -> setSingleGameObjectAttr(id, "physics_shape", shape);
+}
+
+ObjectType getObjectType(objid id){
+  auto name = mainApi -> getGameObjNameForId(id).value();
+  auto type = getObjectType(name);  
+  return type;
+}
+
+
+bool isEditorDebug(){
+  return state.showDebug;
+}
+void setEditorDebug(bool show){
+  state.showDebug = show;
+}
+bool isShowCamera(){
+  return (state.showDebugMask & 0b10) != 0;
+}
+void setShowCamera(bool show){
+  if (show){
+    state.showDebugMask = state.showDebugMask | 0b10;
+  }else{
+    state.showDebugMask = state.showDebugMask & ~(0b10);
+  }
+}
+bool isShowLights(){
+  return (state.showDebugMask & 0b1000) != 0;
+}
+void setShowLights(bool show){
+  if (show){
+    state.showDebugMask = state.showDebugMask | 0b1000;
+  }else{
+    state.showDebugMask = state.showDebugMask & ~(0b1000);
+  }
+}
+bool isShowEmitters(){
+  return (state.showDebugMask & 0b100000) != 0;
+}
+void setShowEmitters(bool show){
+  if (show){
+    state.showDebugMask = state.showDebugMask | 0b100000;
+  }else{
+    state.showDebugMask = state.showDebugMask & ~(0b100000);
+  }
+}
+bool isShowSound(){
+  return (state.showDebugMask & 0b100) != 0;
+}
+void setShowSound(bool show){
+  if (show){
+    state.showDebugMask = state.showDebugMask | 0b100;
+  }else{
+    state.showDebugMask = state.showDebugMask & ~(0b100);
+  }
+}
+
+
+

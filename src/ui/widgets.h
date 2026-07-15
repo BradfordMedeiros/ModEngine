@@ -12,9 +12,13 @@
 void renderDebug(bool includePanel);
 void renderObjectCount(bool includePanel);
 void renderActiveScene(bool includePanel);
+void renderCreateObj(bool includePanel);
 
 void renderCameraPanel(bool includePanel);
 void renderLightPanel(bool includePanel);
+void renderMeshPanel(bool includePanel, std::optional<objid> objectToDetail);
+void renderUnknownObjPanel(bool includePanel);
+void renderObjPanel(bool includePanel, std::optional<objid> objectToDetail);
 
 void renderBallGameplay(bool includePanel);
 

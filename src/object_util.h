@@ -3,6 +3,7 @@
 
 #include "./scene/scene.h"
 #include "./cscript/cscript_binding.h"
+#include "./state.h"
 
 void setGameObjectTexture(objid id, std::string texture);
 void setGameObjectTextureOffset(objid id, glm::vec2 offset);
@@ -11,7 +12,10 @@ void setGameObjectFriction(objid id, float friction);
 void setGameObjectGravity(objid id, glm::vec3 gravity);
 glm::vec3 getGameObjectVelocity(objid id);
 void setGameObjectVelocity(objid id, glm::vec3 velocity);
+
 void setGameObjectTint(objid id, glm::vec4 tint);
+glm::vec4 getGameObjectTint(objid id);
+
 void setGameObjectStateEnabled(objid id, bool enable);
 void setGameObjectMeshEnabled(objid id, bool enable);
 
@@ -32,5 +36,25 @@ void setGameObjectLayer(objid id, std::string layer);
 
 std::string getGameObjectShader(objid id);
 void setGameObjectShader(objid id, std::string shader);
+
+bool getGameObjectHasCollision(objid id);
+void setGameObjectHasCollision(objid id, bool hasCollision);
+
+std::string getGameObjectPhysicsShape(objid id);
+void setGameObjectPhysicsShape(objid id, std::string shape);
+
+ObjectType getObjectType(objid id);
+
+
+bool isEditorDebug();
+void setEditorDebug(bool show);
+bool isShowCamera();
+void setShowCamera(bool show);
+bool isShowLights();
+void setShowLights(bool show);
+bool isShowEmitters();
+void setShowEmitters(bool show);
+bool isShowSound();
+void setShowSound(bool show);
 
 #endif

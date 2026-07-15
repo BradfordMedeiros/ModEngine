@@ -65,7 +65,12 @@ ImGui::End();
 
 enum ImMenuView { MENUVIEW_NONE, MENUVIEW_EDITOR };
 
-enum ImMenuWidgets  { WIDGET_OBJECTCOUNT, WIDGET_DEBUG, WIDGET_ACTIVE_SCENE, WIDGET_CAMERA, WIDGET_LIGHT, WIDGET_BALL, WIDGET_OBJECT_DETAILS, WIDGET_SCENEGRAPH };
+enum ImMenuWidgets  { 
+    WIDGET_OBJECTCOUNT, WIDGET_DEBUG, WIDGET_ACTIVE_SCENE, WIDGET_OBJECT_DETAILS, WIDGET_SCENEGRAPH, WIDGET_CREATE_OBJ,
+    WIDGET_CAMERA, WIDGET_LIGHT, WIDGET_MESH, WIDGET_OBJ,
+    WIDGET_BALL, 
+};
+
 ImMenuView menuViewState = MENUVIEW_NONE;
 std::set<ImMenuWidgets> widgets {};
 
@@ -87,6 +92,10 @@ std::vector<WidgetMenuItem> widgetMenuItems {
         .name = "ActiveScene",
         .widget = WIDGET_ACTIVE_SCENE,
     },
+    WidgetMenuItem {
+        .name = "Create Obj",
+        .widget = WIDGET_CREATE_OBJ,
+    },
 
     // Object Specific
     WidgetMenuItem {
@@ -94,8 +103,16 @@ std::vector<WidgetMenuItem> widgetMenuItems {
         .widget = WIDGET_LIGHT,
     },
     WidgetMenuItem {
+        .name = "Object - Mesh",
+        .widget = WIDGET_MESH,
+    },
+    WidgetMenuItem {
         .name = "Object - Camera",
         .widget = WIDGET_CAMERA,
+    },
+    WidgetMenuItem {
+        .name = "Object",
+        .widget = WIDGET_OBJ,
     },
 
     // Game Specific 
@@ -359,11 +376,20 @@ void renderWidget(ImMenuWidgets widget, bool includePanel){
     if (widget == WIDGET_ACTIVE_SCENE){
         renderActiveScene(includePanel);
     }
+    if (widget == WIDGET_CREATE_OBJ){
+        renderCreateObj(includePanel);
+    }
     if (widget == WIDGET_CAMERA){
         renderCameraPanel(includePanel);
     }
     if (widget == WIDGET_LIGHT){
         renderLightPanel(includePanel);
+    }
+    if (widget == WIDGET_MESH){
+        renderMeshPanel(includePanel, objectToDetail);
+    }
+    if (widget == WIDGET_OBJ){
+        renderObjPanel(includePanel, objectToDetail);
     }
     if (widget == WIDGET_BALL){
         renderBallGameplay(includePanel);
@@ -416,6 +442,10 @@ void renderUi(){
             WidgetMenuItem {
                 .name = "Object Details",
                 .widget = WIDGET_OBJECT_DETAILS,
+            },
+           WidgetMenuItem {
+                .name = "Object Type",
+                .widget = WIDGET_OBJ,
             },
         };
 
