@@ -369,7 +369,7 @@ std::vector<std::pair<std::string, std::string>> uniqueAdditionalFields(GameObje
     if (field == "meshes"){
       continue;
     }
-    modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
+    //modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
     fields.push_back({ field, serializeAttributeValue(value) });
   }
   return fields;

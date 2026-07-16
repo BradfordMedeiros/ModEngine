@@ -147,16 +147,19 @@ void renderNavbar(){
         // Edit menu
         if (ImGui::BeginMenu("Mode"))
         {
-            if (ImGui::MenuItem("Play", "play the game"))
+            if (ImGui::BeginMenu("Start", "start mode"))
             {
+                if(ImGui::MenuItem("Ball")){
+                }
+                if(ImGui::MenuItem("Fps")){
+                }
+    
+                ImGui::EndMenu();
             }
 
             ImGui::Separator();
 
-            if (ImGui::MenuItem("Free", "move camera freely"))
-            {
-            }
-            if (ImGui::MenuItem("Edit", "editor mode"))
+            if (ImGui::MenuItem("Stop", "stop mode"))
             {
             }
 
@@ -367,6 +370,12 @@ void renderScenegraphWithState(bool includePanel){
 }
 
 void renderWidget(ImMenuWidgets widget, bool includePanel){
+    static std::optional<objid> sceneId;
+    auto sceneIdValue = activeSceneId();
+    if (sceneIdValue.has_value()){
+        sceneId = sceneIdValue;
+    }
+
     if (widget == WIDGET_OBJECTCOUNT){
         renderObjectCount(includePanel);
     }
@@ -374,10 +383,10 @@ void renderWidget(ImMenuWidgets widget, bool includePanel){
         renderDebug(includePanel);
     }
     if (widget == WIDGET_ACTIVE_SCENE){
-        renderActiveScene(includePanel);
+        renderActiveScene(includePanel, sceneId);
     }
     if (widget == WIDGET_CREATE_OBJ){
-        renderCreateObj(includePanel);
+        renderCreateObj(includePanel, sceneId);
     }
     if (widget == WIDGET_CAMERA){
         renderCameraPanel(includePanel);
@@ -423,6 +432,11 @@ void renderUi(){
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+
+
+    if (objectToDetail.has_value() && !mainApi -> gameobjExists(objectToDetail.value())){
+        objectToDetail = std::nullopt;
+    }
 
     renderNavbar();
 

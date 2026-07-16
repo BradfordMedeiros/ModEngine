@@ -57,4 +57,8 @@ void setShowEmitters(bool show);
 bool isShowSound();
 void setShowSound(bool show);
 
+std::optional<objid> activeSceneId();
+bool isMuted();
+void setIsMuted(bool isMuted);
+
 #endif

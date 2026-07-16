@@ -211,4 +211,19 @@ void setShowSound(bool show){
 }
 
 
+std::optional<objid> activeSceneId(){
+  auto selected = mainApi -> selected();
+  if (selected.size() == 0){
+    return std::nullopt;
+  }
+  auto selectedId = selected.at(0);
+  auto sceneId = mainApi -> listSceneId(selectedId);
+  return sceneId;
+}
 
+bool isMuted(){
+  return state.muteSound;
+}
+void setIsMuted(bool isMuted){
+  state.muteSound = isMuted;
+}

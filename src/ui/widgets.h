@@ -11,8 +11,8 @@
 
 void renderDebug(bool includePanel);
 void renderObjectCount(bool includePanel);
-void renderActiveScene(bool includePanel);
-void renderCreateObj(bool includePanel);
+void renderActiveScene(bool includePanel, std::optional<objid> activeScene);
+void renderCreateObj(bool includePanel, std::optional<objid> activeScene);
 
 void renderCameraPanel(bool includePanel);
 void renderLightPanel(bool includePanel);

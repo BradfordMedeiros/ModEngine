@@ -584,9 +584,14 @@ void resetReservedId(){
 }
 
 
-std::string getUniqueObjectName(std::string&& prefix){
+std::string getUniqueObjectName(std::string prefix){
   return prefix + std::to_string(getUniqueObjId()) + ")";
 }
+
+std::string uniqueNameSuffix(){
+  return std::to_string(getUniqueObjId());
+}
+
 
 AttributeValue parseAttributeValue(std::string payload){
   glm::vec3 vec(0.f, 0.f, 0.f);

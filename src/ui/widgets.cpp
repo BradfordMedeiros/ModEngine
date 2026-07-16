@@ -52,6 +52,17 @@ void renderDebug(bool includePanel){
     }
   }
 
+  ImGui::Dummy(ImVec2(0, 10));
+
+  {
+    auto currValue = isMuted();
+    auto oldValue = currValue;
+    ImGui::Checkbox("Mute", &currValue);
+    if(oldValue != currValue){
+      setIsMuted(currValue);
+    }
+  }
+
   if (includePanel){
 	  ImGui::End();
   }
@@ -115,29 +126,85 @@ void renderObjectCount(bool includePanel){
 	}
 }
 
-void renderActiveScene(bool includePanel){
+void renderActiveScene(bool includePanel, std::optional<objid> activeScene){
 	if (includePanel){
 	  ImGui::Begin("Active Scene");
 	}
 
-  ImGui::Text("Active Id = [19323939]");
-  ImGui::Button("Save Scene");
-  ImGui::Button("Reset Scene");
+  if (activeScene.has_value()){
+    ImGui::Text((std::string("Active Id = ") + std::to_string(activeScene.value())).c_str());
+    if(ImGui::Button("Save Scene")){
+      mainApi -> saveScene(false /*include ids */, activeScene.value(), std::nullopt /* filename */);
+    }
+    if(ImGui::Button("Reset Scene")){
+      mainApi -> resetScene(activeScene.value());
+    }
+  }
 
   if (includePanel){
 	  ImGui::End();
   }
 }
 
-void renderCreateObj(bool includePanel){
+void renderCreateObj(bool includePanel, std::optional<objid> sceneId){
   if (includePanel){
     ImGui::Begin("Create Object");
   }
 
-  ImGui::Button("Create Mesh");
-  ImGui::Button("Create Camera");
-  ImGui::Button("Create Light");
-  ImGui::Button("Create Text");
+  if (sceneId.has_value()){
+    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+    GameobjAttributes attr { .attr = {} };
+
+    if(ImGui::Button("Create Mesh")){
+      mainApi -> makeObjectAttr(
+        sceneId.value(), 
+        std::string("mesh-") + uniqueNameSuffix(), 
+        attr, 
+        submodelAttributes
+      );
+    }
+    if(ImGui::Button("Create Camera")){
+      mainApi -> makeObjectAttr(
+        sceneId.value(), 
+        std::string(">camera-") + uniqueNameSuffix(), 
+        attr, 
+        submodelAttributes
+      );
+    }
+    if(ImGui::Button("Create Light")){
+      mainApi -> makeObjectAttr(
+        sceneId.value(), 
+        std::string("!light-") + uniqueNameSuffix(), 
+        attr, 
+        submodelAttributes
+      );
+    }
+    if(ImGui::Button("Create Text")){
+      mainApi -> makeObjectAttr(
+        sceneId.value(), 
+        std::string(")text-") + uniqueNameSuffix(), 
+        attr, 
+        submodelAttributes
+      );
+    }
+  }
+
+
+/*
+getUniqueObjectName
+  .createCamera = []() -> void {
+    makeObject(uiManagerContext.uiContext -> activeSceneId().value(), std::string(">camera-") + uniqueNameSuffix(), attr, submodelAttributes);
+  },
+  .createLight = []() -> void {
+    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+    GameobjAttributes attr { .attr = {} };
+    makeObject(uiManagerContext.uiContext -> activeSceneId().value(), std::string("!light-") + uniqueNameSuffix(), attr, submodelAttributes);
+  },
+  .createNavmesh = []() -> void {
+    std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+    GameobjAttributes attr { .attr = {} };
+    makeObject(uiManagerContext.uiContext -> activeSceneId().value(), std::string(";navmesh-") + uniqueNameSuffix(), attr, submodelAttributes);
+  },*/
 
 
   if (includePanel){
@@ -149,8 +216,6 @@ void renderCameraPanel(bool includePanel){
 	if (includePanel){
 	  ImGui::Begin("Cameras");
 	}
-
-  ImGui::Button("Create Camera");
 
   static bool doThing = false;
   ImGui::Checkbox("Depth of Field", &doThing);
@@ -170,8 +235,6 @@ void renderLightPanel(bool includePanel){
 	if (includePanel){
 	  ImGui::Begin("Light");
 	}
-
-  ImGui::Button("Create Light");
 
   static bool showOption = false;
   ImGui::Text("Type");
