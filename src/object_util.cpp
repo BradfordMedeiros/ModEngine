@@ -227,3 +227,97 @@ bool isMuted(){
 void setIsMuted(bool isMuted){
   state.muteSound = isMuted;
 }
+
+bool isDiffuseEnabled(){
+  return state.enableDiffuse;
+}
+void setDiffuseEnabled(bool enabled){
+  state.enableDiffuse = enabled;
+}
+bool isSpecularEnabled(){
+  return state.enableSpecular;
+}
+void setSpecularEnabled(bool enabled){
+  state.enableSpecular = enabled;
+}
+bool isBloomEnabled(){
+  return state.enableBloom;
+}
+void setBloomEnabled(bool enabled){
+  state.enableBloom = enabled;
+}
+bool isAttenuationEnabled(){
+  return state.enableAttenuation;
+}
+void setAttenuationEnabled(bool enabled){
+  state.enableAttenuation = enabled;
+}
+bool isShadowsEnabled(){
+  return state.enableShadows;
+}
+void setShadowsEnabled(bool enabled){
+  state.enableShadows = enabled;
+}
+bool isExposureEnabled(){
+  return state.enableExposure;
+}
+void setExposureEnabled(bool enabled){
+  state.enableExposure = enabled;
+}
+bool isGammaEnabled(){
+  return state.enableGammaCorrection;
+}
+void setGammaEnabled(bool enabled){
+  state.enableGammaCorrection = enabled;
+}
+bool isSkyboxEnabled(){
+  return state.showSkybox;
+}
+void setSkyboxEnabled(bool enabled){
+  state.showSkybox = enabled;
+}
+glm::vec3 skyboxColor(){
+  return state.skyboxcolor;
+}
+void setSkyboxColor(glm::vec3 color){
+  state.skyboxcolor = color;
+}
+bool isCullEnabled(){
+  return state.cullEnabled;
+}
+void setCulling(bool cullEnabled);
+void setCullEnabled(bool enabled){
+  state.cullEnabled = enabled;
+  setCulling(state.cullEnabled);
+}
+bool isFogEnabled(){
+  return state.enableFog;
+}
+void setFogEnabled(bool enabled){
+  state.enableFog = enabled;
+}
+float fogMinCutoff(){
+  return state.fogMinCutoff;
+}
+void setFogMinCutoff(float value){
+  state.fogMinCutoff = value;
+}
+float fogMaxCutoff(){
+  return state.fogMaxCutoff;
+}
+void setFogMaxCutoff(float value){
+  state.fogMaxCutoff = value;
+}
+glm::vec4 fogColor(){
+  return state.fogColor;
+}
+void setFogColor(glm::vec4 value){
+  state.fogColor = value;
+}
+
+glm::vec3 ambientLight(){
+  return state.ambient;
+}
+void setAmbientLightColor(glm::vec3 amount){
+  state.ambient = amount;
+}

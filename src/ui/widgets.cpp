@@ -567,3 +567,135 @@ void renderObjectDetails(objid id, bool includePanel){
       ImGui::End();
   }
 }
+
+void renderRenderPanel(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Render Settings");
+  }
+
+  {
+    auto currValue = isDiffuseEnabled();
+    auto oldValue = currValue;
+    ImGui::Checkbox("Diffuse", &currValue);
+    if(oldValue != currValue){
+      setDiffuseEnabled(currValue);
+    }
+  }
+  {
+    auto currValue = isSpecularEnabled();
+    auto oldValue = currValue;
+    ImGui::Checkbox("specular", &currValue);
+    if(oldValue != currValue){
+      setSpecularEnabled(currValue);
+    }
+  }
+  {
+    auto currValue = isBloomEnabled();
+    auto oldValue = currValue;
+    ImGui::Checkbox("bloom", &currValue);
+    if(oldValue != currValue){
+      setBloomEnabled(currValue);
+    }
+  }
+  {
+    auto currValue = isAttenuationEnabled();
+    auto oldValue = currValue;
+    ImGui::Checkbox("attenuation", &currValue);
+    if(oldValue != currValue){
+      setAttenuationEnabled(currValue);
+    }
+  }
+  {
+    auto currValue = isShadowsEnabled();
+    auto oldValue = currValue;
+    ImGui::Checkbox("shadows", &currValue);
+    if(oldValue != currValue){
+      setShadowsEnabled(currValue);
+    }
+  }
+  {
+    auto currValue = isExposureEnabled();
+    auto oldValue = currValue;
+    ImGui::Checkbox("exposure", &currValue);
+    if(oldValue != currValue){
+      setExposureEnabled(currValue);
+    }
+  }
+  {
+    auto currValue = isGammaEnabled();
+    auto oldValue = currValue;
+    ImGui::Checkbox("gamma", &currValue);
+    if(oldValue != currValue){
+      setGammaEnabled(currValue);
+    }
+  }
+  {
+    auto currValue = isSkyboxEnabled();
+    auto oldValue = currValue;
+    ImGui::Checkbox("skybox", &currValue);
+    if(oldValue != currValue){
+      setSkyboxEnabled(currValue);
+    }
+  }
+  {
+
+    auto tint = skyboxColor();
+    float color[3] = {tint.r, tint.g, tint.b};
+    if (ImGui::ColorEdit3("Skybox Color", color)){
+      setSkyboxColor(glm::vec3(color[0], color[1], color[2]));
+    }
+  }
+
+
+
+  {
+    auto currValue = isCullEnabled();
+    auto oldValue = currValue;
+    ImGui::Checkbox("cull", &currValue);
+    if(oldValue != currValue){
+      setCullEnabled(currValue);
+    }
+  }
+  {
+    auto currValue = isFogEnabled();
+    auto oldValue = currValue;
+    ImGui::Checkbox("fog", &currValue);
+    if(oldValue != currValue){
+      setFogEnabled(currValue);
+    }
+
+    { 
+      auto minFog = fogMinCutoff();
+      auto maxFog = fogMaxCutoff();
+      if(ImGui::SliderFloat("Min Fog", &minFog, 0.0f, 10.0f)){
+        setFogMinCutoff(minFog);
+      }
+      if(ImGui::SliderFloat("Max Fog", &maxFog, 0.0f, 10.0f)){
+        setFogMaxCutoff(maxFog);
+      }
+    }
+
+    {
+      auto tint = fogColor();
+      float color[4] = {tint.r, tint.g, tint.b, tint.w};
+      if (ImGui::ColorEdit4("fog color", color)){
+        setFogColor(glm::vec4(color[0], color[1], color[2], color[3]));
+      }
+    }
+
+  }
+
+  {
+
+    auto tint = ambientLight();
+    float color[3] = {tint.r, tint.g, tint.b};
+    if (ImGui::ColorEdit3("Ambient", color)){
+      setAmbientLightColor(glm::vec3(color[0], color[1], color[2]));
+    }
+  }
+
+
+  if (includePanel){
+    ImGui::End();
+  }
+}

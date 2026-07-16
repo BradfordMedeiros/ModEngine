@@ -60,5 +60,36 @@ void setShowSound(bool show);
 std::optional<objid> activeSceneId();
 bool isMuted();
 void setIsMuted(bool isMuted);
+bool isDiffuseEnabled();
+void setDiffuseEnabled(bool enabled);
+bool isSpecularEnabled();
+void setSpecularEnabled(bool enabled);
+bool isBloomEnabled();
+void setBloomEnabled(bool enabled);
+bool isAttenuationEnabled();
+void setAttenuationEnabled(bool enabled);
+bool isShadowsEnabled();
+void setShadowsEnabled(bool enabled);
+bool isExposureEnabled();
+void setExposureEnabled(bool enabled);
+bool isGammaEnabled();
+void setGammaEnabled(bool enabled);
+bool isSkyboxEnabled();
+void setSkyboxEnabled(bool enabled);
+glm::vec3 skyboxColor();
+void setSkyboxColor(glm::vec3 color);
+bool isCullEnabled();
+void setCullEnabled(bool enabled);
+bool isFogEnabled();
+void setFogEnabled(bool enabled);
+float fogMinCutoff();
+void setFogMinCutoff(float value);
+float fogMaxCutoff();
+void setFogMaxCutoff(float value);
+glm::vec4 fogColor();
+void setFogColor(glm::vec4 value);
+
+glm::vec3 ambientLight();
+void setAmbientLightColor(glm::vec3 amount);
 
 #endif
