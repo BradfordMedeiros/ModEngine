@@ -24,5 +24,6 @@ void renderBallGameplay(bool includePanel);
 
 void renderObjectDetails(objid id, bool includePanel);
 void renderRenderPanel(bool includePanel);
+void renderTransformPanel(bool includePanel);
 
 #endif

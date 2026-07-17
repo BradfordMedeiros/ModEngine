@@ -88,8 +88,15 @@ float fogMaxCutoff();
 void setFogMaxCutoff(float value);
 glm::vec4 fogColor();
 void setFogColor(glm::vec4 value);
-
 glm::vec3 ambientLight();
 void setAmbientLightColor(glm::vec3 amount);
+void setManipulatorMode(ManipulatorMode mode);
+ManipulatorMode getManipulatorMode();
+bool isTranslateMirror();
+void setTranslateMirror(bool isEnabled);
+bool isUniformScale();
+void setUniformScale(bool isEnabled);
+Axis getManipulatorAxis();
+void setManipulatorAxis(Axis axis);
 
 #endif

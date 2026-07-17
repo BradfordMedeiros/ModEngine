@@ -321,3 +321,29 @@ glm::vec3 ambientLight(){
 void setAmbientLightColor(glm::vec3 amount){
   state.ambient = amount;
 }
+
+void setManipulatorMode(ManipulatorMode mode){
+  state.manipulatorMode = mode;
+}
+ManipulatorMode getManipulatorMode(){
+  return state.manipulatorMode;
+}
+bool isTranslateMirror(){
+  return state.translateMirror;
+}
+void setTranslateMirror(bool isEnabled){
+  state.translateMirror = isEnabled;
+}
+bool isUniformScale(){
+  return state.preserveRelativeScale;
+}
+void setUniformScale(bool isEnabled){
+  state.preserveRelativeScale = isEnabled;
+}
+
+Axis getManipulatorAxis(){
+  return state.manipulatorAxis;
+}
+void setManipulatorAxis(Axis axis){
+  state.manipulatorAxis = axis;
+}

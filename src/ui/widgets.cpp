@@ -2,6 +2,7 @@
 
 extern CustomApiBindings* mainApi;
 std::vector<std::string> getAllShaders();
+void sendManipulatorEvent(MANIPULATOR_EVENT event);
 
 void renderDebug(bool includePanel){
 	if (includePanel){
@@ -698,4 +699,100 @@ void renderRenderPanel(bool includePanel){
   if (includePanel){
     ImGui::End();
   }
+}
+
+void renderTransformPanel(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Transform Panel");
+  }
+ 
+  //enum ManipulatorMode { NONE, ROTATE, TRANSLATE, SCALE };
+  auto mode = getManipulatorMode();
+
+  bool isTranslateMode = mode == TRANSLATE;
+  bool wasTranslateMode = isTranslateMode;
+  ImGui::Checkbox("Translate", &isTranslateMode);
+  ImGui::SameLine();
+
+  bool isMirror = isTranslateMirror();
+  ImGui::Checkbox("Mirror", &isMirror);
+  setTranslateMirror(isMirror);
+
+  bool isScaleMode = mode == SCALE;
+  bool wasScaleMode = isScaleMode;
+  ImGui::Checkbox("Scale", &isScaleMode);
+  ImGui::SameLine();
+
+  auto uniformScale = isUniformScale();
+  ImGui::Checkbox("Uniform", &uniformScale);
+  setUniformScale(uniformScale);
+
+  bool isRotateMode = mode == ROTATE;
+  bool wasRotateMode = isRotateMode;
+  ImGui::Checkbox("Rotate", &isRotateMode);
+
+  if (!wasTranslateMode && isTranslateMode){
+    setManipulatorMode(TRANSLATE);
+  }else if (!wasScaleMode && isScaleMode){
+    setManipulatorMode(SCALE);
+  }else if (!wasRotateMode && isRotateMode){
+    setManipulatorMode(ROTATE);
+  }
+
+  auto axis = getManipulatorAxis();
+  std::string axisString = "none";
+  if (axis == XAXIS){
+    axisString = "X";
+  }else if (axis == YAXIS){
+    axisString = "Y";
+  }else if (axis == ZAXIS){
+    axisString = "Z";
+  }
+  if (ImGui::BeginCombo("Axis", axisString.c_str())){
+    auto isXAxis = axis == XAXIS;
+    auto isYAxis = axis == YAXIS;
+    auto isZAxis = axis == ZAXIS;
+    if (ImGui::Selectable("X", isXAxis)){
+      setManipulatorAxis(XAXIS);
+    }
+    if (ImGui::Selectable("Y", isYAxis)){
+      setManipulatorAxis(YAXIS);
+    }
+    if (ImGui::Selectable("Z", isZAxis)){
+      setManipulatorAxis(ZAXIS);
+    }
+    ImGui::EndCombo();
+  }
+
+
+  if(ImGui::Button("-X")){
+    sendManipulatorEvent(OBJECT_ORIENT_LEFT);
+  }
+  ImGui::SameLine();
+  if(ImGui::Button("+X")){
+    sendManipulatorEvent(OBJECT_ORIENT_RIGHT);
+  }
+  ImGui::SameLine();
+  if(ImGui::Button("-Y")){
+    sendManipulatorEvent(OBJECT_ORIENT_DOWN);
+  }
+  ImGui::SameLine();
+  if(ImGui::Button("+Y")){
+    sendManipulatorEvent(OBJECT_ORIENT_UP);
+  }
+  ImGui::SameLine();
+  if(ImGui::Button("-Z")){
+    sendManipulatorEvent(OBJECT_ORIENT_FORWARD);
+  }
+  ImGui::SameLine();
+  if(ImGui::Button("+Z")){
+    sendManipulatorEvent(OBJECT_ORIENT_BACK);
+  }
+
+  ImGui::Dummy(ImVec2(0, 10));
+  ImGui::Checkbox("Show Grid", &isTranslateMode);
+
+  if (includePanel){
+    ImGui::End();
+  } 
 }

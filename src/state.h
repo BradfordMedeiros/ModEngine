@@ -126,7 +126,6 @@ struct engineState {
 
   int fontsize;
 
-  bool showGrid;
   int gridSize;
   EasyUseInfo easyUse;
 
