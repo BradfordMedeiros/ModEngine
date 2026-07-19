@@ -26,4 +26,6 @@ void renderObjectDetails(objid id, bool includePanel);
 void renderRenderPanel(bool includePanel);
 void renderTransformPanel(bool includePanel);
 
+void renderTextures(bool includePanel, std::optional<objid> objectToDetail);
+
 #endif

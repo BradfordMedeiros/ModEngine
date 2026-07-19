@@ -67,7 +67,7 @@ enum ImMenuView { MENUVIEW_NONE, MENUVIEW_EDITOR };
 
 enum ImMenuWidgets  { 
     WIDGET_OBJECTCOUNT, WIDGET_DEBUG, WIDGET_ACTIVE_SCENE, WIDGET_OBJECT_DETAILS, WIDGET_CREATE_OBJ,
-    WIDGET_RENDER, WIDGET_SCENEGRAPH, WIDGET_TRANSFORM,
+    WIDGET_RENDER, WIDGET_SCENEGRAPH, WIDGET_TRANSFORM, WIDGET_TEXTURES,
     WIDGET_CAMERA, WIDGET_LIGHT, WIDGET_MESH, WIDGET_OBJ,
     WIDGET_BALL, 
 };
@@ -133,6 +133,10 @@ std::vector<WidgetMenuItem> widgetMenuItems {
     WidgetMenuItem {
         .name = "Transform",
         .widget = WIDGET_TRANSFORM,
+    },
+    WidgetMenuItem {
+        .name = "Textures",
+        .widget = WIDGET_TEXTURES,
     },
 
 };
@@ -422,6 +426,9 @@ void renderWidget(ImMenuWidgets widget, bool includePanel){
     }
     if (widget == WIDGET_TRANSFORM){
         renderTransformPanel(includePanel);
+    }
+    if (widget == WIDGET_TEXTURES){
+        renderTextures(includePanel, objectToDetail);
     }
 }
 

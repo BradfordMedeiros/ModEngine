@@ -10,9 +10,36 @@ void setGameObjectTexture(objid id, std::string texture){
 void setGameObjectTextureOffset(objid id, glm::vec2 offset){
   mainApi -> setSingleGameObjectAttr(id, "textureoffset", offset);
 }
+glm::vec2 getGameObjectTextureOffset(objid id){
+  std::optional<glm::vec2*> value = getTypeFromAttr<glm::vec2>(getObjectAttributePtr(world, id, "textureoffset"));
+  if (value.has_value()){
+    return *(value.value());
+  }
+  return glm::vec2(0.f, 0.f);
+}
 void setGameObjectTextureSize(objid id, glm::vec2 offset){
   mainApi -> setSingleGameObjectAttr(id, "texturesize", offset);
 }
+glm::vec2 getGameObjectTextureSize(objid id){
+  std::optional<glm::vec2*> value = getTypeFromAttr<glm::vec2>(getObjectAttributePtr(world, id, "texturesize"));
+  if (value.has_value()){
+    return *(value.value());
+  }
+  return glm::vec2(0.f, 0.f);
+}
+
+glm::vec2 getGameObjectTextureTiling(objid id){
+  std::optional<glm::vec2*> value = getTypeFromAttr<glm::vec2>(getObjectAttributePtr(world, id, "texturetiling"));
+  if (value.has_value()){
+    return *(value.value());
+  }
+  return glm::vec2(0.f, 0.f);
+}
+void setGameObjectTextureTiling(objid id, glm::vec2 tiling){
+  mainApi -> setSingleGameObjectAttr(id, "texturetiling", tiling);
+}
+
+
 void setGameObjectFriction(objid id, float friction){
   mainApi -> setSingleGameObjectAttr(id, "physics_friction", friction);
 }
@@ -347,3 +374,37 @@ Axis getManipulatorAxis(){
 void setManipulatorAxis(Axis axis){
   state.manipulatorAxis = axis;
 }
+
+bool isGroupSelection(){
+  return state.groupSelection;
+}
+void setGroupSelection(bool groupSelection){
+  state.groupSelection = groupSelection;
+}
+
+SNAPPING_MODE getModeRotate(){
+  return state.rotateMode;
+}
+void setModeRotate(SNAPPING_MODE mode){
+  state.rotateMode = mode;
+}
+SNAPPING_MODE getModeTranslate(){
+  return state.manipulatorPositionMode;
+}
+void setModeTranslate(SNAPPING_MODE mode){
+  state.manipulatorPositionMode = mode;
+}
+
+std::vector<TextureInfo> getTextures(){
+  std::vector<TextureInfo> textures;
+
+  // This is based off loaded textures which is wrong
+  for (auto& [textureName, texture] : world.textures){
+    textures.push_back(TextureInfo {
+      .name = textureName.c_str(),
+      .textureId = texture.texture.textureId,
+    });
+  }
+  return textures;
+}
+

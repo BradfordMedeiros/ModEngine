@@ -6,8 +6,17 @@
 #include "./state.h"
 
 void setGameObjectTexture(objid id, std::string texture);
+
+glm::vec2 getGameObjectTextureOffset(objid id);
 void setGameObjectTextureOffset(objid id, glm::vec2 offset);
+
+glm::vec2 getGameObjectTextureSize(objid id);
 void setGameObjectTextureSize(objid id, glm::vec2 offset);
+
+glm::vec2 getGameObjectTextureTiling(objid id);
+void setGameObjectTextureTiling(objid id, glm::vec2);
+
+
 void setGameObjectFriction(objid id, float friction);
 void setGameObjectGravity(objid id, glm::vec3 gravity);
 glm::vec3 getGameObjectVelocity(objid id);
@@ -98,5 +107,18 @@ bool isUniformScale();
 void setUniformScale(bool isEnabled);
 Axis getManipulatorAxis();
 void setManipulatorAxis(Axis axis);
+bool isGroupSelection();
+void setGroupSelection(bool groupSelection);
+
+SNAPPING_MODE getModeRotate();
+void setModeRotate(SNAPPING_MODE mode);
+SNAPPING_MODE getModeTranslate();
+void setModeTranslate(SNAPPING_MODE mode);
+
+struct TextureInfo {
+	const char* name;
+	unsigned int textureId;
+};
+std::vector<TextureInfo> getTextures();
 
 #endif

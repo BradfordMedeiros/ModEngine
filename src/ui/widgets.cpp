@@ -792,6 +792,134 @@ void renderTransformPanel(bool includePanel){
   ImGui::Dummy(ImVec2(0, 10));
   ImGui::Checkbox("Show Grid", &isTranslateMode);
 
+  auto isGroup = isGroupSelection();
+  ImGui::Checkbox("Group Selection", &isGroup);
+  setGroupSelection(isGroup);
+
+  ImGui::Dummy(ImVec2(0, 10));
+
+  {
+    auto isContinuousTranslate = getModeTranslate() == SNAP_CONTINUOUS;
+    auto oldIsContinuousTranslate = isContinuousTranslate;
+    auto isAbsoluteTranslate = getModeTranslate() == SNAP_ABSOLUTE;
+    auto oldIsAbsoluteTranslate = isAbsoluteTranslate;
+    auto isRelativeTranslate = getModeTranslate() == SNAP_RELATIVE;
+    auto oldIsRelativeTranslate = isRelativeTranslate;
+
+    ImGui::Checkbox("Continuous Translate", &isContinuousTranslate);
+    ImGui::Checkbox("Absolute Translate", &isAbsoluteTranslate);
+    ImGui::Checkbox("Relative Translate", &isRelativeTranslate);
+      
+    if (isContinuousTranslate && (isContinuousTranslate != oldIsContinuousTranslate)){
+      setModeTranslate(SNAP_CONTINUOUS);
+    }else if (isAbsoluteTranslate && (isAbsoluteTranslate != oldIsAbsoluteTranslate)){
+      setModeTranslate(SNAP_ABSOLUTE);
+    }else if (isRelativeTranslate && (isRelativeTranslate != oldIsRelativeTranslate)){
+      setModeTranslate(SNAP_RELATIVE);
+    }else if (!isContinuousTranslate && !isAbsoluteTranslate && !isRelativeTranslate){
+      setModeTranslate(SNAP_CONTINUOUS);
+    }
+  }
+
+
+  ImGui::Dummy(ImVec2(0, 10));
+
+  auto isAbsoluteRotate = getModeRotate() == SNAP_ABSOLUTE;
+  auto oldIsAbsoluteRotate = isAbsoluteRotate;
+  ImGui::Checkbox("Absolute Rotation", &isAbsoluteRotate);
+  if (isAbsoluteRotate != oldIsAbsoluteRotate){
+    if (isAbsoluteRotate){
+      setModeRotate(SNAP_ABSOLUTE);
+    }else{
+      setModeRotate(SNAP_CONTINUOUS);
+    }
+  }
+
+/*
+  put angles here
+          .options = { "0.01", "0.1", "0.5", "1", "5" },
+        .onClick = optionsOnClick("editor", "snaptranslate", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
+        .getSelectedIndex = optionsSelectedIndex("editor", "snaptranslate", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
+      },
+      DockOptionConfig {  // "Snap Scales",
+        .options = { "0.01", "0.1", "0.5", "1", "5" },
+        .onClick = optionsOnClick("editor", "snapscale", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
+        .getSelectedIndex = optionsSelectedIndex("editor", "snapscale", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f }),
+      DockOptionConfig { // Snap Rotation
+        .options = { "1", "5", "15", "30", "45", "90", "180" },
+        .onClick = optionsOnClick("editor", "snapangle", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }),
+        .getSelectedIndex = optionsSelectedIndex("editor", "snapangle", { 0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }),
+      },*/
+
+
+  if (includePanel){
+    ImGui::End();
+  } 
+}
+
+void renderTextures(bool includePanel, std::optional<objid> objectToDetail){
+  if (includePanel){
+    ImGui::Begin("Textures Panel");
+  }
+
+  if (objectToDetail.has_value()){
+    auto id = objectToDetail.value();
+    auto objType = getObjectType(id);
+    if (objType == OBJ_MESH){
+      static float position[3] = {0};
+      //position[0] = objPosition.x;
+      //position[1] = objPosition.y;
+      //position[2] = objPosition.z ;
+
+      auto textureSize = getGameObjectTextureSize(id);
+      auto textureTiling = getGameObjectTextureTiling(id);
+      auto textureOffset = getGameObjectTextureOffset(id);
+
+      ImGui::Text("Size");
+      ImGui::PushItemWidth(70);
+      ImGui::DragFloat("##X-size", &textureSize.x, 0.1f);
+      ImGui::SameLine();
+      ImGui::DragFloat("##Y-size", &textureSize.y, 0.1f);
+      ImGui::PopItemWidth();
+
+      ImGui::Text("Tiling");
+      ImGui::PushItemWidth(70);
+      ImGui::DragFloat("##X-tiling", &textureTiling.x, 0.1f);
+      ImGui::SameLine();
+      ImGui::DragFloat("##Y-tiling", &textureTiling.y, 0.1f);
+      ImGui::PopItemWidth();
+
+      ImGui::Text("Offset");
+      ImGui::PushItemWidth(70);
+      ImGui::DragFloat("##X-offset", &textureOffset.x, 0.1f);
+      ImGui::SameLine();
+      ImGui::DragFloat("##Y-offset", &textureOffset.y, 0.1f);
+      ImGui::PopItemWidth();
+
+      setGameObjectTextureSize(id, textureSize);
+      setGameObjectTextureOffset(id, textureOffset);
+      setGameObjectTextureTiling(id, textureTiling);
+
+      auto textures = getTextures();
+
+      float thumbnailSize = 64.0f;
+      float spacing = ImGui::GetStyle().ItemSpacing.x;
+      float panelWidth = ImGui::GetContentRegionAvail().x;
+      int columns = (panelWidth + spacing) / (thumbnailSize + spacing);
+      columns = std::max(columns, 1);
+
+      for (int i = 0; i < textures.size(); i++){
+        auto& texture = textures.at(i);
+        if (ImGui::ImageButton(texture.name, texture.textureId, ImVec2(64, 64))){
+          setGameObjectTexture(id, texture.name);
+        }
+        if ((i + 1) % columns != 0){
+          ImGui::SameLine();
+        }
+      }
+    }
+  }
+
   if (includePanel){
     ImGui::End();
   } 
