@@ -68,9 +68,9 @@ enum ImMenuView { MENUVIEW_NONE, MENUVIEW_EDITOR };
 enum ImMenuWidgets  { 
     WIDGET_OBJECTCOUNT, WIDGET_DEBUG, WIDGET_ACTIVE_SCENE, WIDGET_OBJECT_DETAILS, WIDGET_CREATE_OBJ,
     WIDGET_RENDER, WIDGET_SCENEGRAPH, WIDGET_TRANSFORM, WIDGET_TEXTURES,
-    WIDGET_CAMERA, WIDGET_LIGHT, WIDGET_MESH, WIDGET_OBJ, WIDGET_MODEL,
+    WIDGET_CAMERA, WIDGET_LIGHT, WIDGET_MESH, WIDGET_OBJ, WIDGET_MODEL, WIDGET_PARTICLE,
     
-    WIDGET_BALL, WIDGET_MOVEMENT, WIDGET_WEAPONS,
+    WIDGET_BALL, WIDGET_MOVEMENT, WIDGET_WEAPONS, WIDGET_SPAWN, WIDGET_TRIGGER,
 };
 
 ImMenuView menuViewState = MENUVIEW_NONE;
@@ -138,6 +138,10 @@ std::vector<WidgetMenuItem> widgetMenuItems {
         .name = "Textures",
         .widget = WIDGET_TEXTURES,
     },
+    WidgetMenuItem {
+        .name = "Particle",
+        .widget = WIDGET_PARTICLE,
+    },
 };
 
 std::vector<WidgetMenuItem> widgetMenuItems2 {
@@ -152,6 +156,14 @@ std::vector<WidgetMenuItem> widgetMenuItems2 {
     WidgetMenuItem {
         .name = "FPS - Weapons",
         .widget = WIDGET_WEAPONS,
+    },
+    WidgetMenuItem {
+        .name = "FPS - Spawn",
+        .widget = WIDGET_SPAWN,
+    },
+    WidgetMenuItem {
+        .name = "Trigger",
+        .widget = WIDGET_TRIGGER,
     },
 };
 
@@ -440,6 +452,9 @@ void renderWidget(ImMenuWidgets widget, bool includePanel){
     if (widget == WIDGET_MODEL){
         renderModelPanel(includePanel, sceneId);;
     }
+    if (widget == WIDGET_PARTICLE){
+        renderParticlePanel(includePanel);
+    }
 
     if (widget == WIDGET_BALL){
         renderBallGameplay(includePanel);
@@ -449,6 +464,12 @@ void renderWidget(ImMenuWidgets widget, bool includePanel){
     }
     if (widget == WIDGET_WEAPONS){
         renderWeaponsPanel(includePanel);
+    }
+    if (widget == WIDGET_SPAWN){
+        renderSpawnPanel(includePanel);
+    }
+    if (widget == WIDGET_TRIGGER){
+        renderTriggerPanel(includePanel);
     }
 
 }

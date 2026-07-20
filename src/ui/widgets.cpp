@@ -957,6 +957,184 @@ void renderModelPanel(bool includePanel, std::optional<objid> sceneId){
   } 
 }
 
+void renderParticlePanel(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Particle Panel");
+  }
+/*
+      DockButtonConfig {
+        .buttonText = "Emit One",
+        .onClick = []() -> void {
+          dockConfigApi.emitParticleViewerParticle();
+        },
+      },
+      DockCheckboxConfig {
+        .label = "Emit Particles",
+        .isChecked = []() -> bool {
+          return dockConfigApi.getParticlesViewerShouldEmit();
+        },
+        .onChecked = [](bool isChecked) -> void { 
+          dockConfigApi.setParticlesViewerShouldEmit(isChecked);
+        },
+      },
+      DockTextboxNumeric {
+        .label = "rate",
+        .value = floatParticleGetValue("rate"),
+        .onEdit = floatParticleSetValue("rate"),
+      },
+      DockTextboxNumeric {
+        .label = "duration",
+        .value = floatParticleGetValue("duration"),
+        .onEdit = floatParticleSetValue("duration"),
+      },
+      DockTextboxNumeric {
+        .label = "limit",
+        .value = floatParticleGetValue("limit"),
+        .onEdit = floatParticleSetValue("limit"),
+      },
+      DockGroup {
+        .groupName = "Base Particle",
+        .onClick = createCollapsableOnClick("particle-base"),
+        .collapse = createShouldBeCollapse("particle-base"),
+        .configFields = {
+          DockCheckboxConfig {
+            .label = "enable physics",
+            .isChecked = floatParticleGetValueBool("+physics", "enabled", "disabled"),
+            .onChecked = floatParticleSetValueBool("+physics", "enabled", "disabled"),
+          },    
+          DockCheckboxConfig {
+            .label = "enable collision",
+            .isChecked = floatParticleGetValueBool("+physics_collision", "collide", "nocollide"),
+            .onChecked = floatParticleSetValueBool("+physics_collision", "collide", "nocollide"),
+          },    
+          DockColorPickerConfig {
+            .label = "tint",
+            .getColor = []() -> glm::vec4 { 
+              auto attr = dockConfigApi.getParticleAttribute("+tint");
+              if (!attr.has_value()){
+                return glm::vec4(0.f, 0.f, 0.f, 0.f);
+              }
+              auto vec4Value = std::get_if<glm::vec4>(&attr.value());
+              modassert(vec4Value, "has tint but not a vec4");
+              return *vec4Value;
+            },
+            .onColor = [](glm::vec4 color) -> void {
+              dockConfigApi.setParticleAttribute("+tint", color);
+            },
+          },
+          DockImageConfig {
+            .label =  "texture",
+            .onImageSelect = [](std::string texture) -> void {
+              dockConfigApi.setParticleAttribute("+texture", texture);
+            }
+          },
+          DockTextboxNumeric {
+            .label = "gravity-x",
+            .value = floatParticleGetValueVec3("+physics_gravity", 0),
+            .onEdit = floatParticleSetValueVec3("+physics_gravity", 0),
+          },
+          DockTextboxNumeric {
+            .label = "gravity-y",
+            .value = floatParticleGetValueVec3("+physics_gravity", 1),
+            .onEdit = floatParticleSetValueVec3("+physics_gravity", 1),
+          },
+          DockTextboxNumeric {
+            .label = "gravity-z",
+            .value = floatParticleGetValueVec3("+physics_gravity", 2),
+            .onEdit = floatParticleSetValueVec3("+physics_gravity", 2),
+          },
+          DockTextboxNumeric {
+            .label = "velocity-x",
+            .value = floatParticleGetValueVec3("+physics_velocity", 0),
+            .onEdit = floatParticleSetValueVec3("+physics_velocity", 0),
+          },
+          DockTextboxNumeric {
+            .label = "velocity-y",
+            .value = floatParticleGetValueVec3("+physics_velocity", 1),
+            .onEdit = floatParticleSetValueVec3("+physics_velocity", 1),
+          },
+          DockTextboxNumeric {
+            .label = "velocity-z",
+            .value = floatParticleGetValueVec3("+physics_velocity", 2),
+            .onEdit = floatParticleSetValueVec3("+physics_velocity", 2),
+          },
+          DockTextboxNumeric {
+            .label = "scale-x",
+            .value = floatParticleGetValueVec3("+scale", 0),
+            .onEdit = floatParticleSetValueVec3("+scale", 0),
+          },
+          DockTextboxNumeric {
+            .label = "scale-y",
+            .value = floatParticleGetValueVec3("+scale", 1),
+            .onEdit = floatParticleSetValueVec3("+scale", 1),
+          },
+          DockTextboxNumeric {
+            .label = "scale-z",
+            .value = floatParticleGetValueVec3("+scale", 2),
+            .onEdit = floatParticleSetValueVec3("+scale", 2),
+          },
+        },
+      },
+      DockGroup {
+        .groupName = "Particle Values",
+        .onClick = createCollapsableOnClick("particle-values"),
+        .collapse = createShouldBeCollapse("particle-values"),
+        .configFields = {
+          DockTextboxNumeric {
+            .label = "position-x",
+            .value = floatParticleGetValueVec3("!position", 0),
+            .onEdit = floatParticleSetValueVec3("!position", 0),
+          },
+          DockTextboxNumeric {
+            .label = "position-y",
+            .value = floatParticleGetValueVec3("!position", 1),
+            .onEdit = floatParticleSetValueVec3("!position", 1),
+          },
+          DockTextboxNumeric {
+            .label = "position-z",
+            .value = floatParticleGetValueVec3("!position", 2),
+            .onEdit = floatParticleSetValueVec3("!position", 2),
+          },
+          DockTextboxNumeric {
+            .label = "scale-x",
+            .value = floatParticleGetValueVec3("!scale", 0),
+            .onEdit = floatParticleSetValueVec3("!scale", 0),
+          },
+          DockTextboxNumeric {
+            .label = "scale-y",
+            .value = floatParticleGetValueVec3("!scale", 1),
+            .onEdit = floatParticleSetValueVec3("!scale", 1),
+          },
+          DockTextboxNumeric {
+            .label = "scale-z",
+            .value = floatParticleGetValueVec3("!scale", 2),
+            .onEdit = floatParticleSetValueVec3("!scale", 2),
+          },
+        }
+      }, 
+      DockGroup {
+        .groupName = "Particle Variance",
+        .onClick = createCollapsableOnClick("particle-variance"),
+        .collapse = createShouldBeCollapse("particle-variance"),
+        .configFields = {
+          DockTextboxNumeric {
+            .label = "position",
+            .value = []() -> std::string{ return "1.0"; },
+            .onEdit = [](float, std::string&) -> void { },
+          },
+          DockTextboxNumeric {
+            .label = "scale",
+            .value = []() -> std::string{ return "1.0"; },
+            .onEdit = [](float, std::string&) -> void { },
+          },
+        }
+      }
+    }
+    */
+  if (includePanel){
+    ImGui::End();
+  }  
+}
 
 
 ///// these are game specific, so should be moved, theyre just mocked here for now
@@ -1135,4 +1313,231 @@ void renderWeaponsPanel(bool includePanel){
   if (includePanel){
     ImGui::End();
   } 
+}
+
+void renderSpawnPanel(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Spawn");
+  }
+
+/*
+     DockButtonConfig {
+        .buttonText = "Create Spawnpoint",
+        .onClick = []() -> void {
+          std::string spawnpointFile("../afterworld/scenes/prefabs/gameplay/spawnpoint.rawscene");
+          std::unordered_map<std::string, AttributeValue> attrs;
+          attrs["+spawnpoint|spawn"] = std::string("|") + enemyTypes.at(0);
+          dockConfigApi.createPrefab(spawnpointFile, attrs);
+        },
+      },
+      DockOptionConfig {
+        .options = enemyTypes,
+        .onClick = [](std::string&, int index) -> void {
+          dockConfigApi.setObjAttr("+spawnpoint|spawn", std::string("|") + enemyTypes.at(index));
+        },
+        .getSelectedIndex = [](void) -> int {
+          auto attr = dockConfigApi.getObjAttr("+spawnpoint|spawn");
+          if (!attr.has_value()){
+            return -1;
+          }
+          auto spawnStr = std::get_if<std::string>(&attr.value());
+          modassert(spawnStr, "invalid type for spawnStr");
+
+          for (int i = 0; i < enemyTypes.size(); i++){
+            if (enemyTypes.at(i) == spawnStr -> substr(1, spawnStr -> size())){
+              return i;
+            }
+          }
+          return -1;
+        }
+      },
+      DockCheckboxConfig {
+        .label = "Spawn On Load",
+        .isChecked = []() -> bool {
+          auto attr = dockConfigApi.getObjAttr("+spawnpoint|spawntags");
+          if (!attr.has_value()){
+            return false;
+          }
+          auto value = std::get_if<std::string>(&attr.value());
+          if (value == NULL){
+            return false;
+          }
+          return *value == "|onload";
+        },
+        .onChecked = [](bool checked) -> void {
+          if (checked){
+            dockConfigApi.setObjAttr("+spawnpoint|spawntags", "|onload");
+          }else{
+            dockConfigApi.setObjAttr("+spawnpoint|spawntags", DeleteAttribute{});
+          }
+        },
+      },
+      DockCheckboxConfig {
+        .label = "Enable Spawn Tag",
+        .isChecked = []() -> bool {
+          auto attr = dockConfigApi.getObjAttr("+spawnpoint|spawntags");
+          if (!attr.has_value()){
+            return false;
+          }
+          auto strValue = std::get_if<std::string>(&attr.value());
+          modassert(strValue, "enable spawn tag wrong type");
+          auto values = split(strValue -> substr(1, strValue -> size()), ',');
+          for (auto &value : values){
+            if (value != "onload"){
+              return true;
+            }
+          }
+          return false;
+        },
+        .onChecked = [](bool checked) -> void {
+          if (checked){
+            dockConfigApi.setObjAttr("+spawnpoint|spawntags", "|default");
+          }else{
+            dockConfigApi.setObjAttr("+spawnpoint|spawntags", DeleteAttribute{});
+          }
+        },
+      },
+      DockTextboxConfig {
+        .label = "Spawn Tag",
+        .text = []() -> std::string {
+          auto attr = dockConfigApi.getObjAttr("+spawnpoint|spawntags");
+          if (!attr.has_value()){
+            return "[disabled]";
+          }
+          auto strValue = std::get_if<std::string>(&attr.value());
+          modassert(strValue, "invalid type for spawn tag");
+          auto body = strValue -> substr(1, strValue -> size());
+          if (body == "onload"){
+            return "[disabled]";
+          }
+          return body; 
+        },
+        .onEdit = [](std::string value) -> void {
+          auto attr = dockConfigApi.getObjAttr("+spawnpoint|spawntags");
+          if (!attr.has_value()){
+            return;
+          }
+          auto strValue = std::get_if<std::string>(&attr.value());
+          modassert(strValue, "invalid type for spawn tag");
+          auto body = strValue -> substr(1, strValue -> size());
+          if (body == "onload"){
+            return;
+          }
+          dockConfigApi.setObjAttr("+spawnpoint|spawntags", std::string("|") + value);
+        }
+      },
+      */
+  if (includePanel){
+    ImGui::End();
+  }   
+}
+
+void renderTriggerPanel(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Trigger");
+  }
+
+/*
+      DockButtonConfig {
+        .buttonText = "Create Trigger",
+        .onClick = []() -> void {
+          std::unordered_map<std::string, AttributeValue> attrs;
+          std::string triggerFile("../afterworld/scenes/prefabs/gameplay/trigger.rawscene");
+          dockConfigApi.createPrefab(triggerFile, attrs);
+        },
+      },
+      DockCheckboxConfig {
+        .label = "Oneshot",
+        .isChecked = []() -> bool {
+          auto value = dockConfigApi.getObjAttr("+trigger|switch-remove");
+          if (!value.has_value()){
+            return false;
+          }
+          auto strValue = std::get_if<std::string>(&value.value());
+          if (strValue == NULL){
+            return false;
+          }
+          return *strValue == "|enter";
+        },
+        .onChecked = [](bool checked) -> void {
+          if (checked){
+            dockConfigApi.setObjAttr("+trigger|switch-remove", "|enter");
+          }else{
+            dockConfigApi.setObjAttr("+trigger|switch-remove", DeleteAttribute{});
+          }
+        },
+      },
+      DockCheckboxConfig {
+        .label = "On Enter",
+        .isChecked = []() -> bool {
+          auto value = dockConfigApi.getObjAttr("+trigger|switch-enter");
+          return value.has_value();
+        },
+        .onChecked = [](bool checked) -> void {
+          if (checked){
+            dockConfigApi.setObjAttr("+trigger|switch-enter", "|enter");
+          }else{
+            dockConfigApi.setObjAttr("+trigger|switch-enter", DeleteAttribute{});
+          }   
+        },
+      },
+      DockTextboxConfig {
+        .label = "On Enter Key",
+        .text = []() -> std::string {
+          auto value = dockConfigApi.getObjAttr("+trigger|switch-enter");
+          if (!value.has_value()){
+            return "[disabled]";
+          }
+          auto attrValue = value.value();
+          auto strValue = std::get_if<std::string>(&attrValue);
+          modassert(strValue, "invalid type onEnterKey");
+          return strValue -> substr(1, strValue -> size());
+        },
+        .onEdit = [](std::string value) -> void {
+          auto enterValue = dockConfigApi.getObjAttr("+trigger|switch-enter");
+          if (!enterValue.has_value()){
+            return;
+          }
+          dockConfigApi.setObjAttr("+trigger|switch-enter", std::string("|") + value);
+        }
+      },
+      DockCheckboxConfig {
+        .label = "On Exit",
+        .isChecked = []() -> bool {
+          auto value = dockConfigApi.getObjAttr("+trigger|switch-exit");
+          return value.has_value();
+        },
+        .onChecked = [](bool checked) -> void {
+          if (checked){
+            dockConfigApi.setObjAttr("+trigger|switch-exit", "|exit");
+          }else{
+            dockConfigApi.setObjAttr("+trigger|switch-exit", DeleteAttribute{});
+          }   
+        },
+      },
+      DockTextboxConfig {
+        .label = "On Exit Key",
+        .text = []() -> std::string {
+          auto value = dockConfigApi.getObjAttr("+trigger|switch-exit");
+          if (!value.has_value()){
+            return "[disabled]";
+          }
+          auto attrValue = value.value();
+          auto strValue = std::get_if<std::string>(&attrValue);
+          modassert(strValue, "invalid type onEnterKey");
+          return strValue -> substr(1, strValue -> size());
+        },
+        .onEdit = [](std::string value) -> void {
+          auto enterValue = dockConfigApi.getObjAttr("+trigger|switch-exit");
+          if (!enterValue.has_value()){
+            return;
+          }
+          dockConfigApi.setObjAttr("+trigger|switch-exit", std::string("|") + value);
+        }
+      },
+    }
+    */
+  if (includePanel){
+    ImGui::End();
+  }   
 }
