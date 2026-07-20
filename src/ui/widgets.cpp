@@ -140,6 +140,9 @@ void renderActiveScene(bool includePanel, std::optional<objid> activeScene){
     if(ImGui::Button("Reset Scene")){
       mainApi -> resetScene(activeScene.value());
     }
+    if(ImGui::Button("New Scene")){
+      modassert(false, "not yet implemented");
+    }
   }
 
   if (includePanel){
@@ -326,27 +329,6 @@ void renderObjPanel(bool includePanel, std::optional<objid> objectToDetail){
   if (includePanel){
     ImGui::End();
   } 
-}
-
-void renderBallGameplay(bool includePanel){
-	if (includePanel){
-	  ImGui::Begin("Ball Gameplay");
-	}
-  static bool doThing = false;
-
-  static float speed = 0.f;
-  ImGui::DragFloat("jump", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("magnitude", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("torque", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("jump-magnitude", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("mass", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("friction", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("restitution", &speed, 0.0f, 10.0f);
-  ImGui::DragFloat("gravity", &speed, 0.0f, 10.0f);
-
-  if (includePanel){
-	  ImGui::End();
-  }
 }
 
 void renderObjectDetails(objid id, bool includePanel){
@@ -968,6 +950,186 @@ void renderModelPanel(bool includePanel, std::optional<objid> sceneId){
       mainApi -> makeObjectAttr(sceneId.value(), std::string("mesh-") + uniqueNameSuffix(), attr, submodelAttributes);
     }    
   }
+
+
+  if (includePanel){
+    ImGui::End();
+  } 
+}
+
+
+
+///// these are game specific, so should be moved, theyre just mocked here for now
+
+void renderBallGameplay(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Ball Gameplay");
+  }
+  static bool doThing = false;
+
+  static float speed = 0.f;
+  ImGui::DragFloat("jump", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("magnitude", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("torque", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("jump-magnitude", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("mass", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("friction", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("restitution", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("gravity", &speed, 0.0f, 10.0f);
+
+  if (includePanel){
+    ImGui::End();
+  }
+}
+void renderMovementPanel(bool includePanel){
+
+  /*
+      createSimpleTextboxNumeric("traits", "Speed", "speed", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
+      createSimpleTextboxNumeric("traits", "Speed Air", "speed-air", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
+      createSimpleTextboxNumeric("traits", "Jump Height", "jump-height", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
+      createSimpleTextboxNumeric("traits", "Gravity", "gravity", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
+      createSimpleTextboxNumeric("traits", "Mass", "mass", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
+      createSimpleTextboxNumeric("traits", "Friction", "friction", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
+      createSimpleTextboxNumeric("traits", "Restitution", "restitution", []() -> std::optional<SqlFilter> { return SqlFilter { .column = "profile", .value = "default" }; }),
+      createSimpleCheckbox("traits", "Crouch", "crouch", []() -> SqlFilter { return SqlFilter { .column = "profile", .value = "default" }; }),
+      createSimpleCheckbox("traits", "Move Vertical", "move-vertical", []() -> SqlFilter { return SqlFilter { .column = "profile", .value = "default" }; }),
+  */
+
+  if (includePanel){
+    ImGui::Begin("Movement Gameplay");
+  }
+
+  static float speed = 0.f;
+  ImGui::DragFloat("Speed", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("Speed Air", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("Jump Height", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("Gravity", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("Mass", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("Friction", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("Restitution", &speed, 0.0f, 10.0f);
+
+  bool enabled = false;
+  ImGui::Checkbox("Crouch", &enabled);
+  ImGui::Checkbox("Move Vertical", &enabled);
+
+  if (includePanel){
+    ImGui::End();
+  } 
+}
+
+void renderWeaponsPanel(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Weapons Gameplay");
+  }
+
+/*
+    .title = "WEAPONS",
+    .configFields = {
+      DockSelectConfig {
+        .selectOptions = SelectOptions {
+          .getOptions = []() -> std::vector<std::string>& {
+            static std::vector<std::string> options = listGuns();
+            return options;
+          },
+          .toggleExpanded = [](bool expanded) -> void {
+            weaponsExpanded = expanded;
+          },
+          .onSelect = [](int index, std::string& gun) -> void {
+            weaponSelectIndex = index;
+            weaponsExpanded = false;
+            selectedGun = gun;
+            modlog("editor gun", std::string("selected gun: ") + gun);
+          },
+          .currentSelection = []() -> int { return weaponSelectIndex; },
+          .isExpanded = []() -> bool { return weaponsExpanded; },
+        }
+      },
+      createSimpleGunCheckbox("Ironsight", "ironsight"),
+      createSimpleGunCheckbox("Raycast", "raycast"),
+      createSimpleGunCheckbox("Hold", "hold"),
+      createSimpleTextboxNumeric("guns","Bloom", "bloom"),
+      createSimpleTextboxNumeric("guns","Min Bloom", "minbloom"),
+      createSimpleTextboxNumeric("guns","Bloom Length", "bloom-length"),
+      createSimpleTextboxNumeric("guns","Horizontal Sway", "bloom-length"),
+      createSimpleTextboxNumeric("guns","Vertical Sway", "bloom-length"),
+    }
+  },
+  */
+
+  {
+    if (ImGui::Button("Rename")){
+      ImGui::OpenPopup("Rename");
+    }
+  
+    if (ImGui::BeginPopupModal("Rename", nullptr, ImGuiWindowFlags_AlwaysAutoResize)){
+        std::string name = "";
+        ImGui::InputText("Name", &name);
+        if (ImGui::Button("OK"))
+        {
+            std::cout << "create weapon: " << name << std::endl;
+    
+            ImGui::CloseCurrentPopup();
+        }
+    
+        ImGui::SameLine();
+    
+        if (ImGui::Button("Cancel"))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+    
+        ImGui::EndPopup();
+    }
+  }
+  {
+    if (ImGui::Button("Delete Weapon")){
+      ImGui::OpenPopup("Confirm Delete Weapon");
+    }
+    if (ImGui::BeginPopupModal("Confirm Delete Weapon", nullptr, ImGuiWindowFlags_AlwaysAutoResize)){
+      ImGui::Text("Are you sure?");
+      if (ImGui::Button("OK")){
+          ImGui::CloseCurrentPopup();
+      }
+      ImGui::SameLine();
+      if (ImGui::Button("Cancel")){
+          ImGui::CloseCurrentPopup();
+      }
+      ImGui::EndPopup();
+    }
+  }
+
+  std::vector<std::string> weapons {
+    "weapon_one",
+    "weapon_two",
+  };
+
+  int selectedWeapon = 0;
+
+  if (ImGui::BeginCombo("Weapon", weapons.at(selectedWeapon).c_str())){
+      for (int i = 0; i < weapons.size(); i++){
+          bool selected = (selectedWeapon == i);
+          if (ImGui::Selectable(weapons.at(i).c_str(), selected)){
+             selectedWeapon = i;
+          }
+          if (selected){
+            ImGui::SetItemDefaultFocus();
+          }
+      }
+      ImGui::EndCombo();
+  }
+
+  bool enabled = false;
+
+  ImGui::Checkbox("Ironsight", &enabled);
+  ImGui::Checkbox("Raycast", &enabled);
+  ImGui::Checkbox("Hold", &enabled);
+
+  static float speed = 0.f;
+  ImGui::DragFloat("Bloom", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("Min Bloom", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("Bloom Length", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("Horizontal Sway", &speed, 0.0f, 10.0f);
+  ImGui::DragFloat("Vertical Sway", &speed, 0.0f, 10.0f);
 
 
   if (includePanel){

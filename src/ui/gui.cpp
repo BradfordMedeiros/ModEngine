@@ -69,7 +69,8 @@ enum ImMenuWidgets  {
     WIDGET_OBJECTCOUNT, WIDGET_DEBUG, WIDGET_ACTIVE_SCENE, WIDGET_OBJECT_DETAILS, WIDGET_CREATE_OBJ,
     WIDGET_RENDER, WIDGET_SCENEGRAPH, WIDGET_TRANSFORM, WIDGET_TEXTURES,
     WIDGET_CAMERA, WIDGET_LIGHT, WIDGET_MESH, WIDGET_OBJ, WIDGET_MODEL,
-    WIDGET_BALL, 
+    
+    WIDGET_BALL, WIDGET_MOVEMENT, WIDGET_WEAPONS,
 };
 
 ImMenuView menuViewState = MENUVIEW_NONE;
@@ -121,11 +122,6 @@ std::vector<WidgetMenuItem> widgetMenuItems {
     },
 
     // Game Specific 
-
-    WidgetMenuItem {
-        .name = "Game - Ball",
-        .widget = WIDGET_BALL,
-    },
     WidgetMenuItem {
         .name = "Scenegraph",
         .widget = WIDGET_SCENEGRAPH,
@@ -142,8 +138,23 @@ std::vector<WidgetMenuItem> widgetMenuItems {
         .name = "Textures",
         .widget = WIDGET_TEXTURES,
     },
-
 };
+
+std::vector<WidgetMenuItem> widgetMenuItems2 {
+    WidgetMenuItem {
+        .name = "Game - Ball",
+        .widget = WIDGET_BALL,
+    },
+    WidgetMenuItem {
+        .name = "FPS - Movement",
+        .widget = WIDGET_MOVEMENT,
+    },
+    WidgetMenuItem {
+        .name = "FPS - Weapons",
+        .widget = WIDGET_WEAPONS,
+    },
+};
+
 
 void renderNavbar(){
     if (ImGui::BeginMainMenuBar())
@@ -219,31 +230,26 @@ void renderNavbar(){
 
         }   
 
+        if (ImGui::BeginMenu("GameWidget")){
+            if(ImGui::MenuItem("Hide All")){
+                widgets = {};
+            }
+            ImGui::Separator();
 
-        if (ImGui::BeginMenu("Special")){
-           if (ImGui::MenuItem("Gun Editor"))
-           {
-           }
+            for (auto& widgetMenuItem : widgetMenuItems2){
+                if (ImGui::MenuItem(widgetMenuItem.name.c_str())){
+                    if (widgets.count(widgetMenuItem.widget) > 0){
+                        widgets.erase(widgetMenuItem.widget);
+                    }else{
+                        widgets.insert(widgetMenuItem.widget);
+                    }
+                }
+            }
 
-           if (ImGui::BeginMenu("Arcade"))
-           {
+            ImGui::EndMenu();
 
-               if (ImGui::MenuItem("Invaders"))
-               {
-                    // open scene1
-               }
+        }   
 
-               if (ImGui::MenuItem("Tennis"))
-               {
-                    // open scene1
-               }
-
-               ImGui::EndMenu();
-
-           }
-
-           ImGui::EndMenu();
-        }
 
         ImGui::EndMainMenuBar();
     }
@@ -416,9 +422,6 @@ void renderWidget(ImMenuWidgets widget, bool includePanel){
     if (widget == WIDGET_OBJ){
         renderObjPanel(includePanel, objectToDetail);
     }
-    if (widget == WIDGET_BALL){
-        renderBallGameplay(includePanel);
-    }
     if (widget == WIDGET_OBJECT_DETAILS){
         renderObjectDetailsWithState(includePanel);
     }
@@ -437,6 +440,17 @@ void renderWidget(ImMenuWidgets widget, bool includePanel){
     if (widget == WIDGET_MODEL){
         renderModelPanel(includePanel, sceneId);;
     }
+
+    if (widget == WIDGET_BALL){
+        renderBallGameplay(includePanel);
+    }
+    if (widget == WIDGET_MOVEMENT){
+        renderMovementPanel(includePanel);
+    }
+    if (widget == WIDGET_WEAPONS){
+        renderWeaponsPanel(includePanel);
+    }
+
 }
 
 float sidebar(const char* title, std::vector<WidgetMenuItem>& widgets){

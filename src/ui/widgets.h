@@ -20,13 +20,16 @@ void renderMeshPanel(bool includePanel, std::optional<objid> objectToDetail);
 void renderUnknownObjPanel(bool includePanel);
 void renderObjPanel(bool includePanel, std::optional<objid> objectToDetail);
 
-void renderBallGameplay(bool includePanel);
-
 void renderObjectDetails(objid id, bool includePanel);
 void renderRenderPanel(bool includePanel);
 void renderTransformPanel(bool includePanel);
 
 void renderTextures(bool includePanel, std::optional<objid> objectToDetail);
 void renderModelPanel(bool includePanel, std::optional<objid> sceneId);;
+
+
+void renderBallGameplay(bool includePanel);
+void renderMovementPanel(bool includePanel);
+void renderWeaponsPanel(bool includePanel);
 
 #endif
