@@ -14,7 +14,7 @@
 #include "./util/types.h"
 #include "./textures_gen.h"
 
-struct Texture {
+struct  Texture {
    unsigned int textureId;
 };
 

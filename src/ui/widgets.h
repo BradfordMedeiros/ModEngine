@@ -27,5 +27,6 @@ void renderRenderPanel(bool includePanel);
 void renderTransformPanel(bool includePanel);
 
 void renderTextures(bool includePanel, std::optional<objid> objectToDetail);
+void renderModelPanel(bool includePanel, std::optional<objid> sceneId);;
 
 #endif

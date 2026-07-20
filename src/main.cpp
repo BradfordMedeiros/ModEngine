@@ -1992,7 +1992,6 @@ int main(int argc, char* argv[]){
   glfwSetScrollCallback(window, onScrollCallback);
   glfwSetKeyCallback(window, keyCallback);
   glfwSetCharCallback(window, keyCharCallback);
-  glfwSetDropCallback(window, drop_callback);
   glfwSetJoystickCallback(joystickCallback);
   glfwSwapInterval(state.swapInterval);
   toggleFullScreen(state.fullscreen);

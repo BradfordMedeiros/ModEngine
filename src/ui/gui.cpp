@@ -68,7 +68,7 @@ enum ImMenuView { MENUVIEW_NONE, MENUVIEW_EDITOR };
 enum ImMenuWidgets  { 
     WIDGET_OBJECTCOUNT, WIDGET_DEBUG, WIDGET_ACTIVE_SCENE, WIDGET_OBJECT_DETAILS, WIDGET_CREATE_OBJ,
     WIDGET_RENDER, WIDGET_SCENEGRAPH, WIDGET_TRANSFORM, WIDGET_TEXTURES,
-    WIDGET_CAMERA, WIDGET_LIGHT, WIDGET_MESH, WIDGET_OBJ,
+    WIDGET_CAMERA, WIDGET_LIGHT, WIDGET_MESH, WIDGET_OBJ, WIDGET_MODEL,
     WIDGET_BALL, 
 };
 
@@ -114,6 +114,10 @@ std::vector<WidgetMenuItem> widgetMenuItems {
     WidgetMenuItem {
         .name = "Object",
         .widget = WIDGET_OBJ,
+    },
+    WidgetMenuItem {
+        .name = "Model",
+        .widget = WIDGET_MODEL,
     },
 
     // Game Specific 
@@ -429,6 +433,9 @@ void renderWidget(ImMenuWidgets widget, bool includePanel){
     }
     if (widget == WIDGET_TEXTURES){
         renderTextures(includePanel, objectToDetail);
+    }
+    if (widget == WIDGET_MODEL){
+        renderModelPanel(includePanel, sceneId);;
     }
 }
 

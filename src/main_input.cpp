@@ -212,12 +212,6 @@ void onArrowKey(int key){
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   cBindings.onScrollCallback(yoffset);
 
-  for (auto &selectedIndex : state.editor.selectedObjs){
-    if (idExists(world.sandbox, selectedIndex) && getLayerForId(selectedIndex).selectIndex != -2){ 
-      maybeChangeTexture(selectedIndex);
-    }
-  }
- 
   auto octreeId = getSelectedOctreeId();
   if (octreeId.has_value()){
     GameObjectOctree* octreeObject = getOctree(world.objectMapping, octreeId.value());
@@ -351,39 +345,6 @@ void onMouseButton(){
     lineId = addLineNextCycle(fromPos, rayPosition, true, -1, glm::vec4(1.f, 1.f, 0.f, 1.f), std::nullopt, std::nullopt);
   }
   doOctreeRaycast(world, state.currentHoverIndex, fromPos, rayPosition, glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
-}
-
-void drop_callback(GLFWwindow* window, int count, const char** paths){
-  for (int i = 0;  i < count;  i++){
-    std::cout << "Detected dropped file: " << paths[i] << std::endl;
-    auto fileType = getFileType(paths[i]);
-
-    std::string objectName = "random";
-
-    auto sceneId = 0;  
-    MODTODO("dropping element into scene assumes sceneId " + sceneId);
-
-    if (fileType == IMAGE_EXTENSION){
-      auto selectedIndex = latestSelected(state.editor);
-      if (selectedIndex.has_value()){
-        setTexture(selectedIndex.value(), paths[i]);
-      }
-    }else if (fileType == AUDIO_EXTENSION){
-      GameobjAttributes attr {
-        .attr = {{ "clip", std::string(paths[i]) }}, 
-      };
-      std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-      makeObjectAttr(sceneId, "&" + objectName, attr, submodelAttributes);
-    }else if (fileType == MODEL_EXTENSION){
-      GameobjAttributes attr {
-        .attr = {{ "mesh", std::string(paths[i]) }}, 
-      };
-      std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-      makeObjectAttr(sceneId, objectName, attr, submodelAttributes);
-    }else if (fileType == UNKNOWN_EXTENSION){
-      std::cout << "UNKNOWN file format, so doing nothing: " << paths[i] << std::endl;
-    }
-  }
 }
 
 void handleInput(GLFWwindow* window){

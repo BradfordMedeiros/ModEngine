@@ -924,3 +924,53 @@ void renderTextures(bool includePanel, std::optional<objid> objectToDetail){
     ImGui::End();
   } 
 }
+
+
+
+std::optional<std::string> ScenegraphView(std::string directory){
+    std::optional<std::string> selectedModel;
+    for (auto& entry : std::filesystem::directory_iterator(directory)){
+        if (entry.is_directory()){
+            if (ImGui::TreeNode(entry.path().filename().string().c_str())){
+                auto model = ScenegraphView(entry.path());
+                if (model.has_value()){
+                  selectedModel = model;
+                }
+                ImGui::TreePop();
+            }
+        }
+        else{   
+            auto fileType = getFileType(entry.path().filename().string());
+            auto isModel = fileType == MODEL_EXTENSION;
+            if (isModel){
+              if(ImGui::Selectable(entry.path().filename().string().c_str())){
+                selectedModel = entry.path().string();
+              }
+            }
+        }
+    }
+    return selectedModel;
+}
+
+void renderModelPanel(bool includePanel, std::optional<objid> sceneId){
+  if (includePanel){
+    ImGui::Begin("Model Panel");
+  }
+
+  if (sceneId.has_value()){
+    auto selectedModel = ScenegraphView("../gameresources/build/");
+    if (selectedModel.has_value()){
+      std::cout << "renderModelPanel: " << print(selectedModel) << std::endl;
+      std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+      GameobjAttributes attr { .attr = {
+        {"mesh", selectedModel.value()}
+      }};
+      mainApi -> makeObjectAttr(sceneId.value(), std::string("mesh-") + uniqueNameSuffix(), attr, submodelAttributes);
+    }    
+  }
+
+
+  if (includePanel){
+    ImGui::End();
+  } 
+}

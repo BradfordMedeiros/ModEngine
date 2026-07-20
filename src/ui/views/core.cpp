@@ -81,4 +81,3 @@ std::optional<objid> renderScenegraph(const char* name, bool includePanel){
     return selectedId;
 }
 
-
