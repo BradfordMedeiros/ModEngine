@@ -1201,6 +1201,7 @@ std::vector<std::string> imageExtensions = { "png", "jpg", "jpeg", "tga" };
 std::vector<std::string> audioExtensions = { "wav", "mp3" };
 std::vector<std::string> modelExtensions = { "fbx", "dae", "obj", "gltf" };
 std::vector<std::string> effekseekerExtensions = { "efkefc" };
+std::vector<std::string> rawsceneExtensions = { "rawscene" };
 
 FILE_EXTENSION_TYPE getFileType(std::string filepath){
   auto extensionData = getExtension(filepath);
@@ -1218,6 +1219,9 @@ FILE_EXTENSION_TYPE getFileType(std::string filepath){
     } 
     if (std::find(effekseekerExtensions.begin(), effekseekerExtensions.end(), extension) != effekseekerExtensions.end()){
       return EFFEKSEEKER_EXTENSION;
+    }
+    if (std::find(rawsceneExtensions.begin(), rawsceneExtensions.end(), extension) != rawsceneExtensions.end()){
+      return RAWSCENE_EXTENSION;
     }
   }
   return UNKNOWN_EXTENSION;

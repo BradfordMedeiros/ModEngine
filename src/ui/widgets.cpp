@@ -127,6 +127,31 @@ void renderObjectCount(bool includePanel){
 	}
 }
 
+std::optional<std::string> ScenegraphView(std::string directory, FILE_EXTENSION_TYPE type){
+    std::optional<std::string> selectedModel;
+    for (auto& entry : std::filesystem::directory_iterator(directory)){
+        if (entry.is_directory()){
+            if (ImGui::TreeNode(entry.path().filename().string().c_str())){
+                auto model = ScenegraphView(entry.path(), type);
+                if (model.has_value()){
+                  selectedModel = model;
+                }
+                ImGui::TreePop();
+            }
+        }
+        else{   
+            auto fileType = getFileType(entry.path().filename().string());
+            auto isModel = fileType == type;
+            if (isModel){
+              if(ImGui::Selectable(entry.path().filename().string().c_str())){
+                selectedModel = entry.path().string();
+              }
+            }
+        }
+    }
+    return selectedModel;
+}
+
 void renderActiveScene(bool includePanel, std::optional<objid> activeScene){
 	if (includePanel){
 	  ImGui::Begin("Active Scene");
@@ -143,6 +168,43 @@ void renderActiveScene(bool includePanel, std::optional<objid> activeScene){
     if(ImGui::Button("New Scene")){
       modassert(false, "not yet implemented");
     }
+    if(ImGui::Button("Load Scene")){
+      ImGui::OpenPopup("load-scene-modal");
+    }
+
+    {
+      if (ImGui::BeginPopupModal("load-scene-modal")){
+        auto selectedScene = ScenegraphView("../afterworld/scenes/levels/worlds", RAWSCENE_EXTENSION);
+        if (selectedScene.has_value()){
+          std::cout << "load scene: " << selectedScene.value() << std::endl;
+
+          if (activeScene.has_value()){
+            mainApi -> unloadScene(activeScene.value());
+          }
+
+          mainApi -> loadScene(selectedScene.value(), {}, std::nullopt, std::nullopt);
+
+        }
+          /*std::string name = "";
+          ImGui::InputText("Name", &name);
+          if (ImGui::Button("OK"))
+          {
+              std::cout << "create weapon: " << name << std::endl;
+      
+              ImGui::CloseCurrentPopup();
+          }
+      
+          ImGui::SameLine();
+      
+          if (ImGui::Button("Cancel"))
+          {
+              ImGui::CloseCurrentPopup();
+          }*/
+      
+          ImGui::EndPopup();
+      }
+    }
+
   }
 
   if (includePanel){
@@ -909,38 +971,13 @@ void renderTextures(bool includePanel, std::optional<objid> objectToDetail){
 
 
 
-std::optional<std::string> ScenegraphView(std::string directory){
-    std::optional<std::string> selectedModel;
-    for (auto& entry : std::filesystem::directory_iterator(directory)){
-        if (entry.is_directory()){
-            if (ImGui::TreeNode(entry.path().filename().string().c_str())){
-                auto model = ScenegraphView(entry.path());
-                if (model.has_value()){
-                  selectedModel = model;
-                }
-                ImGui::TreePop();
-            }
-        }
-        else{   
-            auto fileType = getFileType(entry.path().filename().string());
-            auto isModel = fileType == MODEL_EXTENSION;
-            if (isModel){
-              if(ImGui::Selectable(entry.path().filename().string().c_str())){
-                selectedModel = entry.path().string();
-              }
-            }
-        }
-    }
-    return selectedModel;
-}
-
 void renderModelPanel(bool includePanel, std::optional<objid> sceneId){
   if (includePanel){
     ImGui::Begin("Model Panel");
   }
 
   if (sceneId.has_value()){
-    auto selectedModel = ScenegraphView("../gameresources/build/");
+    auto selectedModel = ScenegraphView("../gameresources/build/", MODEL_EXTENSION);
     if (selectedModel.has_value()){
       std::cout << "renderModelPanel: " << print(selectedModel) << std::endl;
       std::unordered_map<std::string, GameobjAttributes> submodelAttributes;

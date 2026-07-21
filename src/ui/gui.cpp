@@ -10,6 +10,9 @@ void renderUi(){}
 extern CustomApiBindings* mainApi;
 extern GLFWwindow* window;
 
+void startMode(bool loadedScene);
+void stopMode(bool loadedScene);
+
 void initUi(){
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -168,6 +171,15 @@ std::vector<WidgetMenuItem> widgetMenuItems2 {
 };
 
 
+std::optional<objid> currSceneId(){
+    static std::optional<objid> sceneId;
+    auto sceneIdValue = activeSceneId();
+    if (sceneIdValue.has_value()){
+        sceneId = sceneIdValue;
+    }
+    return sceneId;  
+}
+
 void renderNavbar(){
     if (ImGui::BeginMainMenuBar())
     {
@@ -183,30 +195,6 @@ void renderNavbar(){
             ImGui::EndMenu();
         }
 
-        // Edit menu
-        if (ImGui::BeginMenu("Mode"))
-        {
-            if (ImGui::BeginMenu("Start", "start mode"))
-            {
-                if(ImGui::MenuItem("Ball")){
-                }
-                if(ImGui::MenuItem("Fps")){
-                }
-    
-                ImGui::EndMenu();
-            }
-
-            ImGui::Separator();
-
-            if (ImGui::MenuItem("Stop", "stop mode"))
-            {
-            }
-
- 
-            ImGui::EndMenu();
-        }
-
-        // View menu
         if (ImGui::BeginMenu("View"))
         {
             bool showNone = menuViewState == MENUVIEW_NONE;
@@ -262,6 +250,24 @@ void renderNavbar(){
 
         }   
 
+        if (ImGui::BeginMenu("Mode")){
+            if (ImGui::BeginMenu("Start", "start mode"))
+            {
+                if(ImGui::MenuItem("Ball")){
+                    startMode(false);
+                }
+                
+                ImGui::EndMenu();
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Stop", "stop mode"))
+            {
+                stopMode(false);
+            }
+            ImGui::EndMenu();
+        }
 
         ImGui::EndMainMenuBar();
     }
@@ -403,12 +409,9 @@ void renderScenegraphWithState(bool includePanel){
    }
 }
 
+
 void renderWidget(ImMenuWidgets widget, bool includePanel){
-    static std::optional<objid> sceneId;
-    auto sceneIdValue = activeSceneId();
-    if (sceneIdValue.has_value()){
-        sceneId = sceneIdValue;
-    }
+    auto sceneId = currSceneId();
 
     if (widget == WIDGET_OBJECTCOUNT){
         renderObjectCount(includePanel);
@@ -490,7 +493,6 @@ float sidebar(const char* title, std::vector<WidgetMenuItem>& widgets){
     return width;
 }
 
-
 void renderUi(){
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -547,7 +549,6 @@ void renderUi(){
     ImGui::Render();
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
 }
 
 #endif
