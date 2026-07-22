@@ -1,7 +1,7 @@
 #include "./editor.h"
 
 void setSelectedIndex(EditorContent& editor, objid id, bool reset){
-  std::cout << "INFO: EDITOR: ADD SELECTED INDEX" << std::endl;
+  std::cout << "INFO: EDITOR: ADD SELECTED INDEX: " << id << ", reset = " << reset << std::endl;
   bool inSelected = false;
   for (auto itemId : editor.selectedObjs){
     if (itemId == id){

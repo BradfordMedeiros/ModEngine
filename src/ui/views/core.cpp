@@ -16,20 +16,20 @@ void removeObjectById(objid id);
 void moveCameraAbs(glm::vec3 position);
 
 
-std::optional<objid> ScenegraphView2(objid id){
+std::optional<objid> ScenegraphView2(objid id, std::optional<objid> lastSelectedId){
     std::optional<objid> selectedId;
 
     auto children = childObj(id);
 
     std::cout << "scenegraph: " << id << ", size = " << children.size() << std::endl;
 
+    bool selected = lastSelectedId.has_value() && lastSelectedId.value() == id;
     if (children.size() > 0){
-        bool selected = true;
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | (selected ? ImGuiTreeNodeFlags_Selected : 0);
         if (ImGui::TreeNodeEx(getGameObjectName(id).value().c_str(), flags))
         {
             for (auto childId : children){
-                auto selectedObjId = ScenegraphView2(childId);
+                auto selectedObjId = ScenegraphView2(childId, lastSelectedId);
                 if (selectedObjId.has_value()){
                     selectedId = selectedObjId;
                 }
@@ -38,7 +38,7 @@ std::optional<objid> ScenegraphView2(objid id){
             ImGui::TreePop();
         }
     }else{
-            if(ImGui::Selectable(getGameObjectName(id).value().c_str())){
+            if(ImGui::Selectable(getGameObjectName(id).value().c_str(), selected)){
                 selectedId = id;
             }
 
@@ -63,13 +63,13 @@ std::optional<objid> ScenegraphView2(objid id){
 }
 
 
-std::optional<objid> renderScenegraph(const char* name, bool includePanel){
+std::optional<objid> renderScenegraph(const char* name, bool includePanel, std::optional<objid> selectedObjId){
     if (includePanel){
         ImGui::Begin(name, nullptr);
     }
     ImVec2 size = ImGui::GetContentRegionAvail();
   
-    auto selectedId = ScenegraphView2(rootObjId());
+    auto selectedId = ScenegraphView2(rootObjId(), selectedObjId);
     if (selectedId.has_value()){
         std::cout << "scenegraph selected: " << selectedId.value() << std::endl;
     }

@@ -388,8 +388,28 @@ void FileExplorer(std::string directory){
 
 }
 
-static std::optional<objid> objectToDetail;
+std::optional<objid> getGameObjectForDetail(){
+    static std::optional<objid> objectToDetail2;
+
+    auto selectedId = mainApi -> selected();
+    if (selectedId.size() > 0){
+        objectToDetail2 = selectedId.at(0);
+    }
+
+    if (objectToDetail2.has_value() && !mainApi -> gameobjExists(objectToDetail2.value())){
+        objectToDetail2 = std::nullopt;
+    }
+    
+    std::string name = "[unknown]";
+    if (objectToDetail2.has_value()){
+        name = mainApi -> getGameObjNameForId(objectToDetail2.value()).value();
+    }
+    std::cout << "object to detail: " << print(objectToDetail2) << "     " << name << std::endl;
+    return objectToDetail2;
+}
+
 void renderObjectDetailsWithState(bool includePanel){
+    auto objectToDetail = getGameObjectForDetail();
     std::cout << "objectdetails: " << print(objectToDetail) << std::endl;
     if (objectToDetail.has_value()){
         auto exists = mainApi -> gameobjExists(objectToDetail.value());
@@ -403,15 +423,17 @@ void renderObjectDetailsWithState(bool includePanel){
     }
 }
 void renderScenegraphWithState(bool includePanel){
-   auto selectedId = renderScenegraph("scenegraph", includePanel);
+   auto selectedId = renderScenegraph("scenegraph", includePanel, getGameObjectForDetail());
    if (selectedId.has_value()){
-     objectToDetail = selectedId.value(); 
+     std::set<objid> selectedIds { selectedId.value() };
+     mainApi -> setSelected(selectedIds);
    }
 }
 
 
 void renderWidget(ImMenuWidgets widget, bool includePanel){
     auto sceneId = currSceneId();
+    auto objectToDetail = getGameObjectForDetail();
 
     if (widget == WIDGET_OBJECTCOUNT){
         renderObjectCount(includePanel);
@@ -498,10 +520,6 @@ void renderUi(){
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-
-    if (objectToDetail.has_value() && !mainApi -> gameobjExists(objectToDetail.value())){
-        objectToDetail = std::nullopt;
-    }
 
     renderNavbar();
 

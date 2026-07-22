@@ -2172,8 +2172,7 @@ int main(int argc, char* argv[]){
     auto shouldSelectItem = selectItemCalledThisFrame || (state.forceSelectIndex != 0);
     state.forceSelectIndex = 0; // stateupdate
 
-
-    if (shouldSelectItem){
+    if (shouldSelectItem && selectTargetId != 0){
       auto objExists = idExists(world.sandbox, selectTargetId); 
       if (objExists){
         auto layerSelectIndex = getLayerForId(selectTargetId).selectIndex;
@@ -2353,6 +2352,10 @@ int main(int argc, char* argv[]){
           state.currentHoverIndex = selectionResult.id.value(); // 
           auto hoveredItemColor = selectionResult.color.value();
           state.hoveredItemColor = glm::vec3(hoveredItemColor.r, hoveredItemColor.g, hoveredItemColor.b); // stateupdate     
+        }else{
+          state.lastHoverIndex = state.currentHoverIndex; // stateupdate
+          state.currentHoverIndex = 0;
+          state.hoveredItemColor = glm::vec3(0.f, 0.f, 0.f);
         }
         for (int i = 0; i < selectionResult.uvResults.size(); i++){
           if (!selectionResult.uvResults.at(i).has_value()){
