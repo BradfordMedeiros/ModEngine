@@ -74,6 +74,7 @@ enum ImMenuWidgets  {
     WIDGET_CAMERA, WIDGET_LIGHT, WIDGET_MESH, WIDGET_OBJ, WIDGET_MODEL, WIDGET_PARTICLE,
     
     WIDGET_BALL, WIDGET_MOVEMENT, WIDGET_WEAPONS, WIDGET_SPAWN, WIDGET_TRIGGER,
+    WIDGET_LEVEL,
 };
 
 ImMenuView menuViewState = MENUVIEW_NONE;
@@ -167,6 +168,10 @@ std::vector<WidgetMenuItem> widgetMenuItems2 {
     WidgetMenuItem {
         .name = "Trigger",
         .widget = WIDGET_TRIGGER,
+    },
+    WidgetMenuItem {
+        .name = "level",
+        .widget = WIDGET_LEVEL,
     },
 };
 
@@ -495,6 +500,9 @@ void renderWidget(ImMenuWidgets widget, bool includePanel){
     }
     if (widget == WIDGET_TRIGGER){
         renderTriggerPanel(includePanel);
+    }
+    if (widget == WIDGET_LEVEL){
+        renderLevelPanel(includePanel);
     }
 
 }

@@ -517,6 +517,7 @@ enum OctreeMaterial { OCTREE_MATERIAL_DEFAULT, OCTREE_MATERIAL_WATER };
 typedef std::variant<std::string, std::vector<std::string>, bool, int, float> JsonType;
 std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& allValues);
 std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadFromJson(std::string& fileContent, bool* success);
+std::unordered_map<std::string, JsonType> loadFromJson2(std::string& fileContent, bool* success);
 
 struct LayerOverride {
   //int zIndex;
@@ -599,5 +600,11 @@ struct ControlInfo2{
 };
 
 std::string print(ControlInfo& controlInfo);
+
+/// needs to be moved 
+struct UiLevelInfo {
+  std::string levelName;
+  std::string description;
+};
 
 #endif

@@ -1832,6 +1832,7 @@ int main(int argc, char* argv[]){
     
     .saveToJsonFile = saveToJsonFile,
     .loadFromJsonFile = loadFromJsonFile,
+    .loadFromJsonFile2 = loadFromJsonFile2,
 
     .createViewport = createViewport,
     .removeViewport = removeViewport,

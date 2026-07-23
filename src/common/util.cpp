@@ -1438,6 +1438,52 @@ std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadF
   return mapData;
 }
 
+std::unordered_map<std::string, JsonType> loadFromJson2(std::string& fileContent, bool* success){
+  rapidjson::Document doc;
+  rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
+  if (doc.HasParseError()){
+    *success = false;
+    modlog("loadValuesFromStr", "invalid json document");
+    return {};
+  }
+
+  *success = true;
+
+  std::unordered_map<std::string, JsonType> mapData;
+  for (auto innerObj = doc.MemberBegin(); innerObj != doc.MemberEnd(); innerObj++) {
+        std::string innerKey = innerObj -> name.GetString();
+        if(innerObj -> value.IsString()){
+          std::string innerVal = innerObj -> value.GetString();
+          mapData[innerKey] = innerVal;
+        }else if (innerObj -> value.IsBool()){
+          bool innerVal = innerObj -> value.GetBool();
+          mapData[innerKey] = innerVal;
+        }else if (innerObj -> value.IsInt()){
+          int innerVal = innerObj -> value.GetInt();
+          mapData[innerKey] = innerVal;
+        }else if (innerObj -> value.IsFloat()){
+          float innerVal = innerObj -> value.GetFloat();
+          mapData[innerKey] = innerVal;
+        }else if (innerObj -> value.IsArray()){
+          for (rapidjson::SizeType i = 0; i < innerObj -> value.Size(); ++i) {
+              rapidjson::Value& element = innerObj -> value[i];
+              std::vector<std::string> values;
+              if (element.IsString()) {
+                values.push_back(element.GetString());
+              }else{
+                modassert(false, "loadFromJson array - not a string type, unsupported");
+              }
+              mapData[innerKey] = values;
+          }
+        }else{
+          modassert(false, "loadFromJson type not supported for loading");
+        }
+    
+  }
+
+  return mapData;
+}
+
 std::string print(BUTTON_TYPE button){
   if (button == BUTTON_A){
     return "BUTTON_A";

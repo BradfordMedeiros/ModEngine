@@ -206,6 +206,8 @@ struct CustomApiBindings {
 
   void (*saveToJsonFile)(std::string file, std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& allValues);
   std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> (*loadFromJsonFile)(std::string file, bool* success);
+  std::unordered_map<std::string, JsonType> (*loadFromJsonFile2)(std::string fileContent, bool* success, bool realFile);
+
 
   void (*createViewport)(int viewportIndex, float x, float y, float widthNdi, float heightNdi, ViewportOption bindingOption, std::vector<LayerOverride> layerOverride);
   void (*removeViewport)(int viewportIndex);

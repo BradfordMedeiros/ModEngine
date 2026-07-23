@@ -34,5 +34,18 @@ void renderWeaponsPanel(bool includePanel);
 
 void renderSpawnPanel(bool includePanel);
 void renderTriggerPanel(bool includePanel);
+void renderLevelPanel(bool includePanel);
+
+
+
+std::vector<UiLevelInfo> uiListLevelInfo();
+void uiSetLevelInfo(UiLevelInfo uiLevelInfo);
+
+std::vector<std::string> uiListLevels();
+std::optional<std::string> uiCurrentLevel();
+void uiGoToLevel(std::optional<std::string> level);
+std::vector<std::string> uiListLevelSkyboxes();
+void uiSetLevelSkybox(std::string level, std::string skybox);
+
 
 #endif

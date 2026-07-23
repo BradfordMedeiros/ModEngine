@@ -310,6 +310,7 @@ std::optional<int> physicsLayer(objid id);
 
 void saveToJsonFile(std::string file, std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& allValues);
 std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadFromJsonFile(std::string file, bool* success);
+std::unordered_map<std::string, JsonType> loadFromJsonFile2(std::string file, bool* success, bool realFile);
 
 void applyVertexLighting();
 

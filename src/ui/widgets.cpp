@@ -1578,3 +1578,96 @@ void renderTriggerPanel(bool includePanel){
     ImGui::End();
   }   
 }
+
+
+
+
+
+
+
+void renderLevelPanel(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Levels");
+  }
+
+  ImGui::Text("Current Level: None");
+
+  {
+
+    static int selectedLevel = -1;
+    auto levels = uiListLevelInfo();
+
+    std::string selectedLevelStr = "[no level]";
+    if (selectedLevel != -1){
+      selectedLevelStr = levels.at(selectedLevel).levelName;
+    }
+    
+    static std::string description = selectedLevel >= 0 ? levels.at(selectedLevel).description : "No description";
+    ImGui::InputText("Name", &description);
+    
+    if (ImGui::BeginCombo("Level", selectedLevelStr.c_str())){
+          for (int i = 0; i < levels.size(); i++){
+              bool selected = (selectedLevel == i);
+              if (ImGui::Selectable(levels.at(i).levelName.c_str(), selected)){
+                selectedLevel = i;
+              }
+              if (selected){
+                ImGui::SetItemDefaultFocus();
+              }
+          }
+          ImGui::EndCombo();
+    }
+    if(ImGui::Button("Load Level")){
+      uiGoToLevel(selectedLevelStr);
+    }
+
+    if(ImGui::Button("Update")){
+      /// needs to be moved 
+      std::cout << "uiSetLevelInfo here: " << description << std::endl;
+       UiLevelInfo newLevelInfo {
+          .levelName = selectedLevelStr,
+          .description = description,
+       };
+       uiSetLevelInfo(newLevelInfo);
+    }
+  }
+
+
+  ImGui::Dummy(ImVec2(0, 10));
+  {
+    
+    std::vector<std::string> skyboxs = uiListLevelSkyboxes();
+    static int selectedLevel = -1;
+
+    std::string selectedLevelStr = "[no skybox]";
+    if (selectedLevel != -1){
+      selectedLevelStr = skyboxs.at(selectedLevel);
+    }
+
+
+    if (ImGui::BeginCombo("Skybox", selectedLevelStr.c_str())){
+          for (int i = 0; i < skyboxs.size(); i++){
+              bool selected = (selectedLevel == i);
+              if (ImGui::Selectable(skyboxs.at(i).c_str(), selected)){
+                 selectedLevel = i;
+              }
+              if (selected){
+                ImGui::SetItemDefaultFocus();
+              }
+          }
+          ImGui::EndCombo();
+    }
+    if(ImGui::Button("Set skybox")){
+      if (selectedLevel != -1){
+        uiSetLevelSkybox("mylevel", skyboxs.at(selectedLevel));
+      }
+    }
+
+  }
+
+
+
+  if (includePanel){
+    ImGui::End();
+  }     
+}
