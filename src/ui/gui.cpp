@@ -13,6 +13,7 @@ extern GLFWwindow* window;
 void startMode(bool loadedScene);
 void stopMode(bool loadedScene);
 
+void registerWidget(std::string name, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render);
 void initUi(){
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -22,6 +23,87 @@ void initUi(){
 
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
+
+
+    registerWidget("Debug", [](bool includePanel, std::optional<objid>, std::optional<objid>) -> void {
+        renderDebug(includePanel);
+    });
+    registerWidget("Transform", [](bool includePanel, std::optional<objid>, std::optional<objid>) -> void {
+        renderTransformPanel(includePanel);
+    });
+    registerWidget("ActiveScene", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderActiveScene(includePanel, sceneId);
+    });
+    registerWidget("Create Obj", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderCreateObj(includePanel, sceneId);
+    });
+    
+    registerWidget("Render", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderRenderPanel(includePanel);
+    });
+
+    registerWidget("Object Count", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderObjectCount(includePanel);
+    });
+
+    registerWidget("Textures", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderTextures(includePanel, objectToDetail);
+    });
+
+    registerWidget("Model", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderModelPanel(includePanel, sceneId);
+    });   
+    
+    registerWidget("Object - Camera", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderCameraPanel(includePanel);
+    });  
+
+    registerWidget("Object - Light", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderLightPanel(includePanel);
+    });  
+
+    registerWidget("Object - Mesh", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderMeshPanel(includePanel, objectToDetail);
+    });  
+
+    registerWidget("Particle", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderParticlePanel(includePanel);
+    });  
+        
+    registerWidget("Game - Ball", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderBallGameplay(includePanel);
+    });        
+
+    registerWidget("FPS - Movement", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderMovementPanel(includePanel);
+    });                     
+        
+    registerWidget("FPS - Weapons", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderWeaponsPanel(includePanel);
+    });            
+
+    registerWidget("FPS - Spawn", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderSpawnPanel(includePanel);
+    });     
+               
+    registerWidget("Trigger", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderTriggerPanel(includePanel);
+    });   
+        
+        
+     registerWidget("level", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderLevelPanel(includePanel);
+    });   
+               
+        
+        
+        
+        
+
+        
+        
+
+  
 }
 
 void renderConsole(){
@@ -69,12 +151,7 @@ ImGui::End();
 enum ImMenuView { MENUVIEW_NONE, MENUVIEW_EDITOR };
 
 enum ImMenuWidgets  { 
-    WIDGET_OBJECTCOUNT, WIDGET_DEBUG, WIDGET_ACTIVE_SCENE, WIDGET_OBJECT_DETAILS, WIDGET_CREATE_OBJ,
-    WIDGET_RENDER, WIDGET_SCENEGRAPH, WIDGET_TRANSFORM, WIDGET_TEXTURES,
-    WIDGET_CAMERA, WIDGET_LIGHT, WIDGET_MESH, WIDGET_OBJ, WIDGET_MODEL, WIDGET_PARTICLE,
-    
-    WIDGET_BALL, WIDGET_MOVEMENT, WIDGET_WEAPONS, WIDGET_SPAWN, WIDGET_TRIGGER,
-    WIDGET_LEVEL,
+    WIDGET_OBJECT_DETAILS, WIDGET_SCENEGRAPH, WIDGET_OBJ,
 };
 
 ImMenuView menuViewState = MENUVIEW_NONE;
@@ -85,44 +162,9 @@ struct WidgetMenuItem {
     ImMenuWidgets widget;
 };
 std::vector<WidgetMenuItem> widgetMenuItems {
-    // Generic Global ones
-    WidgetMenuItem {
-        .name = "Object Count",
-        .widget = WIDGET_OBJECTCOUNT,
-    },
-    WidgetMenuItem {
-        .name = "Debug",
-        .widget = WIDGET_DEBUG,
-    },
-    WidgetMenuItem {
-        .name = "ActiveScene",
-        .widget = WIDGET_ACTIVE_SCENE,
-    },
-    WidgetMenuItem {
-        .name = "Create Obj",
-        .widget = WIDGET_CREATE_OBJ,
-    },
-
-    // Object Specific
-    WidgetMenuItem {
-        .name = "Object - Light",
-        .widget = WIDGET_LIGHT,
-    },
-    WidgetMenuItem {
-        .name = "Object - Mesh",
-        .widget = WIDGET_MESH,
-    },
-    WidgetMenuItem {
-        .name = "Object - Camera",
-        .widget = WIDGET_CAMERA,
-    },
     WidgetMenuItem {
         .name = "Object",
         .widget = WIDGET_OBJ,
-    },
-    WidgetMenuItem {
-        .name = "Model",
-        .widget = WIDGET_MODEL,
     },
 
     // Game Specific 
@@ -130,50 +172,27 @@ std::vector<WidgetMenuItem> widgetMenuItems {
         .name = "Scenegraph",
         .widget = WIDGET_SCENEGRAPH,
     },
-    WidgetMenuItem {
-        .name = "Render",
-        .widget = WIDGET_RENDER,
-    },
-    WidgetMenuItem {
-        .name = "Transform",
-        .widget = WIDGET_TRANSFORM,
-    },
-    WidgetMenuItem {
-        .name = "Textures",
-        .widget = WIDGET_TEXTURES,
-    },
-    WidgetMenuItem {
-        .name = "Particle",
-        .widget = WIDGET_PARTICLE,
-    },
+
 };
 
-std::vector<WidgetMenuItem> widgetMenuItems2 {
-    WidgetMenuItem {
-        .name = "Game - Ball",
-        .widget = WIDGET_BALL,
-    },
-    WidgetMenuItem {
-        .name = "FPS - Movement",
-        .widget = WIDGET_MOVEMENT,
-    },
-    WidgetMenuItem {
-        .name = "FPS - Weapons",
-        .widget = WIDGET_WEAPONS,
-    },
-    WidgetMenuItem {
-        .name = "FPS - Spawn",
-        .widget = WIDGET_SPAWN,
-    },
-    WidgetMenuItem {
-        .name = "Trigger",
-        .widget = WIDGET_TRIGGER,
-    },
-    WidgetMenuItem {
-        .name = "level",
-        .widget = WIDGET_LEVEL,
-    },
+
+struct WidgetMenuItem2 {
+    int id;
+    std::string name;
+    std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render;
 };
+std::vector<WidgetMenuItem2> dynamicWidgets {};
+std::set<int> dynamicWidgetEnabled;
+
+void registerWidget(std::string name, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render){
+    static int id = 0;
+    id++;
+    dynamicWidgets.push_back(WidgetMenuItem2 {
+        .id = id,
+        .name = name,
+        .render = render,
+    });
+}
 
 
 std::optional<objid> currSceneId(){
@@ -218,6 +237,7 @@ void renderNavbar(){
         if (ImGui::BeginMenu("Widget")){
             if(ImGui::MenuItem("Hide All")){
                 widgets = {};
+                dynamicWidgetEnabled = {};
             }
             ImGui::Separator();
 
@@ -235,18 +255,21 @@ void renderNavbar(){
 
         }   
 
-        if (ImGui::BeginMenu("GameWidget")){
+
+        if (ImGui::BeginMenu("Dynamic Widget")){
             if(ImGui::MenuItem("Hide All")){
                 widgets = {};
+                dynamicWidgetEnabled = {};
             }
             ImGui::Separator();
 
-            for (auto& widgetMenuItem : widgetMenuItems2){
+            for (auto& widgetMenuItem : dynamicWidgets){
                 if (ImGui::MenuItem(widgetMenuItem.name.c_str())){
-                    if (widgets.count(widgetMenuItem.widget) > 0){
-                        widgets.erase(widgetMenuItem.widget);
+
+                    if (dynamicWidgetEnabled.count(widgetMenuItem.id) > 0){
+                        dynamicWidgetEnabled.erase(widgetMenuItem.id);
                     }else{
-                        widgets.insert(widgetMenuItem.widget);
+                        dynamicWidgetEnabled.insert(widgetMenuItem.id);
                     }
                 }
             }
@@ -254,6 +277,7 @@ void renderNavbar(){
             ImGui::EndMenu();
 
         }   
+
 
         if (ImGui::BeginMenu("Mode")){
             if (ImGui::BeginMenu("Start", "start mode"))
@@ -440,27 +464,7 @@ void renderWidget(ImMenuWidgets widget, bool includePanel){
     auto sceneId = currSceneId();
     auto objectToDetail = getGameObjectForDetail();
 
-    if (widget == WIDGET_OBJECTCOUNT){
-        renderObjectCount(includePanel);
-    }
-    if (widget == WIDGET_DEBUG){
-        renderDebug(includePanel);
-    }
-    if (widget == WIDGET_ACTIVE_SCENE){
-        renderActiveScene(includePanel, sceneId);
-    }
-    if (widget == WIDGET_CREATE_OBJ){
-        renderCreateObj(includePanel, sceneId);
-    }
-    if (widget == WIDGET_CAMERA){
-        renderCameraPanel(includePanel);
-    }
-    if (widget == WIDGET_LIGHT){
-        renderLightPanel(includePanel);
-    }
-    if (widget == WIDGET_MESH){
-        renderMeshPanel(includePanel, objectToDetail);
-    }
+
     if (widget == WIDGET_OBJ){
         renderObjPanel(includePanel, objectToDetail);
     }
@@ -470,44 +474,17 @@ void renderWidget(ImMenuWidgets widget, bool includePanel){
     if (widget == WIDGET_SCENEGRAPH){
         renderScenegraphWithState(includePanel);
     }
-    if (widget == WIDGET_RENDER){
-        renderRenderPanel(includePanel);
-    }
-    if (widget == WIDGET_TRANSFORM){
-        renderTransformPanel(includePanel);
-    }
-    if (widget == WIDGET_TEXTURES){
-        renderTextures(includePanel, objectToDetail);
-    }
-    if (widget == WIDGET_MODEL){
-        renderModelPanel(includePanel, sceneId);;
-    }
-    if (widget == WIDGET_PARTICLE){
-        renderParticlePanel(includePanel);
-    }
 
-    if (widget == WIDGET_BALL){
-        renderBallGameplay(includePanel);
-    }
-    if (widget == WIDGET_MOVEMENT){
-        renderMovementPanel(includePanel);
-    }
-    if (widget == WIDGET_WEAPONS){
-        renderWeaponsPanel(includePanel);
-    }
-    if (widget == WIDGET_SPAWN){
-        renderSpawnPanel(includePanel);
-    }
-    if (widget == WIDGET_TRIGGER){
-        renderTriggerPanel(includePanel);
-    }
-    if (widget == WIDGET_LEVEL){
-        renderLevelPanel(includePanel);
-    }
 
 }
 
-float sidebar(const char* title, std::vector<WidgetMenuItem>& widgets){
+void renderWidget2(WidgetMenuItem2& item, bool includePanel){
+    auto sceneId = currSceneId();
+    auto objectToDetail = getGameObjectForDetail();
+    item.render(includePanel, objectToDetail, sceneId);
+}
+
+float sidebar(const char* title, std::vector<WidgetMenuItem>& widgets, std::vector<WidgetMenuItem2>& widgets2){
     ImGui::Begin(title, nullptr);
         ImVec2 size = ImGui::GetContentRegionAvail();
         
@@ -542,6 +519,8 @@ void renderUi(){
                 .widget = WIDGET_SCENEGRAPH,
             },
         };
+        std::vector<WidgetMenuItem2> leftWidgets2 {
+        };
 
         std::vector<WidgetMenuItem> rightWidgets {
             WidgetMenuItem {
@@ -553,23 +532,30 @@ void renderUi(){
                 .widget = WIDGET_OBJ,
             },
         };
-
+        std::vector<WidgetMenuItem2> rightWidgets2 {
+        };
 
         float paddedOffset = viewport -> WorkSize.x * 0.005;
 
         float leftPaneWidth = viewport -> WorkSize.x * 0.125f;
     	ImGui::SetNextWindowPos(ImVec2(viewport -> WorkPos.x - paddedOffset, viewport -> WorkPos.y));
     	ImGui::SetNextWindowSize(ImVec2(leftPaneWidth , viewport -> WorkSize.y), ImGuiCond_FirstUseEver);
-    	sidebar("Scenegraph", leftWidgets);
+    	sidebar("Scenegraph", leftWidgets, leftWidgets2);
 
         static float rightPaneWidth = viewport -> WorkSize.x * 0.125f;
         ImGui::SetNextWindowPos(ImVec2(viewport -> WorkSize.x - rightPaneWidth + paddedOffset, viewport -> WorkPos.y));
         ImGui::SetNextWindowSize(ImVec2(rightPaneWidth, viewport -> WorkSize.y), ImGuiCond_FirstUseEver);
-        rightPaneWidth = sidebar("GameObject Details", rightWidgets);
+        rightPaneWidth = sidebar("GameObject Details", rightWidgets, rightWidgets2);
     }
     
     for (auto &widget : widgets){
         renderWidget(widget, true);
+    }
+
+    for (auto &dynamicWidget : dynamicWidgets){
+        if (dynamicWidgetEnabled.count(dynamicWidget.id) > 0){
+            renderWidget2(dynamicWidget, true);
+        }
     }
 
     ImGui::Render();
