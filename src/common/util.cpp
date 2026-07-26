@@ -1384,6 +1384,54 @@ std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::s
   return buffer.GetString();
 }
 
+std::string saveToJson2(std::unordered_map<std::string, JsonType>& allValues){
+  rapidjson::Document doc;
+  doc.SetObject();
+  rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+
+
+  for(auto& [key, value] : allValues){
+      rapidjson::Value jsonKey(key.c_str(), allocator);
+
+      std::string* strValue = std::get_if<std::string>(&value);
+      bool* boolValue = std::get_if<bool>(&value);
+      int* intValue = std::get_if<int>(&value);
+      float* floatValue = std::get_if<float>(&value);
+      std::vector<std::string>* vecStrValue = std::get_if<std::vector<std::string>>(&value);
+      std::vector<float>* vecFloatValue = std::get_if<std::vector<float>>(&value);
+      if (strValue){
+        rapidjson::Value jsonValue(strValue -> c_str(), allocator);
+        doc.AddMember(jsonKey, jsonValue, allocator);
+      }else if (boolValue){
+        doc.AddMember(jsonKey, *boolValue, allocator);
+      }else if (intValue){
+        doc.AddMember(jsonKey, *intValue, allocator);
+      }else if (floatValue){
+        doc.AddMember(jsonKey, *floatValue, allocator);
+      }else if (vecStrValue){
+        rapidjson::Value jsonArray(rapidjson::kArrayType);
+        for (auto& element : *vecStrValue){
+          jsonArray.PushBack(rapidjson::Value(element.c_str(), allocator), allocator);
+        }
+        doc.AddMember(jsonKey, jsonArray, allocator);
+      }else if (vecFloatValue){
+        rapidjson::Value jsonArray(rapidjson::kArrayType);
+        for (auto& element : *vecFloatValue){
+          jsonArray.PushBack(element, allocator);
+        }
+        doc.AddMember(jsonKey, jsonArray, allocator);
+      }else{
+        modassert(strValue != NULL, "saveToJson only string, bool, int supported");
+      }
+  }
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  doc.Accept(writer);
+
+  return buffer.GetString();
+}
+
 std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadFromJson(std::string& fileContent, bool* success){
   rapidjson::Document doc;
   rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
@@ -1415,16 +1463,16 @@ std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadF
           float innerVal = innerObj -> value.GetFloat();
           mapData.at(key)[innerKey] = innerVal;
         }else if (innerObj -> value.IsArray()){
+          std::vector<std::string> values;
           for (rapidjson::SizeType i = 0; i < innerObj -> value.Size(); ++i) {
               rapidjson::Value& element = innerObj -> value[i];
-              std::vector<std::string> values;
               if (element.IsString()) {
                 values.push_back(element.GetString());
               }else{
                 modassert(false, "loadFromJson array - not a string type, unsupported");
               }
-              mapData.at(key)[innerKey] = values;
           }
+          mapData.at(key)[innerKey] = values;
         }else{
           modassert(false, "loadFromJson type not supported for loading");
         }
@@ -1465,15 +1513,40 @@ std::unordered_map<std::string, JsonType> loadFromJson2(std::string& fileContent
           float innerVal = innerObj -> value.GetFloat();
           mapData[innerKey] = innerVal;
         }else if (innerObj -> value.IsArray()){
-          for (rapidjson::SizeType i = 0; i < innerObj -> value.Size(); ++i) {
-              rapidjson::Value& element = innerObj -> value[i];
-              std::vector<std::string> values;
-              if (element.IsString()) {
-                values.push_back(element.GetString());
-              }else{
-                modassert(false, "loadFromJson array - not a string type, unsupported");
-              }
-              mapData[innerKey] = values;
+          if (innerObj -> value.Size() == 0){
+            std::vector<std::string> values;
+            mapData[innerKey] = values;
+            continue;
+          }
+
+          rapidjson::Value& firstObj = innerObj -> value[0];
+          if (firstObj.IsString()){
+            std::vector<std::string> values;
+            for (rapidjson::SizeType i = 0; i < innerObj -> value.Size(); ++i) {
+                rapidjson::Value& element = innerObj -> value[i];
+
+                if (element.IsString()) {
+                  values.push_back(element.GetString());
+                }else{
+                  modassert(false, "loadFromJson array - not a string type, unsupported");
+                }
+            }
+            mapData[innerKey] = values;
+
+          }else if (firstObj.IsFloat()){
+            std::vector<float> values;
+            for (rapidjson::SizeType i = 0; i < innerObj -> value.Size(); ++i) {
+                rapidjson::Value& element = innerObj -> value[i];
+                if (element.IsFloat()) {
+                  values.push_back(element.GetFloat());
+                }else{
+                  modassert(false, "loadFromJson array - not a float type, unsupported");
+                }
+            }
+            mapData[innerKey] = values;
+
+          }else {
+            modassert(false, "unexpected type for array");
           }
         }else{
           modassert(false, "loadFromJson type not supported for loading");

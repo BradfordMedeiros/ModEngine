@@ -1602,7 +1602,7 @@ void renderLevelPanel(bool includePanel){
       selectedLevelStr = levels.at(selectedLevel).levelName;
     }
     
-    static std::string description = selectedLevel >= 0 ? levels.at(selectedLevel).description : "No description";
+    static std::string description = selectedLevel >= 0 ? levels.at(selectedLevel).description.value() : std::string("No description");
     ImGui::InputText("Name", &description);
     
     if (ImGui::BeginCombo("Level", selectedLevelStr.c_str())){
@@ -1621,12 +1621,58 @@ void renderLevelPanel(bool includePanel){
       uiGoToLevel(selectedLevelStr);
     }
 
+    std::vector<std::string> skyboxs = uiListLevelSkyboxes();
+    std::optional<std::string> selectedSkyboxStr;
+    {
+      static int selectedSkybox = -1;
+      if (selectedSkybox != -1){
+        selectedSkyboxStr = skyboxs.at(selectedSkybox);
+      }
+      if (ImGui::BeginCombo("Skybox", selectedSkyboxStr.has_value() ? selectedSkyboxStr.value().c_str() : "none")){
+            for (int i = 0; i < skyboxs.size(); i++){
+                bool selected = (selectedSkybox == i);
+                if (ImGui::Selectable(skyboxs.at(i).c_str(), selected)){
+                   selectedSkybox = i;
+                }
+                if (selected){
+                  ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::EndCombo();
+      }
+      if(ImGui::Button("Set skybox")){
+        if (selectedSkybox != -1){
+          uiSetLevelSkybox("mylevel", skyboxs.at(selectedSkybox));
+        }
+      }
+    }
+
+    auto skybox = skyboxColor();
+    auto ambient = ambientLight();
+
+    {
+      float color[3] = {skybox.r, skybox.g, skybox.b};
+      if (ImGui::ColorEdit3("Skybox Color", color)){
+        setSkyboxColor(glm::vec3(color[0], color[1], color[2]));
+      }
+    }
+
+    {
+      float color[3] = {ambient.r, ambient.g, ambient.b};
+      if (ImGui::ColorEdit3("Ambient", color)){
+        setAmbientLightColor(glm::vec3(color[0], color[1], color[2]));
+      }
+    }
+
     if(ImGui::Button("Update")){
       /// needs to be moved 
       std::cout << "uiSetLevelInfo here: " << description << std::endl;
        UiLevelInfo newLevelInfo {
           .levelName = selectedLevelStr,
           .description = description,
+          .skybox = selectedSkyboxStr,
+          .ambient = ambient,
+          .skyboxColor = skybox,
        };
        uiSetLevelInfo(newLevelInfo);
     }
@@ -1634,36 +1680,11 @@ void renderLevelPanel(bool includePanel){
 
 
   ImGui::Dummy(ImVec2(0, 10));
-  {
+  
     
-    std::vector<std::string> skyboxs = uiListLevelSkyboxes();
-    static int selectedLevel = -1;
-
-    std::string selectedLevelStr = "[no skybox]";
-    if (selectedLevel != -1){
-      selectedLevelStr = skyboxs.at(selectedLevel);
-    }
 
 
-    if (ImGui::BeginCombo("Skybox", selectedLevelStr.c_str())){
-          for (int i = 0; i < skyboxs.size(); i++){
-              bool selected = (selectedLevel == i);
-              if (ImGui::Selectable(skyboxs.at(i).c_str(), selected)){
-                 selectedLevel = i;
-              }
-              if (selected){
-                ImGui::SetItemDefaultFocus();
-              }
-          }
-          ImGui::EndCombo();
-    }
-    if(ImGui::Button("Set skybox")){
-      if (selectedLevel != -1){
-        uiSetLevelSkybox("mylevel", skyboxs.at(selectedLevel));
-      }
-    }
-
-  }
+  
 
 
 

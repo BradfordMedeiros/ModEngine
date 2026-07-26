@@ -205,6 +205,7 @@ struct CustomApiBindings {
   std::optional<int> (*physicsLayer)(objid id);
 
   void (*saveToJsonFile)(std::string file, std::unordered_map<std::string, std::unordered_map<std::string, JsonType>>& allValues);
+  void (*saveToJsonFile2)(std::string file, std::unordered_map<std::string, JsonType>& allValues);
   std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> (*loadFromJsonFile)(std::string file, bool* success);
   std::unordered_map<std::string, JsonType> (*loadFromJsonFile2)(std::string fileContent, bool* success, bool realFile);
 

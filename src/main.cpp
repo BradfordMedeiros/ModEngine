@@ -1831,6 +1831,7 @@ int main(int argc, char* argv[]){
     .physicsLayer = physicsLayer,
     
     .saveToJsonFile = saveToJsonFile,
+    .saveToJsonFile2 = saveToJsonFile2,
     .loadFromJsonFile = loadFromJsonFile,
     .loadFromJsonFile2 = loadFromJsonFile2,
 
