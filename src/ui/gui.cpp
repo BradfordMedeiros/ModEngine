@@ -160,6 +160,14 @@ void registerWidget(std::string name, std::function<void(bool includePanel,  std
         .render = render,
     });
 }
+std::optional<WidgetMenuItem2*> widgetByName(std::string name){
+    for (auto& widget : dynamicWidgets){
+        if (name == widget.name){
+            return &widget;
+        }
+    }
+    return std::nullopt;
+}
 
 
 std::optional<objid> currSceneId(){
@@ -441,7 +449,7 @@ void renderUi(){
     }else if (menuViewState == MENUVIEW_EDITOR){
         std::vector<WidgetMenuItem2> leftWidgets2 {
             WidgetMenuItem2 {
-                .name = "Object Count",
+                .name = "Scenegraph",
                 .render = [](bool includePanel, std::optional<objid>, std::optional<objid>) -> void {
                     renderScenegraphWithState(includePanel);
                 },
