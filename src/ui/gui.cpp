@@ -4,7 +4,7 @@
 
 void initUi(){}
 void renderUi(){}
-
+void registerWidget(std::string name, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render){}
 #else 
 
 extern CustomApiBindings* mainApi;
@@ -13,7 +13,6 @@ extern GLFWwindow* window;
 void startMode(bool loadedScene);
 void stopMode(bool loadedScene);
 
-void registerWidget(std::string name, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render);
 void initUi(){
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -69,33 +68,7 @@ void initUi(){
     registerWidget("Particle", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderParticlePanel(includePanel);
     });  
-        
-    registerWidget("Game - Ball", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderBallGameplay(includePanel);
-    });        
-
-    registerWidget("FPS - Movement", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderMovementPanel(includePanel);
-    });                     
-        
-    registerWidget("FPS - Weapons", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderWeaponsPanel(includePanel);
-    });            
-
-    registerWidget("FPS - Spawn", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderSpawnPanel(includePanel);
-    });     
-               
-    registerWidget("Trigger", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderTriggerPanel(includePanel);
-    });   
-        
-        
-     registerWidget("level", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderLevelPanel(includePanel);
-    });   
-               
-  
+           
 }
 
 void renderConsole(){

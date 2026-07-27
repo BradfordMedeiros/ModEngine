@@ -28,15 +28,6 @@ void renderTextures(bool includePanel, std::optional<objid> objectToDetail);
 void renderModelPanel(bool includePanel, std::optional<objid> sceneId);;
 void renderParticlePanel(bool includePanel);
 
-void renderBallGameplay(bool includePanel);
-void renderMovementPanel(bool includePanel);
-void renderWeaponsPanel(bool includePanel);
-
-void renderSpawnPanel(bool includePanel);
-void renderTriggerPanel(bool includePanel);
-void renderLevelPanel(bool includePanel);
-
-
 
 std::vector<UiLevelInfo> uiListLevelInfo();
 void uiSetLevelInfo(UiLevelInfo uiLevelInfo);

@@ -19,5 +19,6 @@
 
 void initUi();
 void renderUi();
+void registerWidget(std::string name, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render);
 
 #endif
