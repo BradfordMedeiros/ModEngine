@@ -4,7 +4,7 @@
 
 void initUi(){}
 void renderUi(){}
-void registerWidget(std::string name, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render){}
+void registerWidget(std::string name, std::string list, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render){}
 #else 
 
 extern CustomApiBindings* mainApi;
@@ -23,49 +23,48 @@ void initUi(){
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-
-    registerWidget("Debug", [](bool includePanel, std::optional<objid>, std::optional<objid>) -> void {
+    registerWidget("Debug", "default", [](bool includePanel, std::optional<objid>, std::optional<objid>) -> void {
         renderDebug(includePanel);
     });
-    registerWidget("Transform", [](bool includePanel, std::optional<objid>, std::optional<objid>) -> void {
+    registerWidget("Transform", "default", [](bool includePanel, std::optional<objid>, std::optional<objid>) -> void {
         renderTransformPanel(includePanel);
     });
-    registerWidget("ActiveScene", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("ActiveScene", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderActiveScene(includePanel, sceneId);
     });
-    registerWidget("Create Obj", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("Create Obj", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderCreateObj(includePanel, sceneId);
     });
     
-    registerWidget("Render", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("Render", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderRenderPanel(includePanel);
     });
 
-    registerWidget("Object Count", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("Object Count", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderObjectCount(includePanel);
     });
 
-    registerWidget("Textures", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("Textures", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderTextures(includePanel, objectToDetail);
     });
 
-    registerWidget("Model", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("Model", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderModelPanel(includePanel, sceneId);
     });   
     
-    registerWidget("Object - Camera", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("Object - Camera", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderCameraPanel(includePanel);
     });  
 
-    registerWidget("Object - Light", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("Object - Light", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderLightPanel(includePanel);
     });  
 
-    registerWidget("Object - Mesh", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("Object - Mesh", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderMeshPanel(includePanel, objectToDetail);
     });  
 
-    registerWidget("Particle", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("Particle", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderParticlePanel(includePanel);
     });  
            
@@ -119,19 +118,33 @@ ImMenuView menuViewState = MENUVIEW_NONE;
 struct WidgetMenuItem2 {
     int id;
     std::string name;
+    std::string list;
     std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render;
 };
 std::vector<WidgetMenuItem2> dynamicWidgets {};
+std::vector<std::string> widgetLists;
 std::set<int> dynamicWidgetEnabled;
 
-void registerWidget(std::string name, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render){
+void registerWidget(std::string name, std::string list, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render){
     static int id = 0;
     id++;
     dynamicWidgets.push_back(WidgetMenuItem2 {
         .id = id,
         .name = name,
+        .list = list,
         .render = render,
     });
+
+    bool alreadyHasList = false;
+    for (auto& widgetList : widgetLists){
+        if (widgetList == list){
+            alreadyHasList = true;
+            break;
+        }
+    }
+    if (!alreadyHasList){
+        widgetLists.push_back(list);
+    }
 }
 std::optional<WidgetMenuItem2*> widgetByName(std::string name){
     for (auto& widget : dynamicWidgets){
@@ -182,26 +195,29 @@ void renderNavbar(){
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Widget")){
-            if(ImGui::MenuItem("Hide All")){
-                dynamicWidgetEnabled = {};
-            }
-            ImGui::Separator();
-
-            for (auto& widgetMenuItem : dynamicWidgets){
-                if (ImGui::MenuItem(widgetMenuItem.name.c_str())){
-
-                    if (dynamicWidgetEnabled.count(widgetMenuItem.id) > 0){
-                        dynamicWidgetEnabled.erase(widgetMenuItem.id);
-                    }else{
-                        dynamicWidgetEnabled.insert(widgetMenuItem.id);
+        for (auto& widgetList : widgetLists){
+            if (ImGui::BeginMenu(widgetList.c_str())){
+                if(ImGui::MenuItem("Hide All")){
+                    dynamicWidgetEnabled = {};
+                }
+                ImGui::Separator();
+                for (auto& widgetMenuItem : dynamicWidgets){
+                    if (widgetMenuItem.list != widgetList){
+                        continue;
+                    }
+                    if (ImGui::MenuItem(widgetMenuItem.name.c_str())){
+                        if (dynamicWidgetEnabled.count(widgetMenuItem.id) > 0){
+                            dynamicWidgetEnabled.erase(widgetMenuItem.id);
+                        }else{
+                            dynamicWidgetEnabled.insert(widgetMenuItem.id);
+                        }
                     }
                 }
-            }
+                ImGui::EndMenu();
+            }   
 
-            ImGui::EndMenu();
+        }
 
-        }   
 
 
         if (ImGui::BeginMenu("Mode")){

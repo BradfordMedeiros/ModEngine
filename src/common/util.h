@@ -602,13 +602,4 @@ struct ControlInfo2{
 
 std::string print(ControlInfo& controlInfo);
 
-/// needs to be moved 
-struct UiLevelInfo {
-  std::string levelName;
-  std::optional<std::string> description;
-  std::optional<std::string> skybox;
-  std::optional<glm::vec3> ambient;
-  std::optional<glm::vec3> skyboxColor;
-};
-
 #endif

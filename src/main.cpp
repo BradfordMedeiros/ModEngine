@@ -1970,18 +1970,6 @@ int main(int argc, char* argv[]){
     return 0;
   }
 
-  loadCScript(getUniqueObjId(), "native/tools", -1, bootStrapperMode, true);
-  for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
-    loadCScript(getUniqueObjId(), script.c_str(), -1, bootStrapperMode, true);
-  }
-  afterFrameForScripts(); // call this so api called will be ready -- for the above script (eg for callbacks).  This moves scripts from staged to loaded
-
-  
-  std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
-  for (auto parsedScene : parseSceneArgs(rawScenes)){
-    loadScene(parsedScene.sceneToLoad, {}, parsedScene.sceneFileName, parsedScene.tags);
-  }
-
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
 
@@ -1998,6 +1986,22 @@ int main(int argc, char* argv[]){
   glfwSwapInterval(state.swapInterval);
   toggleFullScreen(state.fullscreen);
   toggleCursor(state.cursorBehavior); 
+
+  initUi(); // this modifies glfw callbacks so call this after we setup the callbacks so we do not override them
+
+
+  loadCScript(getUniqueObjId(), "native/tools", -1, bootStrapperMode, true);
+  for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
+    loadCScript(getUniqueObjId(), script.c_str(), -1, bootStrapperMode, true);
+  }
+  afterFrameForScripts(); // call this so api called will be ready -- for the above script (eg for callbacks).  This moves scripts from staged to loaded
+
+  
+  std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
+  for (auto parsedScene : parseSceneArgs(rawScenes)){
+    loadScene(parsedScene.sceneToLoad, {}, parsedScene.sceneFileName, parsedScene.tags);
+  }
+
 
   std::cout << "INFO: render loop starting" << std::endl;
   GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
@@ -2046,7 +2050,6 @@ int main(int argc, char* argv[]){
   waterShader = pluginApi.loadShader("water", "./res/shaders/water");
   initEffekseer();
   
-  initUi();
 
 
   PROFILE("MAINLOOP",
