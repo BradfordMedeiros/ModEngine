@@ -5,13 +5,12 @@
 void initUi(){}
 void renderUi(){}
 void registerWidget(std::string name, std::string list, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render){}
+void registerAction(std::string name, std::string list, std::function<void()> fn){}
+
 #else 
 
 extern CustomApiBindings* mainApi;
 extern GLFWwindow* window;
-
-void startMode(bool loadedScene);
-void stopMode(bool loadedScene);
 
 void initUi(){
 	IMGUI_CHECKVERSION();
@@ -109,6 +108,41 @@ ImGui::InputText("##input", &testname1);
 
 
 ImGui::End();
+
+}
+
+struct RegisteredAction {
+    std::string name;
+    std::function<void()> fn;
+};
+
+struct RegisteredActions {
+    std::string list;
+    std::vector<RegisteredAction> actions;
+};
+
+std::vector<RegisteredActions> registeredActionLists;
+
+void registerAction(std::string name, std::string list, std::function<void()> fn){
+    bool foundList = false;
+    for (auto& registeredActionList : registeredActionLists){
+        if (registeredActionList.list == list){
+            registeredActionList.actions.push_back(RegisteredAction {
+                .name = name,
+                .fn = fn,
+            });
+            return;
+        }
+    }
+    registeredActionLists.push_back(RegisteredActions{
+        .list = list,
+        .actions  = {
+            RegisteredAction {
+                .name = name,
+                .fn = fn,
+            }
+        }
+    });
 
 }
 
@@ -215,28 +249,18 @@ void renderNavbar(){
                 }
                 ImGui::EndMenu();
             }   
-
         }
 
 
-
-        if (ImGui::BeginMenu("Mode")){
-            if (ImGui::BeginMenu("Start", "start mode"))
-            {
-                if(ImGui::MenuItem("Ball")){
-                    startMode(false);
+        for (auto &registeredActionList : registeredActionLists){
+            if (ImGui::BeginMenu(registeredActionList.list.c_str())){
+                for (auto &action : registeredActionList.actions){
+                    if(ImGui::MenuItem(action.name.c_str())){
+                        action.fn();
+                    }
                 }
-                
                 ImGui::EndMenu();
             }
-
-            ImGui::Separator();
-
-            if (ImGui::MenuItem("Stop", "stop mode"))
-            {
-                stopMode(false);
-            }
-            ImGui::EndMenu();
         }
 
         ImGui::EndMainMenuBar();
