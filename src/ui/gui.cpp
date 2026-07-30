@@ -64,7 +64,7 @@ void initUi(){
     });  
 
     registerWidget("Particle", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderParticlePanel(includePanel);
+        renderParticlePanel(includePanel, objectToDetail, sceneId);
     });  
            
 }

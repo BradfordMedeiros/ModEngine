@@ -994,7 +994,7 @@ void renderModelPanel(bool includePanel, std::optional<objid> sceneId){
   } 
 }
 
-void renderParticlePanel(bool includePanel){
+void renderParticlePanel(bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId){
   if (includePanel){
     ImGui::Begin("Particle Panel");
   }
@@ -1168,6 +1168,85 @@ void renderParticlePanel(bool includePanel){
       }
     }
     */
+
+  std::string particleType = "effekseer";
+
+  std::vector<std::string> particles {
+    "./res/particles/electric.efkefc",
+    "./res/particles/firework.efkefc",
+    "./res/particles/sparks.efkefc",
+    "./res/particles/dark.efkefc",
+    "./res/particles/plague.efkefc",
+    "./res/particles/rain.efkefc",
+    "./res/particles/waterfall.efkefc",
+
+  };
+
+
+  if(ImGui::Button("Create Particle")){
+    if (sceneId.has_value()){
+      GameobjAttributes emitterAttr { 
+          .attr = {
+            { "effekseer", "./res/particles/spirit-white.efkefc" },
+            { "state", "enabled" },
+          } 
+      };
+      std::unordered_map<std::string, GameobjAttributes> submodelAttributesEmitter;
+      auto ballSpirit = mainApi -> makeObjectAttr(sceneId.value(), std::string("+particle"), emitterAttr, submodelAttributesEmitter);      
+    }
+  }
+
+
+  bool isEffekseer = true;
+
+  if (objectToDetail.has_value()){
+    auto objType = getObjectType(objectToDetail.value());
+    if (objType == OBJ_EMITTER){
+      if (isEffekseer){
+        if (ImGui::BeginCombo("File", particleType.c_str())){
+          for (auto& particle : particles){
+            bool selected = false;
+            if (ImGui::Selectable(particle.c_str(), selected)){
+                std::cout << "set effekseer: " << particle << std::endl;
+                mainApi -> setSingleGameObjectAttr(objectToDetail.value(), "effekseer", particle);
+            }
+            if (selected){
+              ImGui::SetItemDefaultFocus();
+            }  
+          }
+          ImGui::EndCombo();
+        }    
+      }else{
+        ImGui::Text("Cannot configure non-effekseer");
+      }
+    }
+
+  }
+
+ /* if (ImGui::BeginCombo("Type", particleType.c_str())){
+    {
+      bool selected = false;
+      if (ImGui::Selectable("builtin", selected)){
+      }
+      if (selected){
+        ImGui::SetItemDefaultFocus();
+      }
+    }
+
+    {
+      bool selected = false;
+      if (ImGui::Selectable("effekseer", selected)){
+      }
+      if (selected){
+        ImGui::SetItemDefaultFocus();
+      }
+    }
+    ImGui::EndCombo();
+  }*/
+
+
+
+
   if (includePanel){
     ImGui::End();
   }  

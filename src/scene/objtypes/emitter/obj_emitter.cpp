@@ -302,7 +302,7 @@ bool setEmitterAttribute(GameObjectEmitter& emitterObj, const char* field, Attri
   bool setAnyValue = autoserializerSetAttrWithTextureLoading((char*)&emitterObj, emitterAutoserializer, field, value, util);
   std::string fieldName(field);
   if (fieldName == "effekseer"){
-    modassert(false, "cannot update effekseer effect at runtime");
+    //modassert(false, "cannot update effekseer effect at runtime");
   }else if (fieldName == "state"){
     if (emitterObj.effekseerEffect.has_value()){
       setEffectState(emitterObj.effekseerEffect.value(), emitterObj.state);
