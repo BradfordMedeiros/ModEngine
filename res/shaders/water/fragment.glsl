@@ -85,7 +85,7 @@ int xyzToIndex(int x, int y, int z){
   return x + (numCellsDim * y) + (numCellsDim * numCellsDim * z);
 }
 
-ivec3 calcLightIndexValues(out bool outOfRange){
+ivec3 calcLightIndexValues(out bool outOfRange, out vec3 _outColor){
   outOfRange = false;
 
   vec3 voxelSamplingPosition = FragPos;
@@ -114,7 +114,9 @@ ivec3 calcLightIndexValues(out bool outOfRange){
 
 int calcLightIndex(){
   bool outOfRange = false;
-  ivec3 indexs = calcLightIndexValues(outOfRange);
+
+  vec3 outColor = vec3(0.f, 0.f, 0.f);
+  ivec3 indexs = calcLightIndexValues(outOfRange, outColor);
   if (outOfRange){  // maybe i should clamp this instead? 
     return -1;
   }

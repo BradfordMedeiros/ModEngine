@@ -100,7 +100,7 @@ int xyzToIndex(int x, int y, int z){
   return x + (numCellsDim * y) + (numCellsDim * numCellsDim * z);
 }
 
-ivec3 calcLightIndexValues(out bool outOfRange){
+ivec3 calcLightIndexValues(out bool outOfRange, out vec3 _indexFloat){
   outOfRange = false;
 
   vec3 voxelSamplingPosition = FragPos + voxelOffset + (normalize(Normal) * 0.0001);  // this bias is so things aligned to the edge sample the interior they are facing.
@@ -124,12 +124,15 @@ ivec3 calcLightIndexValues(out bool outOfRange){
   if (outOfRange){  // maybe i should clamp this instead? 
     return ivec3(0, 0, 0);
   }
+
+  _indexFloat = vec3(newValueXFloat, newValueYFloat, newValueZFloat);
   return ivec3(newValueX, newValueY, newValueZ);
 }
 
 int calcLightIndex(){
   bool outOfRange = false;
-  ivec3 indexs = calcLightIndexValues(outOfRange);
+  vec3 floatValues = vec3(0.f, 0.f, 0.f);
+  ivec3 indexs = calcLightIndexValues(outOfRange, floatValues);
   if (outOfRange){  // maybe i should clamp this instead? 
     return -1;
   }

@@ -94,11 +94,21 @@ vec3 calculatePhongLight(vec3 normal, out vec3 lightPos, out bool hasLight, bool
 
   if (visualizeLights){
     bool outOfRange = false;
-    ivec3 indexs = calcLightIndexValues(outOfRange);
+
+    vec3 floatValues = vec3(0.f, 0.f, 0.f);
+    ivec3 indexs = calcLightIndexValues(outOfRange, floatValues);
     int sum = indexs.x + indexs.y + indexs.z;
 
-    if (hasLight){
-      return vec3(1, 0, 0);
+    float remainderX = fract(floatValues.x);
+    float remainderY = fract(floatValues.y);
+    float remainderZ = fract(floatValues.z);
+
+    if (hasLight && 
+      (remainderX > 0.4 && remainderX < 0.6) &&
+      (remainderY > 0.4 && remainderY < 0.6) &&
+      (remainderZ > 0.4 && remainderZ < 0.6)
+    ){
+      return vec3(5, 0, 0);
     }
     if ((sum & 1) == 0) {
         return vec3(color.r, color.g + 0.5, color.b + 0.5);
