@@ -134,6 +134,7 @@ void onMouse(int button, int action, int mods){
   }
 
   mouse_button_callback(state, button, action, mods, onMouseButton);
+
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
     selectItemCalled = true;
     onManipulatorMouseDown(state.manipulatorState);
@@ -1213,19 +1214,6 @@ std::vector<InputDispatch> inputFns = {
   },
   InputDispatch{
     .alwaysEnable = false,
-    .sourceKey = '0', // zero 
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [](ViewportSettings& viewport) -> void {
-      std::cout << dumpDebugInfo(false) << std::endl;
-      modassert(false, "-");
-      //std::cout << dumpProfiling() << std::endl;
-      //sendAlert("*dumped debug data to console*");
-    }
-  },
-  InputDispatch{
-    .alwaysEnable = false,
     .sourceKey = 348, // to the right of fn key, looks like notepad
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
@@ -1730,136 +1718,8 @@ std::vector<InputDispatch> inputFns = {
     }
   },
 
-  InputDispatch{
-    .alwaysEnable = false,
-    .sourceKey = '8', 
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [](ViewportSettings& viewport) -> void {
-      for (auto &selectedIndex : state.editor.selectedObjs){
-        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
-        if (octreeObject != NULL){
-          updatePhysicsBody(world, selectedIndex);
-        }
-      }
-      //();
-    }
-  },
 
-  InputDispatch{
-    .alwaysEnable = false,
-    .sourceKey = '7', 
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [](ViewportSettings& viewport) -> void {
-      auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
-      for (auto &selectedIndex : state.editor.selectedObjs){
-        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
-        if (octreeObject != NULL){
-          if (isCtrlHeld){
-            deleteSelectedOctreeNodes(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex));
-            if (state.rebuildOctreePhysicsOnEdit){
-              updatePhysicsBody(world, selectedIndex);
-            }
-          }else{
-            insertSelectedOctreeNodes(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex));
-            if (state.rebuildOctreePhysicsOnEdit){
-              updatePhysicsBody(world, selectedIndex);
-            }
-          }
-        }
-      }
-      //();
-    }
-  },
 
-  InputDispatch{
-    .alwaysEnable = false,
-    .sourceKey = '6', 
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [](ViewportSettings& viewport) -> void {
-      auto isCtrlHeld = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
-      for (auto &selectedIndex : state.editor.selectedObjs){
-        writeOctreeTexture(world, selectedIndex, isCtrlHeld);
-      }
-    }
-  },
-  InputDispatch{
-    .alwaysEnable = false,
-    .sourceKey = '4', 
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [](ViewportSettings& viewport) -> void {
-      setPrevOctreeTexture();
-    }
-  },
-  InputDispatch{
-    .alwaysEnable = false,
-    .sourceKey = '5', 
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [](ViewportSettings& viewport) -> void {
-      setNextOctreeTexture();
-    }
-  },
-  InputDispatch{
-    .alwaysEnable = false,
-    .sourceKey = '1', 
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [](ViewportSettings& viewport) -> void {
-      for (auto &selectedIndex : state.editor.selectedObjs){
-        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
-        modassert(octreeObject, "octree object null");
-        //makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
-        makeOctreeCellMaterial(*octreeObject, createScopedLoadMesh(world, selectedIndex), OCTREE_MATERIAL_WATER);
-
-        //setColor(*octreeObject, glm::vec3(0.f, 0.f, 0.2f));
-
-        if (true || state.rebuildOctreePhysicsOnEdit){
-          updatePhysicsBody(world, selectedIndex);
-        }
-      }
-    }
-  },
-
-  InputDispatch{
-    .alwaysEnable = false,
-    .sourceKey = '1', 
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [](ViewportSettings& viewport) -> void {
-      for (auto &selectedIndex : state.editor.selectedObjs){
-        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
-        modassert(octreeObject, "octree object null");
-        //makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
-        //addTag(*octreeObject, getSymbol("audio"), "testaudio");
-      }
-    }
-  },
-  InputDispatch{
-    .alwaysEnable = false,
-    .sourceKey = '2', 
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [](ViewportSettings& viewport) -> void {
-      for (auto &selectedIndex : state.editor.selectedObjs){
-        GameObjectOctree* octreeObject = getOctree(world.objectMapping, selectedIndex);
-        modassert(octreeObject, "octree object null");
-        //makeOctreeCellRamp(*octreeObject, octreeObject -> octree, createScopedLoadMesh(world, selectedIndex), state.rampDirection);
-        removeTag(*octreeObject, getSymbol("audio"));
-      }
-    }
-  },
   InputDispatch{
     .alwaysEnable = false,
     .sourceKey = '[', 

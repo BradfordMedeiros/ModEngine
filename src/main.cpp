@@ -2173,6 +2173,7 @@ int main(int argc, char* argv[]){
 
     bool selectItemCalledThisFrame = selectItemCalled;
     selectItemCalled = false;  // reset the state
+
     auto selectTargetId = state.forceSelectIndex == 0 ? state.currentHoverIndex : state.forceSelectIndex;
     auto shouldSelectItem = selectItemCalledThisFrame || (state.forceSelectIndex != 0);
     state.forceSelectIndex = 0; // stateupdate
@@ -2310,6 +2311,8 @@ int main(int argc, char* argv[]){
       // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
         renderWithProgram(renderContext, renderStages.selection, viewport);
   
+        renderUi();  // TODO - eventually this should just use the mask from the previous frame.  This is fine until its too slow.  
+
         shaderSetUniform(*renderStages.selection.shader, "projview", ndiOrtho);
         glDisable(GL_DEPTH_TEST);
         drawShapeData(lineData, *renderStages.selection.shader, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth, *defaultResources.defaultMeshes.unitXYRect, getTextureId, true);

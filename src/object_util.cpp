@@ -183,6 +183,29 @@ void setGameObjectPhysicsShape(objid id, std::string shape){
   mainApi -> setSingleGameObjectAttr(id, "physics_shape", shape);
 }
 
+
+LightType getGameObjectLightType(objid id){
+  return world.objectMapping.light.at(id).type;
+}
+void setGameObjectLightType(objid id, LightType type){
+  world.objectMapping.light.at(id).type = type;
+}
+
+glm::vec3 getGameObjectLightAttenutation(objid id){
+  return world.objectMapping.light.at(id).attenuation;
+}
+void setGameObjectLightAttenutation(objid id, glm::vec3 value){
+  world.objectMapping.light.at(id).attenuation = value;
+}
+
+glm::vec3 getGameObjectLightColor(objid id){
+  return world.objectMapping.light.at(id).color;
+}
+void setGameObjectLightColor(objid id, glm::vec3 value){
+  world.objectMapping.light.at(id).color = value;
+}
+
+
 ObjectType getObjectType(objid id){
   auto name = mainApi -> getGameObjNameForId(id).value();
   auto type = getObjectType(name);  
@@ -408,3 +431,10 @@ std::vector<TextureInfo> getTextures(){
   return textures;
 }
 
+
+void setVisualizeVoxelLighting(bool enabled){
+  state.visualizeVoxelLightingCells = enabled;
+}
+bool isVisualizeVoxelLighting(){
+  return state.visualizeVoxelLightingCells;
+}

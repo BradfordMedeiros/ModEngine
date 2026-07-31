@@ -52,6 +52,15 @@ void setGameObjectHasCollision(objid id, bool hasCollision);
 std::string getGameObjectPhysicsShape(objid id);
 void setGameObjectPhysicsShape(objid id, std::string shape);
 
+LightType getGameObjectLightType(objid id);
+void setGameObjectLightType(objid id, LightType type);
+
+glm::vec3 getGameObjectLightAttenutation(objid id);
+void setGameObjectLightAttenutation(objid id, glm::vec3 value);
+glm::vec3 getGameObjectLightColor(objid id);
+void setGameObjectLightColor(objid id, glm::vec3 value);
+
+
 ObjectType getObjectType(objid id);
 
 
@@ -114,6 +123,9 @@ SNAPPING_MODE getModeRotate();
 void setModeRotate(SNAPPING_MODE mode);
 SNAPPING_MODE getModeTranslate();
 void setModeTranslate(SNAPPING_MODE mode);
+
+void setVisualizeVoxelLighting(bool enabled);
+bool isVisualizeVoxelLighting();
 
 struct TextureInfo {
 	const char* name;

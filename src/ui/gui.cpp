@@ -56,7 +56,7 @@ void initUi(){
     });  
 
     registerWidget("Object - Light", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderLightPanel(includePanel);
+        renderLightPanel(includePanel, objectToDetail);
     });  
 
     registerWidget("Object - Mesh", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {

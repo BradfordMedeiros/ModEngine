@@ -53,6 +53,18 @@ void renderDebug(bool includePanel){
     }
   }
 
+
+  {
+    auto currValue = isVisualizeVoxelLighting();
+    auto oldValue = currValue;
+    ImGui::Checkbox("Show Grid", &currValue);
+    if(oldValue != currValue){
+      setVisualizeVoxelLighting(currValue);
+    }
+  }
+
+
+
   ImGui::Dummy(ImVec2(0, 10));
 
   {
@@ -297,19 +309,58 @@ void renderCameraPanel(bool includePanel){
   }
 }
 
-void renderLightPanel(bool includePanel){
+void renderLightPanel(bool includePanel, std::optional<objid> objectToDetail){
 	if (includePanel){
 	  ImGui::Begin("Light");
 	}
 
-  static bool showOption = false;
-  ImGui::Text("Type");
+  auto type = objectToDetail.has_value() ? getObjectType(objectToDetail.value()) : OBJ_INVALID;
+  if (type == OBJ_LIGHT){
+    auto id = objectToDetail.value();
+    auto lightType = getGameObjectLightType(objectToDetail.value());
 
-  ImGui::Checkbox("Point", &showOption);
-  ImGui::SameLine();
-  ImGui::Checkbox("Spotlight", &showOption);
-  ImGui::SameLine();
-  ImGui::Checkbox("Directional", &showOption);
+    auto isPoint = lightType == LIGHT_POINT;
+    auto wasPoint = isPoint;
+    auto isSpotlight = lightType == LIGHT_SPOTLIGHT;
+    auto wasSpotlight = isSpotlight;
+    auto isDirectional = lightType == LIGHT_DIRECTIONAL;
+    auto wasDirectional = isDirectional;
+
+    static bool showOption = false;
+    ImGui::Text("Type");
+
+    ImGui::Checkbox("Point", &isPoint);
+    ImGui::SameLine();
+    ImGui::Checkbox("Spotlight", &isSpotlight);
+    ImGui::SameLine();
+    ImGui::Checkbox("Directional", &isDirectional);
+
+    if (isPoint && !wasPoint){
+      setGameObjectLightType(id, LIGHT_POINT);
+    }else if (isSpotlight && !wasSpotlight){
+      setGameObjectLightType(id, LIGHT_SPOTLIGHT);
+    }else if (isDirectional && !wasDirectional){
+      setGameObjectLightType(id, LIGHT_DIRECTIONAL);
+    }
+
+    {
+      auto tint = getGameObjectLightColor(id);
+      float color[3] = {tint.r, tint.g, tint.b};
+      if (ImGui::ColorEdit4("Tint", color)){
+        setGameObjectLightColor(id, glm::vec3(color[0], color[1], color[2]));
+      }
+    }
+
+    {
+      auto attenuation = getGameObjectLightAttenutation(id);
+      ImGui::DragFloat("atten-x", &attenuation.x, 0.1f);
+      ImGui::DragFloat("atten-y", &attenuation.y, 0.1f);
+      ImGui::DragFloat("atten-z", &attenuation.z, 0.1f);
+      setGameObjectLightAttenutation(id, attenuation);
+
+    }
+
+  }
 
   if (includePanel){
 	  ImGui::End();
@@ -370,7 +421,7 @@ void renderObjPanel(bool includePanel, std::optional<objid> objectToDetail){
     }else if (type == OBJ_SOUND){
       renderUnknownObjPanel(includePanel);
     }else if (type == OBJ_LIGHT){
-      renderLightPanel(includePanel);
+      renderLightPanel(includePanel, objectToDetail);
     }else if (type == OBJ_OCTREE){
       renderUnknownObjPanel(includePanel);
     }else if (type == OBJ_EMITTER){
