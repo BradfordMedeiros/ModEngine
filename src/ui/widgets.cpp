@@ -258,6 +258,7 @@ void renderCreateObj(bool includePanel, std::optional<objid> sceneId){
       );
     }
     if(ImGui::Button("Create Text")){
+      GameobjAttributes attr { .attr = { {"value", "placeholder text" }, {  "wraptype", "char" }} };
       mainApi -> makeObjectAttr(
         sceneId.value(), 
         std::string(")text-") + uniqueNameSuffix(), 
@@ -367,6 +368,38 @@ void renderLightPanel(bool includePanel, std::optional<objid> objectToDetail){
   }
 }
 
+void renderTextPanel(bool includePanel, std::optional<objid> objectToDetail){
+  if (includePanel){
+    ImGui::Begin("Mesh");
+  }
+
+  ImGui::Text("Text");
+  if (objectToDetail.has_value()){
+    auto id = objectToDetail.value();
+
+    auto text = getGameObjectText(id);
+    ImGui::Text(text.c_str());
+    ImGui::InputText("Rename Object", &text);
+    setGameObjectText(id, text);
+
+
+    {
+      auto tint = getGameObjectTextTint(id);
+      float color[4] = {tint.r, tint.g, tint.b, tint.a};
+      if (ImGui::ColorEdit4("Tint", color)){
+        setGameObjectTextTint(id, glm::vec4(color[0], color[1], color[2], color[3]));
+      }
+    }
+
+
+   
+  }
+
+  if (includePanel){
+    ImGui::End();
+  } 
+}
+
 void renderMeshPanel(bool includePanel, std::optional<objid> objectToDetail){
   if (includePanel){
     ImGui::Begin("Mesh");
@@ -429,7 +462,7 @@ void renderObjPanel(bool includePanel, std::optional<objid> objectToDetail){
     }else if (type == OBJ_NAVMESH){
       renderUnknownObjPanel(includePanel);
     }else if (type == OBJ_TEXT){
-      renderUnknownObjPanel(includePanel);
+      renderTextPanel(includePanel, objectToDetail);
     }else if (type == OBJ_PREFAB){
       renderUnknownObjPanel(includePanel);
     }else if (type == OBJ_VIDEO){

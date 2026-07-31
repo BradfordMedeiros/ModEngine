@@ -60,6 +60,10 @@ void setGameObjectLightAttenutation(objid id, glm::vec3 value);
 glm::vec3 getGameObjectLightColor(objid id);
 void setGameObjectLightColor(objid id, glm::vec3 value);
 
+std::string getGameObjectText(objid id);
+void setGameObjectText(objid id, std::string text);
+glm::vec4 getGameObjectTextTint(objid id);
+void setGameObjectTextTint(objid id, glm::vec4 tint);
 
 ObjectType getObjectType(objid id);
 

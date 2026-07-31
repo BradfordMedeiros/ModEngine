@@ -635,8 +635,9 @@ int renderObject(
   {
     auto textObj = getUIText(objectMapping, id);
     if (textObj != NULL){
+      std::cout << "text tint: " << print(textObj -> tint) << std::endl;
       shaderSetUniform(shaderProgram, "tint", textObj -> tint);
-      return api.drawWord(shaderProgram, id, textObj -> value, 1000.f /* 1000.f => -1,1 range for each quad */, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor, textObj -> fontFamily, selectionMode);
+      return api.drawWord(shaderProgram, id, textObj -> value, 1000.f /* 1000.f => -1,1 range for each quad */, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor, textObj -> fontFamily, selectionMode, textObj -> tint);
     }
   }
   

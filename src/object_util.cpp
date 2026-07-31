@@ -205,6 +205,19 @@ void setGameObjectLightColor(objid id, glm::vec3 value){
   world.objectMapping.light.at(id).color = value;
 }
 
+std::string getGameObjectText(objid id){
+  return world.objectMapping.text.at(id).value;
+}
+void setGameObjectText(objid id, std::string text){
+  world.objectMapping.text.at(id).value = text;
+}
+glm::vec4 getGameObjectTextTint(objid id){
+  return world.objectMapping.text.at(id).tint;
+}
+void setGameObjectTextTint(objid id, glm::vec4 tint){
+  world.objectMapping.text.at(id).tint = tint;
+}
+
 
 ObjectType getObjectType(objid id){
   auto name = mainApi -> getGameObjNameForId(id).value();
