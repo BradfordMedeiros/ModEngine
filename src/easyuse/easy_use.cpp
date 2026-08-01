@@ -291,10 +291,22 @@ glm::vec3 snapScale(EasyUseInfo& easyUse, glm::vec3 scale){
   return snapVector(scale, easyUse.currentScale);
 }
 
-SnapCoordSystem getSnapTranslateSize(EasyUseInfo& easyUse){
+SnapCoordSystem getSnapTranslateSize(EasyUseInfo& easyUse, std::optional<glm::vec3> position){
+  float gridX = 0.f;
+  float gridY = 0.f;
+  float gridZ = 0.f;
+  if (position.has_value()){
+    int gridXNumber = floor(position.value().x / easyUse.currentTranslate);
+    int gridYNumber = floor(position.value().y / easyUse.currentTranslate);
+    int gridZNumber = floor(position.value().z / easyUse.currentTranslate);
+    gridX = gridXNumber * easyUse.currentTranslate;
+    gridY = gridYNumber * easyUse.currentTranslate;
+    gridZ = gridZNumber * easyUse.currentTranslate;
+  }
   return SnapCoordSystem {
     .orientation = easyUse.orientation,
     .size = easyUse.currentTranslate,
+    .gridOffset = glm::vec3(gridX, gridY, gridZ),
   };
 }
 

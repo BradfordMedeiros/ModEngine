@@ -101,7 +101,7 @@ ManipulatorTools tools {
     addLineToNextCycle(lineData, frompos, topos, true, state.manipulatorLineId, color, std::nullopt);
   },
   .getSnapRotation = []() -> std::optional<glm::quat> { 
-    return getSnapTranslateSize(state.easyUse).orientation; 
+    return getSnapTranslateSize(state.easyUse, std::nullopt).orientation; 
   },
   .clearLines = []() -> void {
     if (state.manipulatorLineId != 0){

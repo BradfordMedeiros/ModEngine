@@ -236,7 +236,7 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
 
 
   auto lineModelMatrix = glm::mat4(1.f);
-  drawAllLines(lineData, *renderingResources.uiShaderProgram, texture.textureId, lineModelMatrix);
+  //drawAllLines(lineData, *renderingResources.uiShaderProgram, texture.textureId, lineModelMatrix);
 
   glEnable(GL_BLEND);
   glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -745,9 +745,20 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
   return numTriangles;
 }
 
+std::vector<objid> selected(){
+  auto ids = state.editor.selectedObjs;
+  for (auto id : ids){
+    if (!idExists(world.sandbox, id)){
+      modassert(false, "id does not exist but is in selected objs");
+    }
+  }
+  return ids;  
+}
+
+
 void renderVector(glm::mat4 view,  int numChunkingGridCells, ViewportSettings& viewport){
   glUseProgram(*mainShaders.shaderProgram);
-  glDisable(GL_DEPTH_TEST);
+  glEnable(GL_DEPTH_TEST);
 
   auto projection = projectionFromLayer(world.sandbox.layers.at(0), viewport);
   shaderSetUniform(*mainShaders.shaderProgram, "projview", (projection * view));
@@ -759,6 +770,20 @@ void renderVector(glm::mat4 view,  int numChunkingGridCells, ViewportSettings& v
     for (auto &line : lines){
       addLineNextCycle(line.fromPos, line.toPos, false, -1, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, std::nullopt);
     }
+  }
+
+  {
+    auto selectedIds = selected();
+    if (selectedIds.size() > 0){
+      auto position = getGameObjectPosition(selectedIds.at(0), true, "selected dragGrid");
+      auto snapCoord = getSnapTranslateSize(state.easyUse, position);
+      auto lines =  drawGridXZ(10, 10, snapCoord.size, snapCoord.gridOffset.x, snapCoord.gridOffset.y, snapCoord.gridOffset.z, snapCoord.orientation);
+      for (auto &line : lines){
+        addLineNextCycle(line.fromPos, line.toPos, false, -1, glm::vec4(0.f, 0.f, 1.f, 1.f), std::nullopt, std::nullopt);
+      }      
+    }
+
+
   }
 
   if (state.showDebug){
@@ -1182,6 +1207,7 @@ void compileMap(std::string compileMapFile, std::string templateFile, bool useTe
 
   std::cout << "compiled: " << compileMapFile << std::endl;
 }
+
 
 void onGLFWEerror(int error, const char* description){
   std::cerr << "Error: " << description << std::endl;
@@ -1780,15 +1806,7 @@ int main(int argc, char* argv[]){
     .mountPackage = mountPackage,
     .compileSqlQuery = sql::compileSqlQuery,
     .executeSqlQuery = executeSqlQuery,
-    .selected = []() -> std::vector<objid> {
-      auto ids = state.editor.selectedObjs;
-      for (auto id : ids){
-        if (!idExists(world.sandbox, id)){
-          modassert(false, "id does not exist but is in selected objs");
-        }
-      }
-      return ids;
-    },
+    .selected = selected,
     .setSelected = setSelected,
     .click = dispatchClick,
     .moveMouse = moveMouse,

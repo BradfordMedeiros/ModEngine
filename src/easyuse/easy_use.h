@@ -32,9 +32,11 @@ glm::vec3 snapScale(EasyUseInfo& easyUse, glm::vec3 scale);
 struct SnapCoordSystem {
 	std::optional<glm::quat> orientation;
 	float size;
+
+	glm::vec3 gridOffset;
 };
 
-SnapCoordSystem getSnapTranslateSize(EasyUseInfo& easyUse);
+SnapCoordSystem getSnapTranslateSize(EasyUseInfo& easyUse, std::optional<glm::vec3> position);
 
 void setSnapEasyUseUp(EasyUseInfo& easyUse, ManipulatorMode manipulatorMode);
 void setSnapEasyUseDown(EasyUseInfo& easyUse, ManipulatorMode manipulatorMode);
