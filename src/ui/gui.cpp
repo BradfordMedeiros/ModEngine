@@ -360,7 +360,7 @@ void RenderEditor(){
 
 #include <filesystem>
 
-void FileExplorer(std::string directory){
+std::optional<std::string> FileExplorer(std::string directory){
 
     for (auto& entry : std::filesystem::directory_iterator(directory))
     {
@@ -368,17 +368,20 @@ void FileExplorer(std::string directory){
         {
             if (ImGui::TreeNode(entry.path().filename().string().c_str()))
             {
-                FileExplorer(entry.path());
+                auto selectedFile = FileExplorer(entry.path());
                 ImGui::TreePop();
+                if (selectedFile.has_value()){
+                    return selectedFile.value();
+                }
             }
         }
-        else
-        {
-            ImGui::Selectable(
-                entry.path().filename().string().c_str()
-            );
+        else{
+            if(ImGui::Selectable(entry.path().filename().string().c_str())){
+                return entry.path();
+            }
         }
     }
+    return std::nullopt;
 
 }
 

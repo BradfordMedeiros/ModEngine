@@ -416,10 +416,10 @@ RenderObjApi api {};
 // but simple enough until have a better fix eg extended file syntax, naming convention, or templated shaders
 bool checkIfUiShader(std::string& value){ 
   std::cout << "is ui shader: " << value << std::endl;
-  if (value == "storyboard"){
+  if (stringContains(value, "storyboard")){
     return true;
   }
-  if (value == "arcade"){
+  if (stringContains(value, "arcade")){
     return true;
   }
   return false;
