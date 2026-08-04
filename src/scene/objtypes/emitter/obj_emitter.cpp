@@ -281,6 +281,7 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
  
     auto effectTint = getVec4Attr(attributes, "effect-tint");
     if (effectTint.has_value()){
+      obj.tint = effectTint.value();
       auto tint = effectTint.value();
       setEffectColor(obj.effekseerEffect.value(), glm::vec4(tint.x * 255, tint.y * 255, tint.z * 255, tint.w * 255));
     }
@@ -330,6 +331,7 @@ bool setEmitterAttribute(GameObjectEmitter& emitterObj, const char* field, Attri
   }else if (fieldName == "effect-tint"){
     if (emitterObj.effekseerEffect.has_value()){
       glm::vec4 tint = unwrapAttr<glm::vec4>(value);
+      emitterObj.tint =  tint;
       setEffectColor(emitterObj.effekseerEffect.value(), glm::vec4(tint.x * 255, tint.y * 255, tint.z * 255, tint.w * 255));
     }
   }else {

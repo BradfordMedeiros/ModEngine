@@ -103,7 +103,7 @@ struct CustomApiBindings {
   void (*setSoundVolume)(objid id, std::optional<float> volume);
   std::optional<objid> (*getClipByName)(std::string, objid sceneId);
 
-  OneShot (*playOneshot)(objid, std::optional<glm::vec3> position, std::optional<float> volume, bool loop, bool center);
+  OneShot (*playOneshot)(objid, std::optional<glm::vec3> position, std::optional<float> volume, std::optional<bool> loop, std::optional<bool> center);
   void (*setSoundPitchOneshot)(OneShot& source, std::optional<float> pitch);
   void (*setSoundVolumeOneshot)(OneShot& source, std::optional<float> volume);
 

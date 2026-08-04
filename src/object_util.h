@@ -64,6 +64,25 @@ std::string getGameObjectText(objid id);
 void setGameObjectText(objid id, std::string text);
 glm::vec4 getGameObjectTextTint(objid id);
 void setGameObjectTextTint(objid id, glm::vec4 tint);
+TextWrap getGameObjectTextWrap(objid id);
+void setGameObjectTextWrap(objid id, TextWrap textWrap);
+
+bool isGameObjectAutoplay(objid id);
+void setGameObjectAutoplay(objid id, bool autoplay);
+bool isGameObjectLoop(objid id);
+void setGameObjectLoop(objid id, bool loop);
+bool isGameObjectCenter(objid id);
+void setGameObjectCenter(objid id, bool center);
+float getGameObjectSoundVolume(objid id);
+void setGameObjectSoundVolume(objid id, float volume);
+std::string getGameObjectSoundClip(objid id);
+void setGameObjectSoundClip(objid id, std::string clip);
+
+std::string getEmitterEffect(objid id);
+void setEmitterEffect(objid id, std::string particle);
+std::optional<glm::vec4> getEmitterEffectTint(objid id);
+void setEmitterEffectTint(objid id, glm::vec4 tint);
+
 
 ObjectType getObjectType(objid id);
 

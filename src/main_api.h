@@ -86,6 +86,7 @@ std::optional<ModAABB2> getModAABBModel(int32_t index);
 std::optional<PhysicsInfo> getPhysicsInfo(int32_t index, bool group);
 
 std::vector<std::string> listSceneFiles(std::optional<objid> sceneId);
+std::vector<std::string> listParticlesFiles();
 
 int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags);
 std::optional<objid> sceneIdByName(std::string name);
@@ -171,7 +172,7 @@ void stopSoundStateById(objid id);
 void setSoundPitch(objid id, std::optional<float> pitch);
 void setSoundVolume(objid id, std::optional<float> volume);
 
-OneShot playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume, bool loop, bool center);
+OneShot playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume, std::optional<bool> loop, std::optional<bool> center);
 void setSoundPitchOneshot(OneShot& oneShot, std::optional<float> pitch);
 void setSoundVolumeOneshot(OneShot& oneShot, std::optional<float> volume);
 

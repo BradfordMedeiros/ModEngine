@@ -2006,6 +2006,7 @@ int main(int argc, char* argv[]){
   toggleCursor(state.cursorBehavior); 
 
   initUi(); // this modifies glfw callbacks so call this after we setup the callbacks so we do not override them
+  initEffekseer();
 
 
   loadCScript(getUniqueObjId(), "native/tools", -1, bootStrapperMode, true);
@@ -2066,7 +2067,6 @@ int main(int argc, char* argv[]){
   }
 
   waterShader = pluginApi.loadShader("water", "./res/shaders/water");
-  initEffekseer();
   
 
 

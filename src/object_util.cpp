@@ -217,7 +217,65 @@ glm::vec4 getGameObjectTextTint(objid id){
 void setGameObjectTextTint(objid id, glm::vec4 tint){
   world.objectMapping.text.at(id).tint = tint;
 }
+TextWrap getGameObjectTextWrap(objid id){
+  return world.objectMapping.text.at(id).wrap;
+}
+void setGameObjectTextWrap(objid id, TextWrap textWrap){
+  world.objectMapping.text.at(id).wrap = textWrap;
+}
 
+bool isGameObjectAutoplay(objid id){
+  std::optional<std::string*> value = getTypeFromAttr<std::string>(getObjectAttributePtr(world, id, "autoplay"));
+  if (!value.has_value()){
+    return false;
+  }
+  return *value.value() == "true";
+}
+void setGameObjectAutoplay(objid id, bool autoplay){
+    mainApi -> setSingleGameObjectAttr(id, "autoplay", autoplay ? "true" : "false");
+}
+bool isGameObjectLoop(objid id){
+  std::optional<bool*> value = getTypeFromAttr<bool>(getObjectAttributePtr(world, id, "loop"));
+  if (!value.has_value()){
+    return false;
+  }
+  return *value.value();
+}
+void setGameObjectLoop(objid id, bool loop){
+  mainApi -> setSingleGameObjectAttr(id, "loop", loop);
+
+}
+bool isGameObjectCenter(objid id){
+  return world.objectMapping.sound.at(id).center;
+}
+void setGameObjectCenter(objid id, bool center){
+  world.objectMapping.sound.at(id).center = center;
+}
+float getGameObjectSoundVolume(objid id){
+  return world.objectMapping.sound.at(id).volume;
+}
+void setGameObjectSoundVolume(objid id, float volume){
+  world.objectMapping.sound.at(id).volume = volume;
+}
+std::string getGameObjectSoundClip(objid id){
+  return world.objectMapping.sound.at(id).clip;
+}
+void setGameObjectSoundClip(objid id, std::string clip){
+  
+}
+
+std::string getEmitterEffect(objid id){
+  return world.objectMapping.emitter.at(id).effekseer;
+}
+void setEmitterEffect(objid id, std::string particle){
+   mainApi -> setSingleGameObjectAttr(id, "effekseer", particle);
+}
+std::optional<glm::vec4> getEmitterEffectTint(objid id){
+  return world.objectMapping.emitter.at(id).tint;
+}
+void setEmitterEffectTint(objid id, glm::vec4 tint){
+  mainApi -> setSingleGameObjectAttr(id, "effect-tint", tint);
+}
 
 ObjectType getObjectType(objid id){
   auto name = mainApi -> getGameObjNameForId(id).value();

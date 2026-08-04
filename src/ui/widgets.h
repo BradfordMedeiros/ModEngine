@@ -15,10 +15,11 @@ void renderActiveScene(bool includePanel, std::optional<objid> activeScene);
 void renderCreateObj(bool includePanel, std::optional<objid> activeScene);
 
 void renderCameraPanel(bool includePanel);
+void renderSoundPanel(bool includePanel, std::optional<objid> objectToDetail);
 void renderLightPanel(bool includePanel, std::optional<objid> objectToDetail);
 void renderMeshPanel(bool includePanel, std::optional<objid> objectToDetail);
 void renderUnknownObjPanel(bool includePanel);
-void renderObjPanel(bool includePanel, std::optional<objid> objectToDetail);
+void renderObjPanel(bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId);
 
 void renderObjectDetails(objid id, bool includePanel);
 void renderRenderPanel(bool includePanel);

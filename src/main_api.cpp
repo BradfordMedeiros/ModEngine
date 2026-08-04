@@ -669,6 +669,11 @@ std::vector<std::string> listSceneFiles(){
   return { listFilesWithExtensionsFromPackage("./res/scenes", { "rawscene" }) };
 }
 
+std::vector<std::string> listParticlesFiles(){
+  return { listFilesWithExtensionsFromPackage("./res/particles", { "efkefc" }) };
+}
+
+
 std::vector<std::string> listResources(std::string resourceType){
   if (resourceType == "sounds"){
     return listSoundFiles();
@@ -1008,11 +1013,15 @@ void stopSoundStateById(objid id){
   stopSoundState(world.objectMapping, id); 
 }
 
-OneShot playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume, bool loop, bool center){
+OneShot playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume, std::optional<bool> loop, std::optional<bool> center){
   auto soundObj = getSoundObj(world.objectMapping, id);
   if (soundObj != NULL){
     auto buffer = getBufferFromSource(soundObj -> source);
-    return OneShot { .source = playSourceOneshot(buffer, position, volume, loop, center) };
+    auto targetPosition = position.has_value() ? position.value() :  getGameObjectPosition(id, true, "playOneshot");
+    auto targetVolume = volume.has_value() ? volume.value() : soundObj -> volume;
+    bool shouldLoop = loop.has_value() ? loop.value() : soundObj -> loop;
+    bool shouldCenter = center.has_value() ? center.value() : soundObj -> center;
+    return OneShot { .source = playSourceOneshot(buffer, targetPosition, volume, shouldLoop, shouldCenter) };
   }
   modassert(false, "playOneshot id does not exist");
   return OneShot { .source = 0 };

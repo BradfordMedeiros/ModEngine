@@ -3,6 +3,7 @@
 extern CustomApiBindings* mainApi;
 std::vector<std::string> getAllShaders();
 void sendManipulatorEvent(MANIPULATOR_EVENT event);
+std::vector<std::string> listParticlesFiles();
 
 void renderDebug(bool includePanel){
 	if (includePanel){
@@ -224,6 +225,12 @@ void renderActiveScene(bool includePanel, std::optional<objid> activeScene){
   }
 }
 
+glm::vec3 createLocation(){
+    auto cameraTransform = mainApi -> getCameraTransform(0);
+    auto location = cameraTransform.position + (cameraTransform.rotation * glm::vec3(0.f, 0.f, -1.f));
+    return location;
+}
+
 void renderCreateObj(bool includePanel, std::optional<objid> sceneId){
   if (includePanel){
     ImGui::Begin("Create Object");
@@ -233,8 +240,11 @@ void renderCreateObj(bool includePanel, std::optional<objid> sceneId){
     std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
     GameobjAttributes attr { .attr = {} };
 
+
+
+    std::optional<objid> createdId;
     if(ImGui::Button("Create Mesh")){
-      mainApi -> makeObjectAttr(
+      createdId = mainApi -> makeObjectAttr(
         sceneId.value(), 
         std::string("mesh-") + uniqueNameSuffix(), 
         attr, 
@@ -242,7 +252,7 @@ void renderCreateObj(bool includePanel, std::optional<objid> sceneId){
       );
     }
     if(ImGui::Button("Create Camera")){
-      mainApi -> makeObjectAttr(
+      createdId = mainApi -> makeObjectAttr(
         sceneId.value(), 
         std::string(">camera-") + uniqueNameSuffix(), 
         attr, 
@@ -250,7 +260,7 @@ void renderCreateObj(bool includePanel, std::optional<objid> sceneId){
       );
     }
     if(ImGui::Button("Create Light")){
-      mainApi -> makeObjectAttr(
+      createdId = mainApi -> makeObjectAttr(
         sceneId.value(), 
         std::string("!light-") + uniqueNameSuffix(), 
         attr, 
@@ -258,14 +268,40 @@ void renderCreateObj(bool includePanel, std::optional<objid> sceneId){
       );
     }
     if(ImGui::Button("Create Text")){
-      GameobjAttributes attr { .attr = { {"value", "placeholder text" }, {  "wraptype", "char" }} };
-      mainApi -> makeObjectAttr(
+      GameobjAttributes attr { .attr = { {"value", "default text" }, {  "wraptype", "char" }} };
+      createdId = mainApi -> makeObjectAttr(
         sceneId.value(), 
         std::string(")text-") + uniqueNameSuffix(), 
         attr, 
         submodelAttributes
       );
     }
+
+    if(ImGui::Button("Create Sound")){
+      GameobjAttributes attr { .attr = { { "clip", "../gameresources/sound/q009/jumppad.ogg"} }};
+      createdId = mainApi -> makeObjectAttr(
+        sceneId.value(), 
+        std::string("&sound-") + uniqueNameSuffix(), 
+        attr, 
+        submodelAttributes
+      );
+    }
+
+    if(ImGui::Button("Create Particle")){
+      GameobjAttributes emitterAttr { 
+          .attr = {
+            { "effekseer", "./res/particles/spirit-white.efkefc" },
+            { "state", "enabled" },
+          } 
+      };
+      std::unordered_map<std::string, GameobjAttributes> submodelAttributesEmitter;
+      createdId = mainApi -> makeObjectAttr(sceneId.value(), std::string("+particle"), emitterAttr, submodelAttributesEmitter);     
+    }
+
+    if (createdId.has_value()){
+      mainApi -> setGameObjectPosition(createdId.value(), createLocation(), true, Hint { .hint = "[ui] - create obj set pos" });
+    }
+
   }
 
 
@@ -308,6 +344,78 @@ void renderCameraPanel(bool includePanel){
   if (includePanel){
 	  ImGui::End();
   }
+}
+
+void renderSoundPanel(bool includePanel, std::optional<objid> objectToDetail){
+  if (includePanel){
+    ImGui::Begin("Sound");
+  }
+
+  if (objectToDetail.has_value()){
+    auto id = objectToDetail.value();
+
+    bool isAutoplay = isGameObjectAutoplay(id);
+    ImGui::Checkbox("Autoplay", &isAutoplay);
+    setGameObjectAutoplay(id, isAutoplay);
+
+    bool isLoop = isGameObjectLoop(id);
+    ImGui::Checkbox("Loop", &isLoop);
+    setGameObjectLoop(id, isLoop);
+
+    bool isCenter = isGameObjectCenter(id);
+    ImGui::Checkbox("Center", &isCenter);
+    setGameObjectCenter(id, isCenter);
+
+    float volume = getGameObjectSoundVolume(id);
+    ImGui::SliderFloat("Volume", &volume, 0.f, 1.f);
+    setGameObjectSoundVolume(id, volume);
+    
+    auto clip = getGameObjectSoundClip(id);
+    ImGui::Text(clip.c_str());
+
+    if(ImGui::Button("Play Sound")){
+      mainApi -> playOneshot(id, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+    }
+  /*
+  AutoSerializeCustom {
+    .structOffset = 0,
+    .field = "clip",
+    .fieldType = ATTRIBUTE_STRING,
+    .deserialize = [](void* offset, void* fieldValue) -> void {
+      GameObjectSound* obj = static_cast<GameObjectSound*>(offset);
+      std::string* clip = static_cast<std::string*>(fieldValue);
+      if (fieldValue == NULL){
+        modassert(false, "clip must not be unspecified");
+      }else{
+        obj -> clip = *clip;
+        obj -> source = loadSoundState(obj -> clip);     
+      }
+    },
+    .setAttributes = [](void* offset, void* fieldValue) -> void {
+      GameObjectSound* obj = static_cast<GameObjectSound*>(offset);
+      std::string* clip = static_cast<std::string*>(fieldValue);
+      if (fieldValue != NULL){
+        unloadSoundState(obj -> source, obj -> clip); 
+        obj -> clip = *clip;
+        obj -> source = loadSoundState(obj -> clip);     
+      }
+    },
+    .getAttribute = [](void* offset) -> AttributeValue {
+      GameObjectSound* obj = static_cast<GameObjectSound*>(offset);
+      return obj -> clip;
+    },
+  },*/
+
+  
+
+
+
+
+  }
+
+  if (includePanel){
+    ImGui::End();
+  } 
 }
 
 void renderLightPanel(bool includePanel, std::optional<objid> objectToDetail){
@@ -391,7 +499,32 @@ void renderTextPanel(bool includePanel, std::optional<objid> objectToDetail){
       }
     }
 
+    {
+      auto textWrap = getGameObjectTextWrap(id);
 
+      bool wrapNoneEnabled = textWrap.type == WRAP_NONE;
+      bool oldWrapNoneEnabled = wrapNoneEnabled;
+      bool wrapCharEnabled = textWrap.type == WRAP_CHARACTERS;
+      bool oldWrapCharEnabled = wrapCharEnabled;
+
+      ImGui::Checkbox("None", &wrapNoneEnabled);
+      ImGui::SameLine();
+      ImGui::Checkbox("Char", &wrapCharEnabled);
+
+      if (wrapNoneEnabled && (wrapNoneEnabled != oldWrapNoneEnabled)){
+        textWrap.type = WRAP_NONE;
+      }else if (wrapCharEnabled && (wrapCharEnabled != oldWrapCharEnabled)){
+        textWrap.type = WRAP_CHARACTERS;
+      }else if (!wrapNoneEnabled && !wrapCharEnabled){
+        textWrap.type = WRAP_NONE;
+      }
+
+      ImGui::SliderFloat("Wrap Amount", &textWrap.wrapamount, 0.f, 10.f);
+
+      setGameObjectTextWrap(id, textWrap);
+    }
+
+    
    
   }
 
@@ -436,7 +569,7 @@ void renderUnknownObjPanel(bool includePanel){
   } 
 }
 
-void renderObjPanel(bool includePanel, std::optional<objid> objectToDetail){
+void renderObjPanel(bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId){
   if (includePanel){
     ImGui::Begin("Object Type Panel");
   }
@@ -452,13 +585,13 @@ void renderObjPanel(bool includePanel, std::optional<objid> objectToDetail){
     }else if (type == OBJ_PORTAL){
       renderUnknownObjPanel(includePanel);
     }else if (type == OBJ_SOUND){
-      renderUnknownObjPanel(includePanel);
+      renderSoundPanel(includePanel, objectToDetail);
     }else if (type == OBJ_LIGHT){
       renderLightPanel(includePanel, objectToDetail);
     }else if (type == OBJ_OCTREE){
       renderUnknownObjPanel(includePanel);
     }else if (type == OBJ_EMITTER){
-      renderUnknownObjPanel(includePanel);
+      renderParticlePanel(includePanel, objectToDetail, sceneId);
     }else if (type == OBJ_NAVMESH){
       renderUnknownObjPanel(includePanel);
     }else if (type == OBJ_TEXT){
@@ -1068,7 +1201,10 @@ void renderModelPanel(bool includePanel, std::optional<objid> sceneId){
       GameobjAttributes attr { .attr = {
         {"mesh", selectedModel.value()}
       }};
-      mainApi -> makeObjectAttr(sceneId.value(), std::string("mesh-") + uniqueNameSuffix(), attr, submodelAttributes);
+      auto createdId = mainApi -> makeObjectAttr(sceneId.value(), std::string("mesh-") + uniqueNameSuffix(), attr, submodelAttributes);
+      if (createdId.has_value()){
+        mainApi -> setGameObjectPosition(createdId.value(), createLocation(), true, Hint { .hint = "[ui] - renderModelPanel set pos" });
+      }
     }    
   }
 
@@ -1255,41 +1391,19 @@ void renderParticlePanel(bool includePanel, std::optional<objid> objectToDetail,
 
   std::string particleType = "effekseer";
 
-  std::vector<std::string> particles {
-    "./res/particles/electric.efkefc",
-    "./res/particles/firework.efkefc",
-    "./res/particles/sparks.efkefc",
-    "./res/particles/dark.efkefc",
-    "./res/particles/plague.efkefc",
-    "./res/particles/rain.efkefc",
-    "./res/particles/waterfall.efkefc",
-
-  };
-
-
-  if(ImGui::Button("Create Particle")){
-    if (sceneId.has_value()){
-      GameobjAttributes emitterAttr { 
-          .attr = {
-            { "effekseer", "./res/particles/spirit-white.efkefc" },
-            { "state", "enabled" },
-          } 
-      };
-      std::unordered_map<std::string, GameobjAttributes> submodelAttributesEmitter;
-      auto ballSpirit = mainApi -> makeObjectAttr(sceneId.value(), std::string("+particle"), emitterAttr, submodelAttributesEmitter);      
-    }
-  }
-
-
-  bool isEffekseer = true;
+  std::vector<std::string> particles = listParticlesFiles();
 
   if (objectToDetail.has_value()){
-    auto objType = getObjectType(objectToDetail.value());
+    auto id = objectToDetail.value();
+    auto effectName = getEmitterEffect(id);
+    bool isEffekseer = effectName != "";
+
+    auto objType = getObjectType(id);
     if (objType == OBJ_EMITTER){
       if (isEffekseer){
-        if (ImGui::BeginCombo("File", particleType.c_str())){
+        if (ImGui::BeginCombo("File", effectName.c_str())){
           for (auto& particle : particles){
-            bool selected = false;
+            bool selected = particle == effectName;
             if (ImGui::Selectable(particle.c_str(), selected)){
                 std::cout << "set effekseer: " << particle << std::endl;
                 mainApi -> setSingleGameObjectAttr(objectToDetail.value(), "effekseer", particle);
@@ -1302,6 +1416,16 @@ void renderParticlePanel(bool includePanel, std::optional<objid> objectToDetail,
         }    
       }else{
         ImGui::Text("Cannot configure non-effekseer");
+      }
+    }
+
+
+    {
+      auto tintValue = getEmitterEffectTint(id);
+      auto tint = tintValue.has_value() ? tintValue.value() : glm::vec4(1.f, 1.f, 1.f, 1.f);
+      float color[4] = {tint.r, tint.g, tint.b, tint.a};
+      if (ImGui::ColorEdit4("Tint", color)){
+        setEmitterEffectTint(id, glm::vec4(color[0], color[1], color[2], color[3]));
       }
     }
 

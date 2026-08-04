@@ -66,6 +66,10 @@ void initUi(){
     registerWidget("Particle", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderParticlePanel(includePanel, objectToDetail, sceneId);
     });  
+
+    registerWidget("Object - Sound", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderSoundPanel(includePanel, objectToDetail);
+    });  
            
 }
 
@@ -481,8 +485,8 @@ void renderUi(){
             },
             WidgetMenuItem2 {
                 .name = "Object Type",
-                .render = [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid>) -> void {
-                    renderObjPanel(includePanel, objectToDetail);
+                .render = [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+                    renderObjPanel(includePanel, objectToDetail, sceneId);
                 },
             },
 
