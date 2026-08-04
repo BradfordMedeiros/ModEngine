@@ -261,7 +261,7 @@ std::string getGameObjectSoundClip(objid id){
   return world.objectMapping.sound.at(id).clip;
 }
 void setGameObjectSoundClip(objid id, std::string clip){
-  
+   mainApi -> setSingleGameObjectAttr(id, "clip", clip);
 }
 
 std::string getEmitterEffect(objid id){

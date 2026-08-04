@@ -662,7 +662,17 @@ std::vector<std::string> listTextures(){
   return listFilesWithExtensionsFromPackage("./res/textures", { "png", "jpg" });
 }
 std::vector<std::string> listSoundFiles(){
-  return { listFilesWithExtensionsFromPackage("./res/sounds", { "wav" }) };
+  auto mainSoundFiles = listFilesWithExtensionsFromPackage("./res/sounds", { "wav" });
+  auto additionalFiles = listFilesWithExtensionsFromPackage("../gameresources/sound/", { "wav", "ogg" });
+
+  std::vector<std::string> clips;
+  for (auto& file : mainSoundFiles){
+    clips.push_back(file);
+  }
+  for (auto& file : additionalFiles){
+    clips.push_back(file);
+  }
+  return clips;
 }
 
 std::vector<std::string> listSceneFiles(){

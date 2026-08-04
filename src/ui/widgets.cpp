@@ -4,6 +4,7 @@ extern CustomApiBindings* mainApi;
 std::vector<std::string> getAllShaders();
 void sendManipulatorEvent(MANIPULATOR_EVENT event);
 std::vector<std::string> listParticlesFiles();
+std::vector<std::string> listSoundFiles();
 
 void renderDebug(bool includePanel){
 	if (includePanel){
@@ -370,8 +371,23 @@ void renderSoundPanel(bool includePanel, std::optional<objid> objectToDetail){
     ImGui::SliderFloat("Volume", &volume, 0.f, 1.f);
     setGameObjectSoundVolume(id, volume);
     
+    std::vector<std::string> clips = listSoundFiles();
+
     auto clip = getGameObjectSoundClip(id);
-    ImGui::Text(clip.c_str());
+
+    if (ImGui::BeginCombo("Clip", clip.c_str())){
+        for (int i = 0; i < clips.size(); i++){
+            bool selected = clip == clips.at(i);
+            if (ImGui::Selectable(clips.at(i).c_str(), selected)){
+              setGameObjectSoundClip(id, clips.at(i));
+            }
+            if (selected){
+              ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+
 
     if(ImGui::Button("Play Sound")){
       mainApi -> playOneshot(id, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
