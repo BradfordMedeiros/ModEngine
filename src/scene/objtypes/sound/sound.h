@@ -39,9 +39,10 @@ void setSoundVolume(ALuint source, float newVolume);
 void setSoundLooping(ALuint source, bool shouldLoop);
 void setSoundPitch(ALuint source, float pitchMultiplier);
 
-ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::optional<float> volume, bool loop, bool center);
+ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::optional<float> volume, bool loop, bool center, objid ownerId);
 ALuint getBufferFromSource(ALuint source);
 bool isCurrentOneshot(ALuint sourceId);
+void maybeRemoveOwnerId(objid ownerId);
 
 struct OneShot {
   ALuint source;

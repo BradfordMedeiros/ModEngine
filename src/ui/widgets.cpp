@@ -352,7 +352,7 @@ void renderSoundPanel(bool includePanel, std::optional<objid> objectToDetail){
     ImGui::Begin("Sound");
   }
 
-  if (objectToDetail.has_value()){
+  if (objectToDetail.has_value() && getObjectType(objectToDetail.value()) == OBJ_SOUND){
     auto id = objectToDetail.value();
 
     bool isAutoplay = isGameObjectAutoplay(id);
@@ -390,7 +390,7 @@ void renderSoundPanel(bool includePanel, std::optional<objid> objectToDetail){
 
 
     if(ImGui::Button("Play Sound")){
-      mainApi -> playOneshot(id, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+      mainApi -> playOneshot(id, std::nullopt, std::nullopt, std::nullopt, std::nullopt, id);
     }
   /*
   AutoSerializeCustom {
@@ -421,12 +421,8 @@ void renderSoundPanel(bool includePanel, std::optional<objid> objectToDetail){
       return obj -> clip;
     },
   },*/
-
-  
-
-
-
-
+  }else{
+    ImGui::Text("Select a sound object");
   }
 
   if (includePanel){

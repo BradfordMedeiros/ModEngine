@@ -1023,7 +1023,7 @@ void stopSoundStateById(objid id){
   stopSoundState(world.objectMapping, id); 
 }
 
-OneShot playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume, std::optional<bool> loop, std::optional<bool> center){
+OneShot playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume, std::optional<bool> loop, std::optional<bool> center, objid ownerId){
   auto soundObj = getSoundObj(world.objectMapping, id);
   if (soundObj != NULL){
     auto buffer = getBufferFromSource(soundObj -> source);
@@ -1031,7 +1031,7 @@ OneShot playOneshot(objid id, std::optional<glm::vec3> position, std::optional<f
     auto targetVolume = volume.has_value() ? volume.value() : soundObj -> volume;
     bool shouldLoop = loop.has_value() ? loop.value() : soundObj -> loop;
     bool shouldCenter = center.has_value() ? center.value() : soundObj -> center;
-    return OneShot { .source = playSourceOneshot(buffer, targetPosition, volume, shouldLoop, shouldCenter) };
+    return OneShot { .source = playSourceOneshot(buffer, targetPosition, targetVolume, shouldLoop, shouldCenter, ownerId) };
   }
   modassert(false, "playOneshot id does not exist");
   return OneShot { .source = 0 };

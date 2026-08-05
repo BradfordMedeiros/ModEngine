@@ -12,6 +12,8 @@ static std::unordered_map<std::string, int> soundUsages;
 struct OneShotData {
   ALuint bufferId;
   bool center;
+  objid ownerId;
+  bool shouldErase = false;
 };
 
 static std::unordered_map<ALuint, OneShotData> soundOneshotsSourceToBuffer;
@@ -210,10 +212,12 @@ ALuint loadSoundState(std::string filepath){
   return soundSource;
 }
 
-ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::optional<float> volume, bool loop, bool center){
+ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::optional<float> volume, bool loop, bool center, objid ownerId){
   ALuint source = createSource(buffer);
 
+  std::cout << "playSourceOneshot: " << print(volume) << std::endl;
   if (volume.has_value()){
+    std::cout << "set volume: " << volume.value() << std::endl;
     setSoundVolume(source, volume.value());
   }
   if (position.has_value()){
@@ -229,8 +233,17 @@ ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::
   soundOneshotsSourceToBuffer[source] = OneShotData {
     .bufferId = buffer,
     .center = center,
+    .ownerId = ownerId,
   };
   return source;
+}
+
+void maybeRemoveOwnerId(objid ownerId){
+  for (auto &[source, oneshotData] : soundOneshotsSourceToBuffer){
+    if (oneshotData.ownerId == ownerId){
+      oneshotData.shouldErase = true;
+    }
+  }
 }
 
 ALuint getBufferFromSource(ALuint source){
@@ -243,6 +256,7 @@ ALuint getBufferFromSource(ALuint source){
   }
   return bufferId;
 }
+
 
 int getUsages(std::string filepath){
   if (soundUsages.find(filepath) == soundUsages.end()){
@@ -305,7 +319,7 @@ void onSoundFrame(glm::vec3 listenerPosition){
 
   std::vector<ALuint> sourceIds;
   for (auto& [sourceId, bufferId] : soundOneshotsSourceToBuffer){
-    bool isFinished = isSoundFinished(sourceId);
+    bool isFinished = isSoundFinished(sourceId) || bufferId.shouldErase;
     if (isFinished){
       sourceIds.push_back(sourceId);
     }

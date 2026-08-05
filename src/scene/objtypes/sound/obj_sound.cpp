@@ -79,5 +79,8 @@ bool setSoundAttribute(GameObjectSound& soundObj, const char* field, AttributeVa
   auto updated = autoserializerSetAttrWithTextureLoading((char*)&soundObj, soundAutoserializer, field, value, util);
   setSoundVolume(soundObj.source, soundObj.volume);
   setSoundLooping(soundObj.source, soundObj.loop);
+  std::cout << "set volume sound volume: " << soundObj.volume << std::endl;
+  std::cout << "set volume sound loop: " << soundObj.loop << std::endl;
+
   return updated;
 }

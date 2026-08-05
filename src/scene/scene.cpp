@@ -1139,7 +1139,7 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
     },
     getObjTypeLookup(world.sandbox, objectId)
   );
-  
+  maybeRemoveOwnerId(objectId);
   freeModelDataRefsByOwner(world, objectId);
   freeMeshRefsByOwner(world, objectId);
   freeTextureRefsByOwner(world, objectId);

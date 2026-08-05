@@ -255,7 +255,7 @@ float getGameObjectSoundVolume(objid id){
   return world.objectMapping.sound.at(id).volume;
 }
 void setGameObjectSoundVolume(objid id, float volume){
-  world.objectMapping.sound.at(id).volume = volume;
+  mainApi -> setSingleGameObjectAttr(id, "volume", volume);
 }
 std::string getGameObjectSoundClip(objid id){
   return world.objectMapping.sound.at(id).clip;
