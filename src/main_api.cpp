@@ -1395,10 +1395,6 @@ std::unordered_map<std::string, std::unordered_map<std::string, JsonType>> loadF
 }
 
 std::unordered_map<std::string, JsonType> loadFromJsonFile2(std::string file, bool* success, bool realFile){
-  if (!realfiles::fileExists(file)){
-    *success = false;
-    return {};
-  }
   auto fileContent = realFile ? realfiles::doLoadFile(file) : readFileOrPackage(file);
   auto values = loadFromJson2(fileContent, success);
   return values; 
