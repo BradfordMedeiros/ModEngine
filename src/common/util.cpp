@@ -1378,7 +1378,7 @@ std::string saveToJson(std::unordered_map<std::string, std::unordered_map<std::s
   }
 
   rapidjson::StringBuffer buffer;
-  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
   doc.Accept(writer);
 
   return buffer.GetString();
@@ -1426,7 +1426,7 @@ std::string saveToJson2(std::unordered_map<std::string, JsonType>& allValues){
   }
 
   rapidjson::StringBuffer buffer;
-  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
   doc.Accept(writer);
 
   return buffer.GetString();

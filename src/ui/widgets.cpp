@@ -590,30 +590,30 @@ void renderObjPanel(bool includePanel, std::optional<objid> objectToDetail, std:
     auto id = objectToDetail.value();
     auto type = getObjectType(id);
     if (type == OBJ_MESH){
-      renderMeshPanel(includePanel, objectToDetail);
+      renderMeshPanel(false, objectToDetail);
       // enum ObjectType {, , , , , , ,  };
     }else if (type == OBJ_CAMERA){
-      renderCameraPanel(includePanel);
+      renderCameraPanel(false);
     }else if (type == OBJ_PORTAL){
-      renderUnknownObjPanel(includePanel);
+      renderUnknownObjPanel(false);
     }else if (type == OBJ_SOUND){
-      renderSoundPanel(includePanel, objectToDetail);
+      renderSoundPanel(false, objectToDetail);
     }else if (type == OBJ_LIGHT){
-      renderLightPanel(includePanel, objectToDetail);
+      renderLightPanel(false, objectToDetail);
     }else if (type == OBJ_OCTREE){
-      renderUnknownObjPanel(includePanel);
+      renderUnknownObjPanel(false);
     }else if (type == OBJ_EMITTER){
-      renderParticlePanel(includePanel, objectToDetail, sceneId);
+      renderParticlePanel(false, objectToDetail, sceneId);
     }else if (type == OBJ_NAVMESH){
-      renderUnknownObjPanel(includePanel);
+      renderUnknownObjPanel(false);
     }else if (type == OBJ_TEXT){
-      renderTextPanel(includePanel, objectToDetail);
+      renderTextPanel(false, objectToDetail);
     }else if (type == OBJ_PREFAB){
-      renderUnknownObjPanel(includePanel);
+      renderUnknownObjPanel(false);
     }else if (type == OBJ_VIDEO){
-      renderUnknownObjPanel(includePanel);
+      renderUnknownObjPanel(false);
     }else{
-      renderUnknownObjPanel(includePanel);
+      renderUnknownObjPanel(false);
     }
   }
 
