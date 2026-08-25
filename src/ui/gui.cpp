@@ -4,7 +4,7 @@
 
 void initUi(){}
 void renderUi(){}
-void registerWidget(std::string name, std::string list, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render){}
+void registerWidget(std::string name, std::optional<std::string> list, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render){}
 void registerAction(std::string name, std::string list, std::function<void()> fn){}
 void registerView(std::string name, std::vector<std::string> leftWidgets, std::vector<std::string> rightWidgets){}
 
@@ -28,7 +28,7 @@ std::vector<RegisteredActions> registeredActionLists;
 struct WidgetMenuItem2 {
     int id;
     std::string name;
-    std::string list;
+    std::optional<std::string> list;
     std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render;
 };
 std::vector<WidgetMenuItem2> dynamicWidgets {};
@@ -175,17 +175,17 @@ void initUi(){
     });  
 
 
-    registerWidget("Scenegraph", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("Scenegraph", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderScenegraphWithState(includePanel);
     });  
 
    
-    registerWidget("Object Details", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("Object Details", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderObjectDetailsWithState(includePanel);
     });  
              
 
-    registerWidget("Object Type", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+    registerWidget("Object Type", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
         renderObjPanel(includePanel, objectToDetail, sceneId);
     });  
 
@@ -249,7 +249,7 @@ void registerAction(std::string name, std::string list, std::function<void()> fn
 }
 
 
-void registerWidget(std::string name, std::string list, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render){
+void registerWidget(std::string name, std::optional<std::string> list, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render){
     static int id = 0;
     id++;
     dynamicWidgets.push_back(WidgetMenuItem2 {
@@ -261,13 +261,13 @@ void registerWidget(std::string name, std::string list, std::function<void(bool 
 
     bool alreadyHasList = false;
     for (auto& widgetList : widgetLists){
-        if (widgetList == list){
+        if (!list.has_value() ||  widgetList == list.value()){
             alreadyHasList = true;
             break;
         }
     }
     if (!alreadyHasList){
-        widgetLists.push_back(list);
+        widgetLists.push_back(list.value());
     }
 }
 std::optional<WidgetMenuItem2*> widgetByName(std::string name){
@@ -348,7 +348,7 @@ void renderNavbar(){
                 }
                 ImGui::Separator();
                 for (auto& widgetMenuItem : dynamicWidgets){
-                    if (widgetMenuItem.list != widgetList){
+                    if (!widgetMenuItem.list.has_value() || widgetMenuItem.list.value() != widgetList){
                         continue;
                     }
                     if (ImGui::MenuItem(widgetMenuItem.name.c_str())){

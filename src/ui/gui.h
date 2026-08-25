@@ -19,7 +19,7 @@
 
 void initUi();
 void renderUi();
-void registerWidget(std::string name, std::string list, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render);
+void registerWidget(std::string name, std::optional<std::string> list, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render);
 void registerAction(std::string name, std::string list, std::function<void()> fn);
 void registerView(std::string name, std::vector<std::string> leftWidgets, std::vector<std::string> rightWidgets);
 

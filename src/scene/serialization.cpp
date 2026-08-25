@@ -200,7 +200,7 @@ std::vector<AutoSerialize> gameobjSerializer {
     .structOffset = offsetof(GameObject, physicsOptions.restitution),
     .structOffsetFiller = std::nullopt,
     .field = "physics_restitution",
-    .defaultValue = 0.f,
+    .defaultValue = 0.1f,
   }, 
   AutoSerializeInt {
     .structOffset = offsetof(GameObject, physicsOptions.layer),

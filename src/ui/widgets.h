@@ -9,6 +9,8 @@
 #include "../cscript/cscript_binding.h"
 #include "../object_util.h"
 
+glm::vec3 createLocation();
+
 void renderDebug(bool includePanel);
 void renderObjectCount(bool includePanel);
 void renderActiveScene(bool includePanel, std::optional<objid> activeScene);
