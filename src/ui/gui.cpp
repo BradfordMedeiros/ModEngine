@@ -402,7 +402,25 @@ float sidebar(const char* title, std::vector<WidgetMenuItem2>& widgets2){
     return width;
 }
 
-void renderLayout(std::vector<WidgetMenuItem2>& leftWidgets2, std::vector<WidgetMenuItem2>& rightWidgets2){
+float sidebar2(const char* title, std::vector<WidgetMenuItem2>& widgets2){
+    ImGui::Begin(title, nullptr,  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground);
+        ImVec2 size = ImGui::GetContentRegionAvail();
+
+        for (int i = 0; i < widgets2.size(); i++){
+            auto& widget = widgets2.at(i);
+            ImGui::BeginChild(std::to_string(i).c_str(), ImVec2(size.x, size.y * 0.5), true);
+                renderWidget2(widget, false);
+            ImGui::EndChild();
+        }
+
+    float width = ImGui::GetWindowWidth();
+
+    ImGui::End();
+    return width;
+}
+
+
+void renderDividedLayout(std::vector<WidgetMenuItem2>& leftWidgets2, std::vector<WidgetMenuItem2>& rightWidgets2){
     ImGuiViewport* viewport = ImGui::GetMainViewport();
 
     float paddedOffset = viewport -> WorkSize.x * 0.005;
@@ -416,6 +434,31 @@ void renderLayout(std::vector<WidgetMenuItem2>& leftWidgets2, std::vector<Widget
     ImGui::SetNextWindowSize(ImVec2(rightPaneWidth, viewport -> WorkSize.y), ImGuiCond_FirstUseEver);
     rightPaneWidth = sidebar("GameObject Details", rightWidgets2);
 }
+
+void renderSplitLayout(std::vector<WidgetMenuItem2>& leftWidgets2, std::vector<WidgetMenuItem2>& rightWidgets2){
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+    float paddedOffset = viewport -> WorkSize.x * 0.00;
+    float verticalOffset = 0.f;
+
+    float leftPaneWidth = viewport -> WorkSize.x * 0.125f;
+    ImGui::SetNextWindowPos(ImVec2(viewport -> WorkPos.x - paddedOffset, viewport -> WorkPos.y + verticalOffset));
+    ImGui::SetNextWindowSize(ImVec2(leftPaneWidth , viewport -> WorkSize.y), ImGuiCond_FirstUseEver);
+    sidebar2("Scenegraph", leftWidgets2);
+
+    static float rightPaneWidth = viewport -> WorkSize.x * 0.875f;
+    ImGui::SetNextWindowPos(ImVec2(viewport -> WorkSize.x - rightPaneWidth + paddedOffset, viewport -> WorkPos.y + verticalOffset));
+    ImGui::SetNextWindowSize(ImVec2(rightPaneWidth, viewport -> WorkSize.y), ImGuiCond_FirstUseEver);
+    rightPaneWidth = sidebar2("GameObject Details", rightWidgets2);  
+}
+
+
+struct BufferedTextImGui {
+    std::string text;
+};
+static std::vector<BufferedTextImGui> bufferedTextImGui;
+
+
 
 
 void renderUi(){
@@ -435,8 +478,8 @@ void renderUi(){
                 std::vector<WidgetMenuItem2> rightWidgets2 {
                 };
 
-
-                renderLayout(dynamicView.leftWidgets, dynamicView.rightWidgets);
+                renderSplitLayout(dynamicView.leftWidgets, dynamicView.rightWidgets);
+                //renderDividedLayout(dynamicView.leftWidgets, dynamicView.rightWidgets);
                 break;
             }
         }
@@ -448,9 +491,28 @@ void renderUi(){
         }
     }
 
+  
+    //std::cout << "imgui text: " << bufferedTextImGui.size() << std::endl;
+    //for (auto& bufferedText : bufferedTextImGui){
+    //    ImGui::Text(bufferedText.text.c_str());
+    //}
+
+
     ImGui::Render();
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+}
+
+
+void drawImGuiText(std::string text){
+    bufferedTextImGui.push_back(BufferedTextImGui {
+        .text = text,
+    });
+}
+
+void clearImGuiData(){
+    bufferedTextImGui = {};
 }
 
 #endif

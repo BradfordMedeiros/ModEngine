@@ -277,6 +277,14 @@ void setEmitterEffectTint(objid id, glm::vec4 tint){
   mainApi -> setSingleGameObjectAttr(id, "effect-tint", tint);
 }
 
+glm::vec3* getColorGrade(){
+  return &state.colorGrade;
+}
+
+float* getSaturation(){
+  return &state.saturation;
+}
+
 ObjectType getObjectType(objid id){
   auto name = mainApi -> getGameObjNameForId(id).value();
   auto type = getObjectType(name);  

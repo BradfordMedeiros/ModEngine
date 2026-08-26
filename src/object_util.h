@@ -83,6 +83,9 @@ void setEmitterEffect(objid id, std::string particle);
 std::optional<glm::vec4> getEmitterEffectTint(objid id);
 void setEmitterEffectTint(objid id, glm::vec4 tint);
 
+glm::vec3* getColorGrade();
+float* getSaturation();
+
 
 ObjectType getObjectType(objid id);
 

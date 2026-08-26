@@ -17,6 +17,8 @@ uniform float exposure;
 uniform bool enableGammaCorrection;
 uniform bool enableExposure;
 uniform bool enableDepthVisualization;
+uniform vec3 colorGrade;
+uniform float saturation;
 
 void calculateFogEffect(in float depthAmount, out vec4 fogAmount){
   if (depthAmount < mincutoff || depthAmount > maxcuttoff){
@@ -66,5 +68,9 @@ void main(){
     color = pow(color, vec3(1.0 / 2.2));  
   }
 
-  FragColor = vec4(color, FragColor.a);
+  // This is saturation / desaturation 
+  float luminance = dot(color, vec3(0.299, 0.587, 0.114)); // Rec. 601 luma coefficients
+  color = mix(color, vec3(luminance), saturation);
+
+  FragColor = vec4(color, FragColor.a) * vec4(colorGrade.rgb, 1);
 }

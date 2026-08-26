@@ -2085,7 +2085,8 @@ int main(int argc, char* argv[]){
     
     resetReservedId();
     disposeTempBufferedData(lineData);
-
+    clearImGuiData();
+    
     for (int i = 0; i < debugPoints.size(); i++){
       auto point = debugPoints.at(i);
       auto pointTo = debugPointsTo.at(i);

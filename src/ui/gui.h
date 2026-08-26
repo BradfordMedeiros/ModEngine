@@ -23,4 +23,9 @@ void registerWidget(std::string name, std::optional<std::string> list, std::func
 void registerAction(std::string name, std::string list, std::function<void()> fn);
 void registerView(std::string name, std::vector<std::string> leftWidgets, std::vector<std::string> rightWidgets);
 
+
+void drawImGuiText(std::string text);
+void clearImGuiData();
+
+
 #endif

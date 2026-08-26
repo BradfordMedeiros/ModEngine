@@ -153,6 +153,9 @@ struct engineState {
   std::optional<objid> cullingObject;
   
   bool rebuildOctreePhysicsOnEdit;
+
+  glm::vec3 colorGrade = glm::vec3(1.f, 1.f, 1.f);
+  float saturation = 0.f;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

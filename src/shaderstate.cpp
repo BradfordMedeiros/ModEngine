@@ -365,6 +365,8 @@ void initFramebufferShader(unsigned int shader){
   	"enableExposure",
     "enableDepthVisualization",
     "flipCoords",
+    "colorGrade",
+    "saturation",
   });
 }
 
@@ -418,6 +420,18 @@ void updateFramebufferShaderFrame(unsigned int shader, float near, float far){
     .name = "maxcuttoff",
     .value = state.fogMaxCutoff,
   });
+
+  uniformData.push_back(UniformData {
+    .name = "colorGrade",
+    .value = state.colorGrade,
+  });
+
+  uniformData.push_back(UniformData {
+    .name = "saturation",
+    .value = state.saturation,
+  });
+
+
 
   setUniformData(shader, uniformData, { "framebufferTexture", "bloomTexture", "depthTexture", "flipCoords" });
 }
