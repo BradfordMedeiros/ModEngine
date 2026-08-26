@@ -156,6 +156,7 @@ struct engineState {
 
   glm::vec3 colorGrade = glm::vec3(1.f, 1.f, 1.f);
   float saturation = 0.f;
+  float contrast = 1.f;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

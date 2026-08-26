@@ -19,6 +19,8 @@ uniform bool enableExposure;
 uniform bool enableDepthVisualization;
 uniform vec3 colorGrade;
 uniform float saturation;
+uniform float contrast;
+uniform float realtime;
 
 void calculateFogEffect(in float depthAmount, out vec4 fogAmount){
   if (depthAmount < mincutoff || depthAmount > maxcuttoff){
@@ -60,7 +62,17 @@ void main(){
   }
 
   // should restore after testing a bit more
-  vec3 color = FragColor.rgb;
+  //vec3 color = FragColor.rgb;
+
+  //   // chromatic abberation 
+
+  vec2 offset = vec2(cos(realtime) * 0.005, 0.002);
+  vec3 color = vec3(
+    texture(framebufferTexture, TexCoords + offset).r,
+    texture(framebufferTexture, TexCoords).g,
+    texture(framebufferTexture, TexCoords - offset).b
+  );
+
   if (enableExposure){
     color = vec3(1.0) - exp(-FragColor.rgb * exposure);
   }
@@ -71,6 +83,9 @@ void main(){
   // This is saturation / desaturation 
   float luminance = dot(color, vec3(0.299, 0.587, 0.114)); // Rec. 601 luma coefficients
   color = mix(color, vec3(luminance), saturation);
+
+  color = (color - 0.5) * contrast + 0.5;
+
 
   FragColor = vec4(color, FragColor.a) * vec4(colorGrade.rgb, 1);
 }

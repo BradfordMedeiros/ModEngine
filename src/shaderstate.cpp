@@ -367,6 +367,8 @@ void initFramebufferShader(unsigned int shader){
     "flipCoords",
     "colorGrade",
     "saturation",
+    "contrast",
+    "realtime",
   });
 }
 
@@ -431,6 +433,15 @@ void updateFramebufferShaderFrame(unsigned int shader, float near, float far){
     .value = state.saturation,
   });
 
+  uniformData.push_back(UniformData {
+    .name = "contrast",
+    .value = state.contrast,
+  });
+
+  uniformData.push_back(UniformData {
+    .name = "realtime",
+    .value = getTotalTime(),
+  });
 
 
   setUniformData(shader, uniformData, { "framebufferTexture", "bloomTexture", "depthTexture", "flipCoords" });

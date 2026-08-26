@@ -285,6 +285,10 @@ float* getSaturation(){
   return &state.saturation;
 }
 
+float* getContrast(){
+  return &state.contrast;
+}
+
 ObjectType getObjectType(objid id){
   auto name = mainApi -> getGameObjNameForId(id).value();
   auto type = getObjectType(name);  
