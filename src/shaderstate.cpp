@@ -369,6 +369,8 @@ void initFramebufferShader(unsigned int shader){
     "saturation",
     "contrast",
     "realtime",
+    "chromatic",
+    "resolution",
   });
 }
 
@@ -441,6 +443,16 @@ void updateFramebufferShaderFrame(unsigned int shader, float near, float far){
   uniformData.push_back(UniformData {
     .name = "realtime",
     .value = getTotalTime(),
+  });
+
+  uniformData.push_back(UniformData {
+    .name = "chromatic",
+    .value = state.chromatic,
+  });
+
+  uniformData.push_back(UniformData {
+    .name = "resolution",
+    .value = state.resolution,
   });
 
 

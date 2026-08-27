@@ -21,6 +21,8 @@ uniform vec3 colorGrade;
 uniform float saturation;
 uniform float contrast;
 uniform float realtime;
+uniform vec2 chromatic;
+uniform ivec2 resolution;
 
 void calculateFogEffect(in float depthAmount, out vec4 fogAmount){
   if (depthAmount < mincutoff || depthAmount > maxcuttoff){
@@ -66,7 +68,10 @@ void main(){
 
   //   // chromatic abberation 
 
-  vec2 offset = vec2(cos(realtime) * 0.005, 0.002);
+  //vec2 offset = vec2(cos(realtime) * 0.005, 0.002);
+
+  vec2 offset = vec2(chromatic.x, chromatic.y);
+
   vec3 color = vec3(
     texture(framebufferTexture, TexCoords + offset).r,
     texture(framebufferTexture, TexCoords).g,
@@ -84,8 +89,16 @@ void main(){
   float luminance = dot(color, vec3(0.299, 0.587, 0.114)); // Rec. 601 luma coefficients
   color = mix(color, vec3(luminance), saturation);
 
+  // Contrast
   color = (color - 0.5) * contrast + 0.5;
 
+  // CRT overlay 
+  //float scanlineCount = 140.0;
+  //float flicker = 0.97 + 0.03 * sin(realtime * 8.0);
+  //float scanline =  0.85 + 0.05 * sin(TexCoords.y * scanlineCount * 6.2831853);
+  //color *= scanline * flicker;
 
   FragColor = vec4(color, FragColor.a) * vec4(colorGrade.rgb, 1);
+
+
 }

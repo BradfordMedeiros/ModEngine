@@ -266,6 +266,13 @@ std::vector<UniformData> queryUniforms(unsigned int program){
           .name = name,
           .value = uniformValue,
         });
+      }else if (type == GL_INT_VEC2){
+        glm::ivec2 uniformValue;
+        glGetUniformiv(program, glGetUniformLocation(program, name), glm::value_ptr(uniformValue));
+        uniformValues.push_back(UniformData {
+          .name = name,
+          .value = uniformValue,
+        });
       }else if (type == GL_FLOAT_VEC2){
         glm::vec2 uniformValue;
         glGetUniformfv(program, glGetUniformLocation(program, name), glm::value_ptr(uniformValue));
@@ -351,6 +358,7 @@ void assertAllUniformsSet(unsigned int program, std::vector<UniformData>& unifor
 
     auto requiredBoolType = std::get_if<bool>(&requiredUniform.value);
     auto requiredFloatType = std::get_if<float>(&requiredUniform.value);
+    auto requiredIVec2Type = std::get_if<glm::ivec2>(&requiredUniform.value);
     auto requiredVec2Type = std::get_if<glm::vec2>(&requiredUniform.value);
     auto requiredVec3Type = std::get_if<glm::vec3>(&requiredUniform.value);
     auto requiredVec4Type = std::get_if<glm::vec4>(&requiredUniform.value);
@@ -373,6 +381,12 @@ void assertAllUniformsSet(unsigned int program, std::vector<UniformData>& unifor
         }else if (requiredFloatType){
           auto floatType = std::get_if<float>(&uniform.value);
           if (floatType){
+            correctType = true;
+            break;
+          }
+        }else if (requiredIVec2Type){
+          auto ivec2Type = std::get_if<glm::ivec2>(&uniform.value);
+          if (ivec2Type){
             correctType = true;
             break;
           }
@@ -441,6 +455,13 @@ void setUniformData(unsigned int program, UniformData& uniform){
       glProgramUniform1f(program, glGetUniformLocation(program, uniform.name.c_str()), *floatType);
       return;
     }
+
+    auto ivec2Type = std::get_if<glm::ivec2>(&uniform.value);
+    if (ivec2Type){
+      glProgramUniform2iv(program, glGetUniformLocation(program, uniform.name.c_str()), 1, glm::value_ptr(*ivec2Type));
+      return;
+    }    
+
     auto vec2Type = std::get_if<glm::vec2>(&uniform.value);
     if (vec2Type){
       glProgramUniform2fv(program, glGetUniformLocation(program, uniform.name.c_str()), 1, glm::value_ptr(*vec2Type));
@@ -503,6 +524,10 @@ std::string print(std::vector<UniformData>& uniforms){
     auto boolPtr = std::get_if<bool>(&uniform.value);
     if (boolPtr){
       value += (*boolPtr ? "true" : "false");
+    }
+    auto ivec2Ptr = std::get_if<glm::ivec2>(&uniform.value);
+    if (ivec2Ptr){
+      value += print(*ivec2Ptr);
     }
     auto vec2Ptr = std::get_if<glm::vec2>(&uniform.value);
     if (vec2Ptr){

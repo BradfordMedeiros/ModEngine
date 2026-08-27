@@ -86,6 +86,7 @@ std::string uniqueNameSuffix();
 std::string print(bool value);
 std::string print(glm::vec3 vec);
 std::string print(glm::vec4 vec);
+std::string print(glm::ivec2 vec);
 std::string print(glm::ivec3 vec);
 std::string print(glm::vec2 vec);
 std::string print(std::optional<glm::vec2> vec);
@@ -465,7 +466,7 @@ struct Sampler2D {
 struct SamplerCube {
   int textureUnitId;
 };
-typedef std::variant<bool, float, glm::vec2, glm::vec3, glm::vec4, Sampler2D, SamplerCube, glm::mat4, int> UniformValue;
+typedef std::variant<bool, float, glm::ivec2, glm::vec2, glm::vec3, glm::vec4, Sampler2D, SamplerCube, glm::mat4, int> UniformValue;
 struct UniformData {
   std::string name;
   UniformValue value;

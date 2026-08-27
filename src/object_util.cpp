@@ -289,6 +289,10 @@ float* getContrast(){
   return &state.contrast;
 }
 
+glm::vec2* getChromatic(){
+  return &state.chromatic;
+}
+
 ObjectType getObjectType(objid id){
   auto name = mainApi -> getGameObjNameForId(id).value();
   auto type = getObjectType(name);  

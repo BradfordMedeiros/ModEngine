@@ -86,6 +86,8 @@ void setEmitterEffectTint(objid id, glm::vec4 tint);
 glm::vec3* getColorGrade();
 float* getSaturation();
 
+glm::vec2* getChromatic();
+
 
 ObjectType getObjectType(objid id);
 
