@@ -6,7 +6,7 @@ void initUi(){}
 void renderUi(){}
 void registerWidget(std::string name, std::optional<std::string> list, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render){}
 void registerAction(std::string name, std::string list, std::function<void()> fn){}
-void registerView(std::string name, std::vector<std::string> leftWidgets, std::vector<std::string> rightWidgets){}
+void registerView(std::string name, bool hide, std::vector<std::string> leftWidgets, std::vector<std::string> rightWidgets){}
 
 #else 
 
@@ -24,23 +24,10 @@ struct RegisteredActions {
 };
 
 std::vector<RegisteredActions> registeredActionLists;
-
-struct WidgetMenuItem2 {
-    int id;
-    std::string name;
-    std::optional<std::string> list;
-    std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render;
-};
 std::vector<WidgetMenuItem2> dynamicWidgets {};
 std::vector<std::string> widgetLists;
 std::set<int> dynamicWidgetEnabled;
 
-struct ViewMenuItem {
-    int id;
-    std::string name;
-    std::vector<WidgetMenuItem2> leftWidgets;
-    std::vector<WidgetMenuItem2> rightWidgets;
-};
 std::vector<ViewMenuItem> dynamicViews;
 std::optional<int> currentDynamicView;
 
@@ -190,7 +177,7 @@ void initUi(){
     });  
 
 
-    registerView("Editor", { "Scenegraph" }, { "Object Details", "Object Type" });
+    registerView("Editor", false, { "Scenegraph" }, { "Object Details", "Object Type" }, DIVIDED_LAYOUT);
 }
 
 void renderConsole(){
@@ -280,9 +267,8 @@ std::optional<WidgetMenuItem2*> widgetByName(std::string name){
 }
 
 
-void registerView(std::string name, std::vector<std::string> leftWidgetStrs, std::vector<std::string> rightWidgetStrs){
-    static int id = 0;
-    id++;
+void registerView(std::string name, bool hide, std::vector<std::string> leftWidgetStrs, std::vector<std::string> rightWidgetStrs, ViewType viewType){
+    int id = getSymbol(name);
 
     std::vector<WidgetMenuItem2> leftWidgets;
     std::vector<WidgetMenuItem2> rightWidgets;
@@ -299,12 +285,22 @@ void registerView(std::string name, std::vector<std::string> leftWidgetStrs, std
 
     dynamicViews.push_back(ViewMenuItem {
         .id = id,
+        .hide = hide,
         .name = name,
+        .type = viewType,
         .leftWidgets = leftWidgets,
         .rightWidgets = rightWidgets,
     });
 }
 
+std::optional<ViewMenuItem*> viewByName(int symbol){
+    for (auto& view : dynamicViews){
+        if (view.id == symbol){
+            return &view;
+        }
+    }
+    return std::nullopt;
+}
 
 std::optional<objid> currSceneId(){
     static std::optional<objid> sceneId;
@@ -331,6 +327,9 @@ void renderNavbar(){
                 currentDynamicView = std::nullopt;
             }    
             for (auto& dynamicView : dynamicViews){
+                if (dynamicView.hide){
+                    continue;
+                }
                 bool showEditor = currentDynamicView.has_value() && currentDynamicView.value() == dynamicView.id;
                 if(ImGui::MenuItem(dynamicView.name.c_str(), nullptr, showEditor)){
                     currentDynamicView = dynamicView.id;
@@ -420,36 +419,39 @@ float sidebar2(const char* title, std::vector<WidgetMenuItem2>& widgets2){
 }
 
 
-void renderDividedLayout(std::vector<WidgetMenuItem2>& leftWidgets2, std::vector<WidgetMenuItem2>& rightWidgets2){
+void renderDividedLayout(ViewMenuItem& view){
     ImGuiViewport* viewport = ImGui::GetMainViewport();
 
     float paddedOffset = viewport -> WorkSize.x * 0.005;
     float leftPaneWidth = viewport -> WorkSize.x * 0.125f;
     ImGui::SetNextWindowPos(ImVec2(viewport -> WorkPos.x - paddedOffset, viewport -> WorkPos.y));
     ImGui::SetNextWindowSize(ImVec2(leftPaneWidth , viewport -> WorkSize.y), ImGuiCond_FirstUseEver);
-    sidebar("Scenegraph", leftWidgets2);
+    sidebar(view.leftWidgets.at(0).name.c_str(), view.leftWidgets);
 
     static float rightPaneWidth = viewport -> WorkSize.x * 0.125f;
     ImGui::SetNextWindowPos(ImVec2(viewport -> WorkSize.x - rightPaneWidth + paddedOffset, viewport -> WorkPos.y));
     ImGui::SetNextWindowSize(ImVec2(rightPaneWidth, viewport -> WorkSize.y), ImGuiCond_FirstUseEver);
-    rightPaneWidth = sidebar("GameObject Details", rightWidgets2);
+    rightPaneWidth = sidebar(view.rightWidgets.at(0).name.c_str(), view.rightWidgets);
 }
 
-void renderSplitLayout(std::vector<WidgetMenuItem2>& leftWidgets2, std::vector<WidgetMenuItem2>& rightWidgets2){
+void renderSplitLayout(ViewMenuItem& view){
     ImGuiViewport* viewport = ImGui::GetMainViewport();
 
     float paddedOffset = viewport -> WorkSize.x * 0.00;
     float verticalOffset = 0.f;
 
-    float leftPaneWidth = viewport -> WorkSize.x * 0.125f;
-    ImGui::SetNextWindowPos(ImVec2(viewport -> WorkPos.x - paddedOffset, viewport -> WorkPos.y + verticalOffset));
-    ImGui::SetNextWindowSize(ImVec2(leftPaneWidth , viewport -> WorkSize.y), ImGuiCond_FirstUseEver);
-    sidebar2("Scenegraph", leftWidgets2);
+    float leftPanelWidth = viewport -> WorkSize.x * 0.125f;
+    float leftPanelX = viewport -> WorkPos.x - paddedOffset;
+    float leftPanelXRight = leftPanelX + leftPanelWidth;
 
-    static float rightPaneWidth = viewport -> WorkSize.x * 0.875f;
-    ImGui::SetNextWindowPos(ImVec2(viewport -> WorkSize.x - rightPaneWidth + paddedOffset, viewport -> WorkPos.y + verticalOffset));
-    ImGui::SetNextWindowSize(ImVec2(rightPaneWidth, viewport -> WorkSize.y), ImGuiCond_FirstUseEver);
-    rightPaneWidth = sidebar2("GameObject Details", rightWidgets2);  
+    ImGui::SetNextWindowPos(ImVec2(leftPanelX, viewport -> WorkPos.y + verticalOffset));
+    ImGui::SetNextWindowSize(ImVec2(leftPanelWidth , viewport -> WorkSize.y), ImGuiCond_Always);
+    sidebar2(view.leftWidgets.at(0).name.c_str(), view.leftWidgets);
+
+    float rightPaneWidth = viewport -> WorkSize.x * 0.875f;
+    ImGui::SetNextWindowPos(ImVec2(leftPanelXRight, viewport -> WorkPos.y + verticalOffset));
+    ImGui::SetNextWindowSize(ImVec2(rightPaneWidth, viewport -> WorkSize.y), ImGuiCond_Always);
+    rightPaneWidth = sidebar2(view.rightWidgets.at(0).name.c_str(), view.rightWidgets);  
 }
 
 
@@ -460,6 +462,19 @@ static std::vector<BufferedTextImGui> bufferedTextImGui;
 
 
 
+void renderLayout(ViewMenuItem& dynamicView){
+    if (dynamicView.type == SPLIT_LAYOUT){
+        renderSplitLayout(dynamicView);
+    }else if (dynamicView.type == DIVIDED_LAYOUT){
+        renderDividedLayout(dynamicView);
+    }
+}
+
+std::optional<std::function<void()>> additionalUserGui;
+
+void setGuiFn(std::optional<std::function<void()>> fn){
+    additionalUserGui = fn;
+}
 
 void renderUi(){
     ImGui_ImplOpenGL3_NewFrame();
@@ -472,14 +487,7 @@ void renderUi(){
     if (currentDynamicView.has_value()){
         for (auto& dynamicView : dynamicViews){
             if (currentDynamicView.value() == dynamicView.id){
-                std::vector<WidgetMenuItem2> leftWidgets2 {
-                    *widgetByName("Scenegraph").value(),
-                };
-                std::vector<WidgetMenuItem2> rightWidgets2 {
-                };
-
-                renderSplitLayout(dynamicView.leftWidgets, dynamicView.rightWidgets);
-                //renderDividedLayout(dynamicView.leftWidgets, dynamicView.rightWidgets);
+                renderLayout(dynamicView);
                 break;
             }
         }
@@ -497,6 +505,9 @@ void renderUi(){
     //    ImGui::Text(bufferedText.text.c_str());
     //}
 
+    if (additionalUserGui.has_value()){
+        additionalUserGui.value()();
+    }
 
     ImGui::Render();
 
