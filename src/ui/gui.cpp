@@ -237,10 +237,8 @@ void registerAction(std::string name, std::string list, std::function<void()> fn
 
 
 void registerWidget(std::string name, std::optional<std::string> list, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render){
-    static int id = 0;
-    id++;
     dynamicWidgets.push_back(WidgetMenuItem2 {
-        .id = id,
+        .id = getSymbol(name),
         .name = name,
         .list = list,
         .render = render,
@@ -260,6 +258,15 @@ void registerWidget(std::string name, std::optional<std::string> list, std::func
 std::optional<WidgetMenuItem2*> widgetByName(std::string name){
     for (auto& widget : dynamicWidgets){
         if (name == widget.name){
+            return &widget;
+        }
+    }
+    return std::nullopt;
+}
+
+std::optional<WidgetMenuItem2*> widgetByNameSymbol(int symbol){
+    for (auto& widget : dynamicWidgets){
+        if (symbol == widget.id){
             return &widget;
         }
     }

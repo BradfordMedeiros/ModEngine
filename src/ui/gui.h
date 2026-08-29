@@ -42,7 +42,10 @@ void setGuiFn(std::optional<std::function<void()>> fn);
 
 void registerView(std::string name, bool hide, std::vector<std::string> leftWidgetStrs, std::vector<std::string> rightWidgetStrs, ViewType viewType);
 std::optional<ViewMenuItem*> viewByName(int symbol);
+
 void renderLayout(ViewMenuItem& dynamicView);
+void renderWidget2(WidgetMenuItem2& item, bool includePanel);
+std::optional<WidgetMenuItem2*> widgetByNameSymbol(int symbol);
 
 void drawImGuiText(std::string text);
 void clearImGuiData();
