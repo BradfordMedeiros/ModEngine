@@ -176,6 +176,12 @@ void initUi(){
         renderObjPanel(includePanel, objectToDetail, sceneId);
     });  
 
+    registerWidget("Render Display", "render", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+        renderDisplayBinding(includePanel);
+    });  
+
+    
+
 
     registerView("Editor", false, { "Scenegraph" }, { "Object Details", "Object Type" }, DIVIDED_LAYOUT);
 }

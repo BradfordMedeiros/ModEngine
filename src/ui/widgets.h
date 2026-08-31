@@ -32,4 +32,6 @@ void renderModelPanel(bool includePanel, std::optional<objid> sceneId);;
 void renderParticlePanel(bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId);
 
 
+void renderDisplayBinding(bool includePanel);
+
 #endif

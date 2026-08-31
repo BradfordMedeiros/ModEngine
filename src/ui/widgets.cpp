@@ -1,6 +1,7 @@
 #include "./widgets.h"
 
 extern CustomApiBindings* mainApi;
+
 std::vector<std::string> getAllShaders();
 void sendManipulatorEvent(MANIPULATOR_EVENT event);
 std::vector<std::string> listParticlesFiles();
@@ -1476,3 +1477,44 @@ void renderParticlePanel(bool includePanel, std::optional<objid> objectToDetail,
 ///// these are game specific, so should be moved, theyre just mocked here for now
 
 
+enum DisplayRenderType { DEFAULT_RENDER, TEST_RENDER, DEPTH_RENDER };
+DisplayRenderType renderType = DEFAULT_RENDER;
+
+void renderDisplayBinding(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Display Panel");
+  }
+
+  bool wasDefault = renderType == DEFAULT_RENDER;
+  bool isDefault = wasDefault;
+  ImGui::Checkbox("Default", &isDefault);
+
+  bool wasTestRender = renderType == TEST_RENDER;
+  bool isTestRender = wasTestRender;
+  ImGui::Checkbox("Test", &isTestRender);
+
+  bool wasDepthRender = renderType == DEPTH_RENDER;
+  bool isDepthRender = wasDepthRender;
+  ImGui::Checkbox("Depth", &isDepthRender);
+  
+
+  if (wasDefault != isDefault && isDefault){
+    renderType = DEFAULT_RENDER;
+    mainApi -> createViewport(0, 0.f, 0.f, 1.f, 1.f, DefaultBindingOption{}, {});
+    mainApi -> removeViewport(1);
+    mainApi -> removeViewport(2);
+
+  } 
+  if (wasTestRender != isTestRender && isTestRender){
+    renderType = TEST_RENDER;
+    mainApi -> createViewport(0, 0.f, 0.5f, 0.5f, 0.5f, DefaultBindingOption{}, {});
+    mainApi -> createViewport(1, 0.5f, 0.5f, 0.5f, 0.5f, DepthBindingOption{}, {});
+    mainApi -> createViewport(2, 0.0f, 0.0f, 0.5f, 0.5f, BloomBindingOption{}, {});
+
+  }
+
+
+  if (includePanel){
+    ImGui::End();
+  }  
+}
