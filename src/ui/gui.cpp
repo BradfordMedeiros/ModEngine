@@ -186,38 +186,6 @@ void initUi(){
     registerView("Editor", false, { "Scenegraph" }, { "Object Details", "Object Type" }, DIVIDED_LAYOUT);
 }
 
-void renderConsole(){
-ImGui::Begin("Console");
-
-ImGui::BeginChild("Log", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);
-
-static float fpsHistory[120] = { 0 };
-static int offsetV = 0;
-
-fpsHistory[offsetV] = 20;
-
-// Every frame
-offsetV = (offsetV + 1) % 120;
-
-ImGui::PlotLines(
-    "FPS",
-    fpsHistory,
-    IM_ARRAYSIZE(fpsHistory),
-    offsetV,          // ring buffer offset
-    nullptr,         // overlay text
-    0.0f,
-    240.0f,
-    ImVec2(0,80));
-
-ImGui::EndChild();
-
-// Input line
-static std::string testname1 = "hello world";
-ImGui::InputText("##input", &testname1);
-
-ImGui::End();
-
-}
 
 void registerAction(std::string name, std::string list, std::function<void()> fn){
     bool foundList = false;
