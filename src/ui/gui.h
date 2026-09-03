@@ -47,6 +47,12 @@ void renderLayout(ViewMenuItem& dynamicView);
 void renderWidget2(WidgetMenuItem2& item, bool includePanel);
 std::optional<WidgetMenuItem2*> widgetByNameSymbol(int symbol);
 
+
+void renderLayoutAlignUpCenterHorz(const char* name, WidgetMenuItem2& widget, ImVec2 ndi, ImVec2 alignment, ImVec2 size);
+void renderLayoutCenter(const char* name, WidgetMenuItem2& widget);
+void renderLayoutHalf(WidgetMenuItem2& widgetOne, WidgetMenuItem2& widgetTwo);
+
+
 void drawImGuiText(std::string text);
 void clearImGuiData();
 

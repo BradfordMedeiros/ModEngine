@@ -481,18 +481,94 @@ void renderUi(){
     }
 
   
-    //std::cout << "imgui text: " << bufferedTextImGui.size() << std::endl;
-    //for (auto& bufferedText : bufferedTextImGui){
-    //    ImGui::Text(bufferedText.text.c_str());
-    //}
-
     if (additionalUserGui.has_value()){
         additionalUserGui.value()();
     }
 
+
+    //std::cout << "imgui text: " << bufferedTextImGui.size() << std::endl;
+
+
+    ImVec2 screen = ImGui::GetIO().DisplaySize;
+    ImGui::SetNextWindowSize(ImVec2(screen.x, screen.y));
+    ImGui::SetNextWindowPos(ImVec2(0, 300));
+
+
+    ImGui::Begin("##BufferedText", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground |  ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoInputs);
+
+    std::cout << "push alert size: " << bufferedTextImGui.size() << std::endl;
+    for (auto& bufferedText : bufferedTextImGui){
+        ImGui::TextUnformatted(bufferedText.text.c_str());
+    }
+
+
+    ImGui::End();
+
     ImGui::Render();
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+}
+
+
+void renderLayoutAlignUpCenterHorz(const char* name, WidgetMenuItem2& widget, ImVec2 ndi, ImVec2 alignment, ImVec2 size){
+    ImVec2 screen = ImGui::GetIO().DisplaySize;
+
+    ImVec2 position(screen.x * ndi.x, screen.y * (1.f - ndi.y));
+
+    position.x -= size.x * (1.f - alignment.x);
+    position.y -= size.y * alignment.y;
+
+    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.f, 0.f, 0.f, 0.f));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 0.f, 0.f));
+    
+    ImGui::SetNextWindowPos(position);
+    ImGui::SetNextWindowSize(size);
+    ImGui::Begin(name, nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+    renderWidget2(widget, false);
+
+    ImGui::End();
+
+    ImGui::PopStyleColor(2);
+}
+
+void renderLayoutCenter(const char* name, WidgetMenuItem2& widget){
+    ImVec2 screen = ImGui::GetIO().DisplaySize;
+    ImVec2 position(0.f, 0.f);
+
+    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.f, 0.f, 0.f, 0.f));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 1.f, 0.f));
+    
+    ImGui::SetNextWindowPos(position);
+    ImGui::SetNextWindowSize(ImVec2(screen.x, screen.y * 0.5));
+    ImGui::Begin(name, nullptr, ImGuiWindowFlags_NoDecoration);
+
+    renderWidget2(widget, false);
+
+    ImGui::End();
+    ImGui::PopStyleColor(2);
+}
+
+void renderLayoutHalf(WidgetMenuItem2& widgetOne, WidgetMenuItem2& widgetTwo){
+  ImVec2 available = ImGui::GetContentRegionAvail();
+
+  float leftWidth = available.x * 0.325f;
+  float rightWidth = available.x * 0.675f;
+
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 1.0f, 0.f));
+  ImGui::BeginChild("Left", ImVec2(leftWidth, available.y));
+    renderWidget2(widgetOne, false);
+  ImGui::EndChild();
+  ImGui::PopStyleColor();
+
+  ImGui::SameLine();
+
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.f, 0.0f, 0.0f, 0.f));
+  ImGui::BeginChild("Right", ImVec2(rightWidth, available.y));
+    renderWidget2(widgetTwo, false);
+  ImGui::EndChild();
+  ImGui::PopStyleColor();
 
 }
 
