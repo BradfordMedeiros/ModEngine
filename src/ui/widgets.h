@@ -8,6 +8,7 @@
 #include "imgui_internal.h"
 #include "../cscript/cscript_binding.h"
 #include "../object_util.h"
+#include "../main_api.h"
 
 glm::vec3 createLocation();
 
@@ -33,5 +34,7 @@ void renderParticlePanel(bool includePanel, std::optional<objid> objectToDetail,
 
 
 void renderDisplayBinding(bool includePanel);
+
+void renderCoreDebug(bool includePanel);
 
 #endif

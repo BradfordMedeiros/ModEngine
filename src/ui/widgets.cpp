@@ -1,11 +1,15 @@
 #include "./widgets.h"
 
 extern CustomApiBindings* mainApi;
+extern DefaultResources defaultResources;
+extern Stats statistics;
+extern engineState state;
 
 std::vector<std::string> getAllShaders();
 void sendManipulatorEvent(MANIPULATOR_EVENT event);
 std::vector<std::string> listParticlesFiles();
 std::vector<std::string> listSoundFiles();
+double timeSeconds(bool realtime);
 
 void renderDebug(bool includePanel){
 	if (includePanel){
@@ -1517,4 +1521,111 @@ void renderDisplayBinding(bool includePanel){
   if (includePanel){
     ImGui::End();
   }  
+}
+
+
+
+
+void renderCoreDebug(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("CoreDebug");
+  }
+
+  {
+    ImGui::Text("Framerate: ");
+    ImGui::SameLine();
+    ImGui::Text("%i", static_cast<int>(unwrapStat<float>(statValue(statistics.fpsStat))));
+  }
+
+  {
+    ImGui::Text("Selected Name: ");
+    ImGui::SameLine();
+
+    auto ids = state.editor.selectedObjs;
+    if (ids.size() > 0 && gameobjExists(ids.at(0))){
+      auto selectedObject = mainApi -> getGameObjNameForId(ids.at(0)).value();
+      ImGui::Text("%s", selectedObject.c_str());
+    }else{
+      ImGui::Text("[none]");
+
+    }
+  }
+
+
+  {
+    ImGui::Text("Default Camera Position: ");
+    ImGui::SameLine();
+    ImGui::Text("%s", print(defaultResources.defaultCamera.transformation.position).c_str());
+  }
+  {
+    ImGui::Text("Default Camera Rotation: ");
+    ImGui::SameLine();
+    ImGui::Text("%s", print(defaultResources.defaultCamera.transformation.rotation).c_str());
+  }
+
+  {
+    float ndiX = 2 * (state.cursorLeft / (float)state.resolution.x) - 1.f;
+    float ndiY = -2 * (state.cursorTop / (float)state.resolution.y) + 1.f;
+    ImGui::Text("Cursor NDI: ");
+    ImGui::SameLine();
+    ImGui::Text("%s", print(glm::vec2(ndiX, ndiY)).c_str());
+  }
+
+  {
+    auto idExists = gameobjExists(state.currentHoverIndex);
+    std::string name = idExists ? getGameObjectName(state.currentHoverIndex).value() : "[none]";
+
+    ImGui::Text("hovered id: ");
+    ImGui::SameLine();
+    ImGui::Text("%d", state.currentHoverIndex);
+    ImGui::SameLine();
+    ImGui::Text("%s", name.c_str());
+  }
+  {
+    ImGui::Text("triangles");
+    ImGui::SameLine();
+    ImGui::Text("%d", statistics.numTriangles);
+  }
+
+  {
+    ImGui::Text("draw calls");
+    ImGui::SameLine();
+    ImGui::Text("%d", statistics.numDrawCalls);
+  }
+
+  {
+    ImGui::Text("num gameobjects");
+    ImGui::SameLine();
+    ImGui::Text("%d", unwrapStat<int>(statValue(statistics.numObjectsStat)));
+  }
+
+  {
+    ImGui::Text("num rigidbodys");
+    ImGui::SameLine();
+    ImGui::Text("%d", unwrapStat<int>(statValue(statistics.rigidBodiesStat)));
+  }
+
+
+  {
+    ImGui::Text("num scenes loaded");
+    ImGui::SameLine();
+    ImGui::Text("%d",unwrapStat<int>(statValue(statistics.scenesLoadedStat)));
+  }
+
+
+  {
+    ImGui::Text("time");
+    ImGui::SameLine();
+    ImGui::Text("%f", timeSeconds(false));
+  }
+
+  {
+    ImGui::Text("realtime");
+    ImGui::SameLine();
+    ImGui::Text("%f", timeSeconds(true));
+  }
+
+  if (includePanel){
+    ImGui::End();
+  }    
 }

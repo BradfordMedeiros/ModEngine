@@ -814,93 +814,6 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, ViewportSettings& viewpor
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram, false, meshUniforms); 
 }
 
-void renderDebugUi(Color pixelColor){  
-  const float offsetPerLineMargin = 0.02f;
-  float offsetPerLine = -1 * (state.fontsize / 500.f + offsetPerLineMargin);
-  float uiYOffset = (1.f + 3 * offsetPerLine) + state.infoTextOffset.y;
-  float uiXOffset = (-1.f - offsetPerLine) + state.infoTextOffset.x;
-
-  static std::string nameForStat  = args.find("stat") != args.end() ? args.at("stat") : std::string("");
-  if (nameForStat != ""){
-    auto stat = statValue(statName(nameForStat));
-    drawTextNdi(std::string(nameForStat) + ": " + print(stat), uiXOffset, uiYOffset + offsetPerLine * -2, state.fontsize * 2);
-  }
-  
-  if (!state.showDebug){
-    return;
-  }
-
-  auto currentFramerate = static_cast<int>(unwrapStat<float>(statValue(statistics.fpsStat)));
-  //std::cout << "offsets: " << uiXOffset << " " << uiYOffset << std::endl;
-
-
-  auto ids = state.editor.selectedObjs;
-  std::string selectedName = "no object selected";
-  if (ids.size() > 0 && gameobjExists(ids.at(0))){
-    auto selectedObject = getGameObject(world, ids.at(0));
-    selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";  
-  }
-
-
-  std::string additionalText =  "     <" + std::to_string((int)(255 * state.hoveredItemColor.r)) + ","  + std::to_string((int)(255 * state.hoveredItemColor.g)) + " , " + std::to_string((int)(255 * state.hoveredItemColor.b)) + ">  " + " --- " + selectedName;
-  drawTextNdi(std::to_string(currentFramerate) + additionalText, uiXOffset, uiYOffset + offsetPerLine, state.fontsize + 1);
-
-  drawTextNdi("position: " + print(defaultResources.defaultCamera.transformation.position), uiXOffset, uiYOffset + offsetPerLine * 3, state.fontsize);
-  drawTextNdi("rotation: " + print(defaultResources.defaultCamera.transformation.rotation), uiXOffset, uiYOffset + offsetPerLine * 4, state.fontsize);
-
-  float ndiX = 2 * (state.cursorLeft / (float)state.resolution.x) - 1.f;
-  float ndiY = -2 * (state.cursorTop / (float)state.resolution.y) + 1.f;
-
-  drawTextNdi("cursor: (" + std::to_string(ndiX) + " | " + std::to_string(ndiY) + ") - " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.resolution.x) + "||" + std::to_string(state.resolution.y) + ")", uiXOffset, uiYOffset + offsetPerLine * 5, state.fontsize);
-  
-  std::string position = "n/a";
-  std::string worldPosition= "n/a";
-  std::string scale = "n/a";
-  std::string worldScale = "n/a";
-  std::string rotation = "n/a";
-  std::string worldRotation = "n/a";
-
-  auto selectedValue = latestSelected(state.editor);
-  if (selectedValue.has_value()){
-    auto selectedIndex = selectedValue.value();
-    auto transformation = gameobjectTransformation(world, selectedIndex, false, "renderDebugUI display info relative");
-    position = print(transformation.position);
-    scale = print(transformation.scale);
-    rotation = serializeQuat(transformation.rotation);
-
-    auto worldTransformation = gameobjectTransformation(world, selectedIndex, true, "renderDebugUI display info world");
-    worldPosition = print(worldTransformation.position);
-    worldScale = print(worldTransformation.scale);
-    worldRotation = print(worldTransformation.rotation);
-  }
-
-  drawTextNdi("position: " + position + " / " + worldPosition, uiXOffset, uiYOffset + offsetPerLine * 6, state.fontsize);
-  drawTextNdi("scale: " + scale + " / " + worldScale, uiXOffset, uiYOffset + offsetPerLine * 7, state.fontsize);
-  drawTextNdi("rotation: " + rotation + worldRotation, uiXOffset, uiYOffset + offsetPerLine * 8, state.fontsize);
-    
-
-  drawTextNdi("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), uiXOffset, uiYOffset + offsetPerLine * 9, state.fontsize);
-  drawTextNdi("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , uiXOffset, uiYOffset + offsetPerLine * 10, state.fontsize);
-
-  auto idExists = gameobjExists(state.currentHoverIndex);
-  std::string name = idExists ? getGameObjectName(state.currentHoverIndex).value() : "[none]";
-  drawTextNdi("hovered id: " + std::to_string(state.currentHoverIndex) + " - " + name, uiXOffset, uiYOffset + offsetPerLine * 11, state.fontsize);
-
-
-  drawTextNdi(std::string("animation info: ") + (timePlayback.isPaused() ? "paused" : "playing"), uiXOffset, uiYOffset + offsetPerLine * 12, state.fontsize);
-  drawTextNdi("using animation: " + std::to_string(-1) + " / " + std::to_string(-1) , uiXOffset, uiYOffset + offsetPerLine * 13, state.fontsize);
-  drawTextNdi("using object id: -1" , uiXOffset, uiYOffset + offsetPerLine * 14, state.fontsize);
-
-  drawTextNdi(std::string("triangles: ") + std::to_string(statistics.numTriangles), uiXOffset, uiYOffset + offsetPerLine * 15, state.fontsize);
-  drawTextNdi(std::string("draw calls: ") + std::to_string(statistics.numDrawCalls), uiXOffset, uiYOffset + offsetPerLine * 16, state.fontsize);
-  drawTextNdi(std::string("num gameobjects: ") + std::to_string(unwrapStat<int>(statValue(statistics.numObjectsStat))), uiXOffset, uiYOffset + offsetPerLine * 17, state.fontsize);
-  drawTextNdi(std::string("num rigidbodys: ") + std::to_string(unwrapStat<int>(statValue(statistics.rigidBodiesStat))), uiXOffset, uiYOffset + offsetPerLine * 18, state.fontsize);
-  drawTextNdi(std::string("num scenes loaded: ") + std::to_string(unwrapStat<int>(statValue(statistics.scenesLoadedStat))), uiXOffset, uiYOffset + offsetPerLine * 19, state.fontsize);
-  drawTextNdi(std::string("time: ") + std::to_string(timeSeconds(false)), uiXOffset, uiYOffset + offsetPerLine * 21, state.fontsize);
-  drawTextNdi(std::string("realtime: ") + std::to_string(timeSeconds(true)), uiXOffset, uiYOffset + offsetPerLine * 22, state.fontsize);
-}
-
-
 void onClientMessage(std::string message){
 
   
@@ -2566,8 +2479,6 @@ int main(int argc, char* argv[]){
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
   
     {
-      renderDebugUi(pixelColor);
-
       // below and render screepspace lines can probably be consoliated
       glUseProgram(*renderingResources.uiShaderProgram);
       glEnable(GL_BLEND);
