@@ -1,9 +1,4 @@
-#ifndef MOD_GUI
-#define MOD_GUI
-
-#define USE_IMGUI
-
-#ifdef USE_IMGUI
+#pragma once
 
 #include <iostream>
 
@@ -12,10 +7,11 @@
 #include "imgui_impl_opengl3.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "imgui_internal.h"
-#include "./views/core.h"
-#include "./widgets.h"
+#include "./widgets/core.h"
+#include "./widgets/widgets.h"
+#include "./widgets/obj.h"
 
-#endif
+
 
 struct WidgetMenuItem2 {
     int id;
@@ -55,6 +51,3 @@ void renderLayoutHalf(WidgetMenuItem2& widgetOne, WidgetMenuItem2& widgetTwo);
 
 void drawImGuiText(std::string text);
 void clearImGuiData();
-
-
-#endif

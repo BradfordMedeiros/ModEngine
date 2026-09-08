@@ -1,15 +1,5 @@
 #include "./gui.h"
 
-#ifndef USE_IMGUI
-
-void initUi(){}
-void renderUi(){}
-void registerWidget(std::string name, std::optional<std::string> list, std::function<void(bool includePanel,  std::optional<objid> objectToDetail, std::optional<objid> sceneId)> render){}
-void registerAction(std::string name, std::string list, std::function<void()> fn){}
-void registerView(std::string name, bool hide, std::vector<std::string> leftWidgets, std::vector<std::string> rightWidgets){}
-
-#else 
-
 extern CustomApiBindings* mainApi;
 extern GLFWwindow* window;
 
@@ -23,41 +13,17 @@ struct RegisteredActions {
     std::vector<RegisteredAction> actions;
 };
 
+struct BufferedTextImGui {
+    std::string text;
+};
+
 std::vector<RegisteredActions> registeredActionLists;
 std::vector<WidgetMenuItem2> dynamicWidgets {};
 std::vector<std::string> widgetLists;
 std::set<int> dynamicWidgetEnabled;
-
 std::vector<ViewMenuItem> dynamicViews;
 std::optional<int> currentDynamicView;
-
-
-#include <filesystem>
-
-std::optional<std::string> FileExplorer(std::string directory){
-
-    for (auto& entry : std::filesystem::directory_iterator(directory))
-    {
-        if (entry.is_directory())
-        {
-            if (ImGui::TreeNode(entry.path().filename().string().c_str()))
-            {
-                auto selectedFile = FileExplorer(entry.path());
-                ImGui::TreePop();
-                if (selectedFile.has_value()){
-                    return selectedFile.value();
-                }
-            }
-        }
-        else{
-            if(ImGui::Selectable(entry.path().filename().string().c_str())){
-                return entry.path();
-            }
-        }
-    }
-    return std::nullopt;
-
-}
+std::vector<BufferedTextImGui> bufferedTextImGui;
 
 std::optional<objid> getGameObjectForDetail(){
     static std::optional<objid> objectToDetail2;
@@ -112,80 +78,68 @@ void initUi(){
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-    registerWidget("Debug", "default", [](bool includePanel, std::optional<objid>, std::optional<objid>) -> void {
-        renderDebug(includePanel);
-    });
-    registerWidget("Transform", "default", [](bool includePanel, std::optional<objid>, std::optional<objid>) -> void {
-        renderTransformPanel(includePanel);
-    });
-    registerWidget("ActiveScene", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderActiveScene(includePanel, sceneId);
-    });
-    registerWidget("Create Obj", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderCreateObj(includePanel, sceneId);
-    });
-    
-    registerWidget("Render", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderRenderPanel(includePanel);
-    });
+    {
+        registerWidget("Debug", "core", [](bool includePanel, std::optional<objid>, std::optional<objid>) -> void {
+            renderDebug(includePanel);
+        });
+        registerWidget("CoreDebug", "core", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+          renderCoreDebug(includePanel);
+        });  
+        registerWidget("Object Count", "core", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderObjectCount(includePanel);
+        });
+        registerWidget("ActiveScene", "core", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderActiveScene(includePanel, sceneId);
+        });
+    }
 
-    registerWidget("Object Count", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderObjectCount(includePanel);
-    });
+    {
+        registerWidget("Object - Camera", "objects", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderCameraPanel(includePanel);
+        });  
+        registerWidget("Object - Sound", "objects", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderSoundPanel(includePanel, objectToDetail);
+        });  
+        registerWidget("Object - Light", "objects", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderLightPanel(includePanel, objectToDetail);
+        });  
+        registerWidget("Object - Mesh", "objects", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderMeshPanel(includePanel, objectToDetail);
+        });  
+        registerWidget("Particle", "objects", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderParticlePanel(includePanel, objectToDetail, sceneId);
+        });  
+        registerWidget("Object Type", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderObjPanel(includePanel, objectToDetail, sceneId);
+        });  
+        registerWidget("Object Details", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderObjectDetailsWithState(includePanel);
+        });
+        registerWidget("Create Obj", "objects", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderCreateObj(includePanel, sceneId);
+        });
+        registerWidget("Model", "objects", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderModelPanel(includePanel, sceneId);
+        });   
+    }
 
-    registerWidget("Textures", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderTextures(includePanel, objectToDetail);
-    });
-
-    registerWidget("Model", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderModelPanel(includePanel, sceneId);
-    });   
-    
-    registerWidget("Object - Camera", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderCameraPanel(includePanel);
-    });  
-
-    registerWidget("Object - Light", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderLightPanel(includePanel, objectToDetail);
-    });  
-
-    registerWidget("Object - Mesh", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderMeshPanel(includePanel, objectToDetail);
-    });  
-
-    registerWidget("Particle", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderParticlePanel(includePanel, objectToDetail, sceneId);
-    });  
-
-    registerWidget("Object - Sound", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderSoundPanel(includePanel, objectToDetail);
-    });  
-
-
-    registerWidget("Scenegraph", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderScenegraphWithState(includePanel);
-    });  
-
-   
-    registerWidget("Object Details", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderObjectDetailsWithState(includePanel);
-    });  
-             
-
-    registerWidget("Object Type", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderObjPanel(includePanel, objectToDetail, sceneId);
-    });  
-
-    registerWidget("Render Display", "default", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderDisplayBinding(includePanel);
-    });  
-
- 
-    registerWidget("CoreDebug", "render", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-        renderCoreDebug(includePanel);
-    });  
-  
-
+    {
+        registerWidget("Transform", "widgets", [](bool includePanel, std::optional<objid>, std::optional<objid>) -> void {
+            renderTransformPanel(includePanel);
+        });
+        registerWidget("Render", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderRenderPanel(includePanel);
+        });
+        registerWidget("Textures", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderTextures(includePanel, objectToDetail);
+        });
+        registerWidget("Scenegraph", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderScenegraphWithState(includePanel);
+        });  
+        registerWidget("Render Display", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderDisplayBinding(includePanel);
+        });  
+    }
 
     registerView("Editor", false, { "Scenegraph" }, { "Object Details", "Object Type" }, DIVIDED_LAYOUT);
 }
@@ -440,13 +394,6 @@ void renderSplitLayout(ViewMenuItem& view){
 }
 
 
-struct BufferedTextImGui {
-    std::string text;
-};
-static std::vector<BufferedTextImGui> bufferedTextImGui;
-
-
-
 void renderLayout(ViewMenuItem& dynamicView){
     if (dynamicView.type == SPLIT_LAYOUT){
         renderSplitLayout(dynamicView);
@@ -573,7 +520,6 @@ void renderLayoutHalf(WidgetMenuItem2& widgetOne, WidgetMenuItem2& widgetTwo){
     renderWidget2(widgetTwo, false);
   ImGui::EndChild();
   ImGui::PopStyleColor();
-
 }
 
 
@@ -587,4 +533,3 @@ void clearImGuiData(){
     bufferedTextImGui = {};
 }
 
-#endif
