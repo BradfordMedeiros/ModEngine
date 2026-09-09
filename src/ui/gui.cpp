@@ -341,7 +341,7 @@ float sidebar(const char* title, std::vector<WidgetMenuItem2>& widgets2){
 }
 
 float sidebar2(const char* title, std::vector<WidgetMenuItem2>& widgets2){
-    ImGui::Begin(title, nullptr,  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground);
+    ImGui::Begin(title, nullptr,  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus);
         ImVec2 size = ImGui::GetContentRegionAvail();
 
         for (int i = 0; i < widgets2.size(); i++){
@@ -445,7 +445,7 @@ void renderUi(){
     ImGui::SetNextWindowPos(ImVec2(0, 300));
 
 
-    ImGui::Begin("##BufferedText", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground |  ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoInputs);
+    ImGui::Begin("##BufferedText", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground |  ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
     std::cout << "push alert size: " << bufferedTextImGui.size() << std::endl;
     for (auto& bufferedText : bufferedTextImGui){
@@ -475,7 +475,7 @@ void renderLayoutAlignUpCenterHorz(const char* name, WidgetMenuItem2& widget, Im
     
     ImGui::SetNextWindowPos(position);
     ImGui::SetNextWindowSize(size);
-    ImGui::Begin(name, nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+    ImGui::Begin(name, nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
     renderWidget2(widget, false);
 
