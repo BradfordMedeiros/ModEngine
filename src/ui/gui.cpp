@@ -139,6 +139,12 @@ void initUi(){
         registerWidget("Render Display", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
             renderDisplayBinding(includePanel);
         });  
+        registerWidget("Font", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderFontWidget(includePanel);
+        });  
+
+        
+
     }
 
     registerView("Editor", false, { "Scenegraph" }, { "Object Details", "Object Type" }, DIVIDED_LAYOUT);

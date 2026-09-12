@@ -15,6 +15,18 @@ void renderRenderPanel(bool includePanel);
 void renderTransformPanel(bool includePanel);
 void renderTextures(bool includePanel, std::optional<objid> objectToDetail);
 void renderDisplayBinding(bool includePanel);
+void renderFontWidget(bool includePanel);
 
+
+struct ImGuiLoadedFont {
+  ImFont* font;
+  int symbol;
+  float fontSize;
+  std::string path;
+};
+extern std::vector<ImGuiLoadedFont> imguiFonts;
+void loadImGuiFont(int symbol, std::string path, float fontSize);
+std::optional<ImFont*> getImGuiFont(int symbol);
+void updateFont(int symbol, std::string path, float fontSize);
 
 #endif

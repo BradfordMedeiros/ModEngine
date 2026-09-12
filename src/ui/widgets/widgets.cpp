@@ -439,3 +439,106 @@ void renderDisplayBinding(bool includePanel){
 
 
 
+std::vector<ImGuiLoadedFont> imguiFonts;
+void loadImGuiFont(int symbol, std::string path, float fontSize){
+  for (auto& font : imguiFonts){
+    if (font.symbol == symbol){
+      return;
+    }
+  }
+
+  ImGuiIO& io = ImGui::GetIO();
+  ImFont* loadedFont = io.Fonts->AddFontFromFileTTF(path.c_str(), fontSize);
+  imguiFonts.push_back(ImGuiLoadedFont {
+    .font = loadedFont,
+    .symbol = symbol,
+    .fontSize = fontSize,
+    .path = path,
+  });
+}
+
+std::optional<ImFont*> getImGuiFont(int symbol){
+  for (auto& font : imguiFonts){
+    if (font.symbol == symbol){
+      return font.font;
+    }
+  }
+  return std::nullopt;
+}
+void updateFont(int symbol, std::string path, float fontSize){
+  for (auto& font : imguiFonts){
+    if (font.symbol == symbol){
+      font.path = path;
+      font.fontSize = fontSize;
+      break;
+    }
+  }
+
+  ImGuiIO& io = ImGui::GetIO();
+
+  io.Fonts -> Clear();
+
+  for (auto& font : imguiFonts){
+    font.font = io.Fonts -> AddFontFromFileTTF(
+      font.path.c_str(),
+      font.fontSize
+    );
+  }
+
+  io.Fonts -> Build();
+
+  // Your ImGui renderer/backend also needs to recreate its font texture
+  // here, depending on how you've initialized ImGui.
+}
+
+std::vector<std::string> allFonts {
+
+};
+std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, std::vector<std::string> extensions);
+
+
+void renderFontWidget(bool includePanel){
+  static bool doOnce = true;
+  if (doOnce){
+    doOnce = false;
+    allFonts = listFilesWithExtensionsFromPackage("./res/fonts/", { "ttf", "otf" });
+  }
+  if (includePanel){
+    ImGui::Begin("Font Panel");
+  }
+
+  for (int i = 0; i < imguiFonts.size(); i++){
+    auto& font = imguiFonts.at(i);
+    ImGui::PushID(i);
+
+    ImGui::Text(nameForSymbol(font.symbol).c_str());
+    if (ImGui::BeginCombo("##path", font.path.c_str())){
+      for (int j = 0; j < allFonts.size(); j++){
+        auto& newFont = allFonts.at(j);
+        if (ImGui::Selectable(newFont.c_str(), false)){
+          updateFont(font.symbol, newFont, font.fontSize);
+        }      
+      }
+      ImGui::EndCombo();
+    }
+
+    if (ImGui::Button("-")){
+      font.fontSize -= 1.f;
+      updateFont(font.symbol, font.path, font.fontSize);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("+")){
+      font.fontSize += 1.f;
+      updateFont(font.symbol, font.path, font.fontSize);
+    }
+    ImGui::Text("%.0f", font.fontSize);
+
+    ImGui::Dummy(ImVec2(0.f, 10.f));
+
+    ImGui::PopID();
+  }
+
+  if (includePanel){
+    ImGui::End();
+  }  
+}

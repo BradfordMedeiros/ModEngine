@@ -51,3 +51,4 @@ void renderLayoutHalf(WidgetMenuItem2& widgetOne, WidgetMenuItem2& widgetTwo);
 
 void drawImGuiText(std::string text);
 void clearImGuiData();
+
