@@ -142,7 +142,9 @@ void initUi(){
         registerWidget("Font", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
             renderFontWidget(includePanel);
         });  
-
+        registerWidget("Color", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderColorWidget(includePanel);
+        });  
         
 
     }
@@ -330,6 +332,8 @@ void renderWidget2(WidgetMenuItem2& item, bool includePanel){
 }
 
 float sidebar(const char* title, std::vector<WidgetMenuItem2>& widgets2){
+    auto color = getImGuiColor(getSymbol("editor-color"), glm::vec4(0.f, 0.f, 0.f, 1.f));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, color);
     ImGui::Begin(title, nullptr);
         ImVec2 size = ImGui::GetContentRegionAvail();
 
@@ -343,10 +347,15 @@ float sidebar(const char* title, std::vector<WidgetMenuItem2>& widgets2){
     float width = ImGui::GetWindowWidth();
 
     ImGui::End();
+    ImGui::PopStyleColor();
+
     return width;
 }
 
 float sidebar2(const char* title, std::vector<WidgetMenuItem2>& widgets2){
+    auto color = getImGuiColor(getSymbol("editor-color"), glm::vec4(0.f, 0.f, 0.f, 1.f));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, color);
+
     ImGui::Begin(title, nullptr,  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus);
         ImVec2 size = ImGui::GetContentRegionAvail();
 
@@ -360,6 +369,7 @@ float sidebar2(const char* title, std::vector<WidgetMenuItem2>& widgets2){
     float width = ImGui::GetWindowWidth();
 
     ImGui::End();
+    ImGui::PopStyleColor();
     return width;
 }
 
@@ -433,7 +443,10 @@ void renderUi(){
 
     for (auto &dynamicWidget : dynamicWidgets){
         if (dynamicWidgetEnabled.count(dynamicWidget.id) > 0){
+            auto color = getImGuiColor(getSymbol("widget-color"), glm::vec4(1.f, 0.f, 0.f, 1.f));
+            ImGui::PushStyleColor(ImGuiCol_WindowBg, color);
             renderWidget2(dynamicWidget, true);
+            ImGui::PopStyleColor();
         }
     }
 

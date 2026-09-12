@@ -491,6 +491,21 @@ void updateFont(int symbol, std::string path, float fontSize){
   // here, depending on how you've initialized ImGui.
 }
 
+std::vector<ImGuiColor> imguiColors;
+
+ImVec4 getImGuiColor(int symbol, glm::vec4 defaultColor){
+  for (auto& color : imguiColors){
+    if (color.symbol == symbol){
+      return ImVec4(color.color.r, color.color.g, color.color.b, color.color.a);
+    }
+  }
+  imguiColors.push_back(ImGuiColor{
+    .symbol = symbol,
+    .color = defaultColor,
+  });
+  return ImVec4(defaultColor.r, defaultColor.g, defaultColor.b, defaultColor.a);
+}
+
 std::vector<std::string> allFonts {
 
 };
@@ -534,6 +549,33 @@ void renderFontWidget(bool includePanel){
     ImGui::Text("%.0f", font.fontSize);
 
     ImGui::Dummy(ImVec2(0.f, 10.f));
+
+    ImGui::PopID();
+  }
+
+  if (includePanel){
+    ImGui::End();
+  }  
+}
+
+void renderColorWidget(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Color Panel");
+  }
+
+  for (int i = 0; i < imguiColors.size(); i++){
+    auto& color = imguiColors.at(i);
+    ImGui::PushID(i);
+
+    ImGui::Text(nameForSymbol(color.symbol).c_str());
+    ImGui::Text(print(color.color).c_str());
+    ImGui::Dummy(ImVec2(0.f, 10.f));
+
+    auto tint = color.color;
+    float colorValues[4] = {tint.r, tint.g, tint.b, tint.a};
+    if (ImGui::ColorEdit4("Tint", colorValues)){
+      color.color = glm::vec4(colorValues[0], colorValues[1], colorValues[2], colorValues[3]);
+    }
 
     ImGui::PopID();
   }

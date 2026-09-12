@@ -16,7 +16,7 @@ void renderTransformPanel(bool includePanel);
 void renderTextures(bool includePanel, std::optional<objid> objectToDetail);
 void renderDisplayBinding(bool includePanel);
 void renderFontWidget(bool includePanel);
-
+void renderColorWidget(bool includePanel);
 
 struct ImGuiLoadedFont {
   ImFont* font;
@@ -28,5 +28,13 @@ extern std::vector<ImGuiLoadedFont> imguiFonts;
 void loadImGuiFont(int symbol, std::string path, float fontSize);
 std::optional<ImFont*> getImGuiFont(int symbol);
 void updateFont(int symbol, std::string path, float fontSize);
+
+
+struct ImGuiColor {
+	int symbol;
+	glm::vec4 color;
+};
+extern std::vector<ImGuiColor> imguiColors;
+ImVec4 getImGuiColor(int symbol, glm::vec4 defaultColor);
 
 #endif
