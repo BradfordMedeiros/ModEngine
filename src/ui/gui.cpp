@@ -481,7 +481,7 @@ void renderUi(){
 }
 
 
-void renderLayoutAlignUpCenterHorz(const char* name, WidgetMenuItem2& widget, ImVec2 ndi, ImVec2 alignment, ImVec2 size){
+void renderLayoutAlignUpCenterHorz(const char* name, WidgetMenuItem2& widget, ImVec2 ndi, ImVec2 alignment, ImVec2 size, ImVec4 color){
     ImVec2 screen = ImGui::GetIO().DisplaySize;
 
     ImVec2 position(screen.x * ndi.x, screen.y * (1.f - ndi.y));
@@ -490,7 +490,7 @@ void renderLayoutAlignUpCenterHorz(const char* name, WidgetMenuItem2& widget, Im
     position.y -= size.y * alignment.y;
 
     ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.f, 0.f, 0.f, 0.f));
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 0.f, 0.f));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, color);
     
     ImGui::SetNextWindowPos(position);
     ImGui::SetNextWindowSize(size);
