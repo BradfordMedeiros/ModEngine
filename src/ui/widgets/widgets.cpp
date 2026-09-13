@@ -512,6 +512,68 @@ std::vector<std::string> allFonts {
 std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, std::vector<std::string> extensions);
 
 
+void loadUiData(std::string filepath){
+  auto fileContent = readFileOrPackage(filepath);
+  rapidjson::Document doc;
+  rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
+  if (doc.HasParseError()){
+    std::cout << "error parsing ui file: " << filepath << "  (" << fileContent << ")" << std::endl;
+    exit(0);
+  }
+
+  {
+    auto it = doc.FindMember("colors");
+    if (it != doc.MemberEnd() && it->value.IsObject()){
+      auto& colors = it->value;
+
+      for (auto colorIt = colors.MemberBegin(); colorIt != colors.MemberEnd(); ++colorIt){
+        if (colorIt->value.IsArray() && colorIt->value.Size() == 4){
+          auto symbol = getSymbol(colorIt->name.GetString());
+          auto color = glm::vec4(colorIt->value[0].GetFloat(), colorIt->value[1].GetFloat(), colorIt->value[2].GetFloat(), colorIt->value[3].GetFloat());
+          imguiColors.push_back(ImGuiColor{
+            .symbol = symbol,
+            .color = color,
+          });
+        }
+      }
+    }
+  }
+}
+
+void saveUiData(){
+  rapidjson::Document doc;
+  doc.SetObject();
+  rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+
+  rapidjson::Value jsonMap(rapidjson::kObjectType);
+
+  for (auto& imguiColor : imguiColors) {
+      auto colorName = nameForSymbol(imguiColor.symbol);
+      rapidjson::Value key(colorName, allocator);
+      rapidjson::Value value(rapidjson::kArrayType);
+      value.PushBack(imguiColor.color.r, allocator);
+      value.PushBack(imguiColor.color.g, allocator);
+      value.PushBack(imguiColor.color.b, allocator);
+      value.PushBack(imguiColor.color.a, allocator);
+      jsonMap.AddMember(key, value, allocator);
+  }
+  doc.AddMember("colors", jsonMap, allocator);
+
+  //doc.AddMember("volume", mixedSound.volume, allocator);
+  //doc.AddMember("center", mixedSound.center, allocator);
+  //doc.AddMember("loop", mixedSound.loop, allocator);
+  //doc.AddMember("sequential", mixedSound.clipOrderSequential, allocator);
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+  doc.Accept(writer);
+
+  auto strValue = buffer.GetString();
+  std::cout << strValue << std::endl;
+
+  realfiles::saveFile("../afterworld/data/config/ui.json", strValue);
+}
+
 void renderFontWidget(bool includePanel){
   static bool doOnce = true;
   if (doOnce){
@@ -578,6 +640,10 @@ void renderColorWidget(bool includePanel){
     }
 
     ImGui::PopID();
+  }
+
+  if (ImGui::Button("Save")){
+    saveUiData();
   }
 
   if (includePanel){

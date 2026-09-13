@@ -78,6 +78,8 @@ void initUi(){
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
+    loadUiData("../afterworld/data/config/ui.json");
+
     {
         registerWidget("Debug", "core", [](bool includePanel, std::optional<objid>, std::optional<objid>) -> void {
             renderDebug(includePanel);
