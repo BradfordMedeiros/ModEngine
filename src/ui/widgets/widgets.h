@@ -26,7 +26,7 @@ struct ImGuiLoadedFont {
 };
 extern std::vector<ImGuiLoadedFont> imguiFonts;
 void loadImGuiFont(int symbol, std::string path, float fontSize);
-std::optional<ImFont*> getImGuiFont(int symbol);
+ImFont* getImGuiFont(int symbol);
 void updateFont(int symbol, std::string path, float fontSize);
 
 

@@ -79,6 +79,7 @@ void initUi(){
 	ImGui_ImplOpenGL3_Init("#version 330");
 
     loadUiData("../afterworld/data/config/ui.json");
+    loadImGuiFont(getSymbol("default-font"), "./res/fonts/vcr.ttf", 16.f);
 
     {
         registerWidget("Debug", "core", [](bool includePanel, std::optional<objid>, std::optional<objid>) -> void {

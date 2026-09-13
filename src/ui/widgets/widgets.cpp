@@ -457,14 +457,26 @@ void loadImGuiFont(int symbol, std::string path, float fontSize){
   });
 }
 
-std::optional<ImFont*> getImGuiFont(int symbol){
+
+ImFont* getDefaultImGuiFont(){
+  static int defaultFontSymbol = getSymbol("default-font");
+  for (auto& font : imguiFonts){
+    if (font.symbol == defaultFontSymbol){
+      return font.font;
+    }
+  }
+  modassert(false, "no default font");
+  return NULL;
+}
+ImFont* getImGuiFont(int symbol){
   for (auto& font : imguiFonts){
     if (font.symbol == symbol){
       return font.font;
     }
   }
-  return std::nullopt;
+  return getDefaultImGuiFont();
 }
+
 void updateFont(int symbol, std::string path, float fontSize){
   for (auto& font : imguiFonts){
     if (font.symbol == symbol){
@@ -530,11 +542,29 @@ void loadUiData(std::string filepath){
         if (colorIt->value.IsArray() && colorIt->value.Size() == 4){
           auto symbol = getSymbol(colorIt->name.GetString());
           auto color = glm::vec4(colorIt->value[0].GetFloat(), colorIt->value[1].GetFloat(), colorIt->value[2].GetFloat(), colorIt->value[3].GetFloat());
+
           imguiColors.push_back(ImGuiColor{
             .symbol = symbol,
             .color = color,
           });
         }
+      }
+    }
+  }
+
+  {
+    auto it = doc.FindMember("fonts");
+    if (it != doc.MemberEnd() && it->value.IsObject()){
+      auto& fonts = it->value;
+
+      for (auto fontIt = fonts.MemberBegin(); fontIt != fonts.MemberEnd(); ++fontIt){
+        auto& font = fontIt->value;
+
+        auto symbol = getSymbol(fontIt->name.GetString());
+        auto file = font["file"].GetString();
+        auto size = font["size"].GetFloat();
+
+        loadImGuiFont(symbol, file, size);
       }
     }
   }
@@ -545,24 +575,34 @@ void saveUiData(){
   doc.SetObject();
   rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
 
-  rapidjson::Value jsonMap(rapidjson::kObjectType);
-
-  for (auto& imguiColor : imguiColors) {
-      auto colorName = nameForSymbol(imguiColor.symbol);
-      rapidjson::Value key(colorName, allocator);
-      rapidjson::Value value(rapidjson::kArrayType);
-      value.PushBack(imguiColor.color.r, allocator);
-      value.PushBack(imguiColor.color.g, allocator);
-      value.PushBack(imguiColor.color.b, allocator);
-      value.PushBack(imguiColor.color.a, allocator);
-      jsonMap.AddMember(key, value, allocator);
+  {
+    rapidjson::Value jsonMap(rapidjson::kObjectType);
+    for (auto& imguiColor : imguiColors) {
+        auto colorName = nameForSymbol(imguiColor.symbol);
+        rapidjson::Value key(colorName, allocator);
+        rapidjson::Value value(rapidjson::kArrayType);
+        value.PushBack(imguiColor.color.r, allocator);
+        value.PushBack(imguiColor.color.g, allocator);
+        value.PushBack(imguiColor.color.b, allocator);
+        value.PushBack(imguiColor.color.a, allocator);
+        jsonMap.AddMember(key, value, allocator);
+    }
+    doc.AddMember("colors", jsonMap, allocator);
   }
-  doc.AddMember("colors", jsonMap, allocator);
 
-  //doc.AddMember("volume", mixedSound.volume, allocator);
-  //doc.AddMember("center", mixedSound.center, allocator);
-  //doc.AddMember("loop", mixedSound.loop, allocator);
-  //doc.AddMember("sequential", mixedSound.clipOrderSequential, allocator);
+  {
+    rapidjson::Value jsonMap(rapidjson::kObjectType);
+    for (auto& imguiFont : imguiFonts) {
+        auto fontName = nameForSymbol(imguiFont.symbol);
+        rapidjson::Value name(fontName, allocator);
+        rapidjson::Value fontObject(rapidjson::kObjectType);
+        rapidjson::Value fontPath(imguiFont.path, allocator);
+        fontObject.AddMember("file", fontPath, allocator);
+        fontObject.AddMember("size", imguiFont.fontSize, allocator);
+        jsonMap.AddMember(name, fontObject, allocator);
+    }
+    doc.AddMember("fonts", jsonMap, allocator);
+  }
 
   rapidjson::StringBuffer buffer;
   rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
