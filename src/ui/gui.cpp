@@ -68,6 +68,7 @@ void renderScenegraphWithState(bool includePanel){
    }
 }
 
+bool showNavbar = false;
 void initUi(){
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -78,7 +79,7 @@ void initUi(){
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-    loadUiData("../afterworld/data/config/ui.json");
+    showNavbar = loadUiData("../afterworld/data/config/ui.json");
     loadImGuiFont(getSymbol("default-font"), "./res/fonts/vcr.ttf", 16.f);
 
     {
@@ -432,8 +433,10 @@ void renderUi(){
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-
-    renderNavbar();
+    if (showNavbar){
+        renderNavbar();    
+    }
+    
 
     if (currentDynamicView.has_value()){
         for (auto& dynamicView : dynamicViews){

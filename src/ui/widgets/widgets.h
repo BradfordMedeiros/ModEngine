@@ -36,6 +36,6 @@ struct ImGuiColor {
 };
 extern std::vector<ImGuiColor> imguiColors;
 ImVec4 getImGuiColor(int symbol, glm::vec4 defaultColor);
-void loadUiData(std::string filepath);
+bool loadUiData(std::string filepath);
 
 #endif

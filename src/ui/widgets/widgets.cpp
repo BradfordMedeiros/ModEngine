@@ -524,7 +524,7 @@ std::vector<std::string> allFonts {
 std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, std::vector<std::string> extensions);
 
 
-void loadUiData(std::string filepath){
+bool loadUiData(std::string filepath){
   auto fileContent = readFileOrPackage(filepath);
   rapidjson::Document doc;
   rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
@@ -568,6 +568,8 @@ void loadUiData(std::string filepath){
       }
     }
   }
+
+  return false;
 }
 
 void saveUiData(){
