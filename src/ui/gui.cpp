@@ -392,7 +392,7 @@ void renderDividedLayout(ViewMenuItem& view){
     rightPaneWidth = sidebar(view.rightWidgets.at(0).name.c_str(), view.rightWidgets);
 }
 
-void renderSplitLayout(ViewMenuItem& view){
+void renderSplitLayout(ViewMenuItem& view, glm::vec2 additionalOffset){
     ImGuiViewport* viewport = ImGui::GetMainViewport();
 
     float paddedOffset = viewport -> WorkSize.x * 0.00;
@@ -402,12 +402,12 @@ void renderSplitLayout(ViewMenuItem& view){
     float leftPanelX = viewport -> WorkPos.x - paddedOffset;
     float leftPanelXRight = leftPanelX + leftPanelWidth;
 
-    ImGui::SetNextWindowPos(ImVec2(leftPanelX, viewport -> WorkPos.y + verticalOffset));
+    ImGui::SetNextWindowPos(ImVec2(leftPanelX + additionalOffset.x, viewport -> WorkPos.y + verticalOffset + additionalOffset.y));
     ImGui::SetNextWindowSize(ImVec2(leftPanelWidth , viewport -> WorkSize.y), ImGuiCond_Always);
     sidebar2(view.leftWidgets.at(0).name.c_str(), view.leftWidgets);
 
     float rightPaneWidth = viewport -> WorkSize.x * 0.875f;
-    ImGui::SetNextWindowPos(ImVec2(leftPanelXRight, viewport -> WorkPos.y + verticalOffset));
+    ImGui::SetNextWindowPos(ImVec2(leftPanelXRight + additionalOffset.x, viewport -> WorkPos.y + verticalOffset + additionalOffset.y));
     ImGui::SetNextWindowSize(ImVec2(rightPaneWidth, viewport -> WorkSize.y), ImGuiCond_Always);
     rightPaneWidth = sidebar2(view.rightWidgets.at(0).name.c_str(), view.rightWidgets);  
 }

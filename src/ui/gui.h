@@ -40,6 +40,8 @@ void registerView(std::string name, bool hide, std::vector<std::string> leftWidg
 std::optional<ViewMenuItem*> viewByName(int symbol);
 
 void renderLayout(ViewMenuItem& dynamicView);
+void renderSplitLayout(ViewMenuItem& view, glm::vec2 additionalOffset = glm::vec2(0.f, 0.f));
+
 void renderWidget2(WidgetMenuItem2& item, bool includePanel);
 std::optional<WidgetMenuItem2*> widgetByNameSymbol(int symbol);
 
