@@ -15,6 +15,7 @@ struct RegisteredActions {
 
 struct BufferedTextImGui {
     std::string text;
+    std::optional<glm::vec2> positionNdi;
 };
 
 std::vector<RegisteredActions> registeredActionLists;
@@ -146,11 +147,12 @@ void initUi(){
         registerWidget("Font", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
             renderFontWidget(includePanel);
         });  
+        registerWidget("FontBinding", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderFontBindingWidget(includePanel);
+        });  
         registerWidget("Color", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
             renderColorWidget(includePanel);
         });  
-        
-
     }
 
     registerView("Editor", false, { "Scenegraph" }, { "Object Details", "Object Type" }, DIVIDED_LAYOUT);
@@ -474,6 +476,24 @@ void renderUi(){
 
     std::cout << "push alert size: " << bufferedTextImGui.size() << std::endl;
     for (auto& bufferedText : bufferedTextImGui){
+        if (!bufferedText.positionNdi.has_value()){
+            ImGui::TextUnformatted(bufferedText.text.c_str());
+        }
+    }
+
+    for (auto& bufferedText : bufferedTextImGui){
+        if (!bufferedText.positionNdi.has_value()){
+            continue;
+        }
+        auto& position = bufferedText.positionNdi.value();
+        float x = position.x * screen.x;
+        float y = (1.0f - position.y) * screen.y;
+        auto textSize = ImGui::CalcTextSize(bufferedText.text.c_str());
+        ImGui::SetCursorScreenPos(ImVec2(
+            x - textSize.x * 0.5f,
+            y - textSize.y * 0.5f
+        ));
+
         ImGui::TextUnformatted(bufferedText.text.c_str());
     }
 
@@ -548,9 +568,10 @@ void renderLayoutHalf(WidgetMenuItem2& widgetOne, WidgetMenuItem2& widgetTwo){
 }
 
 
-void drawImGuiText(std::string text){
+void drawImGuiText(std::string text, std::optional<glm::vec2> positionNdi){
     bufferedTextImGui.push_back(BufferedTextImGui {
         .text = text,
+        .positionNdi = positionNdi,
     });
 }
 

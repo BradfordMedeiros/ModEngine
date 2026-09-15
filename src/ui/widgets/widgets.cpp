@@ -438,45 +438,6 @@ void renderDisplayBinding(bool includePanel){
 }
 
 
-
-std::vector<ImGuiLoadedFont> imguiFonts;
-void loadImGuiFont(int symbol, std::string path, float fontSize){
-  for (auto& font : imguiFonts){
-    if (font.symbol == symbol){
-      return;
-    }
-  }
-
-  ImGuiIO& io = ImGui::GetIO();
-  ImFont* loadedFont = io.Fonts->AddFontFromFileTTF(path.c_str(), fontSize);
-  imguiFonts.push_back(ImGuiLoadedFont {
-    .font = loadedFont,
-    .symbol = symbol,
-    .fontSize = fontSize,
-    .path = path,
-  });
-}
-
-
-ImFont* getDefaultImGuiFont(){
-  static int defaultFontSymbol = getSymbol("default-font");
-  for (auto& font : imguiFonts){
-    if (font.symbol == defaultFontSymbol){
-      return font.font;
-    }
-  }
-  modassert(false, "no default font");
-  return NULL;
-}
-ImFont* getImGuiFont(int symbol){
-  for (auto& font : imguiFonts){
-    if (font.symbol == symbol){
-      return font.font;
-    }
-  }
-  return getDefaultImGuiFont();
-}
-
 void updateFont(int symbol, std::string path, float fontSize){
   for (auto& font : imguiFonts){
     if (font.symbol == symbol){
@@ -503,118 +464,11 @@ void updateFont(int symbol, std::string path, float fontSize){
   // here, depending on how you've initialized ImGui.
 }
 
-std::vector<ImGuiColor> imguiColors;
-
-ImVec4 getImGuiColor(int symbol, glm::vec4 defaultColor){
-  for (auto& color : imguiColors){
-    if (color.symbol == symbol){
-      return ImVec4(color.color.r, color.color.g, color.color.b, color.color.a);
-    }
-  }
-  imguiColors.push_back(ImGuiColor{
-    .symbol = symbol,
-    .color = defaultColor,
-  });
-  return ImVec4(defaultColor.r, defaultColor.g, defaultColor.b, defaultColor.a);
-}
-
 std::vector<std::string> allFonts {
 
 };
 std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, std::vector<std::string> extensions);
 
-
-bool loadUiData(std::string filepath){
-  auto fileContent = readFileOrPackage(filepath);
-  rapidjson::Document doc;
-  rapidjson::ParseResult ok = doc.Parse(fileContent.c_str());
-  if (doc.HasParseError()){
-    std::cout << "error parsing ui file: " << filepath << "  (" << fileContent << ")" << std::endl;
-    exit(0);
-  }
-
-  {
-    auto it = doc.FindMember("colors");
-    if (it != doc.MemberEnd() && it->value.IsObject()){
-      auto& colors = it->value;
-
-      for (auto colorIt = colors.MemberBegin(); colorIt != colors.MemberEnd(); ++colorIt){
-        if (colorIt->value.IsArray() && colorIt->value.Size() == 4){
-          auto symbol = getSymbol(colorIt->name.GetString());
-          auto color = glm::vec4(colorIt->value[0].GetFloat(), colorIt->value[1].GetFloat(), colorIt->value[2].GetFloat(), colorIt->value[3].GetFloat());
-
-          imguiColors.push_back(ImGuiColor{
-            .symbol = symbol,
-            .color = color,
-          });
-        }
-      }
-    }
-  }
-
-  {
-    auto it = doc.FindMember("fonts");
-    if (it != doc.MemberEnd() && it->value.IsObject()){
-      auto& fonts = it->value;
-
-      for (auto fontIt = fonts.MemberBegin(); fontIt != fonts.MemberEnd(); ++fontIt){
-        auto& font = fontIt->value;
-
-        auto symbol = getSymbol(fontIt->name.GetString());
-        auto file = font["file"].GetString();
-        auto size = font["size"].GetFloat();
-
-        loadImGuiFont(symbol, file, size);
-      }
-    }
-  }
-
-  return false;
-}
-
-void saveUiData(){
-  rapidjson::Document doc;
-  doc.SetObject();
-  rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
-
-  {
-    rapidjson::Value jsonMap(rapidjson::kObjectType);
-    for (auto& imguiColor : imguiColors) {
-        auto colorName = nameForSymbol(imguiColor.symbol);
-        rapidjson::Value key(colorName, allocator);
-        rapidjson::Value value(rapidjson::kArrayType);
-        value.PushBack(imguiColor.color.r, allocator);
-        value.PushBack(imguiColor.color.g, allocator);
-        value.PushBack(imguiColor.color.b, allocator);
-        value.PushBack(imguiColor.color.a, allocator);
-        jsonMap.AddMember(key, value, allocator);
-    }
-    doc.AddMember("colors", jsonMap, allocator);
-  }
-
-  {
-    rapidjson::Value jsonMap(rapidjson::kObjectType);
-    for (auto& imguiFont : imguiFonts) {
-        auto fontName = nameForSymbol(imguiFont.symbol);
-        rapidjson::Value name(fontName, allocator);
-        rapidjson::Value fontObject(rapidjson::kObjectType);
-        rapidjson::Value fontPath(imguiFont.path, allocator);
-        fontObject.AddMember("file", fontPath, allocator);
-        fontObject.AddMember("size", imguiFont.fontSize, allocator);
-        jsonMap.AddMember(name, fontObject, allocator);
-    }
-    doc.AddMember("fonts", jsonMap, allocator);
-  }
-
-  rapidjson::StringBuffer buffer;
-  rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
-  doc.Accept(writer);
-
-  auto strValue = buffer.GetString();
-  std::cout << strValue << std::endl;
-
-  realfiles::saveFile("../afterworld/data/config/ui.json", strValue);
-}
 
 void renderFontWidget(bool includePanel){
   static bool doOnce = true;
@@ -657,6 +511,59 @@ void renderFontWidget(bool includePanel){
     ImGui::PopID();
   }
 
+  if (ImGui::Button("Save")){
+    saveUiData("../afterworld/data/config/ui.json");
+  }
+
+  if (includePanel){
+    ImGui::End();
+  }  
+}
+
+void renderFontBindingWidget(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Font Binding Panel");
+  }
+
+  if (imguiFontBindings.size() == 0){
+    ImGui::Text("No font bindings");
+    if (includePanel){
+      ImGui::End();
+      return;
+    }  
+  }
+
+  static int selectedBinding = 0;
+  auto& imguiFontBinding = imguiFontBindings.at(selectedBinding);
+  auto name = nameForSymbol(imguiFontBinding.fontBinding);
+
+  if (ImGui::BeginCombo("Font Binding", name.c_str())){
+    for (int i = 0; i < imguiFontBindings.size(); i++){
+      auto& imguiFontBinding = imguiFontBindings.at(i);
+      auto name = nameForSymbol(imguiFontBinding.fontBinding);
+      if(ImGui::Selectable(name.c_str())){
+        selectedBinding = i;
+      }
+    }
+    ImGui::EndCombo();
+  }
+
+  auto selectedFontName = nameForSymbol(imguiFontBinding.fontSymbol);
+  if (ImGui::BeginCombo("##path", selectedFontName.c_str())){
+    for (int i = 0; i < imguiFonts.size(); i++){
+      auto& font = imguiFonts.at(i);
+      auto fontName = nameForSymbol(font.symbol);
+      if (ImGui::Selectable(fontName.c_str(), false)){
+        imguiFontBinding.fontSymbol = font.symbol;
+      }      
+    }
+    ImGui::EndCombo();
+  }
+
+  if (ImGui::Button("Save")){
+    saveUiData("../afterworld/data/config/ui.json");
+  }
+
   if (includePanel){
     ImGui::End();
   }  
@@ -685,7 +592,7 @@ void renderColorWidget(bool includePanel){
   }
 
   if (ImGui::Button("Save")){
-    saveUiData();
+    saveUiData("../afterworld/data/config/ui.json");
   }
 
   if (includePanel){

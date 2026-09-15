@@ -51,6 +51,6 @@ void renderLayoutCenter(const char* name, WidgetMenuItem2& widget);
 void renderLayoutHalf(WidgetMenuItem2& widgetOne, WidgetMenuItem2& widgetTwo);
 
 
-void drawImGuiText(std::string text);
+void drawImGuiText(std::string text, std::optional<glm::vec2> positionNdi);
 void clearImGuiData();
 
