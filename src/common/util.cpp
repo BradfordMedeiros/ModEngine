@@ -291,6 +291,13 @@ std::string print(std::optional<objid> id){
   return std::to_string(id.value());
 }
 
+std::string printFloat(std::optional<float> id){
+  if (!id.has_value()){
+    return "[no value]";
+  }
+  return std::to_string(id.value());
+}
+
 std::string print(std::optional<bool> value){
   if (!value.has_value()){
     return "[no value]";
