@@ -31,6 +31,16 @@ std::vector<AutoSerialize> meshAutoserializer {
     .fieldType = ATTRIBUTE_STRING,
   },
   AutoSerializeTextureLoaderManual {
+    .structOffset = offsetof(GameObjectMesh, customTexture),
+    .field = "custom-texture",
+    .defaultValue = "",
+  },
+  AutoSerializeTextureLoaderManual {
+    .structOffset = offsetof(GameObjectMesh, opacityTexture),
+    .field = "opacity-texture",
+    .defaultValue = "",
+  },
+  AutoSerializeTextureLoaderManual {
     .structOffset = offsetof(GameObjectMesh, normalTexture),
     .field = "normal-texture",
     .defaultValue = "",

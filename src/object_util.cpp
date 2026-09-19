@@ -7,6 +7,20 @@ extern engineState state;
 void setGameObjectTexture(objid id, std::string texture){
   mainApi -> setSingleGameObjectAttr(id, "texture", texture);
 }
+std::string getGameObjectCustomTexture(objid id){
+  std::optional<std::string*> value = getTypeFromAttr<std::string>(getObjectAttributePtr(world, id, "custom-texture"));
+  return value.has_value() ? *(value.value()) : "";
+}
+void setGameObjectCustomTexture(objid id, std::string texture){
+  mainApi -> setSingleGameObjectAttr(id, "custom-texture", texture);
+}
+std::string getGameObjectOpacityTexture(objid id){
+  std::optional<std::string*> value = getTypeFromAttr<std::string>(getObjectAttributePtr(world, id, "opacity-texture"));
+  return value.has_value() ? *(value.value()) : "";
+}
+void setGameObjectOpacityTexture(objid id, std::string texture){
+  mainApi -> setSingleGameObjectAttr(id, "opacity-texture", texture);
+}
 void setGameObjectCubemap(objid id, std::string cubemap){
   mainApi -> setSingleGameObjectAttr(id, "cubemap", cubemap);
 }

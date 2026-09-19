@@ -72,7 +72,7 @@ void initDefaultShader(unsigned int shader){
     "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscoord[0]", "lightscolor[0]", "lightsdir[0]", "lightsdirmat[0]", "lightsisdir[0]", "lightstexindex[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "voxelcellwidth", "voxelOffset", "defaultVoxelLight",
     "lightsprojview", "textureOffset", "textureSize", "textureTiling", "cubemapReflection", "tint", "projview", "realtime", "time",
 
-    "encodedid", "textureid",
+    "encodedid", "textureid", "customTexture", "hasCustomTexture",
     "forceTint", // selection shader only
     "useInstancing", "instanceOffsets[0]",
     "groupToModel",
@@ -236,7 +236,7 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
 
 
   setUniformData(shader, uniformData, {
-    "textureid", "bones[0]", "encodedid", "hasBones", "model", "discardTexAmount", 
+    "textureid", "customTexture", "hasCustomTexture", "bones[0]", "encodedid", "hasBones", "model", "discardTexAmount",
     "emissionAmount", 
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture", "sky", 
     "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscoord[0]", "lightscolor[0]", "lightsdir[0]", "lightsdirmat[0]", "lightsisdir[0]", "lightstexindex[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth", "voxelOffset",

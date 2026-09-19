@@ -265,6 +265,14 @@ void drawMesh(Mesh& mesh, GLint shaderProgram, bool drawPoints, MeshUniforms& me
  
   glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "textureid"), diffuseTextureId);
 
+  bool hasCustomUseTexture = meshUniforms.customUseTextureId != static_cast<unsigned int>(-1);
+  glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasCustomTexture"), hasCustomUseTexture);
+  if (hasCustomUseTexture){
+    glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "customTexture"), 10);
+    glActiveTexture(GL_TEXTURE0 + 10);
+    glBindTexture(GL_TEXTURE_2D, meshUniforms.customUseTextureId);
+  }
+
   glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "hasEmissionTexture"), mesh.hasEmissionTexture);
   glActiveTexture(GL_TEXTURE0 + 1);
   glBindTexture(GL_TEXTURE_2D, mesh.emissionTexture.textureId);

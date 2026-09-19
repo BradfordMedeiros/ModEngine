@@ -15,6 +15,8 @@ struct GameObjectMesh {
   std::vector<ViewportMeshEnablement> viewports;
 
   TextureInformation texture;
+  TextureLoadingData customTexture;
+  TextureLoadingData opacityTexture;
   TextureLoadingData normalTexture;
   TextureLoadingData cubemapTexture;
 

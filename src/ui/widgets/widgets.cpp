@@ -367,6 +367,23 @@ void renderTextures(bool includePanel, std::optional<objid> objectToDetail){
       setGameObjectTextureTiling(id, textureTiling);
 
       auto textures = getTextures();
+      auto customTexture = getGameObjectCustomTexture(id);
+      auto opacityTexture = getGameObjectOpacityTexture(id);
+      static int textureTarget = 0;
+      const char* textureTargets[] = {
+        "Main texture",
+        "Custom shader texture",
+        "Opacity texture",
+      };
+
+      ImGui::Text("Assign texture as");
+      ImGui::SetNextItemWidth(-1);
+      ImGui::Combo("##texture-target", &textureTarget, textureTargets, IM_ARRAYSIZE(textureTargets));
+      if (textureTarget == 1){
+        ImGui::TextWrapped("Current: %s", customTexture.c_str());
+      }else if (textureTarget == 2){
+        ImGui::TextWrapped("Current: %s", opacityTexture.c_str());
+      }
 
       float thumbnailSize = 64.0f;
       float spacing = ImGui::GetStyle().ItemSpacing.x;
@@ -377,7 +394,15 @@ void renderTextures(bool includePanel, std::optional<objid> objectToDetail){
       for (int i = 0; i < textures.size(); i++){
         auto& texture = textures.at(i);
         if (ImGui::ImageButton(texture.name, texture.textureId, ImVec2(64, 64))){
-          setGameObjectTexture(id, texture.name);
+          if (textureTarget == 0){
+            setGameObjectTexture(id, texture.name);
+          }else if (textureTarget == 1){
+            setGameObjectCustomTexture(id, texture.name);
+            customTexture = texture.name;
+          }else{
+            setGameObjectOpacityTexture(id, texture.name);
+            opacityTexture = texture.name;
+          }
         }
         if ((i + 1) % columns != 0){
           ImGui::SameLine();
