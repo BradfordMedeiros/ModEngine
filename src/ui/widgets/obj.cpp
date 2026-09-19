@@ -182,6 +182,29 @@ void renderMeshPanel(bool includePanel, std::optional<objid> objectToDetail){
     if (ImGui::ColorEdit4("Tint", color)){
       setGameObjectTint(id, glm::vec4(color[0], color[1], color[2], color[3]));
     }
+
+    static std::string cubemap;
+    static objid cubemapObject = 0;
+    if (cubemapObject != id){
+      cubemapObject = id;
+      cubemap = getGameObjectCubemap(id);
+    }
+    ImGui::Text("Cubemap");
+    bool applyCubemap = ImGui::InputText("##cubemap", &cubemap, ImGuiInputTextFlags_EnterReturnsTrue);
+    ImGui::SameLine();
+    if (ImGui::Button("Apply")){
+      applyCubemap = true;
+    }
+    if (applyCubemap){
+      setGameObjectCubemap(id, cubemap);
+    }
+    ImGui::TextDisabled("Directory containing the six .jpg cubemap faces");
+    glm::vec3 cubemapReflection = getGameObjectCubemapReflection(id);
+    if (ImGui::SliderFloat("Cubemap Strength", &cubemapReflection.x, 0.f, 3.f) ||
+        ImGui::SliderFloat("Fresnel Power", &cubemapReflection.y, 0.1f, 10.f) ||
+        ImGui::SliderFloat("Fresnel Base", &cubemapReflection.z, 0.f, 1.f)){
+      setGameObjectCubemapReflection(id, cubemapReflection);
+    }
   }
 
   if (includePanel){

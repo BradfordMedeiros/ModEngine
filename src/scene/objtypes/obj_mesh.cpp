@@ -34,6 +34,18 @@ std::vector<AutoSerialize> meshAutoserializer {
     .structOffset = offsetof(GameObjectMesh, normalTexture),
     .field = "normal-texture",
     .defaultValue = "",
+  },
+  AutoSerializeTextureLoaderManual {
+    .structOffset = offsetof(GameObjectMesh, cubemapTexture),
+    .field = "cubemap",
+    .defaultValue = "",
+    .isCubemap = true,
+  },
+  AutoSerializeVec3 {
+    .structOffset = offsetof(GameObjectMesh, cubemapReflection),
+    .structOffsetFiller = std::nullopt,
+    .field = "cubemap-reflection",
+    .defaultValue = glm::vec3(0.f, 5.f, 0.2f),
   }
 };
 

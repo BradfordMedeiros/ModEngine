@@ -811,7 +811,9 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, ViewportSettings& viewpor
     .model = model,
     .tint = glm::vec4(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z, 1.f),
   };
+  glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "sky"), true);
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram, false, meshUniforms); 
+  glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "sky"), false);
 }
 
 void onClientMessage(std::string message){

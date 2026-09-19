@@ -16,7 +16,9 @@ struct GameObjectMesh {
 
   TextureInformation texture;
   TextureLoadingData normalTexture;
+  TextureLoadingData cubemapTexture;
 
+  glm::vec3 cubemapReflection;
   float discardAmount;
   glm::vec3 emissionAmount;
   glm::vec4 tint;

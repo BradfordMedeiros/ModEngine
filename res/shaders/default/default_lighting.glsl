@@ -27,6 +27,7 @@ uniform sampler2D roughnessTexture;
 uniform sampler2D normalTexture;
 uniform sampler2D lightTexture;
 uniform vec4 tint;
+uniform vec3 cubemapReflection;
 
 uniform bool hasDiffuseTexture;
 uniform bool hasEmissionTexture;
@@ -183,7 +184,7 @@ void mainAlgorithm(out vec4 _fragColor, out vec3 _normal, vec2 extraUvOffset, ve
 
     /////////////////
 
-    if (hasCubemapTexture){
+    if (sky && hasCubemapTexture){
       _fragColor = tint * texture(cubemapTexture, normalize(vec3(FragPos.x, FragPos.y, -1 * FragPos.z)));
       return;
     }
@@ -270,6 +271,17 @@ void mainAlgorithm(out vec4 _fragColor, out vec3 _normal, vec2 extraUvOffset, ve
       _fragColor = (tint *  vec4(color.xyz * shadowDelta, color.w) + vec4(finalEmission.rgb, 0));
     }else{
       _fragColor = tint * texColor;
+    }
+
+    if (hasCubemapTexture && cubemapReflection.x > 0.0){
+      vec3 viewDirection = normalize(FragPos - cameraPosition);
+      vec3 reflectionDirection = reflect(viewDirection, normal);
+      vec3 environmentDirection = vec3(reflectionDirection.x, reflectionDirection.y, -reflectionDirection.z);
+      vec3 environmentColor = texture(cubemapTexture, environmentDirection).rgb;
+      float fresnel = pow(1.0 - max(dot(normal, -viewDirection), 0.0), cubemapReflection.y);
+      float reflectionAmount = cubemapReflection.x * mix(cubemapReflection.z, 1.0, fresnel);
+      float baseContribution = max(1.0 - reflectionAmount, 0.0);
+      _fragColor.rgb = (_fragColor.rgb * baseContribution) + (environmentColor * reflectionAmount);
     }
 
     //if (useInstancing && instanceId > 0){

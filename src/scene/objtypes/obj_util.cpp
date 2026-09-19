@@ -169,14 +169,16 @@ std::string enumStringFromEnumValue(int value, std::vector<int>& enums, std::vec
 }
 
 
-void autoserializeHandleTextureLoading(char* structAddress, AutoSerialize& value, std::function<Texture(std::string)> ensureTextureLoaded, std::function<void(int)> releaseTexture){
+void autoserializeHandleTextureLoading(char* structAddress, AutoSerialize& value, std::function<Texture(std::string)> ensureTextureLoaded, std::function<Texture(std::string)> ensureCubemapTextureLoaded, std::function<void(int)> releaseTexture){
   AutoSerializeTextureLoaderManual* textureLoaderManual = std::get_if<AutoSerializeTextureLoaderManual>(&value);
   if (textureLoaderManual != NULL){
     TextureLoadingData* _textureLoading = (TextureLoadingData*)(((char*)structAddress) + textureLoaderManual -> structOffset);
     if (_textureLoading -> isLoaded){
       // do nothing
     }else if (_textureLoading -> textureString != ""){
-      auto texture = ensureTextureLoaded(_textureLoading -> textureString);
+      auto texture = textureLoaderManual -> isCubemap
+        ? ensureCubemapTextureLoaded(_textureLoading -> textureString)
+        : ensureTextureLoaded(_textureLoading -> textureString);
       _textureLoading -> textureId = texture.textureId;
       _textureLoading -> isLoaded = true;
     }else{
@@ -329,7 +331,7 @@ void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values
 void createAutoSerializeWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util){
   createAutoSerialize(structAddress, values, attr);
   for (auto &value : values){
-    autoserializeHandleTextureLoading(structAddress, value, util.ensureTextureLoaded, util.releaseTexture);
+    autoserializeHandleTextureLoading(structAddress, value, util.ensureTextureLoaded, util.ensureCubemapTextureLoaded, util.releaseTexture);
   }
 }
 
@@ -532,10 +534,8 @@ std::optional<AttributeValuePtr> autoserializerGetAttrPtr(char* structAddress, A
  
   AutoSerializeTextureLoaderManual* textureLoaderManual = std::get_if<AutoSerializeTextureLoaderManual>(&value);
   if (textureLoaderManual != NULL){
-    //TextureLoadingData* address = (TextureLoadingData*)(((char*)structAddress) + textureLoaderManual -> structOffset);
-    //return;
-    modassert(false, "objtypes cannot get a AutoSerializeTextureLoaderManual field");
-    return std::nullopt;
+    TextureLoadingData* address = (TextureLoadingData*)(((char*)structAddress) + textureLoaderManual -> structOffset);
+    return &address -> textureString;
   }
 
   AutoSerializeInt* intValue = std::get_if<AutoSerializeInt>(&value);
@@ -852,7 +852,7 @@ bool autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<Au
     return false;
   }
   bool setAttr = autoserializerSetAttr(structAddress, *(serializer.value()), field, attrValue);
-  autoserializeHandleTextureLoading(structAddress, *(serializer.value()), util.ensureTextureLoaded, util.releaseTexture);
+  autoserializeHandleTextureLoading(structAddress, *(serializer.value()), util.ensureTextureLoaded, util.ensureCubemapTextureLoaded, util.releaseTexture);
   return setAttr;
 }
 

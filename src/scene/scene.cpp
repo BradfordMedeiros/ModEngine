@@ -403,6 +403,21 @@ Texture loadSkyboxWorld(World& world, std::string texturepath, objid ownerId){
   return texture;
 }
 
+Texture loadCubemapWorld(World& world, std::string texturepath, objid ownerId){
+  if (world.textures.find(texturepath) != world.textures.end()){
+    world.textures.at(texturepath).owners.insert(ownerId);
+    return world.textures.at(texturepath).texture;
+  }
+  Texture texture = loadCubemapTexture(world.interface.modlayerPath(texturepath));
+  std::cout << "load cubemap: " << texturepath << std::endl;
+  world.textures[texturepath] = TextureRef {
+    .owners = { ownerId },
+    .texture = texture,
+    .mappingTexture = std::nullopt,
+  };
+  return texture;
+}
+
 Texture loadTextureDataWorld(World& world, std::string texturepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels, objid ownerId){
   if (world.textures.find(texturepath) != world.textures.end()){
     world.textures.at(texturepath).owners.insert(ownerId);
@@ -991,6 +1006,9 @@ void addObjectToWorld(
       std::cout << "Custom texture loading: " << texturepath << std::endl;
       return loadTextureWorld(world, texturepath, id);
     };
+    auto ensureCubemapTextureLoaded = [&world, id](std::string texturepath) -> Texture {
+      return loadCubemapWorld(world, texturepath, id);
+    };
     auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &submodelAttributes, prefabId, rootname](std::string meshName) {
       // this assumes that the root mesh is loaded first, which i should probably cover, although it probably doesnt get hit
       modassert(meshName.size() > 0, std::string("invalid mesh name:  ") + meshName + ", name = " + name);
@@ -1045,6 +1063,7 @@ void addObjectToWorld(
       .createMeshCopy = getCreateMeshCopy(world, rootname),
       .meshes = world.meshes,
       .ensureTextureLoaded = ensureTextureLoaded,
+      .ensureCubemapTextureLoaded = ensureCubemapTextureLoaded,
       .releaseTexture = [&world, id](int textureId){
           freeTextureRefsIdByOwner(world, id, textureId);
       },
@@ -1465,6 +1484,9 @@ void setSingleGameObjectAttr(World& world, objid id, const char* field, Attribut
   ObjectSetAttribUtil util {
     .ensureTextureLoaded = [&world, id](std::string texturepath) -> Texture {
       return loadTextureWorld(world, texturepath, id);
+    },
+    .ensureCubemapTextureLoaded = [&world, id](std::string texturepath) -> Texture {
+      return loadCubemapWorld(world, texturepath, id);
     },
     .releaseTexture = [&world, id](int textureId){
       freeTextureRefsIdByOwner(world, id, textureId);

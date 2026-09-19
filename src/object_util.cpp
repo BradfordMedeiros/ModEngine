@@ -7,6 +7,20 @@ extern engineState state;
 void setGameObjectTexture(objid id, std::string texture){
   mainApi -> setSingleGameObjectAttr(id, "texture", texture);
 }
+void setGameObjectCubemap(objid id, std::string cubemap){
+  mainApi -> setSingleGameObjectAttr(id, "cubemap", cubemap);
+}
+std::string getGameObjectCubemap(objid id){
+  std::optional<std::string*> value = getTypeFromAttr<std::string>(getObjectAttributePtr(world, id, "cubemap"));
+  return value.has_value() ? *(value.value()) : "";
+}
+void setGameObjectCubemapReflection(objid id, glm::vec3 reflection){
+  mainApi -> setSingleGameObjectAttr(id, "cubemap-reflection", reflection);
+}
+glm::vec3 getGameObjectCubemapReflection(objid id){
+  std::optional<glm::vec3*> value = getTypeFromAttr<glm::vec3>(getObjectAttributePtr(world, id, "cubemap-reflection"));
+  return value.has_value() ? *(value.value()) : glm::vec3(0.f, 5.f, 0.2f);
+}
 void setGameObjectTextureOffset(objid id, glm::vec2 offset){
   mainApi -> setSingleGameObjectAttr(id, "textureoffset", offset);
 }

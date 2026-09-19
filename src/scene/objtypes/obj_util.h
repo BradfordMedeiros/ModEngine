@@ -14,9 +14,9 @@ struct GameObjectUICommon {
 };
 
 struct TextureLoadingData {
-  int textureId;
+  int textureId = -1;
   std::string textureString;
-  bool isLoaded;
+  bool isLoaded = false;
 };
 struct TextureInformation {
   glm::vec2 textureoffset;
@@ -31,6 +31,7 @@ struct ObjectTypeUtil {
   std::function<Mesh(std::string)> createMeshCopy;
   std::unordered_map<std::string, MeshRef>& meshes;
   std::function<Texture(std::string)> ensureTextureLoaded;
+  std::function<Texture(std::string)> ensureCubemapTextureLoaded;
   std::function<void(int)> releaseTexture;
   std::function<Mesh(MeshData&)> loadMesh;
   std::function<void(std::string, float, float, int, GameobjAttributes&, std::unordered_map<std::string, GameobjAttributes>&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter;
@@ -57,6 +58,7 @@ struct SetAttrFlags {
 
 struct ObjectSetAttribUtil {
   std::function<Texture(std::string)> ensureTextureLoaded;
+  std::function<Texture(std::string)> ensureCubemapTextureLoaded;
   std::function<void(int)> releaseTexture;
   std::function<Mesh(MeshData&)> loadMesh;
   std::function<void(Mesh&)> unloadMesh;
@@ -95,6 +97,7 @@ struct AutoSerializeTextureLoaderManual {
   size_t structOffset;
   const char* field;
   std::string defaultValue;
+  bool isCubemap = false;
 };
 
 struct AutoSerializeInt {

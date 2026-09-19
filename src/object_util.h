@@ -6,6 +6,10 @@
 #include "./state.h"
 
 void setGameObjectTexture(objid id, std::string texture);
+void setGameObjectCubemap(objid id, std::string cubemap);
+std::string getGameObjectCubemap(objid id);
+void setGameObjectCubemapReflection(objid id, glm::vec3 reflection);
+glm::vec3 getGameObjectCubemapReflection(objid id);
 
 glm::vec2 getGameObjectTextureOffset(objid id);
 void setGameObjectTextureOffset(objid id, glm::vec2 offset);

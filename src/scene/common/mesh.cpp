@@ -221,6 +221,7 @@ void drawMesh(Mesh& mesh, GLint shaderProgram, bool drawPoints, MeshUniforms& me
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(meshUniforms.textureSize));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshUniforms.textureTiling));
   glProgramUniform2fv(shaderProgram, glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshUniforms.textureOffset));
+  glProgramUniform3fv(shaderProgram, glGetUniformLocation(shaderProgram, "cubemapReflection"), 1, glm::value_ptr(meshUniforms.cubemapReflection));
   shaderSetUniform(shaderProgram, "tint", meshUniforms.tint);
   glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "forceTint"), false);
 

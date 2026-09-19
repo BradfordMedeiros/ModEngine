@@ -70,7 +70,7 @@ void initDefaultShader(unsigned int shader){
  		"model", "numlights", "shadowIntensity", "useBoneTransform",
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture", "sky", "lightTexture",
     "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscoord[0]", "lightscolor[0]", "lightsdir[0]", "lightsdirmat[0]", "lightsisdir[0]", "lightstexindex[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "voxelcellwidth", "voxelOffset", "defaultVoxelLight",
-    "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview", "realtime", "time", 
+    "lightsprojview", "textureOffset", "textureSize", "textureTiling", "cubemapReflection", "tint", "projview", "realtime", "time",
 
     "encodedid", "textureid",
     "forceTint", // selection shader only
@@ -240,7 +240,7 @@ void updateDefaultShaderPerFrame(unsigned int shader, std::vector<LightInfo>& li
     "emissionAmount", 
     "hasCubemapTexture", "hasDiffuseTexture", "hasEmissionTexture", "hasNormalTexture", "hasOpacityTexture", "sky", 
     "lights[0]", "lightsangledelta[0]", "lightsatten[0]", "lightscoord[0]", "lightscolor[0]", "lightsdir[0]", "lightsdirmat[0]", "lightsisdir[0]", "lightstexindex[0]", "lightsmaxangle[0]", "voxelindexs2[0]", "colors[0]", "voxelcellwidth", "voxelOffset",
-    "lightsprojview", "textureOffset", "textureSize", "textureTiling", "tint", "projview",
+    "lightsprojview", "textureOffset", "textureSize", "textureTiling", "cubemapReflection", "tint", "projview",
 
     "maintexture", "textureid", "emissionTexture", "opacityTexture", "lightDepthTexture", "cubemapTexture", "roughnessTexture", "normalTexture", "lightTexture",
     
@@ -458,4 +458,3 @@ void updateFramebufferShaderFrame(unsigned int shader, float near, float far){
 
   setUniformData(shader, uniformData, { "framebufferTexture", "bloomTexture", "depthTexture", "flipCoords" });
 }
-
