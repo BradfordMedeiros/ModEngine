@@ -68,7 +68,7 @@ void renderSoundPanel(bool includePanel, std::optional<objid> objectToDetail){
 
 
     if(ImGui::Button("Play Sound")){
-      mainApi -> playOneshot(id, std::nullopt, std::nullopt, std::nullopt, std::nullopt, id);
+      mainApi -> playOneshot(id, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, id);
     }
   /*
   AutoSerializeCustom {

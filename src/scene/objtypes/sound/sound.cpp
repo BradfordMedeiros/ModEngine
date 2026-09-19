@@ -212,7 +212,7 @@ ALuint loadSoundState(std::string filepath){
   return soundSource;
 }
 
-ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::optional<float> volume, bool loop, bool center, objid ownerId){
+ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::optional<float> volume, std::optional<float> pitch, bool loop, bool center, objid ownerId){
   ALuint source = createSource(buffer);
 
   std::cout << "playSourceOneshot: " << print(volume) << std::endl;
@@ -220,6 +220,7 @@ ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::
     std::cout << "set volume: " << volume.value() << std::endl;
     setSoundVolume(source, volume.value());
   }
+  setSoundPitch(source, pitch.has_value() ? pitch.value() : 1.f);
   if (position.has_value()){
     setSoundPosition(source, position.value().x, position.value().y, position.value().z);
   }
