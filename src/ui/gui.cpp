@@ -126,6 +126,9 @@ void initUi(){
         registerWidget("Model", "objects", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
             renderModelPanel(includePanel, sceneId);
         });   
+        registerWidget("Prefab", "objects", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderPrefabPanel(includePanel, objectToDetail, sceneId);
+        });
     }
 
     {
@@ -578,4 +581,3 @@ void drawImGuiText(std::string text, std::optional<glm::vec2> positionNdi){
 void clearImGuiData(){
     bufferedTextImGui = {};
 }
-

@@ -1,10 +1,104 @@
 #include "./obj.h"
+#include "../../main_api.h"
+#include "../../package.h"
 
 extern CustomApiBindings* mainApi;
 
 std::vector<std::string> listSoundFiles();
 std::vector<std::string> listParticlesFiles();
 std::optional<std::string> ScenegraphView(std::string directory, FILE_EXTENSION_TYPE type);
+
+void renderPrefabPanel(bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId){
+  if (includePanel){
+    ImGui::Begin("Prefab");
+  }
+
+  auto prefabFiles = listFilesWithExtensionsFromPackage("../afterworld/scenes/prefabs", { "rawscene" });
+  static std::string prefabPath;
+  if (prefabPath.empty() && !prefabFiles.empty()){
+    prefabPath = prefabFiles.at(0);
+  }
+
+  ImGui::Text("Create Prefab");
+  if (prefabFiles.empty()){
+    ImGui::TextDisabled("No .rawscene prefabs found");
+  }else if (ImGui::BeginCombo("Source", prefabPath.c_str())){
+    for (auto& prefabFile : prefabFiles){
+      bool selected = prefabPath == prefabFile;
+      if (ImGui::Selectable(prefabFile.c_str(), selected)){
+        prefabPath = prefabFile;
+      }
+      if (selected){
+        ImGui::SetItemDefaultFocus();
+      }
+    }
+    ImGui::EndCombo();
+  }
+
+  if (ImGui::Button("Create at Camera")){
+    if (sceneId.has_value() && !prefabPath.empty()){
+      GameobjAttributes attr {
+        .attr = {
+          { "scene", prefabPath },
+          { "position", createLocation() },
+        },
+      };
+      std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+      mainApi -> makeObjectAttr(
+        sceneId.value(),
+        std::string("[prefab-instance-") + uniqueNameSuffix(),
+        attr,
+        submodelAttributes
+      );
+    }
+  }
+  if (!sceneId.has_value()){
+    ImGui::TextDisabled("No active scene");
+  }
+
+  ImGui::Separator();
+  ImGui::Text("Selected Prefab");
+  if (!objectToDetail.has_value()){
+    ImGui::TextDisabled("Select a prefab");
+  }else{
+    auto selectedId = objectToDetail.value();
+    auto prefabId = mainApi -> prefabId(selectedId);
+    auto rootId = prefabId.value_or(selectedId);
+    auto prefabPathValue = getObjectAttribute(rootId, "scene");
+    auto prefabPathValueString = prefabPathValue.has_value() ? std::get_if<std::string>(&prefabPathValue.value()) : nullptr;
+
+    if (prefabPathValueString == nullptr){
+      ImGui::TextDisabled("Selected object is not a prefab instance");
+    }else{
+      ImGui::Text("Root ID: %d", rootId);
+      ImGui::TextWrapped("Source: %s", prefabPathValueString -> c_str());
+
+      auto children = mainApi -> getChildrenIdsAndParent(rootId);
+      ImGui::Separator();
+      ImGui::Text("Objects: %zu", children.size() + 1);
+
+      bool showPrefabObjects = ImGui::BeginChild("PrefabObjects", ImVec2(0.f, 0.f), true);
+      if (showPrefabObjects){
+        auto rootName = mainApi -> getGameObjNameForId(rootId);
+        if (rootName.has_value()){
+          ImGui::BulletText("%s", rootName.value().c_str());
+        }
+
+        for (auto childId : children){
+          auto childName = mainApi -> getGameObjNameForId(childId);
+          if (childName.has_value()){
+            ImGui::BulletText("%s", childName.value().c_str());
+          }
+        }
+      }
+      ImGui::EndChild();
+    }
+  }
+
+  if (includePanel){
+    ImGui::End();
+  }
+}
 
 void renderCameraPanel(bool includePanel){
   if (includePanel){
@@ -529,7 +623,7 @@ void renderObjPanel(bool includePanel, std::optional<objid> objectToDetail, std:
     }else if (type == OBJ_TEXT){
       renderTextPanel(false, objectToDetail);
     }else if (type == OBJ_PREFAB){
-      renderUnknownObjPanel(false);
+      renderPrefabPanel(false, objectToDetail, sceneId);
     }else if (type == OBJ_VIDEO){
       renderUnknownObjPanel(false);
     }else{

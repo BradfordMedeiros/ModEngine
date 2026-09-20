@@ -11,6 +11,7 @@ void renderSoundPanel(bool includePanel, std::optional<objid> objectToDetail);
 void renderLightPanel(bool includePanel, std::optional<objid> objectToDetail);
 void renderMeshPanel(bool includePanel, std::optional<objid> objectToDetail);
 void renderParticlePanel(bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId);
+void renderPrefabPanel(bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId);
 void renderUnknownObjPanel(bool includePanel);
 void renderObjPanel(bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId);
 
