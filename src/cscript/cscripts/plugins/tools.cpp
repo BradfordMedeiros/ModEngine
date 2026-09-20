@@ -67,9 +67,14 @@ objid createManipulator(){
 
 ManipulatorSelection onManipulatorSelected(){
   std::vector<objid> ids;
+  std::set<objid> normalizedIds;
   for (auto &id : mainApi -> selected()){
     if (getLayerForId(id).selectIndex != -2){
-      ids.push_back(id);
+      auto prefabRootId = mainApi -> prefabId(id);
+      auto transformId = prefabRootId.value_or(id);
+      if (normalizedIds.insert(transformId).second){
+        ids.push_back(transformId);
+      }
     }
   }
   return ManipulatorSelection {

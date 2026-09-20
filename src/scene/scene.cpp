@@ -969,7 +969,7 @@ std::set<objid> updatePhysicsFromSandbox(World& world){
       auto body =  phys.body;
       
       auto isStatic = body -> getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT;
-      if (isStatic){
+      if (isStatic || world.updateDynamicBodiesPositionsBasedOnParent){
         auto& fullTransform = fullTransformation(world.sandbox, index, "read back transform for rigid body position");
         setTransform(world.physicsEnvironment, body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
         std::cout << inColor("hint - physics setTransform", CONSOLE_COLOR_YELLOW) << ": [" << std::to_string(index) + " " + getGameObject(world, index).name + "] " << "setTransform" << " " << inColor(print(fullTransform), CONSOLE_COLOR_YELLOW) <<  std::endl;        
@@ -1639,7 +1639,7 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::unordered_map<obj
     GameObject& gameobj = getGameObject(world, i);
     auto isStatic = rigidBody.body -> getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT;
 
-    if (!isStatic){
+    if (!isStatic && !world.updateDynamicBodiesPositionsBasedOnParent){
       auto rotation = getRotation(rigidBody.body);
       auto posUpdate = hasPosUpdate(world, i);
       auto rotUpdate = hasRotUpdate(world, i);

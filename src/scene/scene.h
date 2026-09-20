@@ -25,6 +25,7 @@ struct Constraint {
 
 struct World {
   physicsEnv physicsEnvironment;
+  bool updateDynamicBodiesPositionsBasedOnParent = true;
   std::unordered_map<objid, PhysicsValue> rigidbodys;
   std::vector<Constraint> constraints;
 

@@ -403,6 +403,10 @@ void setPhysicsVelocity(int32_t id, glm::vec3 velocity){
   physicsVelocitySet(world, id, velocity);
 }
 
+void setUpdateDynamicBodiesPositionsBasedOnParent(bool enabled){
+  world.updateDynamicBodiesPositionsBasedOnParent = enabled;
+}
+
 
 void setMeshEnabled(int32_t id, bool enabled, std::vector<ViewportMeshEnablement> viewports){
   setMeshEnabled(world, id, enabled, viewports);

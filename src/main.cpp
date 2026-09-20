@@ -1640,6 +1640,7 @@ int main(int argc, char* argv[]){
     
     .getPhysicsVelocity = getPhysicsVelocity,
     .setPhysicsVelocity = setPhysicsVelocity,
+    .setUpdateDynamicBodiesPositionsBasedOnParent = setUpdateDynamicBodiesPositionsBasedOnParent,
     .setMeshEnabled = setMeshEnabled,
 
     .getGameObjectPos = getGameObjectPosition,
