@@ -59,6 +59,7 @@ struct CustomApiBindings {
   void (*unbindTexture)(unsigned int program, unsigned int textureUnit);
 
   std::optional<std::string> (*getGameObjNameForId)(int32_t id);
+  void (*renameGameObject)(int32_t id, std::string name);
   void (*setGameObjectAttr)(int32_t id, std::vector<GameobjAttribute> attrs);
   void (*setSingleGameObjectAttr)(int32_t id, const char* field, AttributeValue value);
   

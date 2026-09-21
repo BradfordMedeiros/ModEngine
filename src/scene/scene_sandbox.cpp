@@ -110,6 +110,26 @@ objid sandboxAddToScene(Scene& scene, objid sceneId, std::optional<objid> parent
   return gameobjectObj.id;
 }
 
+void renameGameObject(SceneSandbox& sandbox, objid id, std::string name){
+  modassert(idExists(sandbox, id), std::string("cannot rename missing object: ") + std::to_string(id));
+  modassert(!name.empty(), "cannot rename object to an empty name");
+
+  auto& scene = sandbox.mainScene;
+  auto& gameobject = getGameObject(sandbox, id);
+  auto& gameobjectH = getGameObjectH(sandbox, id);
+  auto& names = scene.sceneToNameToId.at(gameobjectH.sceneId);
+  auto existing = names.find(name);
+  modassert(existing == names.end() || existing->second == id, std::string("duplicate object name: ") + name);
+
+  if (gameobject.name == name){
+    return;
+  }
+
+  names.erase(gameobject.name);
+  gameobject.name = name;
+  names[name] = id;
+}
+
 SceneDeserialization createSceneFromParsedContent(
   objid sceneId,
   std::vector<Token> tokens,  

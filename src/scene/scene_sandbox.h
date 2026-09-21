@@ -77,6 +77,7 @@ TransformCacheElement& getAbsoluteByDirectIndex(SceneSandbox& sandbox, int direc
 
 std::vector<std::string> childnamesNoPrefabs(SceneSandbox& sandbox, GameObjectH& gameobjecth);
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children, std::optional<objid> prefabId);
+void renameGameObject(SceneSandbox& sandbox, objid id, std::string name);
 
 std::set<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid);
 void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::set<objid> objects);

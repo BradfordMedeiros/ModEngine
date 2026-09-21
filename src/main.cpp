@@ -1635,6 +1635,7 @@ int main(int argc, char* argv[]){
     .bindTexture = bindTexture,
     .unbindTexture = unbindTexture,
     .getGameObjNameForId = getGameObjectName,
+    .renameGameObject = renameGameObject,
     .setGameObjectAttr = setGameObjectAttr,
     .setSingleGameObjectAttr = setSingleGameObjectAttr,
     

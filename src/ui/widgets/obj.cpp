@@ -653,12 +653,31 @@ void renderObjectDetails(objid id, bool includePanel){
 
   static std::string testname = name;
   static objid objectId = id;
+  static std::string renameError;
   if (objectId != id){
-  	testname = objectName;
+    objectId = id;
+    testname = name;
+    renameError.clear();
   }
 
   ImGui::InputText("Rename Object", &testname);
-  ImGui::Button("Rename");
+  if (ImGui::Button("Rename")){
+    renameError.clear();
+    if (testname.empty()){
+      renameError = "Object name cannot be empty";
+    }else{
+      auto sceneId = mainApi -> listSceneId(id);
+      auto existingId = mainApi -> getGameObjectByName(testname, sceneId);
+      if (existingId.has_value() && existingId.value() != id){
+        renameError = "An object with that name already exists";
+      }else{
+        mainApi -> renameGameObject(id, testname);
+      }
+    }
+  }
+  if (!renameError.empty()){
+    ImGui::TextColored(ImVec4(1.f, 0.3f, 0.3f, 1.f), "%s", renameError.c_str());
+  }
   ImGui::Dummy(ImVec2(0, 10));
 
 

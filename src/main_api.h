@@ -114,6 +114,7 @@ bool gameobjExists(objid id);
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId);
 std::vector<int32_t> getObjectsByAttr(std::string type, std::optional<AttributeValue> value, std::optional<int32_t> sceneId);
 std::optional<std::string> getGameObjectName(int32_t index);
+void renameGameObject(int32_t id, std::string name);
 std::optional<AttributeValuePtr> getObjectAttributePtr(int32_t id, const char* field);
 std::optional<AttributeValue> getObjectAttribute(int32_t id, const char* field);
 void setGameObjectAttr(int32_t id, std::vector<GameobjAttribute> attrs);

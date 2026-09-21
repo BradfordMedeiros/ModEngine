@@ -380,6 +380,10 @@ std::optional<std::string> getGameObjectName(int32_t index){
   return getGameObject(world, index).name;
 }
 
+void renameGameObject(int32_t id, std::string name){
+  renameGameObject(world.sandbox, id, name);
+}
+
 std::optional<AttributeValuePtr> getObjectAttributePtr(int32_t id, const char* field){
   return getObjectAttributePtr(world, id, field);
 }
