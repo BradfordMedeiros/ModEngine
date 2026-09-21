@@ -20,20 +20,44 @@ void moveCameraAbs(glm::vec3 position);
 void sendManipulatorEvent(MANIPULATOR_EVENT event);
 std::optional<std::string> ScenegraphView(std::string directory, FILE_EXTENSION_TYPE type);
 
-std::optional<objid> ScenegraphView2(objid id, std::optional<objid> lastSelectedId){
+bool scenegraphContainsMatch(objid id, const std::string& searchText){
+    if (searchText.empty()){
+        return true;
+    }
+
+    auto objectName = getGameObjectName(id);
+    if (objectName.has_value() && objectName.value().find(searchText) != std::string::npos){
+        return true;
+    }
+
+    for (auto childId : childObj(id)){
+        if (scenegraphContainsMatch(childId, searchText)){
+            return true;
+        }
+    }
+    return false;
+}
+
+std::optional<objid> ScenegraphView2(objid id, std::optional<objid> lastSelectedId, const std::string& searchText){
     std::optional<objid> selectedId;
 
     auto children = childObj(id);
 
-    std::cout << "scenegraph: " << id << ", size = " << children.size() << std::endl;
+    auto objectName = getGameObjectName(id);
+    if (!objectName.has_value() || !scenegraphContainsMatch(id, searchText)){
+        return std::nullopt;
+    }
 
     bool selected = lastSelectedId.has_value() && lastSelectedId.value() == id;
     if (children.size() > 0){
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | (selected ? ImGuiTreeNodeFlags_Selected : 0);
-        if (ImGui::TreeNodeEx(getGameObjectName(id).value().c_str(), flags))
+        if (!searchText.empty()){
+            ImGui::SetNextItemOpen(true, ImGuiCond_Always);
+        }
+        if (ImGui::TreeNodeEx(objectName.value().c_str(), flags))
         {
             for (auto childId : children){
-                auto selectedObjId = ScenegraphView2(childId, lastSelectedId);
+                auto selectedObjId = ScenegraphView2(childId, lastSelectedId, searchText);
                 if (selectedObjId.has_value()){
                     selectedId = selectedObjId;
                 }
@@ -42,7 +66,7 @@ std::optional<objid> ScenegraphView2(objid id, std::optional<objid> lastSelected
             ImGui::TreePop();
         }
     }else{
-            if(ImGui::Selectable(getGameObjectName(id).value().c_str(), selected)){
+            if(ImGui::Selectable(objectName.value().c_str(), selected)){
                 selectedId = id;
             }
 
@@ -68,12 +92,19 @@ std::optional<objid> ScenegraphView2(objid id, std::optional<objid> lastSelected
 
 
 std::optional<objid> renderScenegraph(const char* name, bool includePanel, std::optional<objid> selectedObjId){
+    static std::string scenegraphSearch;
+
     if (includePanel){
         ImGui::Begin(name, nullptr);
     }
-    ImVec2 size = ImGui::GetContentRegionAvail();
-  
-    auto selectedId = ScenegraphView2(rootObjId(), selectedObjId);
+
+    ImGui::InputTextWithHint("##scenegraph-search", "Search objects...", &scenegraphSearch);
+    ImGui::SameLine();
+    if (ImGui::Button("Clear") && !scenegraphSearch.empty()){
+        scenegraphSearch.clear();
+    }
+
+    auto selectedId = ScenegraphView2(rootObjId(), selectedObjId, scenegraphSearch);
     if (selectedId.has_value()){
         std::cout << "scenegraph selected: " << selectedId.value() << std::endl;
     }

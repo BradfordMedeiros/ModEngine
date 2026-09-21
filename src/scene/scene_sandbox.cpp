@@ -357,6 +357,7 @@ std::unordered_map<std::string, GameobjAttributesWithId> multiObjAdd(
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children, std::optional<objid> prefabId){
   modassert(name == gameobjectObj.name, "names do not match");
   auto addedId = sandboxAddToScene(sandbox.mainScene, sceneId, std::nullopt, gameobjectObj, prefabId);      
+  enforceParentRelationship(sandbox.mainScene, addedId, 0);
   for (auto child : children){
     if (sandbox.mainScene.sceneToNameToId.at(sceneId).find(child) == sandbox.mainScene.sceneToNameToId.at(sceneId).end()){
        // @TODO - shouldn't be an error should automatically create instead
