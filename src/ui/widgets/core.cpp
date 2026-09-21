@@ -54,7 +54,11 @@ std::optional<objid> ScenegraphView2(objid id, std::optional<objid> lastSelected
         if (!searchText.empty()){
             ImGui::SetNextItemOpen(true, ImGuiCond_Always);
         }
-        if (ImGui::TreeNodeEx(objectName.value().c_str(), flags))
+        bool treeNodeOpen = ImGui::TreeNodeEx(objectName.value().c_str(), flags);
+        if (ImGui::IsItemClicked()){
+            selectedId = id;
+        }
+        if (treeNodeOpen)
         {
             for (auto childId : children){
                 auto selectedObjId = ScenegraphView2(childId, lastSelectedId, searchText);
