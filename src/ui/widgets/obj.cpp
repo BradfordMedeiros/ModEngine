@@ -290,13 +290,30 @@ void renderPrefabPanel(bool includePanel, std::optional<objid> objectToDetail, s
           { "position", createLocation() },
         },
       };
+
+      auto filepath = decomposePath(prefabPath);
+
+
       std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-      mainApi -> makeObjectAttr(
-        sceneId.value(),
-        std::string("[prefab-instance-") + uniqueNameSuffix(),
-        attr,
-        submodelAttributes
-      );
+      //std::string name = std::string("[prefab-instance-") + uniqueNameSuffix();
+      std::string name = std::string("[")  + filepath.filename + "_";
+      int i = 0;
+      while(true){
+        std::string joinedName = name + std::to_string(i);
+        i++;
+        auto existingId = mainApi -> getGameObjectByName(joinedName, sceneId.value());
+        if (!existingId.has_value()){
+          name = joinedName;
+          break;
+        }
+
+        if (i > 1000000){
+          modassert(false, "error creating prefab could not generate name");
+        }
+
+      }
+
+      mainApi -> makeObjectAttr(sceneId.value(), name, attr, submodelAttributes);
     }
   }
   if (!sceneId.has_value()){
