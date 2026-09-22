@@ -1,12 +1,257 @@
 #include "./obj.h"
 #include "../../main_api.h"
 #include "../../package.h"
+#include <sstream>
 
 extern CustomApiBindings* mainApi;
 
 std::vector<std::string> listSoundFiles();
 std::vector<std::string> listParticlesFiles();
 std::optional<std::string> ScenegraphView(std::string directory, FILE_EXTENSION_TYPE type);
+
+struct PrefabEditorExpose {
+  std::string target;
+  std::string type = "auto";
+  std::string label;
+  std::optional<float> min;
+  std::optional<float> max;
+};
+
+std::vector<PrefabEditorExpose> parsePrefabEditorExposes(std::string& content){
+  std::vector<PrefabEditorExpose> exposes;
+  std::istringstream lines(content);
+  std::string line;
+  while (std::getline(lines, line)){
+    auto marker = line.find("@editor expose ");
+    if (marker == std::string::npos){
+      continue;
+    }
+
+    std::istringstream tokens(line.substr(marker + 15));
+    PrefabEditorExpose expose;
+    std::string target;
+    std::string option;
+    if (!(tokens >> target)){
+      continue;
+    }
+    expose.target = target;
+    while (tokens >> option){
+      auto equals = option.find('=');
+      if (equals == std::string::npos){
+        continue;
+      }
+      auto key = option.substr(0, equals);
+      auto value = option.substr(equals + 1);
+      if (key == "type"){
+        expose.type = value;
+      }else if (key == "label"){
+        expose.label = value;
+      }else if (key == "min"){
+        float parsed = 0.f;
+        if (maybeParseFloat(value, parsed)){
+          expose.min = parsed;
+        }
+      }else if (key == "max"){
+        float parsed = 0.f;
+        if (maybeParseFloat(value, parsed)){
+          expose.max = parsed;
+        }
+      }
+    }
+    if (expose.label.empty()){
+      expose.label = expose.target;
+    }
+    exposes.push_back(expose);
+  }
+  return exposes;
+}
+
+
+struct ResolvedProperty {
+  objid id;
+  std::string field;
+};
+std::optional<ResolvedProperty> resolvePrefabExpose(objid rootId, PrefabEditorExpose& expose){
+  std::cout << std::endl;
+  auto separator = expose.target.find(':');
+  if (separator == std::string::npos){
+    separator = expose.target.rfind('/');
+  }
+  if (separator == std::string::npos){
+    return ResolvedProperty { .id = rootId, .field = expose.target };
+  }
+
+  auto targetPath = expose.target.substr(0, separator);
+  auto field = expose.target.substr(separator + 1);
+  if (targetPath == "root"){
+    return ResolvedProperty { .id = rootId, .field = field };
+  }
+
+  auto currentId = rootId;
+  auto pathParts = split(targetPath, '/');
+  auto rootName = mainApi -> getGameObjNameForId(rootId);
+  if (pathParts.size() == 1 && rootName.has_value() && rootName.value() == pathParts.at(0)){
+    return ResolvedProperty { .id = rootId, .field = field };
+  }
+
+  for (auto& pathPart : pathParts){
+    auto directChildren = mainApi -> getChildrenIdsAndParent(currentId);
+    std::optional<objid> nextId;
+    std::cout << "child path part: " << pathPart << std::endl;
+    for (auto childId : directChildren){
+      auto childName = mainApi -> getGameObjNameForId(childId);
+      std::cout << "child: " << childName.value() << std::endl;
+      if (childName.has_value() && childName.value() == targetPath){
+        nextId = childId;
+        break;
+      }
+    }
+    if (!nextId.has_value()){
+      return std::nullopt;
+    }
+    currentId = nextId.value();
+  }
+  return ResolvedProperty {
+    .id = currentId,
+    .field = field,
+  };
+}
+
+std::optional<std::string> prefabOverrideField(const PrefabEditorExpose& expose){
+  auto separator = expose.target.find(':');
+  if (separator == std::string::npos){
+    separator = expose.target.rfind('/');
+  }
+  if (separator == std::string::npos){
+    return std::nullopt;
+  }
+  return std::string("+") + expose.target.substr(0, separator) + "|" + expose.target.substr(separator + 1);
+}
+
+std::string serializePrefabOverrideValue(AttributeValue& value){
+  auto floatValue = std::get_if<float>(&value);
+  if (floatValue != nullptr){
+    return serializeFloat(*floatValue);
+  }
+  auto boolValue = std::get_if<bool>(&value);
+  if (boolValue != nullptr){
+    return *boolValue ? "true" : "false";
+  }
+  auto stringValue = std::get_if<std::string>(&value);
+  if (stringValue != nullptr){
+    return *stringValue;
+  }
+  return serializeAttributeValue(value);
+}
+
+void savePrefabExposeOverride(objid rootId, const PrefabEditorExpose& expose, AttributeValue value){
+  auto field = prefabOverrideField(expose);
+  if (!field.has_value()){
+    return;
+  }
+  auto payload = serializePrefabOverrideValue(value);
+  mainApi -> setSingleGameObjectAttr(rootId, field->c_str(), payload);
+}
+
+void renderPrefabExpose(PrefabEditorExpose& expose, objid rootId, int index){
+  auto resolved = resolvePrefabExpose(rootId, expose);
+  if (!resolved.has_value()){
+    ImGui::TextDisabled("%s (target not found)", expose.label.c_str());
+    return;
+  }
+
+  auto targetId = resolved ->id;
+  auto field = resolved ->field;
+  auto value = getObjectAttribute(targetId, field.c_str());
+  if (!value.has_value()){
+    ImGui::TextDisabled("%s (value not found)", expose.label.c_str());
+    return;
+  }
+
+  auto label = expose.label + "##prefab_expose_" + std::to_string(index);
+  auto min = expose.min.value_or(-1000000.f);
+  auto max = expose.max.value_or(1000000.f);
+
+  auto vec3Value = std::get_if<glm::vec3>(&value.value());
+  if (expose.type == "vec3" || (expose.type == "auto" && vec3Value != nullptr)){
+    if (vec3Value == nullptr){
+      ImGui::TextDisabled("%s (expected vec3)", expose.label.c_str());
+      return;
+    }
+    float edited[3] = { vec3Value->x, vec3Value->y, vec3Value->z };
+    if (ImGui::SliderFloat3(label.c_str(), edited, min, max)){
+      mainApi -> setSingleGameObjectAttr(
+        targetId,
+        field.c_str(),
+        glm::vec3(edited[0], edited[1], edited[2])
+      );
+      savePrefabExposeOverride(rootId, expose, glm::vec3(edited[0], edited[1], edited[2]));
+    }
+    return;
+  }
+
+  auto vec4Value = std::get_if<glm::vec4>(&value.value());
+  if (expose.type == "vec4" || (expose.type == "auto" && vec4Value != nullptr)){
+    if (vec4Value == nullptr){
+      ImGui::TextDisabled("%s (expected vec4)", expose.label.c_str());
+      return;
+    }
+    float edited[4] = { vec4Value->x, vec4Value->y, vec4Value->z, vec4Value->w };
+    if (ImGui::SliderFloat4(label.c_str(), edited, min, max)){
+      mainApi -> setSingleGameObjectAttr(
+        targetId,
+        field.c_str(),
+        glm::vec4(edited[0], edited[1], edited[2], edited[3])
+      );
+      savePrefabExposeOverride(rootId, expose, glm::vec4(edited[0], edited[1], edited[2], edited[3]));
+    }
+    return;
+  }
+
+  auto floatValue = std::get_if<float>(&value.value());
+  if (expose.type == "float" || (expose.type == "auto" && floatValue != nullptr)){
+    if (floatValue == nullptr){
+      ImGui::TextDisabled("%s (expected float)", expose.label.c_str());
+      return;
+    }
+    float edited = *floatValue;
+    if (ImGui::SliderFloat(label.c_str(), &edited, min, max)){
+      mainApi -> setSingleGameObjectAttr(targetId, field.c_str(), edited);
+      savePrefabExposeOverride(rootId, expose, edited);
+    }
+    return;
+  }
+
+  auto boolValue = std::get_if<bool>(&value.value());
+  if (expose.type == "bool" || (expose.type == "auto" && boolValue != nullptr)){
+    if (boolValue == nullptr){
+      ImGui::TextDisabled("%s (expected bool)", expose.label.c_str());
+      return;
+    }
+    bool edited = *boolValue;
+    if (ImGui::Checkbox(label.c_str(), &edited)){
+      mainApi -> setSingleGameObjectAttr(targetId, field.c_str(), edited);
+      savePrefabExposeOverride(rootId, expose, edited);
+    }
+    return;
+  }
+
+  auto stringValue = std::get_if<std::string>(&value.value());
+  if (expose.type == "string" || (expose.type == "auto" && stringValue != nullptr)){
+    if (stringValue == nullptr){
+      ImGui::TextDisabled("%s (expected string)", expose.label.c_str());
+      return;
+    }
+    auto edited = *stringValue;
+    if (ImGui::InputText(label.c_str(), &edited)){
+      mainApi -> setSingleGameObjectAttr(targetId, field.c_str(), edited);
+      savePrefabExposeOverride(rootId, expose, edited);
+    }
+    return;
+  }
+
+  ImGui::TextDisabled("%s (unsupported type: %s)", expose.label.c_str(), expose.type.c_str());
+}
 
 void renderPrefabPanel(bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId){
   if (includePanel){
@@ -19,6 +264,7 @@ void renderPrefabPanel(bool includePanel, std::optional<objid> objectToDetail, s
     prefabPath = prefabFiles.at(0);
   }
 
+  // Prefab file Select
   ImGui::Text("Create Prefab");
   if (prefabFiles.empty()){
     ImGui::TextDisabled("No .rawscene prefabs found");
@@ -35,6 +281,7 @@ void renderPrefabPanel(bool includePanel, std::optional<objid> objectToDetail, s
     ImGui::EndCombo();
   }
 
+  // Create Prefab Button
   if (ImGui::Button("Create at Camera")){
     if (sceneId.has_value() && !prefabPath.empty()){
       GameobjAttributes attr {
@@ -56,6 +303,7 @@ void renderPrefabPanel(bool includePanel, std::optional<objid> objectToDetail, s
     ImGui::TextDisabled("No active scene");
   }
 
+  // Prefab detail editor
   ImGui::Separator();
   ImGui::Text("Selected Prefab");
   if (!objectToDetail.has_value()){
@@ -74,6 +322,17 @@ void renderPrefabPanel(bool includePanel, std::optional<objid> objectToDetail, s
       ImGui::TextWrapped("Source: %s", prefabPathValueString -> c_str());
 
       auto children = mainApi -> getChildrenIdsAndParent(rootId);
+      auto prefabFileContent = readFileOrPackage(*prefabPathValueString);
+      auto exposes = parsePrefabEditorExposes(prefabFileContent);
+      if (!exposes.empty()){
+        ImGui::Separator();
+        ImGui::Text("Exposed Properties");
+        for (int i = 0; i < exposes.size(); i++){
+          renderPrefabExpose(exposes.at(i), rootId, i);
+        }
+      }
+
+      // Prefab GameObject List
       ImGui::Separator();
       ImGui::Text("Objects: %zu", children.size() + 1);
 
