@@ -404,13 +404,31 @@ void renderCameraPanel(bool includePanel, std::optional<objid> objectToDetail, s
 
   if (objectToDetail.has_value() && sceneId.has_value()){
     createCameraButton(sceneId.value());
-  
     auto id = objectToDetail.value();
 
     auto dof = getTypeFromAttr<bool>(getObjectAttributePtr(id, "dof"));
+    bool isCamera = dof.has_value();
     auto minBlur = getTypeFromAttr<float>(getObjectAttributePtr(id, "minblur"));
     auto maxBlur = getTypeFromAttr<float>(getObjectAttributePtr(id, "maxblur"));
     auto blurAmount = getTypeFromAttr<uint>(getObjectAttributePtr(id, "bluramount"));
+
+    if (isCamera){
+      std::string cameraTag;
+      auto cameraTagValue = getObjectAttribute(id, "cameratag");
+      if (cameraTagValue.has_value()){
+        auto stringValue = std::get_if<std::string>(&cameraTagValue.value());
+        if (stringValue != nullptr){
+          cameraTag = *stringValue;
+        }
+      }
+      if (ImGui::InputText("Camera Tag", &cameraTag)){
+        if (cameraTag.empty()){
+          setSingleGameObjectAttr(id, "cameratag", DeleteAttribute{});
+        }else{
+          setSingleGameObjectAttr(id, "cameratag", cameraTag);
+        }
+      }
+    }
 
     if (dof.has_value()){
       bool enabled = *dof.value();
