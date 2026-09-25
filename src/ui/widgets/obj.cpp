@@ -376,20 +376,71 @@ void renderPrefabPanel(bool includePanel, std::optional<objid> objectToDetail, s
   }
 }
 
-void renderCameraPanel(bool includePanel){
+std::optional<objid> createCameraButton(objid sceneId){
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  GameobjAttributes attr { .attr = {} };
+
+  std::optional<objid> createdId;  
+  if(ImGui::Button("Create Camera")){
+      createdId = mainApi -> makeObjectAttr(
+        sceneId, 
+        std::string(">camera-") + uniqueNameSuffix(), 
+        attr, 
+        submodelAttributes
+      );
+  }
+
+  if (createdId.has_value()){
+      mainApi -> setGameObjectPosition(createdId.value(), createLocation(), true, Hint { .hint = "[ui] - createCameraButton set pos" });
+  }
+
+  return createdId;
+}
+
+void renderCameraPanel(bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId){
   if (includePanel){
     ImGui::Begin("Cameras");
   }
 
-  static bool doThing = false;
-  ImGui::Checkbox("Depth of Field", &doThing);
+  if (objectToDetail.has_value() && sceneId.has_value()){
+    createCameraButton(sceneId.value());
   
-  float speed = 5.0f;
+    auto id = objectToDetail.value();
 
-  ImGui::SliderFloat("Min Blur", &speed, 0.0f, 10.0f);
-  ImGui::SliderFloat("Max Blur", &speed, 0.0f, 10.0f);
-  ImGui::SliderFloat("Blur Amount", &speed, 0.0f, 10.0f);
+    auto dof = getTypeFromAttr<bool>(getObjectAttributePtr(id, "dof"));
+    auto minBlur = getTypeFromAttr<float>(getObjectAttributePtr(id, "minblur"));
+    auto maxBlur = getTypeFromAttr<float>(getObjectAttributePtr(id, "maxblur"));
+    auto blurAmount = getTypeFromAttr<uint>(getObjectAttributePtr(id, "bluramount"));
 
+    if (dof.has_value()){
+      bool enabled = *dof.value();
+      if (ImGui::Checkbox("Depth of Field", &enabled) && enabled != *dof.value()){
+        setSingleGameObjectAttr(id, "dof", enabled);
+      }
+    }
+
+    if (minBlur.has_value()){
+      float value = *minBlur.value();
+      if (ImGui::SliderFloat("Min Blur", &value, 0.0f, 100.0f) && value != *minBlur.value()){
+        setSingleGameObjectAttr(id, "minblur", value);
+      }
+    }
+
+    if (maxBlur.has_value()){
+      float value = *maxBlur.value();
+      if (ImGui::SliderFloat("Max Blur", &value, 0.0f, 100.0f) && value != *maxBlur.value()){
+        setSingleGameObjectAttr(id, "maxblur", value);
+      }
+    }
+
+    if (blurAmount.has_value()){
+      int value = static_cast<int>(*blurAmount.value());
+      if (ImGui::SliderInt("Blur Amount", &value, 0, 20) && value != static_cast<int>(*blurAmount.value())){
+        setSingleGameObjectAttr(id, "bluramount", static_cast<float>(value));
+      }
+    }
+
+  }
   if (includePanel){
 	  ImGui::End();
   }
@@ -883,7 +934,7 @@ void renderObjPanel(bool includePanel, std::optional<objid> objectToDetail, std:
       renderMeshPanel(false, objectToDetail);
       // enum ObjectType {, , , , , , ,  };
     }else if (type == OBJ_CAMERA){
-      renderCameraPanel(false);
+      renderCameraPanel(false, objectToDetail, sceneId);
     }else if (type == OBJ_PORTAL){
       renderUnknownObjPanel(false);
     }else if (type == OBJ_SOUND){
@@ -1159,6 +1210,7 @@ glm::vec3 createLocation(){
     return location;
 }
 
+
 void renderCreateObj(bool includePanel, std::optional<objid> sceneId){
   if (includePanel){
     ImGui::Begin("Create Object");
@@ -1179,6 +1231,12 @@ void renderCreateObj(bool includePanel, std::optional<objid> sceneId){
         submodelAttributes
       );
     }
+
+    auto createdCamera = createCameraButton(sceneId.value());
+    if (createdCamera.has_value()){
+      createdId = createdCamera;
+    }
+
     if(ImGui::Button("Create Camera")){
       createdId = mainApi -> makeObjectAttr(
         sceneId.value(), 

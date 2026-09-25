@@ -100,7 +100,7 @@ void initUi(){
 
     {
         registerWidget("Object - Camera", "objects", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-            renderCameraPanel(includePanel);
+            renderCameraPanel(includePanel, objectToDetail, sceneId);
         });  
         registerWidget("Object - Sound", "objects", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
             renderSoundPanel(includePanel, objectToDetail);

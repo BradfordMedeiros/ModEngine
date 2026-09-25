@@ -6,7 +6,7 @@
 #include "../../cscript/cscript_binding.h"
 #include "../../object_util.h"
 
-void renderCameraPanel(bool includePanel);
+void renderCameraPanel(bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId);
 void renderSoundPanel(bool includePanel, std::optional<objid> objectToDetail);
 void renderLightPanel(bool includePanel, std::optional<objid> objectToDetail);
 void renderMeshPanel(bool includePanel, std::optional<objid> objectToDetail);
