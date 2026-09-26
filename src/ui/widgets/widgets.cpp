@@ -9,6 +9,7 @@ extern engineState state;
 
 std::vector<std::string> getAllShaders();
 double timeSeconds(bool realtime);
+glm::vec3 createLocation();
 
 
 std::optional<std::string> ScenegraphView(std::string directory, FILE_EXTENSION_TYPE type){
@@ -654,6 +655,24 @@ std::optional<objid> generateMeshFromPoints(std::vector<glm::vec3>& points){
   );
 }
 
+std::optional<objid> createPointMarker(glm::vec3 position){
+  GameobjAttributes attributes;
+  attributes.attr["mesh"] = "./res/models/ui/node.obj";
+  attributes.attr["point-editor-marker"] = "true";
+
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  auto pointId = mainApi -> makeObjectAttr(
+    0,
+    std::string("mesh-point-marker-") + uniqueNameSuffix(),
+    attributes,
+    submodelAttributes
+  );
+  if (pointId.has_value()){
+    mainApi -> setGameObjectPosition(pointId.value(), position, true, Hint { .hint = "[ui] - point editor create point" });
+  }
+  return pointId;
+}
+
 void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
   if (includePanel){
     ImGui::Begin("Point Editor Panel");
@@ -666,21 +685,29 @@ void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
   };
   static std::vector<objid> pointIds;
   static std::string meshError;
+  static std::string pointError;
+  static bool showPointCoordinates = false;
 
+  if (ImGui::Button("Create Point")){
+    pointError.clear();
+    auto position = createLocation();
+    points.push_back(position);
+    if (!pointIds.empty()){
+      auto pointId = createPointMarker(position);
+      if (!pointId.has_value()){
+        points.pop_back();
+        pointError = "Failed to create point marker";
+      }else{
+        pointIds.push_back(pointId.value());
+      }
+    }
+  }
+
+  ImGui::SameLine();
   if (ImGui::Button("Sponsor Points")){
     if (pointIds.empty()){
       for (auto point : points){
-        GameobjAttributes attributes;
-        attributes.attr["mesh"] = "./res/models/ui/node.obj";
-        attributes.attr["point-editor-marker"] = "true";
-
-        std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-        auto pointId = mainApi -> makeObjectAttr(
-          0, // root scene id will not serialize or save
-          std::string("mesh-point-marker-") + uniqueNameSuffix(),
-          attributes,
-          submodelAttributes
-        );
+        auto pointId = createPointMarker(point);
         if (!pointId.has_value()){
           std::cout << "point editor failed to sponsor point" << std::endl;
           for (auto createdPointId : pointIds){
@@ -689,8 +716,6 @@ void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
           pointIds.clear();
           break;
         }
-
-        mainApi -> setGameObjectPosition(pointId.value(), point, true, Hint { .hint = "[ui] - point editor sponsor point" });
         pointIds.push_back(pointId.value());
       }
     }
@@ -735,6 +760,10 @@ void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
     pointIds.clear();
   }
 
+  if (!pointError.empty()){
+    ImGui::TextColored(ImVec4(1.f, 0.3f, 0.3f, 1.f), "%s", pointError.c_str());
+  }
+
   if (ImGui::Button("Generate Mesh")){
     meshError.clear();
     if (points.size() < 2){
@@ -752,9 +781,42 @@ void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
 
   ImGui::Text("Points: %zu", points.size());
   ImGui::Text("Sponsored objects: %zu", pointIds.size());
-  for (int index = 0; index < points.size(); index++){
-    auto& point = points.at(index);
-    ImGui::Text("%d: %.2f, %.2f, %.2f", index, point.x, point.y, point.z);
+  auto selectedIds = mainApi -> selected();
+  int selectedPointIndex = -1;
+  for (int index = 0; index < pointIds.size(); index++){
+    for (auto selectedId : selectedIds){
+      if (selectedId == pointIds.at(index)){
+        selectedPointIndex = index;
+        break;
+      }
+    }
+    if (selectedPointIndex >= 0){
+      break;
+    }
+  }
+  if (selectedPointIndex >= 0){
+    auto selectedId = pointIds.at(selectedPointIndex);
+    auto position = mainApi -> getGameObjectPos(selectedId, true, "[ui] - point editor selected point");
+    ImGui::Text("Selected point %d: %.2f, %.2f, %.2f", selectedPointIndex, position.x, position.y, position.z);
+    if (ImGui::Button("Order -") && selectedPointIndex > 0){
+      std::swap(points.at(selectedPointIndex), points.at(selectedPointIndex - 1));
+      std::swap(pointIds.at(selectedPointIndex), pointIds.at(selectedPointIndex - 1));
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Order +") && selectedPointIndex + 1 < pointIds.size()){
+      std::swap(points.at(selectedPointIndex), points.at(selectedPointIndex + 1));
+      std::swap(pointIds.at(selectedPointIndex), pointIds.at(selectedPointIndex + 1));
+    }
+  }
+  ImGui::Checkbox("Show point coordinates", &showPointCoordinates);
+  if (showPointCoordinates){
+    if (ImGui::BeginChild("PointCoordinates", ImVec2(0.f, 200.f), true)){
+      for (int index = 0; index < points.size(); index++){
+        auto& point = points.at(index);
+        ImGui::Text("%d: %.2f, %.2f, %.2f", index, point.x, point.y, point.z);
+      }
+    }
+    ImGui::EndChild();
   }
 
   if (includePanel){
