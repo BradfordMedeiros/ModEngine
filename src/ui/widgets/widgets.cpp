@@ -641,7 +641,6 @@ void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
       for (auto point : points){
         GameobjAttributes attributes;
         attributes.attr["mesh"] = "./res/models/ui/node.obj";
-        attributes.attr["scale"] = glm::vec3(0.25f, 0.25f, 0.25f);
         attributes.attr["point-editor-marker"] = "true";
 
         std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
@@ -660,12 +659,7 @@ void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
           break;
         }
 
-        mainApi -> setGameObjectPosition(
-          pointId.value(),
-          point,
-          true,
-          Hint { .hint = "[ui] - point editor sponsor point" }
-        );
+        mainApi -> setGameObjectPosition(pointId.value(), point, true, Hint { .hint = "[ui] - point editor sponsor point" });
         pointIds.push_back(pointId.value());
       }
     }
@@ -673,11 +667,7 @@ void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
 
   ImGui::SameLine();
   if (ImGui::Button("Read Back Points")){
-    auto markerIds = mainApi -> getObjectsByAttr(
-      "point-editor-marker",
-      std::nullopt,
-      0
-    );
+    auto markerIds = mainApi -> getObjectsByAttr("point-editor-marker", std::nullopt, 0);
     for (auto markerId : markerIds){
       bool isTracked = false;
       for (auto pointId : pointIds){
