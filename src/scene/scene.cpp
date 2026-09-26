@@ -1369,6 +1369,10 @@ AttributeValuePtr ptrFromAttributeValue(AttributeValue& attributeValue){
   if (floatValue){
     return floatValue;
   }
+  bool* boolValue = std::get_if<bool>(&attributeValue);
+  if (boolValue){
+    return boolValue;
+  }
   modassert(false, "ptrFromAttributeValue invalid value type");
   return (float*)NULL;
 }
@@ -1387,7 +1391,9 @@ std::optional<AttributeValuePtr> getObjectAttributePtr(World& world, objid id, c
     return objectValuePtr;
   }
   if (gameobj.additionalAttr.attr.find(field) != gameobj.additionalAttr.attr.end()){
-      return ptrFromAttributeValue(gameobj.additionalAttr.attr.at(field));
+    auto& additionalValue = gameobj.additionalAttr.attr.at(field);
+    if (std::get_if<DeleteAttribute>(&additionalValue) != nullptr) return std::nullopt;
+    return ptrFromAttributeValue(additionalValue);
   }
   return std::nullopt;
 }

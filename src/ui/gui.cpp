@@ -155,7 +155,12 @@ void initUi(){
         });  
         registerWidget("Color", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
             renderColorWidget(includePanel);
-        });  
+        });
+
+        registerWidget("Points", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderPointEditorWidget(includePanel, sceneId);
+        });
+          
     }
 
     registerView("Editor", false, { "Scenegraph" }, { "Object Details", "Object Type" }, DIVIDED_LAYOUT);

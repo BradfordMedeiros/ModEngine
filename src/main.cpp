@@ -272,6 +272,9 @@ void renderScreenspaceShapes(Texture& texture, Texture texture2, bool shouldClea
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::vec3 normal, float force){
   auto obj1Id = getIdForCollisionObject(world, obj1);
   auto obj2Id = getIdForCollisionObject(world, obj2);
+  if (!obj1Id.has_value() || !obj2Id.has_value()){
+    return;
+  }
   if (!gameobjExists(obj1Id.value()) || !gameobjExists(obj2Id.value())){
     return;
   }
@@ -282,6 +285,9 @@ void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2,
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
   auto obj1Id = getIdForCollisionObject(world, obj1);
   auto obj2Id = getIdForCollisionObject(world, obj2);
+  if (!obj1Id.has_value() || !obj2Id.has_value()){
+    return;
+  }
   if (!gameobjExists(obj1Id.value()) || !gameobjExists(obj2Id.value())){
     return;
   }

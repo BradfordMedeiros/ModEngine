@@ -624,3 +624,108 @@ void renderColorWidget(bool includePanel){
     ImGui::End();
   }  
 }
+void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
+  if (includePanel){
+    ImGui::Begin("Point Editor Panel");
+  }
+
+  static std::vector<glm::vec3> points {
+    glm::vec3(-1.f, 0.f, 0.f),
+    glm::vec3(0.f, 0.f, 0.f),
+    glm::vec3(1.f, 0.f, 0.f),
+  };
+  static std::vector<objid> pointIds;
+
+  if (ImGui::Button("Sponsor Points")){
+    if (pointIds.empty()){
+      for (auto point : points){
+        GameobjAttributes attributes;
+        attributes.attr["mesh"] = "./res/models/ui/node.obj";
+        attributes.attr["scale"] = glm::vec3(0.25f, 0.25f, 0.25f);
+        attributes.attr["point-editor-marker"] = "true";
+
+        std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+        auto pointId = mainApi -> makeObjectAttr(
+          0, // root scene id will not serialize or save
+          std::string("mesh-point-marker-") + uniqueNameSuffix(),
+          attributes,
+          submodelAttributes
+        );
+        if (!pointId.has_value()){
+          std::cout << "point editor failed to sponsor point" << std::endl;
+          for (auto createdPointId : pointIds){
+            mainApi -> removeObjectById(createdPointId);
+          }
+          pointIds.clear();
+          break;
+        }
+
+        mainApi -> setGameObjectPosition(
+          pointId.value(),
+          point,
+          true,
+          Hint { .hint = "[ui] - point editor sponsor point" }
+        );
+        pointIds.push_back(pointId.value());
+      }
+    }
+  }
+
+  ImGui::SameLine();
+  if (ImGui::Button("Read Back Points")){
+    auto markerIds = mainApi -> getObjectsByAttr(
+      "point-editor-marker",
+      std::nullopt,
+      0
+    );
+    for (auto markerId : markerIds){
+      bool isTracked = false;
+      for (auto pointId : pointIds){
+        if (pointId == markerId){
+          isTracked = true;
+          break;
+        }
+      }
+      if (!isTracked){
+        pointIds.push_back(markerId);
+      }
+    }
+
+    std::vector<glm::vec3> updatedPoints;
+    std::vector<objid> validPointIds;
+    for (auto pointId : pointIds){
+      if (!mainApi -> gameobjExists(pointId)){
+        continue;
+      }
+      updatedPoints.push_back(mainApi -> getGameObjectPos(
+        pointId,
+        true,
+        "[ui] - point editor read point"
+      ));
+      validPointIds.push_back(pointId);
+    }
+    points = updatedPoints;
+    pointIds = validPointIds;
+  }
+
+  ImGui::SameLine();
+  if (ImGui::Button("Remove Sponsored Points")){
+    for (auto pointId : pointIds){
+      if (mainApi -> gameobjExists(pointId)){
+        mainApi -> removeObjectById(pointId);
+      }
+    }
+    pointIds.clear();
+  }
+
+  ImGui::Text("Points: %zu", points.size());
+  ImGui::Text("Sponsored objects: %zu", pointIds.size());
+  for (int index = 0; index < points.size(); index++){
+    auto& point = points.at(index);
+    ImGui::Text("%d: %.2f, %.2f, %.2f", index, point.x, point.y, point.z);
+  }
+
+  if (includePanel){
+    ImGui::End();
+  }
+}
