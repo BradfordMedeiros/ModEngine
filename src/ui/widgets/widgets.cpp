@@ -1,5 +1,7 @@
 #include "./widgets.h"
 
+#include <cmath>
+
 extern CustomApiBindings* mainApi;
 extern DefaultResources defaultResources;
 extern Stats statistics;
@@ -624,6 +626,34 @@ void renderColorWidget(bool includePanel){
     ImGui::End();
   }  
 }
+
+std::optional<objid> generateMeshFromPoints(std::vector<glm::vec3>& points){
+  constexpr int sides = 6;
+  constexpr float radius = 0.25f;
+  constexpr float pi = 3.14159265358979323846f;
+  std::vector<glm::vec3> face;
+  face.reserve(sides * 3);
+  for (int side = 0; side < sides; side++){
+    float angle = (2.f * pi * side) / sides;
+    float nextAngle = (2.f * pi * (side + 1)) / sides;
+    face.push_back(glm::vec3(0.f, 0.f, 0.f));
+    face.push_back(glm::vec3(radius * std::cos(angle), radius * std::sin(angle), 0.f));
+    face.push_back(glm::vec3(radius * std::cos(nextAngle), radius * std::sin(nextAngle), 0.f));
+  }
+  auto meshName = std::string("point-editor-mesh-") + uniqueNameSuffix();
+  mainApi -> generateMesh(face, points, meshName);
+
+  GameobjAttributes attributes;
+  attributes.attr["mesh"] = meshName;
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  return mainApi -> makeObjectAttr(
+    0,
+    std::string("mesh-point-editor-") + uniqueNameSuffix(),
+    attributes,
+    submodelAttributes
+  );
+}
+
 void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
   if (includePanel){
     ImGui::Begin("Point Editor Panel");
@@ -635,6 +665,7 @@ void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
     glm::vec3(1.f, 0.f, 0.f),
   };
   static std::vector<objid> pointIds;
+  static std::string meshError;
 
   if (ImGui::Button("Sponsor Points")){
     if (pointIds.empty()){
@@ -706,6 +737,21 @@ void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
       }
     }
     pointIds.clear();
+  }
+
+  if (ImGui::Button("Generate Mesh")){
+    meshError.clear();
+    if (points.size() < 2){
+      meshError = "Generate Mesh requires at least two points";
+    }else{
+      auto meshId = generateMeshFromPoints(points);
+      if (!meshId.has_value()){
+        meshError = "Failed to create generated mesh object";
+      }
+    }
+  }
+  if (!meshError.empty()){
+    ImGui::TextColored(ImVec4(1.f, 0.3f, 0.3f, 1.f), "%s", meshError.c_str());
   }
 
   ImGui::Text("Points: %zu", points.size());
