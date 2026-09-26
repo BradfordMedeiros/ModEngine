@@ -718,11 +718,7 @@ void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
       if (!mainApi -> gameobjExists(pointId)){
         continue;
       }
-      updatedPoints.push_back(mainApi -> getGameObjectPos(
-        pointId,
-        true,
-        "[ui] - point editor read point"
-      ));
+      updatedPoints.push_back(mainApi -> getGameObjectPos(pointId, true, "[ui] - point editor read point"));
       validPointIds.push_back(pointId);
     }
     points = updatedPoints;
