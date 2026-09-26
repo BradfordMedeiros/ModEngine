@@ -1285,15 +1285,14 @@ void removeSceneFromWorld(World& world, objid sceneId){
   }
 }
 
-bool copyObjectToScene(World& world, objid id){
+std::optional<objid> copyObjectToScene(World& world, objid id){
   std::cout << "INFO: SCENE: COPY OBJECT: " << id << std::endl;
   auto serializedObject = serializeObject(world, id, true, getGameObject(world, id).name + "-copy-" + std::to_string(getUniqueObjId()));
   if (!deserializeSingleObj(serializedObject, id, false).has_value()){  // really bad hack 
     modlog("copy object", "copy object failure, more than one object tried to be copied");
-    return false;
+    return std::nullopt;
   }
-  addObjectToScene(world, getGameObjectH(world.sandbox, id).sceneId, serializedObject, -1, false);
-  return true;
+  return addObjectToScene(world, getGameObjectH(world.sandbox, id).sceneId, serializedObject, -1, false);
 }
 
 void createObjectForScene(World& world, objid sceneId, std::string& name, AttrChildrenPair& attrWithChildren, std::unordered_map<std::string, GameobjAttributes>& submodelAttributes){

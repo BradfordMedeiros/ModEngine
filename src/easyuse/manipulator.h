@@ -61,6 +61,7 @@ ManipulatorData createManipulatorData();
 
 objid getManipulatorId(ManipulatorData& manipulatorState);
 void onManipulatorSelectItem(ManipulatorData& manipulatorState, objid selectedItem, std::string selectedItemName);
+void onManipulatorSelectionChanged(ManipulatorData& manipulatorState);
 void onManipulatorMouseDown(ManipulatorData& manipulatorState);
 void onManipulatorMouseRelease(ManipulatorData& manipulatorState);
 

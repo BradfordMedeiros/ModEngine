@@ -39,6 +39,15 @@ void onManipulatorSelectItem(ManipulatorData& manipulatorState, objid selectedIt
   manipulatorState.selectedItemLastFrame = true;
 }
 
+void onManipulatorSelectionChanged(ManipulatorData& manipulatorState){
+  manipulatorState.state = "idle";
+  manipulatorState.manipulatorObject = NOAXIS;
+  manipulatorState.initialDragPosition = std::nullopt;
+  manipulatorState.initialTransforms = {};
+  manipulatorState.rotationAmount = 0.f;
+  manipulatorState.meanPosition = std::nullopt;
+}
+
 void onManipulatorMouseDown(ManipulatorData& manipulatorState){
   manipulatorState.mouseClickedLastFrame = true;
 }
@@ -602,4 +611,3 @@ void onManipulatorUpdate(
 
   manipulatorStateByName(manipulatorState.state).onState(manipulatorState, manipulatorTools, updateInfo);
 }
-

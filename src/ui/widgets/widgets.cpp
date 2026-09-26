@@ -628,9 +628,9 @@ void renderColorWidget(bool includePanel){
 }
 
 std::optional<objid> generateMeshFromPoints(std::vector<glm::vec3>& points){
-  constexpr int sides = 6;
-  constexpr float radius = 0.25f;
-  constexpr float pi = 3.14159265358979323846f;
+  int sides = 6;
+  float radius = 0.25f;
+  float pi = 3.14159265358979323846f;
   std::vector<glm::vec3> face;
   face.reserve(sides * 3);
   for (int side = 0; side < sides; side++){

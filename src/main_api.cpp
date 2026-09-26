@@ -460,11 +460,18 @@ std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttr
 void handleCopy(){
   modlog("clipboard", "pasting objects");
   modlog("editor", std::string("copying objects from clipboard, size = ") + std::to_string(state.editor.clipboardObjs.size()));
+  std::vector<objid> copiedIds;
   for (auto itemId : state.editor.clipboardObjs){
-    bool success = copyObjectToScene(world, itemId);
-    if (!success){
+    auto copiedId = copyObjectToScene(world, itemId);
+    if (!copiedId.has_value()){
       sendAlert(std::string("failure copying object: ") + std::to_string(itemId));
+      continue;
     }
+    copiedIds.push_back(copiedId.value());
+  }
+  if (!copiedIds.empty()){
+    state.editor.selectedObjs = copiedIds;
+    onManipulatorSelectionChanged(state.manipulatorState);
   }
 }
 void handleClipboardSelect(){
