@@ -223,7 +223,7 @@ if (NOT NO_INCLUDE_ASSIMP)
   set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "Disable all importers" FORCE)
   set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "Enable glTF importer" FORCE)
   set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "Enable OBJ importer" FORCE)
-  set(ASSIMP_BUILD_COLLADA_IMPORTER ON CACHE BOOL "" FORCE)  # .dae file...lets get rid of this
+  set(ASSIMP_BUILD_COLLADA_IMPORTER OFF CACHE BOOL "Disable unused Collada importer" FORCE)
   set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "Disable sample apps" FORCE)
 
   add_subdirectory("${ASSIMP_DIR}")
