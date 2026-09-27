@@ -684,7 +684,6 @@ void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
     glm::vec3(1.f, 0.f, 0.f),
   };
   static std::vector<objid> pointIds;
-  static std::string meshError;
   static std::string pointError;
   static bool showPointCoordinates = false;
 
@@ -764,21 +763,6 @@ void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
     ImGui::TextColored(ImVec4(1.f, 0.3f, 0.3f, 1.f), "%s", pointError.c_str());
   }
 
-  if (ImGui::Button("Generate Mesh")){
-    meshError.clear();
-    if (points.size() < 2){
-      meshError = "Generate Mesh requires at least two points";
-    }else{
-      auto meshId = generateMeshFromPoints(points);
-      if (!meshId.has_value()){
-        meshError = "Failed to create generated mesh object";
-      }
-    }
-  }
-  if (!meshError.empty()){
-    ImGui::TextColored(ImVec4(1.f, 0.3f, 0.3f, 1.f), "%s", meshError.c_str());
-  }
-
   ImGui::Text("Points: %zu", points.size());
   ImGui::Text("Sponsored objects: %zu", pointIds.size());
   auto selectedIds = mainApi -> selected();
@@ -817,6 +801,25 @@ void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
       }
     }
     ImGui::EndChild();
+  }
+
+  ImGui::Separator();
+  if (ImGui::CollapsingHeader("Generate Mesh Part")){
+    static std::string meshError;
+    if (ImGui::Button("Generate Mesh")){
+      meshError.clear();
+      if (points.size() < 2){
+        meshError = "Generate Mesh requires at least two points";
+      }else{
+        auto meshId = generateMeshFromPoints(points);
+        if (!meshId.has_value()){
+          meshError = "Failed to create generated mesh object";
+        }
+      }
+    }
+    if (!meshError.empty()){
+      ImGui::TextColored(ImVec4(1.f, 0.3f, 0.3f, 1.f), "%s", meshError.c_str());
+    }
   }
 
   if (includePanel){
