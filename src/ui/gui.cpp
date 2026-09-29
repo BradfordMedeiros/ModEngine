@@ -157,8 +157,11 @@ void initUi(){
             renderColorWidget(includePanel);
         });
 
-        registerWidget("Points", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-            renderPointEditorWidget(includePanel, sceneId);
+        registerWidget("Point Mesh Generator", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderMeshPointEditorWidget(includePanel);
+        });
+        registerWidget("Point Orb UI Generator", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
+            renderOrbUiPointEditorWidget(includePanel, sceneId);
         });
           
     }

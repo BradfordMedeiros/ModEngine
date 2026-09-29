@@ -1825,7 +1825,7 @@ int main(int argc, char* argv[]){
     resources::MODEL_NODE,
     "./res/models/unit_rect/unit_rect.obj",
     resources::MODEL_CAMERA,
-    "./res/models/box/plane.dae",
+    "./res/models/box/plane.gltf",
     resources::MODEL_UNITXY,
     resources::MODEL_EMITTER,
     resources::MODEL_SOUND,
@@ -1894,7 +1894,7 @@ int main(int argc, char* argv[]){
     .fontFamily = loadFontMeshes(readFontFile(fontPaths), world.textures.at("./res/textures/wood.jpg").texture),
     .defaultMeshes = DefaultMeshes{
       .nodeMesh = &world.meshes.at(resources::MODEL_NODE).mesh,
-      .portalMesh = &world.meshes.at("./res/models/box/plane.dae").mesh,
+      .portalMesh = &world.meshes.at("./res/models/box/plane.gltf").mesh,
       .cameraMesh = &world.meshes.at(resources::MODEL_CAMERA).mesh, 
       .voxelCubeMesh = &world.meshes.at("./res/models/unit_rect/unit_rect.obj").mesh,
       .unitXYRect = &world.meshes.at(resources::MODEL_UNITXY).mesh,

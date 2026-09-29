@@ -13,7 +13,7 @@ extern CustomApiBindings* mainApi;
 void createObj(objid sceneId){
   GameobjAttributes attr {
     .attr = {
-    	{ "mesh", "./res/models/box/spriteplane.dae" },
+    	{ "mesh", "./res/models/box/spriteplane.gltf" },
     	{ "position", glm::vec3(1.f, 1.f, 0.f) },
     },
   };
@@ -147,4 +147,3 @@ CScriptBinding cscriptCreatePerformanceGraphBinding(CustomApiBindings& api){
 
   return binding;
 }
-

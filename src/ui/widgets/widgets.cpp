@@ -1,5 +1,7 @@
 #include "./widgets.h"
 
+#include <algorithm>
+#include <charconv>
 #include <cmath>
 
 extern CustomApiBindings* mainApi;
@@ -607,7 +609,7 @@ void renderColorWidget(bool includePanel){
     ImGui::PushID(i);
 
     ImGui::Text(nameForSymbol(color.symbol).c_str());
-    ImGui::Text(print(color.color).c_str());
+    ImGui::Text("%s", print(color.color).c_str());
     ImGui::Dummy(ImVec2(0.f, 10.f));
 
     auto tint = color.color;
@@ -628,7 +630,11 @@ void renderColorWidget(bool includePanel){
   }  
 }
 
-std::optional<objid> generateMeshFromPoints(std::vector<glm::vec3>& points){
+const std::string pointEditorMeshName = "point-editor-generated-mesh";
+const std::string pointEditorMeshObjectName = "mesh-point-editor-generated";
+const std::string pointEditorOrbObjectName = "orbs-point-editor-generated";
+
+std::optional<objid> generateMeshFromPoints(const std::vector<glm::vec3>& points){
   int sides = 6;
   float radius = 0.25f;
   float pi = 3.14159265358979323846f;
@@ -641,17 +647,111 @@ std::optional<objid> generateMeshFromPoints(std::vector<glm::vec3>& points){
     face.push_back(glm::vec3(radius * std::cos(angle), radius * std::sin(angle), 0.f));
     face.push_back(glm::vec3(radius * std::cos(nextAngle), radius * std::sin(nextAngle), 0.f));
   }
-  auto meshName = std::string("point-editor-mesh-") + uniqueNameSuffix();
-  mainApi -> generateMesh(face, points, meshName);
+  mainApi -> generateMesh(face, points, pointEditorMeshName);
 
   GameobjAttributes attributes;
-  attributes.attr["mesh"] = meshName;
+  attributes.attr["mesh"] = pointEditorMeshName;
   std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
   return mainApi -> makeObjectAttr(
     0,
-    std::string("mesh-point-editor-") + uniqueNameSuffix(),
+    pointEditorMeshObjectName,
     attributes,
     submodelAttributes
+  );
+}
+
+struct OrbPointConfig {
+  std::string orbUi;
+  std::string level;
+  std::optional<objid> connectionPointId;
+};
+
+std::optional<objid> generateOrbsFromPoints(
+  const std::vector<glm::vec3>& points,
+  const std::vector<objid>& pointIds,
+  objid sceneId,
+  const std::vector<OrbPointConfig>& orbConfigs
+){
+  std::string positions;
+  std::string rotations;
+  std::string connections;
+  std::string names;
+  std::string orbUis;
+  std::string levels;
+  for (int index = 0; index < points.size(); index++){
+    if (index > 0){
+      positions += ",";
+      rotations += ",";
+      connections += ",";
+      names += ",";
+      orbUis += ",";
+      levels += ",";
+    }
+    positions += serializeVec(points.at(index));
+    auto rotation = mainApi -> getGameObjectRotation(pointIds.at(index), true, "[ui] - point editor generate orb");
+    rotations += serializeVec(serializeQuatToVec4(rotation));
+    auto connectionPointId = orbConfigs.at(index).connectionPointId;
+    auto connection = connectionPointId.has_value()
+      ? std::find(pointIds.begin(), pointIds.end(), connectionPointId.value())
+      : pointIds.end();
+    connections += connection != pointIds.end()
+      ? std::to_string(std::distance(pointIds.begin(), connection))
+      : "";
+    names += "point-orb-" + std::to_string(index);
+    orbUis += orbConfigs.at(index).orbUi;
+    levels += orbConfigs.at(index).level;
+  }
+
+  GameobjAttributes attributes;
+  attributes.attr["orbui"] = "true";
+  attributes.attr["data-pos"] = positions;
+  attributes.attr["data-rot"] = rotations;
+  attributes.attr["data-conn"] = connections;
+  attributes.attr["data-name"] = names;
+  attributes.attr["data-orbui"] = orbUis;
+  attributes.attr["data-level"] = levels;
+
+  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+  return mainApi -> makeObjectAttr(
+    sceneId,
+    pointEditorOrbObjectName,
+    attributes,
+    submodelAttributes
+  );
+}
+
+OrbPointConfig getPointMarkerOrbConfig(objid pointId){
+  OrbPointConfig config;
+  auto orbUi = getObjectAttribute(pointId, "point-editor-orb-ui");
+  auto level = getObjectAttribute(pointId, "point-editor-orb-level");
+  auto connection = getObjectAttribute(pointId, "point-editor-orb-connection");
+  if (orbUi.has_value()){
+    if (auto value = std::get_if<std::string>(&orbUi.value())) config.orbUi = *value;
+  }
+  if (level.has_value()){
+    if (auto value = std::get_if<std::string>(&level.value())) config.level = *value;
+  }
+  if (connection.has_value()){
+    if (auto value = std::get_if<std::string>(&connection.value())){
+      auto first = value->data();
+      auto last = first + value->size();
+      objid connectionPointId;
+      auto [parsedEnd, error] = std::from_chars(first, last, connectionPointId);
+      if (error == std::errc() && parsedEnd == last){
+        config.connectionPointId = connectionPointId;
+      }
+    }
+  }
+  return config;
+}
+
+void savePointMarkerOrbConfig(objid pointId, const OrbPointConfig& config){
+  mainApi -> setSingleGameObjectAttr(pointId, "point-editor-orb-ui", config.orbUi);
+  mainApi -> setSingleGameObjectAttr(pointId, "point-editor-orb-level", config.level);
+  mainApi -> setSingleGameObjectAttr(
+    pointId,
+    "point-editor-orb-connection",
+    config.connectionPointId.has_value() ? std::to_string(config.connectionPointId.value()) : ""
   );
 }
 
@@ -673,49 +773,48 @@ std::optional<objid> createPointMarker(glm::vec3 position){
   return pointId;
 }
 
-void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
-  if (includePanel){
-    ImGui::Begin("Point Editor Panel");
-  }
-
-  static std::vector<glm::vec3> points {
+struct PointEditorCore {
+  std::vector<glm::vec3> points {
     glm::vec3(-1.f, 0.f, 0.f),
     glm::vec3(0.f, 0.f, 0.f),
     glm::vec3(1.f, 0.f, 0.f),
   };
-  static std::vector<objid> pointIds;
-  static std::string pointError;
-  static bool showPointCoordinates = false;
+  std::vector<objid> pointIds;
+  std::string error;
+  bool showCoordinates = false;
+  int selectedPointIndex = -1;
+};
 
+void renderPointEditorControls(PointEditorCore& editor){
   if (ImGui::Button("Create Point")){
-    pointError.clear();
+    editor.error.clear();
     auto position = createLocation();
-    points.push_back(position);
-    if (!pointIds.empty()){
+    editor.points.push_back(position);
+    if (!editor.pointIds.empty()){
       auto pointId = createPointMarker(position);
       if (!pointId.has_value()){
-        points.pop_back();
-        pointError = "Failed to create point marker";
+        editor.points.pop_back();
+        editor.error = "Failed to create point marker";
       }else{
-        pointIds.push_back(pointId.value());
+        editor.pointIds.push_back(pointId.value());
       }
     }
   }
 
   ImGui::SameLine();
   if (ImGui::Button("Sponsor Points")){
-    if (pointIds.empty()){
-      for (auto point : points){
+    if (editor.pointIds.empty()){
+      for (auto point : editor.points){
         auto pointId = createPointMarker(point);
         if (!pointId.has_value()){
           std::cout << "point editor failed to sponsor point" << std::endl;
-          for (auto createdPointId : pointIds){
+          for (auto createdPointId : editor.pointIds){
             mainApi -> removeObjectById(createdPointId);
           }
-          pointIds.clear();
+          editor.pointIds.clear();
           break;
         }
-        pointIds.push_back(pointId.value());
+        editor.pointIds.push_back(pointId.value());
       }
     }
   }
@@ -723,105 +822,293 @@ void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
   ImGui::SameLine();
   if (ImGui::Button("Read Back Points")){
     auto markerIds = mainApi -> getObjectsByAttr("point-editor-marker", std::nullopt, 0);
+    if (editor.pointIds.empty()){
+      editor.points.clear();
+    }
     for (auto markerId : markerIds){
       bool isTracked = false;
-      for (auto pointId : pointIds){
+      for (auto pointId : editor.pointIds){
         if (pointId == markerId){
           isTracked = true;
           break;
         }
       }
       if (!isTracked){
-        pointIds.push_back(markerId);
+        editor.pointIds.push_back(markerId);
       }
     }
 
     std::vector<glm::vec3> updatedPoints;
     std::vector<objid> validPointIds;
-    for (auto pointId : pointIds){
+    for (auto pointId : editor.pointIds){
       if (!mainApi -> gameobjExists(pointId)){
         continue;
       }
       updatedPoints.push_back(mainApi -> getGameObjectPos(pointId, true, "[ui] - point editor read point"));
       validPointIds.push_back(pointId);
     }
-    points = updatedPoints;
-    pointIds = validPointIds;
+    editor.points = updatedPoints;
+    editor.pointIds = validPointIds;
   }
 
   ImGui::SameLine();
   if (ImGui::Button("Remove Sponsored Points")){
-    for (auto pointId : pointIds){
+    for (auto pointId : editor.pointIds){
       if (mainApi -> gameobjExists(pointId)){
         mainApi -> removeObjectById(pointId);
       }
     }
-    pointIds.clear();
+    editor.pointIds.clear();
   }
 
-  if (!pointError.empty()){
-    ImGui::TextColored(ImVec4(1.f, 0.3f, 0.3f, 1.f), "%s", pointError.c_str());
+  if (!editor.error.empty()){
+    ImGui::TextColored(ImVec4(1.f, 0.3f, 0.3f, 1.f), "%s", editor.error.c_str());
   }
 
-  ImGui::Text("Points: %zu", points.size());
-  ImGui::Text("Sponsored objects: %zu", pointIds.size());
+  ImGui::Text("Points: %zu", editor.points.size());
+  ImGui::Text("Sponsored objects: %zu", editor.pointIds.size());
   auto selectedIds = mainApi -> selected();
-  int selectedPointIndex = -1;
-  for (int index = 0; index < pointIds.size(); index++){
+  editor.selectedPointIndex = -1;
+  for (int index = 0; index < editor.pointIds.size(); index++){
     for (auto selectedId : selectedIds){
-      if (selectedId == pointIds.at(index)){
-        selectedPointIndex = index;
+      if (selectedId == editor.pointIds.at(index)){
+        editor.selectedPointIndex = index;
         break;
       }
     }
-    if (selectedPointIndex >= 0){
+    if (editor.selectedPointIndex >= 0){
       break;
     }
   }
-  if (selectedPointIndex >= 0){
-    auto selectedId = pointIds.at(selectedPointIndex);
+  if (editor.selectedPointIndex >= 0){
+    auto selectedId = editor.pointIds.at(editor.selectedPointIndex);
     auto position = mainApi -> getGameObjectPos(selectedId, true, "[ui] - point editor selected point");
-    ImGui::Text("Selected point %d: %.2f, %.2f, %.2f", selectedPointIndex, position.x, position.y, position.z);
-    if (ImGui::Button("Order -") && selectedPointIndex > 0){
-      std::swap(points.at(selectedPointIndex), points.at(selectedPointIndex - 1));
-      std::swap(pointIds.at(selectedPointIndex), pointIds.at(selectedPointIndex - 1));
+    ImGui::Text("Selected point %d: %.2f, %.2f, %.2f", editor.selectedPointIndex, position.x, position.y, position.z);
+    if (ImGui::Button("Order -") && editor.selectedPointIndex > 0){
+      std::swap(editor.points.at(editor.selectedPointIndex), editor.points.at(editor.selectedPointIndex - 1));
+      std::swap(editor.pointIds.at(editor.selectedPointIndex), editor.pointIds.at(editor.selectedPointIndex - 1));
     }
     ImGui::SameLine();
-    if (ImGui::Button("Order +") && selectedPointIndex + 1 < pointIds.size()){
-      std::swap(points.at(selectedPointIndex), points.at(selectedPointIndex + 1));
-      std::swap(pointIds.at(selectedPointIndex), pointIds.at(selectedPointIndex + 1));
+    if (ImGui::Button("Order +") && editor.selectedPointIndex + 1 < editor.pointIds.size()){
+      std::swap(editor.points.at(editor.selectedPointIndex), editor.points.at(editor.selectedPointIndex + 1));
+      std::swap(editor.pointIds.at(editor.selectedPointIndex), editor.pointIds.at(editor.selectedPointIndex + 1));
     }
   }
-  ImGui::Checkbox("Show point coordinates", &showPointCoordinates);
-  if (showPointCoordinates){
+  ImGui::Checkbox("Show point coordinates", &editor.showCoordinates);
+  if (editor.showCoordinates){
     if (ImGui::BeginChild("PointCoordinates", ImVec2(0.f, 200.f), true)){
-      for (int index = 0; index < points.size(); index++){
-        auto& point = points.at(index);
+      for (int index = 0; index < editor.points.size(); index++){
+        auto& point = editor.points.at(index);
         ImGui::Text("%d: %.2f, %.2f, %.2f", index, point.x, point.y, point.z);
       }
     }
     ImGui::EndChild();
   }
+}
+
+PointEditorCore pointEditorCore;
+
+void renderMeshPointEditorWidget(bool includePanel){
+  if (includePanel){
+    ImGui::Begin("Point Mesh Generator");
+  }
+
+  ImGui::PushID("PointMeshGenerator");
+  renderPointEditorControls(pointEditorCore);
+
+  static std::string error;
+  static std::optional<std::vector<glm::vec3>> pendingPoints;
+  static int framesUntilCreation = 0;
 
   ImGui::Separator();
   if (ImGui::CollapsingHeader("Generate Mesh Part")){
-    static std::string meshError;
-    if (ImGui::Button("Generate Mesh")){
-      meshError.clear();
-      if (points.size() < 2){
-        meshError = "Generate Mesh requires at least two points";
+    if (pendingPoints.has_value()){
+      if (framesUntilCreation > 0){
+        framesUntilCreation--;
+        ImGui::TextDisabled("Replacing generated mesh...");
       }else{
-        auto meshId = generateMeshFromPoints(points);
-        if (!meshId.has_value()){
-          meshError = "Failed to create generated mesh object";
+        auto existingId = mainApi -> getGameObjectByName(pointEditorMeshObjectName, 0);
+        if (existingId.has_value()){
+          if (mainApi -> gameobjExists(existingId.value())){
+            mainApi -> removeObjectById(existingId.value());
+          }
+          framesUntilCreation = 1;
+          ImGui::TextDisabled("Replacing generated mesh...");
+        }else{
+          auto meshId = generateMeshFromPoints(pendingPoints.value());
+          pendingPoints = std::nullopt;
+          if (!meshId.has_value()){
+            error = "Failed to create generated mesh object";
+          }
         }
       }
     }
-    if (!meshError.empty()){
-      ImGui::TextColored(ImVec4(1.f, 0.3f, 0.3f, 1.f), "%s", meshError.c_str());
+    if (ImGui::Button("Generate Mesh") && !pendingPoints.has_value()){
+      error.clear();
+      if (pointEditorCore.points.size() < 2){
+        error = "Generate Mesh requires at least two points";
+      }else{
+        auto existingId = mainApi -> getGameObjectByName(pointEditorMeshObjectName, 0);
+        if (existingId.has_value()){
+          mainApi -> removeObjectById(existingId.value());
+        }
+        pendingPoints = pointEditorCore.points;
+        framesUntilCreation = 1;
+      }
+    }
+    if (!error.empty()){
+      ImGui::TextColored(ImVec4(1.f, 0.3f, 0.3f, 1.f), "%s", error.c_str());
     }
   }
 
+  ImGui::PopID();
+  if (includePanel){
+    ImGui::End();
+  }
+}
+
+void renderOrbUiPointEditorWidget(bool includePanel, std::optional<objid> sceneId){
+  if (includePanel){
+    ImGui::Begin("Point Orb UI Generator");
+  }
+
+  ImGui::PushID("PointOrbUiGenerator");
+  renderPointEditorControls(pointEditorCore);
+
+  static std::unordered_map<objid, OrbPointConfig> configs;
+  static std::string error;
+  struct PendingOrbGeneration {
+    std::vector<glm::vec3> points;
+    std::vector<objid> pointIds;
+    std::vector<OrbPointConfig> configs;
+    objid sceneId;
+  };
+  static std::optional<PendingOrbGeneration> pendingGeneration;
+  static int framesUntilCreation = 0;
+
+  ImGui::Separator();
+  if (ImGui::CollapsingHeader("Generate Orbs Part")){
+    if (pointEditorCore.selectedPointIndex >= 0){
+      auto selectedId = pointEditorCore.pointIds.at(pointEditorCore.selectedPointIndex);
+      auto configIt = configs.find(selectedId);
+      if (configIt == configs.end()){
+        configIt = configs.emplace(selectedId, getPointMarkerOrbConfig(selectedId)).first;
+      }
+      auto& orbConfig = configIt->second;
+      ImGui::Text("Orb configuration for point %d", pointEditorCore.selectedPointIndex);
+      if (ImGui::InputText("Orb UI", &orbConfig.orbUi)){
+        savePointMarkerOrbConfig(selectedId, orbConfig);
+      }
+      if (ImGui::InputText("Orb level", &orbConfig.level)){
+        savePointMarkerOrbConfig(selectedId, orbConfig);
+      }
+      auto connectionPointIndex = -1;
+      if (orbConfig.connectionPointId.has_value()){
+        auto connection = std::find(
+          pointEditorCore.pointIds.begin(),
+          pointEditorCore.pointIds.end(),
+          orbConfig.connectionPointId.value()
+        );
+        if (connection != pointEditorCore.pointIds.end()){
+          connectionPointIndex = std::distance(pointEditorCore.pointIds.begin(), connection);
+        }
+      }
+      auto connectionLabel = connectionPointIndex >= 0
+        ? "Point " + std::to_string(connectionPointIndex)
+        : "None";
+      if (ImGui::BeginCombo("Connects to", connectionLabel.c_str())){
+        if (ImGui::Selectable("None", !orbConfig.connectionPointId.has_value())){
+          orbConfig.connectionPointId = std::nullopt;
+          savePointMarkerOrbConfig(selectedId, orbConfig);
+        }
+        for (int pointIndex = 0; pointIndex < pointEditorCore.points.size(); pointIndex++){
+          if (pointIndex == pointEditorCore.selectedPointIndex){
+            continue;
+          }
+          auto pointLabel = "Point " + std::to_string(pointIndex);
+          if (ImGui::Selectable(pointLabel.c_str(), connectionPointIndex == pointIndex)){
+            orbConfig.connectionPointId = pointEditorCore.pointIds.at(pointIndex);
+            savePointMarkerOrbConfig(selectedId, orbConfig);
+          }
+        }
+        ImGui::EndCombo();
+      }
+      ImGui::Separator();
+    }else{
+      ImGui::TextDisabled("Select a sponsored point to configure its orb");
+    }
+    if (pendingGeneration.has_value()){
+      if (framesUntilCreation > 0){
+        framesUntilCreation--;
+        ImGui::TextDisabled("Replacing generated Orb UI...");
+      }else{
+        auto existingId = mainApi -> getGameObjectByName(
+            pointEditorOrbObjectName,
+            pendingGeneration->sceneId
+        );
+        if (existingId.has_value()){
+            if (mainApi -> gameobjExists(existingId.value())){
+              mainApi -> removeObjectById(existingId.value());
+            }
+            framesUntilCreation = 1;
+            ImGui::TextDisabled("Replacing generated Orb UI...");
+        }else{
+            auto orbId = generateOrbsFromPoints(
+              pendingGeneration->points,
+              pendingGeneration->pointIds,
+              pendingGeneration->sceneId,
+              pendingGeneration->configs
+            );
+            pendingGeneration = std::nullopt;
+            if (!orbId.has_value()){
+              error = "Failed to create orb object";
+            }else{
+              mainApi -> setSelected(std::set<objid> { orbId.value() });
+            }
+        }
+      }
+    }
+    if (!sceneId.has_value()){
+      ImGui::TextDisabled("No active scene");
+    }
+    if (sceneId.has_value() && ImGui::Button("Generate Orbs") && !pendingGeneration.has_value()){
+      error.clear();
+      if (pointEditorCore.points.empty()){
+        error = "Generate Orbs requires at least one point";
+      }else if (pointEditorCore.points.size() != pointEditorCore.pointIds.size()){
+        error = "Generate Orbs requires sponsored points";
+      }else{
+        std::vector<OrbPointConfig> pointConfigs;
+        pointConfigs.reserve(pointEditorCore.pointIds.size());
+        for (auto pointId : pointEditorCore.pointIds){
+            auto configIt = configs.find(pointId);
+            if (configIt == configs.end()){
+              configIt = configs.emplace(pointId, getPointMarkerOrbConfig(pointId)).first;
+            }
+            pointConfigs.push_back(configIt->second);
+        }
+        auto existingId = mainApi -> getGameObjectByName(
+            pointEditorOrbObjectName,
+            sceneId.value()
+        );
+        if (existingId.has_value()){
+            mainApi -> removeObjectById(existingId.value());
+        }
+        pendingGeneration = PendingOrbGeneration {
+            .points = pointEditorCore.points,
+            .pointIds = pointEditorCore.pointIds,
+            .configs = pointConfigs,
+            .sceneId = sceneId.value(),
+        };
+        framesUntilCreation = 1;
+      }
+    }
+    if (!error.empty()){
+      ImGui::TextColored(ImVec4(1.f, 0.3f, 0.3f, 1.f), "%s", error.c_str());
+    }
+  }
+
+  ImGui::PopID();
   if (includePanel){
     ImGui::End();
   }

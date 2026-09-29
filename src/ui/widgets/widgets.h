@@ -19,7 +19,8 @@ void renderFontWidget(bool includePanel);
 void renderFontBindingWidget(bool includePanel);
 void renderColorWidget(bool includePanel);
 
-void renderPointEditorWidget(bool includePanel, std::optional<objid> sceneId);
+void renderMeshPointEditorWidget(bool includePanel);
+void renderOrbUiPointEditorWidget(bool includePanel, std::optional<objid> sceneId);
 
 
 #endif
