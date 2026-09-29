@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <charconv>
 #include <cmath>
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
 
 extern CustomApiBindings* mainApi;
 extern DefaultResources defaultResources;
@@ -660,12 +663,171 @@ std::optional<objid> generateMeshFromPoints(const std::vector<glm::vec3>& points
   );
 }
 
+
+PointConfig loadPointConfig(std::string filepath){
+  auto fileContent = readFileOrPackage(filepath);
+  rapidjson::Document doc;
+  doc.Parse(fileContent.c_str());
+  modassert(!doc.HasParseError() && doc.IsObject(), "invalid point config json");
+
+  PointConfig pointConfig;
+  auto& positions = doc["position"];
+  auto& rotations = doc["rotations"];
+  auto& connections = doc["connections"];
+  auto& names = doc["names"];
+
+  for (rapidjson::SizeType index = 0; index < positions.Size(); index++){
+    auto& position = positions[index];
+    modassert(position.IsArray() && position.Size() == 3 && position[0].IsNumber() && position[1].IsNumber() && position[2].IsNumber(), "point config position must be a three-component vector");  
+    pointConfig.position.emplace_back(position[0].GetFloat(), position[1].GetFloat(), position[2].GetFloat());
+
+    auto& rotation = rotations[index];
+    modassert(rotation.IsArray() && rotation.Size() == 4 && rotation[0].IsNumber() && rotation[1].IsNumber() && rotation[2].IsNumber() && rotation[3].IsNumber(), "point config rotation must be a four-component scene rotation");
+    auto rotationQuat = parseQuat(glm::vec4(rotation[0].GetFloat(), rotation[1].GetFloat(), rotation[2].GetFloat(), rotation[3].GetFloat()));
+    pointConfig.rotations.push_back(rotationQuat);
+
+    modassert(connections[index].IsInt(), "point config connection must be an integer");
+    pointConfig.connections.push_back(connections[index].GetInt());
+
+    if (names[index].IsString()){
+      pointConfig.names.push_back(names[index].GetString());
+    }else if (names[index].IsNull()){
+      pointConfig.names.push_back(std::nullopt);
+    }else{
+      modassert(false, "invalid type for name");
+    }
+
+
+    if (doc.HasMember("orbui")){
+      auto& orbUis = doc["orbui"];
+      if (orbUis[index].IsString()){
+        pointConfig.orbUis.push_back(orbUis[index].GetString());
+      }else if (orbUis[index].IsNull()){
+        pointConfig.orbUis.push_back(std::nullopt);
+      }else{
+        modassert(false, "invalid type for orbui");
+      }
+    }
+    if (doc.HasMember("levels")){
+      auto& levels = doc["levels"];
+      if (levels[index].IsString()){
+        pointConfig.levels.push_back(levels[index].GetString());
+      }else if (levels[index].IsNull()){
+        pointConfig.levels.push_back(std::nullopt);
+      }else{
+        modassert(false, "invalid type for levels");
+      }
+    }
+  }
+  return pointConfig;
+}
+void savePointConfig(std::string filepath, PointConfig pointConfig){
+  modassert(pointConfig.position.size() == pointConfig.rotations.size(), std::string("rotation expected size: ") + std::to_string(pointConfig.position.size()));
+  modassert(pointConfig.position.size() == pointConfig.connections.size(), std::string("connections expected size: ") + std::to_string(pointConfig.position.size()));
+  modassert(pointConfig.position.size() == pointConfig.names.size(), std::string("names expected size: ") + std::to_string(pointConfig.position.size()));
+  modassert(pointConfig.position.size() == pointConfig.orbUis.size() || pointConfig.orbUis.size() == 0, std::string("orbUis expected size: ") + std::to_string(pointConfig.position.size()));
+  modassert(pointConfig.position.size() == pointConfig.levels.size() || pointConfig.levels.size() == 0, std::string("levels expected size: ") + std::to_string(pointConfig.position.size()));
+
+
+  rapidjson::Document doc;
+  doc.SetObject();
+  auto& allocator = doc.GetAllocator();
+  rapidjson::Value positions(rapidjson::kArrayType);
+  rapidjson::Value rotations(rapidjson::kArrayType);
+  rapidjson::Value connections(rapidjson::kArrayType);
+  rapidjson::Value names(rapidjson::kArrayType);
+  rapidjson::Value orbUis(rapidjson::kArrayType);
+  rapidjson::Value levels(rapidjson::kArrayType);
+
+  for (int i = 0; i < pointConfig.position.size(); i++){
+    auto& position = pointConfig.position.at(i);
+    rapidjson::Value jsonPosition(rapidjson::kArrayType);
+    jsonPosition.PushBack(position.x, allocator);
+    jsonPosition.PushBack(position.y, allocator);
+    jsonPosition.PushBack(position.z, allocator);
+    positions.PushBack(jsonPosition, allocator);
+
+    auto rotation = serializeQuatToVec4(pointConfig.rotations.at(i));
+    rapidjson::Value jsonRotation(rapidjson::kArrayType);
+    jsonRotation.PushBack(rotation.x, allocator);
+    jsonRotation.PushBack(rotation.y, allocator);
+    jsonRotation.PushBack(rotation.z, allocator);
+    jsonRotation.PushBack(rotation.w, allocator);
+    rotations.PushBack(jsonRotation, allocator);
+
+    connections.PushBack(pointConfig.connections.at(i), allocator);
+    if (pointConfig.names.at(i).has_value()){
+      names.PushBack(rapidjson::Value(pointConfig.names.at(i).value().c_str(), allocator), allocator);
+    }else{
+      names.PushBack(rapidjson::Value() /* null */, allocator);
+    }
+
+    if (pointConfig.orbUis.size() > 0){
+      if (pointConfig.orbUis.at(i).has_value()){
+        orbUis.PushBack(rapidjson::Value(pointConfig.orbUis.at(i).value().c_str(), allocator), allocator);
+      }else{
+        orbUis.PushBack(rapidjson::Value() /* null */, allocator);
+      }      
+    }
+
+    if (pointConfig.levels.size() > 0){
+      if (pointConfig.levels.at(i).has_value()){
+        levels.PushBack(rapidjson::Value(pointConfig.levels.at(i).value().c_str(), allocator), allocator);
+      }else{
+        levels.PushBack(rapidjson::Value() /* null */, allocator);
+      }
+    }
+  }
+
+  doc.AddMember("position", positions, allocator);
+  doc.AddMember("rotations", rotations, allocator);
+  doc.AddMember("connections", connections, allocator);
+  doc.AddMember("names", names, allocator);
+  doc.AddMember("orbUis", orbUis, allocator);
+  doc.AddMember("levels", levels, allocator);
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+  doc.Accept(writer);
+  realfiles::saveFile(filepath, buffer.GetString());
+}
+
+std::string print(PointConfig pointConfig){
+  std::string values;
+  values += "position: [";
+  values += print(pointConfig.position);
+  values += "]\n";
+
+  values += "rotations: [";
+  values += print(pointConfig.rotations);
+  values += "]\n";
+
+  values += "connections: [";
+  values += print(pointConfig.connections);
+  values += "]\n";
+
+  values += "names: [";
+  values += print(pointConfig.names);
+  values += "]\n";
+
+  values += "orbUis: [";
+  values += print(pointConfig.orbUis);
+  values += "]\n";
+
+  values += "levels: [";
+  values += print(pointConfig.levels);
+  values += "]\n";
+
+
+  return values;
+}
+
+
 struct OrbPointConfig {
   std::string orbUi;
   std::string level;
   std::optional<objid> connectionPointId;
 };
-
 std::optional<objid> generateOrbsFromPoints(
   const std::vector<glm::vec3>& points,
   const std::vector<objid>& pointIds,

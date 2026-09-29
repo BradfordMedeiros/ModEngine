@@ -177,6 +177,37 @@ std::string print(std::vector<std::string>& values){
   stream << "]";
   return stream.str();
 }
+
+std::string print(std::vector<std::optional<std::string>>& values){
+  std::stringstream stream;
+  stream << "[ ";
+  for (auto &value : values){
+    stream << (value.has_value() ? value.value() : "[no value]") << " ";
+  }
+  stream << "]";
+  return stream.str();  
+}
+
+std::string print(std::vector<glm::vec3>& values){
+  std::stringstream stream;
+  stream << "[ ";
+  for (auto &value : values){
+    stream << "(" << print(value) << ")" << " ";
+  }
+  stream << "]";
+  return stream.str();
+}
+
+std::string print(std::vector<glm::quat>& values){
+  std::stringstream stream;
+  stream << "[ ";
+  for (auto &value : values){
+    stream << "(" << serializeQuat(value) << ")" << " ";
+  }
+  stream << "]";
+  return stream.str(); 
+}
+
 std::string print(std::set<std::string>& values){
   std::string value;
   for (auto &val : values){

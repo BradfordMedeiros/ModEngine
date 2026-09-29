@@ -1778,6 +1778,44 @@ std::vector<InputDispatch> inputFns = {
       });
     }
   },
+
+
+
+  InputDispatch{
+    .alwaysEnable = false,
+    .sourceKey = 'P', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = [](ViewportSettings& viewport) -> void {
+      PointConfig pointConfigToSave { 
+/*  std::vector<glm::vec3> position;
+  std::vector<glm::quat> rotations;
+  std::vector<int> connections;
+  std::vector<std::optional<std::string>> names;
+  std::vector<std::string> orbUis;
+  std::vector<std::string> levels;
+  */
+        .position = { glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 10.f, 0.f) },
+        .rotations = { parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)), parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)) },
+        .connections = { -1, -1 },
+        .names = { std::nullopt, std::nullopt },
+        .orbUis = { "w1", "w1" },
+        .levels = { "w1-1", "w1-2" },
+      };
+      savePointConfig("../afterworld/scenes/levels/worlds/w1/w1-2/orbs2.json", pointConfigToSave);
+
+      auto pointConfig = loadPointConfig("../afterworld/scenes/levels/worlds/w1/w1-2/orbs.json");
+      std::cout << print(pointConfig) << std::endl;
+
+      savePointConfig("../afterworld/scenes/levels/worlds/w1/w1-2/orbs3.json", pointConfig);
+
+      modassert(false, "early cut for point config");
+
+    }
+  },
+
+
 };
 
     

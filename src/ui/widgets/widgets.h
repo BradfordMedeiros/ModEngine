@@ -23,4 +23,17 @@ void renderMeshPointEditorWidget(bool includePanel);
 void renderOrbUiPointEditorWidget(bool includePanel, std::optional<objid> sceneId);
 
 
+struct PointConfig {
+  std::vector<glm::vec3> position;
+  std::vector<glm::quat> rotations;
+  std::vector<int> connections;
+  std::vector<std::optional<std::string>> names;
+  std::vector<std::optional<std::string>> orbUis;
+  std::vector<std::optional<std::string>> levels;
+};
+
+PointConfig loadPointConfig(std::string filepath);
+void savePointConfig(std::string filepath, PointConfig pointConfig);
+std::string print(PointConfig pointConfig);
+
 #endif
