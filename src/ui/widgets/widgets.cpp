@@ -828,58 +828,43 @@ struct OrbPointConfig {
   std::string level;
   std::optional<objid> connectionPointId;
 };
-std::optional<objid> generateOrbsFromPoints(
+
+void generateOrbsFromPoints(
   const std::vector<glm::vec3>& points,
   const std::vector<objid>& pointIds,
   objid sceneId,
   const std::vector<OrbPointConfig>& orbConfigs
 ){
-  std::string positions;
-  std::string rotations;
-  std::string connections;
-  std::string names;
-  std::string orbUis;
-  std::string levels;
+  PointConfig pointConfig {};
+
   for (int index = 0; index < points.size(); index++){
-    if (index > 0){
-      positions += ",";
-      rotations += ",";
-      connections += ",";
-      names += ",";
-      orbUis += ",";
-      levels += ",";
-    }
-    positions += serializeVec(points.at(index));
-    auto rotation = mainApi -> getGameObjectRotation(pointIds.at(index), true, "[ui] - point editor generate orb");
-    rotations += serializeVec(serializeQuatToVec4(rotation));
+    pointConfig.position.push_back(points.at(index));
+
+    auto rotation = mainApi -> getGameObjectRotation(pointIds.at(index), true, "[ui] - point editor generateOrbsFromPoints");
+    pointConfig.rotations.push_back(rotation);
+
     auto connectionPointId = orbConfigs.at(index).connectionPointId;
-    auto connection = connectionPointId.has_value()
-      ? std::find(pointIds.begin(), pointIds.end(), connectionPointId.value())
-      : pointIds.end();
-    connections += connection != pointIds.end()
-      ? std::to_string(std::distance(pointIds.begin(), connection))
-      : "";
-    names += "point-orb-" + std::to_string(index);
-    orbUis += orbConfigs.at(index).orbUi;
-    levels += orbConfigs.at(index).level;
+    int connection = -1;
+    if (connectionPointId.has_value()){
+      for (int i = 0; i < pointIds.size(); i++){
+        if (pointIds.at(i) == connectionPointId.value()){
+          connection = i;
+        }
+      }      
+    }
+    pointConfig.connections.push_back(connection);
+
+    std::string name = std::string("point-orb-") + std::to_string(index);
+    pointConfig.names.push_back(name);
+
+    pointConfig.orbUis.push_back(orbConfigs.at(index).orbUi);
+    pointConfig.levels.push_back(orbConfigs.at(index).level);
+
   }
 
-  GameobjAttributes attributes;
-  attributes.attr["orbui"] = "true";
-  attributes.attr["data-pos"] = positions;
-  attributes.attr["data-rot"] = rotations;
-  attributes.attr["data-conn"] = connections;
-  attributes.attr["data-name"] = names;
-  attributes.attr["data-orbui"] = orbUis;
-  attributes.attr["data-level"] = levels;
+  savePointConfig("../afterworld/scenes/levels/worlds/w1/w1-2/test.json", pointConfig);
 
-  std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
-  return mainApi -> makeObjectAttr(
-    sceneId,
-    pointEditorOrbObjectName,
-    attributes,
-    submodelAttributes
-  );
+
 }
 
 OrbPointConfig getPointMarkerOrbConfig(objid pointId){
@@ -1145,8 +1130,6 @@ void renderOrbUiPointEditorWidget(bool includePanel, std::optional<objid> sceneI
     std::vector<OrbPointConfig> configs;
     objid sceneId;
   };
-  static std::optional<PendingOrbGeneration> pendingGeneration;
-  static int framesUntilCreation = 0;
 
   ImGui::Separator();
   if (ImGui::CollapsingHeader("Generate Orbs Part")){
@@ -1199,41 +1182,11 @@ void renderOrbUiPointEditorWidget(bool includePanel, std::optional<objid> sceneI
     }else{
       ImGui::TextDisabled("Select a sponsored point to configure its orb");
     }
-    if (pendingGeneration.has_value()){
-      if (framesUntilCreation > 0){
-        framesUntilCreation--;
-        ImGui::TextDisabled("Replacing generated Orb UI...");
-      }else{
-        auto existingId = mainApi -> getGameObjectByName(
-            pointEditorOrbObjectName,
-            pendingGeneration->sceneId
-        );
-        if (existingId.has_value()){
-            if (mainApi -> gameobjExists(existingId.value())){
-              mainApi -> removeObjectById(existingId.value());
-            }
-            framesUntilCreation = 1;
-            ImGui::TextDisabled("Replacing generated Orb UI...");
-        }else{
-            auto orbId = generateOrbsFromPoints(
-              pendingGeneration->points,
-              pendingGeneration->pointIds,
-              pendingGeneration->sceneId,
-              pendingGeneration->configs
-            );
-            pendingGeneration = std::nullopt;
-            if (!orbId.has_value()){
-              error = "Failed to create orb object";
-            }else{
-              mainApi -> setSelected(std::set<objid> { orbId.value() });
-            }
-        }
-      }
-    }
+
     if (!sceneId.has_value()){
       ImGui::TextDisabled("No active scene");
     }
-    if (sceneId.has_value() && ImGui::Button("Generate Orbs") && !pendingGeneration.has_value()){
+    if (sceneId.has_value() && ImGui::Button("Generate Orbs")){
       error.clear();
       if (pointEditorCore.points.empty()){
         error = "Generate Orbs requires at least one point";
@@ -1256,13 +1209,20 @@ void renderOrbUiPointEditorWidget(bool includePanel, std::optional<objid> sceneI
         if (existingId.has_value()){
             mainApi -> removeObjectById(existingId.value());
         }
-        pendingGeneration = PendingOrbGeneration {
+        PendingOrbGeneration pendingGeneration {
             .points = pointEditorCore.points,
             .pointIds = pointEditorCore.pointIds,
             .configs = pointConfigs,
             .sceneId = sceneId.value(),
         };
-        framesUntilCreation = 1;
+
+        generateOrbsFromPoints(
+              pendingGeneration.points,
+              pendingGeneration.pointIds,
+              pendingGeneration.sceneId,
+              pendingGeneration.configs
+        );
+
       }
     }
     if (!error.empty()){
