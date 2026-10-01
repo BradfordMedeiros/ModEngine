@@ -788,7 +788,7 @@ void savePointConfig(std::string filepath, PointConfig pointConfig){
   doc.AddMember("rotations", rotations, allocator);
   doc.AddMember("connections", connections, allocator);
   doc.AddMember("names", names, allocator);
-  doc.AddMember("orbUis", orbUis, allocator);
+  doc.AddMember("orbui", orbUis, allocator);
   doc.AddMember("levels", levels, allocator);
 
   rapidjson::StringBuffer buffer;
