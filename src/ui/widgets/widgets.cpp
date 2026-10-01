@@ -723,8 +723,9 @@ PointConfig loadPointConfig(std::string filepath){
   return pointConfig;
 }
 void savePointConfig(std::string filepath, PointConfig pointConfig){
+  std::cout << "save point config: " << filepath << std::endl;
   modassert(pointConfig.position.size() == pointConfig.rotations.size(), std::string("rotation expected size: ") + std::to_string(pointConfig.position.size()));
-  modassert(pointConfig.position.size() == pointConfig.connections.size(), std::string("connections expected size: ") + std::to_string(pointConfig.position.size()));
+  modassert(pointConfig.position.size() == pointConfig.connections.size() || pointConfig.connections.size() == 0 , std::string("connections expected size: ") + std::to_string(pointConfig.position.size()));
   modassert(pointConfig.position.size() == pointConfig.names.size(), std::string("names expected size: ") + std::to_string(pointConfig.position.size()));
   modassert(pointConfig.position.size() == pointConfig.orbUis.size() || pointConfig.orbUis.size() == 0, std::string("orbUis expected size: ") + std::to_string(pointConfig.position.size()));
   modassert(pointConfig.position.size() == pointConfig.levels.size() || pointConfig.levels.size() == 0, std::string("levels expected size: ") + std::to_string(pointConfig.position.size()));
@@ -756,7 +757,10 @@ void savePointConfig(std::string filepath, PointConfig pointConfig){
     jsonRotation.PushBack(rotation.w, allocator);
     rotations.PushBack(jsonRotation, allocator);
 
-    connections.PushBack(pointConfig.connections.at(i), allocator);
+    if (pointConfig.connections.size() > 0){
+      connections.PushBack(pointConfig.connections.at(i), allocator);
+    }
+
     if (pointConfig.names.at(i).has_value()){
       names.PushBack(rapidjson::Value(pointConfig.names.at(i).value().c_str(), allocator), allocator);
     }else{
@@ -830,7 +834,7 @@ struct OrbPointConfig {
   std::optional<objid> connectionPointId;
 };
 
-void generateOrbsFromPoints(std::vector<glm::vec3>& points, std::vector<objid>& pointIds, std::vector<OrbPointConfig>& orbConfigs){
+void saveOrbConfig(std::vector<glm::vec3>& points, std::vector<objid>& pointIds, std::optional<std::vector<OrbPointConfig>> orbConfigs, std::string& file){
   PointConfig pointConfig {};
 
   for (int index = 0; index < points.size(); index++){
@@ -839,26 +843,29 @@ void generateOrbsFromPoints(std::vector<glm::vec3>& points, std::vector<objid>& 
     auto rotation = mainApi -> getGameObjectRotation(pointIds.at(index), true, "[ui] - point editor generateOrbsFromPoints");
     pointConfig.rotations.push_back(rotation);
 
-    auto connectionPointId = orbConfigs.at(index).connectionPointId;
-    int connection = -1;
-    if (connectionPointId.has_value()){
-      for (int i = 0; i < pointIds.size(); i++){
-        if (pointIds.at(i) == connectionPointId.value()){
-          connection = i;
-        }
-      }      
+    if (orbConfigs.has_value()){
+      auto connectionPointId = orbConfigs.value().at(index).connectionPointId;
+      int connection = -1;
+      if (connectionPointId.has_value()){
+        for (int i = 0; i < pointIds.size(); i++){
+          if (pointIds.at(i) == connectionPointId.value()){
+            connection = i;
+          }
+        }      
+      }
+      pointConfig.connections.push_back(connection);
+
+      pointConfig.orbUis.push_back(orbConfigs.value().at(index).orbUi);
+      pointConfig.levels.push_back(orbConfigs.value().at(index).level);
+    }else{
+      pointConfig.connections.push_back(-1);
     }
-    pointConfig.connections.push_back(connection);
 
     std::string name = std::string("point-orb-") + std::to_string(index);
     pointConfig.names.push_back(name);
-
-    pointConfig.orbUis.push_back(orbConfigs.at(index).orbUi);
-    pointConfig.levels.push_back(orbConfigs.at(index).level);
-
   }
 
-  savePointConfig("../afterworld/scenes/levels/worlds/w1/w1-2/test.json", pointConfig);
+  savePointConfig(file, pointConfig);
 
 
 }
@@ -929,9 +936,9 @@ struct PointEditorCore {
 };
 
 
-void createPoint(PointEditorCore& editor){
+void createPoint(PointEditorCore& editor, std::optional<glm::vec3> pos = std::nullopt){
   editor.error.clear();
-  auto position = createLocation();
+  auto position = pos.has_value() ? pos.value() : createLocation();
   editor.points.push_back(position);
   if (!editor.pointIds.empty()){
     auto pointId = createPointMarker(position);
@@ -1004,18 +1011,34 @@ void clearPoints(PointEditorCore& editor){
   editor.selectedPointIndex = -1;
 }
 
+void updatePoints(PointEditorCore& editor, PointConfig& pointConfig){
+  clearPoints(editor);
+  for (auto& pointPosition : pointConfig.position){
+    createPoint(editor, pointPosition);
+  }
+}
+
 std::optional<std::string> renderPointEditorControls(PointEditorCore& editor, std::optional<std::string> pointFile, bool* _changed){
+  static bool doOnce = true;
+
+  static std::vector<std::string> allPointFiles;
+  if (doOnce){
+    doOnce = false;
+    allPointFiles = listFilesWithExtensionsFromPackage("./res/data/", { "json" });
+  }
+
   std::optional<std::string> currentFile = pointFile;
   if (ImGui::BeginCombo("Point File", pointFile.has_value() ? pointFile.value().c_str() : "no value")){
     if (ImGui::Selectable("None", false)){
       currentFile = std::nullopt;
     }
-    if (ImGui::Selectable("./res/data/test_points.json", false)){
-      currentFile = "./res/data/test_points.json";
+    for (auto& pointFile : allPointFiles){
+      if (ImGui::Selectable(pointFile.c_str(), false)){
+        currentFile = pointFile;
+      }     
     }
-    if (ImGui::Selectable("./res/data/test_points2.json", false)){
-      currentFile = "./res/data/test_points2.json";
-    }
+
+    
     ImGui::EndCombo();
   }
 
@@ -1030,6 +1053,11 @@ std::optional<std::string> renderPointEditorControls(PointEditorCore& editor, st
   *_changed = changedFile;
   if (changedFile){
     clearPoints(editor);
+
+    if (currentFile.has_value()){
+      auto pointConfig = loadPointConfig(currentFile.value());
+      updatePoints(editor, pointConfig);
+    }
   }
 
   if (ImGui::Button("Create Point")){
@@ -1166,6 +1194,11 @@ void renderMeshPointEditorWidget(bool includePanel){
         ImGui::TextColored(ImVec4(1.f, 0.3f, 0.3f, 1.f), "%s", error.c_str());
       }
     }
+
+    if (ImGui::Button("Save Mesh Config")){
+      saveOrbConfig(pointEditorCore.points, pointEditorCore.pointIds, std::nullopt, pointFile.value());
+    }
+
   }
 
   ImGui::PopID();
@@ -1235,7 +1268,7 @@ void renderOrbUiPointEditorWidget(bool includePanel){
       }else{
         ImGui::TextDisabled("Select a sponsored point to configure its orb");
       }
-      if (ImGui::Button("Generate Orbs")){
+      if (ImGui::Button("Save Orb Config")){
         error.clear();
         if (pointEditorCore.points.empty()){
           error = "Generate Orbs requires at least one point";
@@ -1251,8 +1284,7 @@ void renderOrbUiPointEditorWidget(bool includePanel){
               }
               pointConfigs.push_back(configIt->second);
           }
-          generateOrbsFromPoints(pointEditorCore.points, pointEditorCore.pointIds, pointConfigs);
-  
+          saveOrbConfig(pointEditorCore.points, pointEditorCore.pointIds, pointConfigs, pointFile.value());
         }
       }
       if (!error.empty()){
@@ -1266,3 +1298,4 @@ void renderOrbUiPointEditorWidget(bool includePanel){
     ImGui::End();
   }
 }
+
