@@ -20,7 +20,7 @@ void renderFontBindingWidget(bool includePanel);
 void renderColorWidget(bool includePanel);
 
 void renderMeshPointEditorWidget(bool includePanel);
-void renderOrbUiPointEditorWidget(bool includePanel, std::optional<objid> sceneId);
+void renderOrbUiPointEditorWidget(bool includePanel);
 
 
 struct PointConfig {

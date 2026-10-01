@@ -161,7 +161,7 @@ void initUi(){
             renderMeshPointEditorWidget(includePanel);
         });
         registerWidget("Point Orb UI Generator", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
-            renderOrbUiPointEditorWidget(includePanel, sceneId);
+            renderOrbUiPointEditorWidget(includePanel);
         });
           
     }
