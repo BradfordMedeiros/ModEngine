@@ -1711,6 +1711,7 @@ int main(int argc, char* argv[]){
     .rmLoadAround = removeLoadingAround,
     .generateMesh = createGeneratedMesh,
     .generateMeshRaw = createGeneratedMeshRaw,
+    .saveModelData = saveModelData,
     .getArgs = getArgs,
     .debugInfo = debugInfo,
     .setWorldState = setWorldState,

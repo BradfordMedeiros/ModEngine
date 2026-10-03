@@ -1779,7 +1779,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
 
-
+ 
 
   InputDispatch{
     .alwaysEnable = false,
@@ -1788,14 +1788,11 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = [](ViewportSettings& viewport) -> void {
+    
+      saveModelData("../gameresources/build/weapons/fork.gltf", "./build/build.model");
+  /*
       PointConfig pointConfigToSave { 
-/*  std::vector<glm::vec3> position;
-  std::vector<glm::quat> rotations;
-  std::vector<int> connections;
-  std::vector<std::optional<std::string>> names;
-  std::vector<std::string> orbUis;
-  std::vector<std::string> levels;
-  */
+
         .position = { glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 10.f, 0.f) },
         .rotations = { parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)), parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)) },
         .connections = { -1, -1 },
@@ -1810,7 +1807,7 @@ std::vector<InputDispatch> inputFns = {
 
       savePointConfig("../afterworld/scenes/levels/worlds/w1/w1-2/orbs3.json", pointConfig);
 
-      modassert(false, "early cut for point config");
+      modassert(false, "early cut for point config");*/
 
     }
   },

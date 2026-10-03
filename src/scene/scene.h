@@ -146,4 +146,7 @@ std::optional<int> physicsLayer(World& world, objid id);
 
 void updateMeshLighting(World& world);
 
+void saveModelData(World& world, std::string meshpath, std::string filename);
+
+
 #endif

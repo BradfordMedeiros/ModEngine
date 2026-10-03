@@ -549,6 +549,14 @@ void loadModelData(World& world, std::string meshpath, int ownerId){
   }
 }
 
+void saveModelData(World& world, std::string meshpath, std::string filename){
+  for (auto& [path, modelData] : world.modelDatas){
+    std::cout << "model data: " << path << std::endl;
+  }
+  ModelData& modelData = world.modelDatas.at(meshpath).modelData.modelData;
+  saveModelData(modelData, filename);
+}
+
 ModelData modelDataFromCache(World& world,  std::string meshpath, std::string rootname, int ownerId){
   loadModelData(world, meshpath, ownerId);
   ModelDataCore& modelDataCore = world.modelDatas.at(meshpath).modelData;

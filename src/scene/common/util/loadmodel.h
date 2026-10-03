@@ -18,6 +18,7 @@
 #include "./boundinfo.h"
 #include "./types.h"
 #include "../../../common/util.h"
+#include "../../../common/files.h"
 
 Transformation aiKeysToTransform(aiVectorKey& positionKey, aiQuatKey& rotationKey, aiVectorKey& scalingKey);
 glm::mat4 transformToGlm(Transformation transform);
@@ -73,6 +74,8 @@ struct ModelDataCore {
 ModelData loadModel(std::string rootname, std::string modelPath);
 ModelDataCore loadModelCore(std::string modelPath);
 ModelData extractModel(ModelDataCore& modelCore, std::string rootname);
+
+void saveModelData(ModelData& modelData, std::string finalPath);
 
 std::vector<glm::vec3> getVertexsFromModelData(ModelData& data);
 

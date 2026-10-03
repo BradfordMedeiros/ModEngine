@@ -757,6 +757,117 @@ ModelData loadModel(std::string rootname, std::string modelPath){
   return data.modelData;
 }
 
+void saveModelData(ModelData& modelData, std::string filepath){
+/*  std::unordered_map<int32_t, MeshData> meshIdToMeshData;
+  // std::unordered_map<int32_t, std::vector<int>> nodeToMeshId;
+  // std::unordered_map<int32_t, int32_t> childToParent;
+  *std::unordered_map<int32_t, Transformation> nodeTransform;
+  //std::unordered_map<int32_t, std::string> names;
+  std::set<int32_t> bones; // does this need serialization?
+  std::vector<Animation> animations;
+  bool sponsorRootPosition = false;
+  */
+
+ rapidjson::Document doc;
+  doc.SetObject();
+  auto& allocator = doc.GetAllocator();
+
+  {
+    rapidjson::Value ids(rapidjson::kArrayType);
+    for(auto& [id, _] : modelData.nodeTransform){
+      ids.PushBack(id, allocator);
+    }
+    doc.AddMember("id", ids, allocator);
+  }
+
+  // /*  std::unordered_map<int32_t, MeshData> meshIdToMeshData;
+
+  {
+    rapidjson::Value meshIdsForNodes(rapidjson::kArrayType);
+    for(auto& [id, meshIds] : modelData.nodeToMeshId){
+      rapidjson::Value meshIdsForNode(rapidjson::kArrayType);
+      for(auto meshId : meshIds){
+        meshIdsForNode.PushBack(meshId, allocator);
+      }
+      meshIdsForNodes.PushBack(meshIdsForNode, allocator);
+    }
+    doc.AddMember("meshids", meshIdsForNodes, allocator);
+  }
+
+  {
+    rapidjson::Value parentIds(rapidjson::kArrayType);
+    for(auto& [id, _] : modelData.nodeTransform){
+      if (modelData.childToParent.find(id) == modelData.childToParent.end()){
+        parentIds.PushBack(rapidjson::Value(), allocator);
+      }else{
+        auto parentId = modelData.childToParent.at(id);
+        parentIds.PushBack(parentId, allocator);
+      }
+    }
+    doc.AddMember("parent", parentIds, allocator);
+  }
+
+  {
+    rapidjson::Value transforms(rapidjson::kArrayType);
+    for (auto& [id, transform] : modelData.nodeTransform){
+      rapidjson::Value transformValues(rapidjson::kArrayType);
+      transformValues.PushBack(rapidjson::Value(serializeVec(transform.position), allocator), allocator);
+      transformValues.PushBack(rapidjson::Value(serializeVec(transform.scale), allocator), allocator);
+      transformValues.PushBack(rapidjson::Value(serializeVec(serializeQuatToVec4(transform.rotation)), allocator), allocator);
+      transforms.PushBack(transformValues, allocator);
+    }
+    doc.AddMember("transform", transforms, allocator);
+  }
+
+  {
+    rapidjson::Value names(rapidjson::kArrayType);
+    for (auto& [id, name] : modelData.names){
+      names.PushBack(rapidjson::Value(name, allocator), allocator);
+    }
+    doc.AddMember("name", names, allocator);
+  }
+
+  // animation 
+  {
+    rapidjson::Value animations(rapidjson::kArrayType);
+    for (auto& animation : modelData.animations){
+      rapidjson::Value values(rapidjson::kArrayType);
+      animations.PushBack(values, allocator);
+    }
+    doc.AddMember("animation", animations, allocator);
+  }
+  /*
+    Transformation aiKeysToTransform(aiVectorKey& positionKey, aiQuatKey& rotationKey, aiVectorKey& scalingKey){
+      Transformation transform {
+        .position = aiVectorToGlm(positionKey.mValue),
+        .scale = aiVectorToGlm(scalingKey.mValue),
+        .rotation = aiQuatToGlm(rotationKey.mValue),
+      };
+      return transform;
+    }
+    struct AnimationChannel {
+      std::string nodeName;
+      std::vector<aiVectorKey> positionKeys;    // @TODO decouple this from assimp 
+      std::vector<aiVectorKey> scalingKeys;
+      std::vector<aiQuatKey> rotationKeys;
+    };
+     struct Animation {
+      std::string name;
+      double duration;
+      double ticksPerSecond;
+      std::vector<AnimationChannel> channels;
+    };
+
+  */
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+  doc.Accept(writer);
+  realfiles::saveFile(filepath, buffer.GetString());
+
+  modassert(false, "saveModelData not yet implemented");
+}
+
 std::vector<glm::vec3> getVertexsFromModelData(ModelData& data){
   std::vector<glm::vec3> vertexs;
   for (auto [id, meshData] : data.meshIdToMeshData){

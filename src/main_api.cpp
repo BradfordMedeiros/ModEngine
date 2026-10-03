@@ -1133,6 +1133,10 @@ void createGeneratedMeshRaw(std::vector<glm::vec3>& verts, std::vector<glm::vec2
   createGeneratedMeshRaw(world, verts, uvCoords, indexs, destMesh);
 }
 
+void saveModelData(std::string mesh, std::string filepath){
+  saveModelData(world, mesh, filepath);
+}
+
 objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth){
   return addLineToNextCycleTint(lineData, fromPos, toPos, permaline, owner, color, textureId, linewidth);
 }
