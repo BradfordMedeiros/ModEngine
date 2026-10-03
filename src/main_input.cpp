@@ -1788,8 +1788,13 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = [](ViewportSettings& viewport) -> void {
-    
+      
+
       saveModelData("../gameresources/build/characters/plaguerobot.gltf", "./build/build.model");
+
+      auto modelData = loadModelData("./build/build.model");
+      saveModelData(modelData, "./build/build2.model");
+
   /*
       PointConfig pointConfigToSave { 
 

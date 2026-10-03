@@ -76,6 +76,7 @@ ModelDataCore loadModelCore(std::string modelPath);
 ModelData extractModel(ModelDataCore& modelCore, std::string rootname);
 
 void saveModelData(ModelData& modelData, std::string finalPath);
+ModelData loadModelData(std::string filepath);
 
 std::vector<glm::vec3> getVertexsFromModelData(ModelData& data);
 

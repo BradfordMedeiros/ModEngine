@@ -1,5 +1,8 @@
 #include "./loadmodel.h"
+#include <algorithm>
 #include <cmath>
+#include <limits>
+#include <utility>
 
 std::string readFileOrPackage(std::string filepath);
 ModelDataCore loadModelCoreBrush(std::string modelPath);
@@ -800,7 +803,14 @@ void saveModelData(ModelData& modelData, std::string filepath){
 
   {
    rapidjson::Value meshes(rapidjson::kArrayType);
-   for (auto& [meshId, meshData] : modelData.meshIdToMeshData){
+   std::vector<int32_t> meshIds;
+   meshIds.reserve(modelData.meshIdToMeshData.size());
+   for (auto& [meshId, _] : modelData.meshIdToMeshData){
+     meshIds.push_back(meshId);
+   }
+   std::sort(meshIds.begin(), meshIds.end());
+   for (int32_t meshId : meshIds){
+     auto& meshData = modelData.meshIdToMeshData.at(meshId);
      rapidjson::Value mesh(rapidjson::kArrayType);
      mesh.PushBack(meshId, allocator);
 
@@ -877,16 +887,23 @@ void saveModelData(ModelData& modelData, std::string filepath){
      meshes.PushBack(mesh, allocator);
    }
    doc.AddMember("meshes", meshes, allocator);
- }
+  }
 
- {
+  {
    rapidjson::Value ids(rapidjson::kArrayType);
    rapidjson::Value meshIdsForNodes(rapidjson::kArrayType);
    rapidjson::Value parentIds(rapidjson::kArrayType);
    rapidjson::Value transforms(rapidjson::kArrayType);
    rapidjson::Value names(rapidjson::kArrayType);
 
-    for (auto& [id, transform] : modelData.nodeTransform){
+    std::vector<int32_t> nodeIds;
+    nodeIds.reserve(modelData.nodeTransform.size());
+    for (auto& [id, _] : modelData.nodeTransform){
+      nodeIds.push_back(id);
+    }
+    std::sort(nodeIds.begin(), nodeIds.end());
+    for (int32_t id : nodeIds){
+      auto& transform = modelData.nodeTransform.at(id);
       ids.PushBack(id, allocator);
 
       rapidjson::Value meshIdsForNode(rapidjson::kArrayType);
@@ -978,6 +995,330 @@ void saveModelData(ModelData& modelData, std::string filepath){
   rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
   modassert(doc.Accept(writer), "saveModelData could not serialize model data as valid JSON");
   realfiles::saveFile(filepath, buffer.GetString());
+}
+
+double readNumber(const rapidjson::Value& value, std::string context){
+  modassert(value.IsNumber(), context + " must be numeric");
+  double number = value.GetDouble();
+  modassert(std::isfinite(number), context + " must be finite");
+  return number;
+}
+
+int32_t readInt32(const rapidjson::Value& value, std::string context){
+  modassert(value.IsInt(), context + " must be a 32-bit integer");
+  return value.GetInt();
+}
+
+std::string readString(const rapidjson::Value& value, std::string context){
+  modassert(value.IsString(), context + " must be a string");
+  return value.GetString();
+}
+
+bool readBool(const rapidjson::Value& value, std::string context){
+  modassert(value.IsBool(), context + " must be a boolean");
+  return value.GetBool();
+}
+
+void requireArraySize(const rapidjson::Value& value, rapidjson::SizeType size, std::string context){
+  modassert(value.IsArray() && value.Size() == size, context + " must be an array of size " + std::to_string(size));
+}
+
+float readFloat(const rapidjson::Value& value, std::string context){
+  double number = readNumber(value, context);
+  modassert(number >= -std::numeric_limits<float>::max() && number <= std::numeric_limits<float>::max(),
+      context + " is outside the float range");
+  return static_cast<float>(number);
+}
+
+glm::vec2 readVec2(const rapidjson::Value& value, std::string context){
+  requireArraySize(value, 2, context);
+  return glm::vec2(readFloat(value[0], context), readFloat(value[1], context));
+}
+
+glm::vec3 readVec3(const rapidjson::Value& value, std::string context){
+  requireArraySize(value, 3, context);
+  return glm::vec3(
+      readFloat(value[0], context),
+      readFloat(value[1], context),
+      readFloat(value[2], context));
+}
+
+glm::vec4 readVec4(const rapidjson::Value& value, std::string context){
+  requireArraySize(value, 4, context);
+  return glm::vec4(
+      readFloat(value[0], context),
+      readFloat(value[1], context),
+      readFloat(value[2], context),
+      readFloat(value[3], context));
+}
+
+glm::quat readQuaternion(const rapidjson::Value& value, std::string context){
+  glm::vec4 encoded = readVec4(value, context);
+  float directionLength = glm::length(glm::vec3(encoded));
+  modassert(std::isfinite(directionLength) && directionLength > 1e-6f,
+      context + " has an invalid direction");
+  return parseQuat(encoded);
+}
+
+glm::mat4 readMat4(const rapidjson::Value& value, std::string context){
+  requireArraySize(value, 4, context);
+  glm::mat4 matrix(1.0f);
+  for (rapidjson::SizeType column = 0; column < 4; column++){
+    glm::vec4 values = readVec4(value[column], context + " column " + std::to_string(column));
+    for (rapidjson::SizeType row = 0; row < 4; row++){
+      matrix[column][row] = values[row];
+    }
+  }
+  return matrix;
+}
+
+Transformation readTransformation(const rapidjson::Value& value, std::string context){
+  requireArraySize(value, 3, context);
+  Transformation transform {
+    .position = readVec3(value[0], context + " position"),
+    .scale = readVec3(value[1], context + " scale"),
+    .rotation = readQuaternion(value[2], context + " rotation"),
+  };
+  return transform;
+}
+
+ModelData loadModelData(std::string filepath){
+  ModelData modelData{};
+
+  std::string fileContent = realfiles::doLoadFile(filepath);
+  rapidjson::Document doc;
+  doc.Parse(fileContent.c_str());
+  modassert(!doc.HasParseError(), "could not parse " + filepath);
+  modassert(doc.IsObject(), "root must be an object");
+
+  modassert(doc.HasMember("meshes"), "missing member meshes");
+  auto& meshes = doc["meshes"];
+  modassert(meshes.IsArray(), "meshes must be an array");
+  for (rapidjson::SizeType meshIndex = 0; meshIndex < meshes.Size(); meshIndex++){
+    MeshData meshData{};
+
+    auto& meshEntry = meshes[meshIndex];
+    requireArraySize(meshEntry, 2, "mesh entry");
+    int32_t meshId = readInt32(meshEntry[0], "mesh id");
+    auto& data = meshEntry[1];
+    modassert(data.IsObject(), "mesh data must be an object");
+    modassert(data.HasMember("vertices"), "missing member vertices");
+    modassert(data.HasMember("indices"), "missing member indices");
+    modassert(data.HasMember("bones"), "missing member bones");
+    modassert(data.HasMember("diffuseTexturePath"), "missing member diffuseTexturePath");
+    modassert(data.HasMember("hasDiffuseTexture"), "missing member hasDiffuseTexture");
+    modassert(data.HasMember("emissionTexturePath"), "missing member emissionTexturePath");
+    modassert(data.HasMember("hasEmissionTexture"), "missing member hasEmissionTexture");
+    modassert(data.HasMember("opacityTexturePath"), "missing member opacityTexturePath");
+    modassert(data.HasMember("hasOpacityTexture"), "missing member hasOpacityTexture");
+    modassert(data.HasMember("roughnessTexturePath"), "missing member roughnessTexturePath");
+    modassert(data.HasMember("hasRoughnessTexture"), "missing member hasRoughnessTexture");
+    modassert(data.HasMember("normalTexturePath"), "missing member normalTexturePath");
+    modassert(data.HasMember("hasNormalTexture"), "missing member hasNormalTexture");
+    modassert(data.HasMember("bounds"), "missing member bounds");
+    modassert(data.HasMember("isSky"), "missing member isSky");
+    modassert(data.HasMember("isWater"), "missing member isWater");
+    modassert(data.HasMember("isHidden"), "missing member isHidden");
+
+    {
+      auto& vertices = data["vertices"];
+      modassert(vertices.IsArray(), "mesh vertices must be an array");
+      for (rapidjson::SizeType vertexIndex = 0; vertexIndex < vertices.Size(); vertexIndex++){
+        auto& vertexData = vertices[vertexIndex];
+        requireArraySize(vertexData, 7, "vertex");
+        Vertex vertex{};
+        vertex.position = readVec3(vertexData[0], "vertex position");
+        vertex.normal = readVec3(vertexData[1], "vertex normal");
+        vertex.tangent = readVec3(vertexData[2], "vertex tangent");
+        vertex.color = readVec3(vertexData[3], "vertex color");
+        vertex.texCoords = readVec2(vertexData[4], "vertex texture coordinates");
+        requireArraySize(vertexData[5], NUM_BONES_PER_VERTEX, "vertex bone indices");
+        requireArraySize(vertexData[6], NUM_BONES_PER_VERTEX, "vertex bone weights");
+        for (int boneIndex = 0; boneIndex < NUM_BONES_PER_VERTEX; boneIndex++){
+          vertex.boneIndexes[boneIndex] = readInt32(vertexData[5][boneIndex], "vertex bone index");
+          vertex.boneWeights[boneIndex] = readFloat(vertexData[6][boneIndex], "vertex bone weight");
+        }
+        meshData.vertices.push_back(vertex);
+      }
+    }
+    {
+      auto& indices = data["indices"];
+      modassert(indices.IsArray(), "mesh indices must be an array");
+      for (rapidjson::SizeType index = 0; index < indices.Size(); index++){
+        auto& value = indices[index];
+        modassert(value.IsUint(), "mesh index must be an unsigned integer");
+        unsigned int meshVertexIndex = value.GetUint();
+        modassert(meshVertexIndex < meshData.vertices.size(), "mesh index references a missing vertex");
+        meshData.indices.push_back(meshVertexIndex);
+      }
+    }
+
+    {
+      auto& bones = data["bones"];
+      modassert(bones.IsArray(), "mesh bones must be an array");
+      for (rapidjson::SizeType boneIndex = 0; boneIndex < bones.Size(); boneIndex++){
+        auto& boneData = bones[boneIndex];
+        modassert(boneData.IsObject(), "bone data must be an object");
+        modassert(boneData.HasMember("name"), "missing member name");
+        modassert(boneData.HasMember("shortName"), "missing member shortName");
+        modassert(boneData.HasMember("offsetMatrix"), "missing member offsetMatrix");
+        modassert(boneData.HasMember("initialBonePoseInverse"), "missing member initialBonePoseInverse");
+        modassert(boneData.HasMember("initialLocalTransform"), "missing member initialLocalTransform");
+        Bone bone{};
+        bone.name = readString(boneData["name"], "bone name");
+        bone.shortName = readString(boneData["shortName"], "bone short name");
+        bone.offsetMatrix = readMat4(boneData["offsetMatrix"], "bone offset matrix");
+        bone.initialBonePoseInverse = readMat4(boneData["initialBonePoseInverse"], "bone initial pose inverse");
+        bone.initialLocalTransform = readTransformation(boneData["initialLocalTransform"], "bone initial local transform");
+        meshData.bones.push_back(bone);
+      }
+    }
+
+    meshData.diffuseTexturePath = readString(data["diffuseTexturePath"], "diffuse texture path");
+    meshData.hasDiffuseTexture = readBool(data["hasDiffuseTexture"], "has diffuse texture");
+    meshData.emissionTexturePath = readString(data["emissionTexturePath"], "emission texture path");
+    meshData.hasEmissionTexture = readBool(data["hasEmissionTexture"], "has emission texture");
+    meshData.opacityTexturePath = readString(data["opacityTexturePath"], "opacity texture path");
+    meshData.hasOpacityTexture = readBool(data["hasOpacityTexture"], "has opacity texture");
+    meshData.roughnessTexturePath = readString(data["roughnessTexturePath"], "roughness texture path");
+    meshData.hasRoughnessTexture = readBool(data["hasRoughnessTexture"], "has roughness texture");
+    meshData.normalTexturePath = readString(data["normalTexturePath"], "normal texture path");
+    meshData.hasNormalTexture = readBool(data["hasNormalTexture"], "has normal texture");
+
+    auto& bounds = data["bounds"];
+    requireArraySize(bounds, 6, "mesh bounds");
+    meshData.boundInfo = {
+      .xMin = readFloat(bounds[0], "bounds xMin"),
+      .xMax = readFloat(bounds[1], "bounds xMax"),
+      .yMin = readFloat(bounds[2], "bounds yMin"),
+      .yMax = readFloat(bounds[3], "bounds yMax"),
+      .zMin = readFloat(bounds[4], "bounds zMin"),
+      .zMax = readFloat(bounds[5], "bounds zMax"),
+    };
+    meshData.isSky = readBool(data["isSky"], "mesh isSky");
+    meshData.isWater = readBool(data["isWater"], "mesh isWater");
+    meshData.isHidden = readBool(data["isHidden"], "mesh isHidden");
+
+    modelData.meshIdToMeshData[meshId] = std::move(meshData);
+  }
+
+  modassert(doc.HasMember("id"), "missing member id");
+  auto& ids = doc["id"];
+  modassert(ids.IsArray(), "id must be an array");
+  auto nodeCount = ids.Size();
+
+  modassert(doc.HasMember("meshids"), "missing member meshids");
+  auto& meshIdsForNodes = doc["meshids"];
+  modassert(meshIdsForNodes.IsArray() && meshIdsForNodes.Size() == nodeCount, "meshids must align with id");
+
+  modassert(doc.HasMember("parent"), "missing member parent");
+  auto& parentIds = doc["parent"];
+  modassert(parentIds.IsArray() && parentIds.Size() == nodeCount, "parent must align with id");
+
+  modassert(doc.HasMember("transform"), "missing member transform");
+  auto& transforms = doc["transform"];
+  modassert(transforms.IsArray() && transforms.Size() == nodeCount, "transform must align with id");
+
+  modassert(doc.HasMember("name"), "missing member name");
+  auto& names = doc["name"];
+  modassert(names.IsArray() && names.Size() == nodeCount, "name must align with id");
+
+  for (rapidjson::SizeType nodeIndex = 0; nodeIndex < nodeCount; nodeIndex++){
+    int32_t id = readInt32(ids[nodeIndex], "node id");
+    Transformation transform = readTransformation(transforms[nodeIndex], "node transform");
+    std::string name = readString(names[nodeIndex], "node name");
+
+    modassert(meshIdsForNodes[nodeIndex].IsArray(), "node mesh ids must be an array");
+    std::vector<int> nodeMeshIds;
+    for (rapidjson::SizeType meshIndex = 0; meshIndex < meshIdsForNodes[nodeIndex].Size(); meshIndex++){
+      int32_t meshId = readInt32(meshIdsForNodes[nodeIndex][meshIndex], "node mesh id");
+      modassert(modelData.meshIdToMeshData.find(meshId) != modelData.meshIdToMeshData.end(), "node references missing mesh id " + std::to_string(meshId));
+      nodeMeshIds.push_back(meshId);
+    }
+
+    modassert(modelData.nodeTransform.emplace(id, transform).second, "duplicate node id " + std::to_string(id));
+    modelData.nodeToMeshId.emplace(id, std::move(nodeMeshIds));
+    modelData.names.emplace(id, std::move(name));
+
+    auto& parent = parentIds[nodeIndex];
+    if (!parent.IsNull()){
+      modelData.childToParent.emplace(id, readInt32(parent, "node parent id"));
+    }
+  }
+  for (auto& [nodeId, parentId] : modelData.childToParent){
+    modassert(modelData.nodeTransform.find(parentId) != modelData.nodeTransform.end(), "node " + std::to_string(nodeId) + " references missing parent " + std::to_string(parentId));
+  }
+
+  modassert(doc.HasMember("animation"), "missing member animation");
+  auto& animations = doc["animation"];
+  modassert(animations.IsArray(), "animation must be an array");
+  for (rapidjson::SizeType animationIndex = 0; animationIndex < animations.Size(); animationIndex++){
+    auto& animationData = animations[animationIndex];
+    requireArraySize(animationData, 4, "animation");
+    Animation animation {
+      .name = readString(animationData[0], "animation name"),
+      .duration = readNumber(animationData[1], "animation duration"),
+      .ticksPerSecond = readNumber(animationData[2], "animation ticks per second"),
+    };
+
+    auto& channels = animationData[3];
+    modassert(channels.IsArray(), "animation channels must be an array");
+    for (rapidjson::SizeType channelIndex = 0; channelIndex < channels.Size(); channelIndex++){
+      auto& channelData = channels[channelIndex];
+      requireArraySize(channelData, 4, "animation channel");
+      AnimationChannel channel;
+      channel.nodeName = readString(channelData[0], "animation channel node name");
+
+      auto& positionKeys = channelData[1];
+      modassert(positionKeys.IsArray(), "position keys must be an array");
+      for (rapidjson::SizeType keyIndex = 0; keyIndex < positionKeys.Size(); keyIndex++){
+        auto& key = positionKeys[keyIndex];
+        requireArraySize(key, 2, "position key");
+        double time = readNumber(key[0], "position key time");
+        glm::vec3 value = readVec3(key[1], "position key value");
+        channel.positionKeys.emplace_back(time, aiVector3D(value.x, value.y, value.z));
+      }
+
+      auto& scalingKeys = channelData[2];
+      modassert(scalingKeys.IsArray(), "scale keys must be an array");
+      for (rapidjson::SizeType keyIndex = 0; keyIndex < scalingKeys.Size(); keyIndex++){
+        auto& key = scalingKeys[keyIndex];
+        requireArraySize(key, 2, "scale key");
+        double time = readNumber(key[0], "scale key time");
+        glm::vec3 value = readVec3(key[1], "scale key value");
+        channel.scalingKeys.emplace_back(time, aiVector3D(value.x, value.y, value.z));
+      }
+
+      auto& rotationKeys = channelData[3];
+      modassert(rotationKeys.IsArray(), "rotation keys must be an array");
+      for (rapidjson::SizeType keyIndex = 0; keyIndex < rotationKeys.Size(); keyIndex++){
+        auto& key = rotationKeys[keyIndex];
+        requireArraySize(key, 2, "rotation key");
+        double time = readNumber(key[0], "rotation key time");
+        glm::quat value = readQuaternion(key[1], "rotation key value");
+        channel.rotationKeys.emplace_back(time, aiQuaternion(value.w, value.x, value.y, value.z));
+      }
+
+      animation.channels.push_back(std::move(channel));
+    }
+    modelData.animations.push_back(std::move(animation));
+  }
+
+  std::set<std::string> boneNames;
+  for (auto& [_, meshData] : modelData.meshIdToMeshData){
+    for (auto& bone : meshData.bones){
+      boneNames.insert(bone.name);
+    }
+  }
+  for (auto& [id, name] : modelData.names){
+    if (boneNames.count(name) > 0 || name.find("mixamorig") != std::string::npos || name.find("Armature") != std::string::npos){
+      modelData.bones.insert(id);
+    }
+  }
+
+  modassert(doc.HasMember("sponsorRootPosition"), "missing member sponsorRootPosition");
+  modelData.sponsorRootPosition = readBool(doc["sponsorRootPosition"], "sponsorRootPosition");
+  return modelData;
 }
 
 std::vector<glm::vec3> getVertexsFromModelData(ModelData& data){
