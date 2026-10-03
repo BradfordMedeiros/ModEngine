@@ -1789,7 +1789,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = [](ViewportSettings& viewport) -> void {
     
-      saveModelData("../gameresources/build/weapons/fork.gltf", "./build/build.model");
+      saveModelData("../gameresources/build/characters/plaguerobot.gltf", "./build/build.model");
   /*
       PointConfig pointConfigToSave { 
 

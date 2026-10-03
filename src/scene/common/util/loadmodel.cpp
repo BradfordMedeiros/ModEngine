@@ -832,6 +832,42 @@ void saveModelData(ModelData& modelData, std::string filepath){
     rapidjson::Value animations(rapidjson::kArrayType);
     for (auto& animation : modelData.animations){
       rapidjson::Value values(rapidjson::kArrayType);
+
+      values.PushBack(rapidjson::Value(animation.name, allocator), allocator);
+      values.PushBack(animation.duration, allocator);
+      values.PushBack(animation.ticksPerSecond, allocator);
+
+      rapidjson::Value channels(rapidjson::kArrayType);
+      for(auto& animationChannel : animation.channels){
+        rapidjson::Value channel(rapidjson::kArrayType);
+        channel.PushBack(rapidjson::Value(animationChannel.nodeName, allocator), allocator);
+        {
+          rapidjson::Value positionKeys(rapidjson::kArrayType);
+          for (auto& positionKey : animationChannel.positionKeys){
+            positionKeys.PushBack(rapidjson::Value(serializeVec(aiVectorToGlm(positionKey.mValue)), allocator), allocator);
+          }
+          channel.PushBack(positionKeys, allocator);
+        }
+        {
+          rapidjson::Value scalingKeys(rapidjson::kArrayType);
+          for (auto& positionKey : animationChannel.positionKeys){
+            scalingKeys.PushBack(rapidjson::Value(serializeVec(aiVectorToGlm(positionKey.mValue)), allocator), allocator);
+          }
+          channel.PushBack(scalingKeys, allocator);
+        }
+
+        {
+          rapidjson::Value rotationKeys(rapidjson::kArrayType);
+          for (auto& rotationKey : animationChannel.rotationKeys){
+            rotationKeys.PushBack(rapidjson::Value(serializeVec(serializeQuatToVec4(aiQuatToGlm(rotationKey.mValue))), allocator), allocator);
+          }
+          channel.PushBack(rotationKeys, allocator);    
+        }
+
+        channels.PushBack(channel, allocator);
+      }
+      values.PushBack(channels, allocator);
+
       animations.PushBack(values, allocator);
     }
     doc.AddMember("animation", animations, allocator);
