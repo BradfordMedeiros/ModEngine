@@ -1,5 +1,6 @@
 #include "./loadmodel.h"
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <limits>
 #include <utility>
@@ -741,11 +742,28 @@ ModelDataCore loadModelCoreAssimp(std::string modelPath){
 }
 
 ModelDataCore loadModelCore(std::string modelPath){
+  auto start = std::chrono::steady_clock::now();
   auto extension = getExtension(modelPath);
+  ModelDataCore modelCore{};
   if (extension.has_value() && extension.value() == "map"){
-    return loadModelCoreBrush(modelPath);
+    modelCore = loadModelCoreBrush(modelPath);
+  }else if (extension.has_value() && extension.value() == "model"){
+    modelCore.modelData = loadModelData(modelPath);
+    std::optional<int32_t> rootId;
+    for (auto& [id, _] : modelCore.modelData.nodeTransform){
+      if (modelCore.modelData.childToParent.find(id) == modelCore.modelData.childToParent.end()){
+        modassert(!rootId.has_value(), "model data has multiple root nodes");
+        rootId = id;
+      }
+    }
+    modassert(rootId.has_value(), "model data has no root node");
+    modelCore.loadedRoot = modelCore.modelData.names.at(rootId.value());
+  }else{
+    modelCore = loadModelCoreAssimp(modelPath);
   }
-  return loadModelCoreAssimp(modelPath);
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
+  modlog("loadModelCore duration", modelPath + " duration " + std::to_string(duration.count()) + " ms");
+  return modelCore;
 }
 
 
