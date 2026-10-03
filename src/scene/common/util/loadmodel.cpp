@@ -794,56 +794,40 @@ void saveModelData(ModelData& modelData, std::string filepath){
 
   {
     rapidjson::Value ids(rapidjson::kArrayType);
-    for(auto& [id, _] : modelData.nodeTransform){
-      ids.PushBack(id, allocator);
-    }
-    doc.AddMember("id", ids, allocator);
-  }
-
-  // /*  std::unordered_map<int32_t, MeshData> meshIdToMeshData;
-
-  {
     rapidjson::Value meshIdsForNodes(rapidjson::kArrayType);
-    for(auto& [id, meshIds] : modelData.nodeToMeshId){
+    rapidjson::Value parentIds(rapidjson::kArrayType);
+    rapidjson::Value transforms(rapidjson::kArrayType);
+    rapidjson::Value names(rapidjson::kArrayType);
+
+    for (auto& [id, transform] : modelData.nodeTransform){
+      ids.PushBack(id, allocator);
+
       rapidjson::Value meshIdsForNode(rapidjson::kArrayType);
-      for(auto meshId : meshIds){
+      for (auto meshId : modelData.nodeToMeshId.at(id)){
         meshIdsForNode.PushBack(meshId, allocator);
       }
       meshIdsForNodes.PushBack(meshIdsForNode, allocator);
-    }
-    doc.AddMember("meshids", meshIdsForNodes, allocator);
-  }
 
-  {
-    rapidjson::Value parentIds(rapidjson::kArrayType);
-    for(auto& [id, _] : modelData.nodeTransform){
-      if (modelData.childToParent.find(id) == modelData.childToParent.end()){
+      auto parent = modelData.childToParent.find(id);
+      if (parent == modelData.childToParent.end()){
         parentIds.PushBack(rapidjson::Value(), allocator);
       }else{
-        auto parentId = modelData.childToParent.at(id);
-        parentIds.PushBack(parentId, allocator);
+        parentIds.PushBack(parent->second, allocator);
       }
-    }
-    doc.AddMember("parent", parentIds, allocator);
-  }
 
-  {
-    rapidjson::Value transforms(rapidjson::kArrayType);
-    for (auto& [id, transform] : modelData.nodeTransform){
       rapidjson::Value transformValues(rapidjson::kArrayType);
       transformValues.PushBack(vec3ToJson(transform.position, allocator), allocator);
       transformValues.PushBack(vec3ToJson(transform.scale, allocator), allocator);
       transformValues.PushBack(vec4ToJson(serializeQuatToVec4(transform.rotation), allocator), allocator);
       transforms.PushBack(transformValues, allocator);
-    }
-    doc.AddMember("transform", transforms, allocator);
-  }
 
-  {
-    rapidjson::Value names(rapidjson::kArrayType);
-    for (auto& [id, name] : modelData.names){
-      names.PushBack(rapidjson::Value(name, allocator), allocator);
+      names.PushBack(rapidjson::Value(modelData.names.at(id), allocator), allocator);
     }
+
+    doc.AddMember("id", ids, allocator);
+    doc.AddMember("meshids", meshIdsForNodes, allocator);
+    doc.AddMember("parent", parentIds, allocator);
+    doc.AddMember("transform", transforms, allocator);
     doc.AddMember("name", names, allocator);
   }
 
@@ -901,6 +885,7 @@ void saveModelData(ModelData& modelData, std::string filepath){
     }
     doc.AddMember("animation", animations, allocator);
   }
+  doc.AddMember("sponsorRootPosition", modelData.sponsorRootPosition, allocator);
 
   rapidjson::StringBuffer buffer;
   rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
