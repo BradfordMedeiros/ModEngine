@@ -1,4 +1,5 @@
 #include "./util.h"
+#include <cmath>
 
 const int maxCallstack = 128;
 bool warnOnly = false;
@@ -488,19 +489,29 @@ glm::quat parseQuat(glm::vec4 v) {
 }
 
 glm::vec4 serializeQuatToVec4(glm::quat q) {
+    bool finite = std::isfinite(q.x) && std::isfinite(q.y) && std::isfinite(q.z) && std::isfinite(q.w);
+    float lengthSquared = glm::dot(q, q);
+    if (!finite || !std::isfinite(lengthSquared) || lengthSquared <= 1e-12f) {
+        modassert(false, "serializeQuatToVec4 received an invalid quaternion");
+    }
+    q = glm::normalize(q);
+
     glm::vec3 forward = glm::vec3(0, 0, -1);
     glm::vec3 dir = glm::normalize(q * forward);
 
     glm::quat look = glm::rotation(forward, dir);
-    glm::quat twistQuat = q * glm::conjugate(look);
+    glm::quat twistQuat = glm::normalize(q * glm::conjugate(look));
 
-    glm::vec3 axis;
-    float angleRad;
-    angleRad = glm::angle(twistQuat);
-    axis = glm::axis(twistQuat);
+    glm::vec3 twistAxis(twistQuat.x, twistQuat.y, twistQuat.z);
+    float axisLength = glm::length(twistAxis);
+    float angleRad = 0.0f;
 
-    if (glm::dot(axis, dir) < 0.0f){
-        angleRad = -angleRad;
+    if (axisLength > 1e-6f) {
+        twistAxis /= axisLength;
+        angleRad = 2.0f * std::atan2(axisLength, twistQuat.w);
+        if (glm::dot(twistAxis, dir) < 0.0f) {
+            angleRad = -angleRad;
+        }
     }
 
     float twistDeg = glm::degrees(angleRad);

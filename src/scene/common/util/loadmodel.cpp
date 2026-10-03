@@ -1,4 +1,5 @@
 #include "./loadmodel.h"
+#include <cmath>
 
 std::string readFileOrPackage(std::string filepath);
 ModelDataCore loadModelCoreBrush(std::string modelPath);
@@ -757,6 +758,25 @@ ModelData loadModel(std::string rootname, std::string modelPath){
   return data.modelData;
 }
 
+rapidjson::Value vec3ToJson(glm::vec3 vec, rapidjson::Document::AllocatorType& allocator){
+  modassert(std::isfinite(vec.x) && std::isfinite(vec.y) && std::isfinite(vec.z), "saveModelData found non-finite vec3 component");
+  rapidjson::Value values(rapidjson::kArrayType);
+  values.PushBack(vec.x, allocator);
+  values.PushBack(vec.y, allocator);
+  values.PushBack(vec.z, allocator);
+  return values;
+}
+
+rapidjson::Value vec4ToJson(glm::vec4 vec, rapidjson::Document::AllocatorType& allocator){
+  modassert(std::isfinite(vec.x) && std::isfinite(vec.y) && std::isfinite(vec.z) && std::isfinite(vec.w), "saveModelData found non-finite vec4 component");
+  rapidjson::Value values(rapidjson::kArrayType);
+  values.PushBack(vec.x, allocator);
+  values.PushBack(vec.y, allocator);
+  values.PushBack(vec.z, allocator);
+  values.PushBack(vec.w, allocator);
+  return values;
+}
+
 void saveModelData(ModelData& modelData, std::string filepath){
 /*  std::unordered_map<int32_t, MeshData> meshIdToMeshData;
   // std::unordered_map<int32_t, std::vector<int>> nodeToMeshId;
@@ -811,9 +831,9 @@ void saveModelData(ModelData& modelData, std::string filepath){
     rapidjson::Value transforms(rapidjson::kArrayType);
     for (auto& [id, transform] : modelData.nodeTransform){
       rapidjson::Value transformValues(rapidjson::kArrayType);
-      transformValues.PushBack(rapidjson::Value(serializeVec(transform.position), allocator), allocator);
-      transformValues.PushBack(rapidjson::Value(serializeVec(transform.scale), allocator), allocator);
-      transformValues.PushBack(rapidjson::Value(serializeVec(serializeQuatToVec4(transform.rotation)), allocator), allocator);
+      transformValues.PushBack(vec3ToJson(transform.position, allocator), allocator);
+      transformValues.PushBack(vec3ToJson(transform.scale, allocator), allocator);
+      transformValues.PushBack(vec4ToJson(serializeQuatToVec4(transform.rotation), allocator), allocator);
       transforms.PushBack(transformValues, allocator);
     }
     doc.AddMember("transform", transforms, allocator);
@@ -844,14 +864,20 @@ void saveModelData(ModelData& modelData, std::string filepath){
         {
           rapidjson::Value positionKeys(rapidjson::kArrayType);
           for (auto& positionKey : animationChannel.positionKeys){
-            positionKeys.PushBack(rapidjson::Value(serializeVec(aiVectorToGlm(positionKey.mValue)), allocator), allocator);
+            rapidjson::Value key(rapidjson::kArrayType);
+            key.PushBack(positionKey.mTime, allocator);
+            key.PushBack(vec3ToJson(aiVectorToGlm(positionKey.mValue), allocator), allocator);
+            positionKeys.PushBack(key, allocator);
           }
           channel.PushBack(positionKeys, allocator);
         }
         {
           rapidjson::Value scalingKeys(rapidjson::kArrayType);
-          for (auto& positionKey : animationChannel.positionKeys){
-            scalingKeys.PushBack(rapidjson::Value(serializeVec(aiVectorToGlm(positionKey.mValue)), allocator), allocator);
+          for (auto& scalingKey : animationChannel.scalingKeys){
+            rapidjson::Value key(rapidjson::kArrayType);
+            key.PushBack(scalingKey.mTime, allocator);
+            key.PushBack(vec3ToJson(aiVectorToGlm(scalingKey.mValue), allocator), allocator);
+            scalingKeys.PushBack(key, allocator);
           }
           channel.PushBack(scalingKeys, allocator);
         }
@@ -859,7 +885,10 @@ void saveModelData(ModelData& modelData, std::string filepath){
         {
           rapidjson::Value rotationKeys(rapidjson::kArrayType);
           for (auto& rotationKey : animationChannel.rotationKeys){
-            rotationKeys.PushBack(rapidjson::Value(serializeVec(serializeQuatToVec4(aiQuatToGlm(rotationKey.mValue))), allocator), allocator);
+            rapidjson::Value key(rapidjson::kArrayType);
+            key.PushBack(rotationKey.mTime, allocator);
+            key.PushBack(vec4ToJson(serializeQuatToVec4(aiQuatToGlm(rotationKey.mValue)), allocator), allocator);
+            rotationKeys.PushBack(key, allocator);
           }
           channel.PushBack(rotationKeys, allocator);    
         }
@@ -872,36 +901,11 @@ void saveModelData(ModelData& modelData, std::string filepath){
     }
     doc.AddMember("animation", animations, allocator);
   }
-  /*
-    Transformation aiKeysToTransform(aiVectorKey& positionKey, aiQuatKey& rotationKey, aiVectorKey& scalingKey){
-      Transformation transform {
-        .position = aiVectorToGlm(positionKey.mValue),
-        .scale = aiVectorToGlm(scalingKey.mValue),
-        .rotation = aiQuatToGlm(rotationKey.mValue),
-      };
-      return transform;
-    }
-    struct AnimationChannel {
-      std::string nodeName;
-      std::vector<aiVectorKey> positionKeys;    // @TODO decouple this from assimp 
-      std::vector<aiVectorKey> scalingKeys;
-      std::vector<aiQuatKey> rotationKeys;
-    };
-     struct Animation {
-      std::string name;
-      double duration;
-      double ticksPerSecond;
-      std::vector<AnimationChannel> channels;
-    };
-
-  */
 
   rapidjson::StringBuffer buffer;
   rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
-  doc.Accept(writer);
+  modassert(doc.Accept(writer), "saveModelData could not serialize model data as valid JSON");
   realfiles::saveFile(filepath, buffer.GetString());
-
-  modassert(false, "saveModelData not yet implemented");
 }
 
 std::vector<glm::vec3> getVertexsFromModelData(ModelData& data){
