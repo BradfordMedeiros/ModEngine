@@ -767,6 +767,14 @@ rapidjson::Value vec3ToJson(glm::vec3 vec, rapidjson::Document::AllocatorType& a
   return values;
 }
 
+rapidjson::Value vec2ToJson(glm::vec2 vec, rapidjson::Document::AllocatorType& allocator){
+  modassert(std::isfinite(vec.x) && std::isfinite(vec.y), "saveModelData found non-finite vec2 component");
+  rapidjson::Value values(rapidjson::kArrayType);
+  values.PushBack(vec.x, allocator);
+  values.PushBack(vec.y, allocator);
+  return values;
+}
+
 rapidjson::Value vec4ToJson(glm::vec4 vec, rapidjson::Document::AllocatorType& allocator){
   modassert(std::isfinite(vec.x) && std::isfinite(vec.y) && std::isfinite(vec.z) && std::isfinite(vec.w), "saveModelData found non-finite vec4 component");
   rapidjson::Value values(rapidjson::kArrayType);
@@ -777,27 +785,106 @@ rapidjson::Value vec4ToJson(glm::vec4 vec, rapidjson::Document::AllocatorType& a
   return values;
 }
 
-void saveModelData(ModelData& modelData, std::string filepath){
-/*  std::unordered_map<int32_t, MeshData> meshIdToMeshData;
-  // std::unordered_map<int32_t, std::vector<int>> nodeToMeshId;
-  // std::unordered_map<int32_t, int32_t> childToParent;
-  *std::unordered_map<int32_t, Transformation> nodeTransform;
-  //std::unordered_map<int32_t, std::string> names;
-  std::set<int32_t> bones; // does this need serialization?
-  std::vector<Animation> animations;
-  bool sponsorRootPosition = false;
-  */
+rapidjson::Value mat4ToJson(glm::mat4 matrix, rapidjson::Document::AllocatorType& allocator){
+  rapidjson::Value columns(rapidjson::kArrayType);
+  for (int column = 0; column < 4; column++){
+    columns.PushBack(vec4ToJson(matrix[column], allocator), allocator);
+  }
+  return columns;
+}
 
- rapidjson::Document doc;
+void saveModelData(ModelData& modelData, std::string filepath){
+  rapidjson::Document doc;
   doc.SetObject();
   auto& allocator = doc.GetAllocator();
 
   {
-    rapidjson::Value ids(rapidjson::kArrayType);
-    rapidjson::Value meshIdsForNodes(rapidjson::kArrayType);
-    rapidjson::Value parentIds(rapidjson::kArrayType);
-    rapidjson::Value transforms(rapidjson::kArrayType);
-    rapidjson::Value names(rapidjson::kArrayType);
+   rapidjson::Value meshes(rapidjson::kArrayType);
+   for (auto& [meshId, meshData] : modelData.meshIdToMeshData){
+     rapidjson::Value mesh(rapidjson::kArrayType);
+     mesh.PushBack(meshId, allocator);
+
+     rapidjson::Value data(rapidjson::kObjectType);
+     rapidjson::Value vertices(rapidjson::kArrayType);
+     for (auto& vertex : meshData.vertices){
+       rapidjson::Value vertexData(rapidjson::kArrayType);
+       vertexData.PushBack(vec3ToJson(vertex.position, allocator), allocator);
+       vertexData.PushBack(vec3ToJson(vertex.normal, allocator), allocator);
+       vertexData.PushBack(vec3ToJson(vertex.tangent, allocator), allocator);
+       vertexData.PushBack(vec3ToJson(vertex.color, allocator), allocator);
+       vertexData.PushBack(vec2ToJson(vertex.texCoords, allocator), allocator);
+
+       rapidjson::Value boneIndexes(rapidjson::kArrayType);
+       rapidjson::Value boneWeights(rapidjson::kArrayType);
+       for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
+         boneIndexes.PushBack(vertex.boneIndexes[i], allocator);
+         modassert(std::isfinite(vertex.boneWeights[i]), "saveModelData found non-finite vertex bone weight");
+         boneWeights.PushBack(vertex.boneWeights[i], allocator);
+       }
+       vertexData.PushBack(boneIndexes, allocator);
+       vertexData.PushBack(boneWeights, allocator);
+       vertices.PushBack(vertexData, allocator);
+     }
+     data.AddMember("vertices", vertices, allocator);
+
+     rapidjson::Value indices(rapidjson::kArrayType);
+     for (auto index : meshData.indices){
+       indices.PushBack(index, allocator);
+     }
+     data.AddMember("indices", indices, allocator);
+
+     rapidjson::Value bones(rapidjson::kArrayType);
+     for (auto& bone : meshData.bones){
+       rapidjson::Value boneData(rapidjson::kObjectType);
+       boneData.AddMember("name", rapidjson::Value(bone.name, allocator), allocator);
+       boneData.AddMember("shortName", rapidjson::Value(bone.shortName, allocator), allocator);
+       boneData.AddMember("offsetMatrix", mat4ToJson(bone.offsetMatrix, allocator), allocator);
+       boneData.AddMember("initialBonePoseInverse", mat4ToJson(bone.initialBonePoseInverse, allocator), allocator);
+
+       rapidjson::Value initialTransform(rapidjson::kArrayType);
+       initialTransform.PushBack(vec3ToJson(bone.initialLocalTransform.position, allocator), allocator);
+       initialTransform.PushBack(vec3ToJson(bone.initialLocalTransform.scale, allocator), allocator);
+       initialTransform.PushBack(vec4ToJson(serializeQuatToVec4(bone.initialLocalTransform.rotation), allocator), allocator);
+       boneData.AddMember("initialLocalTransform", initialTransform, allocator);
+       bones.PushBack(boneData, allocator);
+     }
+     data.AddMember("bones", bones, allocator);
+
+     data.AddMember("diffuseTexturePath", rapidjson::Value(meshData.diffuseTexturePath, allocator), allocator);
+     data.AddMember("hasDiffuseTexture", meshData.hasDiffuseTexture, allocator);
+     data.AddMember("emissionTexturePath", rapidjson::Value(meshData.emissionTexturePath, allocator), allocator);
+     data.AddMember("hasEmissionTexture", meshData.hasEmissionTexture, allocator);
+     data.AddMember("opacityTexturePath", rapidjson::Value(meshData.opacityTexturePath, allocator), allocator);
+     data.AddMember("hasOpacityTexture", meshData.hasOpacityTexture, allocator);
+     data.AddMember("roughnessTexturePath", rapidjson::Value(meshData.roughnessTexturePath, allocator), allocator);
+     data.AddMember("hasRoughnessTexture", meshData.hasRoughnessTexture, allocator);
+     data.AddMember("normalTexturePath", rapidjson::Value(meshData.normalTexturePath, allocator), allocator);
+     data.AddMember("hasNormalTexture", meshData.hasNormalTexture, allocator);
+
+     rapidjson::Value bounds(rapidjson::kArrayType);
+     bounds.PushBack(meshData.boundInfo.xMin, allocator);
+     bounds.PushBack(meshData.boundInfo.xMax, allocator);
+     bounds.PushBack(meshData.boundInfo.yMin, allocator);
+     bounds.PushBack(meshData.boundInfo.yMax, allocator);
+     bounds.PushBack(meshData.boundInfo.zMin, allocator);
+     bounds.PushBack(meshData.boundInfo.zMax, allocator);
+     data.AddMember("bounds", bounds, allocator);
+     data.AddMember("isSky", meshData.isSky, allocator);
+     data.AddMember("isWater", meshData.isWater, allocator);
+     data.AddMember("isHidden", meshData.isHidden, allocator);
+
+     mesh.PushBack(data, allocator);
+     meshes.PushBack(mesh, allocator);
+   }
+   doc.AddMember("meshes", meshes, allocator);
+ }
+
+ {
+   rapidjson::Value ids(rapidjson::kArrayType);
+   rapidjson::Value meshIdsForNodes(rapidjson::kArrayType);
+   rapidjson::Value parentIds(rapidjson::kArrayType);
+   rapidjson::Value transforms(rapidjson::kArrayType);
+   rapidjson::Value names(rapidjson::kArrayType);
 
     for (auto& [id, transform] : modelData.nodeTransform){
       ids.PushBack(id, allocator);
