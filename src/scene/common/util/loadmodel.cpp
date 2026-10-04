@@ -829,8 +829,6 @@ rapidjson::Value mat4ToJson(glm::mat4 matrix, rapidjson::Document::AllocatorType
   return columns;
 }
 
-namespace {
-
 void writeBinaryBytes(std::ofstream& file, char* data, size_t size){
   file.write(data, static_cast<std::streamsize>(size));
   modassert(file.good(), "failed while writing model binary");
@@ -970,7 +968,7 @@ std::vector<int32_t> sortedModelIds(Map& values){
   return ids;
 }
 
-void writeModelBinary(ModelData& modelData, std::string filepath){
+void saveModelDataBinary(ModelData& modelData, std::string filepath){
   std::ofstream file(filepath, std::ios::binary | std::ios::trunc);
   modassert(file.good(), "could not open model binary for writing: " + filepath);
   char magic[8] = {'M', 'O', 'D', 'M', 'O', 'D', 'B', '\0'};
@@ -1277,8 +1275,6 @@ ModelData readModelBinary(std::string& fileContent){
   return modelData;
 }
 
-}
-
 void saveModelData(ModelData& modelData, std::string filepath){
   rapidjson::Document doc;
   doc.SetObject();
@@ -1480,9 +1476,6 @@ void saveModelData(ModelData& modelData, std::string filepath){
   realfiles::saveFile(filepath, buffer.GetString());
 }
 
-void saveModelDataBinary(ModelData& modelData, std::string filepath){
-  writeModelBinary(modelData, filepath);
-}
 
 double readNumber(const rapidjson::Value& value, std::string context){
   modassert(value.IsNumber(), context + " must be numeric");
