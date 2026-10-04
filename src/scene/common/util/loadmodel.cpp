@@ -781,6 +781,22 @@ ModelDataCore loadModelCore(std::string modelPath){
   return modelCore;
 }
 
+bool hasSameMaterial(MeshData& meshOne, MeshData& meshTwo){
+  return meshOne.diffuseTexturePath == meshTwo.diffuseTexturePath &&
+    meshOne.hasDiffuseTexture == meshTwo.hasDiffuseTexture &&
+    meshOne.emissionTexturePath == meshTwo.emissionTexturePath &&
+    meshOne.hasEmissionTexture == meshTwo.hasEmissionTexture &&
+    meshOne.opacityTexturePath == meshTwo.opacityTexturePath &&
+    meshOne.hasOpacityTexture == meshTwo.hasOpacityTexture &&
+    meshOne.roughnessTexturePath == meshTwo.roughnessTexturePath &&
+    meshOne.hasRoughnessTexture == meshTwo.hasRoughnessTexture &&
+    meshOne.normalTexturePath == meshTwo.normalTexturePath &&
+    meshOne.hasNormalTexture == meshTwo.hasNormalTexture &&
+    meshOne.isSky == meshTwo.isSky &&
+    meshOne.isWater == meshTwo.isWater &&
+    meshOne.isHidden == meshTwo.isHidden;
+}
+
 ModelData mergeModelData(std::vector<ModelData>& models, std::string rootName){
   modassert(!rootName.empty(), "merged model root name must not be empty");
   ModelData merged;

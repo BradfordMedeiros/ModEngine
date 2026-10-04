@@ -48,7 +48,7 @@ void mergeModelDataTest(){
   std::vector<ModelData> models = { first, second, empty };
   std::string rootName = "combined";
 
-  ModelData merged = mergeModelData(models, rootName);
+  ModelData merged = mergeModelData(models);
   modassert(merged.nodeTransform.size() == 4 && merged.meshIdToMeshData.size() == 2,
     "merged model should contain the combined root and all source nodes and meshes");
   modassert(merged.names.at(0) == "combined" && merged.names.at(1) == "0/root" && merged.names.at(3) == "1/root",
