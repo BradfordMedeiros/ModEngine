@@ -1,4 +1,5 @@
 #include "./main_test.h"
+#include "../scene/common/util/loadmodel.h"
 
 extern CustomApiBindings* mainApi;
 
@@ -12,10 +13,71 @@ void sampleTest(){
   //throw std::logic_error("error loading buffer");
 }
 
+void mergeModelDataTest(){
+  MeshData firstMesh;
+  Bone firstBone{};
+  firstBone.name = "root";
+  firstBone.shortName = "root";
+  firstMesh.bones.push_back(firstBone);
+  ModelData first {
+    .meshIdToMeshData = {{ 0, firstMesh }},
+    .nodeToMeshId = {{ 0, { 0 } }, { 1, {} }},
+    .childToParent = {{ 1, 0 }},
+    .nodeTransform = {
+      { 0, Transformation{ .position = glm::vec3(1.f, 0.f, 0.f), .scale = glm::vec3(1.f), .rotation = glm::quat(1.f, 0.f, 0.f, 0.f) } },
+      { 1, Transformation{ .position = glm::vec3(0.f), .scale = glm::vec3(1.f), .rotation = glm::quat(1.f, 0.f, 0.f, 0.f) } },
+    },
+    .names = {{ 0, "root" }, { 1, "child" }},
+    .bones = { 0 },
+  };
+  MeshData secondMesh;
+  Bone secondBone{};
+  secondBone.name = "root";
+  secondBone.shortName = "root";
+  secondMesh.bones.push_back(secondBone);
+  ModelData second {
+    .meshIdToMeshData = {{ 0, secondMesh }},
+    .nodeToMeshId = {{ 0, { 0 } }},
+    .nodeTransform = {
+      { 0, Transformation{ .position = glm::vec3(0.f, 2.f, 0.f), .scale = glm::vec3(1.f), .rotation = glm::quat(1.f, 0.f, 0.f, 0.f) } },
+    },
+    .names = {{ 0, "root" }},
+    .bones = { 0 },
+  };
+  ModelData empty;
+  std::vector<ModelData> models = { first, second, empty };
+  std::string rootName = "combined";
+
+  ModelData merged = mergeModelData(models, rootName);
+  modassert(merged.nodeTransform.size() == 4 && merged.meshIdToMeshData.size() == 2,
+    "merged model should contain the combined root and all source nodes and meshes");
+  modassert(merged.names.at(0) == "combined" && merged.names.at(1) == "0/root" && merged.names.at(3) == "1/root",
+    "merged model node names should be namespaced");
+  Transformation& mergedRootTransform = merged.nodeTransform.at(0);
+  modassert(mergedRootTransform.position == glm::vec3(0.f) &&
+    mergedRootTransform.scale == glm::vec3(1.f) &&
+    mergedRootTransform.rotation == glm::quat(1.f, 0.f, 0.f, 0.f),
+    "merged model root transform should be identity");
+  modassert(merged.childToParent.at(1) == 0 &&
+    merged.childToParent.at(2) == 1 &&
+    merged.childToParent.at(3) == 0,
+    "merged model hierarchy should preserve parents and connect source roots");
+  modassert(merged.nodeToMeshId.at(1).at(0) != merged.nodeToMeshId.at(3).at(0),
+    "merged model mesh IDs should be unique");
+  modassert(merged.meshIdToMeshData.at(0).bones.at(0).name == "0/root" &&
+    merged.meshIdToMeshData.at(1).bones.at(0).name == "1/root" &&
+    merged.bones.size() == 2,
+    "merged model should namespace bone names and remap bone node IDs");
+}
+
 std::vector<TestCase> tests = { 
   TestCase{
     .name = "sample_test",
     .test = sampleTest,
+  },
+  TestCase{
+    .name = "merge_model_data",
+    .test = mergeModelDataTest,
   },
   /*TestCase {
     .name = "sandboxBasicDeserialization",

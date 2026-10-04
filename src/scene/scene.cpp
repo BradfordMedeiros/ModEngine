@@ -549,11 +549,7 @@ void loadModelData(World& world, std::string meshpath, int ownerId){
   }
 }
 
-void saveModelData(World& world, std::string meshpath, std::string filename){
-  for (auto& [path, modelData] : world.modelDatas){
-    std::cout << "model data: " << path << std::endl;
-  }
-  ModelData& modelData = world.modelDatas.at(meshpath).modelData.modelData;
+void saveModelData(World& world, ModelData& modelData, std::string filename){
   auto extension = getExtension(filename);
   modassert(extension.has_value() && (extension.value() == "model" || extension.value() == "modelb"),
       std::string("unsupported model data extension: ") + filename);
@@ -562,6 +558,18 @@ void saveModelData(World& world, std::string meshpath, std::string filename){
   }else{
     saveModelDataBinary(modelData, filename);
   }
+}
+
+void saveModelData(World& world, std::string meshpath, std::string filename){
+  for (auto& [path, modelData] : world.modelDatas){
+    std::cout << "model data: " << path << std::endl;
+  }
+  ModelData& modelData = world.modelDatas.at(meshpath).modelData.modelData;
+  saveModelData(world, modelData, filename);
+}
+
+ModelData& modelDataByName(World& world, std::string meshpath){
+  return world.modelDatas.at(meshpath).modelData.modelData;
 }
 
 ModelData modelDataFromCache(World& world,  std::string meshpath, std::string rootname, int ownerId){

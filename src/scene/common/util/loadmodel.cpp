@@ -781,6 +781,101 @@ ModelDataCore loadModelCore(std::string modelPath){
   return modelCore;
 }
 
+ModelData mergeModelData(std::vector<ModelData>& models, std::string rootName){
+  modassert(!rootName.empty(), "merged model root name must not be empty");
+  ModelData merged;
+  merged.names[0] = "merged-root";
+  merged.nodeTransform[0] = Transformation {
+    .position = glm::vec3(0.f),
+    .scale = glm::vec3(1.f),
+    .rotation = glm::quat(1.f, 0.f, 0.f, 0.f),
+  };
+  merged.nodeToMeshId[0] = {};
+
+  int64_t nextNodeId = 1;
+  int64_t nextMeshId = 0;
+  for (size_t modelIndex = 0; modelIndex < models.size(); modelIndex++){
+    ModelData& model = models.at(modelIndex);
+    modassert(model.animations.empty(), "cannot merge model data containing animations");
+    modassert(!model.sponsorRootPosition, "cannot merge model data with sponsorRootPosition");
+    modassert(model.nodeTransform.size() == model.names.size(), "model node transforms and names do not match");
+    modassert(model.nodeTransform.size() == model.nodeToMeshId.size(), "model node transforms and mesh lists do not match");
+
+    std::vector<int32_t> nodeIds;
+    nodeIds.reserve(model.nodeTransform.size());
+    for (auto& [nodeId, _] : model.nodeTransform){
+      nodeIds.push_back(nodeId);
+      modassert(model.names.find(nodeId) != model.names.end(), "model node is missing a name");
+      modassert(model.nodeToMeshId.find(nodeId) != model.nodeToMeshId.end(), "model node is missing its mesh list");
+    }
+    std::sort(nodeIds.begin(), nodeIds.end());
+
+    std::vector<int32_t> rootIds;
+    for (auto nodeId : nodeIds){
+      if (model.childToParent.find(nodeId) == model.childToParent.end()){
+        rootIds.push_back(nodeId);
+      }else{
+        modassert(model.nodeTransform.find(model.childToParent.at(nodeId)) != model.nodeTransform.end(), "model node references a missing parent");
+      }
+    }
+    modassert(model.nodeTransform.empty() ? rootIds.empty() : rootIds.size() == 1,  "each nonempty model to merge must have exactly one root node");
+    modassert(model.childToParent.size() == (model.nodeTransform.empty() ? 0 : model.nodeTransform.size() - 1),  "model hierarchy contains invalid parent entries");
+
+    std::unordered_map<int32_t, int32_t> nodeIdMap;
+    for (auto nodeId : nodeIds){
+      modassert(nextNodeId <= std::numeric_limits<int32_t>::max(), "merged model has too many nodes");
+      nodeIdMap[nodeId] = static_cast<int32_t>(nextNodeId++);
+    }
+
+    std::vector<int32_t> meshIds;
+    meshIds.reserve(model.meshIdToMeshData.size());
+    for (auto& [meshId, _] : model.meshIdToMeshData){
+      meshIds.push_back(meshId);
+    }
+    std::sort(meshIds.begin(), meshIds.end());
+    std::unordered_map<int32_t, int32_t> meshIdMap;
+    for (auto meshId : meshIds){
+      modassert(nextMeshId <= std::numeric_limits<int32_t>::max(), "merged model has too many meshes");
+      meshIdMap[meshId] = static_cast<int32_t>(nextMeshId++);
+    }
+
+    std::string modelPrefix = std::to_string(modelIndex);
+    for (auto nodeId : nodeIds){
+      int32_t mergedNodeId = nodeIdMap.at(nodeId);
+      merged.nodeTransform[mergedNodeId] = model.nodeTransform.at(nodeId);
+      merged.names[mergedNodeId] = modelPrefix + "/" + model.names.at(nodeId);
+
+      std::vector<int> mergedMeshIds;
+      for (auto meshId : model.nodeToMeshId.at(nodeId)){
+        modassert(meshIdMap.find(meshId) != meshIdMap.end(), "model node references a missing mesh");
+        mergedMeshIds.push_back(meshIdMap.at(meshId));
+      }
+      merged.nodeToMeshId[mergedNodeId] = std::move(mergedMeshIds);
+
+      if (nodeId == rootIds.front()){
+        merged.childToParent[mergedNodeId] = 0;
+      }else{
+        merged.childToParent[mergedNodeId] = nodeIdMap.at(model.childToParent.at(nodeId));
+      }
+    }
+
+    for (auto meshId : meshIds){
+      MeshData meshData = model.meshIdToMeshData.at(meshId);
+      for (auto& bone : meshData.bones){
+        bone.name = modelPrefix + "/" + bone.name;
+        bone.shortName = modelPrefix + "/" + bone.shortName;
+      }
+      merged.meshIdToMeshData[meshIdMap.at(meshId)] = std::move(meshData);
+    }
+
+    for (auto boneId : model.bones){
+      modassert(nodeIdMap.find(boneId) != nodeIdMap.end(), "model bone references a missing node");
+      merged.bones.insert(nodeIdMap.at(boneId));
+    }
+  }
+  return merged;
+}
+
 
 ModelData extractModel(ModelDataCore& modelCore, std::string rootname){
   auto modelData = modelCore.modelData;

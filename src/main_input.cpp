@@ -1788,14 +1788,24 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = [](ViewportSettings& viewport) -> void {
-      
+  
 
-      saveModelData("../gameresources/build/characters/plaguerobot.gltf", "./build/build.modelb");
 
-      auto modelData = loadModelDataBinary("./build/build.modelb");
+      std::vector<ModelData> modelData {
+        modelDataByName(world, "../gameresources/build/uncategorized/console.gltf"),
+        modelDataByName(world, "../gameresources/build/misc/pyramid.gltf")
+      };
 
-      saveModelData(modelData, "./build/build2.model");
-      saveModelDataBinary(modelData, "./build/build2.modelb");
+      auto mergedData = mergeModelData(modelData);
+
+      saveModelData(world, mergedData, "./build/merged.model");
+
+      //saveModelData("../gameresources/build/characters/plaguerobot.gltf", "./build/build.modelb");
+//
+      //auto modelData = loadModelDataBinary("./build/build.modelb");
+//
+      //saveModelData(modelData, "./build/build2.model");
+      //saveModelDataBinary(modelData, "./build/build2.modelb");
 
   /*
       PointConfig pointConfigToSave { 

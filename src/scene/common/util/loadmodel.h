@@ -64,6 +64,7 @@ struct ModelData {
   bool sponsorRootPosition = false;
 };
 
+
 struct ModelDataCore {
   ModelData modelData;
   std::string loadedRoot;
@@ -79,6 +80,7 @@ void saveModelData(ModelData& modelData, std::string finalPath);
 void saveModelDataBinary(ModelData& modelData, std::string filepath);
 ModelData loadModelData(std::string filepath);
 ModelData loadModelDataBinary(std::string filepath);
+ModelData mergeModelData(std::vector<ModelData>& models);
 
 std::vector<glm::vec3> getVertexsFromModelData(ModelData& data);
 
