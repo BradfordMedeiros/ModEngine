@@ -554,7 +554,14 @@ void saveModelData(World& world, std::string meshpath, std::string filename){
     std::cout << "model data: " << path << std::endl;
   }
   ModelData& modelData = world.modelDatas.at(meshpath).modelData.modelData;
-  saveModelData(modelData, filename);
+  auto extension = getExtension(filename);
+  modassert(extension.has_value() && (extension.value() == "model" || extension.value() == "modelb"),
+      std::string("unsupported model data extension: ") + filename);
+  if (extension.value() == "model"){
+    saveModelData(modelData, filename);
+  }else{
+    saveModelDataBinary(modelData, filename);
+  }
 }
 
 ModelData modelDataFromCache(World& world,  std::string meshpath, std::string rootname, int ownerId){

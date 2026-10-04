@@ -76,7 +76,9 @@ ModelDataCore loadModelCore(std::string modelPath);
 ModelData extractModel(ModelDataCore& modelCore, std::string rootname);
 
 void saveModelData(ModelData& modelData, std::string finalPath);
+void saveModelDataBinary(ModelData& modelData, std::string filepath);
 ModelData loadModelData(std::string filepath);
+ModelData loadModelDataBinary(std::string filepath);
 
 std::vector<glm::vec3> getVertexsFromModelData(ModelData& data);
 
@@ -92,4 +94,3 @@ struct ModelDataRef {
 };
 
 #endif 
-

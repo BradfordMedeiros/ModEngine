@@ -1253,7 +1253,7 @@ Bounds toBounds(ModAABB2& aabb){
 
 std::vector<std::string> imageExtensions = { "png", "jpg", "jpeg", "tga" };
 std::vector<std::string> audioExtensions = { "wav", "mp3" };
-std::vector<std::string> modelExtensions = { "fbx", "dae", "obj", "gltf" };
+std::vector<std::string> modelExtensions = { "fbx", "dae", "obj", "gltf", "model", "model-bin" };
 std::vector<std::string> effekseekerExtensions = { "efkefc" };
 std::vector<std::string> rawsceneExtensions = { "rawscene" };
 

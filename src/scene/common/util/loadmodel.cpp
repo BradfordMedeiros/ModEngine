@@ -2,7 +2,11 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstdint>
+#include <cstring>
+#include <fstream>
 #include <limits>
+#include <type_traits>
 #include <utility>
 
 std::string readFileOrPackage(std::string filepath);
@@ -758,6 +762,17 @@ ModelDataCore loadModelCore(std::string modelPath){
     }
     modassert(rootId.has_value(), "model data has no root node");
     modelCore.loadedRoot = modelCore.modelData.names.at(rootId.value());
+  }else if (extension.has_value() && extension.value() == "modelb"){
+    modelCore.modelData = loadModelDataBinary(modelPath);
+    std::optional<int32_t> rootId;
+    for (auto& [id, _] : modelCore.modelData.nodeTransform){
+      if (modelCore.modelData.childToParent.find(id) == modelCore.modelData.childToParent.end()){
+        modassert(!rootId.has_value(), "model data has multiple root nodes");
+        rootId = id;
+      }
+    }
+    modassert(rootId.has_value(), "model data has no root node");
+    modelCore.loadedRoot = modelCore.modelData.names.at(rootId.value());
   }else{
     modelCore = loadModelCoreAssimp(modelPath);
   }
@@ -812,6 +827,456 @@ rapidjson::Value mat4ToJson(glm::mat4 matrix, rapidjson::Document::AllocatorType
     columns.PushBack(vec4ToJson(matrix[column], allocator), allocator);
   }
   return columns;
+}
+
+namespace {
+
+void writeBinaryBytes(std::ofstream& file, char* data, size_t size){
+  file.write(data, static_cast<std::streamsize>(size));
+  modassert(file.good(), "failed while writing model binary");
+}
+
+template<typename T>
+void writeBinaryValue(std::ofstream& file, T value){
+  static_assert(std::is_trivially_copyable<T>::value, "binary model values must be trivially copyable");
+  writeBinaryBytes(file, reinterpret_cast<char*>(&value), sizeof(T));
+}
+
+void writeBinaryCount(std::ofstream& file, size_t count){
+  writeBinaryValue<uint64_t>(file, count);
+}
+
+void writeBinaryString(std::ofstream& file, std::string& value){
+  writeBinaryCount(file, value.size());
+  writeBinaryBytes(file, value.data(), value.size());
+}
+
+void writeBinaryVec2(std::ofstream& file, glm::vec2 value){
+  writeBinaryValue(file, value.x);
+  writeBinaryValue(file, value.y);
+}
+
+void writeBinaryVec3(std::ofstream& file, glm::vec3 value){
+  writeBinaryValue(file, value.x);
+  writeBinaryValue(file, value.y);
+  writeBinaryValue(file, value.z);
+}
+
+void writeBinaryQuat(std::ofstream& file, glm::quat value){
+  writeBinaryValue(file, value.w);
+  writeBinaryValue(file, value.x);
+  writeBinaryValue(file, value.y);
+  writeBinaryValue(file, value.z);
+}
+
+void writeBinaryMat4(std::ofstream& file, glm::mat4 value){
+  for (int column = 0; column < 4; column++){
+    for (int row = 0; row < 4; row++){
+      writeBinaryValue(file, value[column][row]);
+    }
+  }
+}
+
+void writeBinaryTransformation(std::ofstream& file, Transformation& value){
+  writeBinaryVec3(file, value.position);
+  writeBinaryVec3(file, value.scale);
+  writeBinaryQuat(file, value.rotation);
+}
+
+size_t binaryRemaining(std::string& data, size_t offset){
+  return data.size() - offset;
+}
+
+void requireBinaryBytes(std::string& data, size_t offset, size_t size){
+  modassert(offset <= data.size() && size <= data.size() - offset, "truncated model binary");
+}
+
+void readBinaryBytes(std::string& data, size_t& offset, char* destination, size_t size){
+  requireBinaryBytes(data, offset, size);
+  std::memcpy(destination, data.data() + offset, size);
+  offset += size;
+}
+
+template<typename T>
+T readBinaryValue(std::string& data, size_t& offset){
+  static_assert(std::is_trivially_copyable<T>::value, "binary model values must be trivially copyable");
+  requireBinaryBytes(data, offset, sizeof(T));
+  T value;
+  std::memcpy(&value, data.data() + offset, sizeof(T));
+  offset += sizeof(T);
+  return value;
+}
+
+size_t readBinaryCount(std::string& data, size_t& offset, size_t minimumRecordSize, std::string description){
+  uint64_t count = readBinaryValue<uint64_t>(data, offset);
+  modassert(minimumRecordSize > 0 && count <= binaryRemaining(data, offset) / minimumRecordSize && count <= std::numeric_limits<size_t>::max(),
+      "invalid model binary count for " + description);
+  return static_cast<size_t>(count);
+}
+
+void readBinaryString(std::string& data, size_t& offset, std::string& value){
+  uint64_t size = readBinaryValue<uint64_t>(data, offset);
+  modassert(size <= binaryRemaining(data, offset) && size <= std::numeric_limits<size_t>::max(), "invalid model binary string length");
+  value.assign(data.data() + offset, static_cast<size_t>(size));
+  offset += static_cast<size_t>(size);
+}
+
+bool readBinaryBool(std::string& data, size_t& offset){
+  uint8_t value = readBinaryValue<uint8_t>(data, offset);
+  modassert(value <= 1, "invalid boolean in model binary");
+  return value != 0;
+}
+
+void readBinaryVec2(std::string& data, size_t& offset, glm::vec2& value){
+  value.x = readBinaryValue<float>(data, offset);
+  value.y = readBinaryValue<float>(data, offset);
+}
+
+void readBinaryVec3(std::string& data, size_t& offset, glm::vec3& value){
+  value.x = readBinaryValue<float>(data, offset);
+  value.y = readBinaryValue<float>(data, offset);
+  value.z = readBinaryValue<float>(data, offset);
+}
+
+void readBinaryQuat(std::string& data, size_t& offset, glm::quat& value){
+  value.w = readBinaryValue<float>(data, offset);
+  value.x = readBinaryValue<float>(data, offset);
+  value.y = readBinaryValue<float>(data, offset);
+  value.z = readBinaryValue<float>(data, offset);
+}
+
+void readBinaryMat4(std::string& data, size_t& offset, glm::mat4& value){
+  for (int column = 0; column < 4; column++){
+    for (int row = 0; row < 4; row++){
+      value[column][row] = readBinaryValue<float>(data, offset);
+    }
+  }
+}
+
+void readBinaryTransformation(std::string& data, size_t& offset, Transformation& value){
+  readBinaryVec3(data, offset, value.position);
+  readBinaryVec3(data, offset, value.scale);
+  readBinaryQuat(data, offset, value.rotation);
+}
+
+template<typename Map>
+std::vector<int32_t> sortedModelIds(Map& values){
+  std::vector<int32_t> ids;
+  ids.reserve(values.size());
+  for (auto& [id, _] : values){
+    ids.push_back(id);
+  }
+  std::sort(ids.begin(), ids.end());
+  return ids;
+}
+
+void writeModelBinary(ModelData& modelData, std::string filepath){
+  std::ofstream file(filepath, std::ios::binary | std::ios::trunc);
+  modassert(file.good(), "could not open model binary for writing: " + filepath);
+  char magic[8] = {'M', 'O', 'D', 'M', 'O', 'D', 'B', '\0'};
+  writeBinaryBytes(file, magic, sizeof(magic));
+  writeBinaryValue<uint32_t>(file, 1);
+
+  auto meshIds = sortedModelIds(modelData.meshIdToMeshData);
+  writeBinaryCount(file, meshIds.size());
+  for (int32_t meshId : meshIds){
+    writeBinaryValue(file, meshId);
+    auto& meshData = modelData.meshIdToMeshData.at(meshId);
+
+    writeBinaryCount(file, meshData.vertices.size());
+    for (auto& vertex : meshData.vertices){
+      writeBinaryVec3(file, vertex.position);
+      writeBinaryVec3(file, vertex.normal);
+      writeBinaryVec3(file, vertex.tangent);
+      writeBinaryVec3(file, vertex.color);
+      writeBinaryVec2(file, vertex.texCoords);
+      for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
+        writeBinaryValue(file, vertex.boneIndexes[i]);
+        writeBinaryValue(file, vertex.boneWeights[i]);
+      }
+    }
+
+    writeBinaryCount(file, meshData.indices.size());
+    for (unsigned int index : meshData.indices){
+      writeBinaryValue<uint32_t>(file, index);
+    }
+
+    writeBinaryCount(file, meshData.bones.size());
+    for (auto& bone : meshData.bones){
+      writeBinaryString(file, bone.name);
+      writeBinaryString(file, bone.shortName);
+      writeBinaryMat4(file, bone.offsetMatrix);
+      writeBinaryMat4(file, bone.initialBonePoseInverse);
+      writeBinaryTransformation(file, bone.initialLocalTransform);
+    }
+
+    writeBinaryString(file, meshData.diffuseTexturePath);
+    writeBinaryValue<uint8_t>(file, meshData.hasDiffuseTexture ? 1 : 0);
+    writeBinaryString(file, meshData.emissionTexturePath);
+    writeBinaryValue<uint8_t>(file, meshData.hasEmissionTexture ? 1 : 0);
+    writeBinaryString(file, meshData.opacityTexturePath);
+    writeBinaryValue<uint8_t>(file, meshData.hasOpacityTexture ? 1 : 0);
+    writeBinaryString(file, meshData.roughnessTexturePath);
+    writeBinaryValue<uint8_t>(file, meshData.hasRoughnessTexture ? 1 : 0);
+    writeBinaryString(file, meshData.normalTexturePath);
+    writeBinaryValue<uint8_t>(file, meshData.hasNormalTexture ? 1 : 0);
+    writeBinaryValue(file, meshData.boundInfo.xMin);
+    writeBinaryValue(file, meshData.boundInfo.xMax);
+    writeBinaryValue(file, meshData.boundInfo.yMin);
+    writeBinaryValue(file, meshData.boundInfo.yMax);
+    writeBinaryValue(file, meshData.boundInfo.zMin);
+    writeBinaryValue(file, meshData.boundInfo.zMax);
+    writeBinaryValue<uint8_t>(file, meshData.isSky ? 1 : 0);
+    writeBinaryValue<uint8_t>(file, meshData.isWater ? 1 : 0);
+    writeBinaryValue<uint8_t>(file, meshData.isHidden ? 1 : 0);
+  }
+
+  auto nodeMeshIds = sortedModelIds(modelData.nodeToMeshId);
+  writeBinaryCount(file, nodeMeshIds.size());
+  for (int32_t id : nodeMeshIds){
+    writeBinaryValue(file, id);
+    auto& meshIdsForNode = modelData.nodeToMeshId.at(id);
+    writeBinaryCount(file, meshIdsForNode.size());
+    for (int meshId : meshIdsForNode){
+      writeBinaryValue<int32_t>(file, meshId);
+    }
+  }
+
+  auto childIds = sortedModelIds(modelData.childToParent);
+  writeBinaryCount(file, childIds.size());
+  for (int32_t id : childIds){
+    writeBinaryValue(file, id);
+    writeBinaryValue(file, modelData.childToParent.at(id));
+  }
+
+  auto nodeIds = sortedModelIds(modelData.nodeTransform);
+  writeBinaryCount(file, nodeIds.size());
+  for (int32_t id : nodeIds){
+    writeBinaryValue(file, id);
+    auto& transform = modelData.nodeTransform.at(id);
+    writeBinaryTransformation(file, transform);
+  }
+
+  auto nameIds = sortedModelIds(modelData.names);
+  writeBinaryCount(file, nameIds.size());
+  for (int32_t id : nameIds){
+    writeBinaryValue(file, id);
+    writeBinaryString(file, modelData.names.at(id));
+  }
+
+  writeBinaryCount(file, modelData.bones.size());
+  for (int32_t id : modelData.bones){
+    writeBinaryValue(file, id);
+  }
+
+  writeBinaryCount(file, modelData.animations.size());
+  for (auto& animation : modelData.animations){
+    writeBinaryString(file, animation.name);
+    writeBinaryValue(file, animation.duration);
+    writeBinaryValue(file, animation.ticksPerSecond);
+    writeBinaryCount(file, animation.channels.size());
+    for (auto& channel : animation.channels){
+      writeBinaryString(file, channel.nodeName);
+      writeBinaryCount(file, channel.positionKeys.size());
+      for (auto& key : channel.positionKeys){
+        writeBinaryValue(file, key.mTime);
+        writeBinaryValue(file, key.mValue.x);
+        writeBinaryValue(file, key.mValue.y);
+        writeBinaryValue(file, key.mValue.z);
+      }
+      writeBinaryCount(file, channel.scalingKeys.size());
+      for (auto& key : channel.scalingKeys){
+        writeBinaryValue(file, key.mTime);
+        writeBinaryValue(file, key.mValue.x);
+        writeBinaryValue(file, key.mValue.y);
+        writeBinaryValue(file, key.mValue.z);
+      }
+      writeBinaryCount(file, channel.rotationKeys.size());
+      for (auto& key : channel.rotationKeys){
+        writeBinaryValue(file, key.mTime);
+        writeBinaryValue(file, key.mValue.w);
+        writeBinaryValue(file, key.mValue.x);
+        writeBinaryValue(file, key.mValue.y);
+        writeBinaryValue(file, key.mValue.z);
+      }
+    }
+  }
+
+  writeBinaryValue<uint8_t>(file, modelData.sponsorRootPosition ? 1 : 0);
+  file.flush();
+  modassert(file.good(), "failed while writing model binary");
+}
+
+ModelData readModelBinary(std::string& fileContent){
+  size_t offset = 0;
+  char expectedMagic[8] = {'M', 'O', 'D', 'M', 'O', 'D', 'B', '\0'};
+  char magic[sizeof(expectedMagic)];
+  readBinaryBytes(fileContent, offset, magic, sizeof(magic));
+  modassert(std::memcmp(magic, expectedMagic, sizeof(magic)) == 0, "invalid model binary header");
+  modassert(readBinaryValue<uint32_t>(fileContent, offset) == 1, "unsupported model binary version");
+  ModelData modelData{};
+
+  size_t meshCount = readBinaryCount(fileContent, offset, 100, "meshes");
+  for (size_t meshIndex = 0; meshIndex < meshCount; meshIndex++){
+    int32_t meshId = readBinaryValue<int32_t>(fileContent, offset);
+    auto insertedMesh = modelData.meshIdToMeshData.emplace(meshId, MeshData{});
+    modassert(insertedMesh.second, "duplicate mesh id in model binary");
+    auto& meshData = insertedMesh.first->second;
+
+    size_t vertexCount = readBinaryCount(fileContent, offset, 88, "vertices");
+    meshData.vertices.reserve(vertexCount);
+    for (size_t vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++){
+      meshData.vertices.emplace_back();
+      auto& vertex = meshData.vertices.back();
+      readBinaryVec3(fileContent, offset, vertex.position);
+      readBinaryVec3(fileContent, offset, vertex.normal);
+      readBinaryVec3(fileContent, offset, vertex.tangent);
+      readBinaryVec3(fileContent, offset, vertex.color);
+      readBinaryVec2(fileContent, offset, vertex.texCoords);
+      for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
+        vertex.boneIndexes[i] = readBinaryValue<int32_t>(fileContent, offset);
+        vertex.boneWeights[i] = readBinaryValue<float>(fileContent, offset);
+      }
+    }
+
+    size_t indexCount = readBinaryCount(fileContent, offset, sizeof(uint32_t), "indices");
+    meshData.indices.reserve(indexCount);
+    for (size_t index = 0; index < indexCount; index++){
+      meshData.indices.push_back(readBinaryValue<uint32_t>(fileContent, offset));
+    }
+
+    size_t boneCount = readBinaryCount(fileContent, offset, 184, "bones");
+    meshData.bones.reserve(boneCount);
+    for (size_t boneIndex = 0; boneIndex < boneCount; boneIndex++){
+      meshData.bones.emplace_back();
+      auto& bone = meshData.bones.back();
+      readBinaryString(fileContent, offset, bone.name);
+      readBinaryString(fileContent, offset, bone.shortName);
+      readBinaryMat4(fileContent, offset, bone.offsetMatrix);
+      readBinaryMat4(fileContent, offset, bone.initialBonePoseInverse);
+      readBinaryTransformation(fileContent, offset, bone.initialLocalTransform);
+    }
+
+    readBinaryString(fileContent, offset, meshData.diffuseTexturePath);
+    meshData.hasDiffuseTexture = readBinaryBool(fileContent, offset);
+    readBinaryString(fileContent, offset, meshData.emissionTexturePath);
+    meshData.hasEmissionTexture = readBinaryBool(fileContent, offset);
+    readBinaryString(fileContent, offset, meshData.opacityTexturePath);
+    meshData.hasOpacityTexture = readBinaryBool(fileContent, offset);
+    readBinaryString(fileContent, offset, meshData.roughnessTexturePath);
+    meshData.hasRoughnessTexture = readBinaryBool(fileContent, offset);
+    readBinaryString(fileContent, offset, meshData.normalTexturePath);
+    meshData.hasNormalTexture = readBinaryBool(fileContent, offset);
+    meshData.boundInfo = {
+      .xMin = readBinaryValue<float>(fileContent, offset),
+      .xMax = readBinaryValue<float>(fileContent, offset),
+      .yMin = readBinaryValue<float>(fileContent, offset),
+      .yMax = readBinaryValue<float>(fileContent, offset),
+      .zMin = readBinaryValue<float>(fileContent, offset),
+      .zMax = readBinaryValue<float>(fileContent, offset),
+    };
+    meshData.isSky = readBinaryBool(fileContent, offset);
+    meshData.isWater = readBinaryBool(fileContent, offset);
+    meshData.isHidden = readBinaryBool(fileContent, offset);
+  }
+
+  size_t nodeMeshCount = readBinaryCount(fileContent, offset, sizeof(int32_t) + sizeof(uint64_t), "node mesh lists");
+  for (size_t nodeIndex = 0; nodeIndex < nodeMeshCount; nodeIndex++){
+    int32_t id = readBinaryValue<int32_t>(fileContent, offset);
+    size_t meshIdCount = readBinaryCount(fileContent, offset, sizeof(int32_t), "node mesh ids");
+    auto insertedNode = modelData.nodeToMeshId.emplace(id, std::vector<int>{});
+    modassert(insertedNode.second, "duplicate node mesh list id in model binary");
+    auto& meshIds = insertedNode.first->second;
+    meshIds.reserve(meshIdCount);
+    for (size_t meshIndex = 0; meshIndex < meshIdCount; meshIndex++){
+      meshIds.push_back(readBinaryValue<int32_t>(fileContent, offset));
+    }
+  }
+
+  size_t parentCount = readBinaryCount(fileContent, offset, sizeof(int32_t) * 2, "node parents");
+  for (size_t parentIndex = 0; parentIndex < parentCount; parentIndex++){
+    int32_t id = readBinaryValue<int32_t>(fileContent, offset);
+    int32_t parentId = readBinaryValue<int32_t>(fileContent, offset);
+    modassert(modelData.childToParent.emplace(id, parentId).second, "duplicate child id in model binary");
+  }
+
+  size_t transformCount = readBinaryCount(fileContent, offset, sizeof(int32_t) + 40, "node transforms");
+  for (size_t nodeIndex = 0; nodeIndex < transformCount; nodeIndex++){
+    int32_t id = readBinaryValue<int32_t>(fileContent, offset);
+    auto insertedTransform = modelData.nodeTransform.emplace(id, Transformation{});
+    modassert(insertedTransform.second, "duplicate node transform id in model binary");
+    readBinaryTransformation(fileContent, offset, insertedTransform.first->second);
+  }
+
+  size_t nameCount = readBinaryCount(fileContent, offset, sizeof(int32_t) + sizeof(uint64_t), "node names");
+  for (size_t nameIndex = 0; nameIndex < nameCount; nameIndex++){
+    int32_t id = readBinaryValue<int32_t>(fileContent, offset);
+    auto insertedName = modelData.names.emplace(id, std::string{});
+    modassert(insertedName.second, "duplicate node name id in model binary");
+    readBinaryString(fileContent, offset, insertedName.first->second);
+  }
+
+  size_t modelBoneCount = readBinaryCount(fileContent, offset, sizeof(int32_t), "model bones");
+  for (size_t boneIndex = 0; boneIndex < modelBoneCount; boneIndex++){
+    modelData.bones.insert(readBinaryValue<int32_t>(fileContent, offset));
+  }
+
+  size_t animationCount = readBinaryCount(fileContent, offset, sizeof(uint64_t) * 4, "animations");
+  modelData.animations.reserve(animationCount);
+  for (size_t animationIndex = 0; animationIndex < animationCount; animationIndex++){
+    modelData.animations.emplace_back();
+    auto& animation = modelData.animations.back();
+    readBinaryString(fileContent, offset, animation.name);
+    animation.duration = readBinaryValue<double>(fileContent, offset);
+    animation.ticksPerSecond = readBinaryValue<double>(fileContent, offset);
+    size_t channelCount = readBinaryCount(fileContent, offset, sizeof(uint64_t) * 4, "animation channels");
+    animation.channels.reserve(channelCount);
+    for (size_t channelIndex = 0; channelIndex < channelCount; channelIndex++){
+      animation.channels.emplace_back();
+      auto& channel = animation.channels.back();
+      readBinaryString(fileContent, offset, channel.nodeName);
+
+      size_t positionKeyCount = readBinaryCount(fileContent, offset, sizeof(double) + sizeof(float) * 3, "position keys");
+      channel.positionKeys.reserve(positionKeyCount);
+      for (size_t keyIndex = 0; keyIndex < positionKeyCount; keyIndex++){
+        channel.positionKeys.emplace_back();
+        auto& key = channel.positionKeys.back();
+        key.mTime = readBinaryValue<double>(fileContent, offset);
+        key.mValue.x = readBinaryValue<float>(fileContent, offset);
+        key.mValue.y = readBinaryValue<float>(fileContent, offset);
+        key.mValue.z = readBinaryValue<float>(fileContent, offset);
+      }
+
+      size_t scalingKeyCount = readBinaryCount(fileContent, offset, sizeof(double) + sizeof(float) * 3, "scale keys");
+      channel.scalingKeys.reserve(scalingKeyCount);
+      for (size_t keyIndex = 0; keyIndex < scalingKeyCount; keyIndex++){
+        channel.scalingKeys.emplace_back();
+        auto& key = channel.scalingKeys.back();
+        key.mTime = readBinaryValue<double>(fileContent, offset);
+        key.mValue.x = readBinaryValue<float>(fileContent, offset);
+        key.mValue.y = readBinaryValue<float>(fileContent, offset);
+        key.mValue.z = readBinaryValue<float>(fileContent, offset);
+      }
+
+      size_t rotationKeyCount = readBinaryCount(fileContent, offset, sizeof(double) + sizeof(float) * 4, "rotation keys");
+      channel.rotationKeys.reserve(rotationKeyCount);
+      for (size_t keyIndex = 0; keyIndex < rotationKeyCount; keyIndex++){
+        channel.rotationKeys.emplace_back();
+        auto& key = channel.rotationKeys.back();
+        key.mTime = readBinaryValue<double>(fileContent, offset);
+        key.mValue.w = readBinaryValue<float>(fileContent, offset);
+        key.mValue.x = readBinaryValue<float>(fileContent, offset);
+        key.mValue.y = readBinaryValue<float>(fileContent, offset);
+        key.mValue.z = readBinaryValue<float>(fileContent, offset);
+      }
+    }
+  }
+
+  modelData.sponsorRootPosition = readBinaryBool(fileContent, offset);
+  modassert(offset == fileContent.size(), "unexpected trailing data in model binary");
+  return modelData;
+}
+
 }
 
 void saveModelData(ModelData& modelData, std::string filepath){
@@ -1015,6 +1480,10 @@ void saveModelData(ModelData& modelData, std::string filepath){
   realfiles::saveFile(filepath, buffer.GetString());
 }
 
+void saveModelDataBinary(ModelData& modelData, std::string filepath){
+  writeModelBinary(modelData, filepath);
+}
+
 double readNumber(const rapidjson::Value& value, std::string context){
   modassert(value.IsNumber(), context + " must be numeric");
   double number = value.GetDouble();
@@ -1103,7 +1572,7 @@ Transformation readTransformation(const rapidjson::Value& value, std::string con
 ModelData loadModelData(std::string filepath){
   ModelData modelData{};
 
-  std::string fileContent = realfiles::doLoadFile(filepath);
+  std::string fileContent = readFileOrPackage(filepath);
   rapidjson::Document doc;
   doc.Parse(fileContent.c_str());
   modassert(!doc.HasParseError(), "could not parse " + filepath);
@@ -1337,6 +1806,11 @@ ModelData loadModelData(std::string filepath){
   modassert(doc.HasMember("sponsorRootPosition"), "missing member sponsorRootPosition");
   modelData.sponsorRootPosition = readBool(doc["sponsorRootPosition"], "sponsorRootPosition");
   return modelData;
+}
+
+ModelData loadModelDataBinary(std::string filepath){
+  std::string fileContent = readFileOrPackage(filepath);
+  return readModelBinary(fileContent);
 }
 
 std::vector<glm::vec3> getVertexsFromModelData(ModelData& data){

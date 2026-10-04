@@ -1790,10 +1790,12 @@ std::vector<InputDispatch> inputFns = {
     .fn = [](ViewportSettings& viewport) -> void {
       
 
-      saveModelData("../gameresources/build/characters/plaguerobot.gltf", "./build/build.model");
+      saveModelData("../gameresources/build/characters/plaguerobot.gltf", "./build/build.modelb");
 
-      auto modelData = loadModelData("./build/build.model");
+      auto modelData = loadModelDataBinary("./build/build.modelb");
+
       saveModelData(modelData, "./build/build2.model");
+      saveModelDataBinary(modelData, "./build/build2.modelb");
 
   /*
       PointConfig pointConfigToSave { 
