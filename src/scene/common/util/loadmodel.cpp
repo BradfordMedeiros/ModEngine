@@ -7,6 +7,7 @@
 #include <fstream>
 #include <limits>
 #include <type_traits>
+#include <unordered_set>
 #include <utility>
 
 std::string readFileOrPackage(std::string filepath);
@@ -797,10 +798,73 @@ bool hasSameMaterial(MeshData& meshOne, MeshData& meshTwo){
     meshOne.isHidden == meshTwo.isHidden;
 }
 
-ModelData mergeModelData(std::vector<ModelData>& models, std::string rootName){
-  modassert(!rootName.empty(), "merged model root name must not be empty");
+glm::vec3 normalizeIfNonZero(glm::vec3 vector){
+  float lengthSquared = glm::dot(vector, vector);
+  return lengthSquared > 0.f ? vector / std::sqrt(lengthSquared) : vector;
+}
+
+void transformMeshData(MeshData& mesh, glm::mat4 transform){
+  modassert(mesh.bones.empty(), "cannot merge meshes with bones");
+  for (auto index : mesh.indices){
+    modassert(index < mesh.vertices.size(), "mesh index references a missing vertex");
+  }
+  glm::mat3 linearTransform(transform);
+  float determinant = glm::determinant(linearTransform);
+  glm::mat3 normalTransform = std::abs(determinant) > std::numeric_limits<float>::epsilon()
+    ? glm::transpose(glm::inverse(linearTransform))
+    : linearTransform;
+  for (auto& vertex : mesh.vertices){
+    vertex.position = glm::vec3(transform * glm::vec4(vertex.position, 1.f));
+    vertex.normal = normalizeIfNonZero(normalTransform * vertex.normal);
+    vertex.tangent = normalizeIfNonZero(linearTransform * vertex.tangent);
+  }
+  mesh.boundInfo = transformBoundInfo(mesh.boundInfo, transform);
+}
+
+void appendMeshData(MeshData& target, MeshData& source, glm::mat4 sourceTransform){
+  const size_t vertexOffset = target.vertices.size();
+  modassert(target.bones.empty() && source.bones.empty(), "cannot merge meshes with bones");
+  modassert(vertexOffset <= std::numeric_limits<unsigned int>::max(), "merged mesh has too many vertices");
+  modassert(source.vertices.size() <= std::numeric_limits<unsigned int>::max() - vertexOffset, "merged mesh has too many vertices");
+
+  MeshData transformedSource = source;
+  transformMeshData(transformedSource, sourceTransform);
+  for (auto vertex : transformedSource.vertices){
+    target.vertices.push_back(vertex);
+  }
+
+  for (auto index : transformedSource.indices){
+    modassert(index < transformedSource.vertices.size(), "mesh index references a missing vertex");
+    modassert(vertexOffset + index <= std::numeric_limits<unsigned int>::max(), "merged mesh has too many vertices");
+    target.indices.push_back(static_cast<unsigned int>(vertexOffset + index));
+  }
+
+  target.boundInfo = getMaxUnionBoundingInfo({ target.boundInfo, transformedSource.boundInfo });
+}
+
+glm::mat4 getNodeTransformToRoot(ModelData& model, int32_t nodeId, int32_t rootId){
+  std::vector<int32_t> nodePath;
+  std::unordered_set<int32_t> visited;
+  int32_t currentNodeId = nodeId;
+  while (currentNodeId != rootId){
+    modassert(visited.insert(currentNodeId).second, "model hierarchy contains a cycle");
+    nodePath.push_back(currentNodeId);
+    auto parent = model.childToParent.find(currentNodeId);
+    modassert(parent != model.childToParent.end(), "model node is not connected to its root");
+    currentNodeId = parent->second;
+  }
+  nodePath.push_back(rootId);
+
+  glm::mat4 transform(1.f);
+  for (auto node = nodePath.rbegin(); node != nodePath.rend(); node++){
+    transform *= transformToGlm(model.nodeTransform.at(*node));
+  }
+  return transform;
+}
+
+ModelData mergeModelData(std::vector<ModelData>& models){
   ModelData merged;
-  merged.names[0] = "merged-root";
+  merged.names[0] = "model";
   merged.nodeTransform[0] = Transformation {
     .position = glm::vec3(0.f),
     .scale = glm::vec3(1.f),
@@ -810,12 +874,26 @@ ModelData mergeModelData(std::vector<ModelData>& models, std::string rootName){
 
   int64_t nextNodeId = 1;
   int64_t nextMeshId = 0;
+  struct MeshMergeOccurrence {
+    MeshData* mesh;
+    int32_t mergedMeshId;
+    int32_t mergedNodeId;
+    glm::mat4 transform;
+  };
+  struct MeshMergeGroup {
+    MeshData* materialMesh;
+    std::vector<MeshMergeOccurrence> occurrences;
+  };
+  std::vector<MeshMergeGroup> meshGroups;
+  bool requiresBoneHierarchy = false;
+
   for (size_t modelIndex = 0; modelIndex < models.size(); modelIndex++){
     ModelData& model = models.at(modelIndex);
     modassert(model.animations.empty(), "cannot merge model data containing animations");
     modassert(!model.sponsorRootPosition, "cannot merge model data with sponsorRootPosition");
     modassert(model.nodeTransform.size() == model.names.size(), "model node transforms and names do not match");
     modassert(model.nodeTransform.size() == model.nodeToMeshId.size(), "model node transforms and mesh lists do not match");
+    requiresBoneHierarchy = requiresBoneHierarchy || !model.bones.empty();
 
     std::vector<int32_t> nodeIds;
     nodeIds.reserve(model.nodeTransform.size());
@@ -851,11 +929,21 @@ ModelData mergeModelData(std::vector<ModelData>& models, std::string rootName){
     std::sort(meshIds.begin(), meshIds.end());
     std::unordered_map<int32_t, int32_t> meshIdMap;
     for (auto meshId : meshIds){
+      MeshData meshData = model.meshIdToMeshData.at(meshId);
+      requiresBoneHierarchy = requiresBoneHierarchy || !meshData.bones.empty();
+      for (auto& bone : meshData.bones){
+        bone.name = std::to_string(modelIndex) + "/" + bone.name;
+        bone.shortName = std::to_string(modelIndex) + "/" + bone.shortName;
+      }
+
       modassert(nextMeshId <= std::numeric_limits<int32_t>::max(), "merged model has too many meshes");
-      meshIdMap[meshId] = static_cast<int32_t>(nextMeshId++);
+      int32_t mergedMeshId = static_cast<int32_t>(nextMeshId++);
+      merged.meshIdToMeshData[mergedMeshId] = std::move(meshData);
+      meshIdMap[meshId] = mergedMeshId;
     }
 
     std::string modelPrefix = std::to_string(modelIndex);
+    std::unordered_set<int32_t> referencedMeshIds;
     for (auto nodeId : nodeIds){
       int32_t mergedNodeId = nodeIdMap.at(nodeId);
       merged.nodeTransform[mergedNodeId] = model.nodeTransform.at(nodeId);
@@ -863,8 +951,36 @@ ModelData mergeModelData(std::vector<ModelData>& models, std::string rootName){
 
       std::vector<int> mergedMeshIds;
       for (auto meshId : model.nodeToMeshId.at(nodeId)){
+        referencedMeshIds.insert(meshId);
         modassert(meshIdMap.find(meshId) != meshIdMap.end(), "model node references a missing mesh");
-        mergedMeshIds.push_back(meshIdMap.at(meshId));
+        int32_t mergedMeshId = meshIdMap.at(meshId);
+        mergedMeshIds.push_back(mergedMeshId);
+
+        MeshData& meshData = model.meshIdToMeshData.at(meshId);
+        if (!meshData.bones.empty()){
+          continue;
+        }
+
+        size_t matchingGroupIndex = meshGroups.size();
+        for (size_t groupIndex = 0; groupIndex < meshGroups.size(); groupIndex++){
+          if (hasSameMaterial(*meshGroups.at(groupIndex).materialMesh, meshData)){
+            matchingGroupIndex = groupIndex;
+            break;
+          }
+        }
+        if (matchingGroupIndex == meshGroups.size()){
+          meshGroups.push_back({
+            .materialMesh = &meshData,
+            .occurrences = {},
+          });
+          matchingGroupIndex = meshGroups.size() - 1;
+        }
+        meshGroups.at(matchingGroupIndex).occurrences.push_back({
+          .mesh = &meshData,
+          .mergedMeshId = mergedMeshId,
+          .mergedNodeId = mergedNodeId,
+          .transform = getNodeTransformToRoot(model, nodeId, rootIds.front()),
+        });
       }
       merged.nodeToMeshId[mergedNodeId] = std::move(mergedMeshIds);
 
@@ -876,18 +992,82 @@ ModelData mergeModelData(std::vector<ModelData>& models, std::string rootName){
     }
 
     for (auto meshId : meshIds){
-      MeshData meshData = model.meshIdToMeshData.at(meshId);
-      for (auto& bone : meshData.bones){
-        bone.name = modelPrefix + "/" + bone.name;
-        bone.shortName = modelPrefix + "/" + bone.shortName;
+      if (referencedMeshIds.find(meshId) != referencedMeshIds.end()){
+        continue;
       }
-      merged.meshIdToMeshData[meshIdMap.at(meshId)] = std::move(meshData);
+      MeshData& meshData = model.meshIdToMeshData.at(meshId);
+      if (!meshData.bones.empty()){
+        continue;
+      }
+      size_t matchingGroupIndex = meshGroups.size();
+      for (size_t groupIndex = 0; groupIndex < meshGroups.size(); groupIndex++){
+        if (hasSameMaterial(*meshGroups.at(groupIndex).materialMesh, meshData)){
+          matchingGroupIndex = groupIndex;
+          break;
+        }
+      }
+      if (matchingGroupIndex == meshGroups.size()){
+        meshGroups.push_back({
+          .materialMesh = &meshData,
+          .occurrences = {},
+        });
+        matchingGroupIndex = meshGroups.size() - 1;
+      }
+      meshGroups.at(matchingGroupIndex).occurrences.push_back({
+        .mesh = &meshData,
+        .mergedMeshId = meshIdMap.at(meshId),
+        .mergedNodeId = 0,
+        .transform = glm::mat4(1.f),
+      });
     }
 
     for (auto boneId : model.bones){
       modassert(nodeIdMap.find(boneId) != nodeIdMap.end(), "model bone references a missing node");
       merged.bones.insert(nodeIdMap.at(boneId));
     }
+  }
+
+  for (auto& group : meshGroups){
+    auto& firstOccurrence = group.occurrences.front();
+    MeshData mergedMesh = *firstOccurrence.mesh;
+    transformMeshData(mergedMesh, firstOccurrence.transform);
+    for (size_t occurrenceIndex = 1; occurrenceIndex < group.occurrences.size(); occurrenceIndex++){
+      auto& occurrence = group.occurrences.at(occurrenceIndex);
+      appendMeshData(mergedMesh, *occurrence.mesh, occurrence.transform);
+    }
+
+    modassert(nextMeshId <= std::numeric_limits<int32_t>::max(), "merged model has too many meshes");
+    int32_t mergedMeshId = static_cast<int32_t>(nextMeshId++);
+    merged.meshIdToMeshData[mergedMeshId] = std::move(mergedMesh);
+    merged.nodeToMeshId[0].push_back(mergedMeshId);
+
+    for (auto& occurrence : group.occurrences){
+      auto& nodeMeshIds = merged.nodeToMeshId.at(occurrence.mergedNodeId);
+      for (size_t nodeMeshIndex = 0; nodeMeshIndex < nodeMeshIds.size();){
+        if (nodeMeshIds.at(nodeMeshIndex) == occurrence.mergedMeshId){
+          nodeMeshIds.erase(nodeMeshIds.begin() + nodeMeshIndex);
+        }else{
+          nodeMeshIndex++;
+        }
+      }
+      merged.meshIdToMeshData.erase(occurrence.mergedMeshId);
+    }
+  }
+
+  if (!requiresBoneHierarchy){
+    std::vector<int> rootMeshIds = std::move(merged.nodeToMeshId.at(0));
+    merged.nodeToMeshId.clear();
+    merged.childToParent.clear();
+    merged.nodeTransform.clear();
+    merged.names.clear();
+    merged.bones.clear();
+    merged.names[0] = "model";
+    merged.nodeTransform[0] = Transformation {
+      .position = glm::vec3(0.f),
+      .scale = glm::vec3(1.f),
+      .rotation = glm::quat(1.f, 0.f, 0.f, 0.f),
+    };
+    merged.nodeToMeshId[0] = std::move(rootMeshIds);
   }
   return merged;
 }

@@ -1792,13 +1792,15 @@ std::vector<InputDispatch> inputFns = {
 
 
       std::vector<ModelData> modelData {
-        modelDataByName(world, "../gameresources/build/uncategorized/console.gltf"),
-        modelDataByName(world, "../gameresources/build/misc/pyramid.gltf")
+        modelDataByName(world, "../gameresources/build/uncategorized/treebox.gltf"),
+        modelDataByName(world, "../gameresources/build/uncategorized/bench.gltf"),
+
+
       };
 
       auto mergedData = mergeModelData(modelData);
 
-      saveModelData(world, mergedData, "./build/merged.model");
+      saveModelData(world, mergedData, "./build/merged.modelb");
 
       //saveModelData("../gameresources/build/characters/plaguerobot.gltf", "./build/build.modelb");
 //

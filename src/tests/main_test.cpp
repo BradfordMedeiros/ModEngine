@@ -46,12 +46,11 @@ void mergeModelDataTest(){
   };
   ModelData empty;
   std::vector<ModelData> models = { first, second, empty };
-  std::string rootName = "combined";
 
   ModelData merged = mergeModelData(models);
   modassert(merged.nodeTransform.size() == 4 && merged.meshIdToMeshData.size() == 2,
     "merged model should contain the combined root and all source nodes and meshes");
-  modassert(merged.names.at(0) == "combined" && merged.names.at(1) == "0/root" && merged.names.at(3) == "1/root",
+  modassert(merged.names.at(0) == "model" && merged.names.at(1) == "0/root" && merged.names.at(3) == "1/root",
     "merged model node names should be namespaced");
   Transformation& mergedRootTransform = merged.nodeTransform.at(0);
   modassert(mergedRootTransform.position == glm::vec3(0.f) &&
@@ -70,6 +69,58 @@ void mergeModelDataTest(){
     "merged model should namespace bone names and remap bone node IDs");
 }
 
+void mergeCommonMeshesTest(){
+  MeshData firstMesh{};
+  firstMesh.vertices.resize(3);
+  firstMesh.indices = { 0, 1, 2 };
+  firstMesh.boundInfo = { .xMin = -1.f, .xMax = 1.f, .yMin = -2.f, .yMax = 2.f, .zMin = -3.f, .zMax = 3.f };
+  MeshData secondMesh{};
+  secondMesh.vertices.resize(3);
+  secondMesh.indices = { 0, 1, 2 };
+  secondMesh.boundInfo = { .xMin = -4.f, .xMax = 4.f, .yMin = -5.f, .yMax = 5.f, .zMin = -6.f, .zMax = 6.f };
+  Transformation identity {
+    .position = glm::vec3(0.f),
+    .scale = glm::vec3(1.f),
+    .rotation = glm::quat(1.f, 0.f, 0.f, 0.f),
+  };
+  Transformation firstTransform = identity;
+  firstTransform.position = glm::vec3(2.f, 0.f, 0.f);
+  Transformation secondTransform = identity;
+  secondTransform.position = glm::vec3(10.f, 0.f, 0.f);
+  ModelData first {
+    .meshIdToMeshData = {{ 0, firstMesh }},
+    .nodeToMeshId = {{ 0, { 0 } }},
+    .nodeTransform = {{ 0, firstTransform }},
+    .names = {{ 0, "root" }},
+  };
+  ModelData second {
+    .meshIdToMeshData = {{ 0, secondMesh }},
+    .nodeToMeshId = {{ 0, { 0 } }},
+    .nodeTransform = {{ 0, secondTransform }},
+    .names = {{ 0, "root" }},
+  };
+  std::vector<ModelData> models = { first, second };
+
+  ModelData merged = mergeModelData(models);
+  modassert(merged.meshIdToMeshData.size() == 1, "meshes with the same material should be merged");
+  int mergedMeshId = merged.nodeToMeshId.at(0).at(0);
+  const MeshData& mergedMesh = merged.meshIdToMeshData.at(mergedMeshId);
+  modassert(mergedMesh.vertices.size() == 6 && mergedMesh.indices.size() == 6 &&
+    mergedMesh.indices.at(0) == 0 && mergedMesh.indices.at(1) == 1 && mergedMesh.indices.at(2) == 2 &&
+    mergedMesh.indices.at(3) == 3 && mergedMesh.indices.at(4) == 4 && mergedMesh.indices.at(5) == 5,
+    "merged mesh should append vertices and adjust indices");
+  modassert(mergedMesh.vertices.at(0).position.x == 2.f && mergedMesh.vertices.at(3).position.x == 10.f,
+    "merged vertices should include their source node transforms");
+  modassert(mergedMesh.boundInfo.xMin == 1.f && mergedMesh.boundInfo.xMax == 14.f &&
+    mergedMesh.boundInfo.yMin == -5.f && mergedMesh.boundInfo.yMax == 5.f &&
+    mergedMesh.boundInfo.zMin == -6.f && mergedMesh.boundInfo.zMax == 6.f,
+    "merged mesh bounds should be the union of source bounds");
+  modassert(merged.nodeTransform.size() == 1 && merged.names.size() == 1 &&
+    merged.names.at(0) == "model" && merged.nodeToMeshId.size() == 1 &&
+    merged.nodeToMeshId.at(0).size() == 1,
+    "static merged models should collapse to one root node with the merged geometry");
+}
+
 std::vector<TestCase> tests = { 
   TestCase{
     .name = "sample_test",
@@ -78,6 +129,10 @@ std::vector<TestCase> tests = {
   TestCase{
     .name = "merge_model_data",
     .test = mergeModelDataTest,
+  },
+  TestCase{
+    .name = "merge_common_meshes",
+    .test = mergeCommonMeshesTest,
   },
   /*TestCase {
     .name = "sandboxBasicDeserialization",
