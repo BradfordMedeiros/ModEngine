@@ -1,4 +1,7 @@
 #include "./scene.h"
+#include <cmath>
+#include <limits>
+#include <unordered_set>
 
 bool fileExistsFromPackage(std::string path);
 
@@ -570,6 +573,176 @@ void saveModelData(World& world, std::string meshpath, std::string filename){
 
 ModelData& modelDataByName(World& world, std::string meshpath){
   return world.modelDatas.at(meshpath).modelData.modelData;
+}
+
+bool isDefaultMergeableMesh(GameObjectMesh& mesh){
+  return !mesh.isDisabled &&
+    mesh.viewports.empty() &&
+    mesh.texture.textureoffset == glm::vec2(0.f) &&
+    mesh.texture.texturetiling == glm::vec2(1.f) &&
+    mesh.texture.texturesize == glm::vec2(1.f) &&
+    mesh.customTexture.textureString.empty() &&
+    mesh.opacityTexture.textureString.empty() &&
+    mesh.normalTexture.textureString.empty() &&
+    mesh.cubemapTexture.textureString.empty() &&
+    mesh.cubemapReflection == glm::vec3(0.f, 5.f, 0.2f) &&
+    mesh.discardAmount == 0.f &&
+    mesh.emissionAmount == glm::vec3(0.f) &&
+    mesh.tint == glm::vec4(1.f) &&
+    !mesh.hasBones;
+}
+
+bool isDefaultMergeableGameObject(GameObject& gameobj){
+  return !gameobj.physicsOptions.enabled &&
+    !gameobj.physicsOptions.hasCollisions &&
+    !gameobj.lookat &&
+    gameobj.script.empty() &&
+    gameobj.shader.empty() &&
+    !gameobj.netsynchronize &&
+    !gameobj.isBone &&
+    gameobj.additionalAttr.attr.empty();
+}
+
+bool sameTransform(Transformation& left, Transformation& right){
+  constexpr float epsilon = 0.0001f;
+  return glm::length(left.position - right.position) <= epsilon &&
+    glm::length(left.scale - right.scale) <= epsilon &&
+    1.f - std::abs(glm::dot(left.rotation, right.rotation)) <= epsilon;
+}
+
+GameObjectModelMergeResult refusedGameObjectMerge(std::string reason){
+  return GameObjectModelMergeResult {
+    .modelData = std::nullopt,
+    .refusalReason = std::move(reason),
+    .eligible = false,
+  };
+}
+
+GameObjectModelMergeResult tryMergeGameObjects(World& world, const std::vector<objid>& ids, bool validateOnly){
+  if (ids.empty() || (!validateOnly && ids.size() < 2)){
+    return refusedGameObjectMerge("at least two game objects are required");
+  }
+
+  std::unordered_set<objid> uniqueIds;
+  for (objid id : ids){
+    if (!uniqueIds.insert(id).second){
+      return refusedGameObjectMerge("the selection contains a duplicate object");
+    }
+    if (!idExists(world.sandbox, id)){
+      return refusedGameObjectMerge("the selection contains an unknown object: " + std::to_string(id));
+    }
+  }
+
+  std::vector<ModelData> models;
+  models.reserve(ids.size());
+  std::optional<objid> commonSceneId;
+  for (objid id : ids){
+    GameObject& rootObject = getGameObject(world.sandbox, id);
+    GameObjectH& rootHierarchy = getGameObjectH(world.sandbox, id);
+    if (rootHierarchy.prefabId.has_value()){
+      return refusedGameObjectMerge("prefab instances cannot be merged");
+    }
+    if (rootHierarchy.parentId != 0){
+      return refusedGameObjectMerge("parented objects cannot be merged independently: " + rootObject.name);
+    }
+    if (!commonSceneId.has_value()){
+      commonSceneId = rootHierarchy.sceneId;
+    }else if (commonSceneId.value() != rootHierarchy.sceneId){
+      return refusedGameObjectMerge("objects from different scenes cannot be merged");
+    }
+    if (!isDefaultMergeableGameObject(rootObject)){
+      return refusedGameObjectMerge("object has physics or game-object behavior that cannot be represented in model data: " + rootObject.name);
+    }
+
+    auto& lookup = getObjTypeLookup(world.sandbox, id);
+    if (lookup.type != OBJ_MESH){
+      return refusedGameObjectMerge("only mesh objects can be merged: " + rootObject.name);
+    }
+    GameObjectMesh* rootMesh = getMesh(world.objectMapping, id, lookup);
+    if (rootMesh == nullptr || !rootMesh->rootMesh.has_value()){
+      return refusedGameObjectMerge("object is not a model root: " + rootObject.name);
+    }
+
+    std::string meshPath = rootMesh->rootMesh.value();
+    auto modelRef = world.modelDatas.find(meshPath);
+    if (modelRef == world.modelDatas.end()){
+      return refusedGameObjectMerge("model data is not loaded: " + meshPath);
+    }
+    ModelDataCore& modelCore = modelRef->second.modelData;
+    if (!modelCore.modelData.animations.empty() || !modelCore.modelData.bones.empty() ||
+        modelCore.modelData.sponsorRootPosition){
+      return refusedGameObjectMerge("animated, skinned, or sponsor-root models cannot be merged: " + rootObject.name);
+    }
+    ModelData model = extractModel(modelCore, rootObject.name);
+
+    std::unordered_map<std::string, int32_t> modelNodeByName;
+    for (auto& [nodeId, nodeName] : model.names){
+      modelNodeByName[nodeName] = nodeId;
+    }
+    std::set<objid> objectSubtree = getChildrenIdsAndParent(world.sandbox.mainScene, id);
+    if (objectSubtree.size() != modelNodeByName.size()){
+      return refusedGameObjectMerge("object hierarchy differs from its source model: " + rootObject.name);
+    }
+    std::unordered_set<std::string> visitedModelNodes;
+    for (objid nodeObjectId : objectSubtree){
+      GameObject& nodeObject = getGameObject(world.sandbox, nodeObjectId);
+      auto modelNode = modelNodeByName.find(nodeObject.name);
+      if (modelNode == modelNodeByName.end() || !visitedModelNodes.insert(nodeObject.name).second){
+        return refusedGameObjectMerge("object hierarchy differs from its source model: " + rootObject.name);
+      }
+      if (!isDefaultMergeableGameObject(nodeObject)){
+        return refusedGameObjectMerge("a model node has game-object behavior that cannot be represented in model data: " + nodeObject.name);
+      }
+      auto& nodeLookup = getObjTypeLookup(world.sandbox, nodeObjectId);
+      GameObjectMesh* nodeMesh = getMesh(world.objectMapping, nodeObjectId, nodeLookup);
+      if (nodeLookup.type != OBJ_MESH || nodeMesh == nullptr || !isDefaultMergeableMesh(*nodeMesh) ||
+          (nodeObjectId == id ? !nodeMesh->rootMesh.has_value() : nodeMesh->rootMesh.has_value())){
+        return refusedGameObjectMerge("a model node has nontrivial mesh state: " + nodeObject.name);
+      }
+      if (nodeObjectId != id && !sameTransform(nodeObject.transformation, model.nodeTransform.at(modelNode->second))){
+        return refusedGameObjectMerge("a model node transform differs from its source model: " + nodeObject.name);
+      }
+    }
+
+    std::vector<int32_t> roots;
+    for (auto& [nodeId, _] : model.nodeTransform){
+      if (model.childToParent.find(nodeId) == model.childToParent.end()){
+        roots.push_back(nodeId);
+      }
+    }
+    if (roots.size() != 1){
+      return refusedGameObjectMerge("source model must have exactly one root node: " + rootObject.name);
+    }
+
+    int64_t transformNodeId = 0;
+    while (transformNodeId <= std::numeric_limits<int32_t>::max() &&
+           model.nodeTransform.find(static_cast<int32_t>(transformNodeId)) != model.nodeTransform.end()){
+      transformNodeId++;
+    }
+    if (transformNodeId > std::numeric_limits<int32_t>::max()){
+      return refusedGameObjectMerge("source model has no available node id for its game-object transform");
+    }
+    int32_t anchorId = static_cast<int32_t>(transformNodeId);
+    model.names[anchorId] = "__game_object_transform";
+    model.nodeTransform[anchorId] = fullTransformation(world.sandbox, id, "tryMergeGameObjects");
+    model.nodeToMeshId[anchorId] = {};
+    model.childToParent[roots.front()] = anchorId;
+    models.push_back(std::move(model));
+  }
+
+  if (validateOnly){
+    return GameObjectModelMergeResult {
+      .modelData = std::nullopt,
+      .refusalReason = "",
+      .eligible = true,
+    };
+  }
+
+  return GameObjectModelMergeResult {
+    .modelData = mergeModelData(models),
+    .refusalReason = "",
+    .eligible = true,
+  };
 }
 
 ModelData modelDataFromCache(World& world,  std::string meshpath, std::string rootname, int ownerId){

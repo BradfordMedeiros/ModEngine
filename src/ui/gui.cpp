@@ -141,6 +141,9 @@ void initUi(){
         registerWidget("Textures", "widgets", [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
             renderTextures(includePanel, objectToDetail);
         });
+        registerWidget("Merge Game Objects", "widgets", [](bool includePanel, std::optional<objid>, std::optional<objid> sceneId) -> void {
+            renderGameObjectMergeWidget(includePanel, sceneId);
+        });
         registerWidget("Scenegraph", std::nullopt, [](bool includePanel, std::optional<objid> objectToDetail, std::optional<objid> sceneId) -> void {
             renderScenegraphWithState(includePanel);
         });  

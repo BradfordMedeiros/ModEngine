@@ -10,6 +10,7 @@
 #include "./widgets/core.h"
 #include "./widgets/widgets.h"
 #include "./widgets/obj.h"
+#include "./widgets/merge_gameobjects.h"
 
 
 
@@ -53,4 +54,3 @@ void renderLayoutHalf(WidgetMenuItem2& widgetOne, WidgetMenuItem2& widgetTwo);
 
 void drawImGuiText(std::string text, std::optional<glm::vec2> positionNdi);
 void clearImGuiData();
-

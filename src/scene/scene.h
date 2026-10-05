@@ -151,4 +151,12 @@ void saveModelData(World& world, ModelData& modelData, std::string filename);
 
 ModelData& modelDataByName(World& world, std::string meshpath);
 
+struct GameObjectModelMergeResult {
+  std::optional<ModelData> modelData;
+  std::string refusalReason;
+  bool eligible;
+};
+
+GameObjectModelMergeResult tryMergeGameObjects(World& world, const std::vector<objid>& ids, bool validateOnly = false);
+
 #endif
