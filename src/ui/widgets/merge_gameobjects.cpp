@@ -86,18 +86,50 @@ void renderGameObjectMergeWidget(bool includePanel, std::optional<objid> sceneId
   bool canMerge = idsToMerge.size() >= 2 && validOutputPath &&
     (!mergeAllSceneCandidates || (sceneId.has_value() && candidatesForScene == sceneId.value()));
   ImGui::BeginDisabled(!canMerge);
-  bool mergeClicked = ImGui::Button("Merge & Save");
+  bool mergeClicked = ImGui::Button("Merge & Save", ImVec2(-1.f, 0.f));
+  bool replaceClicked = ImGui::Button("Merge, Save & Replace", ImVec2(-1.f, 0.f));
   ImGui::EndDisabled();
 
-  if (mergeClicked){
+  if (mergeClicked || replaceClicked){
     auto result = tryMergeGameObjects(world, idsToMerge);
     if (!result.modelData.has_value()){
       status = result.refusalReason;
       lastMergeSucceeded = false;
+    }else if (replaceClicked && world.modelDatas.find(outputPath) != world.modelDatas.end()){
+      status = "Cannot replace from a model path that is already loaded; choose another output path.";
+      lastMergeSucceeded = false;
     }else{
       saveModelData(world, result.modelData.value(), outputPath);
-      status = "Merged model saved to " + outputPath + " (" + std::to_string(result.modelData->meshIdToMeshData.size()) + " meshes).";
-      lastMergeSucceeded = true;
+      if (!replaceClicked){
+        status = "Merged model saved to " + outputPath + " (" +
+          std::to_string(result.modelData->meshIdToMeshData.size()) + " meshes).";
+        lastMergeSucceeded = true;
+      }else{
+        objid sourceSceneId = getGameObjectH(world.sandbox, idsToMerge.front()).sceneId;
+        std::string mergedName = "merged-" + uniqueNameSuffix();
+        while (idExists(world.sandbox, mergedName, sourceSceneId)){
+          mergedName = "merged-" + uniqueNameSuffix();
+        }
+
+        AttrChildrenPair mergedObject {
+          .attr = GameobjAttributes { .attr = { { "mesh", outputPath } } },
+          .children = {},
+        };
+        std::unordered_map<std::string, GameobjAttributes> submodelAttributes;
+        objid mergedId = addObjectToScene(world, sourceSceneId, mergedName, mergedObject, submodelAttributes);
+        if (!idExists(world.sandbox, mergedId)){
+          status = "Saved the merged model, but could not create its replacement scene object.";
+          lastMergeSucceeded = false;
+        }else{
+          for (objid id : idsToMerge){
+            removeObjectFromScene(world, id);
+          }
+          state.editor.selectedObjs = { mergedId };
+          status = "Replaced " + std::to_string(idsToMerge.size()) +
+            " objects with " + mergedName + "; model saved to " + outputPath + ".";
+          lastMergeSucceeded = true;
+        }
+      }
     }
   }
 
