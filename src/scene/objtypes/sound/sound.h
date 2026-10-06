@@ -48,6 +48,13 @@ struct OneShot {
   ALuint source;
 };
 
+struct SoundAnalysisAudio {
+  std::vector<float> monoSamples;
+  int sampleRate = 0;
+};
+
+bool decodeSoundFileForAnalysis(std::string filepath, SoundAnalysisAudio& audio, std::string& error);
+
 // Video ////
 
 struct BufferedAudio {

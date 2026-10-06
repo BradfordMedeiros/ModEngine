@@ -132,6 +132,9 @@ void initUi(){
     }
 
     {
+        registerWidget("Audio Analysis", "widgets", [](bool includePanel, std::optional<objid>, std::optional<objid>) -> void {
+            renderAudioAnalysisWidget(includePanel);
+        });
         registerWidget("Transform", "widgets", [](bool includePanel, std::optional<objid>, std::optional<objid>) -> void {
             renderTransformPanel(includePanel);
         });

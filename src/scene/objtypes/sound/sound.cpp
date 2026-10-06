@@ -1,5 +1,11 @@
 #include "./sound.h"
 
+#include <algorithm>
+#include <cmath>
+#include <cctype>
+#include <cstdint>
+#include <limits>
+
 std::string readFileOrPackage(std::string filepath); // i dont really like directly referencing this here, but...it's ok
 unsigned int openFileOrPackage(std::string filepath);
 int closeFileOrPackage(unsigned int handle);
@@ -112,61 +118,222 @@ ov_callbacks vorbisFileFns = {
     .tell_func = my_tell_func
 };
 
-void readVorbisFile(std::string& filepath, ALuint* _soundBuffer){
-  modlog("vorbis", filepath);
-  modlog("vorbis", "open");
+struct DecodedVorbisAudio {
+  std::vector<char> pcmData;
+  int channels = 0;
+  int sampleRate = 0;
+};
+
+bool decodeVorbisAudio(std::string filepath, DecodedVorbisAudio& audio, std::string& error){
   unsigned int fileHandle = openFileOrPackage(filepath.c_str());
 
   OggVorbis_File vf;
   auto result = ov_open_callbacks(&fileHandle, &vf, NULL, 0, vorbisFileFns); 
   if (result < 0) {
-    modassert(false, std::string("Error setting up callbacks: ") + std::to_string(result));
+    error = std::string("Error opening Ogg/Vorbis audio: ") + std::to_string(result);
+    return false;
   }
 
   vorbis_info* vi = ov_info(&vf, -1);
-
-  std::cout << "bitrate is: " << vi -> bitrate_nominal << std::endl;
-
-  size_t bufferSize = ov_pcm_total(&vf, -1) * vi -> channels * 2; // 2 bytes per sample, per channel 
-  bufferSize = bufferSize + 1; // + 1 since need to get 0 bytes read on the last byte to detect finished
-
-  char* buffer = (char*)malloc(bufferSize);
-
-  int bitstream;
-  int bufferOffset = 0;
-  int sizePerRead = 4096;
-  int expectedReadLimit = bufferSize / sizePerRead;
-
-  int numReads = 0;
-  while(true){
-    if (numReads > (expectedReadLimit * 10)){
-      modassert(false, "Took too long reading vorbis audio file");
-    }
-    numReads++;
-
-    auto bytesRemaining = bufferSize - bufferOffset;
-    if (bytesRemaining < sizePerRead){
-      sizePerRead = bytesRemaining;
-    }
-    modassert(sizePerRead != 0, "cannot provide empty buffer to read");
-
-    auto value = ov_read(&vf, buffer + bufferOffset, sizePerRead, 0, 2, 1, &bitstream);
-    if (value == OV_HOLE || value == OV_EBADLINK || value == OV_EINVAL || value < 0){
-      modassert(false, "bad file read");
-    }
-    bufferOffset = bufferOffset + value;
-    if (value == 0){
-      break;
-    }
+  if (vi == NULL || vi->channels <= 0 || vi->rate <= 0){
+    ov_clear(&vf);
+    error = "Ogg/Vorbis audio has invalid stream metadata.";
+    return false;
   }
 
-  auto format = vi->channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
+  audio.channels = vi->channels;
+  audio.sampleRate = vi->rate;
+  int bitstream = 0;
+  char chunk[8192];
+  while (true){
+    const long bytesRead = ov_read(&vf, chunk, sizeof(chunk), 0, 2, 1, &bitstream);
+    if (bytesRead == 0){
+      break;
+    }
+    if (bytesRead < 0){
+      ov_clear(&vf);
+      error = "An error occurred while decoding Ogg/Vorbis audio.";
+      return false;
+    }
+    audio.pcmData.insert(audio.pcmData.end(), chunk, chunk + bytesRead);
+  }
+  ov_clear(&vf);
 
+  const size_t bytesPerFrame = static_cast<size_t>(audio.channels) * sizeof(int16_t);
+  if (audio.pcmData.empty() || audio.pcmData.size() % bytesPerFrame != 0){
+    error = "Ogg/Vorbis audio contains no complete sample frames.";
+    return false;
+  }
+  return true;
+}
+
+void readVorbisFile(std::string& filepath, ALuint* _soundBuffer){
+  modlog("vorbis", filepath);
+  modlog("vorbis", "open");
+  DecodedVorbisAudio audio;
+  std::string error;
+  if (!decodeVorbisAudio(filepath, audio, error)){
+    modassert(false, error);
+    throw std::runtime_error(error);
+  }
+
+  auto format = audio.channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
   alGenBuffers(1, _soundBuffer);
-  alBufferData(*_soundBuffer, format, buffer, bufferOffset, vi -> rate);
+  alBufferData(*_soundBuffer, format, audio.pcmData.data(), audio.pcmData.size(), audio.sampleRate);
+}
 
-  free(buffer);
-  ov_clear(&vf); // this closes the file handle  https://xiph.org/vorbis/doc/vorbisfile/ov_open.html
+uint16_t readWaveUint16(const std::string& data, size_t offset){
+  return static_cast<uint16_t>(static_cast<uint8_t>(data[offset])) |
+    (static_cast<uint16_t>(static_cast<uint8_t>(data[offset + 1])) << 8);
+}
+
+uint32_t readWaveUint32(const std::string& data, size_t offset){
+  return static_cast<uint32_t>(static_cast<uint8_t>(data[offset])) |
+    (static_cast<uint32_t>(static_cast<uint8_t>(data[offset + 1])) << 8) |
+    (static_cast<uint32_t>(static_cast<uint8_t>(data[offset + 2])) << 16) |
+    (static_cast<uint32_t>(static_cast<uint8_t>(data[offset + 3])) << 24);
+}
+
+bool decodeWaveAudio(const std::string& data, SoundAnalysisAudio& audio, std::string& error){
+  if (data.size() < 12 || data.compare(0, 4, "RIFF") != 0 || data.compare(8, 4, "WAVE") != 0){
+    error = "Expected a RIFF/WAVE audio file.";
+    return false;
+  }
+
+  uint16_t format = 0;
+  uint16_t channels = 0;
+  uint16_t bitsPerSample = 0;
+  uint16_t blockAlign = 0;
+  uint32_t sampleRate = 0;
+  size_t audioOffset = 0;
+  size_t audioSize = 0;
+  for (size_t offset = 12; offset + 8 <= data.size();){
+    const uint32_t chunkSize = readWaveUint32(data, offset + 4);
+    const size_t chunkOffset = offset + 8;
+    if (chunkSize > data.size() - chunkOffset){
+      error = "The WAV file contains a truncated chunk.";
+      return false;
+    }
+    if (data.compare(offset, 4, "fmt ") == 0){
+      if (chunkSize < 16){
+        error = "The WAV format chunk is incomplete.";
+        return false;
+      }
+      format = readWaveUint16(data, chunkOffset);
+      channels = readWaveUint16(data, chunkOffset + 2);
+      sampleRate = readWaveUint32(data, chunkOffset + 4);
+      blockAlign = readWaveUint16(data, chunkOffset + 12);
+      bitsPerSample = readWaveUint16(data, chunkOffset + 14);
+    } else if (data.compare(offset, 4, "data") == 0){
+      audioOffset = chunkOffset;
+      audioSize = chunkSize;
+    }
+
+    const size_t paddedChunkSize = static_cast<size_t>(chunkSize) + (chunkSize & 1);
+    if (paddedChunkSize > data.size() - chunkOffset){
+      break;
+    }
+    offset = chunkOffset + paddedChunkSize;
+  }
+
+  const size_t bytesPerSample = (bitsPerSample + 7) / 8;
+  if ((format != 1 && format != 3) || channels == 0 || sampleRate == 0 ||
+      sampleRate > static_cast<uint32_t>(std::numeric_limits<int>::max()) ||
+      audioSize == 0 || bytesPerSample == 0 || blockAlign < channels * bytesPerSample ||
+      (format == 1 && bitsPerSample != 8 && bitsPerSample != 16 && bitsPerSample != 24 && bitsPerSample != 32) ||
+      (format == 3 && bitsPerSample != 32)){
+    error = "WAV analysis supports PCM (8/16/24/32-bit) and 32-bit float audio.";
+    return false;
+  }
+
+  const size_t frameCount = audioSize / blockAlign;
+  if (frameCount == 0){
+    error = "The WAV file contains no audio samples.";
+    return false;
+  }
+  audio.monoSamples.reserve(frameCount);
+  for (size_t frame = 0; frame < frameCount; frame++){
+    float monoSample = 0.f;
+    const size_t frameOffset = audioOffset + frame * blockAlign;
+    for (size_t channel = 0; channel < channels; channel++){
+      const size_t sampleOffset = frameOffset + channel * bytesPerSample;
+      float sample = 0.f;
+      if (format == 3){
+        std::memcpy(&sample, data.data() + sampleOffset, sizeof(sample));
+        if (!std::isfinite(sample)){
+          sample = 0.f;
+        }
+      } else if (bitsPerSample == 8){
+        sample = (static_cast<int>(static_cast<uint8_t>(data[sampleOffset])) - 128) / 128.f;
+      } else if (bitsPerSample == 16){
+        sample = static_cast<int16_t>(readWaveUint16(data, sampleOffset)) / 32768.f;
+      } else if (bitsPerSample == 24){
+        int32_t value =
+          static_cast<uint8_t>(data[sampleOffset]) |
+          (static_cast<int32_t>(static_cast<uint8_t>(data[sampleOffset + 1])) << 8) |
+          (static_cast<int32_t>(static_cast<uint8_t>(data[sampleOffset + 2])) << 16);
+        if ((value & 0x800000) != 0){
+          value |= static_cast<int32_t>(0xff000000);
+        }
+        sample = value / 8388608.f;
+      } else {
+        const int32_t value = static_cast<int32_t>(readWaveUint32(data, sampleOffset));
+        sample = value / 2147483648.f;
+      }
+      monoSample += std::clamp(sample, -1.f, 1.f);
+    }
+    audio.monoSamples.push_back(monoSample / channels);
+  }
+  audio.sampleRate = static_cast<int>(sampleRate);
+  return true;
+}
+
+bool decodeSoundFileForAnalysis(std::string filepath, SoundAnalysisAudio& audio, std::string& error){
+  audio = {};
+  error.clear();
+  auto extension = getExtension(filepath);
+  if (!extension.has_value()){
+    error = "The selected sound file has no extension.";
+    return false;
+  }
+  std::transform(extension->begin(), extension->end(), extension->begin(), [](unsigned char value){
+    return static_cast<char>(std::tolower(value));
+  });
+
+  if (extension.value() == "ogg"){
+    DecodedVorbisAudio decoded;
+    if (!decodeVorbisAudio(filepath, decoded, error)){
+      return false;
+    }
+    const size_t bytesPerFrame = static_cast<size_t>(decoded.channels) * sizeof(int16_t);
+    const size_t frameCount = decoded.pcmData.size() / bytesPerFrame;
+    audio.monoSamples.reserve(frameCount);
+    for (size_t frame = 0; frame < frameCount; frame++){
+      float monoSample = 0.f;
+      for (int channel = 0; channel < decoded.channels; channel++){
+        const size_t offset = frame * bytesPerFrame + static_cast<size_t>(channel) * sizeof(int16_t);
+        const uint16_t sampleBits = static_cast<uint8_t>(decoded.pcmData[offset]) |
+          (static_cast<uint16_t>(static_cast<uint8_t>(decoded.pcmData[offset + 1])) << 8);
+        const auto sample = static_cast<int16_t>(sampleBits);
+        monoSample += sample / 32768.f;
+      }
+      audio.monoSamples.push_back(monoSample / decoded.channels);
+    }
+    audio.sampleRate = decoded.sampleRate;
+    return true;
+  }
+
+  if (extension.value() == "wav"){
+    const std::string data = readFileOrPackage(filepath);
+    if (data.empty()){
+      error = "The selected WAV file could not be read.";
+      return false;
+    }
+    return decodeWaveAudio(data, audio, error);
+  }
+
+  error = "Audio analysis supports WAV and Ogg/Vorbis files.";
+  return false;
 }
 
 ALuint findOrLoadBuffer(std::string filepath){

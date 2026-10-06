@@ -10,6 +10,7 @@
 #include "../../object_util.h"
 #include "../../main_api.h"
 #include "./resource.h"
+#include "./audio_analysis.h"
 
 void renderRenderPanel(bool includePanel);
 void renderTransformPanel(bool includePanel);
@@ -21,6 +22,7 @@ void renderColorWidget(bool includePanel);
 
 void renderMeshPointEditorWidget(bool includePanel);
 void renderOrbUiPointEditorWidget(bool includePanel);
+void renderAudioAnalysisWidget(bool includePanel);
 
 
 struct PointConfig {
