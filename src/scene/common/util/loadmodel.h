@@ -61,6 +61,7 @@ struct ModelData {
   std::unordered_map<int32_t, std::string> names;
   std::set<int32_t> bones;
   std::vector<Animation> animations;
+  std::string defaultShader;
   bool sponsorRootPosition = false;
 };
 

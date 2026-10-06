@@ -793,6 +793,7 @@ bool hasSameMaterial(MeshData& meshOne, MeshData& meshTwo){
     meshOne.hasRoughnessTexture == meshTwo.hasRoughnessTexture &&
     meshOne.normalTexturePath == meshTwo.normalTexturePath &&
     meshOne.hasNormalTexture == meshTwo.hasNormalTexture &&
+    meshOne.shader == meshTwo.shader &&
     meshOne.isSky == meshTwo.isSky &&
     meshOne.isWater == meshTwo.isWater &&
     meshOne.isHidden == meshTwo.isHidden;
@@ -864,6 +865,15 @@ glm::mat4 getNodeTransformToRoot(ModelData& model, int32_t nodeId, int32_t rootI
 
 ModelData mergeModelData(std::vector<ModelData>& models){
   ModelData merged;
+  if (!models.empty()){
+    merged.defaultShader = models.front().defaultShader;
+    for (const ModelData& model : models){
+      if (model.defaultShader != merged.defaultShader){
+        merged.defaultShader.clear();
+        break;
+      }
+    }
+  }
   merged.names[0] = "model";
   merged.nodeTransform[0] = Transformation {
     .position = glm::vec3(0.f),
@@ -930,6 +940,9 @@ ModelData mergeModelData(std::vector<ModelData>& models){
     std::unordered_map<int32_t, int32_t> meshIdMap;
     for (auto meshId : meshIds){
       MeshData meshData = model.meshIdToMeshData.at(meshId);
+      if (meshData.shader.empty()){
+        meshData.shader = model.defaultShader;
+      }
       requiresBoneHierarchy = requiresBoneHierarchy || !meshData.bones.empty();
       for (auto& bone : meshData.bones){
         bone.name = std::to_string(modelIndex) + "/" + bone.name;
@@ -957,6 +970,9 @@ ModelData mergeModelData(std::vector<ModelData>& models){
         mergedMeshIds.push_back(mergedMeshId);
 
         MeshData& meshData = model.meshIdToMeshData.at(meshId);
+        if (meshData.shader.empty()){
+          meshData.shader = model.defaultShader;
+        }
         if (!meshData.bones.empty()){
           continue;
         }
@@ -996,6 +1012,9 @@ ModelData mergeModelData(std::vector<ModelData>& models){
         continue;
       }
       MeshData& meshData = model.meshIdToMeshData.at(meshId);
+      if (meshData.shader.empty()){
+        meshData.shader = model.defaultShader;
+      }
       if (!meshData.bones.empty()){
         continue;
       }
@@ -1318,6 +1337,7 @@ void saveModelDataBinary(ModelData& modelData, std::string filepath){
     writeBinaryValue<uint8_t>(file, meshData.isSky ? 1 : 0);
     writeBinaryValue<uint8_t>(file, meshData.isWater ? 1 : 0);
     writeBinaryValue<uint8_t>(file, meshData.isHidden ? 1 : 0);
+    writeBinaryString(file, meshData.shader);
   }
 
   auto nodeMeshIds = sortedModelIds(modelData.nodeToMeshId);
@@ -1392,6 +1412,7 @@ void saveModelDataBinary(ModelData& modelData, std::string filepath){
   }
 
   writeBinaryValue<uint8_t>(file, modelData.sponsorRootPosition ? 1 : 0);
+  writeBinaryString(file, modelData.defaultShader);
   file.flush();
   modassert(file.good(), "failed while writing model binary");
 }
@@ -1467,6 +1488,7 @@ ModelData readModelBinary(std::string& fileContent){
     meshData.isSky = readBinaryBool(fileContent, offset);
     meshData.isWater = readBinaryBool(fileContent, offset);
     meshData.isHidden = readBinaryBool(fileContent, offset);
+    readBinaryString(fileContent, offset, meshData.shader);
   }
 
   size_t nodeMeshCount = readBinaryCount(fileContent, offset, sizeof(int32_t) + sizeof(uint64_t), "node mesh lists");
@@ -1562,6 +1584,7 @@ ModelData readModelBinary(std::string& fileContent){
   }
 
   modelData.sponsorRootPosition = readBinaryBool(fileContent, offset);
+  readBinaryString(fileContent, offset, modelData.defaultShader);
   modassert(offset == fileContent.size(), "unexpected trailing data in model binary");
   return modelData;
 }
@@ -1652,6 +1675,7 @@ void saveModelData(ModelData& modelData, std::string filepath){
      data.AddMember("isSky", meshData.isSky, allocator);
      data.AddMember("isWater", meshData.isWater, allocator);
      data.AddMember("isHidden", meshData.isHidden, allocator);
+     data.AddMember("shader", rapidjson::Value(meshData.shader.c_str(), allocator), allocator);
 
      mesh.PushBack(data, allocator);
      meshes.PushBack(mesh, allocator);
@@ -1760,6 +1784,8 @@ void saveModelData(ModelData& modelData, std::string filepath){
     doc.AddMember("animation", animations, allocator);
   }
   doc.AddMember("sponsorRootPosition", modelData.sponsorRootPosition, allocator);
+  rapidjson::Value defaultShader(modelData.defaultShader.c_str(), allocator);
+  doc.AddMember("defaultShader", defaultShader, allocator);
 
   rapidjson::StringBuffer buffer;
   rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
@@ -1969,6 +1995,10 @@ ModelData loadModelData(std::string filepath){
     meshData.isSky = readBool(data["isSky"], "mesh isSky");
     meshData.isWater = readBool(data["isWater"], "mesh isWater");
     meshData.isHidden = readBool(data["isHidden"], "mesh isHidden");
+    if (data.HasMember("shader")){
+      modassert(data["shader"].IsString(), "mesh shader must be a string");
+      meshData.shader = data["shader"].GetString();
+    }
 
     modelData.meshIdToMeshData[meshId] = std::move(meshData);
   }
@@ -2089,6 +2119,10 @@ ModelData loadModelData(std::string filepath){
 
   modassert(doc.HasMember("sponsorRootPosition"), "missing member sponsorRootPosition");
   modelData.sponsorRootPosition = readBool(doc["sponsorRootPosition"], "sponsorRootPosition");
+  if (doc.HasMember("defaultShader")){
+    modassert(doc["defaultShader"].IsString(), "defaultShader must be a string");
+    modelData.defaultShader = doc["defaultShader"].GetString();
+  }
   return modelData;
 }
 

@@ -10,6 +10,7 @@ extern engineState state;
 
 void renderGameObjectMergeWidget(bool includePanel, std::optional<objid> sceneId){
   static std::string outputPath = "./build/merged_gameobjects.modelb";
+  static bool outputBinary = true;
   static std::string status;
   static bool lastMergeSucceeded = false;
   static bool mergeAllSceneCandidates = false;
@@ -75,6 +76,17 @@ void renderGameObjectMergeWidget(bool includePanel, std::optional<objid> sceneId
     }
   }
 
+  if (ImGui::Checkbox("Binary model (.modelb)", &outputBinary)){
+    std::string extension = outputBinary ? ".modelb" : ".model";
+    size_t extensionPosition = outputPath.find_last_of('.');
+    size_t directoryPosition = outputPath.find_last_of("/\\");
+    if (extensionPosition == std::string::npos ||
+        (directoryPosition != std::string::npos && extensionPosition < directoryPosition)){
+      outputPath += extension;
+    }else{
+      outputPath.replace(extensionPosition, std::string::npos, extension);
+    }
+  }
   ImGui::InputText("Output model", &outputPath);
   auto extension = getExtension(outputPath);
   bool validOutputPath = !outputPath.empty() && extension.has_value() &&

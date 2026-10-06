@@ -172,6 +172,8 @@ struct RenderObjApi {
   std::function<Transformation(objid)> getTransform;
 };
 
+std::string shaderForMesh(const std::string& gameObjectShader, const Mesh& mesh);
+
 int renderObject(
   GLint shaderProgram,
   bool isSelectionShader,
@@ -192,7 +194,9 @@ int renderObject(
   int viewportId,
   glm::mat4& projview,
   glm::mat4& proj,
-  glm::mat4& view
+  glm::mat4& view,
+  const std::string& gameObjectShader,
+  std::function<GLint(const std::string&)> resolveShader
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, ObjectMapping& objectMapping, std::function<std::string(int)> getTextureName, std::function<void(std::string, std::string&)> saveFile, ObjTypeLookup& objtypeLookup);

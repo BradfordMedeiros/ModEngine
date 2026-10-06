@@ -46,6 +46,7 @@ struct MeshData {
   bool isSky = false;
   bool isWater = false;
   bool isHidden = false;
+  std::string shader;
 };
 
 struct Line {

@@ -632,29 +632,35 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
           glClear(GL_DEPTH_BUFFER_BIT);
         }
 
-        bool loadedNewShader = false;
-        auto newShaderPtr = (shader == "" || !allowShaderOverride) ? shaderProgram : getShaderByShaderString(shader, shaderFolderPath, interface.readFile, getTemplateValues, &loadedNewShader);
-        auto newShader = *newShaderPtr;
-        if (loadedNewShader){
-          auto isUiShader = checkIfUiShader(shader);
-          extraShadersToUpdate.push_back(ShaderToUpdate {
-            .shader = newShaderPtr,
-            .isUiShader = checkIfUiShader(shader),
-            .name = shader,
-          });
-          if(isUiShader){
-            initUiShader(newShader);
-          }else{
-            initDefaultShader(newShader);
+        auto resolveShader = [&](const std::string& shaderName) -> GLint {
+          bool loadedNewShader = false;
+          std::string mutableShaderName = shaderName;
+          auto shaderPtr = (shaderName.empty() || !allowShaderOverride)
+            ? shaderProgram
+            : getShaderByShaderString(mutableShaderName, shaderFolderPath, interface.readFile, getTemplateValues, &loadedNewShader);
+          GLint resolvedShader = *shaderPtr;
+          if (loadedNewShader){
+            bool isUiShader = checkIfUiShader(mutableShaderName);
+            extraShadersToUpdate.push_back(ShaderToUpdate {
+              .shader = shaderPtr,
+              .isUiShader = isUiShader,
+              .name = mutableShaderName,
+            });
+            if (isUiShader){
+              initUiShader(resolvedShader);
+            }else{
+              initDefaultShader(resolvedShader);
+            }
           }
-        }
-        if (!lastShaderId.has_value() || newShader != lastShaderId.value()){
-          lastShaderId = newShader;
-          glUseProgram(newShader);
-
-          setRenderUniformData(newShader, layer.uniforms);
-        }
-        glProgramUniform1i(newShader, glGetUniformLocation(newShader, "enableLighting"), layer.lighting); // TODO - add type safety and stuff to this
+          if (!lastShaderId.has_value() || lastShaderId.value() != resolvedShader){
+            lastShaderId = resolvedShader;
+            glUseProgram(resolvedShader);
+            setRenderUniformData(resolvedShader, layer.uniforms);
+          }
+          glProgramUniform1i(resolvedShader, glGetUniformLocation(resolvedShader, "enableLighting"), layer.lighting);
+          return resolvedShader;
+        };
+        auto newShader = resolveShader(shader);
 
 
         static glm::mat4 scaledModelMatrix(1.f); // copy assignent showed up in profiling, so just using static here so can prevent copy in most cases
@@ -719,7 +725,9 @@ int renderWorld(World& world,  unsigned int* shaderProgram, bool allowShaderOver
               viewport.index,
               newProjView,
               projMat,
-              viewMat
+              viewMat,
+              shader,
+              resolveShader
             );
             numTriangles = numTriangles + trianglesDrawn;
           }

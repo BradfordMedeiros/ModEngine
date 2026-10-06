@@ -4,6 +4,7 @@
 #include <iostream>
 #include <glm/glm.hpp>
 #include <vector>
+#include <string>
 #include <functional>
 #include <stdexcept>
 #include <stb_image.h>
@@ -17,6 +18,7 @@ struct Mesh {
   unsigned int VAOPointer;
   unsigned int EBOPointer;
   unsigned int VBOPointer;
+  std::string shader;
   bool hasDiffuseTexture;
   Texture texture; 
   bool hasEmissionTexture;

@@ -29,6 +29,7 @@ void mergeModelDataTest(){
     },
     .names = {{ 0, "root" }, { 1, "child" }},
     .bones = { 0 },
+    .defaultShader = "shaders/test",
   };
   MeshData secondMesh;
   Bone secondBone{};
@@ -43,11 +44,18 @@ void mergeModelDataTest(){
     },
     .names = {{ 0, "root" }},
     .bones = { 0 },
+    .defaultShader = "shaders/other",
   };
   ModelData empty;
+  empty.defaultShader = "shaders/test";
   std::vector<ModelData> models = { first, second, empty };
 
   ModelData merged = mergeModelData(models);
+  modassert(merged.defaultShader.empty(),
+    "merged model should not keep a shared default shader when sources differ");
+  modassert(merged.meshIdToMeshData.at(0).shader == "shaders/test" &&
+    merged.meshIdToMeshData.at(1).shader == "shaders/other",
+    "merged meshes should preserve their source model shaders");
   modassert(merged.nodeTransform.size() == 4 && merged.meshIdToMeshData.size() == 2,
     "merged model should contain the combined root and all source nodes and meshes");
   modassert(merged.names.at(0) == "model" && merged.names.at(1) == "0/root" && merged.names.at(3) == "1/root",
@@ -119,6 +127,15 @@ void mergeCommonMeshesTest(){
     merged.names.at(0) == "model" && merged.nodeToMeshId.size() == 1 &&
     merged.nodeToMeshId.at(0).size() == 1,
     "static merged models should collapse to one root node with the merged geometry");
+
+  std::vector<ModelData> differentShaders = { first, second };
+  differentShaders.at(0).meshIdToMeshData.at(0).shader = "shaders/first";
+  differentShaders.at(1).meshIdToMeshData.at(0).shader = "shaders/second";
+  ModelData mergedDifferentShaders = mergeModelData(differentShaders);
+  modassert(mergedDifferentShaders.meshIdToMeshData.size() == 2 &&
+    mergedDifferentShaders.meshIdToMeshData.at(0).shader == "shaders/first" &&
+    mergedDifferentShaders.meshIdToMeshData.at(1).shader == "shaders/second",
+    "meshes using different shaders must remain separate and retain their shaders");
 }
 
 std::vector<TestCase> tests = { 

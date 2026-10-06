@@ -118,7 +118,7 @@ GameObject& getGameObject(World& world, std::string name, objid sceneId);
 int getNumberOfRigidBodies(World& world);
 
 std::optional<PhysicsInfo> getPhysicsInfoForGameObject(World& world, objid index, bool useGroup);
-void loadMeshData(World& world, std::string meshPath, MeshData& meshData, objid ownerId);
+void loadMeshData(World& world, std::string meshPath, MeshData& meshData, objid ownerId, std::string defaultShader = "");
 ModelData modelDataFromCacheFromData(World& world, std::string meshpath, std::string rootname, int ownerId, ModelDataCore& modelDataCore);
 
 std::function<Mesh(MeshData&)> createScopedLoadMesh(World& world, objid id);

@@ -472,10 +472,13 @@ ModelData loadModelPath(World& world, std::string rootname, std::string modelPat
   return loadModel(rootname, world.interface.modlayerPath(modelPath));
 }
 
-void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ownerId){
+void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ownerId, std::string defaultShader){
   if (world.meshes.find(meshPath) != world.meshes.end()){
     modlog("mesh", std::string("mesh cache adding ref mesh: ") + meshPath + ", ref = " + std::to_string(ownerId));
     world.meshes.at(meshPath).owners.insert(ownerId);
+    if (world.meshes.at(meshPath).mesh.shader.empty() && !defaultShader.empty()){
+      world.meshes.at(meshPath).mesh.shader = std::move(defaultShader);
+    }
     for (auto &textureRef : world.meshes.at(meshPath).textureRefs){
       world.textures.at(textureRef).owners.insert(ownerId);
     }
@@ -489,6 +492,9 @@ void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ow
         return loadTextureWorld(world, texture, ownerId);
       }, meshPath.c_str())  
     };
+    if (world.meshes.at(meshPath).mesh.shader.empty()){
+      world.meshes.at(meshPath).mesh.shader = std::move(defaultShader);
+    }
     world.meshes.at(meshPath).textureRefs = textureRefs;
   }
 }
@@ -501,7 +507,7 @@ void addMesh(World& world, std::string meshpath){
     assert(false);
   }
   auto meshData = data.meshIdToMeshData.begin() -> second;
-  loadMeshData(world, meshpath, meshData, -1);
+  loadMeshData(world, meshpath, meshData, -1, data.defaultShader);
   std::cout << "WARNING: add mesh does not load animations, bones for default meshes" << std::endl;
 }
 
@@ -593,11 +599,11 @@ bool isDefaultMergeableMesh(GameObjectMesh& mesh){
 }
 
 bool isDefaultMergeableGameObject(GameObject& gameobj){
-  return !gameobj.physicsOptions.enabled &&
-    !gameobj.physicsOptions.hasCollisions &&
-    !gameobj.lookat &&
+  if (gameobj.physicsOptions.enabled){
+    return false;
+  }
+  return !gameobj.lookat &&
     gameobj.script.empty() &&
-    gameobj.shader.empty() &&
     !gameobj.netsynchronize &&
     !gameobj.isBone &&
     gameobj.additionalAttr.attr.empty();
@@ -693,6 +699,17 @@ GameObjectModelMergeResult tryMergeGameObjects(World& world, const std::vector<o
       if (!isDefaultMergeableGameObject(nodeObject)){
         return refusedGameObjectMerge("a model node has game-object behavior that cannot be represented in model data: " + nodeObject.name);
       }
+      auto modelNodeMeshes = model.nodeToMeshId.find(modelNode->second);
+      if (modelNodeMeshes != model.nodeToMeshId.end()){
+        for (int meshId : modelNodeMeshes->second){
+          MeshData& meshData = model.meshIdToMeshData.at(meshId);
+          if (!nodeObject.shader.empty()){
+            meshData.shader = nodeObject.shader;
+          }else if (meshData.shader.empty()){
+            meshData.shader = modelCore.modelData.defaultShader;
+          }
+        }
+      }
       auto& nodeLookup = getObjTypeLookup(world.sandbox, nodeObjectId);
       GameObjectMesh* nodeMesh = getMesh(world.objectMapping, nodeObjectId, nodeLookup);
       if (nodeLookup.type != OBJ_MESH || nodeMesh == nullptr || !isDefaultMergeableMesh(*nodeMesh) ||
@@ -756,7 +773,7 @@ ModelData modelDataFromCache(World& world,  std::string meshpath, std::string ro
   for (auto [meshId, meshData] : modelData.meshIdToMeshData){
     auto meshPath = nameForMeshId(meshpath, meshId);
     std::cout << "test diffuse texture path: " << meshData.diffuseTexturePath << std::endl;
-    loadMeshData(world, meshPath, meshData, ownerId);
+    loadMeshData(world, meshPath, meshData, ownerId, modelData.defaultShader);
   } 
   return modelData;
 }
@@ -774,7 +791,7 @@ ModelData modelDataFromCacheFromData(World& world, std::string meshpath, std::st
 
   for (auto [meshId, meshData] : modelData.meshIdToMeshData){
     auto meshPath = nameForMeshId(meshpath, meshId);
-    loadMeshData(world, meshPath, meshData, ownerId);
+    loadMeshData(world, meshPath, meshData, ownerId, modelData.defaultShader);
   } 
   return modelData;
 }

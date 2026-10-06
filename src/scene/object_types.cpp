@@ -350,6 +350,10 @@ bool shouldRenderMesh(GameObjectMesh& gameobjMesh, int viewportId){
 }
 
 objid selectedId = 0;
+std::string shaderForMesh(const std::string& gameObjectShader, const Mesh& mesh){
+  return gameObjectShader.empty() ? mesh.shader : gameObjectShader;
+}
+
 int renderObject(
   GLint shaderProgram,
   bool isSelectionShader,
@@ -370,7 +374,9 @@ int renderObject(
   int viewportId,
   glm::mat4& projview,
   glm::mat4& proj,
-  glm::mat4& view
+  glm::mat4& view,
+  const std::string& gameObjectShader,
+  std::function<GLint(const std::string&)> resolveShader
 ){
 
   shaderSetUniform(shaderProgram, "projview", projview);
@@ -420,6 +426,11 @@ int renderObject(
       for (int x = 0; x < meshObj -> meshesToRender.size(); x++){
         Mesh& meshToRender = meshObj -> meshesToRender.at(x);
         shaderLogDebug((std::string("draw mesh: ") + meshObj -> meshNames.at(x)).c_str());
+        GLint meshShaderProgram = shaderProgram;
+        if (!meshToRender.isWater && !meshToRender.isHidden && !isSelectionShader && resolveShader){
+          meshShaderProgram = resolveShader(shaderForMesh(gameObjectShader, meshToRender));
+          shaderSetUniform(meshShaderProgram, "projview", projview);
+        }
   
         MeshUniforms meshUniforms {
           .model = finalModelMatrix,
@@ -440,14 +451,14 @@ int renderObject(
         };
      
         if (meshToRender.isSky){
-          glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "sky"), true);
+          glProgramUniform1i(meshShaderProgram, glGetUniformLocation(meshShaderProgram, "sky"), true);
           glm::mat4 modelRotationOnly = glm::mat4(glm::mat3(finalModelMatrix)); // keep rotation, zero translation
 
           auto value = glm::mat3(view);  // Removes last column aka translational component --> thats why when you move skybox no move!
           auto projview = proj * glm::mat4(value);
 
-          drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms);   
-          glProgramUniform1i(shaderProgram, glGetUniformLocation(shaderProgram, "sky"), false);
+          drawMesh(meshToRender, meshShaderProgram, drawPoints, meshUniforms);
+          glProgramUniform1i(meshShaderProgram, glGetUniformLocation(meshShaderProgram, "sky"), false);
         }else if(meshToRender.isWater){
           glUseProgram(waterShader); 
           auto cubemap = getTestCubemap();
@@ -461,11 +472,15 @@ int renderObject(
           }
           drawMesh(meshToRender, waterShader, drawPoints, meshUniforms);   
           
-          glUseProgram(shaderProgram);        
+          if (resolveShader){
+            resolveShader(gameObjectShader);
+          }else{
+            glUseProgram(shaderProgram);
+          }
         }else if (meshToRender.isHidden){
           // do nothing
         }else{
-          drawMesh(meshToRender, shaderProgram, drawPoints, meshUniforms);   
+          drawMesh(meshToRender, meshShaderProgram, drawPoints, meshUniforms);
         }
         numTriangles = numTriangles + meshToRender.numTriangles; 
       }

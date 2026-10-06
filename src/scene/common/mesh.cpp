@@ -111,6 +111,7 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
     .VAOPointer = VAO,
     .EBOPointer = EBO,
     .VBOPointer = VBO,
+    .shader = meshData.shader,
     .hasDiffuseTexture = meshData.hasDiffuseTexture,
     .texture = texture,
     .hasEmissionTexture = meshData.hasEmissionTexture,
