@@ -1,4 +1,5 @@
 #include "./shaders.h"
+#include "./package.h"
 
 #define SHADER_INFO_LOG_LENGTH 512
 
@@ -240,11 +241,39 @@ std::optional<unsigned int> shaderByName(std::string name){
 }
 
 std::vector<std::string> getAllShaders(){
-  std::vector<std::string> shaders;
-  for (auto& [shaderString, _ ] : shaderstringToId){
-    shaders.push_back(shaderString);
+  std::set<std::string> shaders { "default" };
+  std::set<std::filesystem::path> shaderDirectories;
+
+  for (auto& [shaderString, shaderInfo] : shaderstringToId) {
+    shaders.insert(shaderString);
+    auto fragmentPath = std::filesystem::path(shaderInfo.fragmentShader);
+    if (fragmentPath.filename() == "fragment.glsl") {
+      shaderDirectories.insert(fragmentPath.parent_path().parent_path());
+    }
   }
-  return shaders;
+
+  for (const auto& directory : shaderDirectories) {
+    auto shaderFiles = listFilesWithExtensionsFromPackage(directory.string(), { "glsl" });
+    std::set<std::filesystem::path> shaderFilePaths;
+    for (const auto& shaderFile : shaderFiles) {
+      shaderFilePaths.insert(std::filesystem::path(shaderFile).lexically_normal());
+    }
+
+    for (const auto& shaderFile : shaderFilePaths) {
+      if (shaderFile.filename() != "fragment.glsl") {
+        continue;
+      }
+
+      auto vertex = shaderFile.parent_path() / "vertex.glsl";
+      if (shaderFilePaths.count(vertex) > 0) {
+        shaders.insert(shaderFile.string() + "," + vertex.string());
+      } else {
+        shaders.insert(shaderFile.string());
+      }
+    }
+  }
+
+  return std::vector<std::string>(shaders.begin(), shaders.end());
 }
 
 std::vector<UniformData> queryUniforms(unsigned int program){
