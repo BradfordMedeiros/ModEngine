@@ -80,10 +80,25 @@ std::vector<std::string> getIncludes(std::string& fileContent, std::function<std
 
 std::string readShaderResolveIncludes(std::string file, std::function<std::string(std::string)> readFile){
   auto shaderStr = readFile(file);
-  return join(getIncludes(shaderStr, readFile, { file }), '\n');
+  auto lines = getIncludes(shaderStr, readFile, { file });
+  std::optional<std::string> versionLine;
+  std::vector<std::string> shaderLines;
+  for (const auto& line : lines) {
+    if (trim(line).rfind("#version", 0) == 0) {
+      if (!versionLine.has_value()) {
+        versionLine = line;
+      }
+      continue;
+    }
+    shaderLines.push_back(line);
+  }
+  if (versionLine.has_value()) {
+    shaderLines.insert(shaderLines.begin(), versionLine.value());
+  }
+  return join(shaderLines, '\n');
 }
 
-std::optional<unsigned int> loadShader(std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args){
+std::optional<unsigned int> loadShader(std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args, std::string geometryShaderFilepath = ""){
    auto programCodeVertex = envSubst(readShaderResolveIncludes(vertexShaderFilepath, readFile), args);
    if (!programCodeVertex.valid){
      modlog("shaders", "failed loading vertex: " + programCodeVertex.error);
@@ -93,6 +108,16 @@ std::optional<unsigned int> loadShader(std::string vertexShaderFilepath, std::st
    if (!programCodeFragment.valid){
      modlog("shaders", "failed loading fragment: " + programCodeFragment.error);
     return std::nullopt;
+   }
+
+   std::optional<std::string> programCodeGeometry;
+   if (!geometryShaderFilepath.empty()) {
+    auto geometryCode = envSubst(readShaderResolveIncludes(geometryShaderFilepath, readFile), args);
+    if (!geometryCode.valid) {
+      modlog("shaders", "failed loading geometry: " + geometryCode.error);
+      return std::nullopt;
+    }
+    programCodeGeometry = geometryCode.result;
    }
 
    unsigned int vertexShaderId = compileShader(programCodeVertex.result, GL_VERTEX_SHADER);
@@ -111,13 +136,33 @@ std::optional<unsigned int> loadShader(std::string vertexShaderFilepath, std::st
      modlog("shaders", "compiled fragment shader success");
    }
 
-   if (vertexShaderError.isError || fragmentShaderError.isError){
+   unsigned int geometryShaderId = 0;
+   shaderError geometryShaderError { .isError = false, .errorMessage = "" };
+   if (programCodeGeometry.has_value()) {
+     geometryShaderId = compileShader(programCodeGeometry.value(), GL_GEOMETRY_SHADER);
+     geometryShaderError = checkShaderError(geometryShaderId);
+     if (geometryShaderError.isError) {
+       std::cerr << "ERROR: compiling geometry shader failed: " << geometryShaderError.errorMessage << ", file = " << geometryShaderFilepath << std::endl;
+     } else {
+       modlog("shaders", "compiled geometry shader success");
+     }
+   }
+
+   if (vertexShaderError.isError || fragmentShaderError.isError || geometryShaderError.isError){
+     glDeleteShader(vertexShaderId);
+     glDeleteShader(fragmentShaderId);
+     if (programCodeGeometry.has_value()) {
+       glDeleteShader(geometryShaderId);
+     }
      return std::nullopt;
    }
    
    unsigned int shaderProgramId = glCreateProgram();
    glAttachShader(shaderProgramId, vertexShaderId);
    glAttachShader(shaderProgramId, fragmentShaderId);
+   if (programCodeGeometry.has_value()) {
+     glAttachShader(shaderProgramId, geometryShaderId);
+   }
    glLinkProgram(shaderProgramId);
 
    std::string programNameForDebug = std::string("program|") + fragmentShaderFilepath;
@@ -125,6 +170,9 @@ std::optional<unsigned int> loadShader(std::string vertexShaderFilepath, std::st
 
    glDeleteShader(vertexShaderId);
    glDeleteShader(fragmentShaderId);
+   if (programCodeGeometry.has_value()) {
+     glDeleteShader(geometryShaderId);
+   }
 
    shaderError programError = checkProgramLinkError(shaderProgramId);
    if (programError.isError){
@@ -136,14 +184,15 @@ std::optional<unsigned int> loadShader(std::string vertexShaderFilepath, std::st
    return shaderProgramId;
 }
 
-unsigned int* loadShaderIntoCache(std::string shaderString, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args){
+unsigned int* loadShaderIntoCache(std::string shaderString, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args, std::string geometryShaderFilepath){
   modassert(shaderstringToId.find(shaderString) == shaderstringToId.end(), "shader already loaded")
-  auto shaderId = loadShader(vertexShaderFilepath, fragmentShaderFilepath, readFile, args).value();
+  auto shaderId = loadShader(vertexShaderFilepath, fragmentShaderFilepath, readFile, args, geometryShaderFilepath).value();
   modlog("shader loaded shader", shaderString);
   shaderstringToId[shaderString] = ShaderInformation {
     .programId = shaderId,
     .vertexShader = vertexShaderFilepath,
     .fragmentShader = fragmentShaderFilepath,
+    .geometryShader = geometryShaderFilepath,
   };
 
   std::ostringstream oss;
@@ -161,7 +210,7 @@ void reloadShaders(std::function<std::string(std::string)> readFile, std::unorde
   for (auto &[shaderString, shaderInfo] : shaderstringToId){
     auto uniforms = queryUniforms(shaderInfo.programId);
 
-    auto shaderId = loadShader(shaderInfo.vertexShader, shaderInfo.fragmentShader, readFile, args);
+    auto shaderId = loadShader(shaderInfo.vertexShader, shaderInfo.fragmentShader, readFile, args, shaderInfo.geometryShader);
 
 
     if (shaderId.has_value()){
@@ -203,15 +252,17 @@ void unloadShader(objid shaderId){
 struct ShaderStringVals {
   std::optional<std::string> vertex;
   std::optional<std::string> fragment;
+  std::optional<std::string> geometry;
 };
 
 ShaderStringVals parseShaderString(std::string& shaderString){
-  // format: fragment, vertex (whitespace trimmed). 
+  // format: fragment, vertex, geometry (whitespace trimmed).
   auto values = filterWhitespace(split(shaderString, ','));
-  modassert(values.size() == 1 || values.size() == 2, std::string("shader string size must be 1 or 2, got ") + shaderString);
+  modassert(values.size() >= 1 && values.size() <= 3, std::string("shader string size must be 1, 2, or 3, got ") + shaderString);
   return ShaderStringVals {
     .vertex = values.size() > 1 ? values.at(1) : std::optional<std::string>(std::nullopt),
     .fragment = values.size() > 0 ? values.at(0) : std::optional<std::string>(std::nullopt),
+    .geometry = values.size() > 2 ? values.at(2) : std::optional<std::string>(std::nullopt),
   };
 }
 
@@ -224,8 +275,9 @@ unsigned int* getShaderByShaderString(std::string& shaderString, std::string& sh
     auto parsedShaderString = parseShaderString(shaderString);
     auto vertexShaderPath = parsedShaderString.vertex.has_value() ? parsedShaderString.vertex.value() : shaderFolderPath + "/vertex.glsl";
     auto fragmentShaderPath = parsedShaderString.fragment.has_value() ? parsedShaderString.fragment.value() : shaderFolderPath + "/fragment.glsl";
+    auto geometryShaderPath = parsedShaderString.geometry.has_value() ? parsedShaderString.geometry.value() : "";
     auto args = getArgs();
-    loadShaderIntoCache(shaderString, vertexShaderPath, fragmentShaderPath, readFile, args);
+    loadShaderIntoCache(shaderString, vertexShaderPath, fragmentShaderPath, readFile, args, geometryShaderPath);
     if (loadedNewShader){
       *loadedNewShader = true;
     }
@@ -266,7 +318,12 @@ std::vector<std::string> getAllShaders(){
 
       auto vertex = shaderFile.parent_path() / "vertex.glsl";
       if (shaderFilePaths.count(vertex) > 0) {
-        shaders.insert(shaderFile.string() + "," + vertex.string());
+        auto geometry = shaderFile.parent_path() / "geometry.glsl";
+        if (shaderFilePaths.count(geometry) > 0) {
+          shaders.insert(shaderFile.string() + "," + vertex.string() + "," + geometry.string());
+        } else {
+          shaders.insert(shaderFile.string() + "," + vertex.string());
+        }
       } else {
         shaders.insert(shaderFile.string());
       }

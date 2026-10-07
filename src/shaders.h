@@ -12,9 +12,10 @@ struct ShaderInformation {
   unsigned int programId;
   std::string vertexShader;
   std::string fragmentShader;
+  std::string geometryShader;
 };
 
-unsigned int* loadShaderIntoCache(std::string shaderString, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args);
+unsigned int* loadShaderIntoCache(std::string shaderString, std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile, std::unordered_map<std::string, std::string>& args, std::string geometryShaderFilepath = "");
 unsigned int* getShaderByShaderString(std::string& shaderString, std::string& shaderFolderPath, std::function<std::string(std::string)> readFile, std::function<std::unordered_map<std::string, std::string>&()> getArgs, bool* loadedNewShader);
 std::optional<unsigned int> shaderByName(std::string name);
 std::vector<std::string> getAllShaders();
