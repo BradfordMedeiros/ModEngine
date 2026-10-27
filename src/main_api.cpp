@@ -1253,18 +1253,6 @@ std::unordered_map<std::string, std::string> getArgs(){
   return args;
 }
 
-std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query, bool* valid){
-  auto args = getArgs();
-
-  std::string error = "";
-  auto result = sql::executeSqlQuery(query, sqlDirectory, valid, &error);
-  if (!*valid){
-    modlog("sql", std::string("invalid query execution: " + error), MODLOG_ERROR);
-  }
-  return result;
-}
-
-
 void setLogEndpoint(std::optional<std::function<void(std::string&)>> fn){
   modlogSetLogEndpoint(fn);
   modlog("logging", std::string("custom logEndpoint set: ") + std::string(fn.has_value() ? "true" : "false"));

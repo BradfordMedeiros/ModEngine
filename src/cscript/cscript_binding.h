@@ -6,7 +6,6 @@
 #include <any>
 #include <glm/gtx/compatibility.hpp>
 #include "../common/util.h"
-#include "../sql/sql.h"  // ideally move this away from being a direct dependency
 #include "../perf/profiling.h"
 #include "../perf/benchstats.h"
 #include "../scene/objtypes/lighting/scene_lighting.h"
@@ -156,8 +155,6 @@ struct CustomApiBindings {
   std::vector<std::string> (*listMods)();
   void (*mountPackage)(const char* path);
 
-  sql::SqlQuery (*compileSqlQuery)(std::string queryString, std::vector<std::string> bindValues);
-  std::vector<std::vector<std::string>> (*executeSqlQuery)(sql::SqlQuery& query, bool* valid);
   std::vector<objid> (*selected)();
   void (*setSelected)(std::optional<std::set<objid>> id);
 

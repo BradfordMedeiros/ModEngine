@@ -17,7 +17,6 @@
 #include "./layers.h"
 #include "./perf/benchstats.h"
 #include "./lines.h"
-#include "./sql/sql.h"
 #include "./scene/animation/timeplayback.h"
 #include "./scene/scene_sandbox.h"
 #include "./package.h"
@@ -255,7 +254,6 @@ void freeTexture(objid ownerId);
 void clearTexture(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color, std::optional<std::string> texture);
 void markUserTexturesCleared();
 
-std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query, bool* valid);
 std::unordered_map<std::string, std::string> getArgs();
 
 void schedule(objid id, bool realtime, float delayTimeMs, void* data, std::function<void(void*)> fn);

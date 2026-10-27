@@ -16,7 +16,6 @@
 #include "./cscript/cscripts/plugins/performance_graph.h"
 #include "./cscript/cscripts/plugins/tools.h"
 #include "./scene/common/textures_gen.h"
-#include "./sql/shell.h"
 #include "./common/watch_file.h"
 #include "./tests/main_test.h"
 #include "./world_tasks.h"
@@ -41,7 +40,6 @@ RenderShaders mainShaders {};
 // long lived app resources
 DefaultResources defaultResources {};
 std::string shaderFolderPath;
-std::string sqlDirectory = "./res/data/sql/";
 bool bootStrapperMode = false;
 bool strictResourceMode = false;
 std::unordered_map<std::string, std::string> args;
@@ -1194,7 +1192,6 @@ int main(int argc, char* argv[]){
    ("font", "Default font to use", cxxopts::value<std::vector<std::string>>()->default_value("./res/textures/fonts/gamefont"))
    ("log", "List of logs to display", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("loglevel", "Log level", cxxopts::value<int>()->default_value("0"))
-   ("sqlshell", "Launch into sql shell", cxxopts::value<bool>()->default_value("false"))
    ("watch", "Watch file system for resource changes", cxxopts::value<std::string>()->default_value(""))
    ("reload", "Reload shaders", cxxopts::value<bool>()->default_value("false"))
    ("data", "Directory to store temporary data", cxxopts::value<std::string>()->default_value("./build/res/data/"))
@@ -1346,15 +1343,6 @@ int main(int argc, char* argv[]){
 
   std::string worldfile = result["world"].as<std::string>();
   bool useChunkingSystem = worldfile != "";
-
-  if (args.find("sqldir") != args.end()){
-    sqlDirectory = args.at("sqldir");
-  }
-
-  if (result["sqlshell"].as<bool>()){
-    return loopSqlShell(sqlDirectory);
-  }
-
 
   if (result["shell"].as<bool>()){
     loopPackageShell();
@@ -1736,8 +1724,6 @@ int main(int argc, char* argv[]){
     .uninstallMod = uninstallMod,
     .listMods = listMods,
     .mountPackage = mountPackage,
-    .compileSqlQuery = sql::compileSqlQuery,
-    .executeSqlQuery = executeSqlQuery,
     .selected = selected,
     .setSelected = setSelected,
     .click = dispatchClick,
