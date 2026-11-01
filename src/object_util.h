@@ -95,7 +95,7 @@ glm::vec3* getColorGrade();
 float* getSaturation();
 
 glm::vec2* getChromatic();
-
+float* getDigitalAmount();
 
 ObjectType getObjectType(objid id);
 

@@ -28,7 +28,7 @@ uniform ivec2 resolution;
 
 // 0.0 = original look
 // 1.0 = radical cyber/painterly look
-float postProcessAmount = 2;
+uniform float digitalAmount;
 
 
 void calculateFogEffect(in float depthAmount, out vec4 fogAmount)
@@ -589,7 +589,7 @@ void main(){
     // 1.0 = radical
     //
 
-    float amount = clamp(postProcessAmount, 0.0, 1.0);
+    float amount = clamp(digitalAmount, 0.0, 1.0);
     vec3 finalColor = mix(oldColor, paint, amount);
     FragColor = vec4(finalColor, 1.0);
 }

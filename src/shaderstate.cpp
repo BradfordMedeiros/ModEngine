@@ -371,6 +371,7 @@ void initFramebufferShader(unsigned int shader){
     "realtime",
     "chromatic",
     "resolution",
+    "digitalAmount"
   });
 }
 
@@ -455,6 +456,10 @@ void updateFramebufferShaderFrame(unsigned int shader, float near, float far){
     .value = state.resolution,
   });
 
+  uniformData.push_back(UniformData {
+    .name = "digitalAmount",
+    .value = state.digitalAmount,
+  });
 
   setUniformData(shader, uniformData, { "framebufferTexture", "bloomTexture", "depthTexture", "flipCoords" });
 }

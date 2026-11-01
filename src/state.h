@@ -158,6 +158,7 @@ struct engineState {
   float saturation = 0.f;
   float contrast = 1.f;
   glm::vec2 chromatic = glm::vec2(0.f, 0.f);
+  float digitalAmount = 0.f;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

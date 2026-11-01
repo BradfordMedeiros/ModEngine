@@ -321,6 +321,10 @@ glm::vec2* getChromatic(){
   return &state.chromatic;
 }
 
+float* getDigitalAmount(){
+  return &state.digitalAmount;
+}
+
 ObjectType getObjectType(objid id){
   auto name = mainApi -> getGameObjNameForId(id).value();
   auto type = getObjectType(name);  
