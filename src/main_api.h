@@ -174,6 +174,7 @@ void setSoundPitch(objid id, std::optional<float> pitch);
 void setSoundVolume(objid id, std::optional<float> volume);
 
 OneShot playOneshot(objid id, std::optional<glm::vec3> position, std::optional<float> volume, std::optional<float> pitch, std::optional<bool> loop, std::optional<bool> center, objid ownerId);
+void stopOneshot(OneShot& oneShot);
 void setSoundPitchOneshot(OneShot& oneShot, std::optional<float> pitch);
 void setSoundVolumeOneshot(OneShot& oneShot, std::optional<float> volume);
 

@@ -311,6 +311,14 @@ bool isCurrentOneshot(ALuint sourceId){
   return soundOneshotsSourceToBuffer.find(sourceId) != soundOneshotsSourceToBuffer.end();
 }
 
+void removeOneshot(ALuint source){
+  for (auto &[oneshotSourceId, oneshotData] : soundOneshotsSourceToBuffer){
+    if (source == oneshotSourceId){
+      oneshotData.shouldErase = true;
+    }
+  }
+}
+
 void onSoundFrame(glm::vec3 listenerPosition){
   for (auto& [sourceId, oneshotData] : soundOneshotsSourceToBuffer){
     if (oneshotData.center){

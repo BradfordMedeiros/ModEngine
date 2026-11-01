@@ -1682,6 +1682,7 @@ int main(int argc, char* argv[]){
     .setSoundVolume = setSoundVolume,
     .getClipByName = getClipByName,
     .playOneshot = playOneshot,
+    .stopOneshot = stopOneshot,
     .setSoundPitchOneshot = setSoundPitchOneshot,
     .setSoundVolumeOneshot = setSoundVolumeOneshot,
 

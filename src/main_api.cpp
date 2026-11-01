@@ -1051,6 +1051,9 @@ OneShot playOneshot(objid id, std::optional<glm::vec3> position, std::optional<f
   modassert(false, "playOneshot id does not exist");
   return OneShot { .source = 0 };
 }
+void stopOneshot(OneShot& oneShot){
+  removeOneshot(oneShot.source);
+}
 
 void setSoundPitchOneshot(OneShot& oneShot, std::optional<float> pitch){
   modassert(isCurrentOneshot(oneShot.source), "not a oneshot sound");

@@ -105,6 +105,7 @@ struct CustomApiBindings {
   std::optional<objid> (*getClipByName)(std::string, objid sceneId);
 
   OneShot (*playOneshot)(objid, std::optional<glm::vec3> position, std::optional<float> volume, std::optional<float> pitch, std::optional<bool> loop, std::optional<bool> center, objid ownerId);
+  void (*stopOneshot)(OneShot&);
   void (*setSoundPitchOneshot)(OneShot& source, std::optional<float> pitch);
   void (*setSoundVolumeOneshot)(OneShot& source, std::optional<float> volume);
 

@@ -43,6 +43,7 @@ ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::
 ALuint getBufferFromSource(ALuint source);
 bool isCurrentOneshot(ALuint sourceId);
 void maybeRemoveOwnerId(objid ownerId);
+void removeOneshot(ALuint source);
 
 struct OneShot {
   ALuint source;
