@@ -108,6 +108,7 @@ struct CustomApiBindings {
   void (*stopOneshot)(OneShot&);
   void (*setSoundPitchOneshot)(OneShot& source, std::optional<float> pitch);
   void (*setSoundVolumeOneshot)(OneShot& source, std::optional<float> volume);
+  float (*getSoundLengthOneshot)(OneShot& source);
 
   ///////////
   std::vector<std::string> (*listResources)(std::string);

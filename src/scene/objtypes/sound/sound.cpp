@@ -76,6 +76,25 @@ void setSoundPitch(ALuint source, float pitchMultiplier){
   alSourcef(source, AL_PITCH, pitchMultiplier);
 }
 
+float getSoundLength(ALuint source){
+    ALint buffer;
+    ALint size;
+    ALint bits;
+    ALint channels;
+    ALint frequency;
+    ALfloat pitch;
+
+    alGetSourcei(source, AL_BUFFER, &buffer);
+
+    alGetBufferi(buffer, AL_SIZE, &size);
+    alGetBufferi(buffer, AL_BITS, &bits);
+    alGetBufferi(buffer, AL_CHANNELS, &channels);
+    alGetBufferi(buffer, AL_FREQUENCY, &frequency);
+
+    alGetSourcef(source, AL_PITCH, &pitch);
+
+    return (float)size / (frequency * channels * (bits / 8) * pitch);
+}
 
 size_t my_read_func(void *ptr, size_t size, size_t nmemb, void *datasource) {
   unsigned int* handle = static_cast<unsigned int*>(datasource);
