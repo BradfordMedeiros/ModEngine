@@ -1069,6 +1069,15 @@ float getSoundLengthOneshot(OneShot& oneShot){
   return getSoundLength(oneShot.source);
 }
 
+void pauseOneshot(OneShot& oneShot){
+  modassert(isCurrentOneshot(oneShot.source), "pauseOneshot not a oneshot sound");
+  pauseSound(oneShot.source);
+}
+void resumeOneshot(OneShot& oneShot){
+  modassert(isCurrentOneshot(oneShot.source), "resumeOneshot not a oneshot sound");
+  resumeSound(oneShot.source);
+}
+
 //////////////////
 
 

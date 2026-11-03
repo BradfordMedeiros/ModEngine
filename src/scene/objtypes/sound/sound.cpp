@@ -96,6 +96,14 @@ float getSoundLength(ALuint source){
     return (float)size / (frequency * channels * (bits / 8) * pitch);
 }
 
+void pauseSound(ALuint source){
+  alSourcePause(source);
+}
+void resumeSound(ALuint source){
+  alSourcePlay(source);
+}
+
+
 size_t my_read_func(void *ptr, size_t size, size_t nmemb, void *datasource) {
   unsigned int* handle = static_cast<unsigned int*>(datasource);
   modassert(handle, "handle is null");

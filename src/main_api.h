@@ -178,6 +178,8 @@ void stopOneshot(OneShot& oneShot);
 void setSoundPitchOneshot(OneShot& oneShot, std::optional<float> pitch);
 void setSoundVolumeOneshot(OneShot& oneShot, std::optional<float> volume);
 float getSoundLengthOneshot(OneShot& oneShot);
+void pauseOneshot(OneShot& oneShot);
+void resumeOneshot(OneShot& oneShot);
 
 bool isSoundFinished(ALuint source);
 bool isCurrentOneshot(ALuint sourceId);

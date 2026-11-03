@@ -1686,7 +1686,8 @@ int main(int argc, char* argv[]){
     .setSoundPitchOneshot = setSoundPitchOneshot,
     .setSoundVolumeOneshot = setSoundVolumeOneshot,
     .getSoundLengthOneshot = getSoundLengthOneshot,
-
+    .pauseOneshot = pauseOneshot, 
+    .resumeOneshot = resumeOneshot,
     .listResources = listResources,
     .sendNotifyMessage = sendNotifyMessage,
     .timeSeconds = timeSeconds,

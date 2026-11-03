@@ -40,6 +40,9 @@ void setSoundLooping(ALuint source, bool shouldLoop);
 void setSoundPitch(ALuint source, float pitchMultiplier);
 
 float getSoundLength(ALuint source);
+void pauseSound(ALuint source);
+void resumeSound(ALuint source);
+
 
 ALuint playSourceOneshot(ALuint buffer, std::optional<glm::vec3> position, std::optional<float> volume, std::optional<float> pitch, bool loop, bool center, objid ownerId);
 ALuint getBufferFromSource(ALuint source);
