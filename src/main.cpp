@@ -134,12 +134,20 @@ std::unordered_map<std::string, std::string>& getTemplateValues(){
 
 bool updateTime(bool fpsFixed, float fixedDelta, float speedMultiplier, int timetoexit, bool hasFramelimit, float minDeltaTime, float fpsLag){
   static float currentFps = 0.f;
+  static float previousClockTime = 0.f;
+  static bool clockInitialized = false;
 
   statistics.frameCount++;
   statistics.totalFrames++;
 
-  fpscountstart:
-  statistics.now = fpsFixed ? (fixedDelta * (statistics.totalFrames - 1)) :  (speedMultiplier * glfwGetTime()); // this is weird, time starts so much larger? 
+  float clockTime = fpsFixed ? (fixedDelta * (statistics.totalFrames - 1)) : glfwGetTime();
+  if (!clockInitialized){
+    statistics.now = speedMultiplier * clockTime;
+    clockInitialized = true;
+  }else{
+    statistics.now += speedMultiplier * (clockTime - previousClockTime);
+  }
+  previousClockTime = clockTime;
   statistics.deltaTime = statistics.now - statistics.previous;   
 
   if (timetoexit != 0){
