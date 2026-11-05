@@ -177,7 +177,7 @@ OneShot playOneshot(objid id, std::optional<glm::vec3> position, std::optional<f
 void stopOneshot(OneShot& oneShot);
 void setSoundPitchOneshot(OneShot& oneShot, std::optional<float> pitch);
 void setSoundVolumeOneshot(OneShot& oneShot, std::optional<float> volume);
-float getSoundLengthOneshot(OneShot& oneShot);
+std::optional<float> getSoundLengthOneshot(OneShot& oneShot);
 void pauseOneshot(OneShot& oneShot);
 void resumeOneshot(OneShot& oneShot);
 

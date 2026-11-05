@@ -1065,7 +1065,10 @@ void setSoundVolumeOneshot(OneShot& oneShot, std::optional<float> volume){
   setSoundVolume(oneShot.source, volume.has_value() ? volume.value() : 1.f);
 }
 
-float getSoundLengthOneshot(OneShot& oneShot){
+std::optional<float> getSoundLengthOneshot(OneShot& oneShot){
+  if(!isCurrentOneshot(oneShot.source)){
+    return std::nullopt;
+  }
   return getSoundLength(oneShot.source);
 }
 
