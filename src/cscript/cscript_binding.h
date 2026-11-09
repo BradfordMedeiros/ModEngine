@@ -54,6 +54,7 @@ struct CustomApiBindings {
   void (*unloadShader)(unsigned int shader);
   void (*setShaderUniform)(unsigned int program, UniformData& uniformData);
   std::optional<unsigned int> (*getTextureSamplerId)(std::string& name);
+  glm::vec2 (*getTextureSize)(std::string& name);
   void (*bindTexture)(unsigned int program, unsigned int textureUnit, unsigned int textureId);
   void (*unbindTexture)(unsigned int program, unsigned int textureUnit);
 

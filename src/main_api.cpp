@@ -1,4 +1,5 @@
 #include "./main_api.h"
+#include "./scene/common/texture.h"
 
 extern World world;
 extern RenderStages renderStages;
@@ -1311,6 +1312,11 @@ void setSelected(std::optional<std::set<objid>> ids){
 
 std::optional<unsigned int> getTextureSamplerId(std::string& texturepath){
   return world.textures.at(texturepath).texture.textureId;
+}
+
+glm::vec2 getTextureSize(std::string& texturepath){
+  auto textureSize = getTextureSizeInfo(world.textures.at(texturepath).texture);
+  return glm::vec2((float)textureSize.width, (float)textureSize.height);
 }
 
 

@@ -1642,6 +1642,7 @@ int main(int argc, char* argv[]){
     },
     .setShaderUniform = setUniformData,
     .getTextureSamplerId = getTextureSamplerId,
+    .getTextureSize = getTextureSize,
     .bindTexture = bindTexture,
     .unbindTexture = unbindTexture,
     .getGameObjNameForId = getGameObjectName,

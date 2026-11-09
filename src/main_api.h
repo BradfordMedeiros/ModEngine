@@ -279,6 +279,7 @@ bool loadState(std::string);
 
 void setSelected(std::optional<std::set<objid>> ids);
 std::optional<unsigned int> getTextureSamplerId(std::string& texturepath);
+glm::vec2 getTextureSize(std::string& texturepath);
 void bindTexture(unsigned int program, unsigned int textureUnit, unsigned int textureId);
 void unbindTexture(unsigned int program, unsigned int textureUnit);
 
