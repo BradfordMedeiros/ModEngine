@@ -265,6 +265,7 @@ void handleSnapEasy(objid id, bool left){
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
+  std::cout << "key callback: " << key << " " << action << std::endl;
   cBindings.onKeyCallback(key, scancode, action, mods);
 
   if (state.inputMode != ENABLED){
@@ -1788,14 +1789,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = [](ViewportSettings& viewport) -> void {
-  
-
-
       std::vector<ModelData> modelData {
-        modelDataByName(world, "../gameresources/build/uncategorized/treebox.gltf"),
-        modelDataByName(world, "../gameresources/build/uncategorized/bench.gltf"),
-
-
       };
 
       auto mergedData = mergeModelData(modelData);
