@@ -267,6 +267,8 @@ void handleSnapEasy(objid id, bool left){
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   std::cout << "key callback: " << key << " " << action << std::endl;
   cBindings.onKeyCallback(key, scancode, action, mods);
+  midiKeyboardInput(key, action);
+
 
   if (state.inputMode != ENABLED){
     return;

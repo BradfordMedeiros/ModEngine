@@ -2089,6 +2089,7 @@ int main(int argc, char* argv[]){
     cBindings.onFrameAfterUpdate();
     onWorldFrame(world, timePlayback.getDeltaTime(), timePlayback.getCurrentTime(), false, state.worldpaused, viewTransform, state.inputMode == ENABLED, true);
     onEffekSeekerFrame(deltaTime, timePlayback.getCurrentTime(), state.worldpaused);
+    tickSynth();
 
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
     if (useChunkingSystem){
