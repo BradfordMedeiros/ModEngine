@@ -89,25 +89,57 @@ void updateSynthesizer(Synthesizer& synth) {
     }
 }
 
+std::optional<MidiInput> midiInput;
+
 static Synthesizer synth{};
 static bool hasInitSynth = false;
+
+void noteOn(uint8_t note, uint8_t velocity){
+    modassert(hasInitSynth, "synth not init");
+    noteOn(synth, note, velocity);
+}
+
+void noteOff(uint8_t note){
+    modassert(hasInitSynth, "synth not init");
+    noteOff(synth, note);
+}
+
 void tickSynth(){
 	if (!hasInitSynth){
 		initSynthesizer(synth);
 		hasInitSynth = true;
 	}
 	updateSynthesizer(synth);
+
+    if (midiInput.has_value()){
+       std::vector<MidiEvent> midiEvents;
+       readMidiInput(midiInput.value(), midiEvents);
+
+
+       if (midiEvents.size() > 0){
+        std::cout << "midi size: " << midiEvents.size() << std::endl;
+        for(auto& event : midiEvents){
+          std::cout << "midi: " << print(event.event) << std::endl;
+
+
+          MidiNoteOn* midiNoteOn = std::get_if<MidiNoteOn>(&event.event);
+          MidiNoteOff* midiNoteOff = std::get_if<MidiNoteOff>(&event.event);
+          if (midiNoteOn){
+            noteOn(midiNoteOn -> note, midiNoteOn -> velocity);
+          }
+          if (midiNoteOff){
+            noteOff(midiNoteOff -> note);
+          }
+            //struct MidiNoteOn{ uint8_t note; uint8_t velocity; };
+            //struct MidiNoteOff{ uint8_t note; uint8_t velocity; };
+    
+        }        
+       }
+
+    }
 }
 
-void noteOn(uint8_t note, uint8_t velocity){
-	modassert(hasInitSynth, "synth not init");
-	noteOn(synth, note, velocity);
-}
 
-void noteOff(uint8_t note){
-	modassert(hasInitSynth, "synth not init");
-	noteOff(synth, note);
-}
 
 
 std::vector<std::string> midiNoteNames = {
@@ -145,7 +177,50 @@ std::unordered_map<int, int> keyboardToMidi = {
     {'\'', 65} // F4
 };
 
+
+
 void midiKeyboardInput(int key, int action){
+  static int currentDevice = 0;
+  if (key == 'Y' && action == 1){
+    auto devices = listMidiDevices();
+    std::cout << "midi: " << currentDevice << " | " << print(devices.at(currentDevice)) << std::endl;
+  }
+  if (key == 'U' && action == 1){
+    auto devices = listMidiDevices();
+    currentDevice--;
+    if (currentDevice < 0){
+        currentDevice = 0;
+    }
+    std::cout << "midi: " << currentDevice << " | " << print(devices.at(currentDevice)) << std::endl;
+  }
+  if (key == 'I' && action == 1){
+    auto devices = listMidiDevices();
+    currentDevice++;
+    if (currentDevice >= devices.size()){
+        currentDevice = devices.size() - 1;
+    }
+    std::cout << "midi: " << currentDevice << " | " << print(devices.at(currentDevice)) << std::endl;
+  }
+
+  if (key == 'O' && action == 1){
+    if (midiInput.has_value()){
+        shutdownMidiInput(midiInput.value());
+        midiInput = std::nullopt;
+        std::cout << "midi: device shutdown" << std::endl;
+
+    }else{  
+        auto devices = listMidiDevices();
+        auto device = devices.at(currentDevice);
+        auto midiInitValue = initMidiInput(device.client, device.port);
+        modassert(midiInitValue.has_value(), "could not connect to midi device");
+        midiInput = midiInitValue.value();
+        std::cout << "midi: device connected" << std::endl;
+
+    }
+
+
+  }
+
   static int note = 60;
   if (keyboardToMidi.find(key) != keyboardToMidi.end()){
     auto midiNote = keyboardToMidi.at(key);

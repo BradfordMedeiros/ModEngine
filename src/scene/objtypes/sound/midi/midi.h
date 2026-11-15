@@ -4,6 +4,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include "../../../common/util.h"
+#include "./types.h"
 
 void loadMidi(std::string file);

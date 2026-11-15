@@ -23,7 +23,7 @@
 #include "./shaderstate.h"
 #include "./network/http.h"
 #include "./ui/widgets/widgets.h"
-#include "./scene/objtypes/sound/synth.h"
+#include "./scene/objtypes/sound/midi/synth.h"
 
 struct JoyStickInfo {
   int index;
