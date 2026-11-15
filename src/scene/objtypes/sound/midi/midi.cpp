@@ -132,6 +132,7 @@ std::optional<MidiFile> loadMidi(std::string filename){
     		    event.category = MIDI_CHANNEL_EVENT;
     		    uint8_t eventType = statusByte & 0xF0;
     		    uint8_t channel = statusByte & 0x0F;
+    		    event.channel = channel;
     		    if (eventType == 0x80){
     		        // Note Off
     		        uint8_t note = firstDataByte;
