@@ -1788,6 +1788,7 @@ int main(int argc, char* argv[]){
     .listViewports = listViewports,
 
     .getControlInfo = getControlInfo2,
+    .loadMidi = loadMidi,
     
     .dumpDebugInfo = dumpDebugInfo,
   };

@@ -55,7 +55,7 @@ uint32_t readMidiVariableLength(FILE* file){
 }
 
 
-void loadMidi(std::string filename){
+std::optional<MidiFile> loadMidi(std::string filename){
 	MidiFile midiFile{};
 
 	RawMidiHeader midiHeader{};
@@ -241,5 +241,6 @@ void loadMidi(std::string filename){
 	std::cout << print(midiFile) << std::endl;
 
 	modassert(false, "loadMidi not yet implemented");
+	return midiFile;
 }
 

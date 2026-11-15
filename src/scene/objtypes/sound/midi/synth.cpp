@@ -221,14 +221,14 @@ void midiKeyboardInput(int key, int action){
 
   }
 
-  static int note = 60;
-  if (keyboardToMidi.find(key) != keyboardToMidi.end()){
-    auto midiNote = keyboardToMidi.at(key);
-    if (action == 1){
-        noteOn(midiNote, 20);
-    }else if (action == 0){
-        noteOff(midiNote);
-    }
-  }
+  //static int note = 60;
+  //if (keyboardToMidi.find(key) != keyboardToMidi.end()){
+  //  auto midiNote = keyboardToMidi.at(key);
+  //  if (action == 1){
+  //      noteOn(midiNote, 20);
+  //  }else if (action == 0){
+  //      noteOff(midiNote);
+  //  }
+  //}
 
 }

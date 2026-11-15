@@ -18,7 +18,4 @@
 #include "./device.h"
 
 void tickSynth();
-void noteOn(uint8_t note, uint8_t velocity);
-void noteOff(uint8_t note);
-
 void midiKeyboardInput(int key, int action);

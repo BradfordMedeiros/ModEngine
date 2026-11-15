@@ -6,4 +6,4 @@
 #include <iostream>
 #include "./types.h"
 
-void loadMidi(std::string file);
+std::optional<MidiFile> loadMidi(std::string filename);

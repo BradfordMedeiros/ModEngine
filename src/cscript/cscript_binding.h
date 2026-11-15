@@ -15,6 +15,7 @@
 #include "../network/http.h"
 #include "../mapcompile.h"
 #include "../scene/objtypes/sound/sound.h"
+#include "../scene/objtypes/sound/midi/types.h"
 
 struct CustomApiBindings {
   int32_t (*listSceneId)(int32_t objid);
@@ -220,6 +221,8 @@ struct CustomApiBindings {
   std::vector<int> (*listViewports)();
 
   std::optional<ControlInfo2> (*getControlInfo)(int joystick);
+
+  std::optional<MidiFile> (*loadMidi)(std::string filename);
 
   std::string (*dumpDebugInfo)(bool);
   //std::vector<func_t> registerGuileFns
