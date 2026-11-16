@@ -56,3 +56,5 @@ std::string print(MidiEventCategory category);
 std::string print(MidiTrack& track);
 std::string print(MidiFile& midiFile);
 
+double convertEventToTimeSeconds(MidiFile& midiFile, MidiEvent& midiEvent);
+std::optional<std::string> noteNameFromInt(int note);
