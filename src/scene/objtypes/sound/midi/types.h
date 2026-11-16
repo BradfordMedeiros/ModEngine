@@ -2,6 +2,7 @@
 
 #include "../../../../common/util.h"
 
+// Channel Events 
 struct MidiNoteOn{ uint8_t note; uint8_t velocity; };
 struct MidiNoteOff{ uint8_t note; uint8_t velocity; };
 struct MidiPolyphonicAftertouch {  uint8_t note; uint8_t pressure; };
@@ -10,14 +11,32 @@ struct MidiProgramChange { uint8_t program; };
 struct MidiChannelAftertouch { uint8_t pressure; };
 struct MidiPitchBend { uint16_t pitchBend; };
 
+// Meta Events
+struct MidiSetTempo {
+    uint32_t microsecondsPerQuarter;
+};
+
+// SysEx Events 
+// (none)
 
 struct UnknownMidiEvent{};
-typedef std::variant<UnknownMidiEvent, MidiNoteOn, MidiNoteOff, MidiPolyphonicAftertouch, MidiControlChange, MidiProgramChange, MidiChannelAftertouch, MidiPitchBend> MidiEventType;
+typedef std::variant<
+	UnknownMidiEvent, 
+	MidiNoteOn, 
+	MidiNoteOff, 
+	MidiPolyphonicAftertouch, 
+	MidiControlChange, 
+	MidiProgramChange, 
+	MidiChannelAftertouch, 
+	MidiPitchBend,
+	MidiSetTempo
+> MidiEventType;
 
 enum MidiEventCategory { MIDI_CHANNEL_EVENT, MIDI_META_EVENT, MIDI_SYS_EX_EVENT, MIDI_UNKNOWN_EVENT };
 
 struct MidiEvent {
-	uint32_t offset;
+	int midiEventId = 0; // Just for internal uniqueness
+	uint32_t offset = 0;  // microseconds per quater note  .  Tempo is microsends to play a quarter note
 	uint8_t channel = -1;
 	MidiEventCategory category;
 	MidiEventType event;
@@ -26,6 +45,7 @@ struct MidiTrack {
 	std::vector<MidiEvent> events;
 };
 struct MidiFile {
+	uint16_t division;
 	std::vector<MidiTrack> tracks;
 };
 

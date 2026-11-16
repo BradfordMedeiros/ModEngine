@@ -1789,6 +1789,7 @@ int main(int argc, char* argv[]){
 
     .getControlInfo = getControlInfo2,
     .loadMidi = loadMidi,
+    .playMidiFile = playMidiFile,
     
     .dumpDebugInfo = dumpDebugInfo,
   };
@@ -2091,6 +2092,7 @@ int main(int argc, char* argv[]){
     onWorldFrame(world, timePlayback.getDeltaTime(), timePlayback.getCurrentTime(), false, state.worldpaused, viewTransform, state.inputMode == ENABLED, true);
     onEffekSeekerFrame(deltaTime, timePlayback.getCurrentTime(), state.worldpaused);
     tickSynth();
+    tickMidiAsInput();
 
     handleChangedResourceFiles(pollChangedFiles(filewatch, glfwGetTime()));
     if (useChunkingSystem){

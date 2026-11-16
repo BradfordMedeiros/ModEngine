@@ -56,6 +56,7 @@ uint32_t readMidiVariableLength(FILE* file){
 
 
 std::optional<MidiFile> loadMidi(std::string filename){
+	int midiEventId = 0;
 	MidiFile midiFile{};
 
 	RawMidiHeader midiHeader{};
@@ -70,6 +71,7 @@ std::optional<MidiFile> loadMidi(std::string filename){
 	midiHeader.format = ntohs(midiHeader.format);
 	midiHeader.trackCount = ntohs(midiHeader.trackCount);
 	midiHeader.division = ntohs(midiHeader.division);
+	midiFile.division = midiHeader.division;
 
 	std::cout << print(midiHeader) << std::endl;
 
@@ -104,10 +106,13 @@ std::optional<MidiFile> loadMidi(std::string filename){
     		auto deltaTime = readMidiVariableLength(file);
 
 			midiTrack.events.push_back(MidiEvent {
+				.midiEventId = midiEventId,
 				.offset = deltaTime,
 				.category = MIDI_UNKNOWN_EVENT,
 				.event = UnknownMidiEvent{},
 			});
+			midiEventId++;
+
 			auto& event = midiTrack.events.at(midiTrack.events.size() - 1);
 
     		uint8_t statusByte = 0;
@@ -216,6 +221,15 @@ std::optional<MidiFile> loadMidi(std::string filename){
     			std::vector<uint8_t> metaData(metaLength);
     			fread(metaData.data(), 1, metaLength, file);
 
+				if (metaType == 0x51) {
+				    modassert(metaLength == 3, "Invalid MIDI tempo event");
+				
+				    uint32_t tempo = (metaData[0] << 16) | (metaData[1] << 8) | metaData[2];
+				    event.event = MidiSetTempo{
+				        .microsecondsPerQuarter = tempo
+				    };
+				}
+
     		}else if (statusByte == 0xF0 || statusByte == 0xF7){
     		    // SysEx event
        		    event.category = MIDI_SYS_EX_EVENT;
@@ -241,7 +255,6 @@ std::optional<MidiFile> loadMidi(std::string filename){
 
 	std::cout << print(midiFile) << std::endl;
 
-	modassert(false, "loadMidi not yet implemented");
 	return midiFile;
 }
 

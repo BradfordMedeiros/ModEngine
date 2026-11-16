@@ -223,6 +223,7 @@ struct CustomApiBindings {
   std::optional<ControlInfo2> (*getControlInfo)(int joystick);
 
   std::optional<MidiFile> (*loadMidi)(std::string filename);
+  void (*playMidiFile)(MidiFile& midiFile);
 
   std::string (*dumpDebugInfo)(bool);
   //std::vector<func_t> registerGuileFns

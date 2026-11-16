@@ -19,3 +19,7 @@
 
 void tickSynth();
 void midiKeyboardInput(int key, int action);
+
+void midiAsInput(MidiFile& midiFile);
+void playMidiFile(MidiFile& midiFile);
+void tickMidiAsInput();

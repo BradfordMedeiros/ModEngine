@@ -140,8 +140,6 @@ void tickSynth(){
 }
 
 
-
-
 std::vector<std::string> midiNoteNames = {
     "C-1", "C#-1", "D-1", "D#-1", "E-1", "F-1", "F#-1", "G-1", "G#-1", "A-1", "A#-1", "B-1",
     "C0", "C#0", "D0", "D#0", "E0", "F0", "F#0", "G0", "G#0", "A0", "A#0", "B0",
@@ -230,5 +228,57 @@ void midiKeyboardInput(int key, int action){
   //      noteOff(midiNote);
   //  }
   //}
+}
 
+
+double convertEventToTimeSeconds(MidiFile& midiFile, MidiEvent& midiEvent) {
+    uint32_t tempo = 500000; // 120 BPM
+    return static_cast<double>(midiEvent.offset) * tempo /  (static_cast<double>(midiFile.division) * 1000000.0);
+}
+
+
+double timeSeconds(bool realtime);
+
+std::optional<MidiFile> playingMidiFile;
+std::optional<float> midiStartTime;
+std::vector<int> nextIdToPlayPerTrack {};
+
+void playMidiFile(MidiFile& midiFile){
+    std::cout << "midi playback: start" << std::endl;
+    if (!playingMidiFile.has_value()){
+        playingMidiFile = midiFile;
+        midiStartTime = timeSeconds(true);
+
+        nextIdToPlayPerTrack = {};
+        for (auto& track : midiFile.tracks){
+            nextIdToPlayPerTrack.push_back(0);
+        }
+    }else{
+        playingMidiFile = std::nullopt;
+        midiStartTime = std::nullopt;
+        nextIdToPlayPerTrack = {};
+    }
+}
+
+void tickMidiAsInput(){
+    if (!playingMidiFile.has_value()){
+        return;
+    }
+    auto& midiFile = playingMidiFile.value();
+
+    auto currentTime = timeSeconds(true);
+    for (int i = 0; i < midiFile.tracks.size(); i++){
+        int nextIdToPlay = nextIdToPlayPerTrack.at(i);
+        for (int j = nextIdToPlay; j < midiFile.tracks.at(i).events.size(); j++){
+            auto& event = midiFile.tracks.at(i).events.at(j);
+            auto eventTime = convertEventToTimeSeconds(midiFile, event);
+            std::cout << "midi playback: play event : offset = " <<  event.offset << ",  index = " << j << ", time: " << eventTime << ", time = " << currentTime << std::endl;
+            if (currentTime > eventTime){
+                std::cout << "midi playback: play event: track: " << i << ", event index = " << j << std::endl;
+                nextIdToPlayPerTrack.at(i) = j + 1;
+            }else{
+                break;
+            }
+        }
+    }   
 }
