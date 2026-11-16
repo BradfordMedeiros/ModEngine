@@ -155,7 +155,8 @@ if (NOT NO_INCLUDE_OPENAL)
   target_link_libraries(${PROJECT_NAME} "vorbis")
   target_link_libraries(${PROJECT_NAME} "vorbisfile")
 
-  
+  # Also for midi
+  target_link_libraries(${PROJECT_NAME} asound)
 
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
   find_library(ALUT_LIBRARY NAMES alut PATHS /usr/lib /usr/local/lib)
