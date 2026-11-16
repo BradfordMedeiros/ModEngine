@@ -233,14 +233,14 @@ void midiKeyboardInput(int key, int action){
 
 double convertEventToTimeSeconds(MidiFile& midiFile, MidiEvent& midiEvent) {
     uint32_t tempo = 500000; // 120 BPM
-    return static_cast<double>(midiEvent.offset) * tempo /  (static_cast<double>(midiFile.division) * 1000000.0);
+    return static_cast<double>(midiEvent.absoluteOffset) * tempo /  (static_cast<double>(midiFile.division) * 1000000.0);
 }
 
 
 double timeSeconds(bool realtime);
 
 std::optional<MidiFile> playingMidiFile;
-std::optional<float> midiStartTime;
+std::optional<double> midiStartTime;
 std::vector<int> nextIdToPlayPerTrack {};
 
 void playMidiFile(MidiFile& midiFile){
@@ -266,16 +266,28 @@ void tickMidiAsInput(){
     }
     auto& midiFile = playingMidiFile.value();
 
-    auto currentTime = timeSeconds(true);
+    auto currentTime = timeSeconds(true) - midiStartTime.value();
     for (int i = 0; i < midiFile.tracks.size(); i++){
         int nextIdToPlay = nextIdToPlayPerTrack.at(i);
         for (int j = nextIdToPlay; j < midiFile.tracks.at(i).events.size(); j++){
             auto& event = midiFile.tracks.at(i).events.at(j);
+
             auto eventTime = convertEventToTimeSeconds(midiFile, event);
-            std::cout << "midi playback: play event : offset = " <<  event.offset << ",  index = " << j << ", time: " << eventTime << ", time = " << currentTime << std::endl;
-            if (currentTime > eventTime){
+            //std::cout << "midi playback: play event : offset = " <<  event.offset << ",  index = " << j << ", time: " << eventTime << ", time = " << currentTime << std::endl;
+            if (currentTime >= eventTime){
                 std::cout << "midi playback: play event: track: " << i << ", event index = " << j << std::endl;
                 nextIdToPlayPerTrack.at(i) = j + 1;
+
+                MidiNoteOn* midiNoteOn = std::get_if<MidiNoteOn>(&event.event);
+                MidiNoteOff* midiNoteOff = std::get_if<MidiNoteOff>(&event.event);
+
+                if (midiNoteOn){
+                    noteOn(midiNoteOn -> note, midiNoteOn -> velocity);
+                }
+                if (midiNoteOff){
+                    noteOff(midiNoteOff -> note);
+                }
+
             }else{
                 break;
             }

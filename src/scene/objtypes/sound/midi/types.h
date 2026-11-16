@@ -36,7 +36,8 @@ enum MidiEventCategory { MIDI_CHANNEL_EVENT, MIDI_META_EVENT, MIDI_SYS_EX_EVENT,
 
 struct MidiEvent {
 	int midiEventId = 0; // Just for internal uniqueness
-	uint32_t offset = 0;  // microseconds per quater note  .  Tempo is microsends to play a quarter note
+	uint32_t offset = 0;  // Delta time in MIDI ticks from the previous event
+	uint64_t absoluteOffset = 0;  // Cumulative MIDI ticks from the start of this track
 	uint8_t channel = -1;
 	MidiEventCategory category;
 	MidiEventType event;

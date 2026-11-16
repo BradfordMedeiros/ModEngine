@@ -97,6 +97,7 @@ std::optional<MidiFile> loadMidi(std::string filename){
 		long trackCurrent = trackStart;
 
 		uint8_t runningStatus = 0;
+		uint64_t absoluteOffset = 0;
 
 		int numberOfEvents = 0;
 		while (trackCurrent - trackStart < rawMidiTrack.length){
@@ -104,10 +105,12 @@ std::optional<MidiFile> loadMidi(std::string filename){
 
 			numberOfEvents++;
     		auto deltaTime = readMidiVariableLength(file);
+			absoluteOffset += deltaTime;
 
 			midiTrack.events.push_back(MidiEvent {
 				.midiEventId = midiEventId,
 				.offset = deltaTime,
+				.absoluteOffset = absoluteOffset,
 				.category = MIDI_UNKNOWN_EVENT,
 				.event = UnknownMidiEvent{},
 			});
