@@ -1,9 +1,9 @@
 
-untiled:mesh:./res/models/box/spriteplane.dae
+untiled:mesh:./res/models/box/spriteplane.gltf
 untiled:position:0 5 -10
 untiled:scale:1 1 1
 
-1:mesh:./res/models/box/spriteplane.dae
+1:mesh:./res/models/box/spriteplane.gltf
 1:position:0 2 -10
 1:scale:1 1 1
 
@@ -12,7 +12,6 @@ untiled:scale:1 1 1
 1:texturetiling:2 2
 
 ==================
-
 
 
 

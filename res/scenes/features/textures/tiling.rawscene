@@ -1,3 +1,3 @@
-untiled:mesh:./res/models/box/spriteplane.dae
+untiled:mesh:./res/models/box/spriteplane.gltf
 untiled:position:-5 0 -10
 untiled:texture:./res/textures/wood.jpg

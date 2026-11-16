@@ -1,5 +1,5 @@
 
-1:mesh:./res/models/box/spriteplane.dae
+1:mesh:./res/models/box/spriteplane.gltf
 1:position:0 2 -10
 1:scale:1 1 1
 1:textureoffset:0 0
