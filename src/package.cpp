@@ -1,5 +1,9 @@
 #include "./package.h"
 
+std::string normalizePath(std::string filename){
+   return std::filesystem::path(filename).lexically_normal().generic_string();
+}
+
 struct PackageHeader {
    uint32_t packageIdentifier = 109111;
    uint32_t version = 0;
@@ -35,9 +39,13 @@ void packageDirectory(const char* output, std::vector<std::string> dirs){
 
    std::vector<std::string> allFiles;
    for (auto &dir : dirs){
-      auto files = realfiles::listAllFiles(dir);
-      for (auto &file : files){
-         allFiles.push_back(file);
+      if (std::filesystem::is_regular_file(dir)){
+         allFiles.push_back(dir);
+      }else{
+         auto files = realfiles::listAllFiles(dir);
+         for (auto &file : files){
+            allFiles.push_back(file);
+         }
       }
    }
 
@@ -102,7 +110,8 @@ void unpackageDirectory(const char* path, const char* output){
 }
 
 Package loadPackage(const char* path){
-   FILE* handle = fopen(path, "rb");
+   auto normalizedPath = normalizePath(path);
+   FILE* handle = fopen(normalizedPath.c_str(), "rb");
    if (!handle){
 	   perror("fopen failed");
    }
@@ -138,9 +147,9 @@ void closePackage(Package& package){
 	package.handle = NULL;
 }
 std::string readFile(Package& package, const char* file){
-   std::string fileStr = std::string(file);
+   std::string fileStr = normalizePath(file);
    for (auto &fileMetadata : package.fileMetadata){
-      std::string name(fileMetadata.name);
+      std::string name = normalizePath(fileMetadata.name);
       if (name == fileStr){
          std::cout << "found this file!" << name << std::endl;
          char* data = (char*)malloc(fileMetadata.sizeBytes); // give more thought about the size of this
@@ -173,9 +182,9 @@ std::vector<std::string> allFilenames(Package& package){
 }
 
 bool fileExists(Package& package, const char* file){
-   std::string fileStr = std::string(file);
+   std::string fileStr = normalizePath(file);
    for (auto &fileMetadata : package.fileMetadata){
-      std::string name(fileMetadata.name);
+      std::string name = normalizePath(fileMetadata.name);
       if (name == fileStr){
          return true;
       }
@@ -205,10 +214,11 @@ std::string readPackageFile(const char* file){
 }
 
 uint32_t getPackageFileSizeBytes(const char* fileStr){
+   auto normalizedPath = normalizePath(fileStr);
    modassert(mountedPackage.has_value(), "package is not mounted");
    for (auto &fileMetadata : mountedPackage.value().fileMetadata){
-      std::string name(fileMetadata.name);
-      if (name == fileStr){
+      std::string name = normalizePath(fileMetadata.name);
+      if (name == normalizedPath){
          return fileMetadata.sizeBytes;
       }
    }
@@ -216,9 +226,9 @@ uint32_t getPackageFileSizeBytes(const char* fileStr){
 }
 
 void printFileInfo(Package& package, const char* file){
-   std::string fileStr = std::string(file);
+   std::string fileStr = normalizePath(file);
    for (auto &fileMetadata : package.fileMetadata){
-      std::string name(fileMetadata.name);
+      std::string name = normalizePath(fileMetadata.name);
       if (name == fileStr){
          std::cout << "package file offsetBytes: " << fileMetadata.offsetBytes << std::endl;
          std::cout << "package file sizeBytes: " << fileMetadata.sizeBytes << std::endl;
@@ -297,14 +307,14 @@ void loopPackageShell(){
 
 std::string readFileOrPackage(std::string filepath){
    if (!mountedPackage.has_value()){
-      return realfiles::doLoadFile(filepath);
+      return realfiles::doLoadFile(normalizePath(filepath));
    }
    return readPackageFile(filepath.c_str());
 }
 
 bool fileExistsFromPackage(std::string filepath){
    if (!mountedPackage.has_value()){
-      return realfiles::fileExists(filepath);
+      return realfiles::fileExists(normalizePath(filepath));
    }
    return fileExists(mountedPackage.value(), filepath.c_str());
 }
@@ -341,10 +351,11 @@ std::vector<OpenPackageFile> openFiles;
 // 
 unsigned int openFileOrPackage(std::string filepath){
    static unsigned int fileHandle = 0;
+   auto normalizedFilepath = normalizePath(filepath);
    if (mountedPackage.has_value()){
       for (auto &fileMetadata : mountedPackage.value().fileMetadata){
-         std::string name(fileMetadata.name);
-         if (name == filepath){
+         std::string name = normalizePath(fileMetadata.name);
+         if (name == normalizedFilepath){
             size_t size = fileMetadata.sizeBytes;
             size_t offsetBytes = fileMetadata.offsetBytes;
             unsigned int handle = fileHandle;
@@ -362,7 +373,7 @@ unsigned int openFileOrPackage(std::string filepath){
       return 0;
    }
 
-   FILE* file = fopen(filepath.c_str(), "rb");
+   FILE* file = fopen(normalizedFilepath.c_str(), "rb");
    modassert(file != NULL, "file handle is NULL");
    unsigned int handle = fileHandle;
    openFiles.push_back(OpenPackageFile {
