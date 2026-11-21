@@ -5,6 +5,7 @@
 #include "imgui_impl_opengl3.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "imgui_internal.h"
+#include <memory>
 #include "../../cscript/cscript_binding.h"
 #include "../../object_util.h"
 #include "../../main_api.h"
@@ -21,6 +22,7 @@ struct ImGuiLoadedFont {
   int symbol;
   float fontSize;
   std::string path;
+  std::shared_ptr<std::string> fontData;
 };
 extern std::vector<ImGuiLoadedFont> imguiFonts;
 void loadImGuiFont(int symbol, std::string path, float fontSize);

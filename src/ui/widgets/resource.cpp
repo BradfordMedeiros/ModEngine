@@ -4,6 +4,15 @@ std::vector<ImGuiColor> imguiColors;
 std::vector<ImGuiLoadedFont> imguiFonts;
 std::vector<ImGuiFontBinding> imguiFontBindings;
 
+static ImFont* loadImGuiFontFromPath(ImFontAtlas& fonts, const std::string& path, float fontSize, std::shared_ptr<std::string>& fontData){
+  fontData = std::make_shared<std::string>(readFileOrPackage(path));
+  ImFontConfig config;
+  config.FontDataOwnedByAtlas = false;
+  ImFont* font = fonts.AddFontFromMemoryTTF(fontData->data(), static_cast<int>(fontData->size()), fontSize, &config);
+  modassert(font != nullptr, "failed to load font");
+  return font;
+}
+
 ImVec4 getImGuiColor(int symbol, glm::vec4 defaultColor){
   for (auto& color : imguiColors){
     if (color.symbol == symbol){
@@ -26,12 +35,14 @@ void loadImGuiFont(int symbol, std::string path, float fontSize){
   }
 
   ImGuiIO& io = ImGui::GetIO();
-  ImFont* loadedFont = io.Fonts -> AddFontFromFileTTF(path.c_str(), fontSize);
+  std::shared_ptr<std::string> fontData;
+  ImFont* loadedFont = loadImGuiFontFromPath(*io.Fonts, path, fontSize, fontData);
   imguiFonts.push_back(ImGuiLoadedFont {
     .font = loadedFont,
     .symbol = symbol,
     .fontSize = fontSize,
     .path = path,
+    .fontData = std::move(fontData),
   });
 }
 
@@ -49,10 +60,7 @@ void updateFont(int symbol, std::string path, float fontSize){
   io.Fonts -> Clear();
 
   for (auto& font : imguiFonts){
-    font.font = io.Fonts -> AddFontFromFileTTF(
-      font.path.c_str(),
-      font.fontSize
-    );
+    font.font = loadImGuiFontFromPath(*io.Fonts, font.path, font.fontSize, font.fontData);
   }
 
   io.Fonts -> Build();
