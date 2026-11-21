@@ -26,7 +26,7 @@ void loadImGuiFont(int symbol, std::string path, float fontSize){
   }
 
   ImGuiIO& io = ImGui::GetIO();
-  ImFont* loadedFont = io.Fonts->AddFontFromFileTTF(path.c_str(), fontSize);
+  ImFont* loadedFont = io.Fonts -> AddFontFromFileTTF(path.c_str(), fontSize);
   imguiFonts.push_back(ImGuiLoadedFont {
     .font = loadedFont,
     .symbol = symbol,
@@ -35,6 +35,31 @@ void loadImGuiFont(int symbol, std::string path, float fontSize){
   });
 }
 
+void updateFont(int symbol, std::string path, float fontSize){
+  for (auto& font : imguiFonts){
+    if (font.symbol == symbol){
+      font.path = path;
+      font.fontSize = fontSize;
+      break;
+    }
+  }
+
+  ImGuiIO& io = ImGui::GetIO();
+
+  io.Fonts -> Clear();
+
+  for (auto& font : imguiFonts){
+    font.font = io.Fonts -> AddFontFromFileTTF(
+      font.path.c_str(),
+      font.fontSize
+    );
+  }
+
+  io.Fonts -> Build();
+
+  // Your ImGui renderer/backend also needs to recreate its font texture
+  // here, depending on how you've initialized ImGui.
+}
 
 static int defaultFontSymbol = getSymbol("default-font");
 ImGuiLoadedFont* getImGuiDefaultFontType(){
