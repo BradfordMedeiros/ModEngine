@@ -11,6 +11,16 @@
   #include STR(ADDITIONAL_SRC_HEADER)
 #endif
 
+bool validateResourceReference(std::string path, std::string sourceFile, std::string attribute){
+  std::cout << attribute << ": " << path << std::endl;
+  if (fileExistsFromPackage(path)){
+    return false;
+  }
+
+  std::cout << "\033[31mError:  " << path << ", file = " << sourceFile << "\033[0m" << std::endl;
+  return true;
+}
+
 int validateResourceFiles(std::vector<std::string>& pathsToValidate){
   bool missingFiles = false;
   std::vector<std::string> allFiles;
@@ -27,20 +37,27 @@ int validateResourceFiles(std::vector<std::string>& pathsToValidate){
     std::cout << "validating file: " << file << std::endl;
     auto tokens = parseFormat(readFileOrPackage(file));
     for (auto &token : tokens){
-      if (token.attribute == "texture"){
-        std::cout << "texture: " << token.payload << std::endl;
-
-        if (!fileExistsFromPackage(token.payload)){
-          missingFiles = true;
-          std::cout << "\033[31mError:  " << token.payload << ", file = " << file << "\033[0m" << std::endl;
+      if (
+        token.attribute == "texture" ||
+        token.attribute == "mesh" ||
+        token.attribute == "custom-texture" ||
+        token.attribute == "opacity-texture" ||
+        token.attribute == "normal-texture" ||
+        token.attribute == "clip" ||
+        token.attribute == "effekseer" ||
+        token.attribute == "video" ||
+        token.attribute == "map" ||
+        token.attribute == "scene" ||
+        token.attribute == "script"
+      ){
+        auto resourcePath = token.payload;
+        if (token.attribute == "mesh"){
+          auto comma = resourcePath.find(',');
+          if (comma != std::string::npos){
+            resourcePath = resourcePath.substr(0, comma);
+          }
         }
-      }
-      if (token.attribute == "mesh"){
-        std::cout << "mesh: " << token.payload << std::endl;
-        if (!fileExistsFromPackage(token.payload)){
-          missingFiles = true;
-          std::cout << "\033[31mError:  " << token.payload << ", file = " << file << "\033[0m" << std::endl;
-        }
+        missingFiles |= validateResourceReference(resourcePath, file, token.attribute);
       }
     }
   }
