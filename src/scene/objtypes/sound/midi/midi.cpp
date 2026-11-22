@@ -1,4 +1,9 @@
 #include "./midi.h"
+#include "../../../../package.h"
+
+#include <algorithm>
+#include <climits>
+#include <cstdio>
 
 #pragma pack(push, 1)
 struct RawMidiHeader {
@@ -39,11 +44,11 @@ std::string print(RawMidiTrack& midiTrack){
 }
 
 
-uint32_t readMidiVariableLength(FILE* file){
+uint32_t readMidiVariableLength(unsigned int file){
     uint32_t value = 0;
     while (true){
         uint8_t byte = 0;
-        fread(&byte, 1, 1, file);
+        readFileOrPackage(file, &byte, 1, 1);
 
         value = (value << 7) | (byte & 0x7F);
 
@@ -54,16 +59,23 @@ uint32_t readMidiVariableLength(FILE* file){
     return value;
 }
 
+void skipMidiBytes(unsigned int file, uint32_t byteCount){
+    while (byteCount > 0){
+        auto bytesToSkip = std::min(byteCount, static_cast<uint32_t>(INT_MAX));
+        modassert(seekFileOrPackage(file, static_cast<int>(bytesToSkip), SEEK_CUR) == 0, "Failed to seek MIDI file");
+        byteCount -= bytesToSkip;
+    }
+}
+
 
 std::optional<MidiFile> loadMidi(std::string filename){
 	int midiEventId = 0;
 	MidiFile midiFile{};
 
 	RawMidiHeader midiHeader{};
-	FILE* file = fopen(filename.c_str(), "rb");
-	modassert(file, "file handle is null loadMidi");
+	unsigned int file = openFileOrPackage(filename);
 
-	fread(&midiHeader, sizeof(midiHeader), 1, file);
+	readFileOrPackage(file, &midiHeader, sizeof(midiHeader), 1);
 
 	static_assert(sizeof(RawMidiHeader) == 14); // if this gets hit the compiler has a padding issue
 
@@ -85,16 +97,14 @@ std::optional<MidiFile> loadMidi(std::string filename){
 		//MidiTrack midiTrack{};
 
 		static_assert(sizeof(RawMidiTrack) == 8); // if this gets hit the compiler has a padding issue
-		fread(&rawMidiTrack, sizeof(rawMidiTrack), 1, file);
+		readFileOrPackage(file, &rawMidiTrack, sizeof(rawMidiTrack), 1);
 
 		rawMidiTrack.length = ntohl(rawMidiTrack.length);
 
 		modassert(rawMidiTrack.magic[0] == 'M' && rawMidiTrack.magic[1] == 'T' && rawMidiTrack.magic[2] == 'r' && rawMidiTrack.magic[3] == 'k', std::string("Unexpected midiTrack - probably not a midi file: ") + std::string(rawMidiTrack.magic, 4));;
 
-		//fseek(file, midiTrack.length, SEEK_CUR);
-
-		long trackStart = ftell(file);
-		long trackCurrent = trackStart;
+		size_t trackStart = tellFileOrPackage(file);
+		size_t trackCurrent = trackStart;
 
 		uint8_t runningStatus = 0;
 		uint64_t absoluteOffset = 0;
@@ -119,7 +129,7 @@ std::optional<MidiFile> loadMidi(std::string filename){
 			auto& event = midiTrack.events.at(midiTrack.events.size() - 1);
 
     		uint8_t statusByte = 0;
-    		modassert(fread(&statusByte, 1, 1, file) == 1,  "Failed to read MIDI status byte");
+            modassert(readFileOrPackage(file, &statusByte, 1, 1) == 1, "Failed to read MIDI status byte");
 
     		uint8_t firstDataByte = 0;
     		bool hasFirstDataByte = false;
@@ -145,8 +155,8 @@ std::optional<MidiFile> loadMidi(std::string filename){
     		        // Note Off
     		        uint8_t note = firstDataByte;
     		        uint8_t velocity;
-    		        if (!hasFirstDataByte) fread(&note, 1, 1, file);
-    		        fread(&velocity, 1, 1, file);
+                    if (!hasFirstDataByte) readFileOrPackage(file, &note, 1, 1);
+                    readFileOrPackage(file, &velocity, 1, 1);
     		        event.event = MidiNoteOff{
     		        	.note = note,
     		        	.velocity = velocity,
@@ -155,8 +165,8 @@ std::optional<MidiFile> loadMidi(std::string filename){
     		        // Note On
     		        uint8_t note = firstDataByte;
     		        uint8_t velocity;
-    		        if (!hasFirstDataByte) fread(&note, 1, 1, file);
-    		        fread(&velocity, 1, 1, file);
+                    if (!hasFirstDataByte) readFileOrPackage(file, &note, 1, 1);
+                    readFileOrPackage(file, &velocity, 1, 1);
     		        event.event = MidiNoteOn{
     		        	.note = note,
     		        	.velocity = velocity,
@@ -165,8 +175,8 @@ std::optional<MidiFile> loadMidi(std::string filename){
     		        // Polyphonic Aftertouch
     		        uint8_t note = firstDataByte;
     		        uint8_t pressure;
-    		        if (!hasFirstDataByte) fread(&note, 1, 1, file);
-    		        fread(&pressure, 1, 1, file);
+                    if (!hasFirstDataByte) readFileOrPackage(file, &note, 1, 1);
+                    readFileOrPackage(file, &pressure, 1, 1);
     		        event.event = MidiPolyphonicAftertouch {
     		        	.note = note,
     		        	.pressure = pressure,
@@ -175,8 +185,8 @@ std::optional<MidiFile> loadMidi(std::string filename){
     		        // Control Change
     		        uint8_t controller = firstDataByte;
     		        uint8_t value;
-    		        if (!hasFirstDataByte) fread(&controller, 1, 1, file);
-    		        fread(&value, 1, 1, file);
+                    if (!hasFirstDataByte) readFileOrPackage(file, &controller, 1, 1);
+                    readFileOrPackage(file, &value, 1, 1);
     		        event.event = MidiControlChange {
     		        	.controller = controller,
     		        	.value = value,
@@ -184,14 +194,14 @@ std::optional<MidiFile> loadMidi(std::string filename){
     		    }else if (eventType == 0xC0){
     		        // Program Change
     		        uint8_t program = firstDataByte;
-    		        if (!hasFirstDataByte) fread(&program, 1, 1, file);
+                    if (!hasFirstDataByte) readFileOrPackage(file, &program, 1, 1);
     		        event.event = MidiProgramChange {
     		        	.program = program,
     		        };
     		    }else if (eventType == 0xD0){
     		        // Channel Aftertouch
     		        uint8_t pressure = firstDataByte;
-    		        if (!hasFirstDataByte) fread(&pressure, 1, 1, file);
+                    if (!hasFirstDataByte) readFileOrPackage(file, &pressure, 1, 1);
     		        event.event = MidiChannelAftertouch {
     		        	.pressure = pressure,
     		        };
@@ -199,8 +209,8 @@ std::optional<MidiFile> loadMidi(std::string filename){
     		        // Pitch Bend
     		        uint8_t lsb = firstDataByte;
     		        uint8_t msb;
-    		        if (!hasFirstDataByte) fread(&lsb, 1, 1, file);
-    		        fread(&msb, 1, 1, file);
+                    if (!hasFirstDataByte) readFileOrPackage(file, &lsb, 1, 1);
+                    readFileOrPackage(file, &msb, 1, 1);
     		        uint16_t pitchBend = (msb << 7) | lsb;
     		        event.event = MidiPitchBend {
     		        	.pitchBend = pitchBend,
@@ -217,12 +227,12 @@ std::optional<MidiFile> loadMidi(std::string filename){
     			runningStatus = 0;
 
     			uint8_t metaType = 0;
-    			fread(&metaType, 1, 1, file);
+                readFileOrPackage(file, &metaType, 1, 1);
 
     			uint32_t metaLength = readMidiVariableLength(file);
 
     			std::vector<uint8_t> metaData(metaLength);
-    			fread(metaData.data(), 1, metaLength, file);
+                readFileOrPackage(file, metaData.data(), 1, metaLength);
 
 				if (metaType == 0x51) {
 				    modassert(metaLength == 3, "Invalid MIDI tempo event");
@@ -241,12 +251,12 @@ std::optional<MidiFile> loadMidi(std::string filename){
 
     			uint32_t sysexLength = readMidiVariableLength(file);
 
-		    	fseek(file, sysexLength, SEEK_CUR);
+                skipMidiBytes(file, sysexLength);
     		}else{
     		    modassert(false, "Unknown MIDI event status");
     		}
 
-    		trackCurrent = ftell(file);
+            trackCurrent = tellFileOrPackage(file);
     		modassert(trackCurrent - trackStart <= rawMidiTrack.length, "MIDI track read past declared length");
 		}
 
@@ -258,6 +268,7 @@ std::optional<MidiFile> loadMidi(std::string filename){
 
 	std::cout << print(midiFile) << std::endl;
 
+	closeFileOrPackage(file);
 	return midiFile;
 }
 
