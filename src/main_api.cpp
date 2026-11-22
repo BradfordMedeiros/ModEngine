@@ -25,6 +25,7 @@ extern std::vector<DepthAtCoord> depthsAtCoords;
 extern std::unordered_map<unsigned int, std::vector<ShaderTextureBinding>> textureBindings; 
 extern int currentTick;
 extern std::vector<ViewportSettings> viewports;
+extern bool strictResourceMode;
 
 extern std::vector<objid> objectsQueuedForRemoval;
 extern std::vector<objid> groupsQueuedForRemoval;
@@ -200,7 +201,12 @@ int32_t loadSceneWithId(std::string sceneFile, std::vector<std::vector<std::stri
       .payload = tokens.at(2),
     });
   }
-  return addSceneToWorld(world, sceneFile, addedTokens, name, tags, id, std::nullopt, std::nullopt);
+  auto sceneToLoad = sceneFile;
+  if (!strictResourceMode && !fileExistsFromPackage(sceneFile)){
+    sceneToLoad = "./res/scenes/empty.p.rawscene";
+    modlog("loadScene", "scene does not exist: " + sceneFile + ", using empty scene");
+  }
+  return addSceneToWorld(world, sceneToLoad, addedTokens, name, tags, id, std::nullopt, std::nullopt);
 }
 
 int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags){
