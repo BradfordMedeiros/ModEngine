@@ -21,6 +21,30 @@ bool validateResourceReference(std::string path, std::string sourceFile, std::st
   return true;
 }
 
+bool validateCubemapReference(std::string path, std::string sourceFile){
+  std::vector<std::string> faces = {
+    "right.jpg",
+    "left.jpg",
+    "top.jpg",
+    "bottom.jpg",
+    "front.jpg",
+    "back.jpg",
+  };
+  bool missingFiles = false;
+  for (auto face : faces){
+    missingFiles |= validateResourceReference(path + "/" + face, sourceFile, "cubemap");
+  }
+  return missingFiles;
+}
+
+bool validateShaderReference(std::string shaderPaths, std::string sourceFile){
+  bool missingFiles = false;
+  for (auto shaderPath : filterWhitespace(split(shaderPaths, ','))){
+    missingFiles |= validateResourceReference(shaderPath, sourceFile, "shader");
+  }
+  return missingFiles;
+}
+
 int validateResourceFiles(std::vector<std::string>& pathsToValidate){
   bool missingFiles = false;
   std::vector<std::string> allFiles;
@@ -37,7 +61,11 @@ int validateResourceFiles(std::vector<std::string>& pathsToValidate){
     std::cout << "validating file: " << file << std::endl;
     auto tokens = parseFormat(readFileOrPackage(file));
     for (auto &token : tokens){
-      if (
+      if (token.attribute == "cubemap"){
+        missingFiles |= validateCubemapReference(token.payload, file);
+      }else if (token.attribute == "shader"){
+        missingFiles |= validateShaderReference(token.payload, file);
+      }else if (
         token.attribute == "texture" ||
         token.attribute == "mesh" ||
         token.attribute == "custom-texture" ||
