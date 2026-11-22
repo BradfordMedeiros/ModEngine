@@ -26,6 +26,7 @@
 #include "./scene/objtypes/emitter/effekseer.h"
 #include "./mapcompile.h"
 #include "./ui/gui.h"
+#include "./resource_validation.h"
 
 #ifdef ADDITIONAL_SRC_HEADER
   #include STR(ADDITIONAL_SRC_HEADER)
@@ -1204,7 +1205,7 @@ int main(int argc, char* argv[]){
    ("reload", "Reload shaders", cxxopts::value<bool>()->default_value("false"))
    ("data", "Directory to store temporary data", cxxopts::value<std::string>()->default_value("./build/res/data/"))
    ("validate", "Validate resource files instead of running the game", cxxopts::value<std::vector<std::string>>() -> default_value(""))
-   ("strict", "Assert the existance of resources during runtime", cxxopts::value<bool>()->default_value("false"))
+   ("strict", "Assert the existance of resources during runtime", cxxopts::value<bool>()->default_value("true"))
    ("shell", "Packaging shell",  cxxopts::value<bool>()->default_value("false"))
    ("mount", "Mod package to mount instead of using the file system", cxxopts::value<std::string>()->default_value(""))
    ("package", "Package files to a .mod file instead of running the game", cxxopts::value<std::string>()->default_value(""))
@@ -1253,58 +1254,7 @@ int main(int argc, char* argv[]){
 
   auto pathsToValidate = result["validate"].as<std::vector<std::string>>();
   if (pathsToValidate.size() > 0){
-    // I could plugin to the actual data types here and do true validation, but this is pragmatic 
-    // to find missing files 
-    bool missingFiles = false;
-    std::vector<std::string> allFiles;
-    for (auto &path : pathsToValidate){
-      auto files = listFilesWithExtensionsFromPackage(path, { "rawscene" });
-      for (auto &file : files){
-        allFiles.push_back(file);
-      }
-    }
-
-    for (auto &file : allFiles){
-      std::cout << "validating file: " << file << std::endl;
-      auto tokens = parseFormat(readFileOrPackage(file));
-      for (auto &token : tokens){
-        if (token.attribute == "texture"){
-          std::cout << "texture: " << token.payload << std::endl;
-
-          if (!fileExistsFromPackage(token.payload)){
-            missingFiles = true;
-            std::cout << "\033[31mError:  " << token.payload << ", file = " << file << "\033[0m" << std::endl;
-          }
-        }
-        if (token.attribute == "mesh"){
-          std::cout << "mesh: " << token.payload << std::endl;
-          if (!fileExistsFromPackage(token.payload)){
-            missingFiles = true;
-            std::cout << "\033[31mError:  " << token.payload << ", file = " << file << "\033[0m" << std::endl;
-          }
-        }
-      }
-    }
-
-    for (auto file : resources::coreResources){
-      std::cout << "validating file: " << file << std::endl;
-      if (!fileExistsFromPackage(file)){
-        missingFiles = true;
-        std::cout << "\033[31mError:  " << " hardcoded resource core reference missing - file = " << file << "\033[0m" << std::endl;
-      }
-    }    
-
-    #ifdef ADDITIONAL_SRC_HEADER
-      for (auto file : getAdditionalPathsToValidate()){
-        std::cout << "validating file: " << file << std::endl;
-        if (!fileExistsFromPackage(file)){
-          missingFiles = true;
-          std::cout << "\033[31mError:  " << " hardcoded resource additional reference missing - file = " << file << "\033[0m" << std::endl;
-        }
-      }      
-    #endif
-
-    exit(missingFiles ? 1 : 0);
+    exit(validateResourceFiles(pathsToValidate));
   }
 
 
