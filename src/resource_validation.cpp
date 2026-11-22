@@ -1,6 +1,7 @@
 #include "./resource_validation.h"
 
 #include <iostream>
+#include <algorithm>
 
 #include "./package.h"
 #include "./resources.h"
@@ -48,6 +49,9 @@ bool validateShaderReference(std::string shaderPaths, std::string sourceFile){
 int validateResourceFiles(std::vector<std::string>& pathsToValidate){
   bool missingFiles = false;
   std::vector<std::string> allFiles;
+#ifdef ADDITIONAL_SRC_HEADER
+  auto additionalValidation = getAdditionalPathsToValidate();
+#endif
   for (auto &path : pathsToValidate){
     auto files = listFilesWithExtensionsFromPackage(path, { "rawscene" });
     for (auto &file : files){
@@ -86,6 +90,18 @@ int validateResourceFiles(std::vector<std::string>& pathsToValidate){
           }
         }
         missingFiles |= validateResourceReference(resourcePath, file, token.attribute);
+      }else{
+        bool isAdditionalAttribute = false;
+        #ifdef ADDITIONAL_SRC_HEADER
+          isAdditionalAttribute = std::find(
+            additionalValidation.additionalAttributes.begin(),
+            additionalValidation.additionalAttributes.end(),
+            token.attribute
+          ) != additionalValidation.additionalAttributes.end();
+        #endif
+        if (isAdditionalAttribute){
+          missingFiles |= validateResourceReference(token.payload, file, token.attribute);
+        }
       }
     }
   }
@@ -99,7 +115,7 @@ int validateResourceFiles(std::vector<std::string>& pathsToValidate){
   }
 
   #ifdef ADDITIONAL_SRC_HEADER
-    for (auto file : getAdditionalPathsToValidate()){
+    for (auto file : additionalValidation.additionalPaths){
       std::cout << "validating file: " << file << std::endl;
       if (!fileExistsFromPackage(file)){
         missingFiles = true;
