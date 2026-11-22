@@ -6,8 +6,10 @@
 namespace resources {
 
   #define DEFINE_RESOURCE(name, value) extern const char* name;
+  #define DEFINE_FILE_RESOURCE(name, value) extern const char* name;
     #include "./resource_defs.h"
   #undef DEFINE_RESOURCE
+  #undef DEFINE_FILE_RESOURCE
   
   extern std::vector<const char*> coreResources;
 
