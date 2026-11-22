@@ -543,14 +543,13 @@ void loadModelData(World& world, std::string meshpath, int ownerId){
       if (strictResourceMode){
         modassert(false, std::string("model does not exist: ") + meshpath);
       }else{
-        modlog("loadModelData", std::string("model does not exist: ") + meshpath);
+        modlog("loadModelData", std::string("model does not exist: ") + meshpath + ", using missing-model placeholder");
       }
     }
 
-    auto realpathToLoad = pathExists ? meshpath : "./res/models/box/pbrsphere.gltf";
-    if (!pathExists){
-      modassert(false, "path does not exist loadModelData");
-    }
+    auto realpathToLoad = pathExists
+      ? meshpath
+      : "./res/models/missing_model/missing_model.obj";
     world.modelDatas[meshpath] = ModelDataRef {
       .owners = { ownerId },
       .modelData = loadModelCore(realpathToLoad), 
