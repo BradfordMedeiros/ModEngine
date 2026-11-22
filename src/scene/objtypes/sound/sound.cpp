@@ -1,6 +1,7 @@
 #include "./sound.h"
 
 std::string readFileOrPackage(std::string filepath); // i dont really like directly referencing this here, but...it's ok
+bool fileExistsFromPackage(std::string filepath);
 unsigned int openFileOrPackage(std::string filepath);
 int closeFileOrPackage(unsigned int handle);
 size_t readFileOrPackage(unsigned int handle, void *ptr, size_t size, size_t nmemb);
@@ -8,6 +9,8 @@ int seekFileOrPackage(unsigned int handle, int offset, int whence);
 size_t tellFileOrPackage(unsigned int handle);
 static std::unordered_map<std::string, ALuint> soundBuffers;  
 static std::unordered_map<std::string, int> soundUsages;
+extern bool strictResourceMode;
+static const char* missingSoundPath = "./res/sounds/missing_sound.wav";
 
 struct OneShotData {
   ALuint bufferId;
@@ -201,12 +204,21 @@ ALuint findOrLoadBuffer(std::string filepath){
     return soundBuffers.at(filepath);
   }
 
+  auto soundPath = filepath;
+  if (!fileExistsFromPackage(soundPath)){
+    if (strictResourceMode){
+      modassert(false, "sound does not exist: " + filepath);
+    }
+    std::cerr << "WARNING: sound does not exist: " << filepath << ", using " << missingSoundPath << std::endl;
+    soundPath = missingSoundPath;
+  }
+
   ALuint soundBuffer = 0;
-  auto extension = getExtension(filepath);
+  auto extension = getExtension(soundPath);
   if (extension.value() == "ogg"){
-    readVorbisFile(filepath, &soundBuffer);
+    readVorbisFile(soundPath, &soundBuffer);
   }else{
-    auto soundFileData = readFileOrPackage(filepath);
+    auto soundFileData = readFileOrPackage(soundPath);
     soundBuffer = alutCreateBufferFromFileImage(soundFileData.c_str(), soundFileData.size());    
   }
 
