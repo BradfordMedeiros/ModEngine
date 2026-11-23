@@ -122,6 +122,15 @@ int validateResourceFiles(std::vector<std::string>& pathsToValidate){
   }
 
   #ifdef ADDITIONAL_SRC_HEADER
+    for (auto resource : additionalValidation.additionalResources){
+      if (std::string(resource.validationType).empty()){
+        continue;
+      }
+      if (additionalValidation.additionalResourceValidator != nullptr){
+        missingFiles |= additionalValidation.additionalResourceValidator(resource);
+      }
+    }
+
     for (auto file : additionalValidation.additionalPaths){
       std::cout << "validating file: " << file << std::endl;
       if (!fileExistsFromPackage(file)){
