@@ -330,7 +330,7 @@ std::vector<std::string> listOctreeTextures(){
     "../gameresources/build/uncategorized/bluetransparent.png",
     "../gameresources/build/textures/const_fence.png",
 
-    "./res/textures/wood.jpg",
+    resources::TEXTURE_WOOD,
 
   };
   return octreeTextures;
@@ -343,7 +343,7 @@ std::vector<std::string> listLightTextures(){
 
     "../gameresources/build/textures/clean/grass.jpg", 
     "../gameresources/build/textures/iguana.jpg", 
-    "./res/textures/wood.jpg",
+    resources::TEXTURE_WOOD,
     "../gameresources/textures/backgrounds/test3.png",
     "../gameresources/textures/backgrounds/stainedglass.jpg",
 
@@ -362,7 +362,7 @@ std::optional<std::string> lookupOpacityTexture(std::string textureName){
 // This shoiuld really just be creating a list of names, and then the cycle above should cycle between possible textures to load, instead of what is loaded 
 void loadAllTextures(std::string& textureFolderPath){
   loadTextureWorld(world, "./res/models/box/grid.png", -1);
-  loadTextureWorld(world, "./res/textures/wood.jpg", -1);
+  loadTextureWorld(world, resources::TEXTURE_WOOD, -1);
   loadTextureWorld(world, resources::GRID_TEXTURE, -1);
 
   for (auto texturePath : listFilesWithExtensionsFromPackage(textureFolderPath, { "png", "jpg" })){
@@ -1850,7 +1850,7 @@ int main(int argc, char* argv[]){
     },
     .quadVAO = loadFullscreenQuadVAO(),
     .quadVAO3D = loadFullscreenQuadVAO3D(),
-    .fontFamily = loadFontMeshes(readFontFile(fontPaths), world.textures.at("./res/textures/wood.jpg").texture),
+    .fontFamily = loadFontMeshes(readFontFile(fontPaths), world.textures.at(resources::TEXTURE_WOOD).texture),
     .defaultMeshes = DefaultMeshes{
       .nodeMesh = &world.meshes.at(resources::MODEL_NODE).mesh,
       .portalMesh = &world.meshes.at("./res/models/box/plane.gltf").mesh,
