@@ -6,6 +6,7 @@
 struct ResourceDefinition {
   const char* path;
   const char* validationType;
+  bool isDirectory;
 };
 
 using AdditionalResourceValidator = bool (*)(ResourceDefinition resource);
