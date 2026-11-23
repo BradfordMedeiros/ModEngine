@@ -5,6 +5,7 @@
 
 struct AdditionalResourceValidation {
   std::vector<const char*> additionalPaths;
+  std::vector<const char*> additionalDirectories;
   std::vector<std::string> additionalAttributes;
 };
 

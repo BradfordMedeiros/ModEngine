@@ -113,6 +113,13 @@ int validateResourceFiles(std::vector<std::string>& pathsToValidate){
       std::cout << "\033[31mError:  " << " hardcoded resource core reference missing - file = " << file << "\033[0m" << std::endl;
     }
   }
+  for (auto directory : resources::coreDirectories){
+    std::cout << "validating directory: " << directory << std::endl;
+    if (!directoryExistsFromPackage(directory)){
+      missingFiles = true;
+      std::cout << "\033[31mError:  " << " hardcoded directory core reference missing - file = " << directory << "\033[0m" << std::endl;
+    }
+  }
 
   #ifdef ADDITIONAL_SRC_HEADER
     for (auto file : additionalValidation.additionalPaths){
@@ -120,6 +127,13 @@ int validateResourceFiles(std::vector<std::string>& pathsToValidate){
       if (!fileExistsFromPackage(file)){
         missingFiles = true;
         std::cout << "\033[31mError:  " << " hardcoded resource additional reference missing - file = " << file << "\033[0m" << std::endl;
+      }
+    }
+    for (auto directory : additionalValidation.additionalDirectories){
+      std::cout << "validating directory: " << directory << std::endl;
+      if (!directoryExistsFromPackage(directory)){
+        missingFiles = true;
+        std::cout << "\033[31mError:  " << " hardcoded directory additional reference missing - file = " << directory << "\033[0m" << std::endl;
       }
     }
   #endif

@@ -319,6 +319,20 @@ bool fileExistsFromPackage(std::string filepath){
    return fileExists(mountedPackage.value(), filepath.c_str());
 }
 
+bool directoryExistsFromPackage(std::string filepath){
+   if (!mountedPackage.has_value()){
+      return std::filesystem::is_directory(normalizePath(filepath));
+   }
+
+   auto allFiles = allFilenames(mountedPackage.value());
+   for (auto &file : allFiles){
+      if (isInFolder(filepath, file, "ModEngine")){
+         return true;
+      }
+   }
+   return false;
+}
+
 
 std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, std::vector<std::string> extensions){
    if (!mountedPackage.has_value()){

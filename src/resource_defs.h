@@ -2,6 +2,12 @@
 
 // Core Model Types
 ///////////////////////////////////////////////////////////
+DEFINE_DIRECTORY_RESOURCE(DEFAULT_FONT_DIRECTORY, "./res/textures/fonts/gamefont")
+DEFINE_DIRECTORY_RESOURCE(FONTS_DIRECTORY, "./res/fonts")
+DEFINE_DIRECTORY_RESOURCE(POINT_DATA_DIRECTORY, "./res/data")
+DEFINE_DIRECTORY_RESOURCE(WATER_SHADER_DIRECTORY, "./res/shaders/water")
+DEFINE_FILE_RESOURCE(START_OPTIONS, "./res/start.options")
+DEFINE_FILE_RESOURCE(IMGUI_DEFAULT_FONT, "./res/fonts/vcr.ttf")
 DEFINE_FILE_RESOURCE(MODEL_LIGHT,  "../gameresources/build/objtypes/light.gltf")
 DEFINE_FILE_RESOURCE(MODEL_SOUND,  "../gameresources/build/objtypes/sound.gltf")
 DEFINE_FILE_RESOURCE(MODEL_EMITTER,  "../gameresources/build/objtypes/emitter.gltf")
@@ -25,3 +31,4 @@ DEFINE_FILE_RESOURCE(TEXTURE_ICE, "../gameresources/build/textures/clean/tex_Ice
 DEFINE_FILE_RESOURCE(TEXTURE_WATER, "../gameresources/build/textures/water.png")
 
 DEFINE_FILE_RESOURCE(TEXTURE_WATER_NORMAL, "../gameresources/build/textures/water.normal.png")
+

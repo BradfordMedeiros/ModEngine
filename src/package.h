@@ -16,6 +16,7 @@ void unmountPackage();
 std::string readFileOrPackage(std::string filepath);
 std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, std::vector<std::string> extensions);
 bool fileExistsFromPackage(std::string filepath);
+bool directoryExistsFromPackage(std::string filepath);
 void packageDirectory(const char* output, std::vector<std::string> dirs);
 
 unsigned int openFileOrPackage(std::string filepath);

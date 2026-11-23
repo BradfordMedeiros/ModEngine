@@ -1173,7 +1173,7 @@ int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
    ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))
-   ("t,texture", "Additional textures folder to use", cxxopts::value<std::string>()->default_value("./res/textures/fonts/gamefont"))
+   ("t,texture", "Additional textures folder to use", cxxopts::value<std::string>()->default_value(resources::DEFAULT_FONT_DIRECTORY))
    ("x,scriptpath", "Script file to use", cxxopts::value<std::vector<std::string>>()->default_value(""))
    ("fps", "Framerate limit", cxxopts::value<int>()->default_value("0"))
    ("fps-fixed", "Whether to guarantee the framerate, which means values do not occur in realtime", cxxopts::value<bool>()->default_value("false"))
@@ -1198,7 +1198,7 @@ int main(int argc, char* argv[]){
    ("test-feature", "Run feature scene", cxxopts::value<std::string>()->default_value(""))
    ("rechunk", "Rechunk the world", cxxopts::value<int>()->default_value("0"))
    ("mods", "List of mod folders", cxxopts::value<std::vector<std::string>>() -> default_value(""))
-   ("font", "Default font to use", cxxopts::value<std::vector<std::string>>()->default_value("./res/textures/fonts/gamefont"))
+   ("font", "Default font to use", cxxopts::value<std::vector<std::string>>()->default_value(resources::DEFAULT_FONT_DIRECTORY))
    ("log", "List of logs to display", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("loglevel", "Log level", cxxopts::value<int>()->default_value("0"))
    ("watch", "Watch file system for resource changes", cxxopts::value<std::string>()->default_value(""))
@@ -1228,7 +1228,7 @@ int main(int argc, char* argv[]){
     mountPackage(mount.c_str());
   }
 
-  auto startOptions = split(readFileOrPackage("./res/start.options"), '\n');
+  auto startOptions = split(readFileOrPackage(resources::START_OPTIONS), '\n');
   for (auto& option : startOptions){
     newArgv.push_back((char*)(option.c_str()));
   }
@@ -1948,7 +1948,7 @@ int main(int argc, char* argv[]){
     modlog("loading time first frame (ms)", std::to_string(timeSeconds.count()));
   }
 
-  waterShader = pluginApi.loadShader("water", "./res/shaders/water");
+  waterShader = pluginApi.loadShader("water", resources::WATER_SHADER_DIRECTORY);
   
 
 

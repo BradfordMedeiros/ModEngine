@@ -1,4 +1,5 @@
 #include "./gui.h"
+#include "../resources.h"
 
 extern CustomApiBindings* mainApi;
 extern GLFWwindow* window;
@@ -81,7 +82,7 @@ void initUi(){
 	ImGui_ImplOpenGL3_Init("#version 330");
 
     showNavbar = loadUiData("../afterworld/data/config/ui.json");
-    loadImGuiFont(getSymbol("default-font"), "./res/fonts/vcr.ttf", 16.f);
+    loadImGuiFont(getSymbol("default-font"), resources::IMGUI_DEFAULT_FONT, 16.f);
 
     {
         registerWidget("Debug", "core", [](bool includePanel, std::optional<objid>, std::optional<objid>) -> void {
