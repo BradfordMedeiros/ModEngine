@@ -1209,6 +1209,7 @@ int main(int argc, char* argv[]){
    ("shell", "Packaging shell",  cxxopts::value<bool>()->default_value("false"))
    ("mount", "Mod package to mount instead of using the file system", cxxopts::value<std::string>()->default_value(""))
    ("package", "Package files to a .mod file instead of running the game", cxxopts::value<std::string>()->default_value(""))
+   ("package-report", "Write an HTML size report for the mounted .mod file", cxxopts::value<std::string>()->default_value(""))
    ("p,pak", "Package files to include", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("compile", "Path of map file to compile", cxxopts::value<std::string>() -> default_value(""))
    ("template", "Path of template for file to compile map file", cxxopts::value<std::string>() -> default_value(""))
@@ -1304,6 +1305,11 @@ int main(int argc, char* argv[]){
 
   if (result["shell"].as<bool>()){
     loopPackageShell();
+  }
+
+  auto packageReport = result["package-report"].as<std::string>();
+  if (packageReport != ""){
+    exit(packageSizeReport(packageReport.c_str()) ? 0 : 1);
   }
 
   auto package = result["package"].as<std::string>();

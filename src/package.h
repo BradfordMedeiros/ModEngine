@@ -18,6 +18,7 @@ std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, 
 bool fileExistsFromPackage(std::string filepath);
 bool directoryExistsFromPackage(std::string filepath);
 void packageDirectory(const char* output, std::vector<std::string> dirs);
+bool packageSizeReport(const char* output);
 
 unsigned int openFileOrPackage(std::string filepath);
 int closeFileOrPackage(unsigned int handle);
