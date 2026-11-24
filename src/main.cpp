@@ -6,14 +6,14 @@
 
 #include <csignal>
 #include <cxxopts.hpp>
-#include <cstdio>
-#include <fstream>
 
 #include "./main_input.h"
 #include "./scene/common/vectorgfx.h"
 #include "./scene/objtypes/lighting/scene_lighting.h"
 #include "./network/modnet.h"
 #include "./network/http_server.h"
+#include "./ui_html/index.h"
+#include "./ui_html/package_report.h"
 #include "./main_util.h"
 #include "./cscript/cscripts/plugins/perf-visualize.h"
 #include "./cscript/cscripts/plugins/performance_graph.h"
@@ -1945,35 +1945,8 @@ int main(int argc, char* argv[]){
 
   bool shouldQuitControl = false;
   auto enableHttpServer = result["http-server"].as<bool>();
-  if (enableHttpServer){
-    if (!httpServerStart("127.0.0.1:8085")){
-      return 1;
-    }
-    auto packageReportPath = dataPath + "http-package-report.html";
-    auto packageMounted = !mount.empty();
-    httpGet("/package", [packageReportPath, packageMounted](const HttpRequest&, HttpResponse& response) {
-      if (!packageMounted){
-        httpResponseSend(response, 200, "text/plain", "Package not mounted\n");
-        return;
-      }
-
-      if (!packageSizeReport(packageReportPath.c_str())){
-        httpResponseSend(response, 500, "text/plain", "Could not create package report\n");
-        return;
-      }
-
-      std::ifstream report(packageReportPath, std::ios::binary);
-      if (!report){
-        httpResponseSend(response, 500, "text/plain", "Could not read package report\n");
-        std::remove(packageReportPath.c_str());
-        return;
-      }
-
-      std::string html((std::istreambuf_iterator<char>(report)), std::istreambuf_iterator<char>());
-      report.close();
-      std::remove(packageReportPath.c_str());
-      httpResponseSend(response, 200, "text/html", html);
-    });
+  if (enableHttpServer && !setupHttpServer(dataPath, !mount.empty())){
+    return 1;
   }
   if (result["skiploop"].as<bool>()){
     goto cleanup;

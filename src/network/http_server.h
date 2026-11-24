@@ -23,6 +23,7 @@ struct HttpResponse {
 using HttpHandler = std::function<void(const HttpRequest&, HttpResponse&)>;
 
 void httpGet(const std::string& path, HttpHandler handler);
+void httpPost(const std::string& path, HttpHandler handler);
 void httpStatic(const std::string& urlPrefix, const std::string& root);
 bool httpServerStart(const std::string& endpoint);
 void httpServerUpdate();

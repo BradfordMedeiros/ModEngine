@@ -5,5 +5,6 @@
 
 bool packageSizeReport(const char* output);
 bool writePackageSizeReport(const char* output, std::vector<PackageFileSize> files);
+bool packageSizeReport(const char* output);
 
 #endif

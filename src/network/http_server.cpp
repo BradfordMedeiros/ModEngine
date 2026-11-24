@@ -21,6 +21,7 @@
 namespace {
 
 struct Route {
+  std::string method;
   std::string path;
   HttpHandler handler;
 };
@@ -37,7 +38,7 @@ struct Client {
 
 int serverSocket = -1;
 std::vector<Client> clients;
-std::vector<Route> getRoutes;
+std::vector<Route> routes;
 std::vector<StaticRoute> staticRoutes;
 
 bool setNonBlocking(int fd) {
@@ -51,6 +52,7 @@ std::string statusText(int status) {
     case 400: return "Bad Request";
     case 404: return "Not Found";
     case 405: return "Method Not Allowed";
+    case 409: return "Conflict";
     case 500: return "Internal Server Error";
     default: return "Response";
   }
@@ -204,21 +206,33 @@ bool handleClient(Client& client) {
     return true;
   }
 
-  if (request.method != "GET") {
-    response.status = 405;
-    response.headers["Allow"] = "GET";
-    response.body = "Method Not Allowed\n";
-    sendResponse(client.fd, response);
-    return true;
+  auto contentLength = request.headers.find("Content-Length");
+  if (contentLength != request.headers.end()) {
+    char* end = nullptr;
+    auto expected = std::strtoul(contentLength->second.c_str(), &end, 10);
+    if (*end != '\0' || request.body.size() < expected) return false;
   }
 
   bool handled = false;
-  for (const auto& route : getRoutes) {
-    if (route.path == request.path) {
+  for (const auto& route : routes) {
+    if (route.method == request.method && route.path == request.path) {
       route.handler(request, response);
       handled = true;
       break;
     }
+  }
+
+  if (handled) {
+    sendResponse(client.fd, response);
+    return true;
+  }
+
+  if (request.method != "GET") {
+    response.status = 405;
+    response.headers["Allow"] = "GET, POST";
+    response.body = "Method Not Allowed\n";
+    sendResponse(client.fd, response);
+    return true;
   }
 
   if (!handled) handled = serveStatic(request, response);
@@ -233,7 +247,11 @@ bool handleClient(Client& client) {
 }
 
 void httpGet(const std::string& path, HttpHandler handler) {
-  getRoutes.push_back({path, std::move(handler)});
+  routes.push_back({"GET", path, std::move(handler)});
+}
+
+void httpPost(const std::string& path, HttpHandler handler) {
+  routes.push_back({"POST", path, std::move(handler)});
 }
 
 void httpStatic(const std::string& urlPrefix, const std::string& root) {
