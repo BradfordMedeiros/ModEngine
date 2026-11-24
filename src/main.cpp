@@ -6,11 +6,14 @@
 
 #include <csignal>
 #include <cxxopts.hpp>
+#include <cstdio>
+#include <fstream>
 
 #include "./main_input.h"
 #include "./scene/common/vectorgfx.h"
 #include "./scene/objtypes/lighting/scene_lighting.h"
 #include "./network/modnet.h"
+#include "./network/http_server.h"
 #include "./main_util.h"
 #include "./cscript/cscripts/plugins/perf-visualize.h"
 #include "./cscript/cscripts/plugins/performance_graph.h"
@@ -27,6 +30,7 @@
 #include "./mapcompile.h"
 #include "./ui/gui.h"
 #include "./resource_validation.h"
+#include "./ui_html/package_report.h"
 
 #ifdef ADDITIONAL_SRC_HEADER
   #include STR(ADDITIONAL_SRC_HEADER)
@@ -1183,6 +1187,7 @@ int main(int argc, char* argv[]){
    ("crashinfo", "On crash show info", cxxopts::value<bool>()->default_value("false"))
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
    ("b,bootstrapper", "Run the server in bootstrapper only", cxxopts::value<bool>()->default_value("false"))
+   ("http-server", "Start the HTTP server on localhost:8085", cxxopts::value<bool>()->default_value("false"))
    ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))
    ("g,grid", "Size of grid chunking grid used for open world streaming, default to zero (no grid)", cxxopts::value<int>()->default_value("0"))
    ("w,world", "Use streaming chunk system", cxxopts::value<std::string>()->default_value(""))
@@ -1939,6 +1944,37 @@ int main(int argc, char* argv[]){
   }
 
   bool shouldQuitControl = false;
+  auto enableHttpServer = result["http-server"].as<bool>();
+  if (enableHttpServer){
+    if (!httpServerStart("127.0.0.1:8085")){
+      return 1;
+    }
+    auto packageReportPath = dataPath + "http-package-report.html";
+    auto packageMounted = !mount.empty();
+    httpGet("/package", [packageReportPath, packageMounted](const HttpRequest&, HttpResponse& response) {
+      if (!packageMounted){
+        httpResponseSend(response, 200, "text/plain", "Package not mounted\n");
+        return;
+      }
+
+      if (!packageSizeReport(packageReportPath.c_str())){
+        httpResponseSend(response, 500, "text/plain", "Could not create package report\n");
+        return;
+      }
+
+      std::ifstream report(packageReportPath, std::ios::binary);
+      if (!report){
+        httpResponseSend(response, 500, "text/plain", "Could not read package report\n");
+        std::remove(packageReportPath.c_str());
+        return;
+      }
+
+      std::string html((std::istreambuf_iterator<char>(report)), std::istreambuf_iterator<char>());
+      report.close();
+      std::remove(packageReportPath.c_str());
+      httpResponseSend(response, 200, "text/html", html);
+    });
+  }
   if (result["skiploop"].as<bool>()){
     goto cleanup;
   }
@@ -2028,6 +2064,7 @@ int main(int argc, char* argv[]){
     cBindings.onFrame();
 
     onNetCode(netcode, onClientMessage, bootStrapperMode);
+    httpServerUpdate();
 
     { 
       // TODO - consider moving this later, i think this ends up having one frame of lag for the listener
@@ -2492,6 +2529,7 @@ int main(int argc, char* argv[]){
   modlog("lifecycle", "program exiting");
 
   cleanup:   
+    httpServerStop();
     if (shouldBenchmark){
       realfiles::saveFile(benchmarkFile, dumpDebugInfo());
     }

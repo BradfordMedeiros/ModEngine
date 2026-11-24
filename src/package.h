@@ -5,6 +5,7 @@
 #include <string>
 #include <cstring>
 #include <iostream>
+#include <cstdint>
 
 #include "./common/files.h"
 
@@ -13,12 +14,17 @@ void loopPackageShell();
 void mountPackage(const char* path);
 void unmountPackage();
 
+struct PackageFileSize {
+   std::string path;
+   uintmax_t size;
+};
+
+std::vector<PackageFileSize> mountedPackageFiles();
 std::string readFileOrPackage(std::string filepath);
 std::vector<std::string> listFilesWithExtensionsFromPackage(std::string folder, std::vector<std::string> extensions);
 bool fileExistsFromPackage(std::string filepath);
 bool directoryExistsFromPackage(std::string filepath);
 void packageDirectory(const char* output, std::vector<std::string> dirs);
-bool packageSizeReport(const char* output);
 
 unsigned int openFileOrPackage(std::string filepath);
 int closeFileOrPackage(unsigned int handle);
