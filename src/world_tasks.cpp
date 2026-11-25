@@ -114,6 +114,9 @@ void handleChangedResourceFiles(std::set<std::string> changedFiles){
       // this needs to be a relative path
       reloadEffect(file);
     }
+    if (fileType == MAP_EXTENSION){
+      maybeReloadMapWorld(world, file);
+    }
     if (fileType == UNKNOWN_EXTENSION){
       std::cout << "watch handleChangedResourceFiles unknown file type: " << file << ", extension = " << fileType << std::endl;
     }

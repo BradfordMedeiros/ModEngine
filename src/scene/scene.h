@@ -33,6 +33,7 @@ struct World {
   std::unordered_map<std::string, ModelDataRef> modelDatas;
   std::unordered_map<std::string, MeshRef> meshes;
   std::unordered_map<std::string, TextureRef> textures;
+  std::unordered_map<std::string, std::set<objid>> mapObjectRoots;
   std::unordered_map<objid, std::vector<Animation>> animations;
   std::function<void(objid)> onObjectUpdate;
   std::function<void(GameObject&)> onObjectCreate;
@@ -65,6 +66,7 @@ Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid owner
 Texture loadTextureWorldSelection(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight, std::optional<objid> mappingTexture);
 Texture loadTextureDataWorld(World& world, std::string texturepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels, objid ownerId);
 void maybeReloadTextureWorld(World& world, std::string texturepath);
+void maybeReloadMapWorld(World& world, std::string mappath);
 bool textureLoaded(World& world, std::string& texturepath);
 
 objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> sceneId, std::optional<objid> parentId, std::optional<objid> prefabId);

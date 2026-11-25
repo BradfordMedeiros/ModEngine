@@ -7,6 +7,8 @@ bool fileExistsFromPackage(std::string path);
 
 extern bool strictResourceMode;
 
+std::set<objid> updatePhysicsFromSandbox(World& world);
+
 GameObject& getGameObject(World& world, objid id){
   return getGameObject(world.sandbox, id);
 }
@@ -555,6 +557,67 @@ void loadModelData(World& world, std::string meshpath, int ownerId){
       .modelData = loadModelCore(realpathToLoad), 
     };
   }
+}
+
+std::string normalizedResourcePath(std::string path){
+  std::error_code error;
+  auto normalized = std::filesystem::weakly_canonical(path, error);
+  if (error){
+    normalized = std::filesystem::path(path).lexically_normal();
+  }
+  return normalized.generic_string();
+}
+
+void maybeReloadMapWorld(World& world, std::string mappath){
+  auto changedPath = normalizedResourcePath(mappath);
+  struct MapObjectSnapshot {
+    std::string meshPath;
+    std::string serializedObject;
+    objid sceneId;
+    std::optional<objid> parentId;
+    objid oldId;
+  };
+  std::vector<MapObjectSnapshot> snapshots;
+
+  for (auto &[meshPath, rootIds] : world.mapObjectRoots){
+    auto separator = meshPath.find(',');
+    auto brushPath = meshPath.substr(0, separator);
+    if (normalizedResourcePath(world.interface.modlayerPath(brushPath)) != changedPath){
+      continue;
+    }
+
+    for (auto rootId : rootIds){
+      if (!idExists(world.sandbox, rootId)){
+        continue;
+      }
+      snapshots.push_back(MapObjectSnapshot {
+        .meshPath = meshPath,
+        .serializedObject = serializeObject(world, rootId, true),
+        .sceneId = getGameObjectH(world.sandbox, rootId).sceneId,
+        .parentId = getParent(world.sandbox, rootId),
+        .oldId = rootId,
+      });
+    }
+  }
+
+  if (snapshots.empty()){
+    modlog("scene", std::string("map changed but is not loaded: ") + mappath);
+    return;
+  }
+
+  for (auto &snapshot : snapshots){
+    world.mapObjectRoots[snapshot.meshPath].erase(snapshot.oldId);
+    removeObjectFromScene(world, snapshot.oldId);
+  }
+
+  for (auto &snapshot : snapshots){
+    auto newId = addObjectToScene(world, snapshot.sceneId, snapshot.serializedObject, -1, false);
+    if (snapshot.parentId.has_value() && idExists(world.sandbox, snapshot.parentId.value())){
+      makeParent(world.sandbox, newId, snapshot.parentId.value());
+    }
+    modlog("scene", std::string("map object recreated: ") + snapshot.meshPath);
+  }
+  updatePhysicsFromSandbox(world);
 }
 
 void saveModelData(World& world, ModelData& modelData, std::string filename){
@@ -1290,6 +1353,15 @@ void addObjectToWorld(
     };
 
     addObjectType(world.objectMapping, id, name, attr, util, &getObjTypeLookup(world.sandbox, id));
+
+    auto rootMesh = getStrAttr(attr, "mesh");
+    if (rootMesh.has_value()){
+      auto separator = rootMesh.value().find(',');
+      auto brushPath = rootMesh.value().substr(0, separator);
+      if (getExtension(brushPath) == std::optional<std::string>("map")){
+        world.mapObjectRoots[rootMesh.value()].insert(id);
+      }
+    }
 }
 
 void addSerialObjectsToWorld(
@@ -1350,6 +1422,17 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
 
   if (!idExists(world.sandbox, objectId)){
     return;
+  }
+
+  std::vector<std::string> emptyMapPaths;
+  for (auto &[mapPath, rootIds] : world.mapObjectRoots){
+    rootIds.erase(objectId);
+    if (rootIds.empty()){
+      emptyMapPaths.push_back(mapPath);
+    }
+  }
+  for (auto &mapPath : emptyMapPaths){
+    world.mapObjectRoots.erase(mapPath);
   }
 
   if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
