@@ -21,6 +21,7 @@ struct engineState {
   bool showBones;
   int showDebugMask;
   bool isRotateSelection;
+  bool freeCameraLookLocked;
   bool selectionDisabled;
   bool useDefaultCamera;
   bool moveRelativeEnabled;

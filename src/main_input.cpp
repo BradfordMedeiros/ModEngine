@@ -90,11 +90,11 @@ void onMouse(engineState& state, double xpos, double ypos, void(*rotateCamera)(f
     auto coords = ndiCoord();
     cBindings.onMouseMoveCallback(state.offsetX, state.offsetY, coords.x, coords.y);
     
-    if (state.isRotateSelection || state.inputMode == CAMERA_ONLY){
-      if (state.inputMode == ENABLED || state.inputMode == CAMERA_ONLY){
-        float rotateSensitivity = 0.05;
-        rotateCamera(xoffset * rotateSensitivity, -yoffset * rotateSensitivity);   // -y offset because mouse move forward is negative, which is ok, but inverted        
-      }
+    std::cout << "on mouse rotate camera: freeCameraLookLocked =  " << state.freeCameraLookLocked << ", locked = " << state.freeCameraLookLocked << std::endl;
+    bool shouldRotateCamera = state.inputMode == CAMERA_ONLY  ? !state.freeCameraLookLocked : state.isRotateSelection;
+    if (shouldRotateCamera && (state.inputMode == ENABLED || state.inputMode == CAMERA_ONLY)){
+      float rotateSensitivity = 0.05;
+      rotateCamera(xoffset * rotateSensitivity, -yoffset * rotateSensitivity);   // -y offset because mouse move forward is negative, which is ok, but inverted
     }else{
       state.cursorLeft = xpos;
       state.cursorTop = ypos;
@@ -183,10 +183,16 @@ void mouse_button_callback(engineState& state, int button, int action, int mods,
   }
 
   if (button == GLFW_MOUSE_BUTTON_MIDDLE){
-    if (action == GLFW_PRESS){
-      state.isRotateSelection = true;
-    }else if (action == GLFW_RELEASE){
-      state.isRotateSelection = false;
+    if (state.inputMode == CAMERA_ONLY){
+      if (action == GLFW_PRESS){
+        state.freeCameraLookLocked = !state.freeCameraLookLocked;
+      }
+    }else{
+      if (action == GLFW_PRESS){
+        state.isRotateSelection = true;
+      }else if (action == GLFW_RELEASE){
+        state.isRotateSelection = false;
+      }
     }
 
     if (state.inputMode == ENABLED){

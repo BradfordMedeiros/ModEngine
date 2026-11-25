@@ -179,7 +179,7 @@ ObjectStateMapping simpleIntSerializer(std::string object, std::string attribute
 ObjectStateMapping simpleEnumSerializer(std::string object, std::string attribute, std::vector<int> enums, std::vector<std::string> enumStrings, size_t offset){
   modassert(enums.size() == enumStrings.size(), "enum serializer enums and strings invalid size");
   ObjectStateMapping mapping {
-    .attr = [enums, enumStrings, offset](engineState& state, AttributeValue value, float now) -> void { 
+    .attr = [object, attribute, enums, enumStrings, offset](engineState& state, AttributeValue value, float now) -> void {
       auto strValue = std::get_if<std::string>(&value);
       if (strValue != NULL){
         for (int i = 0; i < enums.size(); i++){
@@ -187,7 +187,16 @@ ObjectStateMapping simpleEnumSerializer(std::string object, std::string attribut
           if (enumString == *strValue){
             auto enumValue = enums.at(i);
             int* value = (int*)(((char*)&state) + offset);
+            int previousValue = *value;
             *value = enumValue;
+            if (object == "editor" && attribute == "disableinput"){
+              if (enumValue != ENABLED){
+                state.isRotateSelection = false;
+              }
+              if (previousValue != enumValue){
+                state.freeCameraLookLocked = false;
+              }
+            }
             return;
           }
         }
@@ -410,6 +419,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .showBones = false,
     .showDebugMask = 0,
 		.isRotateSelection = false,
+		.freeCameraLookLocked = false,
     .selectionDisabled = false,
 		.useDefaultCamera = true,
 		.moveRelativeEnabled = false,
