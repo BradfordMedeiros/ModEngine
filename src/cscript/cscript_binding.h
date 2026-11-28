@@ -33,6 +33,8 @@ struct CustomApiBindings {
   void (*createScene)(std::string scenename);
   void (*deleteScene)(std::string scenename);
   Transformation (*getCameraTransform)(int viewportIndex);
+  void (*moveDefaultCameraAbs)(glm::vec3 position);
+  void (*setDefaultCameraRotation)(glm::quat orientation);
   void (*moveCameraTo)(objid id, glm::vec3 pos, std::optional<float> duration);  // this should be deleted - move through normal methods instead
   std::vector<objid> (*idsInGroupById)(int32_t);
   objid (*groupId)(int32_t);

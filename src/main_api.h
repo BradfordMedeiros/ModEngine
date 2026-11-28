@@ -56,6 +56,8 @@ struct ViewportSettings {
 
 Transformation getCameraTransform(int viewportIndex);
 Transformation getCullingTransform(int viewportIndex);
+void moveDefaultCameraAbs(glm::vec3 position);
+void setDefaultCameraRotation(glm::quat orientation);
 void maybeResetCamera(int32_t id, ViewportSettings& viewport);
 void setActiveCamera(std::optional<int32_t> cameraId, std::optional<int> viewportIndex);
 std::optional<objid> getActiveCamera(std::optional<int> viewportIndex);

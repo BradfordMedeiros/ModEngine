@@ -1556,6 +1556,8 @@ int main(int argc, char* argv[]){
     .createScene = createScene,
     .deleteScene = deleteScene,
     .getCameraTransform = getCameraTransform,
+    .moveDefaultCameraAbs = moveDefaultCameraAbs,
+    .setDefaultCameraRotation = setDefaultCameraRotation,
     .moveCameraTo = moveCameraTo,
     .idsInGroupById = idsInGroupById,
     .groupId = groupId,

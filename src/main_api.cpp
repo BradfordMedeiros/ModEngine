@@ -968,6 +968,10 @@ void moveCameraAbs(glm::vec3 position){
   }
 }
 
+void moveDefaultCameraAbs(glm::vec3 position){
+  defaultResources.defaultCamera.transformation.position = position;
+}
+
 void rotateCamera(float xoffset, float yoffset){
   auto& viewport = getDefaultViewport();
 
@@ -986,6 +990,10 @@ void setCameraRotation(glm::quat orientation){
   }else{
     setGameObjectRotation(viewport.activeCameraObj.value(), orientation, true, Hint { .hint = "mainApi - setCameraRotation" });
   }
+}
+
+void setDefaultCameraRotation(glm::quat orientation){
+  defaultResources.defaultCamera.transformation.rotation = orientation;
 }
 
 ///////////////////////
